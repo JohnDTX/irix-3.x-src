@@ -1,0 +1,208 @@
+1) deleted empty ".so" files
+		300s.1
+		acctcon1.1m
+		acctcon2.1m
+		acctdisk.1m
+		acctdusg.1m
+		accton.1m
+		acctprc1.1m
+		acctprc2.1m
+		acctwtmp.1m
+		bcheckrc.1m
+		cancel.1
+		chargefee.1m
+		checkcw.1
+		checkeq.1
+		checkmm.1
+		chgrp.1
+		ckpacct.1m
+		dfsck.1m
+		dirname.1
+		disable.1
+		dodisk.1m
+		egrep.1
+		false.1
+		fget.demon.1c
+		fgrep.1
+		grpck.1m
+		hashcheck.1
+		hashmake.1
+		labelit.1m
+		lastlogin.1m
+		ln.1
+		lpmove.1m
+		lpshut.1m
+		manprog.1
+		monacct.1m
+		mv.1
+		mvt.1
+		neqn.1
+		nulladm.1m
+		osdd.1
+		pcat.1
+		pdp11.1
+		powerfail.1m
+		prctmp.1m
+		prdaily.1m
+		prfdc.1m
+		prfld.1m
+		prfpr.1m
+		prfsnap.1m
+		prfstat.1m
+		prtacct.1m
+		rc.1m
+		red.1
+		reject.1m
+		rmail.1
+		rmdir.1
+		rsh.1
+		sa1.1m
+		sa2.1m
+		sadc.1m
+		shutacct.1m
+		spellin.1
+		startup.1m
+		tapesave.1m
+		telinit.1m
+		turnacct.1m
+		u3b.1
+		u3b5.1
+		umount.1m
+		unlink.1m
+		unpack.1
+		uulog.1c
+		uuname.1c
+		uupick.1c
+		vax.1
+
+2) need:	xnsd.1m		xns (G. Chesson)
+
+3) get rid of other mentions of UniSoft
+
+4) eqn:		eqn.1
+		spline.1g
+
+5) tbl:		cw.1
+		get.1
+		prs.1
+		tbl.1
+		cc.1
+		extcentry.1
+		mkf2c.1
+
+6) cw:		cw.1
+
+7) added	addbib.1	4.2 refer
+		bcat.1		4.2 cat (D. Sears)
+		check.1		rcs (D. Sears for K. Hickman)
+		ci.1		4.2 rcs
+		co.1		4.2 rcs
+		diction.1	4.2 diction
+		extcentry.1	SGI (G. Boyd)
+		fold.1		4.2 fold
+		gclear.1	B. Toxen
+		graph.1g	4.2 graph
+		ident.1		4.2 rcs
+		install.1m	4.2 + System V (B. Toxen)
+		lav.1		4.2 uptime (D. Sears)
+		lookbib.1	4.2 refer
+		merge.1		4.2 rcs
+		mkf2c.1		SGI (G. Boyd)
+		multi.1m	SGI (D. Sears)
+		plot.1g		4.2 plot
+		ranlib.1	4.2 ranlib
+		rcs.1		4.2 rcs
+		rcsdiff.1	4.2 rcs
+		rcsintro.1	4.2 rcs
+		rcsmerge.1	4.2 rcs
+		reboot.1m	4.2 reboot (D. Sears)
+		refer.1		4.2 refer
+		reset.1		4.2 reset
+		rlog.1		4.2 rcs
+		roffbib.1	4.2 refer
+		see.1		4.2 see
+		sgboot.1m	SGI (D. Sears)
+		sgbounce.1m	SGI (D. Sears)
+		single.1m	B. Toxen
+		smt.1		SGI (C. Bailey)
+		sortbib.1	4.2 refer
+		stty.1		System V
+		style.1		4.2 style
+		whereis.1	4.2 whereis
+		xcp.1		SGI (D. Sears)
+		xlogin.1	SGI (D. Sears)
+		xx.1		SGI (D. Sears)
+		xstr.1		4.2 xstr
+
+8) new pages:	cc.1		SGI (G. Boyd)
+		grep.1		4.2 grep
+		printenv.1	4.2 printenv
+		tar.1		B. Toxen
+
+9) deleted:
+		badblk.1m	B. Toxen; no program
+		dcopy.1m	no program
+		diffdir.1	no program
+		diskformat.1m	B. Toxen; no program
+		disktune.1m	B. Toxen; no program
+		dump.1		B. Toxen said unsupported
+		errdead.1m	B. Toxen; /etc/errdead
+		errdemon.1m	B. Toxen; no program
+		errpt.1m	B. Toxen; /bin/errpt
+		errstop.1m	B. Toxen; /etc/errstop
+		exterr.1	SCR #100
+		fuser.1		no program
+		hex.1		SCR #100
+		hpio.1		no program
+		intro.1m	duplicate of intro.1
+		ipcrm.1		no program
+		ipcs.1		no program
+		ls.1		superceded by ls7.1 man page
+		mkfs1b.1m	no program
+		nroff7.1	B. Toxen; no program
+		profiler.1m	B. Toxen; no program
+		put.1c		SCR #100
+		put7.1c		SCR #100
+		rcp.1		B. Toxen; no program
+		rcvhex.1	SCR #100
+		remsh.1		B. Toxen; no program
+		rlogin.1	B. Toxen; no program
+		rstat.1		B. Toxen; no program
+		ruptime.1	B. Toxen; no program
+		rwho.1		B. Toxen; no program
+		se.1		no program
+		ssp.1		B. Toxen; no program
+		sum7.1		B. Toxen; no program
+		sumdir.1	SCR #100
+		take.1c		SCR #100
+		take7.1c	SCR #100
+		timex.1		no program
+		troff7.1	B. Toxen; no program
+		ul.1		no program
+		updater.1	SCR #100
+		updater.1m	B. Toxen; no program
+		vchk.1m		B. Toxen; no program
+		version.1	SCR #100
+10)	postscripts (these changes have been make since Version 1.0)
+
+	August 1, 1984: replaced cpp.1 with G. Boyd's
+	version, which included an update for Pascal.
+	
+	August 20, 1984: moved "xsh.1" to "xx.1"
+	and changed references.
+
+
+11)	May 5, 1985:   robinf checked in all section 1 manpages as version
+	1.0.  Man pages released with the IRIS Workstation Guide
+	Series 2000 were checked in.  These changes were noted in the
+	rlog file.
+
+12)	November 1, 1985:  robinf created two new directories in man1
+	to reflect the man pages differences between the 68020 and the
+	68010.  Also created were a gl1 and a gl2 directory.
+	Separate RCS directories were created within each of these
+	subdirectories.  These are the directories that should be
+	used for checking files in and out.  In the main directory,
+	man1, I have made adirectory called tools.  In this directory
+	are two shell scripts which can be used for checking files
+	in and out.

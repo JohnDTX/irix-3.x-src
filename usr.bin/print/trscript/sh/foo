@@ -1,0 +1,72 @@
+#
+#ident	"\%W\%"
+#
+# Notes:
+# transcript/sh/Makefile
+#
+# Copyright 1985 Adobe Systems Incorporated
+#
+# RCSID: $Header: /d2/3.7/src/usr.bin/print/trscript/sh/RCS/foo,v 1.1 89/03/27 18:20:24 root Exp $
+# RCSLOG:
+
+# Revision 1.1  86/10/22  10:03:22  glen
+# Initial revision
+# 
+# Revision 2.1  85/11/24  12:31:56  shore
+# Product Release 2.0
+# 
+#
+
+#
+
+#
+# Common Definitions
+#
+include	$(ROOT)/usr/include/make/commondefs
+
+#
+# Compile Time Options
+#
+
+#
+# Local Definitions
+#
+
+#
+# Targets/Rules
+#
+
+default:    all
+
+clean:
+	-rm -f - ptroff psroff *.BAK *.CKP .emacs_[0-9]*
+
+clobber:	clean
+
+FRC:
+
+#
+# Specific Target/Rules follow
+#
+
+install: default
+
+programs all: ptroff psroff
+	- chown $$OWNER ptroff psroff
+	- chgrp $$GROUP ptroff psroff
+	chmod 755 ptroff psroff
+
+
+ptroff: ptroff.sh
+	sed	-e s,TROFFFONTDIR,$$TROFFFONTDIR,g \
+		ptroff.sh >ptroff
+
+psroff: psroff.sh
+	cp psroff.sh psroff
+
+#install: psroff ptroff
+#	cp ptroff psroff $$BINDIR
+#	chown $$OWNER $$BINDIR/ptroff $$BINDIR/psroff
+#	chgrp $$GROUP $$BINDIR/ptroff $$BINDIR/psroff
+#	chmod 755 $$BINDIR/ptroff $$BINDIR/psroff
+

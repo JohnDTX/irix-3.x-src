@@ -1,0 +1,33 @@
+.TH textcolor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B textcolor
+\- sets the color of text drawn in the textport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textcolor(tcolor) "
+.B "Colorindex tcolor;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textco(tcolor)"
+.B "integer*4 tcolor"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure textcolor(tcolor: longint);"
+.SH DESCRIPTION
+\f3textcolor\f1 sets the color of the text drawn in the textport.
+\f2tcolor\fP determines the color of the text \f3charstr\fP
+draws.  \f2tcolor\fP is the index of the desired color. 
+.SH SEE ALSO
+color, pagecolor, pagewritemask, textport, 
+textwritemask, tpoff, tpon
+.sp
+\f2Programming Guide\fP, Chapter 14, Textports 
+.SH NOTE
+This routine is available only in immediate mode.

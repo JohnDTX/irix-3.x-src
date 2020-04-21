@@ -1,0 +1,3 @@
+#! /bin/csh
+makeboot -l $1 $2 /usr/tmp/$2
+echo '0x40?W 7f800' | adb -w /usr/tmp/$2 -

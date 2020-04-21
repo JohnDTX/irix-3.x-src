@@ -1,0 +1,32 @@
+.TH XNSCONNECT 3X
+.SH NAME
+xconnect \- make XNS connection
+.SH SYNOPSIS
+.nf
+.B "xnsconnect(host, socket)"
+.B "char *host;"
+.B "int socket"
+.fi
+.SH DESCRIPTION
+.I Xnsconnect
+returns a file descriptor after making a
+.I "Sequenced Packet Protocol"
+(SPP)
+connection to the indicated
+.B socket
+at
+.B host .
+A \-1 is returned on failure.
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1),
+xlogin(1),
+xnsd(1M),
+xx(1),
+utmp(3X),
+xcmd(3X),
+xnsfile(3X),
+xnsioctl(3X),
+xnslib(3X),
+xnswrite(3X)

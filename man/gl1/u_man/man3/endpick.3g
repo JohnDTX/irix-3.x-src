@@ -1,0 +1,43 @@
+.TH endpick  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I endpick
+- turn picking mode off
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long endpick(buffer)"
+.B "long buffer[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer function endpic(buffer)"
+.B "integer buffer(*)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function endpick(var buffer: Ibuffer): integer;"
+.sp
+.SH DESCRIPTION
+.I Endpick
+returns the IRIS to drawing mode.
+The names of objects that intersect the picking window 
+are reported
+to the user in \f3buffer\f1; the number of names is returned as the function
+value.
+The names are triples, containing an object name, a tag, and a
+command offset from the tag.  Thus, \f3buffer\f1 reports commands
+that intersect the picking window up to a maximum number determined  
+by the previous call to \f2pick\f1.  In addition to the name of the 
+command that intersected the picking window,
+the IRIS provides a code that indicates which clipping 
+planes intersected
+the command.  The hitcode is a six-bit number, with one bit 
+for each clipping plane.  In picking mode, as each command is interpreted, 
+the resulting hitbits are
+logically \f3OR\f1ed into the system-wide hitcode to keep a running summary of
+which planes have been clipped against.
+.SH "SEE ALSO"
+.I pick, gethitcode, clearhitcode
+.SH NOTE
+This command can only be used in immediate mode.

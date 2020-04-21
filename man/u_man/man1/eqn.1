@@ -1,0 +1,165 @@
+'\"macro stdmacro
+.TH EQN 1
+.SH NAME
+eqn \- format mathematical text for troff
+.SH SYNOPSIS
+.B eqn
+[
+.BR \-d lr]
+[
+.BR \-p n
+] [
+.BR \-s n
+] [
+.BR \-f n
+] [
+.BR \-T tty_type
+] [ files ]
+.SH DESCRIPTION
+\f2eqn\f1
+is a
+\f2troff\f1(1)
+preprocessor
+for typesetting mathematical text
+on a phototypesetter.
+Normal usage is:
+.PP
+.RS
+eqn \f2files\f1 \||\| troff [ \||\| \f2typesetter\f1 ]
+.RE
+.PP
+If you do not specify 
+.IR files , " eqn"
+reads the standard input.
+.I eqn
+will also read the standard input if it encounters
+.B \-
+as a
+.I file
+argument.
+\f2eqn\f1 prepares output for the typesetter you name in the
+\f3\-T\f1 option. Currently supported devices are
+\f3\-Taps\f1 (Autologic APS-5),
+and \f3\-Ti10\f1 (Imagen Imprint-10).
+The default is \f3\-Taps\f1.
+.PP
+A line beginning with
+.BR \&.EQ\*
+marks the start of an equation; the end of an
+equation is marked by a line beginning with 
+.BR \&.EN\*s .
+\f2troff\f1 does not alter these lines, so 
+they may be defined in
+macro packages to get centering, numbering, etc.
+You may also name two characters as delimiters;
+\f2eqn\f1 treats subsequent text between delimiters
+as input.  Delimiters may be set to characters
+\f2l\f1 and \f2r\f1 with the command-line argument 
+\f3\-d\f2lr\f1
+or (more commonly) with 
+\f3delim\f2 lr\f1 between \f3\&.EQ\f1 and \f3\&.EN\f1.
+The left and right delimiters may be
+the same character;
+the dollar sign is often used as such a delimiter.
+Turn delimiters off with \f3delim off\f1.
+\f2eqn\f1 touches only text that is between delimiters
+or between
+.BR \&.EQ
+and 
+.BR \&.EN\*s .
+.PP
+Set apart keyword recognized by \f2eqn\f1 with spaces, 
+tabs, new-lines, braces, double quotes, tildes, and 
+circumflexes.  Use braces {} for grouping; generally
+speaking, anywhere you can use single character such as \f2x\f1,
+you may use a complicated construction enclosed in braces instead.
+Tilde (~) represents a full space in the output, circumflex (^)
+half as much.
+.PP
+Subscripts and superscripts are produced with the keywords 
+\f3sub\f1 and \f3sup\f1.
+Fractions are made with \f3over\f1. \f3sqrt\f1
+makes square roots.
+.PP
+The keywords \f3from\f1 and \f3to\f1 introduce
+lower and upper limits.  Left and right
+brackets, braces, etc., of the right height are
+made with \f3left\f1 and \f3right\f1.
+Legal characters after \f3left\f1 and \f3right\f1
+are braces, brackets, bars, 
+\f3c\f1 and \f3f\f1 for ceiling and floor, and \f3""\f1
+for nothing at all (useful for a right-side-only
+bracket). A \f3left\f2 thing\f1 need not have a matching
+\f3right\f2 thing,\f1 but a
+\f3right\f2 thing\f1 must have a matching \f3left\f2 thing\f1.
+.PP
+Vertical piles of things are made with \f3pile\f1, \f3lpile\f1,
+\f3cpile\f1, and \f3rpile\f1.
+Piles may have arbitrary numbers of elements;
+\f3lpile \f1left-justifies, \f3pile\f1 and \f3cpile\f1 center
+(but with different vertical spacing), and \f3rpile\f1
+right justifies.  Matrices are made with
+\f3matrix\f1. In addition, there is \f3rcol\f1 for a
+right-justified column.
+.PP
+Diacritical marks are made with \f3dot\f1, \f3dotdot\f1,
+\f3hat\f1, \f3tilde\f1, \f3bar\f1, \f3vec\f1, \f3dyad\f1, and
+\f3under\f1.
+.PP
+You may change point sizes and fonts with \f3size\f2 n\f1 or
+\f3size \(+-\f2n\f1, \f3roman\f1, \f3italic\f1,
+\f3bold\f1, and \f3font \f2n\f1. You may change
+point sizes and fonts globally in a document
+by \f3gsize \f2n \f1and \f3gfont \f2n,\f1 or
+by the command-line arguments \f3\-s\f2n\f1 and
+\f3\-f\f2n\f1.
+.PP
+Normally, subscripts and superscripts are reduced
+by 3 points from the previous size; you may change
+this with the command-line argument \f3\-p\f2n\f1.
+.PP
+You can line up successive display arguments. Place
+\f3mark\f1 before the desired lineup point in the
+first equation; place \f3lineup \f1at the place that
+is to line up vertically in subsequent equations.
+.PP
+You may define shorthands or redefine existing
+keywords with \f3define\f1:
+.PP
+.RS
+\f3define \f2thing % replacement %\f1
+.RE
+.PP
+defines a new token called \f2thing\f1 that
+is replaced by \f2replacement\f1 whenever it
+appears thereafter. The % may be any character
+that does not occur in \f2replacement.\f1
+.PP
+Keywords such as \f3sum\f1, \f3int\f1, \f3inf\f1, and 
+shorthands such as >=, != and \(mi> are recognized.
+Greek letters are spelled out in the desired case, as
+in \f3alpha\f1 or \f3GAMMA\f1. Mathematical words such as
+\f3sin\f1, \f3cos\f1, and \f3log \f1are made Roman
+automatically. \f2troff\f1 four-character escapes
+such as \f3\\\^(dd\f1, which produces the double dagger,
+may be used anywhere. Strings enclosed in double
+quotes (\f3"\f1...\f3"\f1) are passed through
+untouched; this permits keywords to be entered as
+text, and can be used to communicate with
+\f2troff\f1 when all else fails. 
+Full details
+are given in the documentation cited below.
+.SH SEE ALSO
+mmt(1), mvt(1), neqn(1), nroff(1), tbl(1),
+troff(1), eqnchar(5), mm(5), mv(5).
+.PP
+The section entitled ``EQN'' in the \f2UNIX Programmer's Manual, 
+Volume II\f1.
+.SH BUGS
+To embolden digits, parentheses, etc., it is necessary
+to quote them, as in \f3bold "12.3"\f1. 
+When you use \f2eqn\f1 with
+the \f2mm\f1 macro package, displayed equations must appear only
+inside displays.
+.PP
+See also BUGS under \f2troff\f1(1).

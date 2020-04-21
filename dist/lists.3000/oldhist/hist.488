@@ -1,0 +1,13 @@
+Versions/004-0341-041
+Versions/004-0341-042
+Versions/004-0341-043
+etc/ibtab-
+etc/iib
+etc/rc.488-
+kernels/2400T.488
+kernels/3000.488
+usr/man/a_man/man7/ib.7
+usr/man/u_man/man3/ibtab.3n
+usr/man/u_man/man4/ib.4
+usr/man/u_man/man4/ibtab.4
+usr/man/u_man/man5/ibtab.5

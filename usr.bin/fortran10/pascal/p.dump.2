@@ -1,0 +1,1094 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.DUMP.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               08-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+  
+  procedure argaddr(var arglist: pn);
+  begin
+  if arglist <> nil
+  then begin
+       lout(183 {REFPARM}); expression(arglist^.leftarg);
+       { Would be selector except for COPY and CONCAT! }
+       arglist := arglist^.rightarg;
+       end
+  else error(1000);
+  end; {argaddr}
+  
+  procedure argval2(var arglist: pn);
+  begin
+  if arglist <> nil
+  then begin
+       lout(185 {VALPRM2}); expression(arglist^.leftarg);
+       arglist := arglist^.rightarg;
+       end
+  else error(1001);
+  end; {argval2}
+ 
+  procedure argval4(var arglist: pn);
+  begin
+  if arglist <> nil
+  then begin
+       lout(186 {VALPRM4}); expression(arglist^.leftarg);
+       arglist := arglist^.rightarg;
+       end
+  else error(1002);
+  end; {argval4}
+  
+  procedure argval8(var arglist: pn);
+  begin
+  if arglist <> nil
+  then begin
+       lout(187 {VALPRM8}); expression(arglist^.leftarg);
+       arglist := arglist^.rightarg;
+       end
+  else error(1003);
+  end; {argval8}
+  
+  procedure setupfcall(prmsize: integer);
+  begin
+  lout(190 {PRMLIST}); lout(182 {FCTNRES}); lout(prmsize);
+  end; {setupfcall}
+  
+  procedure dumpsfcall{fproc,pargs: pn};
+    var key,lsize,n,lop: integer; lpn: pn; lid: identrec; CallFlag: Boolean;
+    
+    procedure trans(k: integer);
+    begin
+    CallFlag := FALSE; lout(143{TRANS}); lout(k + pargs^.binop);
+    expression(pargs^.leftarg);
+    end; {trans}
+    
+  begin {dumpsfcall}
+  lid := fproc^.iname; key := fproc^.key; CallFlag := TRUE;
+  case key of
+    1: { ABS }
+       begin
+       lout(pargs^.binop); expression(pargs^.leftarg); CallFlag := FALSE;
+       end;
+   14: { SQR }
+       begin expression(pargs); CallFlag := FALSE; end;
+    2: { ARCTAN } trans(8);
+    4: { COS }    trans(2);
+    7: { EXP }    trans(6);
+    8: { LN }     trans(4);
+   13: { SIN }    trans(0);
+   15: { SQRT }   trans(10);
+    5, { EOF }
+    6: { EOLN }
+       begin setupfcall(1); argaddr(pargs); end;
+    9: { ODD }
+       begin
+       lout(111 {ODD}); expression(pargs^.leftarg); CallFlag := FALSE;
+       end;
+   11, { PRED }
+   16: { SUCC }
+       begin
+       if key = 16 then lop := 64 {ADD2} else lop := 66; {ADD4}
+       lsize := pargs^.binsubop;
+       if lsize > 2 then lop := lop + 1; {2-->4}
+       lout(lop); expression(pargs^.leftarg); outintcnst(1); CallFlag := FALSE;
+       end;
+   12, { ROUND }
+   17: { TRUNC }
+       begin
+       CallFlag := FALSE;
+       lop := 58 + pargs^.binop; {TRUNC4/8}
+       if key = 12 then lop := lop + 2; {ROUND4/8}
+       lout(lop); expression(pargs^.leftarg);
+       end;
+    3, { CHR }
+   10, { ORD }
+   18, { POINTER }
+   26, { SIZEOF }
+   32: { ORD4 }
+       begin
+       expression(pargs^.leftarg); CallFlag := FALSE;
+       end;
+   19: { LENGTH }
+       begin
+       if pargs^.leftarg^.node = CSTNODE
+       then outintcnst(pargs^.leftarg^.cstvalu.svalulen)
+       else begin
+            lout(62 {EXTSFLD}); lout(8{bits});
+            if TARGSEX = MALE then lout(8) else lout(0); {bit-offset}
+            expression(pargs^.leftarg);
+            end;
+       CallFlag := FALSE;
+       end;
+   20: { POS }
+       begin
+       setupfcall(2); argaddr(pargs); argaddr(pargs);
+       end;
+   21: { CONCAT }
+       begin
+       lout(12{UPARROW}); setupfcall(4); n := 0;
+       while pargs <> nil do begin
+             lpn := pargs^.leftarg; argaddr(pargs); n := n + 1;
+             end;
+       lout(185 {VALPRM2}); outintcnst(n - 1);
+       end;
+   22: { COPY }
+       begin
+       lout(12{UPARROW}); setupfcall(4);
+       argaddr(pargs); argval2(pargs); argval2(pargs);
+       lpn := pargs^.leftarg; argaddr(pargs);
+       end;
+   23, { BLOCKREAD }
+   24: { BLOCKWRITE }
+       begin
+       setupfcall(2);
+       argaddr(pargs); argaddr(pargs); argval2(pargs);
+       if pargs <> nil
+       then argval2(pargs)
+       else begin lout(185 {VALPRM2}); outintcnst(-1); end;
+       end;
+   25: { IORESULT }
+       setupfcall(2);
+   31: { MEMAVAIL }
+       setupfcall(4);
+   27: { PWROFTEN }
+       begin setupfcall(36); argval2(pargs); end;
+   28, { SCANEQ }
+   29: { SCANNE }
+       begin
+       setupfcall(2);
+       argval2(pargs); argval2(pargs); argaddr(pargs);
+       end;
+   30: { UNITBUSY }
+       begin setupfcall(2); argval2(pargs); end;
+   33, { CALL }
+   34: { CHAIN }
+       begin
+       setupfcall(2);
+       for n := 1 to 4 do argaddr(pargs); argval2(pargs);
+       end;
+   35, { ISNAN }
+   36, { ISNUM }
+   37: { ISINF }
+       begin
+       if pargs^.binop = 0
+       then if key = 36 {ISNUM}
+            then begin
+                 lout(46); lout(17); {ISNUM}
+                 expression(pargs^.leftarg); CallFlag := FALSE;
+                 end
+            else begin
+                 setupfcall(1);
+                 argval4(pargs)
+                 end
+       else begin
+            setupfcall(1);
+            argval8(pargs);
+            for n := 7 downto 3 do lid.all[n+1] := lid.all[n];
+            lid.all[3] := 'D'; lid.len := lid.len + 1;
+            end;
+       end;
+  end; {case}
+  if CallFlag then dumpjsr(176{UFCALL},1,-1,0,lid);
+  end; {dumpsfcall}
+  
+  procedure dumpucall{fproc,fargs: pn};
+    var formals,actuals: pn; i,n,lop,loff,llen,fres: integer;
+        lname: alfa8;
+  begin
+  lout(190); {BPARMLST}
+  with fproc^ do begin
+       formals := pfarglist; actuals := fargs;
+       if class = FUNC
+       then begin
+            fres := fullbytes(idtype);
+            if (idtype = realptr) or (idtype = doubleptr)
+            then fres := fres + 32;
+            end
+       else fres := 0;
+       if CCall
+       then begin
+            lop := 229; {CFUNCALL}
+            lout(182{FCTNRES}); lout(fres);
+            end
+       else if class = FUNC
+            then begin
+                 lop := 176; {UFUNCALL}
+                 lout(182{FCTNRES}); lout(fres);
+                 end
+            else lop := 177; {UPROCALL}
+       while formals <> nil do begin
+             if formals^.class = VARS
+             then begin
+                  n := fullbytes(formals^.idtype);
+                  if formals^.vkind = DRCT
+                  then if formals^.idtype^.form = SETS
+                       then begin
+                            lout(189{SETVPRM}); lout(n);
+                            end
+                       else if formals^.idtype = doubleptr
+                            then lout(187{VPARAM8})
+                            else if n > 4
+                                 then begin
+                                      lout(188{LRGVPRM}); lout2(n);
+                                      end
+                                 else if n = 1
+                                      then lout(184{VPARAM1})
+                                      else if n = 2
+                                           then lout(185{VPARAM2})
+                                           else lout(186{VPARAM4})
+                  else if (actuals^.leftarg^.node = CSTNODE) or
+                          ((actuals^.leftarg^.node = IDENTNODE) and
+                           (actuals^.leftarg^.class = CONSTS))
+                       then begin lout(215{EXADPRM}); lout(n); end
+                       else lout(183{REFPARM});
+                  expression(actuals^.leftarg);
+                  end
+             else with actuals^.leftarg^ do
+                       if pfdecl = FORMAL
+                       then { Passing formal as formal }
+                            begin
+                            lout(187{VPARAM8}); selector(actuals^.leftarg);
+                            end
+                       else dumpjsr(191{PFPARM},pflev + 1,rtnno,lcbits,name);
+             formals := formals^.next; actuals := actuals^.rightarg;
+             end;
+       if pfdecl = FORMAL
+       then begin { CCall must be FALSE! }
+            if class = PROC
+            then lop := 181 {FPCALL}
+            else lop := 180;{FFCALL}
+            lout(lop); selector(fproc);
+            end
+       else if (class = PROC) and InReg
+            then begin
+                 i := parmbytes - 8;
+                 if pflev > 1
+                 then begin
+                      lout(183 {REFPARM});
+                      if pflev = level
+                      then begin lout(2 {LOCAL}); lout2(0); end
+                      else begin lout(3); lout(level-pflev); lout2(0); end;
+                      i := i + 4;
+                      end;
+                 if not CCall then i := 0;
+                 lout(231{CFORMALCALL}); lout2(i); lout(0);
+                 lout(12 {UPARR}); lout(7{REFREG}); lout(refcount);
+                 end
+            else begin
+                 dumpjsr(lop,pflev + 1,rtnno,lcbits,name);
+                 if lop = 229 {CFUNCALL}
+                 then begin
+                      if pflev <> 1
+                      then lout2(parmbytes - 12)
+                      else lout2(parmbytes - 8);
+                      lout(fres);
+                      end;
+                 end;
+       end;
+  end; {dumpucall}
+  
+  procedure loadbases;
+    var i,lastone: integer;
+  begin
+  lastone := 0;
+  for i := level - 1 downto 2 do
+      if uplevloc[i] > 0 then lastone := i;
+  if lastone > 0
+  then begin
+       lout(250); lout(level - lastone);
+       for i := level - 1 downto lastone do
+           if uplevloc[i] > 0
+           then lout(uplevloc[i] - 1)  { Save in register }
+           else if uplevref[i] >= 2
+                then lout(128)  { Save in memory }
+                else lout(255); { Dont save }
+       end;
+  end; {loadbases}
+  
+  procedure dumpstmt(fstmt: pstmt);
+    var lab1,lab2,lop,lassop: integer; lext: pextrec;
+    
+    procedure outgoto(flablev: integer; plab: plabrec);
+    begin
+    if flablev = level
+    then begin
+         lout(198 {JMPLULB}); lout2(plab^.labelno);
+         lout2(plab^.ilabelno);
+         end
+    else begin
+         lout(199 {JMPGULB}); lout(flablev);
+         if plab^.globrefno < 0
+         then begin
+              plab^.globrefno := locprocno;
+              locprocno := locprocno + 1;
+              end;
+         lout2(plab^.globrefno);
+         end;
+    end; {outgoto}
+    
+    procedure dumpcallstmt(fstmt: pstmt);
+      
+      procedure checkioresult;
+      begin
+      lout(190 {PRMLIST});
+      callproc('%_IOCHK ');
+      end; {checkioresult}
+      
+      procedure readwrite(fstmt: pstmt);
+        var pargs,filearg,colon1,colon2,arg: pn; lid: identrec; lch: char;
+            lop,lop2,lsubop,lsize,op,lkey: integer; lname: alfa8;
+            CkIOres,FCkIOres,DefFlag: Boolean;
+      begin
+      with fstmt^,procpn^ do begin
+        pargs := parglist; FCkIOres := pargs^.binop <> 0; lkey := key;
+        case lkey of
+          8, {read}
+          9: {readln}
+             begin
+             filearg := pargs^.leftarg; pargs := pargs^.rightarg;
+             while pargs <> nil do begin
+               lop := pargs^.binop; arg := pargs^.leftarg;
+               CkIOres := lop >= 50;
+               if CkIOres then lop := lop - 50;
+               
+               {   Binop Proc. Params: Res:
+                   ----- ----- -------
+                     0   %R_C  ------- Val2
+                     1   %R_I  ------- Val4
+                     2   %R_R  Adr
+                     3   %R_D  Adr
+                     4   %R_S  Adr Siz2
+                     5   %R_P  Adr Siz2
+                     6   read(f,v) == v := f^; get(f);
+                   +50 = Check IORESULT      }
+               
+               if lop = 6
+               then begin
+                 { V := F^; }
+                 lsubop := pargs^.binsubop;
+                 if lsubop <= 1
+                 then lop2 := 32 {ASS1}
+                 else if lsubop = 2
+                      then lop2 := 33 {ASS2}
+                      else if lsubop = 4
+                           then lop2 := 34 {ASS4}
+                           else lop2 := 36; {ASSN}
+                 lout(lop2); if lop2 = 36 then lout2(lsubop);
+                 selector(arg); lout(13 {FILEUP}); selector(filearg);
+                 { GET(F); }
+                 lout(190 {BPRMLST});
+                 lout(183 {REFPARM}); selector(filearg);
+                 callproc('%_GET   ');
+                 end
+               else begin
+                 if lop <= 1
+                 then begin
+                      op := 176{UFCALL}; lsubop := pargs^.binsubop;
+                      lout(lsubop); {ASS1/2/4} selector(arg);
+                      if (lop = 1) and (lsubop <> 34 {ASS4})
+                      then if lsubop = 33 {ASS2}
+                           then lout(52 {INT42})
+                           else lout(53 {INT41});
+                      if lop = 0
+                      then setupfcall(130)
+                      else setupfcall(132);
+                      end
+                 else begin op := 177{UPCALL}; lout(190{BPRMLIST}); end;
+                 lout(183 {REFPARAM}); selector(filearg);
+                 if lop >= 2
+                 then begin
+                      lout(183 {REFPARM}); selector(arg);
+                      if lop >= 4
+                      then begin
+                           { binsubop is actual length }
+                           lout(185 {VARPRM2}); outintcnst(pargs^.binsubop);
+                           end;
+                      end;
+                 case lop of
+                   0: makalfaid(lid,'%R_C    ');
+                   1: makalfaid(lid,'%R_I    ');
+                   2: makalfaid(lid,'%R_R    ');
+                   3: makalfaid(lid,'%R_D    ');
+                   4: makalfaid(lid,'%R_STR  ');
+                   5: makalfaid(lid,'%R_PAOC ');
+                 end; {case}
+                 dumpjsr(op,1,-1,0,lid);
+                 end;
+               if CkIOres then checkioresult;
+               pargs := pargs^.rightarg;
+               end;
+             if lkey = 9
+             then begin
+                  lout(190); {BPRMLIST}
+                  lout(183 {REFPARAM}); selector(filearg);
+                  callproc('%R_LN   ');
+                  if FCkIOres then checkioresult;
+                  end;
+             end;
+         10, {write}
+         11: {writeln}
+             begin
+             filearg := pargs^.leftarg; pargs := pargs^.rightarg;
+             while pargs <> nil do begin
+               
+               {   Binop Proc. Kind Size
+                   ----- ----- ---- ----
+                     0   %W_C  Val.  1.
+                     1   %W_B  Val.  1.
+                     2   %W_I  Val.  4.
+                     3   %W_E  Val.  4.
+                     4   %W_F  Val.  4.
+                     5   %W_D  Val.  4.
+                     6   %W_L  Val.  4.
+                     7   %W_2  Val.  2.
+                     8   %W_X  Val.  4.
+                     9   %W_S  Ref.  -
+                    10   %W_P  Ref.  -
+                    11   write(f,v) == f^ := v; put(f);
+                   +50 = Check IORESULT    }
+               
+               lop := pargs^.binop; colon1 := nil; colon2 := nil;
+               arg := pargs^.leftarg;
+               CkIOres := lop >= 50;
+               if CkIOres then lop := lop - 50;
+               if lop = 11
+               then begin
+                 { F^ := V; }
+                 lsubop := pargs^.binsubop;
+                 if lsubop <= 1
+                 then lop2 := 32 {ASS1}
+                 else if lsubop = 2
+                      then lop2 := 33 {ASS2}
+                      else if lsubop = 4
+                           then lop2 := 34 {ASS4}
+                           else lop2 := 36; {ASSN}
+                 lout(lop2);
+                 if lop2 = 36 then lout2(lsubop);
+                 lout(12 {POINTER}); selector(filearg); expression(arg);
+                 { PUT(F); }
+                 lout(190 {PRMLIST});
+                 lout(183 {REFPARM}); selector(filearg);
+                 callproc('%_PUT   ');
+                 end
+               else begin
+                 if (arg^.node = BINNODE) and (arg^.binop = 0 {COLON})
+                 then begin
+                      colon1 := arg^.rightarg; arg := arg^.leftarg;
+                      if (arg^.node = BINNODE) and (arg^.binop = 0 {COLON})
+                      then begin
+                           colon2 := colon1; colon1 := arg^.rightarg;
+                           arg := arg^.leftarg;
+                           end;
+                      end;
+                 DefFlag := (colon1 = nil) and
+                            ((lop = 0) or (lop = 2) or (lop = 7) or (lop = 9));
+                 lout(190); {BPRMLIST}
+                 if (not DefFlag) or (filearg <> outputptr)
+                 then begin lout(183 {REFPARAM}); selector(filearg); end;
+                 if lop <= 8
+                 then begin
+                      case lop of
+                        0: begin lop2 := 184; lsize := 0; lch := 'C'; end;
+                        1: begin lop2 := 184; lsize := 5; lch := 'B'; end;
+                        2: begin lop2 := 186; lsize := 0; lch := 'I'; end;
+                        3: begin lop2 := 186; lsize := 12; lch := 'E'; end;
+                        4: begin lop2 := 186; lsize := 12; lch := 'F'; end;
+                        5: begin lop2 := 187; lsize := 22; lch := 'D'; end;
+                        6: begin lop2 := 187; lsize := 22; lch := 'L'; end;
+                        7: begin lop2 := 185; lsize := 0; lch := '2'; end;
+                        8: begin lop2 := 186; lsize := 8; lch := 'X'; end;
+                      end;
+                      lout(lop2); expression(arg);
+                      end
+                 else begin
+                      lout(183 {REFPARM}); expression(arg); lsize := 0;
+                      { Would be selector except for COPY and CONCAT! }
+                      if lop = 10
+                      then begin
+                           { For %W_PAOC colon1 is actual length }
+                           lsize := colon1^.cstvalu.ivalu;
+                           lout(185 {VALPRM2});
+                           expression(colon1); colon1 := colon2;
+                           lch := 'P';
+                           end
+                      else lch := 'S';
+                      end;
+                 lname := '%W_?    '; lname[4] := lch;
+                 if DefFlag
+                 then begin
+                      lname[5] := 'S';
+                      if filearg = outputptr
+                      then lname[6] := 'F'
+                      else lname[6] := '_';
+                      if (pargs^.rightarg = nil) and (lkey = 11)
+                      then begin lname[7] := 'L'; lkey := 10; end;
+                      end
+                 else begin
+                      lout(185 {VALPRM2});
+                      if colon1 = nil
+                      then outintcnst(lsize)
+                      else expression(colon1);
+                      if (lop = 4) or (lop = 6)
+                      then begin
+                           lout(185 {VALPRM2});
+                           if colon2 = nil
+                           then if lop = 4
+                                then outintcnst(6)
+                                else outintcnst(15)
+                           else expression(colon2);
+                           end;
+                      end;
+                 callproc(lname);
+                 end;
+               if CkIOres then checkioresult;
+               pargs := pargs^.rightarg;
+               end;
+             if lkey = 11
+             then begin
+                  lout(190); {BPRMLIST}
+                  lout(183 {REFPARAM}); selector(filearg);
+                  callproc('%W_LN   ');
+                  if FCkIOres then checkioresult;
+                  end;
+             end;
+        end;
+        end; {with}
+      end; {readwrite}
+      
+      procedure dumpstdproc(fstmt: pstmt);
+        var pargs: pn; op,subop,llev: integer; ChkIO: Boolean;
+      begin
+      with fstmt^,procpn^ do
+           if key = 29 {EXIT}
+           then begin
+                llev := parglist^.leftarg^.pflev + 1;
+                outgoto(llev,display[llev].exitlabel);
+                end
+           else if key = 1 {NEW}
+           then begin
+                pargs := parglist;
+                lout(34 {ASS4}); expression(pargs^.leftarg);
+                pargs := pargs^.rightarg;
+                setupfcall(4); argval4(pargs);
+                dumpjsr(176{UFCALL},1,-1,0,iname);
+                end
+           else begin
+                pargs := parglist; 
+                ChkIO := FALSE;
+                lout(190 {PRMLIST});
+                case key of
+                 15: { CLOSE }
+                     begin
+                     ChkIO := pargs^.binop <> 0;
+                     argaddr(pargs); argval2(pargs);
+                     end;
+                  2, { MARK }
+                  3, { RELEASE }
+                  4, { GET }
+                  5, { PUT }
+                 12: { PAGE }
+                     begin
+                     ChkIO := pargs^.binop <> 0;
+                     argaddr(pargs);
+                     end;
+                  6, { RESET }
+                  7: { REWRITE }
+                     begin
+                     ChkIO := pargs^.binop <> 0; subop := pargs^.binsubop;
+                     argaddr(pargs);
+                     if pargs <> nil
+                     then argaddr(pargs)
+                     else begin lout(186 {VALPRM4}); lout(23 {NIL}); end;
+                     lout(185 {VALPRM2}); outintcnst(subop);
+                     if pargs <> nil
+                     then argval2(pargs)
+                     else begin lout(185 {VALPRM2}); outintcnst(0); end;
+                     end;
+                 16, { DELETE }
+                 24: { FILLCHAR }
+                     begin
+                     argaddr(pargs); argval2(pargs); argval2(pargs);
+                     end;
+                 17, { INSERT }
+                 22, { MOVELEFT }
+                 23: { MOVERIGHT }
+                     begin
+                     argaddr(pargs); argaddr(pargs); argval2(pargs);
+                     end;
+                 18, { UNITREAD }
+                 19, { UNITWRITE }
+                 28: { UNITSTATUS }
+                     begin
+                     ChkIO :=pargs^.binop <> 0;
+                     argval2(pargs); argaddr(pargs); argval4(pargs);
+                     if key <= 19
+                     then begin
+                          if pargs = nil
+                          then begin lout(186 {VALPRM4}); outintcnst(0); end
+                          else argval4(pargs);
+                          if pargs = nil
+                          then begin lout(185 {VALPRM2}); outintcnst(0); end
+                          else argval2(pargs);
+                          end;
+                     end;
+                 20, { SEEK }
+                 27: { DISPOSE }
+                     begin
+                     argaddr(pargs); argval4(pargs);
+                     end;
+                 21: { HALT }
+                     begin
+                     if pargs = nil
+                     then begin lout(185 {VALPRM2}); outintcnst(OKHALT); end
+                     else argval2(pargs);
+                     end;
+                 25: { UNITCLEAR }
+                     begin
+                     ChkIO := pargs^.binop <> 0;
+                     argval2(pargs);
+                     end;
+                 26: { GOTOXY }
+                     begin
+                     argval2(pargs); argval2(pargs);
+                     end;
+                end; {case}
+                dumpjsr(177{UPCALL},2,-1,0,iname);
+                if ChkIO then checkioresult;
+                end;
+      end; {dumpstdproc}
+      
+    begin {dumpcallstmt}
+    with fstmt^, procpn^ do
+         if pfdeclkind = STANDARD
+         then if (key >= 8) and (key <= 11)
+              then readwrite(fstmt)
+              else dumpstdproc(fstmt)
+         else dumpucall(procpn,parglist);
+    end; {dumpcallstmt}
+    
+    procedure dumpcasestmt(fstmt: pstmt);
+      var n,i,thislabno,exitlabno,elselabno,curlabno: integer;
+          lstmt: pstmt; lplng: plnglist; nextval,curval: longint;
+    begin
+    lstmt := fstmt^.cstmtlist; n := 0;
+    exitlabno := nextlabel; elselabno := nextlabel;
+    while lstmt <> nil do
+          with lstmt^ do begin
+               lplng := casevals; thislabno := nextlabel;
+               while lplng <> nil do begin
+                     n := n + 1;
+                     lplng := lplng^.nextlng;
+                     end;
+               lstmt := nextstmt;
+               end;
+    lout(200 {CASEJ}); lout(fstmt^.cexpsize); expression(fstmt^.caseexpr);
+    lout(201 {CASETAB}); lout2(elselabno); lout2(n); flushlbuff;
+    nextval := -2147483648;
+    for i := 1 to n do begin
+        thislabno := elselabno; lstmt := fstmt^.cstmtlist;
+        curval := 2147483647;
+        while lstmt <> nil do
+              with lstmt^ do begin
+                   lplng := casevals; thislabno := thislabno + 1;
+                   while lplng <> nil do
+                         with lplng^ do begin
+                              if (lngval >= nextval) and (lngval <= curval)
+                              then begin
+                                   curval := lngval; curlabno := thislabno;
+                                   end;
+                              lplng := nextlng;
+                              end;
+                   lstmt := nextstmt;
+                   end;
+        out2(curlabno); out4(curval); nextval := curval + 1;
+        end;
+    lstmt := fstmt^.cstmtlist; thislabno := elselabno;
+    while lstmt <> nil do
+          with lstmt^ do begin
+               thislabno := thislabno + 1;
+               lout(192 {ILAB}); lout2(thislabno);
+               dumpstmt(lstmt^.thiscase);
+               lout(193 {JMP}); lout2(exitlabno);
+               lstmt := nextstmt;
+               end;
+    lout(192 {ILAB}); lout2(elselabno);
+    dumpstmt(fstmt^.otherstmt);
+    lout(192 {ILAB}); lout2(exitlabno);
+    end; {dumpcasestmt}
+    
+    procedure fjump(fexpr: pn; flab: integer); forward;
+    
+    procedure tjump(texpr: pn; tlab: integer);
+      var DoIt: Boolean; flab: integer;
+    begin
+    DoIt := TRUE;
+    with texpr^ do
+         if node = BINNODE
+         then begin
+              if binop = 80 {AND}
+              then begin
+                   flab := nextlabel;
+                   fjump(leftarg,flab);
+                   tjump(rightarg,tlab);
+                   lout(192{DEFILAB}); lout2(flab);
+                   DoIt := FALSE;
+                   end
+              else if binop = 83 {OR}
+                   then begin
+                        tjump(leftarg,tlab);
+                        tjump(rightarg,tlab);
+                        DoIt := FALSE;
+                        end;
+              end
+         else if node = UNNODE
+              then if unop = 110 {BOOLNOT}
+                   then begin
+                        fjump(unarg,tlab); DoIt := FALSE;
+                        end;
+    if DoIt
+    then begin lout(195{TJUMP}); lout2(tlab); expression(texpr); end;
+    end; {tjump}
+    
+    procedure fjump{fexpr: pn; flab: integer};
+      var DoIt: Boolean; tlab: integer;
+    begin
+    DoIt := TRUE;
+    with fexpr^ do
+         if node = BINNODE
+         then begin
+              if binop = 83 {OR}
+              then begin
+                   tlab := nextlabel;
+                   tjump(leftarg,tlab);
+                   fjump(rightarg,flab);
+                   lout(192{DEFILAB}); lout2(tlab);
+                   DoIt := FALSE;
+                   end
+              else if binop = 80 {AND}
+                   then begin
+                        fjump(leftarg,flab);
+                        fjump(rightarg,flab);
+                        DoIt := FALSE;
+                        end;
+              end
+         else if node = UNNODE
+              then if unop = 110 {BOOLNOT}
+                   then begin
+                        tjump(unarg,flab); DoIt := FALSE;
+                        end;
+    if DoIt
+    then begin lout(194{FJUMP}); lout2(flab); expression(fexpr); end;
+    end; {fjump}
+    
+  begin {dumpstmt}
+  while fstmt <> nil do
+    with fstmt^ do
+       begin
+       if DebugFlag
+       then while lstmtno < stmtno do
+            begin lout(239{MARKSTMT}); lstmtno := lstmtno + 1; end;
+       case stmtop of
+            BEGINST:
+              dumpstmt(subst);
+            ASSIGNST:
+              begin
+              lassop := assop;
+              lout(lassop);
+              if lassop = 36 {MULTASS}
+              then begin
+                   if (assbop2 <> 0) or (asssubop < 0)
+                   then lout(assbop2 + 128);
+                   lout2(asssubop);
+                   end
+              else if (lassop = 37 {SETASS}) or
+                      (lassop = 39 {STRASS}) or
+                      (lassop = 41 {OPTO})
+                   then lout(asssubop)
+                   else if lassop = 40 {PAOCASS}
+                        then begin lout(asssubop); lout(asssubop); end;
+              expression(assvar);
+              expression(assexpr);
+              end;
+            IFST:
+              begin
+              lab1 := nextlabel; fjump(ifexpr,lab1); dumpstmt(thenst);
+              if elsest <> nil
+              then begin lab2 := nextlabel; lout(193{JUMP}); lout2(lab2); end;
+              lout(192{DEFLAB}); lout2(lab1);
+              if elsest <> nil
+              then begin dumpstmt(elsest); lout(192{DEFLAB}); lout2(lab2); end;
+              end;
+            WHILEST:
+              begin
+              lab1 := nextlabel; lab2 := nextlabel;
+              lout(193{JUMP}); lout2(lab1);
+              lout(192{DEFLAB}); lout2(lab2);
+              dumpstmt(loopstmt);
+              lout(192{DEFLAB}); lout2(lab1);
+              tjump(condexpr,lab2);
+              end;
+            REPST:
+              begin
+              lab1 := nextlabel;
+              lout(192{DEFLAB}); lout2(lab1);
+              dumpstmt(loopstmt); fjump(condexpr,lab1);
+              end;
+            WITHST:
+              begin
+              withlevel := withlevel + 1; lout(44 {WITHBEG}); lout(withlevel);
+              selector(withvar); dumpstmt(withbody);
+              lout(45 {WITHEND}); lout(withlevel); withlevel := withlevel - 1;
+              end;
+            CALLST:
+              dumpcallstmt(fstmt);
+            GOTOST:
+              outgoto(lablev,gotolab);
+            FORTOST,
+            FORDOWNST:
+              begin
+              lout(202 {FOR}); lout(forsize);
+              selector(forvar); expression(forinit); expression(forlimit);
+              if stmtop = FORTOST then outintcnst(1) else outintcnst(-1);
+              dumpstmt(forst); lout(203 {FOREND});
+              end;
+            CASEST:
+              dumpcasestmt(fstmt);
+            LABEDST:
+              begin
+              with stlab^ do
+                   begin
+                   if globrefno < 0
+                   then lop := 196 {LOCULAB}
+                   else lop := 197;{GLOULAB}
+                   lout(lop); lout2(labelno); lout2(ilabelno);
+                   if globrefno >= 0
+                   then lout2(globrefno);
+                   if labelno < 10000 then dumpstmt(labstmt);
+                   end;
+              end;
+            REGST:
+              begin
+              if DefReg
+              then begin
+                   lout(6); lout(regno + $80); { DEFREGV }
+                   if LoadReg
+                   then begin
+                        lout(regop); lout(7); lout(regno);
+                        if LdAddr then lout(22{ADDR});
+                        with regexpr^ do
+                             if class = VARS
+                             then expression(regexpr)
+                             else begin
+                                  lext := findext(name,rtnno,pflev,lcbits);
+                                  lout(177{UPROC}); lout2(lext^.extno);
+                                  end;
+                        end;
+                   if regexpr <> nil then regexpr^.InReg := TRUE;
+                   end
+              else begin
+                   lout(6); lout(regno); { UNDREGV }
+                   if regexpr <> nil then regexpr^.InReg := FALSE;
+                   if LoadReg
+                   then begin
+                        lout(regop);
+                        if LdAddr then lout(22{ADDR});
+                        expression(regexpr);
+                        lout(7); lout(regno);
+                        end;
+                   end;
+              end;
+            FUNRESST:
+              begin
+              lout(178{LDPFUN}); lout(funop); expression(funval);
+              lout(193{JUMP}); lout2(display[level].exitlabel^.ilabelno + 1);
+              end;
+            EPOINTST:
+              begin
+              loadbases;
+              if DebugFlag
+              then begin
+                   lout(238{MARKENTRY}); lout(0);
+                   lout2(procn^.rtnno); louts(lnkname);
+                   end;
+              end;
+            XPOINTST:
+              begin
+              { Define the EXIT label }
+              with display[level].exitlabel^ do begin
+                   if globrefno < 0
+                   then lop := 196 {LOCULAB}
+                   else lop := 197;{GLOULAB}
+                   lout(lop); lout2(labelno); lout2(ilabelno);
+                   if globrefno >= 0
+                   then lout2(globrefno);
+                   if procn^.class = FUNC
+                   then begin
+                        lout(178{LDPFUN}); lout(funtypen(procn^.idtype));
+                                           expression(procn);
+                        end;
+                   lout(192{DEFLAB}); lout2(ilabelno + 1);
+                   end;
+              if DebugFlag
+              then begin
+                   lout(238{MARKEXIT}); lout(1);
+                   lout2(procn^.rtnno); louts(lnkname);
+                   end;
+              end;
+       end;
+       flushlbuff;
+       fstmt := fstmt^.nextstmt;
+       end;
+  end; {dumpstmt}
+  
+begin {dump}
+labno := 0; withlevel := 0; nextextno := 0; lbyteno := 0; lstmtno := 0;
+extlist := nil; unitset := [];
+
+makidstr(lnkname,procn^.name);
+if procn^.CCall then setcase(lnkname,procn^.lcbits);
+if level = 1
+then begin prntname := ''; parentno := -1; end
+else if parentproc^.class = UNITS
+     then begin makidstr(prntname,parentproc^.name); parentno := -1; end
+     else begin
+          parentno := parentproc^.rtnno;
+          makidstr(prntname,parentproc^.name);
+          if parentproc^.CCall then setcase(prntname,parentproc^.lcbits);
+          end;
+
+{ Assign internal label numbers to user labels }
+
+GlobalLabels := FALSE; lplabel := display[level].labels;
+while lplabel <> nil do begin
+      lplabel^.ilabelno := nextlabel;
+      if lplabel^.globrefno >= 0
+      then GlobalLabels := TRUE;
+      lplabel := lplabel^.nextlabel;
+      end;
+
+{ Assign internal label number to exit label }
+
+lplabel := display[level].exitlabel;
+lplabel^.ilabelno := nextlabel; i := nextlabel; { Skip a number }
+if lplabel^.globrefno >= 0
+then GlobalLabels := TRUE;
+
+{ Begin Module }
+
+out($F0); outalfa(segname); out(level); out3(procn^.lc);
+out(ord(GlobalLabels) + ord(QuietFlag)*16 + ord(FPHardware)*64 +
+    ord(CALLCXP)*128);
+out(ord(LONGNAMES) + ord(NoRMW)*2 + ord((procn^.parmbytes and 2) <> 0)*4 +
+    ord(GLOBSTATIC)*8);
+out(TARGETOS);
+out(ord(SWDivinHW)*16);
+
+{ Entry Point }
+
+out($F5); out2(procn^.rtnno); outs(lnkname);
+
+lpn := bigvars;
+while lpn <> nil do
+      with lpn^ do begin
+           out(248 {STKALOC}); out3(fullbytes(lpn^.idtype));
+           out(2 {LOCAL}); out2(lpn^.voff);
+           lpn := next;
+           end;
+
+if MemCheck
+then begin
+     lout(190 {PARMLST}); callproc('%_CHKSTK');
+     end;
+
+{ Copy large value parameters }
+
+lpn := procn^.pfarglist; llc := procn^.parmbytes;
+if CALLCXP then llc := llc + 4;
+while lpn <> nil do begin
+      if lpn^.vkind = DRCT
+      then begin
+           lsize := fullbytes(lpn^.idtype);
+           if (lsize > 4) and (lpn^.idtype^.form <> SETS) and
+              (lpn^.idtype <> doubleptr)
+           then begin
+                llc := llc - 4;
+                lout(36 {MULTASS}); lout2(lsize);
+                lout(2 {LOCAL}); lout2(lpn^.voff);
+                lout(12 {PTR}); lout(2 {LOCAL}); lout2(llc);
+                end
+           else begin
+                llc := llc - lsize;
+                if odd(lsize) then llc := llc - 1;
+                end;
+           end
+      else llc := llc - 4;
+      lpn := lpn^.next;
+      end;
+flushlbuff;
+
+dumpstmt(proctree); flushlbuff;
+
+lout($F6 {RTN});
+if procn^.CCall then lout2(0) else lout2(procn^.parmbytes);
+
+flushlbuff;
+
+if DebugFlag
+then with display[level] do
+          dumpsymbols(nametree,ftypeno,ltypeno,
+                      lnkname,prntname,procn^.rtnno,parentno);
+
+{ End Module }
+
+out($FE);
+
+end; {dump}
+
+procedure dumpuhead(funit: pn);
+begin
+out($F4);
+out4(0); {Text address}
+out4(0); {Text size}
+out2(0); { Flags: Bit 0 = 1 if Last Module is Global Info }
+outsname(funit^.name);
+end; {dumpuhead}
+
+procedure dumpudefs(funit: pn);
+  var lname: idstring;
+begin
+makidstr(lname,funit^.name);
+
+{ Begin Module }
+
+out($F0); outalfa(segname); out(2{level}); out3(0{lc});
+out(ord(QuietFlag)*16 + ord(CALLCXP)*128);
+out(ord(LONGNAMES) + ord(NoRMW)*2); out(TARGETOS);
+out(ord(SWDivinHW)*16);
+
+{ Data Area Definition }
+
+out($F7); out2(1); out4(funit^.ulc); out2(-1); outs(concat('/',lname,'/'));
+
+{ Entry Point }
+
+out($F5); out2(-1); outs(lname);
+
+if DebugFlag
+then begin
+     out(238{MARKENTRY}); out(0); out2(-1); outs(lname);
+     out(238{MARKEXIT}); out(1); out2(-1); outs(lname);
+     end;
+
+out($F6 {RTN}); out2(0);
+
+if DebugFlag
+then with display[1] do
+          dumpsymbols(nametree,ftypeno,ltypeno,lname,'',-1,-1);
+
+out($FE {END});
+
+end; {dumpudefs}
+
+

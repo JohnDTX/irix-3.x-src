@@ -1,0 +1,85 @@
+#
+# Common Definitions for IP2
+#
+# $Source: /d2/3.7/src/usr.bin/edge/gsh/RCS/commondefs,v $
+# $Revsion$
+# $Date: 89/03/27 17:46:28 $
+#
+
+#
+# Other make tools and tool flags
+#
+AR	= ${TOOLROOT}/bin/ar
+AS	= ${TOOLROOT}/bin/as
+CC	= ${TOOLROOT}/bin/cc -ZR /${ROOT} -ZN -ZJ
+F77	= ${TOOLROOT}/bin/f77
+GET	= ${TOOLROOT}/usr/bin/get
+LD	= ${TOOLROOT}/bin/ld
+LEX	= ${TOOLROOT}/usr/bin/lex
+PC	= ${TOOLROOT}/bin/pc
+YACC	= ${TOOLROOT}/usr/bin/yacc
+NM	= ${TOOLROOT}/bin/nm
+SIZE	= ${TOOLROOT}/bin/size
+STRIP	= ${TOOLROOT}/bin/strip
+LORDER	= ${TOOLROOT}/usr/bin/lorder
+M4	= ${TOOLROOT}/usr/bin/m4
+
+ASFLAGS	= 
+
+# Machine type
+MACHTYPE =-DIP2
+
+# Cc flags, composed of predefined {global}, variable, and local parts
+#	followed by local and global include paths
+#	XXX 'sgi' should be defined by 'cc' or 'cpp'
+#GCFLAGS	= -EB -O -Dsgi
+#GCFLAGS	= -EB -Dsgi
+# temporary until compilers understand ident
+GCFLAGS	= -Dident=undef
+#CFLAGS	= ${GCFLAGS} ${VCFLAGS} ${MACHTYPE} ${LCFLAGS}
+CFLAGS	= ${GCFLAGS} ${VCFLAGS} ${MACHTYPE} ${LCFLAGS} ${LINC} ${GINC}
+
+# Loader flags, composed of predefined, variable, and local parts
+#GLDFLAGS	= -s
+GLDFLAGS	=
+LDFLAGS	= ${GLDFLAGS} ${VLDFLAGS} ${LLDFLAGS}
+
+F77FLAGS= 
+GFLAGS	= 
+
+LFLAGS	= 
+MAKEFLAGS	= -b
+PCFLAGS	= 
+YFLAGS	= 
+
+#
+# Convenient command macros that include the flags macros
+#
+MAKEF	= ${MAKE} ${MAKEFLAGS}
+ASF	= ${AS} ${ASFLAGS}
+CCF	= ${CC} ${CFLAGS}
+F77F	= ${F77} ${F77FLAGS}
+GETF	= ${GET} ${GFLAGS}
+LDF	= ${LD} ${LDFLAGS}
+LEXF	= ${LEX} ${LFLAGS}
+PCF	= ${PC} ${PCFLAGS}
+YACCF	= ${YACC} ${YFLAGS}
+
+#
+# Various directories defined
+#
+INCLDIR	= ${ROOT}/usr/include
+GINC	= -I${INCLDIR}
+
+# Echo defined for announcements
+ECHO	= /bin/echo
+
+# The install command to use
+INSTALL	= ${TOOLROOT}/etc/install
+
+# awk and shell scripts for generating make dependencies
+# XXX these should be reconciled ultimately
+AWKDEPEND= ${ROOT}/usr/include/make/c-depend.awk
+MKDEPEND= ${TOOLROOT}/usr/bin/mkdepend -c "${CCF}" \
+	-e 's:${INCLDIR}/:$${INCLDIR}/:' \
+	-e 's:${ROOT}/:$${ROOT}/:'

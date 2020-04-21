@@ -1,0 +1,89 @@
+'\"macro stdmacro
+.TH FS 4
+.SH NAME
+file system \- format of system volumes
+.SH SYNOPSIS
+.B #include <sys/param.h>
+.br
+.B #include <sys/fs.h>
+.br
+.B #include <sys/inode.h>
+.SH DESCRIPTION
+A file system is a discipline imposed by the 
+U\s-2NIX\s+2 
+operating system
+on a block-structured device,
+for the purpose of implementing the
+U\s-2NIX\s+2 abstraction of a file.
+Currently two types of file system are supported:  the Bell file system
+(formerly known as `the'
+U\s-2NIX\s+2
+System V
+file system; see
+.IR bellfs (4)),
+and the Extent file system
+(see
+.IR efs (4)).
+Their common features are:
+.TP "\w'\(bu\ \ 'u"
+\(bu
+A \f2boot block\f1 at byte address 0.
+.TP "\w'\(bu\ \ 'u"
+\(bu
+A \f2super block\f1 at byte address 512,
+containing such information as the number
+of blocks and the number of inodes contained
+in the file system.
+.TP "\w'\(bu\ \ 'u"
+\(bu
+A static division of the remaining file system
+space into \f2inodes\f1 and \f2data\f1,
+determined when the file system is created.
+.TP "\w'\(bu\ \ 'u"
+\(bu
+One \f2inode\f1 per file,
+containing
+its access permissions,
+the number of references (directory entries) to the file,
+its owner,
+its logical size,
+its times of last use and modification,
+and a list designating the blocks
+containing its data.
+.TP "\w'\(bu\ \ 'u"
+\(bu
+A \f2free list\f1 designating blocks available for
+allocation to files.
+.PP
+Their main differences are:
+.TP "\w'\(bu\ \ 'u"
+\(bu
+Free list organization.
+The Bell file system represents the free list as a
+chain of
+.IR "free blocks" ,
+each of which contains some number of block numbers,
+the first of which is the number of the next block in the chain.
+The Extent file system represents the free list as
+a bit map with a `1' for each free block.
+.TP "\w'\(bu\ \ 'u"
+\(bu
+Inode data block list.
+The Bell file system represents the block list as
+a list of block numbers.
+These block numbers appear in the inode itself and in multiply indirect blocks.
+The Extent file system represents the block list as
+a list of extent descriptors
+(i.e., a logical offset, and a disk block number and a length).
+The list appears in the inode itself if the number of extents is small;
+otherwise it appears in an array of indirect extents.
+.TP "\w'\(bu\ \ 'u"
+\(bu
+Inode position.
+The Bell file system has a single inode region
+followed by a single data region.
+The Extent file system has some number of
+.IR cylinder\0 groups ,
+each of which consists of an inode region followed by a data region.
+.SH "SEE ALSO"
+bellfs(4), efs(4), fsck(1M), mkfs(1M), inode(4)

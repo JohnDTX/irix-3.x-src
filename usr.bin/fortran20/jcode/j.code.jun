@@ -1,0 +1,402 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: J.CODE.JUN.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               31-Jul-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure genjrea(fop: integer; fcattr: cattr; r: pregrec; fsiz: sizes);
+  var lcattr: cattr; loff,moff: integer; a: pregrec;
+begin
+if JUN_FLAG
+then begin
+     if fcattr.ckind <> JEXP
+     then begin makevalid(fcattr); chkindr(fcattr); end
+     else if not fcattr.exreg^.InReg
+          then begin
+               fcattr.exreg^.count := fcattr.exreg^.count - 1;
+               fcattr := fcattr.exreg^.memcattr;
+               end;
+     loff := $8000 + fop;
+     if r <> nil then loff := loff + (r^.regno and 15)*16;
+     if fsiz = D
+     then begin
+          moff := $8000 + J_MOVELO;
+          { Use F0 as a scratch, unless this is a LOAD }
+          if fop = J_MOVEHI then moff := moff + (loff and $00F0);
+          if fcattr.ckind = CNST
+          then begin
+               { MOVE.L #x,FLO.w } gen($21FC); gen2(fcattr.cvalu.lvalu2);
+                                   gen(moff);
+               { MOVE.L #x,FOP.w } gen($21FC); gen2(fcattr.cvalu.lvalu);
+                                   gen(loff);
+               end
+          else if fcattr.ckind = JEXP
+               then begin
+                    gen(_MOVE_B + $1C0);
+                    gen(loff + (fcattr.exreg^.regno and 15));
+                    freereg(fcattr.exreg);
+                    end
+               else begin
+                    incoffset(fcattr,8);
+                    a := loadaddress(fcattr); isolate(a);
+                    { MOVE.L -(A),FLO.W } genr($21E0,a); gen(moff);
+                    { MOVE.L -(A),FOP.W } genr($21E0,a); gen(loff);
+                    incrv(a^.regno,-8); freereg(a);
+                    end;
+          end
+     else begin { fsiz = S }
+          if fcattr.ckind = JEXP
+          then begin
+               gen(_MOVE_B + $1C0);
+               gen(loff + (fcattr.exreg^.regno and 15));
+               freereg(fcattr.exreg);
+               end
+          else begin
+               lcattr.ckind := ABSL; lcattr.aboffset := loff;
+               store(fcattr,lcattr,L);
+               end;
+          end;
+     end;
+end; {genjrea}
+
+function loadjreg{freg: pregrec; fsiz: sizes): pregrec};
+  var lreg: pregrec;
+begin
+lreg := getreg(F1,FE);
+if fsiz = D
+then genjrea(J_MOVEHI,freg^.memcattr,lreg,D)
+else genjrea(J_MOVEF,freg^.memcattr,lreg,S);
+loadjreg := lreg;
+end; {loadjreg}
+
+function loadj(var fcattr: cattr; freg: pregrec; fsiz: sizes): pregrec;
+  var r: pregrec; n: integer;
+begin
+if JUN_FLAG
+then begin
+     if fcattr.ckind = JEXP
+     then if fcattr.exreg^.InReg
+          then if freg = nil
+               then r := fcattr.exreg
+               else if freg^.regno = fcattr.exreg^.regno
+                    then r := freg
+                    else begin
+                         r := freg;
+                         genjrea(J_COPY,fcattr,freg,fsiz);
+                         end
+          else begin
+               if freg = nil then r := getreg(F1,FE) else r := freg;
+               if fsiz = D
+               then genjrea(J_MOVEHI,fcattr.exreg^.memcattr,r,D)
+               else genjrea(J_MOVEF,fcattr.exreg^.memcattr,r,S);
+               end
+     else begin
+          if freg = nil then r := getreg(F1,FE) else r := freg;
+          if fsiz = D
+          then if fcattr.ckind = STCK
+               then begin
+                    genjrea(J_MOVEHI,fcattr,r,S);
+                    genjrea(J_MOVELO,fcattr,r,S);
+                    end
+               else genjrea(J_MOVEHI,fcattr,r,D)
+          else genjrea(J_MOVEF,fcattr,r,S);
+          end;
+     fcattr.ckind := JEXP; fcattr.exreg := r;
+     loadj := r;
+     end;
+end; {loadj}
+
+procedure jun44(fop: integer; FComm: Boolean);
+  var lcattr,tcattr: cattr; CheckIt: Boolean; j: pregrec;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     if FComm
+     then begin
+          if lcattr.ckind <> JEXP
+          then CheckIt := TRUE
+          else CheckIt := not lcattr.exreg^.InReg;
+          if CheckIt and (gcattr.ckind = JEXP)
+          then begin
+               tcattr := gcattr; gcattr := lcattr; lcattr := tcattr;
+               end;
+          end;
+     (*
+      * If both operands are on the stack use reverse sub. because
+      * order has been switched
+      *)
+     if (lcattr.ckind = STCK) and (gcattr.ckind = STCK) and (fop = J_FSUB) then
+     begin
+	fop := fop + (4*256);
+     end;
+     j := loadj(lcattr,nil,S);
+     if j^.count > 1
+     then begin
+          genjrea(fop,gcattr,j,S);
+          freereg(j); j := getreg(FF,FF);
+          end
+     else begin
+          genjrea(fop+J_UPDATE,gcattr,j,S);
+          end;
+     gcattr.ckind := JEXP; gcattr.exreg := j;
+     end;
+end; {jun44}
+
+procedure jun88(fop: integer; FComm: Boolean);
+  var lcattr,tcattr: cattr; CheckIt: Boolean; j,j2: pregrec;
+	bothonstack : boolean;
+begin
+if JUN_FLAG
+then begin
+	bothonstack := FALSE;
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     if FComm
+     then begin
+          if lcattr.ckind <> JEXP
+          then CheckIt := TRUE
+          else CheckIt := not lcattr.exreg^.InReg;
+          if CheckIt and (gcattr.ckind = JEXP)
+          then begin
+               tcattr := gcattr; gcattr := lcattr; lcattr := tcattr;
+               end;
+          end;
+     (*
+      * If both operands are on the stack use reverse sub. because
+      * order has been switched
+      *)
+     if (lcattr.ckind = STCK) and (gcattr.ckind = STCK) and (fop = J_DSUB) then
+     begin
+	bothonstack := TRUE;
+     end;
+     j := loadj(lcattr,nil,D); makevalid(gcattr);
+
+     if j^.count > 1
+     then if gcattr.ckind = JEXP
+          then if gcattr.exreg^.count > 1
+               then begin
+                    genjrea(fop,gcattr,j,D);
+                    freereg(j); j := getreg(FF,FF);
+                    end
+               else begin
+                    j2 := gcattr.exreg; gcattr.exreg := j; j := j2;
+                    genjrea(fop+J_UPDATE,gcattr,j,D);
+                    end
+          else begin
+               genjrea(fop,gcattr,j,D);
+               freereg(j); j := getreg(FF,FF);
+               end
+     else begin 
+if bothonstack and (fop = 4096) then
+begin
+genjrea(fop+J_UPDATE+(4*256),gcattr,j,D);
+end
+else
+genjrea(fop+J_UPDATE,gcattr,j,D);
+     end;
+     gcattr.ckind := JEXP; gcattr.exreg := j;
+     end;
+end; {jun88}
+
+procedure juncmp(fop: integer);
+  var lcattr,tcattr: cattr; r: pregrec; DoIt,Reversed: Boolean;
+      lop: integer; lsiz: sizes;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     { 122 = FLT4 }
+     { 123 = FLT8 }
+     { 124 = FGT4 }
+     { 125 = FGT8 }
+     { 126 = FLE4 }
+     { 127 = FLE8 }
+     { 128 = FGE4 }
+     { 129 = FGE8 }
+     { 130 = FEQ4 }
+     { 131 = FEQ8 }
+     { 132 = FNE4 }
+     { 133 = FNE8 }
+     DoIt := FALSE; Reversed := FALSE;
+     if odd(fop)
+     then begin
+          if (gcattr.ckind = CNST) and
+             (gcattr.cvalu.lvalu = 0) and
+             (gcattr.cvalu.lvalu2 = 0)
+          then begin { X ? 0.0 }
+               genjrea(J_DTST,lcattr,nil,D);
+               end
+          else if (lcattr.ckind = CNST) and
+             (lcattr.cvalu.lvalu = 0) and
+             (lcattr.cvalu.lvalu2 = 0)
+          then begin { 0.0 ? X }
+               genjrea(J_DTST,gcattr,nil,D);
+               Reversed := TRUE;
+               end
+          else begin lsiz := D; lop := J_DCMP; DoIt := TRUE; end;
+          end
+     else begin
+          if (gcattr.ckind = CNST) and (gcattr.cvalu.lvalu = 0)
+          then begin { X ? 0.0 }
+               genjrea(J_FTST,lcattr,nil,S);
+               end
+          else if (lcattr.ckind = CNST) and (lcattr.cvalu.lvalu = 0)
+          then begin { 0.0 ? X }
+               genjrea(J_FTST,gcattr,nil,S);
+               Reversed := TRUE;
+               end
+          else begin lsiz := S; lop := J_FCMP; DoIt := TRUE; end;
+          end;
+     if DoIt
+     then begin
+          if lcattr.ckind <> JEXP
+          then DoIt := TRUE
+          else DoIt := not lcattr.exreg^.InReg;
+          if DoIt and (gcattr.ckind = JEXP)
+          then begin
+               tcattr := gcattr; gcattr := lcattr; lcattr := tcattr;
+               Reversed := TRUE;
+               end;
+          r := loadj(lcattr,nil,lsiz); makevalid(gcattr);
+          genjrea(lop,gcattr,r,lsiz); freereg(r);
+          end;
+     { Test Juniper CC } gen(_TST_B+$38); gen($8000 + J_CR);
+     with gcattr do begin
+          ckind := COND;
+          case fop of
+               122,123: { FLT4/8 } if Reversed then cc := GT else cc := LT;
+               124,125: { FGT4/8 } if Reversed then cc := LT else cc := GT;
+               126,127: { FLE4/8 } if Reversed then cc := GE else cc := LE;
+               128,129: { FGE4/8 } if Reversed then cc := LE else cc := GE;
+               130,131: { FEQ4/8 } cc := EQ;
+               132,133: { FNE4/8 } cc := NE;
+          end; {case}
+          end;
+     end;
+end; {juncmp}
+
+procedure juncvt(fop: integer; ssiz,dsiz: sizes);
+  var r: pregrec;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte);
+     r := getreg(F1,FE); makevalid(gcattr);
+     genjrea(fop+J_UPDATE,gcattr,r,ssiz);
+     if dsiz = L
+     then begin
+          gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D7);
+          { MOVE.L Jint,D } genr0($2038,gcattr.exreg);
+                            gen($8000 + J_MOVEI + (r^.regno and 15)*16);
+          freereg(r);
+          end
+     else begin gcattr.ckind := JEXP; gcattr.exreg := r; end;
+     end;
+end; {juncvt}
+
+procedure jround(fsiz: sizes);
+  var r,d1: pregrec; lop: integer;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte); d1 := getreg(D0,D7); lock(d1);
+     { MOVE.B Jor,D } genr0($1038,d1); gen($8000 + J_OR);
+     { ANDI.B #$F1,Jor } gen($0238); gen($F1); gen($8000 + J_OR);
+     r := getreg(F1,FE);
+     if fsiz = D then lop := J_INT8 else lop := J_INT4;
+     genjrea(lop+J_UPDATE,gcattr,r,fsiz);
+     { MOVE.B D,Jor } genr($11C0,d1); gen($8000 + J_OR);
+     { MOVE.L Jint,D } genr0($2038,d1);
+                       gen($8000 + J_MOVEI + (r^.regno and 15)*16);
+     freereg(r); unlock(d1);
+     gcattr.ckind := EXPR; gcattr.exreg := d1;
+     end;
+end; {jround}
+
+procedure jneg(fsiz: sizes);
+  var r: pregrec; lop: integer;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte);
+     r := getreg(F1,FE); makevalid(gcattr);
+     if fsiz = D then lop := J_DNEG else lop := J_FNEG;
+     genjrea(lop+J_UPDATE,gcattr,r,fsiz);
+     gcattr.ckind := JEXP; gcattr.exreg := r;
+     end;
+end; {jneg}
+
+procedure jabs(fsiz: sizes);
+  var r: pregrec; lop,llab: integer;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte);
+     if (fsiz = D) or (gcattr.ckind = JEXP)
+     then begin
+          r := loadj(gcattr,nil,fsiz);
+          if fsiz = D then lop := J_DTST else lop := J_FTST;
+          isolate(r); gcattr.exreg := r; dupref(gcattr,fsiz);
+          genjrea(lop,gcattr,nil,fsiz);
+          { Test Juniper CC } gen(_TST_B+$38); gen($8000 + J_CR);
+          llab := newlabel; genjump(_BPL,llab);
+          if fsiz = D then lop := J_DNEG else lop := J_FNEG;
+          gen(_MOVE_B+$01C0); gen($8100 + lop + (r^.regno and 15)*17);
+          defilabel(llab);
+          gcattr.ckind := JEXP; gcattr.exreg := r;
+          end
+     else begin
+          r := loadd(gcattr,fsiz); isolate(r);
+          genr(_BCLR,r); gen(31);
+          gcattr.ckind := EXPR; gcattr.exreg := r;
+          end;
+     end;
+end; {jabs}
+
+procedure junfupi(fsiz: sizes);
+  var lcattr: cattr; r,r2: pregrec; lop: integer;
+begin
+if JUN_FLAG
+then begin
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     if (gcattr.ckind = CNST) and
+        (gcattr.cvalu.lvalu >= 1) and (gcattr.cvalu.lvalu <= 4)
+     then begin
+          if fsiz = D then lop := J_DMUL+J_UPDATE else lop := J_FMUL+J_UPDATE;
+          r := loadj(lcattr,nil,fsiz);
+          case gcattr.cvalu.lvalu of
+            1: ;
+            2: begin
+               isolate(r); erase(r); lcattr.exreg := r; dupref(lcattr,fsiz);
+               genjrea(lop,lcattr,r,fsiz);
+               end;
+            3: begin
+               lock(r); r2 := getreg(F1,FF);
+               dupref(lcattr,fsiz); dupref(lcattr,fsiz);
+               genjrea(J_COPY,lcattr,r2,fsiz);
+               genjrea(lop,lcattr,r2,fsiz);
+               genjrea(lop,lcattr,r2,fsiz);
+               unlock(r); lcattr.exreg := r2;
+               end;
+            4: begin
+               isolate(r); erase(r); lcattr.exreg := r;
+               dupref(lcattr,fsiz); genjrea(lop,lcattr,r,fsiz);
+               dupref(lcattr,fsiz); genjrea(lop,lcattr,r,fsiz);
+               end;
+          end; {case}
+          gcattr := lcattr;
+          end
+     else begin
+          pushvalue(lcattr,fsiz); pushvalue(gcattr,L); saveallregs;
+          if fsiz = D then genjsra('%_DUPIV ') else genjsra('%_UP_I  ');
+          clearscr; gcattr.ckind := JEXP; gcattr.exreg := getreg(F1,F1);
+          end;
+     end;
+end; {junfupi}
+
+

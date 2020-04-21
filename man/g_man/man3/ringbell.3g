@@ -1,0 +1,30 @@
+.TH ringbell 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B ringbell
+\- rings the keyboard bell
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "ringbell()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine ringbe"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure ringbell;"
+.SH DESCRIPTION
+.B ringbell
+rings the keyboard bell.
+.SH "SEE ALSO"
+clkoff, clkon, lampoff, lampon, setbell
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

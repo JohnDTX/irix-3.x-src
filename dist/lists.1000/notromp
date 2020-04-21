@@ -1,0 +1,14 @@
+bin/ln
+bin/cpio
+bin/csh
+bin/echo
+bin/sh
+bin/su
+bin/tar
+etc/cron
+etc/getty
+etc/init
+etc/sgboot
+etc/sgbounce
+etc/update
+etc/xnsd

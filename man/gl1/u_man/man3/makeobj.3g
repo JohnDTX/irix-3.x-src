@@ -1,0 +1,32 @@
+.TH makeobj  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I makeobj
+- create an object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "makeobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine makeob(obj)"
+.B "integer obj"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure makeobj(obj: Object);"
+.sp
+.SH DESCRIPTION
+Objects are created with the \f2makeobj\f1 command.  \f2Makeobj\f1 takes an
+argument, a 31-bit integer name that will be associated with the object.
+If an object with the given name previously existed, that object is deleted.
+When a \f2makeobj\f1 command is executed, the object name is entered into
+a symbol table and memory is allocated for a display list.  Subsequent
+graphics commands are compiled into the display list instead of being 
+executed.  
+.SH "SEE ALSO"
+.I callobj, closeobj, genobj, isobj
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,11 @@
+bin/chgrp
+bin/chown
+bin/df
+bin/ln
+bin/ls
+bin/mkdir
+bin/rm
+bin/rmdir
+bin/xcp
+etc/mknod
+etc/reboot

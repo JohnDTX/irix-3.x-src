@@ -1,0 +1,40 @@
+.TH UVAR 2 
+.SH NAME
+uvar \- returns system-specific configuration information
+.SH SYNOPSIS
+.B #include <sys/var.h>
+.sp
+.B uvar(v)
+.br
+.B struct var *v;
+.SH DESCRIPTION
+.PP
+Returns system-specific configuration information
+contained in the kernel.
+The information returned contains table sizes, mask words, and other
+system-specific information for programs such as
+.IR adb\^ (1),
+.IR ld\^ (1),
+and
+.IR ps\^ (1).
+.PP
+Presently a maximum of 256 bytes of information is returned.  
+This number is subject to change.
+.SH SEE ALSO
+/usr/include/sys/space.h
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#57,D0
+.B movl	v,A0
+.B movw	#33,A1
+.B trap	#0
+.fi
+.PP
+Carry bit is set if data could not be put into the 
+address pointed to by 
+.BR v .
+.SH NOTE
+This system call is not supported.
+.DT
+.\"	@(#)uvar.2	5.1 of 11/16/83

@@ -1,0 +1,283 @@
+'\"macro stdmacro
+.TH MKFS 1M
+.SH NAME
+mkfs \- construct a file system
+.SH SYNOPSIS
+.B /etc/mkfs
+[
+.B \-C
+cgfsize[:cgisize] [ \f3/-D\f1 deviceproto ] [ \f3-G\f1 heads sectors
+]
+.br
+.in +\w'/etc/mkfs\ \ 'u
+special [ proto ]
+.PP
+.B /etc/mkfs.bell
+special proto [ m n ]
+.br
+.SH DESCRIPTION
+.I mkfs\^
+constructs an Extent file system
+by writing on the file
+.I special
+according to the directions
+found in the remainder of the command line.
+The file system is created with (at least) a root
+directory and the
+.I lost\+found
+directory used by
+.IR fsck (1M).
+.I mkfs.bell\^
+constructs a Bell file system.
+The file system is created with (at least) a root directory.
+The optional modifiers are different
+for the two types of file systems,
+and are described later.
+.PP
+The
+.I proto
+argument specifies the size
+and content of the file system.
+If
+.I proto
+is of the form
+.IR number[:number] ,
+.I mkfs\^
+builds a file system with at most the first
+.I number
+of physical blocks and approximately
+the second
+.I number
+of inodes,
+containing a root directory.
+.I mkfs
+(but not
+.IR mkfs.bell )
+also creates the directory
+.I lost+found
+used by
+.IR fsck (1M).
+The actual sizes are rounded up or down according
+to a formula.
+If the second
+.I number
+is not given,
+the number of inodes is set to
+approximately
+the number of
+.I logical\^
+blocks divided by 5 (4 for a Bell file system).
+In either case,
+the boot program is left uninitialized.
+.PP
+Otherwise,
+.I mkfs\^
+uses
+.I proto
+as the name of
+a description file
+containing tokens separated by white space.
+The first token is the name of a file
+to be copied onto block zero as the bootstrap program.
+The second token is a number specifying the
+size of the created file system in
+physical
+disk blocks.
+Typically it will be the number of blocks on the device,
+perhaps diminished by space for swapping.
+The next token is the number of inodes in the file system.
+The maximum number of inodes configurable is 65500.
+The next set of tokens comprise the specification
+for the root directory.
+File specifications consist of tokens
+giving the mode,
+the user \s-1ID\s0,
+the group \s-1ID\s0,
+and the initial contents of the file.
+The syntax of the contents field
+depends on the mode.
+.PP
+The mode token for a file is a 6-character string.
+The first character
+specifies the type of the file.
+(The characters
+.B \-bcd
+specify regular, block special,
+character special and directory files
+respectively.)
+The second character of the type
+is either
+.B u
+or
+.B \-
+to specify set-user-id mode or not.
+The third is
+.B g
+or
+.B \-
+for the set-group-id mode.
+The rest of the mode
+is a 3-digit octal number giving the
+owner, group, and other read, write, execute
+permissions (see
+.IR chmod (1)).
+.PP
+Two decimal number
+tokens come after the mode; they specify the
+user and group \s-1ID\s0's of the owner of the file.
+.PP
+If the file is a regular file,
+the next token is a path name
+whence the contents and size are copied.
+If the file is a block or character special file,
+two decimal number tokens
+follow which give the major and minor device numbers.
+If the file is a directory,
+.I mkfs\^
+makes the entries `.' and `..' and then
+reads (recursively) a list of names and 
+file specifications for the entries
+in the directory.
+The scan is terminated with the token `$'.
+.PP
+A sample prototype specification follows:
+.PP
+.nf
+.in +5
+/stand/ diskboot\^
+4872 110
+d\-\^\^\-777 3 1
+usr	d\-\^\^\-777 3 1
+	sh	\-\^\^\-\^\^\-755 3 1 /bin/sh
+	ken	d\-\^\^\-755 6 1
+		$
+	b0	b\-\^\^\-644 3 1 0 0
+	c0	c\-\^\^\-644 3 1 0 0
+	$
+$
+.in -5
+.fi
+.PP
+.SS "Mkfs Options"
+.sp 1
+.PP
+.I mkfs
+needs the the number of heads,
+the number of sectors per track,
+and the size in
+.I physical
+blocks
+for the disk and partition on which
+.I filsys
+resides.
+The cylinder group size,
+and the number of inodes per cylinder group
+are also needed.
+If these are not specified on the command line,
+they are read from the disk label
+(heads, sectors, and size)
+or computed from a formula
+(cylinder group size and inodes per cylinder group).
+.PP
+.B \-C
+cgfsize[:cgisize]
+.br
+.in +5
+gives the (approximate)
+size and number of inodes in a cylinder group.
+The actual sizes are rounded up or down according
+to a formula.
+.in -5
+.PP
+.BR \-D\^ device
+.br
+.in +5
+specifies another file system device
+whose disk label parameters are to be used as defaults.
+.in -5
+.PP
+.B \-G
+heads sectors
+.br
+.in +5
+specifies the geometry of the
+disk on which
+.I filsys
+resides.
+.in -5
+.PP
+.SS "Mkfs.bell Options"
+.sp 1
+.PP
+The optional
+.I m
+and
+.I n
+arguments
+to
+.I mkfs.bell
+are used to tune the construction of the freelist
+(and thus the allocation of files)
+for particular disk on which
+.B filsys
+resides.
+.I mkfs.bell
+will process
+.I m
+consecutive blocks at a time,
+arranging them such that
+consecutive allocations are mostly
+.I n
+blocks apart.
+Typically,
+.I n
+is the number of
+.I logical
+blocks per cylinder.
+A default will be used if the supplied
+.I m
+or
+.I n
+is missing or illegal.
+The proper selection of the 
+.I m
+and 
+.I n
+parameters can improve file system efficiency.
+Disks which have
+full or partial track buffering should specify a 
+.I m
+and
+.I n
+of 1 and 1;  
+.I m
+and 
+.I n
+for other disks must be determined by trial and error as the disk
+latency is related to rotational latency and CPU speed.
+.SH EXAMPLE
+.IP
+mkfs \-D /dev/md0a /dev/rmd1a
+.PP
+makes a minimal Extent file system
+on
+.IR /dev/rmd1a ,
+with the same parameters as
+.IR /dev/md0a .
+.PP
+.IP
+mkfs.bell /dev/fd0 2000 7 50
+.PP
+makes a minimal Bell file system of size 2000 on disk
+.IR /dev/fd0 .
+The freelist is processed
+50 blocks at a time,
+in such a way that consecutive allocations
+will be mostly 7 blocks apart.
+.SH SEE ALSO
+labelit(1M), dir(4), fs(4), boot(8)
+.SH BUGS
+If a prototype is used, it is not possible to initialize
+a file larger than 64K bytes, nor is there a way
+to specify links.
+.\"	@(#)mkfs.1m	5.1 of 10/17/83

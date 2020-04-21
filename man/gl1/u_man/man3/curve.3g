@@ -1,0 +1,36 @@
+.TH curve  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I curve
+- draw parametric cubic curves
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curve(precision, basis, geom) "
+.B "short precision; "
+.B "Matrix basis;"
+.B "Coord geom[4][3];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curve(precis, basis, geom)"
+.B "integer*2 precis"
+.B "real basis(4,4), geom(3,4)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curve(precision: Short; var basis: Matrix; "
+.B "	var geom: Coord3array);"
+.sp
+.SH DESCRIPTION
+A curve is defined by a basis matrix and a set of four guiding points.
+The first argument, \f3precision\f1, specifies the number of line segments
+to be used in approximating the curve.  The curve is drawn in the current
+color, writemask, linewidth, and linestyle.  To achieve a 
+continuous line style
+across the \f3precision\f1 segments that approximate the curve, see
+\f2resetls\f1.  See Section 3.7 and
+Figure 3.4 in the \f2IRIS Graphics Library\f1
+for some sample curves, basis matrices, and guiding points.
+.SH "SEE ALSO"
+.I curveit, resetls

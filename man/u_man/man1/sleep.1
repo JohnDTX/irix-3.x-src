@@ -1,0 +1,54 @@
+'\"macro stdmacro
+.TH SLEEP 1 
+.SH NAME
+sleep \- suspend execution for an interval
+.SH SYNOPSIS
+.B sleep
+time
+.SH DESCRIPTION
+.I Sleep\^
+suspends execution for
+.I time\^
+seconds.
+It is used to execute a command
+after a certain amount of time as in:
+.DT
+.IP "" 5
+(sleep 105; \f2command\fP\^)&
+.PP
+or to execute a command every so often, as in:
+.IP
+while true
+.br
+do
+.br
+	\f2command\fP
+.br
+	sleep 37
+.br
+done
+.SH EXAMPLE
+.PP
+label:
+.IP
+command >> x
+.br
+command >> x
+.br
+date >> x
+.br
+sleep 10
+.br
+goto label
+.PP
+The preceding 
+.IR sh\^ (1)
+script would execute the two commands and append the results to
+file "x",
+then sleep for 10 seconds and repeat the process.
+.SH "SEE ALSO"
+alarm(2), sleep(3C).
+.SH BUGS
+.I Time\^
+must be less than 65536 seconds.
+.\"	@(#)sleep.1	5.1 of 11/18/83

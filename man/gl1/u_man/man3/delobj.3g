@@ -1,0 +1,30 @@
+.TH delobj  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I delobj
+- delete an object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "delobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine delobj(obj)"
+.B "integer obj"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure delobj(obj: Object);"
+.sp
+.SH DESCRIPTION
+The \f2delobj\f1 command deletes an object.  All display list storage
+associated with an object is freed, and the object name is marked undefined
+until it is used to create a new object.
+Attempts to call an object with the deleted name will be ignored.
+Only if another call is made on \f2makeobj\f1 can the name be re-used.
+.SH "SEE ALSO"
+.I makeobj
+.SH NOTE
+This command can only be used in immediate mode.

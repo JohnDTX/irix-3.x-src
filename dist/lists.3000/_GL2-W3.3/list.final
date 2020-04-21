@@ -1,0 +1,6 @@
+Versions/004-0611-051
+test
+tmp/*
+usr/test
+usr/tmp
+dist

@@ -1,0 +1,5 @@
+fload is responsible for loading the microcode into the sky fpp
+on system boot.  The microcode is in ffp325.ram in ascii.  The
+program atobin takes an ascii microcode file named ascii and 
+writes the binary microcode file binary which is renamed
+and used by fload.

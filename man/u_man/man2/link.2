@@ -1,0 +1,116 @@
+'\"macro stdmacro
+.TH LINK 2 
+.SH NAME
+link \- link to a file
+.SH SYNOPSIS
+.B int link (path1, path2)
+.br
+.B char \(**path1, \(**path2;
+.SH DESCRIPTION
+.I Path1\^
+points to a
+path name
+naming an existing file.
+.I Path2\^
+points to a
+path name
+naming the new directory entry to be created.
+.I Link\^
+creates a new link (directory entry) for the existing file.
+.PP
+.I Link\^
+will fail and no link will be created if one or more of the following
+are true:
+.RS .3i
+.PP
+A component of either
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.PP
+A component of either
+path prefix
+does not exist.
+.SM
+\%[ENOENT]
+.PP
+A component of either
+path prefix
+denies search permission.
+.SM
+\%[EACCES]
+.PP
+The file named by
+.I path1\^
+does not exist.
+.SM
+\%[ENOENT]
+.PP
+The link named by
+.I path2\^
+exists.
+.SM
+\%[EEXIST]
+.PP
+The file named by
+.I path1\^
+is a directory and the effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.PP
+The link named by
+.I path2\^
+and the file named by
+.I path1\^
+are on different logical devices (file systems).
+.SM
+\%[EXDEV]
+.PP
+.I Path2\^
+points to a null path name.
+.SM
+\%[ENOENT]
+.PP
+The requested link requires writing in a directory
+with a mode
+that denies write permission.
+.SM
+\%[EACCES]
+.PP
+The requested link requires writing in a directory on a read-only file system.
+.SM
+\%[EROFS]
+.PP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.PP
+The requested link requires the file named by
+.I path1\^
+to have more than 1000 links.
+.SM
+\%[EMLINK]
+.RE
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+unlink(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#9,D0
+.B movl	path1,A0
+.B movl	path2,D1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)link.2	5.1 of 11/1/83

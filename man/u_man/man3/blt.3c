@@ -1,0 +1,21 @@
+'\"macro stdmacro
+.TH BLT 3C
+.SH NAME
+blt \- block transfer data
+.SH SYNOPSIS
+.B int blt(to, from, count)
+.br
+.B char *to;
+.br
+.B char *from;
+.br
+.B int count;
+.SH DESCRIPTION
+.I Blt\^
+does a fast copy of 
+.I count\^
+bytes of data starting at address 
+.I from\^
+to address 
+.IR to .
+.\"	@(#)blt.3	5.1 of 10/26/83

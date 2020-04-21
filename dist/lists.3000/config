@@ -1,0 +1,14 @@
+etc/bcheckrc
+etc/brc
+etc/gettydefs
+etc/group
+etc/hosts
+etc/hosts.equiv
+etc/ibtab
+etc/inittab
+etc/rc
+etc/rc.488
+etc/rc.tcp
+usr/lib/Mail.rc
+usr/lib/aliases
+usr/lib/crontab

@@ -1,0 +1,16 @@
+The FORTRAN RGL for IBM mainframes is changed to reflect the reality of the
+GeometryLink performance. The changes are in:
+lib.f
+	1. Comment out trailing cr after a returned array (which ends with a cr)
+		getmatrix, readpixels, readRGB, blkqread, endfeedback.
+	2. Comment out calls to echoon and echooff, as they have no use
+		on the GeometryLink and I don't trust the linker/loader to 
+		remove them. Echoon asnd echoff are empty routines.
+	3. Change the rotate command to convert the transmitted axis from
+		ebcdic to ascii before it is sent.
+fio.copy
+	1. Relevant values for ibm machine
+io.f
+	1. Extensive text conversion for ascii link.
+	2. Removal of dosync on receive arrays.
+	3. Extensive rotate/translate changes.

@@ -1,0 +1,84 @@
+'\"macro stdmacro
+.TH RMDEL 1
+.SH NAME
+rmdel \- remove a delta from an \s-1SCCS\s+1 file
+.SH SYNOPSIS
+.B rmdel
+.if n .ul
+\f3\-r\f1\c
+.if n .ul 0
+\s-1SID\s0
+files
+.SH DESCRIPTION
+.I Rmdel\^
+removes the delta specified by the
+.SM \f2SID\fP
+from each
+named \s-1SCCS\s+1 file.
+The delta to be removed must be the newest (most recent) delta
+in its branch in the delta chain of each
+named \s-1SCCS\s+1 file.
+In addition,
+the 
+.SM SID
+specified must
+.I not\^
+be that of a version being edited for the purpose of
+making a delta (i.e.,
+if a
+.I p-file\^
+(see
+.IR get\^ (1))
+exists for the named \s-1SCCS\s+1 file,
+the 
+.SM SID
+specified must
+.I not\^
+appear in any entry of the
+.IR p-file\| ).
+.PP
+If a directory is named,
+.I rmdel\^
+behaves as though each file in the directory were
+specified as a named file,
+except that non-\s-1SCCS\s+1 files
+(last component of the path name does not begin with \f3s.\f1)
+and unreadable files
+are silently ignored.
+If a name of \f3\-\f1 is given, the standard input is read;
+each line of the standard input is taken to be the name of an \s-1SCCS\s+1 file
+to be processed;
+non-\s-1SCCS\s+1 files and unreadable files are silently ignored.
+.PP
+The basic permissions necessary to remove a delta
+are as follows:
+(1) if you make a delta you can remove it;
+or (2)
+if you own the file and directory you can remove a delta.
+.SH EXAMPLE
+.IP
+rmdel -r1.2 s.test1.c
+.PP
+would remove the latest delta version (i.e., 1.2) for "s.test1.c".
+.SH FILES
+.PD 0
+.TP "\w'x-file\ \ \ 'u"
+x-file
+(see
+.IR delta\^ (1))
+.TP
+z-file
+(see
+.IR delta\^ (1))
+.PD
+.SH "SEE ALSO"
+delta(1),
+get(1),
+help(1),
+prs(1),
+sccsfile(4).
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.\"	@(#)rmdel.1	5.1 of 11/9/83

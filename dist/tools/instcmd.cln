@@ -1,0 +1,3 @@
+#! /bin/sh
+
+/usr/spool/lp/etc/util/rhostfix > /dev/null 2>&1

@@ -1,0 +1,84 @@
+'\"macro stdmacro
+.TH COLORDEMOS 1D
+.SH NAME
+showmap, cedit, interp \- color map demonstration programs
+.SH SYNOPSIS
+.nh
+.na
+.in
+.B /usr/people/mexdemos/bin/showmap
+.PP
+.B /usr/people/mexdemos/bin/cedit
+.PP
+.B /usr/people/mexdemos/bin/interp
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+These three color tools display the current color map, edit single colors,
+and make smooth color ranges respectively.
+They operate 
+.B only 
+under the control of
+.IR mex ,
+the window manager.
+Source files for all three programs are in
+.IR /usr/people/gifts .
+.PP
+.I Showmap
+displays the current color map as a square array of color tiles.
+To determine the size of the map, 
+.I showmap
+calls
+.IR getplanes .
+Depending on the number of available bitplanes returned by
+.IR getplanes ,
+.I showmap
+then selects a display of 64, 256, or 1024 entries.
+The program is not interactive.
+Color 0 is at the lower left corner of the display and
+the highest color index is at the
+upper right.
+.PP
+.I Cedit
+displays three color sliders and a test patch.
+To alter any displayed color, select the
+.IR cedit 
+window.
+Move the cursor to the color and press and release the left
+mouse button.
+The selected color will be displayed in the test patch.
+The color sliders will be set to the relative intensities of red, green,
+and blue that comprise the color.
+To alter the color, move the sliders with the mouse while holding down the
+right mouse button.
+.PP
+.I Interp
+displays two color chips and a Gouraud-shaded polygon showing the shaderange 
+between them.
+To make a shaderange, start windows for 
+.IR showmap ,
+.IR cedit ,
+and
+.IR interp .
+Select the color at the lower (usually darker) end of the shaderange
+and use
+.I cedit
+to set it to the desired value.
+Select the color at the top of the shaderange and edit it as well.
+.PP
+Now select the 
+.I interp 
+window.
+Move the cursor to the lower color (usually on
+.IR showmap )
+and release the left mouse button.
+Move the cursor to the high color and repeat.
+Move the cursor to
+.I interp
+and press and release the middle mouse button.
+.PP
+The resultant color array will be gamma-corrected using the
+floating-point constant in
+.IR ~/.gamma .
+If no such file exists, the gamma constant is 1.0.

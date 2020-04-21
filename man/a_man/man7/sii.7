@@ -1,0 +1,64 @@
+'\"macro stdmacro
+.TH SII 7
+.SH NAME
+sii\- Interphase Storager 2 esdi/st-506 disk/tape/floppy controller
+.SH SYNOPSIS
+.B "controller sii0 at mb0 csr 0x7200 priority 5 vector siiintr
+.br
+.B "disk si0 at sii0 drive 0
+.br
+.B "disk si1 at sii0 drive 1
+.SH DESCRIPTION
+This is a MULTIBUS esdi/st-506 disk and tape controller.
+The driver software supports two winchester hard disk drives,
+one qic-02 streaming tape drive, and one floppy drive.
+This man page documents the hard disk support.
+See \f2siq\f1(7) for
+information on the streaming tape support and \f2sif\f1(7) for
+the floppy support.
+.PP
+Files with minor device numbers 0 through 7 refer to various portions
+of drive 0;
+minor devices 8 through 15 refer to drive 1.
+The standard device names begin with ``si'' followed by
+the drive number and then a letter a-h for partitions 0-7 respectively.
+The character ? stands here for a drive number in the range 0-7.
+.PP
+The block files access the disk via the system's normal
+buffering mechanism and may be read and written without regard to
+physical disk records.  There is also a `raw' interface
+which provides for direct transmission between the disk
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.'
+.PP
+In raw I/O counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.PP
+The size of the various partitions supported by the driver in fact
+are a function of the drive itself.  Present on each drive is a boot
+label which contains the partitions sizes and locations.
+.SH FILES
+/dev/si[01][a-h]     block files
+.br
+/dev/rsi[01][a-h]    raw files
+.SH SEE ALSO
+autoconf(7),
+siq(7),
+sif(7)
+.SH DIAGNOSTICS
+\f3md%d (***NO LABEL***)\f1.  The named drive has no boot label and
+thus cannot be used.
+.br
+\f3(%s Name: %s)\f1.  On a successful attach, the drive type is
+printed out followed by its ``name'' (a user specifiable name).
+.br
+\f3%s: hard error: %s, at: %d/%d/%d, cmd: %s\f1.  A hard error of some
+type has occured.  The first string printed is the name of the device where
+the error occured.  Next printed is a textual description
+of the error, followed by the physical disk address where the error
+occured.  Finally, the command which caused the error is printed.

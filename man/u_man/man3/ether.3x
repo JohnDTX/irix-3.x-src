@@ -1,0 +1,128 @@
+'\"macro stdmacro
+.\" @(#)ether.3r 1.3 86/07/28 SMI; new on release 3.0
+.TH ETHER 3X
+.SH NAME
+ether \- monitor traffic on the Ethernet
+.SH SYNOPSIS
+.B #include <rpcsvc/ether.h> 
+.SH RPC INFO
+.nf
+program number:
+	ETHERPROG
+.PP
+xdr routines:
+	xdr_etherstat(xdrs, es)
+		XDR *xdrs;
+		struct etherstat *es;
+	xdr_etheraddrs(xdrs, ea)
+		XDR *xdrs;
+		struct etheraddrs *ea;
+	xdr_etherhtable(xdrs, hm)
+		XDR *xdrs;
+		struct etherhmem **hm;
+	xdr_etherhmem(xdrs, hm)
+		XDR *xdrs;
+		struct etherhmem **hm;
+	xdr_etherhbody(xdrs, hm)
+		XDR *xdrs;
+		struct etherhmem *hm;
+	xdr_addrmask(xdrs, am)
+		XDR *xdrs;
+		struct addrmask *am;
+.fi
+.IP
+.I Xdr_etherhmem
+processes a single
+.I etherhmem
+structure.
+.I Xdr_etherhtable
+processes an array of HASHSIZE
+.I *struct
+.IR etherhmem s.
+The
+.I **etherhmem
+field of
+.I etheraddrs
+is actually a hashtable, that is, it
+is a pointer to an array of HASHSIZE
+.I hmem
+pointers.
+.PP
+.nf
+procs:
+	ETHERPROC_GETDATA
+		no args, returns struct etherstat
+	ETHERPROC_ON
+		no args or results, puts server in promiscuous mode
+	ETHERPROC_OFF
+		no args or results, puts server in promiscuous mode
+	ETHERPROC_GETSRCDATA
+		no args, returns struct etheraddrs with information
+		about source of packets
+	ETHERPROC_GETDSTDATA
+		no args, returns struct etheraddrs with information
+		about destination of packets
+	ETHERPROC_SELECTSRC
+		takes struct mask as argument, no results
+		sets a mask for source
+	ETHERPROC_SELECTDST
+		takes struct mask as argument, no results
+		sets a mask for dst
+	ETHERPROC_SELECTPROTO
+		takes struct mask as argument, no results
+		sets a mask for proto
+	ETHERPROC_SELECTLNTH
+		takes struct mask as argument, no results
+		sets a mask for lnth
+.PP
+versions:
+	ETHERVERS_ORIG
+.PP
+structures:
+	/*
+	 * all ether stat's except src, dst addresses
+	 */
+	struct etherstat {
+		struct timeval	e_time;
+		unsigned long	e_bytes;
+		unsigned long	e_packets;
+		unsigned long	e_bcast;
+		unsigned long	e_size[NBUCKETS];
+		unsigned long	e_proto[NPROTOS];
+	};
+	/*
+	 * member of address hash table
+	 */
+	struct etherhmem {
+		int h_addr;
+		unsigned h_cnt;
+		struct etherhmem *h_nxt;
+	};
+	/*
+	 * src, dst address info
+	 */
+	struct etheraddrs {
+		struct timeval	e_time;
+		unsigned long	e_bytes;
+		unsigned long	e_packets;
+		unsigned long	e_bcast;
+		struct etherhmem **e_addrs;
+	};
+	/*
+	 * for size, a_addr is lowvalue, a_mask is high value
+	 */
+	struct addrmask {
+		int a_addr;
+		int a_mask;	/* 0 means wild card */
+	};
+.fi
+.SH FILES
+/usr/lib/librpcsvc.a	RPC services library
+.\".SH SEE ALSO
+.\"traffic(1C), etherfind(8C), etherd(8C)
+.SH NOTE
+To compile and link a program that calls any of these routines,
+use a compile command of the form:
+.RS
+\f3cc \-I/usr/include/sun \-I/usr/include/bsd \f2prog.c\f3 \-lrpcsvc \-lsun \-lbsd\f1
+.RE

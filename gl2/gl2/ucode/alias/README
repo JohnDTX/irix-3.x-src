@@ -1,0 +1,30 @@
+		>>>  UPDATE  <<<		1/14/85
+
+
+Here is a fixed up version of some of the files in the ./ucode subtree
+in the microcode development release.
+
+It contains a new mas.doc which documents the changes,
+which are here summarized.
+
+
+o The keyword enddeclares is no longer understood or required in the scratch
+	declaration syntax.
+
+o Added the function decl() as a substitute for declare(), blok(), and
+	external.
+
+o The function scratchlookup() has been revised and _slookup() has been added
+	for use by decl().  Scratchlookup() prints error messages on stdout
+	for common symbol lookup errors, and is used by the scratch() and
+	sarray() macros.  _slookup() looks up in the correct symbol table.
+
+o A "file counter" is now used to keep track of whether a scratch symbol is
+	declared in the file in which it is used.  Define NOFILECHECK in the
+	Makefile to override this test.
+
+o Fixed the external declaration mechanism to not allocate extra space.
+
+o Added the sreloc() function to allow relocation of scratch symbols.
+
+

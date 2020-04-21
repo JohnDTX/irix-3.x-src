@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH NLIST 3C
+.SH NAME
+nlist \- get entries from name list
+.SH SYNOPSIS
+.B #include <a.out.h>
+.PP
+.B int nlist (filename, nl)
+.br
+.B char \(**filename;
+.br
+.B "struct nlist nl[ ];"
+.SH DESCRIPTION
+.I Nlist\^
+examines the name list in
+the executable file whose name is pointed to by
+.IR filename ,
+and selectively extracts a
+list of values and puts them in the array of nlist structures pointed to by
+.IR nl .
+The name list
+.I nl\^
+consists of
+an array of structures containing names of variables,
+types and values.
+The list is terminated with a null name;
+that is, a null string is in the name position of the structure.
+Each variable name is
+looked up in the name list of
+the file.
+If the name is found, the type and value of the
+name are inserted in the next two fields.
+If the name is not found, both entries are set to 0.
+See
+.IR a.out\^ (4)
+for a discussion of the symbol table structure.
+.PP
+This subroutine is useful for
+examining the system name list kept in
+the file
+.BR /vmunix .
+In this way programs can obtain system addresses
+that are up to date.
+.SH SEE ALSO
+a.out(4).
+.SH DIAGNOSTICS
+All
+type entries are set to 0 if the file cannot be read
+or if it doesn't contain a valid name list.
+.PP
+.I Nlist\^
+returns \-1 upon error; otherwise it returns 0.
+.\"	@(#)nlist.3c	5.1 of 10/25/83

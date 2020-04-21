@@ -1,0 +1,12 @@
+'\"macro stdmacro
+.TH VIS 1W
+.SH NAME
+vis \- copy a file to the screen
+.SH SYNOPSIS
+.B vis 
+file
+.SH DESCRIPTION
+.I vis 
+copies bytes from the specified file to pixels on the screen.
+The color indexes used are in the range 256 to 511.
+

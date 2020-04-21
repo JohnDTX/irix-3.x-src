@@ -1,0 +1,51 @@
+'\"macro stdmacro
+.TH SHUTDOWN 1M
+.SH NAME
+shutdown \- terminate all processing
+.SH SYNOPSIS
+.B /etc/shutdown
+.SH DESCRIPTION
+.I Shutdown\^
+is part of the
+.SM UNIX
+System operation procedures.
+Its
+primary function is to terminate all currently running processes
+in an orderly and cautious manner.
+The procedure is designed to interact with the operator
+(i.e., the person who invoked
+.IR shutdown ).
+.I Shutdown\^
+may instruct the operator to perform some
+specific tasks, or to supply certain responses before execution
+can resume.
+.I Shutdown\^
+goes through the following steps:
+.TP 3
+\&
+All users logged on the system are notified to log off the system
+by a broadcasted message. The operator may display his/her own
+message at this time. Otherwise, the standard file save message
+is displayed.
+.TP 3
+\&
+If the operator wishes to run the file-save procedure,
+.I shutdown\^
+unmounts all file systems.
+.TP 3
+\&
+All file systems' super blocks are updated before the system is to
+be stopped (see
+.IR sync (1)).
+This must be done before re-booting the system,
+to insure file system integrity.
+.sh DIAGNOSTICS
+The most common error diagnostic that will occur is
+.IR "device busy" .
+This diagnostic happens when a particular file system could not
+be unmounted.
+.SH SEE ALSO
+mount(1M), sync(1).
+.SH NOTE
+\f2shutdown\fP requires that there be a user "adm".
+.\"	@(#)shutdown.1m	5.1 of 10/17/83

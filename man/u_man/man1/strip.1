@@ -1,0 +1,47 @@
+'\"macro stdmacro
+.TH STRIP 1 
+.SH NAME
+strip \- remove symbols and relocation bits
+.SH SYNOPSIS
+.B strip
+name ...
+.SH DESCRIPTION
+.I Strip\^
+removes the symbol
+table and relocation bits ordinarily attached to the output
+of the assembler and link editor.
+This is useful to save space after a program has been
+debugged.
+.PP
+The effect of
+.I strip\^
+is the same as use of the
+.B \-s
+option
+of
+.IR ld .
+.PP
+If
+.I name\^
+is an archive file,
+.I strip\^
+will remove the local symbols from any
+.I a.out\^
+format files it finds in the archive.
+Certain libraries, such as those residing in
+.BR /lib ,
+have no need for local symbols.
+By deleting them, the size of the archive is decreased and link editing
+performance is increased.
+.SH EXAMPLE
+.IP
+strip a.out
+.PP
+removes the symbol table and relocation bits from
+.BR a.out .
+.SH FILES
+.TP "\w'/tmp/stm\(**\ \ \ \ 'u"
+/tmp/stm\(**	temporary file
+.SH "SEE ALSO"
+ld(1).
+.\"	@(#)strip.1	5.1 of 11/10/83

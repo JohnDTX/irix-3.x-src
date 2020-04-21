@@ -1,0 +1,55 @@
+.TH polarview 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B polarview
+\- defines the viewer's position in polar coordinates
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "polarview(dist, azim, inc, twist) "
+.B "Coord dist;"
+.B "Angle azim, inc, twist;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine polarv(dist, azim, inc, twist)"
+.B "real dist"
+.B "integer*4 azim, inc, twist"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure polarview(dist: Coord; azim, inc, twist:" 
+.br
+.B	longint);
+.SH DESCRIPTION
+.B polarview
+defines the viewer's position in polar coordinates.
+\f2dist\f1, \f2azim\f1, and \f2inc\f1
+define a viewpoint.
+\f2dist\f1 is the distance from 
+the viewpoint to the world space origin.
+\f2azim\f1 is the
+angle in the 
+.I x-y 
+plane, measured from the 
+.i y 
+axis.
+\f2inc\f1 is the angle in 
+.I y-z 
+plane, measured from the 
+.I z 
+axis.
+The line of sight extends from the viewpoint through the world space origin.
+\f2twist\f1 rotates the viewpoint around
+the line of sight using the right-hand rule.
+All angles are specified in tenths of degrees and are integers.
+.sp
+.PP
+.SH "SEE ALSO"
+lookat
+.sp
+.I Programming Guide,
+Section 4.2, Viewing Transformations

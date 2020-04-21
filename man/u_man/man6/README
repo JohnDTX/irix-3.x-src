@@ -1,0 +1,9 @@
+1) deleted empty ".so" file
+2) added:	mastermind.6
+		rogue.6
+3) no eqn
+4) tbl:		mastermind.6
+
+November 2, 1985. Robinf.  Created subdirectory called tools.  This
+directory contains two shell scripts for checking files in and otu
+of RCS.

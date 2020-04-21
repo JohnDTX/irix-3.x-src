@@ -1,0 +1,80 @@
+'\"macro stdmacro
+.TH WHAT 1
+.SH NAME
+what \- identify \s-1SCCS\s+1 files
+.SH SYNOPSIS
+.B what
+files
+.SH DESCRIPTION
+.I What\^
+searches the given files for all occurrences
+of the pattern that
+.IR get\^ (1)
+substitutes for %\&Z% (this is
+\f3@\&(#)\f1
+at this printing)
+and prints out what follows until the
+first " , > , new-line, \e ,
+or null character.
+For example, if the C program in file \f3f.c\f1 contains
+.IP "" 5
+char ident[] = "\|@\&(#)identification information\|";
+.PP
+and \f3f.c\f1 is compiled to yield \f3f.o\f1 and \f3a.out\f1,
+then the command
+.IP
+what\|
+f.c\|
+f.o\|
+a.out
+.PP
+will print
+.RS 5
+.TP "\w'a.out:\ \ \ \ 'u"
+f\f3.\f1c:
+.br
+identification information
+.TP
+f\f3.\f1o:
+.br
+identification information
+.TP
+a\f3.\f1out:
+.br
+identification information
+.RE
+.PP
+.I What\^
+is intended to be used in conjunction with the 
+.SM SCCS
+command
+.IR get\^ (1),
+which automatically inserts identifying information,
+but it can also be used where the information is inserted manually.
+.SH EXAMPLE
+.PP
+If "test1.c" has the following string
+.IP "" 5
+char v[] = "@(#)1 test1.c 2";
+.PP
+typing
+.IP
+what test1.c
+.PP
+would print the following:
+.IP
+test1.c:
+.br
+	1 test1.c 2
+.SH SEE ALSO
+get(1), help(1).
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.SH BUGS
+It's possible that an unintended occurrence of the pattern
+\&@\&(#)
+could be
+found just by chance, but this causes no harm in nearly all cases.
+.\"	@(#)what.1	5.1 of 11/15/83

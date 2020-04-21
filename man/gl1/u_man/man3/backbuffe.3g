@@ -1,0 +1,37 @@
+.TH backbuffer 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I backbuffer
+- enable updating in the back buffer
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "backbuffer(b)"
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine backbu(b)"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure backbuffer(b: Boolean);"
+.sp
+.SH DESCRIPTION
+.I Backbuffer
+enables updating in the back buffer.  If b=
+.I TRUE,
+the default, 
+the buffer is enabled;
+.I FALSE
+means it is not enabled.  This command is useful only in
+double buffer mode, and is ignored in single buffer and RGB modes.
+.PP
+.I Backbuffer 
+is set to 
+.I TRUE
+by
+.I gconfig.
+.SH "SEE ALSO"
+.I doublebuffer, frontbuffer, getbuffer

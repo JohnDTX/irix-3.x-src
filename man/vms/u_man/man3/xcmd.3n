@@ -1,0 +1,47 @@
+'\"macro stdmacro
+.TH XCMD 3N
+.SH NAME
+xcmd, xsh \- remote execution via XNS
+.SH SYNOPSIS
+.nf
+.B "xcmd (host, command)"
+.B "char *host, *command;"
+.PP
+.B "xsh (host)"
+.B "char *host;"
+.fi
+.SH DESCRIPTION
+.I Xcmd
+makes a network connection on socket
+.I EXECSOCKET,
+on
+.I host
+and causes
+.I command
+to be executed remotely.
+It returns \-1 if a connection can't be made.
+If the execution is successful,
+a channel is returned,
+to which the remote process is attached.
+Reads and writes to this channel
+will retrieve/send data from/to the remote process.
+.PP
+.I Xsh
+makes a network connection on socket
+.I XSHSOCKET
+on
+.I host
+and forks a shell.
+It returns \-1 if a connection can't be made.
+.SH "SEE ALSO"
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xnsd(1M),
+xx(1C),
+utmp(3N),
+xconnect(3N),
+xnsfile(3N),
+xnsioctl(3N),
+xnslib(3N),
+xnswrite(3N)

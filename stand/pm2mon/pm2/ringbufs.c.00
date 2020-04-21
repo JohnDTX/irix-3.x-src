@@ -1,0 +1,82 @@
+/*
+ *		 Ring Buffer Package
+ * 		    David J. Brown
+ *		    April 11, 1983
+ *
+ *	Separated for Quirk PROM kernel June 20, 1983
+ */
+
+/*
+ *  Routines to manage ring-buffers
+ *
+ *     These routines are generic - they take a pointer to the ring
+ *  in question, and return/enter an element from/into the ring.
+ */
+
+#include "ringbufs.h"
+
+
+/*
+ * RingGet - return a pointer to an item from the event queue: 'ring'
+ *	returns NULL if event queue is empty, non-NULL is ptr to datum
+ */
+Pointer RingGet(ring)
+register struct ring	*ring;
+{
+    register Pointer		item;
+
+    if (ring->in == ring->out)			/* ring is empty 	*/
+        return(0);
+
+    item = ring->out;				/* get the item pointer	*/
+
+    ring->out++;
+    if (ring->out == ring->last)
+        ring->out = ring->first;
+
+    return(item);			/* return a pointer to the item */
+}
+
+/*
+ * RingPut - Enter the datum: item, into the event queue: ring.
+ *	returns NULL if event queue is full, non-NULL if OK
+ */
+RingPut(ring, item)
+register struct ring *ring;	/* a5 */
+register Pointer item;		/* a4 */
+{
+    register Pointer		newin;		/* a3 */
+    
+    newin = ring->in + 1;
+    if (newin == ring->last)
+        newin = ring->first;
+
+    if(newin == ring->out)			/* ring buffer is full	*/
+        return(0);
+
+    *ring->in = *item;
+
+    ring->in = newin;			/* update the input pointer	*/
+    return(1);				/* return success indication	*/
+}
+
+/*
+ * RingCount - return a count of items in the event queue
+ */
+unsigned short RingCount(ring)
+register struct ring	*ring;
+{
+    unsigned short	count;
+    
+    count = (ring->in - ring->out) / ring->datumSize;
+    if (count<0)
+        count += (ring->last - ring->first) / ring->datumSize;
+    return(count);
+}
+
+
+RingEmpty(ring)
+register struct ring	*ring;
+{
+    return ring->in == ring->out;
+}

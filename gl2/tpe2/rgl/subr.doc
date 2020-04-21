@@ -1,0 +1,22 @@
+where each subroutine is
+bogus:	lastone, gdownload
+callfunc: doprimitive, zerodown
+context: switchtotext, switchtographics, irisinit
+download: gdownload(GL1)
+getline: ttygetline, gl_IdleForRetrace, gl_DisplayListRetrace
+hostio:	initcom, closecom, flushhost, fillhostbuffer, fillgraphbuf,
+	fillttybuf, flushhostbuffer, sendkbdchar, initserial,setlocalecho
+	setserialmode, setkeypadmode, havehostdata, sendbreakchar,
+	lockoutput, unlockoutput
+irisio:	rec6, receive, alloca, freearrays, reca, senda, sendLs, sendFs
+	sendSs, sendBs, recgcmd, recb, recs, recl, frecl, senddata
+	sendB, sendS, sendL, turndelay, xsetslowcom, xsetfastcom, gversion
+	tadelay
+local:	localprim
+ret:	ret_endpick, ret_endselect, ret_getmatrix, ret_readpixels
+	ret_readRGB, ret_blkqread, ret_endfeedback
+special: xginit, xgreset, xgexit
+term:	main, readhosr, writehost, repainter, readttyhost, readgraphhost
+textctl: flushscreen, putscrchar, ttynewline, ttyclear, message,
+	message1, ttyinit
+textio:	text_open, text_close, text_read, text_write

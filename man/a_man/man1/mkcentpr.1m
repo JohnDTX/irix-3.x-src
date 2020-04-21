@@ -1,0 +1,49 @@
+'\"macro stdmacro
+.TH MKCENTPR 1M
+.SH NAME
+mkcentpr \- register a Centronics-interface printer with \s-1LP\s0
+.SH SYNOPSIS
+/usr/spool/lp/etc/util/mkcentpr printer-type printer-name
+.SH DESCRIPTION
+.I mkcentpr
+creates a filter program that controls a printer that communicates with
+the IRIS through a Centronics interface, then
+registers the printer with \s-1LP\s0.  A log file is also created.
+.IR printer-name
+is the name you give the printer (see
+.I lpadmin (1M)).
+.I printer-type
+is the type of printer connected to
+.I /dev/cent.
+You must specify the printer type by providing one of the following
+keys:
+.sp
+.I mits
+	for Mitsubishi
+.br
+.I tek
+	\0for the Tektronics 4692
+.br
+.I vers
+	for the Versatec
+.PP
+After running this program, you might consider making this printer the
+default printer using
+.IR lpadmin (1M) .
+.PP
+Run this program as superuser from directory
+.IR /usr/spool/lp/etc/util .
+.SH FILES
+/usr/spool/lp/interface/\f2printer\f1      /dev/cent
+.SH SEE ALSO
+.na
+accept(1M),
+addclient(1M),
+enable(1),
+lp(1),
+lpadmin(1M),
+lpsched(1M),
+lpshut(1M),
+lpstat(1),
+mknetpr(1M),
+rmprinter(1M).

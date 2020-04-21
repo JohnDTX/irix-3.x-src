@@ -1,0 +1,84 @@
+.TH rdr 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rdr
+\- relative draw
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rdr(dx, dy, dz)"
+.B "Coord dx, dy, dz;"
+.IP
+.B "rdri(dx, dy, dz)"
+.B "Icoord dx, dy, dz;"
+.IP
+.B "rdrs(dx, dy, dz)"
+.B "Scoord dx, dy, dz;"
+.IP
+.B "rdr2(dx, dy)"
+.B "Coord dx, dy;"
+.IP
+.B "rdr2i(dx, dy)"
+.B "Icoord dx, dy;"
+.IP
+.B "rdr2s(dx, dy)"
+.B "Scoord dx, dy;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rdr(dx, dy, dz)"
+.B "real dx, dy, dz"
+.IP 
+.B "subroutine rdri(dx, dy, dz)"
+.B "integer*4 dx, dy, dz"
+.IP 
+.B "subroutine rdrs(dx, dy, dz)"
+.B "integer*2 dx, dy, dz"
+.IP
+.B "subroutine rdr2(dx, dy)"
+.B "real dx, dy"
+.IP 
+.B "subroutine rdr2i(dx, dy)"
+.B "integer*4 dx, dy"
+.IP
+.B "subroutine rdr2s(dx, dy)"
+.B "integer*2 dx, dy"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rdr(dx, dy, dz: Coord);"
+.IP
+.B "procedure rdri(dx, dy, dz: Icoord);"
+.IP
+.B "procedure rdrs(dx, dy, dz: Scoord;"
+.IP
+.B "procedure rdr2(dx, dy: Coord);"
+.IP
+.B "procedure rdr2i(dx, dy: Icoord);"
+.IP
+.B "procedure rdr2s(dx, dy: Scoord);"
+.SH DESCRIPTION
+.B rdr
+is the relative version of 
+\f3draw\f1.
+It connects the
+current graphics position and a point, at the specified
+distance, with a line segment
+using the current linestyle, linewidth, color (if in depth-cue mode,
+the depth-cued color is used), and writemask.
+The system updates the current graphics position to the new
+point.  
+.PP
+Do not place routines 
+that invalidate the current graphics
+position within sequences of 
+relative moves and draws.
+.SH "SEE ALSO"
+draw, move, rmv
+.sp
+.I Programming Guide,
+Section 3.4, Lines

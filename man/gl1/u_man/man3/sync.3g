@@ -1,0 +1,27 @@
+.TH sync 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I sync 
+-  wait for a vertical retrace period
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "sync()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine sync"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure sync;"
+.sp
+.SH DESCRIPTION
+In single buffer and RGB modes, rapidly changing scenes should be synchronized
+with the refresh rate.
+The \f2sync\f1 command
+waits for the next vertical retrace period.  
+.SH "SEE ALSO"
+.I RGBmode, singlebuffer
+.SH NOTE
+This command can only be used in immediate mode.

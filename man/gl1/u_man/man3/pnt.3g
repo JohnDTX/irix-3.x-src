@@ -1,0 +1,52 @@
+.TH pnt  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I pnt
+- draw a point
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pnt(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "pnti(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "pnt2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "pnt2i(x, y) "
+.B "Icoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pnt(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine pnti(x, y, z)"
+.B "integer x, y, z"
+.IP 
+.B "subroutine pnt2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine pnt2i(x, y)"
+.B "integer x, y"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pnt(x, y, z: Coord);"
+.IP 
+.B "procedure pnti(x, y, z: Icoord);"
+.IP 
+.B "procedure pnt2(x, y: Coord);"
+.IP 
+.B "procedure pnt2i(x, y: Icoord);"
+.sp
+.SH DESCRIPTION
+The \f2pnt\f1 command colors a world space point.  If the point is
+visible in the current viewport,
+it will be shown as one pixel.  The pixel is drawn
+in the current color using the current writemask.  The current
+graphics position is updated after the \f2pnt\f1 command is executed.
+.SH "SEE ALSO"
+.I draw, move

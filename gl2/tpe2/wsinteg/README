@@ -1,0 +1,45 @@
+	IBM 3270 interface code		08/05/87 release 3.6
+There are 4 executibles in the directory:
+	t3279	RGL and file transfer
+	cutr	cuts and annotates RDDATA/WRDATA files
+	hexd	enhanced od for ascii, 3274 data, or ebcdic files.
+	pxdtest	a crash test of the 3270 card
+
+The t3279 arguments are: t3279 [-dgiostz] [filename]
+	d	log 3278 text displayed in pxlog (terminal emulation screens)
+	g	log RGL commands as text in LOGFILE.x
+	i	input is ascii RGL file (RDDATA type file)
+	o	log RGL ascii as hex from/to host in RDDATA.x WRDATA.x
+	s	snapshots of comm problems stored at filename
+	t	use textport for 3278 emulation
+	z	use gbegin for xginit, rather than ginit to save color map
+
+The cutr arguments are: cutr -[bcmrw] inputfile [+msg_offset]
+	b	create ascii CUT from binary ebcdic file (80 col records)
+	c	create commlog, replacing "ef {xx xx xx}" with "{xx xx xx xx+1}"
+	m	cut on 0xef (MSGDATA type file)
+	r	cut on 0x10 (RDDATA type file)
+	w	cut on 0x7e (WRDATA type file)
+		msg_offset is decimal messages to skip before cutting
+		CUT is the outputfile, numbered with LOGFILE numbers
+
+The hexd arguments are: hexd -[aeinorw] inputfile [hex_offset]
+	a	input is ascii file
+	e	input is ebcdic file
+	i	input is ascii (hilite 0x05, 0x10, and 0x7e)
+	n	no hilite, regardless of other option
+	o	input is ascii (hilite 0x05, 0x10, and 0x7e)
+	r	input is RDDATA file (0x10 hilite)
+	w	input is WRDATA file (0x7e hilite)
+		where hex_offset is up to 4 bytes and may be expressed as:
+			0x89abcdef or x89abcdef or 89abcdef
+
+The env.csh should be sourced before performing any makes in this directory
+
+The make file asserts DEBUG to allow these log files, but production code 
+should be compiled without DEBUG, as the logging tests take time.
+
+The following files are mainly supporting RGL, and can be ignored by an oem
+interrested im message and file transfer:
+bogus.c, dispatch.[ch], hostio.h, hostio3279.c, irisio3279.c, local.c, ret.c,
+rpc.h, special3279.c, term.h, ttymodes.c, util.c.

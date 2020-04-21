@@ -1,0 +1,242 @@
+cp aliens arithmetic autorobots back bcd bj chase  craps fish hangman life maze moo naliens number  rain robots ttt twinkle worm worms wump /juniper/usr/games/.
+cp: cannot create /juniper/usr/games/./aliens
+cp: cannot create /juniper/usr/games/./arithmetic
+cp: cannot create /juniper/usr/games/./autorobots
+cp: cannot create /juniper/usr/games/./back
+cp: cannot create /juniper/usr/games/./bcd
+cp: cannot create /juniper/usr/games/./bj
+cp: cannot create /juniper/usr/games/./chase
+cp: cannot create /juniper/usr/games/./craps
+cp: cannot create /juniper/usr/games/./fish
+cp: cannot create /juniper/usr/games/./hangman
+cp: cannot create /juniper/usr/games/./life
+cp: cannot create /juniper/usr/games/./maze
+cp: cannot create /juniper/usr/games/./moo
+cp: cannot create /juniper/usr/games/./naliens
+cp: cannot create /juniper/usr/games/./number
+cp: cannot create /juniper/usr/games/./rain
+cp: cannot create /juniper/usr/games/./robots
+cp: cannot create /juniper/usr/games/./ttt
+cp: cannot create /juniper/usr/games/./twinkle
+cp: cannot create /juniper/usr/games/./worm
+cp: cannot create /juniper/usr/games/./worms
+cp: cannot create /juniper/usr/games/./wump
+*** Error code 2 (ignored)
+cd /juniper/usr/games ; chmod 755 aliens arithmetic autorobots back bcd bj chase  craps fish hangman life maze moo naliens number  rain robots ttt twinkle worm worms wump
+chmod: can't change aliens
+chmod: can't change arithmetic
+chmod: can't change autorobots
+chmod: can't change back
+chmod: can't change bcd
+chmod: can't change bj
+chmod: can't change chase
+chmod: can't change craps
+chmod: can't change fish
+chmod: can't change hangman
+chmod: can't change life
+chmod: can't change maze
+chmod: can't change moo
+chmod: can't change naliens
+chmod: can't change number
+chmod: can't change rain
+chmod: can't change robots
+chmod: can't change ttt
+chmod: can't change twinkle
+chmod: can't change worm
+chmod: can't change worms
+chmod: can't change wump
+*** Error code 22 (ignored)
+cd /juniper/usr/games ; touch lib/robotscore lib/rogue_roll alienslog lib/arscore
+cd /juniper/usr/games ; chgrp games aliens arithmetic autorobots back bcd bj chase  craps fish hangman life maze moo naliens number  rain robots ttt twinkle worm worms wump lib/robotscore lib/rogue_roll alienslog lib/arscore ; chown games aliens arithmetic autorobots back bcd bj chase  craps fish hangman life maze moo naliens number  rain robots ttt twinkle worm worms wump lib/robotscore lib/rogue_roll alienslog lib/arscore
+aliens: Not owner
+arithmetic: Not owner
+autorobots: Not owner
+back: Not owner
+bcd: Not owner
+bj: Not owner
+chase: Not owner
+craps: Not owner
+fish: Not owner
+hangman: Not owner
+life: Not owner
+maze: Not owner
+moo: Not owner
+naliens: Not owner
+number: Not owner
+rain: Not owner
+robots: Not owner
+ttt: Not owner
+twinkle: Not owner
+worm: Not owner
+worms: Not owner
+wump: Not owner
+lib/robotscore: Not owner
+lib/rogue_roll: Not owner
+alienslog: Not owner
+lib/arscore: Not owner
+aliens: Not owner
+arithmetic: Not owner
+autorobots: Not owner
+back: Not owner
+bcd: Not owner
+bj: Not owner
+chase: Not owner
+craps: Not owner
+fish: Not owner
+hangman: Not owner
+life: Not owner
+maze: Not owner
+moo: Not owner
+naliens: Not owner
+number: Not owner
+rain: Not owner
+robots: Not owner
+ttt: Not owner
+twinkle: Not owner
+worm: Not owner
+worms: Not owner
+wump: Not owner
+lib/robotscore: Not owner
+lib/rogue_roll: Not owner
+alienslog: Not owner
+lib/arscore: Not owner
+*** Error code 1 (ignored)
+for i in adventure cribbage fortune mastermind quiz rogue trek; do (echo $i; cd $i; make install); done
+adventure
+cc -O -c done.c
+cc -O -c init.c
+cc -O -c io.c
+cc -O -c main.c
+cc -O -DW2_0 -c save.c
+cc -O -c subr.c
+cc -O -c vocab.c
+cc -O -c wizard.c
+CC_OPTS "-ZI -ZN -I/iris/usr/include"; export CC_OPTS; \
+cc --n  done.o init.o io.o main.o save.o subr.o vocab.o wizard.o
+sh: CC_OPTS: not found
+rm -f adventure advent
+mv -f advent adventure
+mv: cannot access advent
+*** Error code 2 (ignored)
+cp adventure /juniper/usr/games/.
+cp: cannot access adventure
+*** Error code 2 (ignored)
+cd /juniper/usr/games ; chmod 755 adventure
+chmod: can't access adventure
+*** Error code 1 (ignored)
+cd /juniper/usr/games ; chgrp games adventure ; chown games adventure
+adventure: No such file or directory
+adventure: No such file or directory
+*** Error code 1 (ignored)
+cribbage
+cp cribbage /juniper/usr/games/.
+cd /juniper/usr/games ; chmod 755 cribbage
+cd /juniper/usr/games ; chgrp games cribbage ; chown games cribbage
+cp crib.instr /juniper/usr/games/lib/.
+cd /juniper/usr/games/lib ; chmod 644 crib.instr
+cd /juniper/usr/games/lib ; chgrp games crib.instr ; chown games crib.instr
+fortune
+cp fortune /juniper/usr/games/.
+cd /juniper/usr/games ; chmod 755 fortune
+cd /juniper/usr/games ; chgrp games fortune ; chown games fortune
+cp fortunes /juniper/usr/games/lib/.
+cd /juniper/usr/games/lib ; chmod 644 fortunes
+cd /juniper/usr/games/lib ; chgrp games fortunes ; chown games fortunes
+mastermind
+cp mastermind /juniper/usr/games/.
+cd /juniper/usr/games ; chmod 755 mastermind
+cd /juniper/usr/games ; chgrp games mastermind ; chown games mastermind
+quiz
+mkdir /juniper/usr/games/lib/quiz
+cp quiz /juniper/usr/games/.
+cd /juniper/usr/games ; chmod 755 quiz /juniper/usr/games/lib/quiz
+cd /juniper/usr/games ; chgrp games quiz /juniper/usr/games/lib/quiz ; chown games quiz /juniper/usr/games/lib/quiz
+cd quizzes ; cp * /juniper/usr/games/lib/quiz/.
+cp: cannot create /juniper/usr/games/lib/quiz/./africa
+cp: cannot create /juniper/usr/games/lib/quiz/./airport
+cp: cannot create /juniper/usr/games/lib/quiz/./america
+cp: cannot create /juniper/usr/games/lib/quiz/./areas
+cp: cannot create /juniper/usr/games/lib/quiz/./arith
+cp: cannot create /juniper/usr/games/lib/quiz/./asia
+cp: cannot create /juniper/usr/games/lib/quiz/./babies
+cp: cannot create /juniper/usr/games/lib/quiz/./bard
+cp: cannot create /juniper/usr/games/lib/quiz/./chinese
+cp: cannot create /juniper/usr/games/lib/quiz/./collectives
+cp: cannot create /juniper/usr/games/lib/quiz/./editor
+cp: cannot create /juniper/usr/games/lib/quiz/./elements
+cp: cannot create /juniper/usr/games/lib/quiz/./europe
+cp: cannot create /juniper/usr/games/lib/quiz/./greeklang
+cp: cannot create /juniper/usr/games/lib/quiz/./inca
+cp: cannot create /juniper/usr/games/lib/quiz/./index
+cp: cannot create /juniper/usr/games/lib/quiz/./latin
+cp: cannot create /juniper/usr/games/lib/quiz/./locomotive
+cp: cannot create /juniper/usr/games/lib/quiz/./midearth
+cp: cannot create /juniper/usr/games/lib/quiz/./morse
+cp: cannot create /juniper/usr/games/lib/quiz/./mult
+cp: cannot create /juniper/usr/games/lib/quiz/./murders
+cp: cannot create /juniper/usr/games/lib/quiz/./poetry
+cp: cannot create /juniper/usr/games/lib/quiz/./posneg
+cp: cannot create /juniper/usr/games/lib/quiz/./pres
+cp: cannot create /juniper/usr/games/lib/quiz/./province
+cp: cannot create /juniper/usr/games/lib/quiz/./rockgroup
+cp: cannot create /juniper/usr/games/lib/quiz/./seq-easy
+cp: cannot create /juniper/usr/games/lib/quiz/./seq-hard
+cp: cannot create /juniper/usr/games/lib/quiz/./sexes
+cp: cannot create /juniper/usr/games/lib/quiz/./sov
+cp: cannot create /juniper/usr/games/lib/quiz/./spell
+cp: cannot create /juniper/usr/games/lib/quiz/./state
+cp: cannot create /juniper/usr/games/lib/quiz/./trek
+cp: cannot create /juniper/usr/games/lib/quiz/./ucc
+*** Error code 2 (ignored)
+cd /juniper/usr/games/lib/quiz ; chmod 644 *
+chmod: can't access *
+*** Error code 1 (ignored)
+cd /juniper/usr/games/lib/quiz ; chgrp games * ; chown games *
+*: No such file or directory
+*: No such file or directory
+*** Error code 1 (ignored)
+rogue
+cd libCurses ; make -f makefile.s5 INCDIR=.. LIBDIR=..
+cp libCurses/libCurses.a . ; ranlib libCurses.a
+make -f makefile.s5 install CURSDIR=.
+if [ -f /tmp/LIBCursesLock ]; then echo "Waiting on libCurses.mk\c"; fi; exit 0
+while [ -f /tmp/LIBCursesLock ]; do echo ".\c"; sleep 5; done; exit 0
+
+cc   -n vers.o main.o rooms.o passages.o command.o move.o fight.o  chase.o init.o new_level.o things.o use.o list.o io.o rip.o  daemon.o daemons.o weapons.o monsters.o save.o options.o armor.o  pack.o potions.o rings.o wands.o ./libCurses.a /usr/lib/libtermlib.a /usr/lib/libgl2.a  /usr/lib/libm.a -o rogue
+`echo cc | sed -e 's,.*/,,' -e 's,cc,size,'` rogue
+text	data	bss	dec	hex
+152872	35960	26332	215164	3487c
+sync
+cp rogue /usr/games/rogue
+cp: cannot create /usr/games/rogue
+*** Error code 2 (ignored)
+cp rogue_gal /usr/games/rogue/lib/rogue_gal
+cp: cannot access rogue_gal
+*** Error code 2 (ignored)
+cd /usr/games ; chmod 4755 rogue ; chmod 600 lib/rogue_gal
+chmod: can't change rogue
+chmod: can't change lib/rogue_gal
+*** Error code 1 (ignored)
+cd /usr/games ; chgrp games rogue lib/rogue_gal
+rogue: Not owner
+lib/rogue_gal: Not owner
+*** Error code 1 (ignored)
+cd /usr/games ; chown games rogue lib/rogue_gal
+rogue: Not owner
+lib/rogue_gal: Not owner
+*** Error code 1 (ignored)
+trek
+cp trek /juniper/usr/games/.
+cd /juniper/usr/games ; chmod 755 trek ; chgrp games trek ; chown games trek
+cd /juniper/usr/games ; chmod 4755 rogue ; chown root rogue ; chgrp sys rogue
+chmod: can't access rogue
+rogue: No such file or directory
+rogue: No such file or directory
+*** Error code 1 (ignored)
+cd /juniper/usr/games ;  chmod 666 lib/robotscore lib/rogue_roll alienslog lib/arscore ; chmod 600 lib/rogue_roll
+chmod: can't change lib/robotscore
+chmod: can't change lib/rogue_roll
+chmod: can't change alienslog
+chmod: can't change lib/arscore
+chmod: can't change lib/rogue_roll
+*** Error code 1 (ignored)

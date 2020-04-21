@@ -1,0 +1,143 @@
+'\"macro stdmacro
+.TH EXPR 1
+.SH NAME
+expr \- evaluate arguments as an expression
+.SH SYNOPSIS
+.B expr
+arguments
+.SH DESCRIPTION
+The arguments are taken as an expression.
+After evaluation, the result is written on the standard output.
+Terms of the expression must be separated by blanks.
+Characters special to the shell
+must be escaped.
+Note that \f30\fP is returned to indicate a zero value,
+rather than the null string.
+Strings containing blanks or other special characters should be quoted.
+Integer-valued arguments may be preceded by a unary minus sign.
+Internally, integers are treated as 32-bit, 2's complement numbers.
+.PP
+The operators and keywords are listed below.
+Characters that need to be escaped are preceded by \f3\\\fP.
+The list is in order of increasing precedence,
+with equal precedence operators grouped within \f3{\|}\fP symbols.
+.TP .3i
+\f2expr \f3\e\^|\|\f2 expr\f1
+returns the first
+.I expr\^
+if it is neither null nor \f30\fP, otherwise
+returns the second
+.IR expr .
+.TP .3i
+\f2expr \f3\e&\f2 expr\f1
+returns the first
+.I expr\^
+if neither
+.I expr\^
+is null or \f30\fP, otherwise returns \f30\fP.
+.TP .3i
+\f2expr \f1{ \f3=\f1, \f3\e>\f1, \f3\e>=\f1, \f3\e<\f1, \f3\e<=\f1, \f3!=\f1 } \f2expr\f1
+returns the result of an integer comparison if both arguments are integers,
+otherwise returns the result of a lexical comparison.
+.TP .3i
+\f2expr \f1{ \f3+\f1, \f3\- \f1} \f2expr\f1
+addition or subtraction of integer-valued arguments.
+.TP .3i
+\f2expr \f1{ \f3\e\(**\f1, \f3/\f1, \f3% \f1} \f2expr\f1
+multiplication, division, or remainder of the integer-valued arguments.
+.TP .3i
+\f2expr\f3 : \f2expr\f1
+The matching operator \f3:\fP compares the first argument
+with the second argument which must be a regular expression;
+regular expression syntax is the same as that of
+.IR ed\^ (1),
+except that all patterns are ``anchored'' (i.e., begin with \f3^\fP)
+and, therefore, \f3^\fP is not a special character, in that context.
+Normally,
+the matching operator returns the number of characters matched
+(\f30\fP on failure).
+Alternatively, the
+\f3\\(\|.\|.\|.\|\\)\fP
+pattern symbols can be used to return a portion of the
+first argument.
+.SH EXAMPLE
+.IP
+a=`expr\| $a\| +\| 1`
+.PP
+adds 1 to the shell variable
+.BR a .
+.IP
+\f3#\fP  'For $a equal to either "/usr/abc/file" or just "file"'
+.br
+expr\  $a\  \f3:\fP\  '\f3.\fP\(**/\e(\f3.\fP\(**\e)'\  \e\^|\| \ $a
+.PP
+returns
+the last segment of a path name
+(i.e., "file").
+Watch out for \f3/\fP alone as an argument:
+.I expr\^
+will take it as the division operator
+(see
+.SM BUGS
+below).
+.IP
+\f3#\fP \ A better representation of above example
+.br
+expr\  //$a\  \f3:\fP\  '\f3.\fP\(**/\e(\f3.\fP\(**\e)'
+.PP
+the addition of the
+.B //
+characters eliminates any ambiguity about the division operator and simplifies
+the whole expression.
+.IP
+expr \ \s-1$VAR\s0 \ \f3:\fP \ '\f3.\(**\fP'
+.PP
+returns the number of characters in
+.SM
+.BR $VAR .
+.SH "SEE ALSO"
+ed(1), sh(1).
+.SH "EXIT CODE"
+As a side effect of expression evaluation,
+.I expr\^
+returns the following exit values:
+.RS .3i
+.ta \w'0\ \ \ 'u
+0	if the expression is neither null nor \f30\fP
+.br
+1	if the expression
+.I is\^
+null or \f30\fP
+.br
+2	for invalid expressions.
+.SH DIAGNOSTICS
+.ta \w'\f2non-numeric argument\^\ \ \ 'u
+\f2syntax error\^\f1	for operator/operand errors
+.br
+\f2non-numeric argument\^\f1	if arithmetic is attempted on such a string
+.SH BUGS
+After argument processing by the shell,
+.I expr\^
+cannot tell the difference between an operator and an operand
+except by the value.
+If
+.B $a
+is an
+.BR = ,
+the command:
+.IP
+expr \ $a \ = \ '='
+.PP
+looks like:
+.IP
+expr \ = \ = \ =
+.PP
+as the arguments are passed to
+.I expr\^
+(and they will all be taken as the
+.B =
+operator).
+The following works:
+.IP
+expr \ X$a \ = \ X=
+.\"	@(#)expr.1	5.1 of 11/15/83

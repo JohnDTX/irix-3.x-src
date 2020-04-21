@@ -1,0 +1,54 @@
+'\"macro stdmacro
+.TH DF 1
+.SH NAME
+df \- report number of free disk blocks
+.SH SYNOPSIS
+.B df
+[
+.B \-f
+]
+[
+.B \-i
+] [ file-systems ]
+.SH DESCRIPTION
+.I df\^
+reports the number of free disk blocks
+(1 disk block equals 1 kbyte)
+available for on-line file systems.
+The
+.I file-systems\^
+argument
+may be specified either by a device name (e.g.,
+.IR /dev/md0c )
+or by a mounted directory name (e.g.,
+.IR /usr ).
+If
+the
+.I file-systems\^
+argument
+is unspecified,
+.I df\^
+reports on all file systems listed in the file
+.IR /etc/fstab .
+.PP
+Normally, the
+free block information is gleaned from the file system's superblock.
+The
+.B \-f
+flag forces a scan of the free block list.
+.PP
+The
+.B \-i
+flag
+reports the number and percentage of free inodes.
+.SH FILES
+/etc/fstab 
+.SH SEE ALSO
+statfs(2), fs(4), mntent(4).
+.SH BUGS
+Free counts may be incorrect, with or without
+the
+.B \-f
+flag.
+.\"	@(#)df.1m	5.1 of 10/17/83
+

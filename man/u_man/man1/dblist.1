@@ -1,0 +1,85 @@
+'\"macro stdmacro
+.TH DBLIST 1
+.SH NAME
+dblist \- list information about the database
+.SH SYNOPSIS
+.PP
+.B
+dblist
+.I
+database-name 
+[
+.B
+\-l 
+] [
+.B
+\-p 
+] 
+.I
+new-database-name
+.SH DESCRIPTION
+.PP
+With no arguments,
+.I
+dblist
+simply lists the keys of every item in the database.
+.PP
+The 
+.B
+\-l
+option causes 
+.I dblist 
+to print the internal information from the
+database.
+.PP
+The 
+.B
+\-p
+option causes the key and content of every entry to be listed in a 
+shell command file in the form of a
+.I
+dbadd
+command.  If
+.I
+new-database-name
+is provided, it becomes the database argument for the 
+.I dbadd
+commands; otherwise
+.I
+database-name
+is used.  
+.PP 
+This form of the 
+.I dblist
+command is very handy; it forms a 
+readable ASCII file representation of a database for editing or
+shipping.  Additionally, databases should be recreated periodically
+for purposes of garbage collection.  To do this, the file can be 
+executed directly, in which case the
+.I
+dbadd
+commands are executed to rebuild the database; or it can be used as
+the argument to the
+.I
+dbbuild
+command.
+.PP
+For information on the 
+Emacs
+database facility, see the following documents:
+.PP
+.RS 5
+.I
+Emacs Reference Manual
+.br
+.SH SEE ALSO
+Several utilities, in addition to dblist,
+are provided for manipulating the Emacs databases outside of Emacs.
+.IP "dbcreate(1)" 17
+creates a database.
+.IP "dbadd(1)" 17
+adds an entry to a database.
+.IP "dbbuild(1)" 17
+builds a database from a shell command file.
+.IP "dbprint(1)" 17
+prints the contents of a database entry.

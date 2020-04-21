@@ -1,0 +1,372 @@
+'\"macro stdmacro
+.TH INSTALL 1M
+.SH NAME
+install \- install commands
+.SH SYNOPSIS
+.in +5m
+.ti -5m
+.B "install"
+.RB  [ \-U " SYS5]"
+.RB  [ \-c " dira]"
+.RB  [ \-f " dirb]"
+.RB  [ \-i ]
+.RB  [ \-n " dirc]"
+.RB  [ \-u " user]"
+.RB  [ \-g " group]"
+.RB  [ \-m " mode]"
+.RB  [ \-F ]
+.RB  [ \-o ]
+.RB  [ \-s ]
+.RB  [ \-S ]
+file [dirx .\|.\|.]
+.ti -5m
+.B "install"
+.RB  [ \-U " BSD42]"
+.RB  [ \-c ]
+.RB  [ \-o " owner]"
+.RB  [ \-u " user]"
+.RB  [ \-g " group]"
+.RB  [ \-m " mode]"
+.RB  [ \-F ]
+.RB  [ \-s ]
+.RB  [ \-S ]
+file destination
+.ti -5m
+.B "/etc/install ..."
+.in -5m
+.SH DESCRIPTION
+.I Install\^
+is a command most commonly used in "makefiles"
+(see
+.IR make\^ (1))
+to install a
+.I file\^
+(updated target file) in a specific place within a file system.
+Each
+.I file\^
+is installed by copying it into the appropriate directory, thereby retaining the
+mode and owner of the original command.
+The program prints messages telling the user exactly what files it is
+replacing or creating and where they are going.
+.PP
+This
+.I install
+has all of the features of both the System V and BSD4.2 systems.
+By default
+.I install
+recognizes the System V (and non-conflicting BSD4.2) flags.
+This default may be overridden by defining an environment variable
+(see
+.IR sh (1),
+.IR csh (1),
+.IR env (1),
+and
+.IR environ (5))
+called
+.B INSTALLSYS
+which may be set to
+.B BSD42
+to operate in the BSD4.2 style; it may be set to
+.B SYS5
+to specify System V style.
+The style may also be specified on the command line with the
+.B -U
+flag followed by either
+.B SYS5
+or
+.BR BSD42 ,
+overriding both the default and environment specifications.
+.PP
+Note that by default the System V style
+.I copies
+the file and
+.I does not
+change the modes of an existing file in the install directory.
+BSD4.2
+.I moves
+the file and
+.I does
+change the modes of an existing file in the install directory to
+mode 755 with an owner and group of bin.
+In both styles, if any of the
+.B -u
+.B -o
+.B -g
+.B -m
+or
+.B -F
+flags are specified then the installed file is always
+.IR chmod ed,
+.IR chgrp ed,
+and
+.IR chown ed.
+In BSD4.2 style, a
+.B -c
+flag will cause the file to be
+.I copied
+rather than
+.IR moved .
+.PP
+If no options or directories
+.RI ( dirx " .\|.\|.)"
+are given to the System V style
+.IR install ,
+it will search
+a set of default directories
+.RB ( /bin ,
+.BR /usr/bin ", " /etc ", " /lib ,
+and
+.BR /usr/lib ,
+in that order)
+for a file with the same name as 
+.IR file .
+When the first occurrence is found,
+.I install\^
+issues a message saying that it is overwriting that file with
+.IR file ,
+and proceeds to do so.
+If the file is not found, the program states this and exits without
+further action.
+.PP
+If one or more directories
+.RI ( dirx " .\|.\|.)"
+are specified after
+.IR file ,
+those directories will be searched before the directories specified
+in the default list.
+.PP
+If the BSD4.2 style is selected then there must be
+exactly two arguments after any flags,
+the first being the file to install and the second being the destination.
+The destination may be either the directory where the file should be
+installed or the entire pathname including the file name itself.
+.PP
+.I Install
+refuses to move a file onto itself.
+Options marked with
+.B \u\(dg\d
+are particular to this implementation.
+.PP
+The meanings of the System V style options are:
+.PP
+.TP "\w'\f3-c\f2 dira\f1\ \ \ \ 'u"
+.BI \-c\^ dira
+Installs a new command (\f2file\fP\^) in the directory specified by
+.IR dira ,
+only if it is not found.
+If it is found,
+.I install\^
+issues a message saying that the file already
+exists, and exits without overwriting it.
+May be used alone or with the
+.B \-s
+option.
+.TP
+.BI \-f\^ dirb
+Forces
+.I file\^
+to be installed in given directory, whether or not one already exists.
+If the file being installed does not already exist, the mode and owner
+of the new file will be set to \f3755\fP and \f3bin\fP, respectively.
+If the file already exists, the mode and owner will be that of the
+already existing file.
+May be used alone or with the
+.B \-o
+or
+.B \-s
+options.
+.TP
+.B \-i
+Ignores default directory list, searching only through the given directories
+.RI ( dirx " .\|.\|.)."
+May be used alone or with any other options other than
+.B \-c
+and
+.BR \-f .
+.TP
+.BI \-n\^ dirc
+If
+.I file\^
+is not found in any of the searched directories, it is put in the directory
+specified in
+.IR dirc .
+The mode and owner of the new file will be set to \f3755\fP and \f3bin\fP,
+respectively.
+May be used alone or with any other options other than
+.B \-c
+and
+.BR \-f .
+.TP
+.B \-o
+If
+.I file\^
+is found, this option saves the ``found'' file by moving it to
+.BI \s-1OLD\s0 file\^
+in the directory in which it was found.
+This option is useful when installing a normally text busy file such as
+.BR /bin/sh .
+.TP
+.B \-s
+Suppresses printing of messages other than error messages.
+May be used alone or with any other options
+.TP
+.BI \-u\^ user \u\(dg\d
+The user (owner) of the installed file is changed to
+.IR user .
+This implies the
+.B -F
+flag.
+By default the user is changed to
+.I bin
+if the file does not already exist in the install directory and left
+as it is otherwise.
+.TP
+.BI \-g\^ group \u\(dg\d
+The group of the installed file is changed to
+.IR group .
+This implies the
+.B -F
+flag.
+By default the group is changed to
+.I bin
+if the file does not already exist in the install directory and left
+as it is otherwise.
+.TP
+.BI \-m\^ mode \u\(dg\d
+The mode of the installed file is changed to
+.IR mode .
+This implies the
+.B -F
+flag.
+By default the mode is changed to
+.I 755
+if the file does not already exist in the install directory and left
+as it is otherwise.
+.TP
+.B -F\u\(dg\d
+Force a
+.IR chmod ,
+.IR chgrp ,
+and a
+.I chown
+to be performed even if the file already exists in the install directory.
+Unless specified otherwise, the mode will be set to
+.I 755
+and the user and group will be set to
+.IR bin .
+.TP
+.B \-S\u\(dg\d
+The binary is stripped of its symbol table after being installed
+(see
+.IR strip (1)).
+.TP
+.BI \-U\^ unix \u\(dg\d
+.IR Install 's
+style will be that of the standard
+.I install
+on the \s-2UNIX\s0 version specified, where
+.I unix
+is either
+.B SYS5
+for System V style or
+.B BSD42
+for Berkeley Distribution 4.2 style.
+.PP
+The meanings of the BSD 4.2 style options are:
+.TP
+.BI \-o\^ owner
+The owner (user) of the installed file is changed to
+.IR owner .
+By default the owner is changed to be that of the person doing the
+installation.
+.TP
+.BI \-g\^ group
+The group of the installed file is changed to
+.IR group .
+By default the group is changed to
+.I staff
+if root is doing the installation or to the group of the install
+directory otherwise.
+.TP
+.BI \-m\^ mode
+The mode of the installed file is changed to
+.IR 755 .
+By default the mode is changed to
+.IR 755 .
+.TP
+.B \-c
+The file is copied rather than moved.
+.TP
+.B \-s
+The binary is stripped of its symbol table after being installed
+(see
+.IR strip (1)).
+.TP
+.BI \-u\^ user \u\(dg\d
+The user (owner) of the installed file is changed to
+.IR user .
+.ne 5
+.TP
+.B \-S\u\(dg\d
+The binary is stripped of its symbol table after being installed
+(see
+.IR strip (1)).
+.ne 6
+.TP
+.BI \-U\^ unix \u\(dg\d
+.IR Install 's
+style will be that of the standard
+.I install
+on the \s-2UNIX\s0 version specified, where
+.I unix
+is either
+.B BSD42
+for Berkeley Distribution 4.2 style
+or
+.B SYS5
+for System V style.
+.SH EXAMPLES
+.de Ex
+.sp
+.nf
+.in +10m
+..
+.de Ee
+.fi
+.in -10m
+..
+To install a new version of the program
+.B ls
+in whatever system directory it belongs in do
+.Ex
+install ls
+.Ee
+To install a new version of
+.B rogue
+in
+.B /usr/games
+do either
+.Ex
+install -f /usr/games -u games -g games -m 4755 rogue
+.Ee
+or
+.Ex
+setenv INSTALLSYS BSD42
+install -o games -g games -m 4755 rogue /usr/games
+.Ee
+A new version of
+.B sh
+may be installed with
+.Ex
+install -U SYS5 -o -f /bin sh
+.Ee
+.SH SEE ALSO
+make(1), chown(1), chmod(1), cp(1), strip(1),
+sh(1), csh(1), env(1), environ(5)
+.SH DIAGNOSTICS
+A non-zero exit code is returned on failure along with an error
+message.
+.\"	@(#)install.1m	5.1 of 11/1/83
+.\" $Source: /d2/3.7/src/man/a_man/man1/RCS/install.1m,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:20:39 $

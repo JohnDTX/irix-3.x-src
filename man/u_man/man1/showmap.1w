@@ -1,0 +1,15 @@
+'\"macro stdmacro
+.TH SHOWMAP 1W
+.SH NAME
+showmap \- display the contents of the color map
+.SH SYNOPSIS
+.B showmap
+.SH DESCRIPTION
+The frame buffer of the IRIS contains values which are translated into
+RGB values by a color map. 
+.I showmap
+displays a square filled with patches of color, one for each color index.
+.SH SEE ALSO
+cedit(1W),
+makemap(1W),
+savedesktop(1W)

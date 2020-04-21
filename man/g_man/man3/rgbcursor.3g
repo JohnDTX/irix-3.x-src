@@ -1,0 +1,49 @@
+.TH RGBcursor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B RGBcursor 
+\- sets the characteristics of the cursor in RGB mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "RGBcursor(index, red, green, blue, redm, greenm, 
+.br
+.B 	bluem)
+.B "short index, red, green, blue, redm, greenm, bluem;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine RGBcur(index, red, green, blue, redm,"
+.br
+.B 	 greenm, bluem)
+.B "integer*4 index, red, green, blue, redm, greenm, 
+.br
+.B	bluem
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure RGBcursor(index, red, green, blue, redm,"
+.br
+.B 	greenm, bluem: longint);
+.SH DESCRIPTION
+.B RGBcursor
+selects a cursor glyph from a table of 16x16 bit patterns that
+you define.
+\f2index\f1 picks a glyph from the definition table.
+\f2red\f1, \f2green\f1, \f2blue\f1 specify the cursor color 
+in RGB mode;
+\f2redm\f1, \f2greenm\f1, \f2bluem\f1 define an RGB writemask for
+the cursor.  
+.PP
+.B RGBcursor 
+is available only in RGB mode.
+.SH "SEE ALSO"
+defcursor, RGBmode, RGBwritemask, setcursor 
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

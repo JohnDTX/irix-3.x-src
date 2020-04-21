@@ -1,0 +1,79 @@
+'\"macro stdmacro
+.TH DU 1
+.SH NAME
+du \- summarize disk usage
+.SH SYNOPSIS
+.B du
+[
+.B \-Lars
+] [ names ]
+.SH DESCRIPTION
+.I du\^
+gives the number of kbytes
+(one kbyte equals 1024 bytes)
+contained in all files,
+directories within
+each directory and files
+specified by
+the
+.I names\^
+argument.  It also recursively searches directories within each directory.
+The count does not include indirect blocks.
+If
+.I names\^
+is missing,
+the current directory, 
+.BR . , 
+is used.
+.PP
+The optional argument
+.B \-s
+causes only the grand total
+(for each
+of the specified
+.IR names )
+to be given.
+The optional argument
+.B \-a
+causes an entry to be generated
+for each file.
+Absence of either causes an entry to be generated for
+each directory only.
+.PP
+.I du\^
+is normally silent about directories that cannot be read,
+files that cannot be opened, etc.
+The
+.B \-r
+option will cause
+.I du\^
+to generate messages in such instances.
+.PP
+The optional argument
+.B \-L
+causes symbolic links to be followed
+(by default they are not followed).
+.PP
+A file with two or more links is only counted once.
+.SH EXAMPLE
+.IP
+du dir1 dir2
+.PP
+produces a count of the number of kbytes in each of the directories.
+In order to see how many kbytes are in each file, the 
+.B \-a
+option must be used.
+.SH BUGS
+If the
+.B \-a
+option is not used,
+non-directories
+given as arguments
+are not listed.
+.PP
+If there are too many distinct linked files,
+.I du\^
+will count the excess files more than once.
+.PP
+Files with holes (holey files) are counted incorrectly.
+.\"	@(#)du.1	5.1 of 10/27/83

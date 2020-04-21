@@ -1,0 +1,62 @@
+.TH pick 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B pick
+\- puts the system in picking mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pick(buffer, numnames) "
+.B "short buffer[];"
+.B "long numnames;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pick(buffer, numnam)"
+.B "integer*2 buffer(*)"
+.B "integer*4 numnam"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pick(var buffer: Short; numnames: 
+.br
+.B	 longint);
+.SH DESCRIPTION
+.B pick
+facilitates the cursor as a pointing object.
+When you draw an image
+in picking mode, nothing is drawn.
+It places a special viewing matrix on the stack,
+which discards everything in the image that does not intersect
+a small region around the lower-left corner of the cursor.
+.PP
+The graphical items that intersect the picking region are hits and
+store the contents of the name stack in
+\f2buffer\fP.
+.I numnames
+specifies the maximum number of names the system saves.
+Picking does not work if you issue a new  
+viewport 
+while in
+picking mode.
+.SH "SEE ALSO"
+clearhitcode,
+endpick, endselect, gethitcode,
+gselect, loadname, picksize,
+pushname, popname, 
+.sp
+.I Programming Guide,
+Section 9.2, Picking
+.SH NOTE
+This routine is available only in immediate mode.
+.SH BUGS
+When using a debugger, do not stop the graphics between
+calls to 
+.B pick 
+and 
+.B endpick 
+because the graphics are frozen and
+the results cannot appear on the screen.

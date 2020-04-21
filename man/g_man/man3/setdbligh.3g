@@ -1,0 +1,35 @@
+.TH setdblights 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B setdblights
+\- sets the lights on the dial and button box
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setdblights(mask)"
+.B "long mask;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setdbl(mask)
+.B "integer*4 mask"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setdblights(mask: longint);"
+.SH DESCRIPTION
+.B setdblights
+turns on a combination of the lights on the dial and button box.
+Each bit in the mask corresponds to a light.
+For example, to turn on lights 4, 7, and 22 (and leave all the others off),
+set the mask to (1<<4) | (1<<7) | (1<<22)\(dn = 0x400090\(dx.
+.SH SEE ALSO
+dbtext
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

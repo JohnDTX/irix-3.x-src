@@ -1,0 +1,27 @@
+.TH getmap 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getmap
+- return the number of the currently selected color map
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getmap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getmap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getmap: Short;"
+.sp
+.SH DESCRIPTION
+.I Getmap
+returns the number, from 0 to 15, of the currently
+selected color map.  If called
+in onemap mode, it returns zero.
+.SH "SEE ALSO"
+.I multimap, onemap
+.SH NOTE
+This command can only be used in immediate mode.

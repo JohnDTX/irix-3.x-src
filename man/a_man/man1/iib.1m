@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH IIB 1M
+.SH NAME
+iib \- initialize ib driver
+.SH SYNOPSIS
+iib [ \f3\-f\fP ibtabfile ] [ \f3\-r\fP ] [ \f3\-v\fP ]
+.SH DESCRIPTION
+.I iib
+initializes and starts the ib driver
+(see
+.IR ib (7)).
+By default it uses information from
+the file
+.IR /etc/ibtab.
+The \-f flag specifies an alternate file of the same format
+(see
+.IR ibtab (4).
+The \-v flag causes
+.I iib
+to print each entry as it reads the file.
+.PP
+Normally
+.I iib
+has no effect if the ib driver is already started.
+The \-r flag makes it re-initialize and re-start
+even if the driver was already started.
+The \-r flag should only
+be used if the driver gets jammed,
+and only
+when no other programs are using the driver.
+Only the super-user may use the \-r flag.
+.SH EXAMPLE
+.nf
+iib
+.br
+.fi
+.SH FILES
+/etc/ibtab
+.SH "SEE ALSO"
+ibtab(4)

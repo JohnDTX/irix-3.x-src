@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH NEWS 1
+.SH NAME
+news \- print news items
+.SH SYNOPSIS
+.B news
+[
+.B \-a
+] [
+.B \-n
+] [
+.B \-s
+] [ items ]
+.SH DESCRIPTION
+.I News\^
+is used to keep the user informed of current events.
+By convention, these events are described by files in
+the directory
+.BR /usr/news .
+.PP
+When invoked without arguments,
+.I news\^
+prints the contents of all current files in
+.BR /usr/news ,
+most recent first,
+with each preceded by an appropriate header.
+.I News\^
+stores the "currency" time
+as the modification date of a file named
+.B .news_time
+in the user's home directory (the identity of this directory
+is determined by the environment variable
+.SM
+.BR $HOME\*S );
+only files more recent than
+this currency time are considered "current".
+.PP
+The
+.B \-a
+option causes
+.I news\^
+to print all items, regardless of currency.
+In this case, the stored time is not changed.
+.PP
+The
+.B \-n
+option causes
+.I news\^
+to report the names of the current items without
+printing their contents, and without changing
+the stored time.
+.PP
+The
+.B \-s
+option causes
+.I news\^
+to report how many current items exist, without
+printing their names or contents, and without changing
+the stored time.
+It is useful to include such an invocation of
+.I news\^
+in one's
+.B .profile
+file, or in the system's
+.BR /etc/profile .
+.PP
+All other arguments
+are assumed to be specific news items that are to
+be printed.
+.PP
+If a
+.I delete\^
+is typed during the printing of a news item, printing stops and the
+next item is started.
+Another
+.I delete\^
+within one second of the first
+causes the program to terminate.
+.SH EXAMPLE
+.IP
+news
+.PP
+will print out all files in 
+.B /usr/news
+that have not been read
+previously by the account owner.
+.SH FILES
+/etc/profile
+.br
+/usr/news/\(**
+.br
+\&\s-1$HOME\s+1/\f3.\fPnews_time
+.SH SEE ALSO
+profile(4), environ(5).
+.\"	@(#)news.1	5.1 of 11/9/83

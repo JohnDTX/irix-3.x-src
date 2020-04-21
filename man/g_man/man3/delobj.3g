@@ -1,0 +1,38 @@
+.TH delobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B delobj
+\- deletes an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "delobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine delobj(obj)"
+.B "integer*4 obj"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure delobj(obj: Object);"
+.SH DESCRIPTION
+.B delobj
+deletes an object.
+Deleting an object frees
+most of its display list storage;
+the object number remains undefined
+until it is used to create a new object.
+The system ignores calls to objects
+that don't exist.
+.SH "SEE ALSO"
+compactify, makeobj 
+.sp
+.I Programming Guide,
+Section 8.1, Defining an Object
+.SH NOTE
+This routine is available only in immediate mode.

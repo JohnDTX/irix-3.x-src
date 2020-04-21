@@ -1,0 +1,44 @@
+.TH patchprecision 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B patchprecision
+\- sets the precision at which curves are drawn
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "patchprecision(usegments, vsegments)"
+.B "long usegments, vsegments;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine patchp(usegments, vsegments)"
+.B "integer*4 usegments, vsegments"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure patchprecision(usegments, vsegments: 
+.br
+.B	longint);
+.SH DESCRIPTION
+.B patchprecision
+sets the precision with which the system draws curves that
+make up a wireframe patch. 
+The
+.I u
+and
+.I v
+directions for a patch specify the precisions independently.
+Patch precisions are similar to 
+curve precisions\(emthey specify the minimum number of line segments used
+to draw a patch.
+.SH "SEE ALSO"
+curveprecision, 
+patch,
+patchbasis,
+patchcurves 
+.sp
+.I Programming Guide,
+Section 11.3, Drawing Surfaces

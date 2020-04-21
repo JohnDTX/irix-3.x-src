@@ -1,0 +1,330 @@
+
+
+Sep 26 11:11 1986  tso.help Page 1
+
+
+***********************************************************************
+*								      *
+*    Copyright (C) 1986, Silicon Graphics, Inc.			      *
+*								      *
+* These	coded instructions, statements,	and computer programs  contain*
+* unpublished  proprietary  information	of Silicon Graphics, Inc., and*
+* are protected	by Federal copyright law.  They	 may  not be disclosed*
+* to  third  parties  or copied	or duplicated in any form, in whole or*
+* in part, without the prior written consent of	Silicon	Graphics, Inc.*
+*								      *
+***********************************************************************
+*
+)F    This command is used to transfer a data file to or from the
+   IRIS	workstation. The file transferred may be allocated during the
+   execution of	the command.  Datasets allocated by this command will
+   remain allocated for	the duration of	the TSO	session	unless the
+   'FREE' parameter was	specified.
+      The parameter values available are a subset of those for the
+   ALLOCATE command.  If the available parameters do not correctly
+   describe the	file to	be transferred,	it must	be pre-allocated.
+
+)X SYNTAX: IRSXFR To/From Iris/SGI/MVS/TSO
+		  Binary/Text
+		  IRISName unix_name
+		  XBufsize decimal_value
+		  XSyncsiz decimal_value
+		  CList
+		  DDname/FIlename  ddname
+		  DSN/DAtaset dataset_name
+		  New/Old/Shr/Mod/SYSOUT sysout_class
+		  KEep/CATlg/UNCat/DELete
+		  Lrecl	decimal_value
+		  BLKsize decimal_value
+		  RECfm	F/FB/FBS/V/VB/VBS/U
+		  SPACE	(primary secondary)
+		  UNIT unit_name
+		  VOLume (volume serial	list)
+		  CYLinder/TRacks/BLocks/ROund
+		  CONtig/ALX/MXig
+		  RLSE
+		  FREe
+
+   REQUIRED: None
+
+   DEFAULTS: TO	IRIS TEXT DD irisdata IRISNAME tsoprfx.DATA
+
+      Keyword abbreviation is permitted.  The portion which must be
+   present for recognition is in uppercase.  No	parameter order	need
+   be maintained.  Parentheses are not required	for keyword definition
+   values unless the definition	is a list.  Quotes are not required.
+   As assistance to VMers, final quotes	and parenthesis	may be
+   omitted.  If	the dataset name value is enclosed in quotes, it will
+   be used as is, else it will be prefixed.
+      DCB parameters of	the file default to the	or of JFCB and DSCB1
+   values.  Transmission buffer	and re-synchronization values (XBUFSIZE
+   and XSYNCSIZ) default as set	during installation. Dataset status and
+
+
+
+
+
+
+
+Sep 26 11:11 1986  tso.help Page 2
+
+
+   disposition default to (SHR,KEEP) for 'to IRIS' and (OLD,KEEP) for
+   'to TSO' unless (NEW,CATLG) is implied by a space parameter.
+
+
+)M	  The command may issue	one or more of the following messages.
+))SGI100E Unknown command parameter: xxxxxxxx
+	  The keyword is unknown to the	command	parser.
+))SGI101E Missing definition value for parameter xxxxxxxx
+	  The keyword entered requires a following definition value and
+	  the command or sublist terminated before one was found.
+))SGI102E Value	for parameter xxxxxxxx is not numeric
+))SGI103E Operand xxxxxxxx conflicts with previous operand(s).
+	  Either a keyword has been repeated or	two of a set of
+	  keywords, only one of	which is allowed, or contradictory
+	  definitions (as FROM TSO TO TSO) have	been entered.
+))SGI104E Invalid source or destination	specified.
+	  One of the keywords 'TO' or 'FROM' was specified and the
+	  following definition value was not one of 'IRIS', 'SGI',
+	  'MVS'	or 'TSO'.
+))SGI105E Invalid input
+	  The command input contains 'should not occur'	values in one
+	  or more bytes.  Detected in LOOKUP routine.
+))SGI106E Logic	error in LOOKUP	routine
+	  The command parser has encountered a logic error.  Contact
+	  Silicon Graphics for support.	 Circumvention may be possible
+	  for this error with simpler command input.
+))SGI107E Iris destination is invalid with SYSOUT.
+	  Either 'TO IRIS/SGI' or 'FROM	MVS/TSO' was specified and the
+	  command contained the	'SYSOUT(class)'	operand.
+))SGI108E Excessive left parenthesis.
+	  Keyword definition values may	be enclosed in parenthesis, but
+	  no sublists are defined in the command and no	command	operand
+	  may be preceeded by a	left parenthsis.
+))SGI109E Unmatched right parenthesis.
+	  A list closing parenthesis has been found without a list
+	  start	parenthesis.
+))SGI110E Misuse of quotes in command.
+	  A single quotation mark is embedded in text (not followed
+	  by left or right parenthesis,	comma or space:	or the command
+	  ends with quotation marks without any	following text.
+))SGI111E Definition of	XXXXXXXX is too	long to	be valid.
+	  Except for the DSN and IRISNAME definitions, no definition
+	  value	can legally exceed 8 bytes.  The limit for DSN is 44
+	  and IRISNAME is limited to 256 bytes.
+))SGI112E Recfm	in command is not F, FB, FBS, V, VB, VBS or U.
+	  Either you have omitted the RECFM definition value, or you
+	  are attempting to use	unsupported (by	this command) variants.
+))SGI200E Error	return from SVC	99.  R15 = xx, Er = xxxx, Inf =	xxxx
+	  See IBM publication GC28-1303	or GC28-1150 for explanations.
+))SGI201E This terminal	does not appear	to be a	327x.
+	  Full screen mode of output cannot be set.  This command can
+	  only be used from an IRIS workstation	defined	to the system
+	  as a 327x device.
+))SGI300E Dataset xxxxxxxx failed to open.
+	  Probable system error.  Contact SGI for support if the
+	  condition persists without a known system or user error.
+
+
+
+
+
+
+
+Sep 26 11:11 1986  tso.help Page 3
+
+
+))SGI301E Dataset xxxxxxxx has a variable length record	specification.
+	  Binary transfer from the IRIS	is not compatable with a
+	  variable record length.  No record separators	exist in the
+	  data as transferred.
+))SGI302E The LRECL value in dataset XXXXXXXX is greater than 12288.
+	  The maximum record length supported by this command is
+	  12288.  The DCB after	open indicates a longer	LRECL.
+))SGI303E The file to be transferred does not exist.
+	  Probable misspelling of the DSN parameter.  The dataset
+	  disposition defaulted	or was specified as OLD	or SHR and
+	  the operating	system could not find the dataset.
+))SGI400E Dataset xxxxxxxx does	not meet text restrictions.
+	  A dataset for	which TEXT mode	transfer was specified or
+	  defaulted contains byte values which can not be transferred
+	  as is.  The BINARY transfer mode is called for.
+))SGI401I Data transfer	terminated due to attention interrupt.
+	  Either the IRIS data transfer	logic encountered an error or
+	  the user terminated the transfer by pressing the PA1 key.
+))SGI402E Data transfer	ended due to I/O error on file XXXXXXXX.
+	  The SYNAD exit for the MVS dataset was entered.  Normally
+	  a physical system error.
+))SGI403E Data transfer	ended due to protocol error: xxx.'
+	  Some occurances of this message indicate logic problems in
+	  either the TSO or workstation	data transfer code.  Most,
+	  however, can be resolved by a	different choice of DCB
+	  parameters for the transfer.	The values for the error codes
+	  and a	brief definition:
+
+	  Code	   Meaning
+	  bcc	   Bad continuation character.	Probably TSO and the
+		   IRIS	have gotten out	of sync	during multiple
+		   aborted file	transfer operations.
+	  vlr	   The DCB is defined to have variable length records
+		   but no record separators are	in the IRIS input.
+	  sfh	   A second file header	has been received while
+		   reading a file from the IRIS.  An out of sync
+		   condition probably caused by	multiple aborts.
+	  ntt	   No text was transferred from	the Iris.  Possibly
+		   a system support code error.
+	  rtl	   The DCB LRECL specification is too short to
+		   support an incoming variable	length record.
+	  zlr	   Two adjacent	record sepators	in Iris	input.
+	  fnf	   The DCB defines fixed length	records, but the Iris
+		   input contains record separators at variable
+		   distances from one another.
+	  bxe	   Binary transfer error.  Probably a physical
+		   transmission	problem.
+))SGI404E XBUFSIZE too large for this system / terminal.
+	  The operating	system will not	allocate enough	buffers	to
+	  support the output transmission request.  The	difficulty
+	  could	be due to system or terminal definition	values.	 Retry
+	  with a smaller value of XBUFSIZE.
+))SGI500I Normal Completion: x records,	y bytes, z.zz seconds.
+	  This is an 'all is well' message.  The record	count refers
+	  to the MVS file.  The	byte count is the number of valid
+	  bytes	transferred (the LLBB field of MVS variable records
+
+
+
+
+
+
+
+Sep 26 11:11 1986  tso.help Page 4
+
+
+	  is not moved across the interface).  In the BINARY mode,
+	  the actual byte transfer will	normally be 3 to 11 bytes
+	  more than the	valid count.  The seconds value	is measured
+	  over the entire command active time (less the	time to	build
+	  and output the message) including setup and termination.
+	  NOTE:	 This message may be suppressed	by the CLIST operand.
+
+)O    There are	no positional operands.	 The operands beginning	with
+   DDNAME are indentical in form and function to the same operands in
+   the ALLOCATE	command.  For a	different perspective on these,	enter
+   HELP	ALLOC O	(operand operand ... ).
+
+))TO	   (FROM) asserts that the destination (source)	of the dataset
+	   follows.  The destination (source) must be one of: 'Iris',
+	   'SGI', 'MVS', or 'TSO'.  The	values 'Iris' and 'SGI'	make
+	   the workstation the destination (source), 'MVS' or 'TSO'
+	   causes the mainframe	environment to be the destination
+	   (source).  Either 'TO' or 'FROM' or both may	be specified.
+	   If both are present,	the destination	and source must	match.
+	   (I.E. the sequence 'FROM MVS	TO TSO'	is invalid.)
+))FROM(Iris/SGI/MVS/TSO) defines the source of the dataset.  This, in
+	   turn, implicitly defines the	destination.  See 'TO'.
+))BINARY   Defines the dataset as requiring translation/unpacking to
+	   avoid transferring 3270 control characters.	The converse of
+	   binary is 'TEXT'.
+))TEXT	   Defines the dataset to be transfered	as compatable with 3270
+	   allowable data without translation/unpacking.  That is, no
+	   byte	in the dataset is a 327x control character or a
+	   hexadecimal value which will	be transferred as X'FF'.  In
+	   general, if the dataset could have been entered from	a 327x
+	   keyboard, it	is 'TEXT', otherwise 'BINARY' should be	used.
+))IRISNAME is the name associated with the dataset on the workstation.
+	   If the definition is	present, it is transfered to the IRIS
+	   as is.  Translation to upper	case is	not performed.	When
+	   IRISNAME is omitted,	the default value is the TSO prefix
+	   value concatenated to DATA with a period between.
+))XBUFSIZE is the buffer size used while transfering data to the IRIS
+	   workstation.	 Large values may speed	data transfer slightly.
+	   Small values	may help control data transmission errors.
+	   Not intended	for normal use as the installing systems
+	   programmer has selected a good value	for this site.
+))XSYNCSIZ is the amount of data sent from the mainframe to the	IRIS
+	   before checking for full work buffer	state.	In a remote
+	   location served by lines slower than	56 KBS,	a value	of 0
+	   (Synchronize	at end of file only) may be appropriate.  In
+	   local operation, the	value should cause resynchronization
+	   at least every 14,000 bytes.
+))CLIST	   is used to suppress the 'SGI500 Normal Completion' message.
+	   The combination of VTAM screen management and the required
+	   shifting of screen modes will cause the command to fail in
+	   a CLIST environment unless every invocation of the command
+	   (except the last) either has	a CList	parameter or there is
+	   a following TERMIN command. A TERMIN	must also preceed the
+	   first invocation of the command if there are	WRITEs or
+	   WRITENRs before or between the occurances of	IRSXFR (as in
+	   a tutorial mode, for	example).
+
+
+
+
+
+
+
+Sep 26 11:11 1986  tso.help Page 5
+
+
+	      The CList	value and an absence of	WRITEs would be	the
+	   normal unattended mode of operation.
+))DDNAME   or FIlename.	 If present, there must	be a following field
+	   which will be used as the DCB name when the file is opened.
+))FILENAME(name) or DDname(name) overrides the default DCB name	in the
+	   command of 'IRISDATA'.
+))DSN	   or DAtaset must be followed by the dataset (DSCB) name of
+	   the data to be transferred.	If the following value is
+	   enclosed in single quotation	marks, it will be used without
+	   being prefixed.
+))DATASET(dataset name)	defines	the external (DSCB, catalog) name of
+	   the dataset to be transferred.  the keyword 'DSN' is
+	   alternative to 'DAtaset'.
+))NEW	   A possible initial dataset status.  Alternative entries are:
+	   'OLD', 'SHR', 'MOD'.	 See JCL Reference.
+))OLD	   A possible initial dataset status.  Alternative entries are:
+	   'NEW', 'SHR', 'MOD'.	 See JCL Reference.  The default status
+	   for datasets	into which Iris	data is	stored.
+))SHR	   A possible initial dataset status.  Alternative entries are:
+	   'OLD', 'NEW', 'MOD'.	 See JCL Reference.  The default status
+	   for data transfer to	the Iris when dynamic allocation done.
+))MOD	   A possible initial dataset status.  Alternative entries are:
+	   'OLD', 'SHR', 'NEW'.	 See JCL Reference.
+))SYSOUT(class)	Defines	the dataset as printed output.	Conflicts with
+	   NEW,	OLD, SHR, MOD, KEEP, DELETE, CATALOG, UNCATALOG, etc
+))KEEP	   A final dataset disposition.	 See JCL Reference.
+))DELETE   A final dataset disposition.	 See JCL Reference.
+))CATLG	   A final dataset disposition.	 See JCL Reference.
+))UNCAT	   A final dataset disposition.	 See JCL Reference.
+))LRECL	   The (maximum) logical record	length of a dataset.
+	   Ordinarily used for data transfer from the IRIS to a	new
+	   MVS dataset.
+))BLKSIZE  The (maximum) physical record size written to the DASD.
+	   Ordinarily used for data transfer from the IRIS to a	new
+	   dataset.
+))RECFM	   Fixed or undefined is required for BINARY mode transfer from
+	   the IRIS.  For text mode transfer, a	'fixed'	declaration
+	   will	require	that the records coming	from the IRIS be the
+	   same	length as LRECL.  Variable is acceptable for fixed or
+	   variable records.  The LRECL	value must be 4	greater	than
+	   the largest record transferred.
+))SPACE(primary	secondary) or 'SPACE primary' or 'SPACE(primary)
+))UNIT	   The class(es) of device from	which the new dataset volume
+	   will	be chosen.  If omitted,	the TSO	default	will be	used.
+))VOLUME   A list of (candidate) volumes for the dataset.
+))CYLINDER Space unit of allocation.
+))TRACK	   Space unit of allocation.
+))CONTIG   Contiguous space is required
+))ALX	   Up to five contiguous areas accecpted
+))MXIG	   Maximum contiguous space on the selected volume is allocated.
+))RLSE	   Dataset space not used is unallocated at CLOSE.
+))FREE	   The dataset used for	the transfer will be FREEd (available
+	   to other users) immediately upon CLOSE of the dataset.
+
+
+
+
+
+
+
+

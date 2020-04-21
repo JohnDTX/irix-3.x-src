@@ -1,0 +1,91 @@
+.TH addtopup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B addtopup 
+\- adds items to an existing pop-up menu
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "addtopup(pup, str, args)"
+.B "long pup;"
+.B "char *str;"
+.B "long args;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine addtop(pup, str, length,  args)"
+.B "integer pup"
+.B "character* str(*)"
+.B "integer*4 length"
+.B "integer*4 args"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure addtopup(pup: longint; str: pstring128; 
+.br
+.B	args: longint);
+.SH DESCRIPTION
+.B addtopup
+adds items to an existing pop-up menu.
+\f2str\f1 specifies the menu items; \f2pup\f1 identifies the menu.
+.B addtopup 
+appends the new menu items
+to the bottom of the existing menu.
+.I pup
+is the identifier returned by 
+.B newpup
+or 
+.B defpup.
+.sp
+.I args
+is a single argument that matches the argument \f2str\f1 specifies.
+In FORTRAN and Pascal, menus are built by a call to 
+.B newpup
+followed by a call to 
+.B addtopup
+(\f3addtop\fP in FORTRAN)
+for each menu item that requires an argument, i.e.,
+a function address or a menu identifier.
+.sp
+The following code segments construct the same pop-up menu 
+using C and FORTRAN.
+.sp
+.ne 5
+.nf
+In C:
+.ft 7
+.ps -2
+submenu = defpup("rotate %f | translate %f | scale %f ",
+			dorotate, dotranslate, doscale);
+menu = defpup("sample %t | persp | xform %m | greset %f ",
+			submenu, greset);
+.ps
+.ft 1
+.ne 10
+.sp
+In FORTRAN:
+.ft 7
+.ps -2
+submenu = newpup()
+call addtop(submen, "rotate %f", 9,  dorota)
+call addtop(submen, "translate %f", 12, dotran)
+call addtop(submen, "scale %f", 8, doscal)
+menu = newpup()
+call addtop(menu, "sample %t | persp | xform %m", 28,  
+\h'-\w`\0`u'+                  submenu)
+call addtop(menu, "greset %f", 8, greset)
+.fi
+.ft 1
+.ps
+.sp
+For a complete description of menu formats, see 
+.B defpup.
+.SH "SEE ALSO"
+defpup, dopup, freepup, newpup
+.sp
+\f2Using mex\fP, Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode under the window manager. 

@@ -1,0 +1,91 @@
+'\"macro stdmacro
+.hw photo-type-setter
+.TH TC 1
+.SH NAME
+tc \- phototypesetter simulator
+.SH SYNOPSIS
+.B tc
+[
+.B \-t
+] [
+.BR \-s n
+] [
+.BR \-p l
+] [ file ]
+.SH DESCRIPTION
+.I Tc\^
+interprets its
+input (standard input default)
+as device codes for a Wang Laboratories, Inc. 
+.SM C/A/T
+phototypesetter.
+The standard output of
+.I tc\^
+is intended for a Tektronix 4014 terminal
+with
+.SM ASCII
+and
+.SM APL
+character sets.
+The sixteen typesetter sizes are mapped into the 4014's
+four sizes;
+the entire
+.SM TROFF
+character set is drawn using the 4014's
+character generator,
+with overstruck combinations where necessary.
+Typical usage is:
+.IP "" 5
+troff\| \-t\| files\| |\| tc
+.PP
+At the end of each page,
+.I tc\^
+waits for a new-line (empty line) from the keyboard before
+continuing on to the next page.
+In this wait state, the command
+.B e
+will
+.I suppress\^
+the screen erase before the next page;
+.BI s\| n\^
+will cause the next
+.I n\^
+pages to be skipped;
+and
+.BI ! cmd\^
+will send
+.I cmd\^
+to the shell.
+.PP
+The command line options are:
+.TP "\w'\f3\-s\|\f2n\f1\ \ \ 'u"
+.B \-t
+Don't wait between pages (for directing output into a file).
+.TP
+.BI \-s n\^
+Skip the first
+.I n\^
+pages.
+.TP
+.BI \-p l\^
+Set page length to
+.IR l\| ;
+.I l\^
+may include the scale factors
+.B p
+(points),
+.B i
+(inches),
+.B c
+(centimeters),
+and
+.B P
+(picas);
+default is picas.
+.SH SEE ALSO
+4014(1),
+sh(1), 
+troff(1).
+.SH BUGS
+Font distinctions are lost.
+.\"	@(#)tc.1	5.1 of 11/15/83

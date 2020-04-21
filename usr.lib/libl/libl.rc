@@ -1,0 +1,12 @@
+#	@(#)libl.rc	1.1
+ccv5 -O -c -I/v/dist/dist/usr/include lib/*.c
+rm -f libl.a
+ar68 rv libl.a *.o
+rm -f *.o
+
+cp libl.a /v/dist/dist/lib/libl.a
+fixbin68 /v/dist/dist/lib/libl.a
+rm -f libl.a
+
+cp lib/ncform /v/dist/dist/usr/lib/lex/ncform
+cp lib/nrform /v/dist/dist/usr/lib/lex/nrform

@@ -1,0 +1,193 @@
+'\"macro stdmacro
+.TH XNSIOCTL 3N
+.SH NAME
+xnsioctl \- ioctls for XNS and Ethernet
+.SH SYNOPSIS
+.nf
+.B "ioctl (nfd, cmd, arg)"
+.B "int nfd, cmd;"
+.B "char *arg;"
+.fi
+.SH DESCRIPTION
+.I Xnsioctl.h
+contains macro definitions for the
+.I ioctl
+routines in the Ethernet Controller device driver.
+These routines control the XNS protocols and the Ethernet.
+.PP
+The following
+.I ioctl
+commands control the Ethernet.
+.PP
+If
+.B cmd
+=
+.I NXIOBOUNCE ,
+then this process wants to receive
+.I sgbounce
+packets.
+If another process had previously requested this,
+a
+.I SIGKILL
+is sent to its process group,
+and the current process replaces it.
+.PP
+If
+.B cmd
+=
+.I NXIORAW ,
+the raw Ethernet output is allowed.
+.PP
+If
+.B cmd
+=
+.I NXPHYSADDR ,
+the physical ethernet address of the Ethernet Controler is returned into the
+.I "struct physnet"
+located at address
+.B arg.
+.PP
+If
+.B cmd
+=
+.I NXPUTSLOT ,
+a multicast slot is set to the
+.I "struct physaddr"
+passed as a pointer in
+.B arg.
+The slot number used is equal to the minor number of the network
+special file on which the
+.I ioctl
+is done.
+.I NXGETSLOT
+does the inverse.
+.PP
+If
+.B cmd
+=
+.I NXSETRCV ,
+receipt of multicast packets is enabled
+on this network file descriptor,
+if
+.B arg > 0.
+Otherwise,
+receipt is turned off.
+If
+.B arg > 1,
+then
+.I DISCARD
+mode is also enabled.
+In 
+.I DISCARD
+mode you will not recieve multicast packets that you transmit.
+.PP
+The following
+.I ioctl
+commands are general in nature.
+They deal with the XNS - Unix interface.
+.PP
+If
+.B cmd
+=
+.I NXIOTEST ,
+the number of times the network special file is open
+is returned into the short located at address
+.B arg.
+.PP
+If
+.B cmd
+=
+.I NXAVAIL ,
+the minor device number of an available network special file
+is returned into the short located at address
+.B arg.
+.PP
+If
+.B cmd
+=
+.I NXSETPGRP ,
+the process group is forced to match that of the current process.
+.PP 
+The following
+.I ioctl 
+commands control the sequence packet protocol
+.I (SPP)
+implementation.
+.PP
+If
+.B cmd
+=
+.I NXIOFAST
+the typewriter output routine will be bypassed for this channel.
+.B cmd
+=
+.I NXIOSLOW
+causes the inverse to occur.
+.PP
+If
+.B cmd
+=
+.I NXSOCKET ,
+then the receive socket number is set to the short located at address
+.B arg.
+Returns
+.I ENXIO
+if a receive socket number is already set.
+.PP
+If
+.B cmd
+=
+.I NXSOCKWAIT ,
+then the driver waits for a connection on the socket set up with
+.I NXSOCKET.
+.PP
+If
+.B cmd
+=
+.I NXCONNECT ,
+an outgoing network connection is made,
+using the
+.I "struct xns_setup"
+located at
+.B arg.
+.PP
+If
+.B cmd
+=
+.I NXWRITE , 
+a network write is done,
+using the pointer to an
+.I "struct xnsio"
+passed in
+.B arg.
+This includes an address, a count a data type, and control bits (see
+.I "Xnsioctl.h" ).
+.I NXREAD
+does the same thing,
+but for network reads.
+Perform a NXBLOCKIO first to allow NXREAD to work.
+.PP
+If
+.B cmd
+=
+.I NXBLOCKIO ,
+block I/O is enabled.
+.I NXBLOCKOFF
+does the inverse.
+.SH FILES
+.nf
+Xnsioctl.h	defines the \f2ioctl\fP codes used by the Ethernet controller device driver
+Xns.h		contains network structure definitions for the XNS protocols
+.SH "SEE ALSO"
+.fi
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xnsd(1M),
+xx(1C),
+utmp(3N),
+xcmd(3N),
+xconnect(3N),
+xnsfile(3N),
+xnslib(3N),
+xnswrite(3N)

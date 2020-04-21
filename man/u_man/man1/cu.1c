@@ -1,0 +1,243 @@
+'\"macro stdmacro
+.tr ~~
+.TH CU 1C
+.SH NAME
+cu \- call another \s-1UNIX\s+1 System
+.SH SYNOPSIS
+.B cu
+.RB [ \-s speed\|]
+.RB [ \-l line\|]
+.RB [ \-h \|]
+.RB [ \-t \|]
+.RB [ \-d \|]
+.RB [ \-m \|]
+.RB [ \-o \||\| \-e \|]
+telno \||\|
+.B dir
+.SH DESCRIPTION
+.I Cu\^
+calls up another \s-1UNIX\s+1 system,
+a terminal,
+or possibly a non-\s-1UNIX\s+1 system.
+It manages an interactive conversation with possible
+transfers of
+.SM ASCII
+files.
+.I Speed\^
+gives the transmission speed (110, 150, 300, 600, 1200, 2400, 4800, 9600);
+300 is the default value.
+Most modems are either 300 or 1200 baud.
+Directly connected lines may be set to speeds higher than 1200 baud.
+.PP
+The
+.B \-l
+value may be used to specify a device name
+for the communications line device to be used.
+This can be used to override searching for
+the first available line having the right speed.
+The
+.B \-h
+option emulates local echo, supporting calls to
+other computer systems which expect terminals to be
+in half-duplex mode.
+The
+.B \-t
+option is used when dialing an \s-1ASCII\s+1 terminal which has been
+set to auto-answer.
+Appropriate mapping of carriage-returns
+to carriage-return-line-feed pairs is set.
+The
+.B \-d
+option cause diagnostic traces to be printed.
+The
+.B \-m
+option specifies a direct line which has modem control.
+The
+.B \-e
+.RB( \-o )
+option designates that even (odd) parity is to be
+generated for data sent to the remote.
+.I Telno\^
+is the telephone number,
+with equal signs for secondary dial tone or minus signs for delays,
+at appropriate places.
+The string
+.B dir
+for
+.I telno\^
+may be used for directly connected lines,
+and implies a null \s-1ACU\s+1.
+Using
+.B dir
+insures that a line has been specified by the
+.B \-l
+option.
+.PP
+.I Cu\^
+will try
+each line listed in the file
+.B \%/usr/lib/uucp/L-devices
+until it finds an available line with appropriate
+attributes or runs out of entries.
+After making the connection,
+.I cu\^
+runs as two processes:
+the
+.I transmit\^
+process reads data from the standard input and,
+except for lines beginning with ~ ,
+passes it to the remote system;
+the
+.I receive\^
+process accepts data from the remote system and,
+except for lines beginning with ~ ,
+passes it to the standard output.
+Normally, an automatic \s-1DC\s+1\&3/\s-1DC\s+1\&1 protocol
+is used to control input from the remote so the buffer is
+not overrun.
+Lines beginning with ~ have special meanings.
+.PP
+The
+.I transmit\^
+process interprets the following:
+.TP "\w'\f1~\f3%take\f2 \|from\f1 \|[\|\f2to\f1\|]\ \ \ 'u"
+.RB ~ .
+terminate the conversation.
+.TP
+.RB ~ !
+escape to an interactive shell on the local system.
+.TP
+\f1~\f3!\f2cmd\f1\|.\|.\|.
+run
+.I cmd\^
+on the local system
+(via
+.BR "sh \-c" ).
+.TP
+\f1~\f3$\f2cmd\f1\|.\|.\|.
+run
+.I cmd\^
+locally and send its output
+to the remote system.
+.TP
+\f1~\f3%take\f2 \|from\f1 \|[\|\f2to\f1\|]
+copy file
+.I from\^
+(on the remote system)
+to file
+.I to\^
+on the local system.
+If
+.I to\^
+is omitted,
+the
+.I from\^
+argument is used in both places.
+.TP
+\f1~\f3%put\f2 \|from\f1 \|[\|\f2to\f1\|]
+copy file
+.I from\^
+(on local system)
+to file
+.I to\^
+on remote system.
+If
+.I to\^
+is omitted, the
+.I from\^
+argument is used in both places.
+.TP
+\&~~ .\|.\|.
+send the line
+\&~ .\|.\|.
+to the remote system.
+.TP
+.RB ~ %nostop
+turn off the \s-1DC\s+1\&3/\s-1DC\s+1\&1
+input control protocol for the remainder of the session.
+This is useful in case the remote system is one which does
+not respond properly to the \s-1DC\s+1\&3 and \s-1DC\s+1\&1 characters.
+.TP
+.RB ~ %break
+send a BREAK to the remote system.
+Pressing the BREAK key has the same effect.
+.TP
+.RB ~ %b
+an abbreviation for
+.RB ~ %break .
+.PP
+The
+.I receive\^
+process normally copies data from the remote system to its standard
+output.
+A line from the remote that begins with ~\f3>\fP initiates
+an output diversion to a file.
+The complete sequence is:
+.PP
+.RS
+\&~\f3>\fP\^[\^\f3>\fP\^]\^\f3:\fP\^\|\f2file\fP
+.br
+zero or more lines to be written to
+.I file\^
+.br
+.RB ~ >
+.RE
+.PP
+Data from the remote is diverted (or appended, if
+.B >>
+is used) to file.
+The trailing ~\f3>\fP terminates the diversion.
+.PP
+The use of
+.RB ~ %put
+requires
+.IR stty\^ (1)
+and
+.IR cat\^ (1)
+on the remote side.
+It also requires that the
+current erase and kill characters on the remote
+system be identical to the current ones on the local system.
+Backslashes are inserted at appropriate places.
+.PP
+The use of
+.RB ~ %take
+requires the existence of
+.IR echo\^ (1)
+and
+.IR cat\^ (1)
+on the remote system.
+Also,
+.B stty tabs
+mode should be set on the remote system if
+tabs are to be copied without expansion.
+.SH EXAMPLE
+.IP
+cu -s 1200 7778888
+.PP
+attempts to connect to the telephone line numbered "7778888"
+at 1200 baud rate.
+.SH FILES
+/usr/lib/uucp/L-devices
+.br
+/usr/spool/uucp/\s-1LCK\s+1..\f2tty-device\f1
+.br
+/dev/null
+.SH SEE ALSO
+cat(1), ct(1C), echo(1), stty(1), uucp(1C).
+.SH DIAGNOSTICS
+Exit code is zero for normal exit,
+non-zero (various values) otherwise.
+.SH BUGS
+When transferring files, characters may be dropped if there is
+any activity, e.g., typing a command or listing a file, on another
+textport or terminal. There is also an artificial slowing of
+transmission by \f2cu\f1 during the 
+.RB ~ %put
+operation to further reduce the likelihood of data loss.
+.PP
+\f2cu\f1 buffers input internally.\f1
+.\"	@(#)cu.1c	5.1 of 11/17/83
+.\"	$Source: /d2/3.7/src/man/u_man/man1/RCS/cu.1c,v $
+.\"	@(#)$Revision: 1.1 $
+.\"	$Date: 89/03/27 16:44:50 $

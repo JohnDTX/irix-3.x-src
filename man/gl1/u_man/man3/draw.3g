@@ -1,0 +1,58 @@
+.TH draw  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I draw
+- draw a line from the current graphics position to the specified point
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "draw(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "drawi(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "draw2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "draw2i(x, y) "
+.B "Icoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine draw(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine drawi(x, y, z)"
+.B "integer x, y, z"
+.IP 
+.B "subroutine draw2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine draw2i(x, y)"
+.B "integer x, y"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure draw(x, y, z: Coord);"
+.IP 
+.B "procedure drawi(x, y, z: Icoord);"
+.IP 
+.B "procedure draw2(x, y: Coord);"
+.IP 
+.B "procedure draw2i(x, y: Icoord);"
+.sp
+.SH DESCRIPTION
+\f2Draw\f1 connects the
+specified point and the current graphics position with a line segment
+using the current linestyle, linewidth, color, and writemask.
+The current graphics position is updated to the specified
+point.  
+Commands
+that invalidate the current graphics
+position should not be placed within sequences of 
+.I moves
+and
+.I draws.
+.SH "SEE ALSO"
+.I move, pnt

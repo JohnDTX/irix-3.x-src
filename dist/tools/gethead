@@ -1,0 +1,14 @@
+#! /bin/sh
+
+if grep -s "^$1	" desc
+then
+	grep "^$1	" desc | sed 's/		*/: /'
+else
+	case $1 in
+	dist)	echo "dist: Distribution Tools" ;;
+	test)	echo "test: Test Software" ;;
+	unix)	echo "unix: Standard System" ;;
+	boot)	echo "boot: Boostrap System" ;;
+	*)	echo "UNKNOWN ENTRY $1" ; exit 1
+	esac
+fi

@@ -1,0 +1,169 @@
+.TH DPR 1C
+.SH NAME
+dpr \- off-line print
+.SH SYNOPSIS
+.B dpr
+[
+.BR \- destination
+] [ options ] [ files ]
+.SH DESCRIPTION
+.I Dpr\^
+causes the named files to be printed off-line at the specified destination,
+by
+.SM GCOS
+at the Murray Hill Computation Center.
+.SM GCOS
+identification must appear in
+the
+.SM UNIX
+System
+password file (see
+.IR passwd (4)),
+or be supplied by the
+.B \-i
+option.
+If no files are listed the standard input is assumed;
+thus
+.I dpr\^
+may be used as a filter.
+.PP
+The destination is a two-character code which
+is taken to be a Murray Hill
+.SM GCOS
+``station id.''
+Useful codes are
+.B r1
+for quality print,
+and
+.B q1
+for quality print with special ribbon,
+both on regular wide paper.
+The codes
+.B r2
+and
+.B q2
+give the same print on narrow paper.
+The code
+.B mx
+is a Xerox 9700 printer.
+The default destination is on-line at the Murray Hill Computation Center.
+.PP
+The following options, each as a separate argument,
+and in any combination (multiple outputs are permitted),
+may be given before or after the destination:
+.PP
+.PD 0
+.TP 7
+.B \-c
+Makes a copy of the file to be sent before returning to the user.
+.TP 7
+.B \-r
+Removes the file after sending it.
+.TP 7
+.BI \-f file
+Use
+.I file
+as a dummy file name to report back in the mail.
+(This is useful for distinguishing multiple runs, especially when
+.I dpr\^
+is being used as a filter).
+.TP 7
+.BI \-i job,bin
+Supply the
+.SM GCOS
+``ident card'' image as the parameter
+.BI \-i job,bin
+where
+.I job
+is the
+.SM GCOS
+job number and
+.I bin
+the
+.SM GCOS
+bin number
+or any comment to the
+.SM GCOS
+operators.
+.TP 7
+.B \-m
+When transmission is complete, reports by
+.IR mail (1)
+the so-called
+.I snumb\^
+of the receiving
+.SM GCOS
+job.
+The mail is sent by the
+.SM UNIX
+daemon;
+there is no guarantee that the
+.SM GCOS
+job ran successfully.
+This is the default option.
+.TP 7
+.B \-n
+Does not report the completion of transmission by
+.IR mail (1).
+.TP 7
+.B \-p
+Selects portrait mode.
+Used in conjunction with a XEROX 9700 printer.
+.TP 7
+.BI \-s n\^
+Submits job to
+.SM GCOS
+with service grade
+.I n\^
+.RI ( n "=1, 2, 3, 4)."
+Default is
+.BR \-s2 .
+.PD
+.SH EXAMPLES
+The command:
+.RS
+.PP
+dpr \|\-r \|\-n \|error1 \|error2
+.RE
+.PP
+will send the files
+.B error1
+and
+.B error2
+to
+.SM GCOS
+for printing,
+removing the files after they have been sent,
+but not sending mail.
+The line:
+.RS
+.PP
+pr \|file1 \|\(bv \|dpr \|\-s1 \|\-f\|job1 \|\-r1
+.RE
+.PP
+will send the output of
+.I pr\^
+to
+.SM GCOS
+for printing on the quality printer
+with service grade 1,
+and will send mail that
+.I job1\^
+has been sent.
+.SH FILES
+.PD 0
+.TP 20
+/etc/passwd
+user's identification and
+.SM GCOS
+ident card.
+.TP
+/usr/lib/dpd
+sending daemon.
+.TP
+/usr/spool/dpd/\(**
+spool area.
+.PD
+.SH SEE ALSO
+dpd(1C), fget(1C), fsend(1C), gcat(1C).
+.\"	@(#)dpr.1c	5.2 of 5/18/82

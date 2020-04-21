@@ -1,0 +1,130 @@
+'\"macro stdmacro
+.TH TMPNAM 3S 
+.SH NAME
+tmpnam, tempnam \- create a name for a temporary file
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B char \(**tmpnam (s)
+.br
+.B char \(**s;
+.PP
+.B char \(**tempnam (dir, pfx)
+.br
+.B char \(**dir, \(**pfx;
+.SH DESCRIPTION
+These functions generate file names that can safely be used for
+a temporary file.
+.PP
+.I Tmpnam\^
+always generates a file name using the path-name defined as
+.B P_tmpdir
+in the
+.RI < stdio.h\^ >
+header file.
+If
+.I s\^
+is
+.SM NULL,
+.I tmpnam\^
+leaves its result in an internal static area and returns a pointer
+to that area.
+The next call to
+.I tmpnam\^
+will destroy the contents of the area.
+If
+.I s\^
+is not
+.SM NULL,
+it is assumed to be the address of an array of at least
+.B L_tmpnam
+bytes, where
+.B L_tmpnam
+is a constant defined in
+.RI < stdio.h\^ >;
+.I tmpnam\^
+places its result in that array and returns
+.IR s .
+.PP
+.I Tempnam\^
+allows the user to control the choice of a directory.
+The argument
+.I dir\^
+points to the path-name of the directory in which
+the file is to be created.
+If
+.I dir\^
+is
+.SM NULL
+or points to a string which is not a path-name
+for an appropriate directory, the path-name defined as
+.B P_tmpdir\^
+in the
+.RI < stdio.h\^ >
+header file is used.
+If that path-name is not accessible,
+.B /tmp
+will be used as a last resort.
+This entire sequence can be up-staged by
+providing an environment variable
+.SM
+.B TMPDIR
+in the user's environment, whose value is a path-name for the
+desired temporary-file directory.
+.PP
+Many applications prefer their temporary files to have certain
+favorite initial letter sequences in their names.
+Use the
+.I pfx\^
+argument for this.  This argument may be
+.SM NULL
+or point to a string
+of up to five characters to be used as the first few characters of the
+temporary-file name.
+.PP
+.I Tempnam\^
+uses
+.IR malloc\^ (3C)
+to get space for the constructed file name,
+and returns a pointer to this area.
+Thus, any pointer value returned from
+.I tempnam\^
+may serve as an argument to
+.I free\^
+(see
+.IR malloc\^ (3C)).
+If
+.I tempnam\^
+cannot return the expected result for any reason, i.e.
+.I malloc\^
+failed, or none of the above mentioned attempts to find
+an appropriate directory was successful, a
+.SM NULL
+pointer will be returned.
+.SH NOTES
+These functions generate a different file name each time they are called.
+.PP
+Files created using these functions and either
+.I fopen\^
+or
+.I creat\^
+are temporary only in the sense that they reside in a directory
+intended for temporary use, and their names are unique.
+It is the user's responsibility to use
+.IR unlink\^ (2)
+to remove the file when its use is ended.
+.SH SEE ALSO
+creat(2), unlink(2),
+fopen(3S), malloc(3C), mktemp(3C), tmpfile(3S).
+.SH BUGS
+If called more than 17,576 times in a single process,
+these functions will start recycling previously used names.
+.br
+Between the time a file name is created and the file is opened, it
+is possible for some other process to create a file with the same name.
+This can never happen if that other process is using
+these functions or
+.IR mktemp ,
+and the file names are chosen so as to render duplication by other
+means unlikely.
+.\"	@(#)tmpnam.3s	5.1 of 10/25/83

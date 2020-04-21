@@ -1,0 +1,79 @@
+../bin/asm68k ubuf
+../bin/asm68k ugotoxy
+../bin/asm68k uio
+../bin/asm68k umem
+../bin/asm68k umisc
+../bin/asm68k utexti
+../bin/asm68k utexto
+../bin/asm68k m.uinit
+../bin/asm68k pascheck
+../bin/asm68k pasdpwr10
+../bin/asm68k pasmath
+../bin/asm68k pasmove
+../bin/asm68k paspwr10
+../bin/asm68k passcomp
+../bin/asm68k passet
+../bin/asm68k pastext
+../bin/asm68k pastring
+../bin/asm68k add
+../bin/asm68k cmp
+../bin/pascal pasrio.pas; ../bin/code pasrio.i
+../bin/pascal d13.pas; ../bin/code d13.i
+../bin/pascal f13.pas; ../bin/code f13.i
+../bin/asm68k dadd
+../bin/asm68k dcmp
+../bin/asm68k div
+../bin/asm68k dmul
+../bin/asm68k dpk
+../bin/asm68k dvmd
+../bin/asm68k fpk
+../bin/asm68k ipk
+../bin/asm68k mod
+../bin/asm68k mul
+../bin/asm68k nan
+../bin/library <<!
+-u
+
+svs.paslib.obj
+ubuf.obj
+umem.obj
+utexti.obj
+utexto.obj
+m.uinit.obj
+umisc.obj
+ugotoxy.obj
+uio.obj
+pascheck.obj
+pasdpwr10.obj
+pasmath.obj
+pasmove.obj
+paspwr10.obj
+pasrio.obj
+passcomp.obj
+passet.obj
+pastext.obj
+pastring.obj
+add.obj
+cmp.obj
+d13.obj
+f13.obj
+dadd.obj
+dcmp.obj
+div.obj
+dmul.obj
+dpk.obj
+dvmd.obj
+fpk.obj
+ipk.obj
+mod.obj
+mul.obj
+nan.obj
+
+!
+echo
+echo svs.paslib.obj built.
+mv svs.paslib.obj svs.paslib.tmp
+rm *.obj
+mv svs.paslib.tmp svs.paslib.obj
+sync
+

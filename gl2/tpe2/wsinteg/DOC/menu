@@ -1,0 +1,109 @@
+/**************************************************************************
+ *									  *
+ * 		 Copyright (C) 1986, Silicon Graphics, Inc.		  *
+ *									  *
+ *  These coded instructions, statements, and computer programs  contain  *
+ *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
+ *  are protected by Federal copyright law.  They  may  not be disclosed  *
+ *  to  third  parties  or copied or duplicated in any form, in whole or  *
+ *  in part, without the prior written consent of Silicon Graphics, Inc.  *
+ *									  *
+ **************************************************************************/
+		T3279 menu version 1.2  revised 27 Feb 86
+		Peter Ecclesine
+
+The t3279 arguments are: t3279 [-dgiotvz] [inputfile]
+	d	log 3278 text displayed in pxlog (terminal emulation screens)
+	g	log RGL commands as text in LOGFILE.x
+	i	input is ascii RGL file (RDDATA type file)
+	o	log RGL ascii as hex from/to host in RDDATA.x WRDATA.x or else
+		log normal messages in MSGDATA
+	t	use textport for 3278 emulation
+	v	use visual 50 textport for 3278 emulation
+	z	use gbegin for xginit, rather than ginit to save color map
+
+	The t3279 program menu has 22 documented entries, and reside in
+the dbgmenu.c program. The entries are:
+
+	1:		Display the menu entries
+	2:		3270 terminal emulation, displaying the first 10
+			bytes of any received message on the status line.
+			The message transfer protocol is supported to
+			receive messages only.
+	3:		3270/Remote Graphics Library
+			implimentation. The full message transfer protocol
+			is supported.
+	4:		3270/File Transfer 
+			implimentation. The full message transfer protocol
+			is supported. See updown for UDT documentation.
+	5 (dd):		The GeometryLink self test diagnostic is
+			run for dd times. Each successful run will display
+			00 00 01 01 .. 18 18. The number displayed if the
+			test does not reach 18 is an index to the trouble.
+	6 (dd):		The GeometryLink static receive ram is tested,
+			and passes, or returns an error code indicating the
+			pattern that failed.
+	7 filename [adego]: dump file to screen
+			a - display ascii hex and translation
+			d,g - literal ascii dump
+			e - display ebcdic hex and translation
+			o - ascii with RGL hilit (10 and 7e)
+	8 [gtv]:	select type of 3270 emulation
+			g - 3279 graphport (full keyboard)
+			t - 3278 textport (vt100 keyboard)
+			v - 3278 textport (visual 50, vt52 keyboard)
+	9:		Causes the clock message to be transmitted to the
+			host computer. Possible error codes are:
+				1 - length > 1900 characters or zero or negative
+				2 - no response from host processor after
+				    ENTER aid(functions.c has details)
+				3 - host input buffer full.
+				5 - 3274 not able to unlock keyboard - probable
+				    host to 3274 problem
+				6 - write to i/f retries exceeded - probable
+				    GeometryLink card or 3274 polling problem
+				7 - write to GeometryLink card failed - probable
+				    kernel software or GeometryLink problem.
+				9 or greater - a received message
+	10:		Causes the quit message to be transmitted to the
+			host computer.
+	11 [dgo]:	selects logging option for t3279
+			d - log 3270 emulation text screens in pxlog
+			g - log RGL commands in LOGFILE.x
+			o - log host messages: menu 2 in MSGDATA.x,
+					menu 3, 33 in RDDATA.x WRDATA.x
+	12 [dgo]:	closes logging option
+			d - close pxlog
+			g - close LOGFILE.x
+			o - close RDDATA.x WRDATA.x MSGDATA.x
+	13 filename:	Replay the host RGL from file "filename", (RDDATA type)
+	14 (dd):	Update the 3278 screen buffer by calling update3270.
+			'dd' messages can be received by this routine.
+	15:		Display the current 3278 screen for a second.
+	16:		'print'(hex) the 3278 screen, surpressing nulls.
+	17 filename:	derive a textfile for transfer from the input textfile.
+			The new file has an uppercase name, and all tabs,
+			linefeeds and formfeeds are removed.
+	18:		'print'(hex) the most recently received message.
+	19:		Close and reopen the GeometryLink card. Causes a
+			Unit Check error to host computer.
+	20 nnnn bb (ae): 'print'(hex) the user memory from nnnn(hex)for bb(hex)
+			bytes. The menu shows the start address of user memory.
+			There is no protection on the display, so you must
+			be sure of the addresses and extent of display.
+			The final field selects the translated display table:
+			a is ascii, e is ebcdic.
+	21 bb:		Write bb(hex) to the 'kb_nano' port(7eef) of the
+			GeometryLink. This is the keystroke port, and it
+			normally uses 3274 codes.
+			Use this only under guidance from above.
+	22 bb:		Write bb(hex) to the 'signal' port(7eee) of the
+			GeometryLink. This is the control port, using
+			the RUN and SIGx bits to control the i/f modes.
+			Use this only under guidance from above.
+	33:		RGL, same as menu 3 with L1 keyboard lamp for each
+			receive message.
+	34:		UDT, same as menu 4 with L1 keyboard lamp for each
+			receive message.
+	100 or higher	quit.
+	!~		Shell escape.

@@ -1,0 +1,46 @@
+.TH mapw2 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B mapw2
+\- maps a point on the screen into 2-D world coordinates
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "mapw2(vobj, sx, sy, wx, wy)"
+.B "Object vobj;"
+.B "Screencord sx, sy;"
+.B "Coord *wx, *wy;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine mapw2(vobj, sx, sy, wx, wy)"
+.B "integer*4 vobj, sx, sy"
+.B "real wx, wy"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure mapw2(vobj: Object; sx sy: longint;
+.br
+.B 	var wx, wy: Coord);
+.SH DESCRIPTION
+.B mapw2
+is the 2-D version of
+\f3mapw\fP.
+.I vobj
+is a viewing object containing the viewport, projection, 
+viewing, and modeling transformations 
+that define world space. \f2sx\f1 and \f2sy\f1 define 
+a point in screen coordinates.
+\f2wx\f1 and \f2wy\f1 return the corresponding world coordinates.
+If the transformation is not
+2D, the result is undefined.
+.SH "SEE ALSO"
+mapw
+.sp
+\f2Programming Guide\fP, Section 9.1, Mapping Screen Coordinates to World
+Coordinates
+.SH NOTE
+This routine is available only in immediate mode.

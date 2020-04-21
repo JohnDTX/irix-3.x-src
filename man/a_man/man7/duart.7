@@ -1,0 +1,27 @@
+'\"macro stdmacro
+.TH DUART 7
+.SH NAME
+duart \- on board serial ports
+.SH SYNOPSIS
+.B "this device is automatically included; no config info is needed"
+.SH DESCRIPTION
+The on board serial ports for the IRIS system provide four serial ports,
+one of which is consumed supporting the IRIS keyboard.  The remaining
+three ports support fully the rs 232 standard.
+.PP
+Each serial line attached to the back panel behaves as described in
+.IR termio (7).
+Input and output for each line may independently
+be set to run at any of 16 speeds;
+see
+.IR termio (7)
+for the encoding.
+.PP
+Unfortunately, due to a historical botch, the UNIX device names for
+the on board ports do not match the back panel definition.  Unix uses
+a zero based numbering scheme, with port 0 being the keyboard.  The
+back panel uses a one based numbering scheme.
+.SH FILES
+/dev/ttyd[0-3]
+.SH "SEE ALSO"
+termio(7)

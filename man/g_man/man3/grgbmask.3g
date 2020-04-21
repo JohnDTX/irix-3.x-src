@@ -1,0 +1,44 @@
+.TH gRGBmask 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gRGBmask
+\- returns the current RGB writemask
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gRGBmask(redm, greenm, bluem)"
+.B "short *redm, *greenm, *bluem;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gRGBma(redm, greenm, bluem)"
+.B "integer*2 redm, greenm, bluem"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gRGBmask(var redm, greenm, bluem: 
+.br
+.B	Short);
+.SH DESCRIPTION
+.B gRGBmask
+returns the current RGB writemask as
+three 8-bit masks.
+.B gRGBmask
+places masks in the low order 8-bits of the locations
+.I redm,
+.I greenm,
+and
+.I bluem
+address.
+The system must be in RGB mode
+when this routine executes.
+.SH "SEE ALSO"
+getwritemask, RGBwritemask
+.sp
+.I Programming Guide,
+Section 6.3, Colors and Writemasks
+.SH NOTE
+This routine is available only in immediate mode.

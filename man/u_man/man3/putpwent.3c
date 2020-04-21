@@ -1,0 +1,39 @@
+'\"macro stdmacro
+.TH PUTPWENT 3C
+.SH NAME
+putpwent \- write password file entry
+.SH SYNOPSIS
+.B #include <pwd.h>
+.PP
+.B int putpwent (p, f)
+.br
+.B struct passwd \(**p;
+.br
+.B \s-1FILE\s+1 \(**f;
+.SH DESCRIPTION
+.I Putpwent\^
+is the inverse of
+.IR getpwent\^ (3C).
+Given a pointer to a
+.I passwd\^
+structure created by
+.I getpwent\^
+(or
+.I getpwuid\^ 
+or
+.IR getpwnam\^ ), 
+.I putpwuid\^
+writes a line on the stream
+.I f\^
+which matches the format of
+.BR /etc/passwd .
+.SH DIAGNOSTICS
+.I Putpwent\^
+returns non-zero if an error was detected during its operation,
+otherwise zero.
+.SH WARNING
+The above routine uses \f3<stdio.h>\fP, which causes 
+it to increase the size of programs,
+not otherwise using standard I/O, more
+than might be expected.
+.\"	@(#)putpwent.3c	5.1 of 10/25/83

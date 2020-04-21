@@ -1,0 +1,195 @@
+#include "mas.h"
+#include "fbcparams.h"
+#include "fbc.h"
+#include "fbc.mic.h"
+#include "consts.h"
+
+dbzline()
+{
+newfile("dbzline.c");
+
+#define _XLO		_X2	/* save X2, Y2, Z2 before drawing */
+#define _YLO		_Y2
+#define _ZLO		_Z2
+/*	_DELTAX		6	*/
+#define _COLR		7
+#define _BIAS		8
+#define _DELTAY		9
+#define _DELTAZ		10
+#define _DX_LO		11
+#define _DY_LO		12
+#define _DZ_LO		13
+#define _COUNT		14
+
+label(DBZ_LINE)
+	_NS /* check the display bit */
+	    ALUOP(ANDOP, P0);
+	    SETROP(0, ALL16); CONST(1); LOADDI(UCONST);
+	    SETSOP(NONQOP, 0, RAMRD);
+	    FTOYANDQ(FF, OLDQ, REGWRD);
+	_ES
+
+	_NS /* branch to the display A code */
+	    REGHOLD; SEQ(JUMP); NEXT(ZV_PIXELLP_A); COND(IFNZ);
+	_ES
+
+/* display "b" code */
+label(ZV_PIXELLP_B)
+	_NS 
+	    ALUOP(RONLYOP, P0);
+	    SETROP(0, ALL16); CONST(0x16); LOADDI(UCONST);
+	    SETSOP(NONQOP, 0, RAMNOP);
+	    FTOYANDQ(FF, OLDQ, REGWRD);
+	    DOTOOUTREG; BPCCMD(LOADCONFIG);
+	_ES
+
+	_NS REGHOLD; BPC(SETADDRS); _ES
+
+	_NS REGHOLD; BPC(READPIXELAB); _ES		/* request Z value */
+
+	_NS LOADDI(BPCDATA); SETROP(0,ALL16); SETSOP(NONQOP,_Z1,RAMNOP);
+	 ALUOP(SUBSRC); YQ(FF,LDQ,REGWRD); READBPCBUS; LDOUT;
+	 COND(IFFALSE); SEQ(CJPP); _ES		/* do comparison, save in Q */
+
+	_NS SETROP(0,NONE); SETSOP(QOPERAND,0,RAMNOP); ALUOP(SONLYOP,P0);
+	 FTODO; COND(IFOVF); DOJUMP(ZOPP_TEST_B); _ES
+	     /* re-lookat compar; if overflow, check OPPOSITE of neg test */
+
+	_NS REGHOLD; COND(IFNNEG); DOJUMP(NOZDRAW_B); _ES
+				/* if new Z less than stored, replace */
+
+label(ZDRAWIT_B)
+	_NS REGREG(MOVE,_Z1,_Z1); BPC(DRAWPIXELAB); _ES
+
+	_NS REGREG(ADD,_DZ_LO,_ZLO); PROPOUT16; _ES
+						/* update Z while UC busy */
+
+	_NS REGREG(ADD,_DELTAZ,_Z1); PROPIN; _ES
+
+	_NS 
+	    ALUOP(RONLYOP, P0);
+	    SETROP(0, ALL16); CONST(0x1a); LOADDI(UCONST);
+	    SETSOP(NONQOP, 0, RAMNOP);
+	    FTOYANDQ(FF, OLDQ, REGWRD);
+	    DOTOOUTREG; BPCCMD(LOADCONFIG);
+	_ES
+
+	_NS REGREG(MOVE,_COLR,_COLR); BPC(DRAWPIXELAB); DOJUMP(ZNEXTPIX_B); _ES
+					/* draw in pixel in current shade */
+
+label(ZOPP_TEST_B)
+	_NS REGHOLD; COND(IFNNEG); DOJUMP(ZDRAWIT_B); _ES
+
+label(NOZDRAW_B)				/* just calc next new Z */
+	_NS REGREG(ADD,_DZ_LO,_ZLO); PROPOUT16; _ES
+
+	_NS REGREG(ADD,_DELTAZ,_Z1); PROPIN; _ES
+
+label(ZNEXTPIX_B)
+	_NS REGREG(ADD,_DX_LO,_XLO); PROPOUT16; _ES
+
+	_NS REGREG(ADD,_DELTAX,_X1); BPC(LOADXS); PROPIN; _ES	/* new X */
+
+	_NS REGREG(ADD,_DY_LO,_YLO); PROPOUT16; _ES
+
+	_NS REGREG(ADD,_DELTAY,_Y1); BPC(LOADYS); PROPIN;
+	 SEQ(RPCT); NEXT(ZV_PIXELLP_B); _ES		/* new Y; next pixel*/
+
+	_NS REGHOLD; DOJSUB(NEW_MASK); _ES
+
+	_NS 
+	    REGREG(RONLYOP, P0, _COUNT, _COUNT); DOTOOUTREG; 
+	    COND(IFNZ); DOJUMP(ZV_VPLOOP); 
+	_ES
+
+	_NS LOADMAR(_CONFIG+1); CONST(_CONFIG+1); _ES
+
+	_NS RAM(RAMRD, _X1, HOLD); BPC(LOADCONFIG); _ES
+
+	_NS LOADMAR(_SAVE2+5); CONST(_SAVE2+5); _ES
+
+	_NS RAM(RAMRD,_X1,INC); _ES	/* move pt. 2 to pt. 1 */
+	_NS RAM(RAMRD,_Y1,INC); _ES
+	_NS RAM(RAMRD,_Z1,HOLD); GEGET; DOJUMP(DISPATCH); _ES
+
+
+/* the display "A" code */
+label(ZV_PIXELLP_A)
+	_NS 
+	    ALUOP(RONLYOP, P0);
+	    SETROP(0, ALL16); CONST(0x19); LOADDI(UCONST);
+	    SETSOP(NONQOP, 0, RAMNOP);
+	    FTOYANDQ(FF, OLDQ, REGWRD);
+	    DOTOOUTREG; BPCCMD(LOADCONFIG);
+	_ES
+
+	_NS REGHOLD; BPC(SETADDRS); _ES
+
+	_NS REGHOLD; BPC(READPIXELCD); _ES		/* request Z value */
+
+	_NS LOADDI(BPCDATA); SETROP(0,ALL16); SETSOP(NONQOP,_Z1,RAMNOP);
+	 ALUOP(SUBSRC); YQ(FF,LDQ,REGWRD); READBPCBUS; LDOUT;
+	 COND(IFFALSE); SEQ(CJPP); _ES		/* do comparison, save in Q */
+
+	_NS SETROP(0,NONE); SETSOP(QOPERAND,0,RAMNOP); ALUOP(SONLYOP,P0);
+	 FTODO; COND(IFOVF); DOJUMP(ZOPP_TEST_A); _ES
+	     /* re-lookat compar; if overflow, check OPPOSITE of neg test */
+
+	_NS REGHOLD; COND(IFNNEG); DOJUMP(NOZDRAW_A); _ES
+				/* if new Z less than stored, replace */
+
+label(ZDRAWIT_A)
+	_NS REGREG(MOVE,_Z1,_Z1); BPC(DRAWPIXELAB); _ES
+
+	_NS REGREG(ADD,_DZ_LO,_ZLO); PROPOUT16; _ES
+						/* update Z while UC busy */
+
+	_NS REGREG(ADD,_DELTAZ,_Z1); PROPIN; _ES
+
+	_NS 
+	    ALUOP(RONLYOP, P0);
+	    SETROP(0, ALL16); CONST(0x15); LOADDI(UCONST);
+	    SETSOP(NONQOP, 0, RAMNOP);
+	    FTOYANDQ(FF, OLDQ, REGWRD);
+	    DOTOOUTREG; BPCCMD(LOADCONFIG);
+	_ES
+
+	_NS REGREG(MOVE,_COLR,_COLR); BPC(DRAWPIXELAB); DOJUMP(ZNEXTPIX_A); _ES
+					/* draw in pixel in current shade */
+
+label(ZOPP_TEST_A)
+	_NS REGHOLD; COND(IFNNEG); DOJUMP(ZDRAWIT_A); _ES
+
+label(NOZDRAW_A)				/* just calc next new Z */
+	_NS REGREG(ADD,_DZ_LO,_ZLO); PROPOUT16; _ES
+
+	_NS REGREG(ADD,_DELTAZ,_Z1); PROPIN; _ES
+
+label(ZNEXTPIX_A)
+	_NS REGREG(ADD,_DX_LO,_XLO); PROPOUT16; _ES
+
+	_NS REGREG(ADD,_DELTAX,_X1); BPC(LOADXS); PROPIN; _ES	/* new X */
+
+	_NS REGREG(ADD,_DY_LO,_YLO); PROPOUT16; _ES
+
+	_NS REGREG(ADD,_DELTAY,_Y1); BPC(LOADYS); PROPIN;
+	 SEQ(RPCT); NEXT(ZV_PIXELLP_A); _ES		/* new Y; next pixel*/
+
+	_NS REGHOLD; DOJSUB(NEW_MASK); _ES
+
+	_NS 
+	    REGREG(RONLYOP, P0, _COUNT, _COUNT); DOTOOUTREG; 
+	    COND(IFNZ); DOJUMP(ZV_VPLOOP); 
+	_ES
+
+	_NS LOADMAR(_CONFIG+1); CONST(_CONFIG+1); _ES
+
+	_NS RAM(RAMRD, _X1, HOLD); BPC(LOADCONFIG); _ES
+
+	_NS LOADMAR(_SAVE2+5); CONST(_SAVE2+5); _ES
+
+	_NS RAM(RAMRD,_X1,INC); _ES	/* move pt. 2 to pt. 1 */
+	_NS RAM(RAMRD,_Y1,INC); _ES
+	_NS RAM(RAMRD,_Z1,HOLD); GEGET; DOJUMP(DISPATCH); _ES
+
+}

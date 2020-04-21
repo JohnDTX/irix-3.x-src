@@ -1,0 +1,35 @@
+.TH imakebackground 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B imakebackground
+\- registers the screen background process
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "imakebackground()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine imakeb"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure imakebackground;"
+.SH DESCRIPTION
+.B imakebackground
+registers a process that
+maintains the screen background.
+Call it before 
+\f3winopen\fP.
+The process draws the background and reads the input queue.
+Every time the process gets a REDRAW token in the queue, it
+redraws the background.
+.SH "SEE ALSO"
+winopen
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

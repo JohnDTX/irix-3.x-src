@@ -1,0 +1,30 @@
+This directory contains the raster files for use by di10
+on the Imagen Imprint-10 laser printer.  It also contains
+the following programs:
+
+make3brast.c- converts a vax raster file to 3b20 format
+	Syntax of make3brast:
+	
+		make3brast "name of raster file in vaxformat"
+		
+	the new font is put out on standard out.  i.e.
+
+		make3brast S.10 > ./newdir/S.10
+
+
+fdump.c- list out a rasterfile in readable form
+	Syntax of fdump:
+
+		fdump "name of raster file"
+
+fbuild.c- builds a raster file from input made from fdump.c
+	Syntax of fbuild:
+		(stdin is a file in the format of the output from fdump)
+
+		fbuild "name of output rasterfile"
+
+	ie.
+
+		fdump S.10 | fbuild xxx
+
+	wouldn't do much but would copy S.10 to xxx

@@ -1,0 +1,32 @@
+'\"macro stdmacro
+.TH MEM 7
+.SH NAME
+mem, kmem \- main memory
+.SH DESCRIPTION
+.lg
+.I Mem
+is a special file that is an image of the main memory
+of the computer.
+It may be used, for example, to examine
+(and even to patch) the system.
+.PP
+Byte addresses in
+.I mem
+are interpreted as physical memory addresses.
+References to non-existent locations cause errors to be returned.
+.PP
+Examining and patching device registers is likely
+to lead to unexpected results when read-only or write-only
+bits are present.
+.PP
+The file
+.I kmem
+is the same as 
+.I mem
+except that kernel virtual memory
+rather than physical memory is accessed.
+.PP
+To arrange the map in \f2adb\f1(1) for examining kernel data structures use the
+command \f3?m c00400 cfffff\f1.
+.br
+/dev/kmem

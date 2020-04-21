@@ -1,0 +1,32 @@
+.TH gsync 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gsync 
+\-  waits for a vertical retrace period
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gsync()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gsync"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gsync;"
+.SH DESCRIPTION
+In single buffer mode, rapidly changing scenes should be synchronized
+with the refresh rate.
+\f3gsync\f1
+waits for the next vertical retrace period.  
+.SH "SEE ALSO"
+RGBmode, singlebuffer
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+.SH NOTE
+This routine is available only in immediate mode.

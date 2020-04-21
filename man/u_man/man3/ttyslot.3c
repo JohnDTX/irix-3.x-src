@@ -1,0 +1,26 @@
+'\"macro stdmacro
+.TH TTYSLOT 3C
+.SH NAME
+ttyslot \- find the slot in the utmp file of the current user
+.SH SYNOPSIS
+.B int ttyslot ( )
+.SH DESCRIPTION
+.I Ttyslot\^
+returns the index of the current user's entry in the
+.B /etc/utmp
+file.
+This is accomplished by actually scanning the file
+.B /etc/inittab
+for the name of the terminal associated with the standard
+input, the standard output, or the error output (0, 1 or 2).
+.SH FILES
+/etc/inittab
+.br
+/etc/utmp
+.SH SEE ALSO
+getut(3C), ttyname(3C).
+.SH DIAGNOSTICS
+A value of 0 is returned if an error was encountered while
+searching for the terminal name or if none of the above
+file descriptors is associated with a terminal device.
+.\"	@(#)ttyslot.3c	5.1 of 10/21/83

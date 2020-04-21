@@ -1,0 +1,39 @@
+.TH writeRGB  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I writeRGB
+- paint a row of pixels on the screen
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "writeRGB(n, red, green, blue) "
+.B "short n; "
+.B "RGBvalue red[], green[], blue[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine writeR(n, red, green, blue)"
+.B "integer*2 n, red(n), green(n), blue(n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure writeRGB(n: Short; var red, green, blue: RGBarray);"
+.sp
+.SH DESCRIPTION
+.I WriteRGB
+paints a row of pixels on the screen in RGB mode.  It specifies
+the number of pixels to paint and a color for each pixel.
+The current character position provides the starting location;
+it is updated to point to the pixel following the last one painted.
+The current character position becomes undefined if the next pixel
+position is outside the viewport.
+Pixels are painted from left to right, 
+and are clipped to the current screen mask.
+\f2WriteRGB\f1 does not automatically wrap from one line to the
+next.  It supplies a 24-bit RGB value (eight bits for
+each color) for each pixel.  This value is
+written directly into the bitplanes.  
+.SH "SEE ALSO"
+.I scrmask, readRGB, RGBcolor, writepixels
+.SH NOTE
+This command can only be used in immediate mode.

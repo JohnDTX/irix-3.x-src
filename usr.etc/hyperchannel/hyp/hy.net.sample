@@ -1,0 +1,75 @@
+hosts
+navier-hy       0xc415
+navier1-hy      0xc200
+wks-hy          0x2200
+annie-hy        0x2201
+igor-hy         0x2203
+wk01-hy         0x2601
+wk02-hy         0x4503
+wk03-hy         0x4501
+wk04-hy         0x4502
+wk05-hy         0x4500
+wk06-hy         0x4403
+wk07-hy         0x4402
+wk08-hy         0x4401
+wk09-hy         0x4400
+wk10-hy         0x4203
+wk11-hy         0x4202
+wk12-hy         0x4201
+wk13-hy         0x4200
+wk14-hy         0x4303
+wk15-hy         0x4302
+wk16-hy         0x4301
+wk17-hy         0x4300
+prandtl-hy      0x2500
+sscdev-hy       0x2070
+ssctst1-hy      0x2534
+ssctst2-hy      0x2078
+ssctst3-hy      0x253c
+sscdev-alt-hy   0x2770
+ssctst1-alt-hy  0x1074
+ssctst2-alt-hy  0x2778
+ssctst3-alt-hy  0x107c
+tuts-hy         0x2040
+meyer-hy        0x2041
+crayarch-hy     0x2510
+fred-hy         0x1200
+wilbur-hy       0x2401
+orville-hy      0x2400
+amelia-hy       0x1201
+euler-hy        0x2600
+
+net
+	trunk 3
+		  navier-hy navier1-hy wks-hy annie-hy igor-hy 
+		  prandtl-hy sscdev-hy ssctst1-hy ssctst2-hy
+		  ssctst3-hy sscdev-alt-hy ssctst1-alt-hy ssctst2-alt-hy
+		  ssctst3-alt-hy tuts-hy meyer-hy crayarch-hy
+		  fred-hy wilbur-hy orville-hy amelia-hy
+
+net
+	trunk 2,1,0
+		  wk01-hy wk03-hy wk04-hy wk05-hy
+		  wk07-hy wk08-hy wk10-hy wk14-hy
+		  wk02-hy wk06-hy wk09-hy wk11-hy 
+		  wk12-hy wk13-hy wk15-hy wk16-hy
+		  wk17-hy euler-hy
+
+		  navier-hy navier1-hy wks-hy annie-hy igor-hy 
+		  prandtl-hy sscdev-hy ssctst1-hy ssctst2-hy
+		  ssctst3-hy sscdev-alt-hy ssctst1-alt-hy ssctst2-alt-hy
+		  ssctst3-alt-hy tuts-hy meyer-hy crayarch-hy
+		  fred-hy wilbur-hy orville-hy amelia-hy
+
+
+
+
+net	trunk 3
+		  wk01-hy wk03-hy wk04-hy wk05-hy
+		  wk07-hy wk08-hy wk10-hy wk14-hy
+		  wk02-hy wk06-hy wk09-hy wk11-hy 
+		  wk12-hy wk13-hy wk15-hy wk16-hy
+		  wk17-hy euler-hy
+
+
+

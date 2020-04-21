@@ -1,0 +1,18 @@
+'\"macro stdmacro
+.TH GETHOSTNAME 2 
+.SH NAME
+gethostname \- get name of current host
+.SH SYNOPSIS
+.B gethostname (hostname, sizeof (hostname));
+.br
+.B char hostname[32];
+.SH DESCRIPTION
+.I gethostname\^
+returns the standard host name for the current processor, as set by
+.IR sethostname\^ (2)
+and defined in
+.IR sys_id\^ (4).
+The name is null-terminated.
+.SH SEE ALSO
+sethostname(2), sys_id(4)
+.\"	@(#)gethostname.2	5.1 of 11/2/83

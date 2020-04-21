@@ -1,0 +1,131 @@
+'\"macro stdmacro
+.ds PS P\s-2OST\s+2S\s-2CRIPT\s+2
+.TH PSROFF 1
+.SH NAME
+psroff \- troff to a P\s-2OST\s+2S\s-2CRIPT\s+2 printer
+.SH SYNOPSIS
+.B psroff
+[ 
+.B \-t
+] [ troff options ] [ spooler options ] [ files ]
+.SH DESCRIPTION
+.I psroff
+is a shell script that runs
+.IR troff (1)
+in an environment to produce output on a P\s-2OST\s+2S\s-2CRIPT\s+2 printer.
+It uses
+.IR psdit (1)
+to convert
+.I troff
+intermediate output to P\s-2OST\s+2S\s-2CRIPT\s+2 format, and spools this for printing.  
+If no 
+.I files
+are specified, the standard input is used.
+.PP
+In addition to the standard 
+.IR troff options ,
+the following option is understood by 
+.IR psroff :
+.TP
+.B \-t 
+sends the P\s-2OST\s+2S\s-2CRIPT\s+2 output to the standard output, 
+rather than spooling it to a printer.
+Note that this overrides the meaning of the 
+.I troff
+.B \-t 
+option; if you want that, run 
+.I troff
+directly.
+.PP
+The following 
+.I spooler options 
+are passed on to
+.IR lp (1).
+.TP
+.BI \-d dest
+causes the output to be sent to the named destination.
+.TP
+.BI \-n n
+causes 
+.I n 
+copies of the output to be produced.  The default is one.
+.TP
+.B \-h
+suppress the printing of the job burst page.
+.TP
+.B \-r
+don't page-reverse the output.
+.TP
+.BI \-s
+suppress messages from 
+.IR lp .
+.TP
+.BI \-m
+send mail after files have been printed.
+.TP
+.BI \-w
+write to user's terminal after files have been printed.
+.SH ENVIRONMENT
+.IP "LPDEST" \w'LPDEST\0\0\0'u
+the name of a printer (as in the 
+.B \-d
+option) for 
+.I lp
+to use.  If no 
+.B \-d 
+option is specified,
+.I lp
+will use this printer.  If neither
+.B \-d
+nor LPDEST is set,
+.I psroff
+will spool to a printer class named ``PostScript''.
+.SH FILES
+.ta \w'/usr/lib/font/devpsc/\(**\0\0\0'u
+/usr/lib/tmac/tmac.\(**	standard macro files
+.br
+/usr/lib/font/devpsc/\(**	\f2troff\f1 description files for P\s-2OST\s+2S\s-2CRIPT\s+2 virtual device.
+.SH "SEE ALSO"
+lp(1), troff(1), psdit(1), eqn(1), tbl(1), pic(1), refer(1).
+.br
+J. F. Ossanna,
+.I Nroff/Troff User's Manual
+.br
+B. W. Kernighan,
+.I A TROFF Tutorial
+and
+.I A Typesetter-independent TROFF
+.br
+.I
+Documenter's Workbench
+.SH AUTHOR
+Adobe Systems Incorporated
+.\" NOTE: As of 3.6, eqn doesn't accept -m,-r nor pic -T576.  An SCR has been
+.\" submitted to make these be the defaults for these programs.
+.\"
+.\".SH BUGS
+.\"The 
+.\".I eqn
+.\"supplied with 
+.\".I troff
+.\"is different from the original.  Use the options 
+.\".B \-r576
+.\".B \-m2
+.\"for best results.  Other programs (e.g.,
+.\".IR pic )
+.\"distributed with 
+.\".SM DWB
+.\"have the device names compiled in (so much for device independence!).
+.\"They should just have a 
+.\".B \-T
+.\"option and read the device description file for the information they need.
+.\"Use
+.\".B \-T576
+.\"with the
+.\".I pic
+.\"distributed with 
+.\".SM DWB.
+.SH NOTES
+P\s-2OST\s+2S\s-2CRIPT\s+2 is a trademark of Adobe Systems Incorporated.
+.br
+Documenter's Workbench is a trademark of AT&T Technologies.

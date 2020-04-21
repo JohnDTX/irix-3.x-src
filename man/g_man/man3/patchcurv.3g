@@ -1,0 +1,37 @@
+.TH patchcurves 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B patchcurves
+\- sets the number of curves that represent a patch
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "patchcurves(ucurves, vcurves)"
+.B "long ucurves, vcurves;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine patchc(ucurves, vcurves)"
+.B "integer*4 ucurves, vcurves"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure patchcurves(ucurves, vcurves: longint);"
+.SH DESCRIPTION
+.B patchcurves
+sets the current number of 
+.I u
+and 
+.I v
+curves that represent a patch as a wire frame.
+.SH "SEE ALSO"
+patch,
+patchbasis,
+patchprecision
+.sp
+.I Programming Guide,
+Section 11.3, Drawing Surfaces
+

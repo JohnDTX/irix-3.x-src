@@ -1,0 +1,226 @@
+Kermit Versions, Listed by Tape (A or B), then by machine and OS, as of:
+22-Jul-86 14:04:04
+
+Prefix,                 Operating  Program   Program  Released
+ Tape  Machine          System     Language  Version  yy/mm/dd  Contributor
+
+AM  A  Alpha Micro 68K  AMOSL 1.2  AM68K Asm    1.0   85/02/11  Soft Machines
+AP2 A  Apple II         DOS        6502 Asm     1.1   84/10/09  U of Virginia
+APO A  Apollo           Aegis      Pascal       2.6   85/04/04  CDC
+APP A  Apple II         DOS        CROSS        2.1A  84/09/12  Stevens I.T.
+AST A  Atari ST Series  GEM        C            1.02  86/07/07  Techn.U.Berlin
+ATA A  Atari Home Comp. DOS        Action!       -    84/01/09  Jack Palevich
+BBC A  Acorn BBC Micro  OS1.20     6502 ADE     1.30  86/04/10  Lancaster U
+C64 A  Commodore 64     DOS        CROSS        1.7   85/09/20  Rutgers U
+C64 A  Commodore 64     FORTH      FORTH        1.5   85/02/08  U of Vermont
+C86 A  DEC Rainbow      CPM86      ASM86        2.9   84/12/03  Columbia U
+C86 A  Fujitsu Micro16s CPM86      ASM86        2.9   85/09/23  WRIST Inc
+C86 A  Future FX20/FX30 CPM86      ASM86        2.9   86/04/10  Birmingham U
+C86 A  NEC APC          CPM86      ASM86        2.9   84/12/03  U Washington
+C86 A  Tektronix 4170   CPM86      ASM86        2.9   84/12/03  TransEra Corp.
+C86 A  Victor/Sirius 1  CPM86      ASM86        2.9   86/07/07  Utah State U
+CC  A  TRS-80 CoCo      DOS        EDTASM       1.1   85/03/21  U of Kansas
+CN8 A  Argos Pro PC     CCPM86     ASM86        2.9   86/04/10  Birmingham U
+CN8 A  Daisy PCi        CCPM86     ASM86        2.9   86/04/10  Birmingham U
+CN8 A  Fallon 2000      CCPM86     ASM86        2.9   86/04/10  Birmingham U
+CN8 A  FTS PCi          CCPM86     ASM86        2.9   86/04/10  Birmingham U
+CN8 A  Orion PCi        CCPM86     ASM86        2.9   86/04/10  Birmingham U
+CP4 A  (various)Generic CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  (various)Generic CPM80 3.0  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Acorn BBC Micro  CPM80 2.2  M80,LASM     4.05  86/04/10  Aberdeen U  
+CP4 A  Acorn BBC Torch  CPM80 2.2  M80,LASM     4.05  86/04/10  Loughbrough U
+CP4 A  Apple II         CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  BigBoard II      CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Cifer 1886       CPM80 2.2  M80,LASM     4.05  86/04/10  Loughbrough U
+CP4 A  Comart Communica CPM80 2.2  M80,LASM     4.05  86/04/10  Leeds U
+CP4 A  CPT-85xx         CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Cromemco         CPM80 2.2  M80,LASM     4.05  86/04/10  Leeds U
+CP4 A  DEC VT-180 Robin CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  DECmate-II,III   CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Delphi 100       CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Epson PX8        CPM80 2.2  M80,LASM     4.05  86/02/14  Salford Univ
+CP4 A  Heath/Zenith-100 CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Heath/Zenith-89  CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Kaypro II        CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Lobo Max-80      CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  MorrowDecisionI  CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  MorrowMicroDec.I CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Nokia MikroMikko CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  NorthstarAdvanta CPM80 2.2  M80,LASM     4.05  86/04/10  Aberdeen U
+CP4 A  NorthstarHorizon CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Ohio Scientific  CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Osborne 1        CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  RM380Z           CPM80 2.2  M80,LASM     4.05  86/02/14  Aberdeen Univ.
+CP4 A  Superbrain       CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Telcon Zorba     CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Teletek/ADM-22   CPM80 2.2  M80,LASM     4.05  86/06/25  APV Automation
+CP4 A  TRS-80 Model II  CPM80 2.25 M80,LASM     4.05  85/02/19  ACC
+CP4 A  Vector Graphics  CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CP4 A  Xerox 820        CPM80 2.2  M80,LASM     4.05  85/02/19  ACC
+CPM A  Compupro IF 3/4  CPM80      ASM          3.9A  84/10/20  Columbia U
+CPM A  Heath H8         CPM80      ASM          3.5   84/11/30  InteCom Inc.
+CPM A  Sanyo 1100 MBC   CPM80      ASM          3.9   85/04/04  InteCom Inc.
+FL  A  Motorola 6809    Flex       Assembler     -    86/02/14  Brighton Poly.
+FLX A  (various 6809)   Flex 9     6809 Asm      -    86/04/17  Brighton Poly
+HL6 A  Honeywell L6/10  MS-DOS     MASM         1.20A 84/10/05  Honeywell
+HP2 A  HP-264x            ?        8080ASM      1.1   86/02/27  Harvard U
+HP8 A  HP86, HP87       HP86       HP 86 BASIC  1.00  86/05/05  Sheffield CP UK
+HP9 A  HP-98xx          UCSD p-Sys HP Pascal     -    84/01/20  Rutgers U
+I86 A  Intel 86/380     iRMX-86    PL/M         2.3   85/09/23  Grinnell Coll.
+LM  A  LMI Lispmachine  LMI-LAMBDA ZETALISP     1.0   85/09/12  LMI
+LM  A  Symbolics 36xx   Lisp       ZETALISP     1.0   85/09/12  HIS
+LUX A  Luxor ABC-800    ABCDOS     BASIC-II     2.2   84/05/08  ABC-K/Stockholm
+M4  A  TRS-80 Model 4   TRSDOS     ASM          5.0   86/04/14  OklahomaState U
+MC  A  Apple Macintosh  Macintosh  C (SUMACC)   0.8   86/03/27  Columbia U
+MD2 A  Intel MDS        ISIS       PL/M          -    85/11/01  Leigh Instrum.
+MDS A  Intel MDS        ISIS       PL/M          -    86/04/10  Intel/Open U
+MS  A  (various)Generic MS-DOS     MASM         2.29  86/05/28  Columbia U
+MS  A  ACT Apricot      MS-DOS     MASM         2.29  86/05/28  Brunel U
+MS  A  DataGeneral DG/1 MS-DOS     MASM         2.29  86/06/16  RCA
+MS  A  DEC Rainbow      MS-DOS     MASM         2.29  86/05/28  Columbia U
+MS  A  DECmate-II,III   MS-DOS     MASM         2.29  86/05/28  DEC
+MS  A  GRiD Compass II  MS-DOS     MASM         2.29  86/05/28  PRC, McLean VA
+MS  A  Heath/Z-100/EZPC MS-DOS     MASM         2.29  86/05/28  UCI Corp
+MS  A  Heath/Zenith-100 MS-DOS     MASM         2.29  86/05/28  U of Texas
+MS  A  HP Portable Plus MS-DOS     MASM         2.29  86/05/28  Los Alamos NL
+MS  A  HP-110           MS-DOS     MASM         2.29  86/05/28  Los Alamos NL
+MS  A  HP-150           MS-DOS     MASM         2.29  86/05/28  Columbia U
+MS  A  IBM PC,XT,AT,jr  PC-DOS     MASM         2.29  86/05/28  Columbia U
+MS  A  Intel 300 Series iRMX-86    MASM/ASM86   2.26  86/01/17  Cal State
+MS  A  NEC APC          MS-DOS     MASM         2.29  86/05/28  U Washington
+MS  A  NEC APC III      MS-DOS     MASM         2.29  86/05/28  VPI
+MS  A  Olivetti M24 PC  MS-DOS     MASM         2.29  86/05/28  CSIRO Australia
+MS  A  Sanyo 550 MBC    MS-DOS     MASM         2.29  86/05/28  Du Pont Co
+MS  A  Seequa Chameleon MS-DOS     MASM         2.29  86/06/20  RCA
+MS  A  TI Professional  MS-DOS     MASM         2.29  86/05/28  ColoSchoolMines
+MS  A  Victor/Sirius 1  MS-DOS     MASM         2.29  86/05/28  Brigham Young U
+MS  A  Wang PC          MS-DOS     MASM         2.29  86/05/28  Columbia U
+OS9 A  (various 68000)  OS-9       C            1.5   85/09/20  USC
+OS9 A  (various 6809)   OS-9       C            1.5   85/09/20  USC
+OS9 A  Gimex III        OS-9       C            1.5   85/09/20  USC
+OS9 A  TRS-80 CoCo      OS-9       C            1.5   85/09/20  USC
+PQ2 A  ICL/Perq         POS D6/R2  POS Pascal    -    85/06/24  Norwegian I.T.
+PQK A  ICL/Perq         Perq OS    Pascal       2.0   84/12/04  U of NSW
+PRO A  DEC Pro-3xx      P/OS       Bliss, Macro 1.0   84/06/01  Stevens I.T.
+QK  A  Apple II         CPM80 2.2  Turbo Pascal 2.5   86/02/14  Queen's Univ.
+QK  A  IBM PC,XT,AT     PC-DOS     Turbo Pascal 2.5   86/02/14  Queen's Univ.
+QK  A  Kaypro II        CPM80 2.2  Turbo Pascal 2.5   86/02/14  Queen's Univ.
+QNX A  DEC Rainbow      QNX 1.x    C            1.0   85/09/23  Merrell-Dow
+QNX A  PC,XT,AT         QNX 1.x    C            1.0   85/09/23  Merrell-Dow
+RMX A  Intel 86,286     RMX 1.0    PL/M         1.0   85/10/25  Cornell U
+TA2 A  Tandy 2000       MS-DOS     MASM         1.20  84/02/16  U of Texas
+TRS A  TRS-80 I and III TRSDOS     M80          3.5   84/08/08  Rice U
+UCA A  Apple II         UCSD p-Sys UCSD Pascal  1.0   86/04/08  RU Groningen
+UCI A  IBM PC           UCSD p-Sys UCSD Pascal  0.1   84/05/23  Cornell U
+UCJ A  J LoeblMagiscan2 UCSD p-Sys UCSD Pascal   -    86/06/23  Lancaster U
+UCM A  PascalMicroengin UCSD p-Sys Pascal       III.0 84/12/03  UCI-ICSD
+UCT A  Terak            UCSD p-Sys UCSD Pascal   -    84/04/11  Cornell U
+UM  A  UMicro U-MAN1000 CP/M-68K   C and Asm     -    86/04/10  Lancaster U
+VIC A  Victor/Sirius 1  MS-DOS     C            1.0   84/09/07  Victor Canada
+WK  A  IBM PC family    PC-DOS     Lattice C    1.18  86/05/22  The Source
+AOS B  DataGeneral MV   AOS,AOS/VS SP/Pascal     -    85/02/08  Duane Galbi
+AOS B  DataGeneral S250 AOS        Fortran-5     -    84/09/14  RCA Labs
+B68 B  Burroughs B6800  CANDE      Algol         -    85/02/15  Quest Research
+B79 B  Burroughs B7900  Burroughs  Algol        5.2   85/11/27  TH Eindhoven
+CDC B  CDC Cyber 170    NOS,NOS/BE Fortran-77   2.2   84/09/07  U of Texas
+CK  B  (various)        Unix Sys 3 C            4D 60 86/04/29  Columbia U
+CK  B  (various)        Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  Altos 986        Xenix 3.0  C            4D 60 86/04/29  Columbia U
+CK  B  Apple Macintosh  Macintosh  C (SUMACC)   0.8   86/03/27  Columbia U
+CK  B  AT&T 3B Series   Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  BBN C/70         IOS 2.0    C            4D 60 86/04/29  Columbia U
+CK  B  Cadmus 68000     Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  CallanUnistar300 Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  Codata           Unix V7    C            4D 60 86/04/29  Columbia U
+CK  B  DEC PDP-11       Unix 2xBSD C            4D 60 86/04/29  Columbia U
+CK  B  DEC PDP-11, ...  Unix V7    C            4D 60 86/04/29  Columbia U
+CK  B  DEC Pro-3xx      Venix V1   C            4D 60 86/04/29  Columbia U
+CK  B  DEC Pro-3xx      Venix V2   C            4D 60 86/04/29  Columbia U
+CK  B  DEC VAX          Ultrix-32  C            4D 60 86/04/29  Columbia U
+CK  B  DEC VAX          VMS        C (VAX-11 C) 4D 60 86/04/29  Columbia U
+CK  B  DEC VAX, ...     Unix 4xBSD C            4D 60 86/04/29  Columbia U
+CK  B  Fortune 16:32    For:Pro1.7 C            4D 60 86/04/29  Columbia U
+CK  B  GEC 63/40        Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  Gould PN6000     Unix 4xBSD C            4D 60 86/04/29  Columbia U
+CK  B  Gould PS2000     Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  Heurikon MiniBox Unisoft5.2 C            4D 60 86/04/29  Columbia U
+CK  B  HP Integral PC   HP-UX      C            4D 60 86/04/29  Columbia U
+CK  B  HP-9000 S/500    HP-UX 3.25 C            4D 60 86/04/29  Columbia U
+CK  B  HP-9836 S/200    HP-UX 200B C            4D 60 86/04/29  Columbia U
+CK  B  IBM 370 Series   VM/UTS 2.4 C            4D 60 86/04/29  Columbia U
+CK  B  IBM 370 Series   VM/UTS v5  C            4D 60 86/04/29  Columbia U
+CK  B  IBM PC/AT        Xenix/286  C            4D 60 86/04/29  Columbia U
+CK  B  IBM PC/XT        PC/IX      C            4D 60 86/04/29  Columbia U
+CK  B  Intel 310        Xenix 3.0  C            4D 60 86/04/29  Columbia U
+CK  B  Masscomp         RTU 2.2    C            4D 60 86/04/29  Columbia U
+CK  B  Motorola 4 Phase Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  NCR Tower        OS 1.02    C            4D 60 86/04/29  Columbia U
+CK  B  NCR Tower        Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  PerkinElmer 3200 Unix V7    C            4D 60 86/04/29  Columbia U
+CK  B  PerkinElmer 3200 Xelos      C            4D 60 86/04/29  Columbia U
+CK  B  PerkinElmer 7350 Uniplus    C            4D 60 86/04/29  Columbia U
+CK  B  Plexus P/35,P/60 Unix Sys 3 C            4D 60 86/04/29  Columbia U
+CK  B  Pyramid 90x      Unix 4xBSD C            4D 60 86/04/29  Columbia U
+CK  B  Ridge 32         ROS 3.2    C            4D 60 86/04/29  Columbia U
+CK  B  Sequent Balance  Unix 4xBSD C            4D 60 86/04/29  Columbia U
+CK  B  SUN Microsystems Unix 4xBSD C            4D 60 86/04/29  Columbia U
+CK  B  TI NU-Machine    Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  TI Pro/Opus32016 Unix Sys V C            4D 60 86/04/29  Columbia U
+CK  B  TRS-80 Model 16  Xenix      C            4D 60 86/04/29  Columbia U
+CK  B  Valid Scaldstar  Unix 4xBSD C            4D 60 86/04/29  Columbia U
+CK  B  Whitechapel MG-1 Genix-1.3  C            4D 60 86/04/29  Columbia U
+CK  B  Zilog Sys 8000   Zeus 3.20- C            4D 60 86/04/29  Columbia U
+CKI B  Commodore Amiga  Intuition  C (Lattice)  4D 60 86/07/21  SAS Institute
+CM2 B  IBM 370 Series   VM/CMS     Pascal VS     -    85/11/01  Queen's U
+CMS B  IBM 370 Series   VM/CMS     Assembler    2.01  85/05/20  Columbia U
+CR  B  Cray-1,Cray-XMP  CTSS       Fortran-77    -    85/02/08  Los Alamos NL
+CUC B  (various)        Unix 4xBSD C             -    86/04/10  Univ Col London
+CUC B  (various)        Unix 2xBSD C             -    86/04/10  Univ Col London
+CUC B  (various)        Unix Sys V C             -    86/04/10  Bath U
+CYB B  CDC Cyber        NOS 2.2    Compass      1.0   86/04/17  U of Manchester
+DGM B  DataGeneral MV   AOS/VSMVUX C             -    85/11/27  U of Washington
+GEC B  GEC 4000 Series  OS4000     MUM/SERC     2.1   86/04/10  Rutherford A.L.
+GM1 B  Gould/SEL 32     MPX-32     Fortran 77+  1.0   86/03/05  Singer Link
+GM2 B  Gould/SEL 32     MPX-32     Fortran 77+  2.2   86/05/12  Simulat'n Assoc
+GUT B  IBM 370 Series   MVS/GUTS   Assembler     -    85/04/05  Gothenburg U
+H8  B  Harris 800       VOS        Pascal,Asm    -    85/02/11  U Wisconsin
+HC6 B  HoneywellDPS8,90 CP-6/IBEX  PL/6         0.95  85/12/19  Honeywell
+HCP B  HoneywellDPS8,90 CP-6       Pascal        -    85/04/04  Bucknell U
+HDP B  HoneywellDPS8    GCOS/TSS   B            1.1   85/03/21  U of Kansas
+HG  B  HoneywellDPS8,66 GCOS3,8    C            3.0   84/10/05  Honeywell
+HP3 B  HP-3000          MPE        SPL          1.1   85/06/24  Polaris Inc
+HPA B  HP-1000 A-Series RTE-A      Pascal/1000  1.0   85/09/23  Finland T.R.C.
+HPM B  HP-1000          RTE-6/VM   Fortran-77   1.0   84/09/14  RCA Labs
+IMU B  IBM 370 Series   MUSIC      Assembler    1.2   85/12/19  Ind/Purdue U
+K08 B  DEC PDP-8        OS8, RTS8  PAL-8         -    85/07/26  R. Hippe
+K10 B  DECsystem-10     TOPS-10    Bliss, Macro 3.0   86/04/14  Stevens I.T.
+K11 B  DEC PDP-11       IAS 3.1    Macro-11     3.50  86/04/22  U of Toledo/EPA
+K11 B  DEC PDP-11       RSTS/E     Macro-11     3.50  86/04/22  U of Toledo
+K11 B  DEC PDP-11       RSX-11/M   Macro-11     3.50  86/04/22  U of Toledo
+K11 B  DEC PDP-11       RSX-11/M+  Macro-11     3.50  86/04/22  U of Toledo
+K11 B  DEC PDP-11       RT-11      Macro-11     3.50  86/04/22  U of Toledo
+K11 B  DEC PDP-11       TSX+       Macro-11     3.50  86/04/22  U of Toledo
+K11 B  DEC Pro-3xx      P/OS       Macro-11     3.50  86/04/22  U of Toledo
+K11 B  DEC Pro-3xx      Pro/RT     Macro-11     3.50  86/04/22  U of Toledo
+K20 B  DECSYSTEM-20     TOPS-20    MACRO-20     4.2   85/05/01  Columbia U
+K27 B  DEC PDP-8        OS-278     PAL-8         -    86/06/11  M. Hemmings
+MP  B  DEC PDP-11       MUMPS-11   MUMPS-1982    -    84/04/11  Cornell U
+MTS B  IBM 370 Series   MTS        Assembler     -    84/01/06  U of Michigan
+MU  B  Honeywell        MULTICS    PL/I         2.0h  84/09/20  Oakland U
+ND  B  ND-10/100/500    SintranIII ND-Pascal    3.1b  85/06/24  Norwegian I.T.
+PER B  PerkinElmer 3200 OS/32      Fortran      2.0   85/06/03  Paul Mamelka
+PRI B  Prime            PRIMOS     PL/P         7.57  86/05/22  The Source
+RDO B  DataGeneral Nova RDOS       Fortran-5     -    84/09/14  RCA Labs
+RT  B  DEC PDP-11       RT-11      OMSI Pascal  2.2C  84/10/11  U of Toronto
+SP9 B  Sperry 90/60     VS9        Assembler     -    86/04/09  B.Thompson, WPI
+ST  B  HP-3000          SoftwTools Ratfor       1n    84/02/18  Ken Poulton
+ST  B  Sperry 1100      SoftwTools Ratfor       1n    84/02/18  Ken Poulton
+TAN B  Tandem Nonstop   Guardian   TAL          1.0   86/04/08  CJ Cantor, etc
+TS2 B  IBM 370 Series   MVS/TSO    Pascal/VS,.. 1.4   86/05/07  U Bern
+TSO B  IBM 370 Series   MVS/TSO    Assembler    1.0   84/07/17  U of Chicago
+TSO B  IBM 370 Series   MVS/TSO/S1 Assembler    1.0   85/03/20  U of Toronto
+UN  B  Sperry 1100      Exec       Assembler    2.2   85/06/24  U of Wisconsin
+UN  B  Sperry 1100      Exec       NOSC Pascal  2.0   84/10/08  U of Maryland
+VME B  ICL 2900         VME        S3           1.0   86/04/17  Bath U
+VMS B  DEC VAX          VMS        Bliss,Macro 3.2 77 86/05/13  Stevens I.T.
+VX  B  DEC VAX          VMS        Pascal       1.1E  84/10/11  U of Toronto

@@ -1,0 +1,30 @@
+'\"macro stdmacro
+.TH SYNC 1
+.SH NAME
+sync \- update the super block
+.SH SYNOPSIS
+.B sync
+.SH DESCRIPTION
+.I Sync\^
+executes the
+.I sync\^
+system primitive.
+If the system is to be stopped,
+.I sync\^
+must be called to insure
+file system integrity.
+It will flush all previously unwritten system buffers out to disk,
+thus assuring that all file modifications up to that point will be
+saved.
+See
+.IR sync\^ (2)
+for details.
+.SH EXAMPLE
+.IP
+sync
+.PP
+should be typed to flush all internal disk buffers, before
+bringing down the system.
+.SH SEE ALSO
+sync(2).
+.\"	@(#)sync.1	5.1 of 11/10/83

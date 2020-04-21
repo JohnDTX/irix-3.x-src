@@ -1,0 +1,84 @@
+.TH ARP 1 
+.SH NAME
+arp \- address resolution display and control
+.SH SYNOPSIS
+.B arp
+\f2hostname\f1
+.br
+.B arp
+.B \-a
+[
+.B entire
+]
+.br
+.B arp
+.B \-d
+\f2hostname\f1
+.br
+.B arp
+.B \-s
+\f2hostname ether_addr\f1
+[
+.B temp
+] [
+.B publ
+]
+.br
+.B arp
+.B \-f
+\f2filename\f1
+.SH DESCRIPTION
+The \f2arp\f1 program displays and modifies the Internet-to-Ethernet 
+address translation tables used by the address resolution protocol 
+[\f2arp(7P)\f1].
+.LP
+With no flags, the program displays the current ARP entry for
+\f2hostname\f1.
+With the \f2\-a\f1
+flag, the program displays all the current ARP entries by requesting
+the \f2i\f1th entry from the EXOS 8010 board until an error is returned.
+Normally, only those entries for which corresponding hosts can be found
+are displayed.
+However, by specifying \f2entire\f1
+the entire contents of the ARP table are displayed.
+.LP
+With the \f2\-d\f1 flag, super user can delete an entry for the host 
+called \f2hostname\f1.
+.LP
+The \f2\-s\f1 flag creates an ARP entry for the host called
+\f2hostname\f1 with the Ethernet address \f2ether_addr\f1.
+The Ethernet address is given as six hexadecimal bytes separated by 
+colons.
+Alternatively, each of the six bytes may be specified in
+octal, decimal or hexadecimal, and separated by dots.
+In this case, octal numbers start with 0, 
+decimal numbers start with 1 to 9, 
+and hexadecimal numbers start with 0x or 0X.
+The entry will be permanent unless the option \f2temp\f1
+is given in the command. 
+Permanent entries do not age out of the cache and 
+are given preference to remain in the cache when the table overflows.
+If the option \f2publ\f1 is given, the entry is ``published''; 
+that is, this system will respond to ARP requests for \f2hostname\f1
+even though the host name is not its own.
+Once again, only the super user can alter the contents of the ARP cache.
+.LP
+The \f2\-f\f1 flag causes the file \f2filename\f1
+to be read and multiple entries to be set in the ARP tables.  Entries
+in the file should be of the form
+.IP
+\f2hostname ether_addr\f1
+[
+.B temp
+] [
+.B publ
+]
+.LP
+with argument meanings and formats as given above.
+.SH "DIAGNOSTICS"
+.LP
+The ARP command will complain of errors in its input format,
+of non-super users attempting to update the cache,
+of references to unknown hosts, and of various system-detected errors.
+.SH "SEE ALSO"
+arp(7P)

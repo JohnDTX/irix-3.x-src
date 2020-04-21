@@ -1,0 +1,18 @@
+# takectl / passctl test
+# watch for changes in the ADSR reg
+@ iii = 0
+while ( $iii < 4 )
+    t0 passctl 1&
+    t1 takectl
+    wait
+    t0 peek adsr
+    t1 peek adsr
+
+    t1 passctl 1&
+    t0 takectl
+    wait
+    t0 peek adsr
+    t1 peek adsr
+
+    @ iii ++
+end

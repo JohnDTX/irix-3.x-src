@@ -1,0 +1,36 @@
+.TH curson 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B curson
+\- turns on the cursor
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curson()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curson"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B " procedure curson;"
+.SH DESCRIPTION
+.B curson
+automatically updates and displays a cursor.
+.B curson
+is usually paired with
+.B cursoff.
+You can call
+.B curson
+when the automatic cursor is already visible.
+.SH "SEE ALSO"
+attachcursor, cursoff, getcursor, setcursor
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

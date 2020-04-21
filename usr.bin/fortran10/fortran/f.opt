@@ -1,0 +1,470 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: F.OPT.TEXT                              *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               18-Mar-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure optimize(fstmt: pstmt);
+  
+  procedure walktree(fstmt: pstmt);
+    var FoundIt: Boolean; lbinop: integer; lpn: pn;
+    
+    function SameVar(apn,bpn: pn): Boolean; forward;
+    
+    function SameExpr(apn,bpn: pn): Boolean;
+    begin
+    SameExpr := FALSE;
+    if apn^.node = bpn^.node
+    then case apn^.node of
+              IDENTNODE:
+                 if apn = bpn
+                 then SameExpr := apn^.nkind = VARS;
+              UNNODE:
+                 if (apn^.unop = bpn^.unop) and (apn^.unsubop = bpn^.unsubop)
+                 then if apn^.unop in [12 {^},15 {.}]
+                      then SameExpr := SameVar(apn,bpn)
+                      else if apn^.unop in [23 {NIL},31 {NULLSET},43 {WITHFLD}]
+                           then SameExpr := TRUE
+                           else SameExpr := SameExpr(apn^.unarg,bpn^.unarg);
+              BINNODE:
+                 if (apn^.binop = bpn^.binop) and (apn^.binsubop = bpn^.binsubop)
+                 then if apn^.binop in [46 {RNGCHK}, 47 {SRNGCHK}]
+                      then SameExpr := SameExpr(apn^.rightarg,bpn^.rightarg)
+                      else if SameExpr(apn^.leftarg,bpn^.leftarg)
+                           then SameExpr :=SameExpr(apn^.rightarg,bpn^.rightarg);
+              TRINODE,
+              INDEXNODE:
+                 SameExpr := SameVar(apn,bpn);
+              CSTNODE:
+                 if apn = bpn
+                 then SameExpr := TRUE
+                 else if (apn^.csttype.typ = bpn^.csttype.typ) and
+                         (apn^.csttype.siz = bpn^.csttype.siz)
+                      then if apn^.csttype.typ = INTEGR
+                           then SameExpr := apn^.cstvalu.ival =
+                                  bpn^.cstvalu.ival;
+         end; {case}
+    end; {SameExpr}
+    
+    function SameVar{apn,bpn: pn): Boolean};
+    begin
+    SameVar := FALSE;
+    if apn^.node = bpn^.node
+    then case apn^.node of
+              IDENTNODE:
+                 if apn = bpn
+                 then SameVar := apn^.nkind = VARS;
+              UNNODE:
+                 if (apn^.unop = bpn^.unop) and (apn^.unsubop = bpn^.unsubop)
+                 then if apn^.unop = 12 {^}
+                      then SameVar := SameVar(apn^.unarg,bpn^.unarg)
+                      else if apn^.unop = 43 {WITHFLD}
+                           then SameVar := TRUE;
+              BINNODE:
+                 if apn^.binop = bpn^.binop
+                 then if apn^.binop = 15 {.}
+                      then if SameVar(apn^.leftarg,bpn^.leftarg)
+                           then SameVar := SameVar(apn^.rightarg,bpn^.rightarg);
+              TRINODE:
+                 if apn^.triop = bpn^.triop
+                 then if apn^.triop = 16 {INDEX}
+                      then SameVar := SameVar(apn^.tri1,bpn^.tri1) and
+                                      SameExpr(apn^.tri2,bpn^.tri2);
+              INDEXNODE:
+                 if (apn^.indexop = bpn^.indexop) and
+                    (apn^.InxCkBnd = bpn^.InxCkBnd) and
+                    (apn^.inxexpsz = bpn^.inxexpsz) and
+                    SameExpr(apn^.inxexpr,bpn^.inxexpr)
+                 then if (apn^.indexop = 9) or (apn^.indexop = 10)
+                      then SameVar := SameExpr(apn^.inxaddr,bpn^.inxaddr)
+                      else SameVar := TRUE;
+              CSTNODE:
+                 begin
+                 end;
+         end; {case}
+    end; {SameVar}
+    
+    procedure foldcstoff(var fpn: pn);
+      var elsize,coffset,temp: longint;
+      
+      function inxcstoff(fpn: pn): longint;
+        var l,lsize: longint;
+        
+        function boundsize(fpn: pn): longint;
+        begin
+        boundsize := 0;
+        if fpn <> nil
+        then with fpn^ do
+                  if node = INDEXNODE
+                  then if indexop = 11{ADJINX}
+                       then with inxbnds^ do
+                                 if (hi.bkind = CONSTBOUND) and
+                                    (lo.bkind = CONSTBOUND)
+                                 then boundsize := hi.i - lo.i + 1;
+        end; {boundsize}
+        
+      begin {inxcstoff}
+      l := 0;
+      if fpn <> nil
+      then with fpn^ do begin
+             if node = INDEXNODE
+             then case indexop of
+                    10: {SCALE}
+                        begin
+                        lsize := boundsize(inxaddr);
+                        if lsize > 0
+                        then l := inxcstoff(inxaddr) +
+                                  lsize*inxcstoff(inxexpr);
+                        end;
+                    11: {ADJINX}
+                        begin
+                        with inxexpr^ do
+                             if (node = BINNODE) and (rightarg <> nil) and
+                                ((binop = 65{ADD4}) or (binop = 67{SUB4}))
+                             then if rightarg^.node = CSTNODE
+                                  then begin
+                                       l := rightarg^.cstvalu.ival;
+                                       if binop = 67 then l := -l;
+                                       fpn^.inxexpr := leftarg;
+                                       end;
+                        end;
+                  end; {case}
+             end;
+      inxcstoff := l;
+      end; {inxcstoff}
+      
+    begin {foldcstoff}
+    if fpn <> nil
+    then with fpn^ do
+              case node of
+                IDENTNODE: ;
+                UNNODE:
+                  if not (unop in [23{NIL},31{NULLSET}])
+                  then foldcstoff(unarg);
+                BINNODE:
+                  if not (binop in [46{RangeChecks}])
+                  then begin
+                       foldcstoff(leftarg); foldcstoff(rightarg);
+                       end;
+                TRINODE:
+                  begin
+                  if triop = 214 {FINDEX}
+                  then begin
+                    foldcstoff(tri1);
+                    if tript <> nil
+                    then
+                      if tript^.esize <> 0
+                      then begin {Constant Size}
+                        elsize := tript^.esize;
+                        with tri2^ do
+                          if node = BINNODE
+                          then
+                            if ((binop = 65{ADD4}) or (binop = 67{SUB4})) and
+                               (rightarg <> nil)
+                            then
+                              if rightarg^.node = CSTNODE
+                              then begin
+                                coffset := elsize*rightarg^.cstvalu.ival;
+                                if binop = 67 then coffset := -coffset;
+                                if abs(coffset) <= 32767
+                                then begin
+                                  fpn^.tri1 := newunnode(15{FIELD},fpn^.tri1);
+                                  fpn^.tri1^.unsubop := coffset;
+                                  fpn^.tri2 := fpn^.tri2^.leftarg;
+                                  end;
+                                end;
+                        end;
+                    end;
+                  end;
+                INDEXNODE:
+                  begin
+                  if indexop = 9 {TOPINDX}
+                  then if inxaddr^.idtype.siz > 0
+                       then begin { Not CHAR*(*) }
+                            coffset := inxcstoff(inxexpr)*inxaddr^.idtype.siz;
+                            if coffset <> 0
+                            then begin
+                                 fpn := newunnode(15{FIELD},fpn);
+                                 if (coffset > 32767) or (coffset < 0)
+                                 then fpn^.unop := 8{BIGFLD};
+                                 fpn^.unsubop := coffset;
+                                 end;
+                            end;
+                  end;
+              end; {case}
+    end; {foldcstoff}
+    
+  begin {walktree}
+  while fstmt <> nil do
+        with fstmt^ do begin
+             case stmtop of
+               ASMTST:
+                 begin
+                 fold(asmtexpr);
+                 if asmtexpr^.node = BINNODE
+                 then begin
+                      lbinop := asmtexpr^.binop; FoundIt := FALSE;
+                      if (lbinop >= 64 {ADD2}) and (lbinop <= 67 {SUB4})
+                      then if SameVar(asmtvar,asmtexpr^.leftarg)
+                           then FoundIt := TRUE { V := V +/- <EXPR> }
+                           else if lbinop <= 65 {ADD4}
+                                then if SameVar(asmtvar,asmtexpr^.rightarg)
+                                     then begin { V := <EXPR> + V }
+                                          lpn := asmtexpr^.rightarg;
+                                          asmtexpr^.rightarg :=
+                                                     asmtexpr^.leftarg;
+                                          asmtexpr^.leftarg := lpn;
+                                          FoundIt := TRUE;
+                                          end;
+                      if FoundIt and (not NoRMW)
+                      then begin
+                           asmtop := 41 {OPTO}; asmtop2 := lbinop;
+                           asmtexpr := asmtexpr^.rightarg;
+                           end;
+                      end;
+                 foldcstoff(asmtvar);
+                 foldcstoff(asmtexpr);
+                 end;
+               AIFST:
+                 begin
+                 fold(aifexpr);
+                 foldcstoff(aifexpr);
+                 end;
+               IFST:
+                 begin
+                 fold(ifexpr);
+                 foldcstoff(ifexpr);
+                 walktree(thenst);
+                 walktree(elsest);
+                 end;
+               DOST:
+                 walktree(dobody);
+             end; {case}
+             fstmt := nextstmt;
+             end;
+  end; {walktree}
+  
+  procedure useregs;
+    var i: integer;
+    
+    procedure tryareg(fcount: integer; fpn: pn);
+      var i,j: integer;
+    begin
+    if ADDRREGS <> 0
+    then begin
+         if fcount > a[ADDRREGS].count
+         then begin
+              i := ADDRREGS;
+              while a[i].count < fcount do i := i - 1;
+              i := i + 1;
+              for j := ADDRREGS downto i + 1 do a[j] := a[j - 1];
+              with a[i] do begin count := fcount; v := fpn; end;
+              end;
+         end;
+    end; {tryareg}
+    
+    procedure trydreg(fcount: integer; fpn: pn);
+      var i,j: integer;
+    begin
+    if DATAREGS <> 0
+    then begin
+         if fcount > d[DATAREGS].count
+         then begin
+              i := DATAREGS;
+              while d[i].count < fcount do i := i - 1;
+              i := i + 1;
+              for j := DATAREGS downto i + 1 do d[j] := d[j - 1];
+              with d[i] do begin count := fcount; v := fpn; end;
+              end;
+         end;
+    end; {trydreg}
+    
+    procedure bestcommons;
+      var lpn: pn;
+    begin
+    if ADDRREGS <> 0
+    then begin
+         lpn := commonlist;
+         while lpn <> nil do
+               with lpn^ do begin
+                    if refcount > 2 then tryareg(refcount - 2,lpn);
+                    lpn := next;
+                    end;
+         end;
+    end; {bestcommons}
+    
+    procedure bestacounts(fpn: pn);
+    begin
+    if ADDRREGS <> 0
+    then begin
+         if fpn <> nil
+         then with fpn^ do begin
+                   bestacounts(llink);
+                   if nkind = COMMON
+                   then tryareg(refcount,fpn)
+                   else
+                     if nkind = VARS
+                     then
+                       if Indirect or (bounds <> nil) or AddrNeeded or
+                          (idtype.siz > 4) or (incommon <> nil)
+                       then
+                         if (idtype.siz > 0) or (idtype.typ <> CHARACTER)
+                         then tryareg(refcount - 2,fpn);
+                   bestacounts(rlink);
+                   end;
+         end;
+    end; {bestacounts}
+    
+    procedure bestdcounts(fpn: pn);
+    begin
+    if DATAREGS <> 0
+    then begin
+         if fpn <> nil
+         then with fpn^ do begin
+                   bestdcounts(llink);
+                   if (nkind = VARS) and (not Indirect) and
+                      (bounds = nil) and (incommon = nil) and
+                      (not AddrNeeded) and (idtype.typ <> CHARACTER) and
+                      (idtype.siz <= 4) and
+                      (not SaveFlag) and (not GSaveFlag)
+                   then trydreg(refcount,fpn);
+                   bestdcounts(rlink);
+                   end;
+         end;
+    end; {bestdcounts}
+    
+    procedure tryrreg(fcount: integer; fpn: pn);
+      var i,j: integer;
+    begin
+    if GENPREGS <> 0
+    then begin
+         if fcount > r[GENPREGS].count
+         then begin
+              i := GENPREGS;
+              while r[i].count < fcount do i := i - 1;
+              i := i + 1;
+              for j := GENPREGS downto i + 1 do r[j] := r[j - 1];
+              with r[i] do begin count := fcount; v := fpn; end;
+              end;
+         end;
+    end; {tryrreg}
+    
+    procedure bestrcommons;
+      var lpn: pn;
+    begin
+    if GENPREGS <> 0
+    then begin
+         lpn := commonlist;
+         while lpn <> nil do
+               with lpn^ do begin
+                    if refcount > 2 then tryrreg((refcount - 2)*2,lpn);
+                    lpn := next;
+                    end;
+         end;
+    end; {bestrcommons}
+    
+    procedure bestrcounts(fpn: pn);
+      var lcount: integer;
+    begin
+    if GENPREGS <> 0
+    then begin
+         if fpn <> nil
+         then with fpn^ do begin
+                   bestrcounts(llink);
+                   if nkind = COMMON
+                   then tryrreg((refcount - 2)*2,fpn)
+                   else
+                     if nkind = VARS
+                     then begin
+                       if Indirect or (bounds <> nil) or AddrNeeded or
+                          (idtype.siz > 4) or (incommon <> nil)
+                       then begin
+                         if (idtype.siz > 0) or (idtype.typ <> CHARACTER)
+                         then begin
+                              lcount := refcount - 1;
+                              if addr > 8192
+                              then lcount := lcount*3
+                              else if addr <= 64
+                                   then lcount := 0;
+                              tryrreg(lcount,fpn);
+                              end;
+                         end
+                       else
+                         if (not Indirect) and (bounds = nil) and
+                            (incommon = nil) and (not AddrNeeded) and
+                            (idtype.typ <> CHARACTER) and
+                            (idtype.siz <= 4) and
+                            (not SaveFlag) and (not GSaveFlag)
+                            and (idtype.typ <> REEL)
+                         then begin
+                              lcount := refcount;
+                              if addr > 8192
+                              then lcount := lcount*4
+                              else if addr > 64
+                                   then lcount := lcount*2;
+                              tryrreg(lcount,fpn);
+                              end;
+                       end;
+                   bestrcounts(rlink);
+                   end;
+         end;
+    end; {bestrcounts}
+    
+  begin {useregs}
+  if (CHIP = M68000) or (CHIP = M68020)
+  then begin
+       a[0].count := 32767; d[0].count := 32767;
+       for i := 1 to ADDRREGS do
+           with a[i] do
+                begin count := 0; v := nil; end;
+       for i := 1 to DATAREGS do
+           with d[i] do
+                begin count := 0; v := nil; end;
+       if entrycount = 0
+       then begin
+            bestcommons;
+            bestacounts(localtree);
+            bestdcounts(localtree);
+            end;
+       for i := 1 to ADDRREGS do
+           with a[i] do
+                if count > 0
+                then begin v^.refcount := i + 31; v^.InReg := TRUE; end;
+       for i := 1 to DATAREGS do
+           with d[i] do
+                if count > 0
+                then begin v^.refcount := i - 1; v^.InReg := TRUE; end;
+       end
+  else if chip = N32000
+       then begin
+            r[0].count := 32767; f[0].count := 32767;
+            for i := 1 to GENPREGS do
+                with r[i] do
+                     begin count := 0; v := nil; end;
+            for i := 1 to FLOTREGS do
+                with f[i] do
+                     begin count := 0; v := nil; end;
+            if entrycount = 0
+            then begin
+                 bestrcommons;
+                 bestrcounts(localtree);
+                 end;
+            for i := 1 to GENPREGS do
+                with r[i] do
+                     if count > 0
+                     then begin v^.refcount := i - 1; v^.InReg := TRUE; end;
+            end;
+  end; {useregs}
+  
+begin {optimize}
+walktree(fstmt);
+useregs;
+end; {optimize}
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                

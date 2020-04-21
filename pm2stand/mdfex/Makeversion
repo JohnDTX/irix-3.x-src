@@ -1,0 +1,4 @@
+echo "Building version.c"
+echo 'char *version = "'6.0'";' > version.c
+echo 'char *compdate ="'`date`'"; ' >> version.c
+cc -c version.c

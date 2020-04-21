@@ -1,0 +1,109 @@
+#! /bin/sh
+#
+# Start sendmail demon after checking that things are healthy.
+#
+# $Header: /d2/3.7/src/etc/RCS/rc.mail,v 1.1 89/03/27 15:38:31 root Exp $
+#
+
+# Get timezone right
+if test -r /etc/TZ; then
+	TZ=`cat /etc/TZ`
+	export TZ
+fi
+
+# Move to post office directory
+if test ! -d /usr/mail ; then
+	mkdir /usr/mail
+fi
+cd /usr/mail
+if test ! -d ':saved' ; then
+	mkdir ':saved'
+fi
+chown root . ':saved'
+chgrp mail . *
+chmod g+w . *
+
+
+# Move to spool directory.  Make sure the directory exists, and is of the
+# proper permissions
+if test ! -d /usr/spool; then
+	mkdir /usr/spool
+fi
+if test ! -d /usr/spool/mqueue; then
+	mkdir /usr/spool/mqueue
+fi
+cd /usr/spool/mqueue
+chmod 755 .
+chown root .
+chgrp sys .
+
+# Make sure that /bin/sendmail is executable and setuid root
+if test ! -x /usr/lib/sendmail; then
+	echo "rc.mail: no /usr/lib/sendmail, can't use mail"
+	exit 255
+fi
+chown root /usr/lib/sendmail
+chgrp sys /usr/lib/sendmail
+chmod 4755 /usr/lib/sendmail
+
+# make the useful links
+rm -rf /usr/bin/mailq /usr/bin/newaliases
+ln -s /usr/lib/sendmail /usr/bin/mailq
+ln -s /usr/lib/sendmail /usr/bin/newaliases
+
+
+# check the alias data base
+if test ! -r /usr/lib/aliases; then
+	echo "rc.mail: /usr/lib/aliases is missing, can't use mail"
+	exit 255
+fi
+if test ! -r /usr/lib/aliases.dir -o ! -r /usr/lib/aliases.pag; then
+	touch /usr/lib/aliases.dir /usr/lib/aliases.pag
+	sleep 1
+	touch /usr/lib/aliases
+fi
+
+# Make sure that /bin/mail is correct
+if test ! -x /bin/mail; then
+	echo "rc.mail: no /bin/mail, can't use mail"
+	exit 255
+fi
+chown root /bin/mail
+chgrp mail /bin/mail
+chmod 2755 /bin/mail
+
+if test ! -p /dev/log; then
+	echo "rc.mail: syslogd is not running, /dev/log does not exist"
+	exit 255
+fi
+
+# Clean up any old lock files
+rm -rf [lnx]f*
+
+# Figure out if tcp is running, so that we know whether to tell sendmail
+# to run the SMTP daemon.
+htcp=''
+if test -x /etc/havetcp && /etc/havetcp; then
+	htcp='-bd'
+fi
+
+
+# re-freeze the configuration file, if we have one
+if test -f /usr/lib/sendmail.fc; then
+	/usr/lib/sendmail -bz
+fi
+
+
+# ignore SIGHUP from init, so the backgrounded demons will not be killed
+trap "" 1
+
+# rebuild aliases just in case...
+#	If you are certain that your /usr/lib/aliases* files can never
+#	get out of step with each other, then you can remove the following
+#	line.
+newaliases > /dev/null &
+
+# Start demons
+echo "Sendmail starting" > /dev/log
+/usr/lib/sendmail $htcp -q15m &
+echo "Mailer daemons: sendmail."

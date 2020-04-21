@@ -1,0 +1,25 @@
+
+LCINCS = -I../include -I${ROOT}/usr/include/gl2
+LCOPTS  = -Zg -O -DIP2 -DUNIX
+LIBS = ../imglib/libimage.a ../portlib/libport.a
+
+ALL = 	blanktime cbal cedit clock curved fade fed gamcal gamma \
+	gexec ical interp ismex keyboard loadav loadfont mag makemap mouse \
+	mousemon mousewarp paint palette randmap savedesktop scribble showmap \
+	showramp showpie spiral stars sunflower texback textcolors vis worms \
+	zoing scribble
+
+default:	install
+
+all: $(ALL)
+
+clean:
+	rm -f $(ALL) *.o
+
+install: all
+	-chown root loadav
+	-chgrp sys loadav
+	-chmod 4755 loadav
+
+.c:
+	cc $(LCINCS) $(LCOPTS) -o $@ $< $(LIBS)

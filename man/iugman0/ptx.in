@@ -1,0 +1,61 @@
+'''\"PERMUTED INDEX
+.fp 4 B
+.pn 1
+.tr ~
+.ll 4.7i
+.lt 4.7i
+.po .975i
+.pl 8.9375i
+.de HD
+'sp .5i
+.ps 12
+.if e .tl '\\*(ET'''
+.if o .tl '''\\*(ET'
+.ps 8
+'sp .25i
+.ns
+..
+.de FO
+'sp .25i
+.af % 1
+.ft 4
+.ps 10
+.if e .tl #\s-1\f6\\*(Dt#\-\^%\^\-#\\*(Ed\s0#
+.if o .tl #\s-1\f6\\*(Ed#\-\^%\^\-#\\*(Dt\s0#
+.\".ps
+.ps 8
+.ft 1
+'bp
+..
+.wh 0 HD
+.wh -1i FO
+.if \n(nl .bp
+.br
+.\".ds SG Silicon Graphics
+.ds ET Permuted \|Index
+.ds Ed Version 1.1
+.ds Dt Graphics Library User's Guide
+.ce
+.ps 14
+.vs 12
+PERMUTED \|INDEX
+.sp 1v
+.\".ps 9
+.\".vs 11
+.ps 8
+.vs 10
+.nf
+.cs 3 36
+.\"	backup from slotput 1, slot, 2
+.\".de xx
+.\".ds s1\"
+.\".if \w\\$2 .ds s1 ~~\"
+.\".ds s2 ~~~~\"
+.\".ds s3\"
+.\".if \w\\$4 .ds s3 ~~\"
+.\".ds s4 ~\"
+.\".ds s5 ~~\"
+.\".ds y \\*(s4\f3\fP\\*(s5
+.\".ta 5.57i-\w\\*(s5u
+.\"\h"2.75i-\w\\$1\\*(s1\\$2\\*(s2u"\\$1\\*(s1\\$2\\*(s2\\$3\\*(s3\\$4\\*y\\$5
+.\"..

@@ -1,0 +1,5 @@
+There are two routines handled specially here (in bugfixes/).
+These are getcursor and gRGBcursor.  If these routines change
+in lib.prim, they must be fixed in bugfixes.
+
+-- GB (5/10/85)

@@ -1,0 +1,82 @@
+#! /bin/sh
+# usage: newboot [ -m machine ] [ -d dev ] [ -r root ] [ -e entdir ] [ -y ]
+#		 [-i idb] [-s source_root]
+#
+# where the "root" is the pathname to the tree that files will be taken from,
+# "entdir" is the directory in which entry.boot will be created.  The idb 
+# contains the list of files to put in the bootstrap system.  These files are
+# are denoted in the idb by the boot attribute.
+#
+# Various other modifications are made to the bootstrap system once the
+# files are in place.  These modifications are ad-hoc and are done by this
+# script as necessary.
+#
+# The "-y" option creates a "/yes" file in the boot system, which causes
+# the .profile there to assume a "yes" answer to all appropriate questions.
+#
+# Currently, the script expects to be able to use device "md0b" to build
+# the bootstrap system on by default; this can be overridden with the -d
+# option.
+#
+# This script hardcodes root size at 6000 sectors.
+
+root=$ROOT
+srcroot=$SRCROOT
+entdir=.
+yes=
+dev=
+
+while test $# -gt 0
+do
+	case $1 in
+	-r)	shift ; root=$1 ;;
+	-s)	shift ; srcroot=$1 ;;
+	-i)	shift ; idb=$1 ;;
+	-e)	shift ; entdir=$1 ;;
+	-d)	shift ; dev=$1 ;;
+	-m)	shift ; machine=$1 ;;
+	-y)	yes="touch /troot/yes";;
+	*)	break ;;
+	esac
+	shift
+done
+
+case $machine in
+iris|2000) mkfs=mkfs.bell other=3000;;
+juniper|3000) mkfs=mkfs other=2000;;
+*) echo "machine not properly set." ; exit 1 ;;
+esac
+
+(
+	cd /
+	/etc/umount /dev/$dev 2>/dev/null
+	$mkfs /dev/r$dev 6000
+	/etc/labelit /dev/r$dev root sgi
+	if test ! -d /troot ;then mkdir /troot ;fi
+	/etc/mount /dev/$dev /troot
+)
+
+#
+#  Install the files on the swab bootable root file system
+#
+$root/usr/sbin/idbinst -v -r/troot -s$srcroot -i$idb "!@$other && @boot"
+
+#
+#  Compute or modify certain files as necessary.
+#
+set -- `du -s $root/dist`
+expr \( $1 + 249 \) / 250 > /troot/distsize
+
+ed - /troot/etc/passwd << 'EOF'
+1s/csh/sh/
+w
+q
+EOF
+
+./kpatch /troot/vmunix rootfs 1 long swplo 0d6000 long nswap 0d11000
+
+$yes
+
+/etc/umount /dev/$dev
+
+dd if=/dev/r$dev of=$entdir/entry.boot bs=250k count=12

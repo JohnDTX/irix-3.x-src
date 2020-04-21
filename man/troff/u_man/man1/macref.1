@@ -1,0 +1,101 @@
+'\"macro stdmacro
+.\" %W%
+.TH MACREF 1
+.SH NAME
+macref \- produce cross-reference listing of macro files
+.SH SYNOPSIS
+.B macref
+.RB [\0  \-t \0]
+.RB [\0  \-s \0]
+.RB [\0  \-n \0]
+.\".RB [\0  \-\^\- \0]
+files
+.SH DESCRIPTION
+.PP
+.I macref
+reads the named 
+.IR files ,
+(which are assumed to be \f2nroff\f1(1)/\f2troff\f1(1) input)
+and produces a cross-reference listing of
+the symbols in the input.
+.PP
+A
+.B \-t
+on the command line causes a macro table of contents to be printed.
+The option
+.B \-s
+causes symbol- use statistics to be output.
+The option
+.B \-n
+causes one line to be printed for each reference to a symbol.
+The options may be grouped behind one \-.
+.\"You may use "\-\^\-" to delimit the end of options.  
+.I macref
+does not accept 
+.B \- 
+to mean read from the standard input.
+.PP
+The default output is a list of the symbols found in the input, each 
+accompanied by a list of all references to that symbol.
+.I macref
+lists the sysmbols alphabetically in the leftmost column, with the
+references following to the right.
+Each reference is given in the form:
+.PP
+.RS
+[ [(\f2NMname\f1)] \f2Mname\f1\-] \f2type\f1 \f2lnum\f1 [#]
+.RE
+.PP
+where the fields have the following meanings:
+.TP 9
+\f2Mname\f1
+the name of the macro within which the reference occurs.
+This field is missing if the reference occurs at the text level.
+Any names listed in the \f2NMname\f1 part
+are macros within which \f2Mname\f1 is defined.
+.TP 9
+\f2type\f1
+the type associated, by context, with this occurrence of the symbol.
+The types may be:
+.RS 9
+.PD 0
+.TP 6
+.B r
+request
+.TP 6
+.B m
+macro
+.TP 6
+.B d
+diversion
+.TP 6
+.B s
+string
+.TP 6
+.B n
+number register
+.TP 6
+.B p
+parameter
+(e.g. \e$x is a parameter reference to x.
+Note that parameters are never modified, and that the only
+valid parameter symbol names
+are 1, 2, ... 9).
+.PD 1
+.RE
+.TP 9
+\f2lnum\f1
+the line number on which the reference occurred.
+.TP 9
+#
+this reference
+modifies the value of the symbol.
+.PP
+Generated names are listed under the artificial symbol name ``~sym''.
+.SH SEE ALSO
+nroff (1), 
+troff (1),
+mm (1),
+mv (5) ,
+mmt (1),
+man (5).

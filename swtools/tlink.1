@@ -1,0 +1,99 @@
+.TH TLINK LOCAL:1
+.SH NAME
+tlink \- clone a file tree via symbolic links
+.SH SYNOPSIS
+.B tlink 
+[
+.B \-cnvX
+] [
+.B \-d 
+name ] [
+.B \-x 
+name ] source target [ path ... ]
+.SH  DESCRIPTION
+.I Tlink 
+creates a directory tree rooted at target identical to the
+directory tree rooted at source, populating the directories under
+target with symbolic links to corresponding files under source.
+If optional paths are supplied after source and target, only the
+sub-trees named by concatenating each path with source are linked
+under target.
+.PP
+The 
+.B \-c
+(clean) option causes 
+.I tlink 
+to walk the target tree removing
+any directory which lacks an isomorph in the source tree, any symbolic
+link which does not name its non-directory isomorph in the source tree,
+and any file which is not a directory or a link.
+.PP
+The 
+.B \-d
+option symbolically links a directory in the source tree into
+the corresponding place in the target tree.  The link's pathname must
+match the regular expression named.  Regular expressions are as
+described in 
+.IR regcmp (3X).  
+When used with
+.BR \-c ,
+this option prevents symbolic links to source directories from being
+cleaned.
+.PP
+The 
+.B \-n
+option causes 
+.I tlink 
+to operate without actually constructing
+a target tree.  With this option, 
+.I tlink 
+will traverse the source tree,
+changing current directory and calling 
+.IR stat (2) 
+on source files.
+.PP
+The 
+.B \-v
+(verbose) option prints the name of each directory and symbolic
+link created or removed (with the 
+.B \-c 
+option).  If a non-directory file
+exists in the target tree and its source file is a directory, 
+.B tlink \-v
+prints the target's pathname and "Not a directory."  If a directory in
+the target tree has a non-directory source, verbose 
+.I tlink 
+prints the
+target's pathname and "Is a directory."  If a symbolic link in the
+target tree names no existent file, then 
+.I tlink 
+will attempt to unlink
+the stale link.  Upon successful removal, verbose 
+.I tlink 
+will print the target's pathname and "No such file or directory."
+.PP
+The 
+.B \-x
+option adds regular expressions describing filenames to be
+excluded from the tree walk to a list.  The list's initial contents
+are:
+.PP
+.DT
+.nf
+	^\.{1,2}$
+	^RCS$
+	^.*,v$
+	^#.*
+.fi
+.PP
+Specifying 
+.B \-X
+eliminates all but the first of these expressions from the
+exclusion list.
+.SH AUTHOR
+Brendan Eich, 01/14/87
+.SH "SEE ALSO"
+stat(2), 
+regexp(3X).
+.SH BUGS
+\&

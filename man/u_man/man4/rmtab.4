@@ -1,0 +1,57 @@
+'\"macro stdmacro
+.TH RMTAB 4
+.SH NAME
+rmtab \- remotely mounted file system table
+.SH SYNOPSIS
+.B /etc/rmtab
+.SH DESCRIPTION
+.I Rmtab
+resides in directory
+.B /etc
+and contains a record of all clients
+that have done remote mounts of file systems from this machine.
+Whenever a remote
+.IR mount (1M)
+is done, an entry is made in the
+.I rmtab
+file of the machine serving up that file system.
+.IR Umount (1M)
+removes entries, if of a remotely mounted file system.
+The
+.B \-a
+option of
+.I umount
+broadcasts to all servers, and informs them that they should remove
+all entries from
+.I rmtab
+created by the sender of the broadcast message.
+.B /etc/rc.nfs
+executes
+.B umount \-a
+so that
+.I rmtab
+tables can be purged of entries made by a crashed host,
+which upon rebooting did not remount the same file systems it had before.
+The table is a series of lines of the form
+.IP
+ hostname:directory
+.PP
+This table is used only to preserve information between crashes,
+and is read only by
+.IR mountd (1M)
+when it starts up.
+.I Mountd
+keeps an in-core table,
+which it uses to handle requests from programs like
+.IR showmount (1M)
+and
+.IR shutdown (1M).
+.SH FILES
+/etc/rmtab
+.SH "SEE ALSO"
+showmount(1M), mountd(1M), mount(1M), umount(1M), shutdown(1M)
+.SH BUGS
+Although the
+.I rmtab
+table is close to the truth,
+it is not always 100% accurate.

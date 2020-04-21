@@ -1,0 +1,55 @@
+.TH defrasterfont 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I defrasterfont
+- define a raster font
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defrasterfont(n, ht, nc, chars, nr, raster)"
+.B "short n, ht, nc, nr;"
+.B "Fontchar chars[];"
+.B "Byte raster[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defras(n, ht, nc, chars, nr, raster)"
+.B "integer*2 n, ht, nc, chars(4,nc), nr"
+.B "character raster(nr)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defrasterfont(n, ht, nc: Short; var chars: Fntchrarray;"
+.B "	nr: Short; var raster: Fontraster);"
+.sp
+.SH DESCRIPTION
+.I Defrasterfont
+defines a raster font and has
+six arguments.  The first two are \f3n\f1, an index into
+the font table, and \f3ht\f1, an integer specifying the maximum 
+height, in pixels,
+of characters in the font.  The index \f3n\f1 becomes the font's
+internal name.  \f3Nc\f1 gives the number of characters in
+the font and thus the number of elements in the \f3chars\f1 array. 
+\f3Chars\f1
+contains a description of each character in the font.  The description
+includes the height and width of the character in pixels, the offsets from the
+character origin to the lower left corner of this character's
+bounding box, an offset
+into the array of rasters, 
+and the amount to add to the current character \f3x\f1 position after
+drawing the character.
+\f3Raster\f1 is an array of \f3nr\f1 bytes of bitmap information.
+It is a one-dimensional array of mask bytes, ordered left to right and then
+bottom to top.  Mask bits are left-justified in the character's bounding
+box. 
+.PP
+To replace a raster font, define the new one to have the 
+same index as the old one.  To
+delete a raster font, define a font with no characters with the same index.
+That is, call 
+.I "defrasterfont(n, 0, 0, 0, 0, 0)."
+.SH "SEE ALSO"
+.I charstr, defobjfont, font
+.SH NOTE
+This command can only be used in immediate mode.

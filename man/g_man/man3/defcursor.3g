@@ -1,0 +1,51 @@
+.TH defcursor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B defcursor
+\- defines a cursor glyph
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defcursor(n, curs)
+.B "short n;"
+.B "Cursor curs;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defcur(n, curs) "
+.B "integer*4 n"
+.B "integer*2 curs(16)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defcursor(n: Short; var curs: Cursor);"
+.SH DESCRIPTION
+.B defcursor
+defines a cursor glyph.  
+The arguments are a name (\f2n\f1) and a 16x16 bitmap.
+The cursor origin is at the cursor's lower-left corner by default; 
+use \f3curorigin\f1 to reset it.
+The cursor origin is the position influenced by 
+valuators attached to the cursor,
+and is also the position
+.B pick
+uses for the picking region.
+The name is used
+in subsequent cursor routines.
+An arrow is defined as cursor 0 by default
+and cannot be redefined.
+To replace a cursor,
+the new cursor must have the same index as the previous one.
+.PP
+When using multiple windows, patterns, cursors, and fonts are
+available to all windows.
+.SH "SEE ALSO"
+curorigin, getcursor, pick, setcursor
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine can be used only in immediate mode.

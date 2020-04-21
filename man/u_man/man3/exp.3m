@@ -1,0 +1,152 @@
+'\"macro stdmacro
+.TH EXP 3M
+.SH NAME
+exp (_lexp), log (_llog), log10 (_llog10), pow (_lpow), sqrt (_lsqrt) \- exponential, logarithm, power, square root functions
+.SH SYNOPSIS
+.nf
+.B #include <math.h>
+.PP
+.B float exp (x)
+.B float x;
+.PP
+.B long float _lexp (x)
+.B long float x;
+.PP
+.B float log (x)
+.B float x;
+.PP
+.B long float _llog (x)
+.B long float x;
+.PP
+.B float log10 (x)
+.B float x;
+.PP
+.B long float _llog10 (x)
+.B long float x;
+.PP
+.B float pow (x, y)
+.B float x, y;
+.PP
+.B long float _lpow (x, y)
+.B long float x, y;
+.PP
+.B float up_i (x,y)
+.B float x;
+.B int y;
+.PP
+.B float sqrt (x)
+.B float x;
+.PP
+.B long float _lsqrt (x)
+.B long float x;
+.fi
+.SH DESCRIPTION
+.I Exp and _lexp\^
+return
+.IR e\u\s8x\s0\d .
+.PP
+.I Log, and _llog\^
+return the natural logarithm of
+.IR x .
+The value of
+.I x\^
+must be positive.
+.PP
+.I Log10 and _llog10\^
+return the logarithm base ten of
+.IR x .
+The value of
+.I x\^
+must be positive.
+.PP
+.I Pow, _lpow, and up_i\^
+return
+.IR x\u\s8y\s0\d .
+If
+.I x\^
+is zero,
+.I y\^
+must be positive.
+For
+.I _lpow\^
+and
+.I pow,\^
+if
+.I x\^
+is non-positive,
+.I y\^
+must be a whole number.
+.PP
+.I Sqrt and _lsqrt\^
+return the square root of
+.IR x .
+The value of
+.I x\^
+may not be negative.
+.PP
+The 
+.I "long float"
+versions of these functions receive and return 
+.I "long float"
+values.  As shown above, they are named by prefixing the single precision
+function name with \f2_l\fP.
+.SH DIAGNOSTICS
+Certain input values cause a floating point exception to be raised using
+the standard handling procedure described in 
+.I fpsigset (3C).\^
+In the cases described below, the global 
+.I _mathfunc_id\^ 
+is set to indicate the function which raised the exception, and the
+operation is set to 
+.I MATH.\^
+All of the functions detect arguments of Nan or \(if, raising a 
+floating point exception with the type
+.I INVALID_OP_A\^
+or
+.I INVALID_OP_F2,\^
+respectively.
+.PP
+If the argument would cause
+.I exp (_lexp)\^
+to overflow (underflow), a floating point exception is raised
+with the type set to 
+.I OVERFL\^
+or 
+.I UNDERFL,\^
+respectively.
+.PP
+.I Log (_llog)\^
+and
+.I log10 (_llog10)\^
+raise an exception with the type 
+.I DOMAIN_ERROR\^
+if the argument is < 0.
+.PP
+Similarly to 
+.I exp and _lexp,\^
+.I pow, _lpow, and up_i\^
+check for values which would overflow or underflow.
+Additionally,
+.I pow and _lpow\^
+check for the special case of zero raised to a non-positive
+power, causing a floating point exception with the type
+.I DOMAIN_ERROR.\^
+.I _lpow\^
+and
+.I pow\^
+also raise an exception of type
+.I DOMAIN_ERROR\^
+if their first argument is less than zero and their second argument is 
+not a whole number.
+.PP
+.I Sqrt and _lsqrt\^
+raise an exception with the type
+.I DOMAIN_ERROR\^
+if their argument is less than zero.
+.SH SEE ALSO
+intro(2),
+hypot(3M),
+sinh(3M),
+fpsigset(3C).
+
+

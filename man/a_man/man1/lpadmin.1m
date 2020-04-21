@@ -1,0 +1,445 @@
+'\"macro stdmacro
+.TH LPADMIN 1M
+.SH NAME
+lpadmin \- configure the \s-1LP\s+1 spooling system
+.SH SYNOPSIS
+.B /usr/lib/lpadmin
+.BR \-p \|printer
+[\|options\|]
+.br
+.B /usr/lib/lpadmin
+.BR \-x \|dest
+.br
+.B /usr/lib/lpadmin
+.BR \-d [dest]
+.SH DESCRIPTION
+.I lpadmin
+configures
+.SM LP
+spooling systems
+to describe printers, classes
+and devices.
+It is used to add and remove destinations,
+change membership in classes,
+change devices for printers,
+change printer interface programs
+and to change the system default destination.
+.I lpadmin
+may not be used when
+the
+.SM LP
+scheduler,
+.IR lpsched (1M),
+is running,
+except where noted below.
+.PP
+Exactly one of the
+.BR \-p ,
+.B \-d
+or
+.B \-x
+options must be present for every legal invocation of
+.IR lpadmin .
+.TP "\w'\-iinterface\ \ \ \ 'u"
+.BR \-d [\f2dest\fP]
+makes
+.IR dest ,
+an existing destination,
+the new system default destination.
+If
+.I dest
+is not supplied,
+then there is no system default destination.
+This option may be used when
+.IR lpsched (1M)
+is running.
+No other
+.I options
+are allowed with
+.BR \-d .
+.TP
+.BI \-x dest
+removes destination
+.I dest
+from the
+.SM LP
+system.
+If
+.I dest
+is a printer
+and is the only member of a class,
+then the class will be deleted, too.
+No other
+.I options
+are allowed with
+.BR \-x .
+.TP
+.BI \-p printer
+names a
+.I printer
+to which all of the
+.I options
+below refer.
+If
+.I printer
+does not exist
+then it will be created.
+.PP
+The following
+.I options
+are only useful with
+.B \-p
+and
+may appear in any order.
+For ease of discussion,
+the printer will be referred to as
+.I P
+below.
+.TP "\w'\-iinterface\ \ \ \ 'u"
+.BI \-c class
+inserts printer
+.I P
+into the specified
+.IR class .
+.I Class
+will be created
+if it does not already exist.
+.TP
+.BI \-e printer
+copies an existing
+.I printer's
+interface program
+to be the new interface program
+for
+.IR P .
+.TP
+.B \-h
+indicates that
+the device associated with
+.I P
+is hardwired.
+This
+.I option
+is assumed
+when creating a new printer
+unless the
+.B \-l
+.I option
+is supplied.
+.TP
+.BI \-i interface
+establishes a new interface program for
+.IR P .
+.I Interface
+is the path name of the new program.
+.TP
+.B \-l
+indicates that the device associated with
+.I P
+is a login terminal.
+The
+.SM LP
+scheduler,
+.IR lpsched ,
+disables all login terminals automatically
+each time it is started.
+Before re-enabling
+.IR P ,
+its current
+.I device
+should be established using
+.IR lpadmin .
+.TP
+.BI \-m model
+selects a model interface program for
+.IR P .
+.I Model
+is one of the model interface names
+supplied with the
+.SM LP
+software
+(see
+.I Models
+below).
+.TP
+.BI \-r class
+removes printer
+.I P
+from the specified
+.IR class .
+If
+.I P
+is the last member of the
+.IR class ,
+then the
+.I class
+will be removed.
+.TP
+.BI \-v device
+associates a new
+.I device
+with printer
+.IR P .
+.I Device
+is the pathname of a file
+that is writable by the
+.SM LP
+administrator,
+.IR lp .
+Note that there is nothing to stop an administrator
+from associating the same
+.I device
+with more than one
+.IR printer .
+If only the
+.B \-p
+and
+.B \-v
+.I options
+are supplied,
+then
+.I lpadmin
+may be used
+while the scheduler is running.
+.SS Restrictions.
+When creating a new printer,
+the
+.B \-v
+option
+and one of the
+.BR \-e ,
+.B \-i
+or
+.B \-m
+options must be supplied.
+Only one of the
+.BR \-e ,
+.B \-i
+or
+.B \-m
+options may be supplied.
+The
+.B \-h
+and
+.B \-l
+keyletters
+are mutually exclusive.
+Printer and class names
+may be no longer than 14 characters
+and must consist entirely of the characters
+.BR A - Z ,
+.BR a - z ,
+.BR 0 - 9 ,
+and
+.B _
+(underscore).
+.SS Models.
+Model printer interface programs are supplied
+with the
+.SM LP
+software.
+They are shell procedures which interface
+between
+.I lpsched
+and devices.
+All models reside in the directory
+.B /usr/spool/lp/model
+and may be used as is with
+.B lpadmin
+.BR \-m .
+Alternatively,
+.SM LP
+administrators may modify copies of models
+and then use
+.B lpadmin
+.B \-i
+to associate them with printers.
+The following list
+describes the
+.I models
+and
+lists the options which they may be given on the
+.I lp
+command line
+using the
+.B \-o
+keyletter:
+.TP "\w'dumb\ \ \ \ 'u"
+.B dumb
+interface for a line printer without special functions and protocol.
+Form feeds are assumed.
+This is a good model to copy and modify for printers
+which do not have models.
+.TP
+.B 1640
+Diablo 1640 terminal
+running at 1200 baud,
+using
+.SM XON\s+1/\s-1XOFF
+protocol.
+Options:
+.RS
+.TP
+.PD 0
+.B \-12
+12-pitch
+(10-pitch is the default).
+This option
+should never be used in conjunction
+with
+.IR nroff .
+.TP
+.B \-f
+don't use the
+.IR 450 (1)
+filter.
+The output has been pre-processed
+by either
+.IR 450 (1)
+or the
+\f2nroff\^\fP 450 driving table.
+.RE
+.PD
+.TP
+.B hp
+Hewlett Packard 2631A line printer at 2400 baud.
+Options:
+.RS
+.TP
+.PD 0
+.B \-c
+compressed print
+.TP
+.B \-e
+expanded print
+.RE
+.PD
+.TP
+.B prx
+Printronix P300 printer using
+.SM XON\s+1/\s-1XOFF
+protocol at 1200 baud.
+.SH EXAMPLES
+.TP 4
+1.
+To set up a printer class called
+.B usual
+that uses a dumb printer called
+.B fast
+which runs at 9600 baud with 
+.SM XON\s+1/\s-1XOFF
+protocol on port
+.BR /dev/ttyd2 ,
+do the following.
+In single-user mode, add the following commands to
+.BR /etc/rc.local :
+.PP
+.RS 10
+.nf
+sleep 10000000 < /dev/ttyd2 &
+sleep 3
+stty 9600 ixon icanon < /dev/ttyd2 &
+.fi
+.RE
+.PP
+.in +4n
+Bring the system to multi-user mode and issue the following commands as root:
+.in
+.PP
+.RS 10
+.nf
+/usr/lib/lpshut
+/usr/lib/lpadmin \-pfast \-mdumb \-cusual \-v/dev/ttyd2
+/usr/lib/lpadmin \-dusual
+/usr/lib/accept usual
+/usr/lib/accept fast
+enable fast
+/usr/lib/lpsched
+lpstat \-t
+.fi
+.RE
+.PP
+.in +4n
+The configuration will be remembered after subsequent rebooting.
+To print the file
+.BR /etc/passwd ,
+issue the command:
+.in
+.PP
+.RS 10
+lp /etc/passwd
+.RE
+.TP 4
+2.
+Assuming there is an existing Hewlett Packard 2631A line printer named
+.IR hp2 ,
+it will use the
+.B hp
+model interface after the command:
+.PP
+.RS 10
+/usr/lib/lpadmin\ \ \-php2\ \ \-mhp
+.RE
+.TP 4
+3.
+To obtain compressed print on
+.IR hp2 ,
+use the command:
+.PP
+.RS 10
+lp\ \ \-dhp2\ \ \-o\-c\ \ files
+.RE
+.TP 4
+4.
+A Diablo 1640 printer called \f2st1\fP
+can be added to the \s-1LP\s+1 configuration
+with the command:
+.PP
+.RS 10
+/usr/lib/lpadmin\ \ \-pst1\ \ \-v/dev/tty20\ \ \-m1640
+.RE
+.TP 4
+5.
+An \f2nroff\fP document may be printed on
+.I st1
+in any of the following ways:
+.PP
+.RS 10
+nroff\ \ \-T450\ \ files\ \ \(bv\ \ lp\ \ \-dst1\ \ \-of
+.br
+nroff\ \ \-T450\-12\ \ files\ \ \(bv\ \ lp\ \ \-dst1\ \ \-of
+.br
+nroff\ \ \-T37\ \ files\ \ \(bv\ \ col\ \ \(bv\ \ lp\ \ \-dst1
+.RE
+.TP 4
+6.
+The following command prints the password file on
+.I st1
+in 12-pitch:
+.PP
+.RS 10
+lp\ \ \-dst1\ \ \-o12\ \ /etc/passwd
+.RE
+.SH FILES
+/usr/spool/lp/\(**
+.SH SEE ALSO
+450(1),
+accept(1M),
+enable(1),
+lp(1),
+lpsched(1M),
+lpstat(1).
+.\"	@(#)lpadmin.1m	5.1 of 10/17/83
+.\" @(#)$Header: /d2/3.7/src/man/a_man/man1/RCS/lpadmin.1m,v 1.1 89/03/27 16:20:48 root Exp $
+.\" $Log:	lpadmin.1m,v $
+Revision 1.1  89/03/27  16:20:48  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  86/09/03  15:25:54  robinf
+.\" Added comment markers to rcs comments
+.\" 
+.\"Revision 1.1  85/05/01  16:58:10  robinf
+.\"Updates from 2000 Series workstation guide, Version 1.0
+.\" Revision 1.2  85/03/15  15:41:49  bob
+.\" Documented how to set up.
+.\" 

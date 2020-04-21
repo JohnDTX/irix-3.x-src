@@ -1,0 +1,133 @@
+a64l(3c) a64l, l64a: convert between long integer and base-64 ASCII string.
+abort(3c) abort: generate an IOT fault.
+abs(3c) abs: return integer absolute value.
+assert(3x) assert: verify program assertion.
+atof(3c) atof (_latof): convert ASCII string to floating-point number.
+bessel(3m) j0, j1, jn, y0, y1, yn: Bessel functions.
+blt(3c) blt: block transfer data.
+bsearch(3c) bsearch: binary search.
+bstring(3c) bcopy, bcmp, bzero, bswap: byte string operations.
+byteorder(3n) htonl, htons, ntohl, ntohs: convert values between host and network byte order.
+clock(3c) clock: report CPU time used.
+conv(3c) toupper, tolower, _toupper, _tolower, toascii: translate characters.
+ctermid(3s) ctermid: generate file name for terminal.
+ctime(3c) ctime, localtime, gmtime, asctime, tzset: convert date and time to string.
+ctype(3c) isalpha, isupper, islower, isdigit, isxdigit, isalnum, isspace, ispunct, isprint, isgraph, iscntrl, isascii: classify or translate characters.
+curses(3x) curses: screen functions with ``optimal'' cursor motion.
+cuserid(3s) cuserid: get character login name of the user.
+dbm(3x) dbminit, fetch, store, delete, firstkey, nextkey: data base subroutines.
+dial(3c) dial, undial: establish and relinquish an out-going terminal line connection.
+directory(3b) opendir, readdir, telldir, seekdir, rewinddir, closedir: directory operations.
+directory(3c) opendir, readdir, telldir, seekdir, rewinddir, closedir: directory operations.
+drand48(3c) drand48, erand48, lrand48, nrand48, mrand48, jrand48, srand48, seed48, lcong48: generate uniformly distributed pseudo-random numbers.
+dup2(3b) dup2: duplicate a file descriptor.
+ecvt(3c) ecvt (_d_ecvt), fcvt (_d_fcvt), gcvt (_d_gcvt): convert floating-point number to string.
+end(3c) end, etext, edata: last locations in program.
+erf(3m) erf, erfc: error function and complementary error function.
+ether(3x) ether: monitor traffic on the Ethernet.
+ethers(3r) ether_ntoa, ether_aton, ether_ntohost, ether_hostton, ether_line: ethernet address mapping operations.
+exp(3m) exp (_lexp), log (_llog), log10 (_llog10), pow (_lpow), sqrt (_lsqrt): exponential, logarithm, power, square root functions.
+fclose(3s) fclose, fflush: close or flush a stream.
+ferror(3s) ferror, feof, clearerr, fileno: stream status inquiries.
+ffs(3b) ffs: bit string operation.
+floor(3m) floor (_lfloor), ceil (_lceil), fmod (_lfmod), fabs (_lfabs): floor, ceiling, remainder, absolute value functions.
+fopen(3s) fopen, freopen, fdopen: open a stream.
+fpsigset(3c) fpsigset: C floating point exception handling system.
+fread(3s) fread, fwrite: binary input/output.
+frexp(3c) frexp (_lfrexp), ldexp (_lldexp), modf (_lmodf): manipulate parts of floating-point numbers.
+fseek(3s) fseek, rewind, ftell: reposition a file pointer in a stream.
+ftw(3c) ftw: walk a file tree.
+gamma(3m) gamma: log gamma function.
+getc(3s) getc, getchar, fgetc, getw: get character or word from stream.
+getcwd(3c) getcwd: get pathname of current working directory.
+getenv(3c) getenv: return value for environment name.
+getgrent(3c) getgrent, getgrgid, getgrnam, setgrent, endgrent: get group file entry.
+getgroups(3b) getgroups: get group access list.
+gethostbyname(3n) gethostbyname, gethostbyaddr, gethostent, sethostent, endhostent: get network host entry.
+gethostident(3c) gethostident: get the host's unique identification.
+getlogin(3c) getlogin: get login name.
+getmntent(3c) setmntent, getmntent, addmntent, endmntent, hasmntopt: get file system descriptor file entry.
+getnetent(3n) getnetent, getnetbyaddr, getnetbyname, setnetent, endnetent: get network entry.
+getnetgrent(3r) getnetgrent, setnetgrent, endnetgrent, innetgr: get network group entry.
+getopt(3c) getopt: get option letter from argument vector.
+getpass(3c) getpass: read a password.
+getprotoent(3n) getprotoent, getprotobynumber, getprotobyname, setprotoent, endprotoent: get protocol entry.
+getpw(3c) getpw: get name from UID.
+getpwent(3c) getpwent, getpwuid, getpwnam, setpwent, endpwent: get password file entry.
+getrpcent(3r) getrpcent, getrpcbyname, getrpcbynumber, setrpcent, endrpcent: get rpc entry.
+getrpcport(3r) getrpcport: get RPC port number.
+gets(3s) gets, fgets: get a string from a stream.
+getservent(3n) getservent, getservbyport, getservbyname, setservent, endservent: get service entry.
+gettimeofday(3b) gettimeofday: get date and time.
+getut(3c) getutent, getutid, getutline, pututline, setutent, endutent, utmpname: access utmp file entry.
+getwd(3c) getwd: get current working directory pathname.
+hsearch(3c) hsearch, hcreate, hdestroy: manage hash search tables.
+hypot(3m) hypot: Euclidean distance function.
+ibtab(3n) setibfile, setibent, endibent, getibent, ibnflags: package for dealing with ibtab files.
+inet(3n) inet_addr, inet_network, inet_ntoa, inet_makeaddr, inet_lnaof, inet_netof: Internet address manipulation routines.
+insque(3b) insque, remque: insert/remove element from a queue.
+intro(3) intro: introduction to subroutines and libraries.
+l3tol(3c) l3tol, ltol3: convert between 3-byte integers and long integers.
+logname(3x) logname: return login name of user.
+lsearch(3c) lsearch: linear search and update.
+malloc(3c) malloc, free, realloc, calloc, cfree, malloc_check: main memory allocator.
+matherr(3m) matherr: error-handling function.
+memory(3c) memccpy, memchr, memcmp, memcpy, memset: memory operations.
+mktemp(3c) mktemp: make a unique file name.
+monitor(3c) monitor, resume_prof, suspend_prof: prepare execution profile.
+mount(3x) mount: keep track of remotely mounted filesystems.
+ndbm(3x) dbm_open, dbm_close, dbm_fetch, dbm_store, dbm_delete, dbm_firstkey, dbm_nextkey, dbm_error, dbm_clearerr: data base subroutines.
+nlist(3c) nlist: get entries from name list.
+perror(3c) perror, errno, sys_errlist, sys_nerr: system error messages.
+popen(3s) popen, pclose: initiate pipe to/from a process.
+printf(3s) printf, fprintf, sprintf: print formatted output.
+putc(3s) putc, putchar, fputc, putw: put character or word on a stream.
+putpwent(3c) putpwent: write password file entry.
+puts(3s) puts, fputs: put a string on a stream.
+qsort(3c) qsort: quicker sort.
+rand(3c) rand, srand: simple random-number generator.
+random(3b) random, srandom, initstate, setstate: better random number generator; routines for changing generators.
+rcmd(3n) rcmd, rresvport, ruserok: routines for returning a stream to a remote command.
+regcmp(3x) regcmp, regex: compile and execute regular expression.
+rexec(3n) rexec: return stream to a remote command.
+rnusers(3x) rnusers, rusers: return information about users on remote machines.
+rpc(3r) rpc: library routines for remote procedure calls.
+rwall(3x) rwall: write to specified remote machines.
+scandir(3b) scandir, alphasort: scan a directory.
+scandir(3c) scandir, alphasort: scan a directory.
+scanf(3s) scanf, fscanf, sscanf: convert formatted input.
+setbuf(3s) setbuf: assign buffering to a stream.
+setfpe(3x) setfpe, fpecleanup: FORTRAN and Pascal floating-point exception handling system.
+setjmp(3c) setjmp, longjmp: non-local goto.
+sinh(3m) sinh (_lsinh), cosh (_lcosh), tanh (_ltanh): hyperbolic functions.
+sleep(3c) sleep: suspend execution for interval.
+spray(3x) spray: scatter data in order to check the network.
+ssignal(3c) ssignal, gsignal: software signals.
+stdio(3s) stdio: standard buffered input/output package.
+stdipc(3c) ftok: standard interprocess communication package.
+string(3c) strcat, strncat, strcmp, strncmp, strcpy, strncpy, strlen, strchr, strrchr, strpbrk, strspn, strcspn, strtok, index, rindex: string operations.
+strtol(3c) strtol, atol, atoi: convert string to integer.
+swab(3c) swab: swap bytes.
+syslog(3b) syslog, openlog, closelog, setlogmask: control system log.
+system(3s) system: issue a shell command.
+termcap(3x) tgetent, tgetnum, tgetflag, tgetstr, tgoto, tputs: terminal independent operation routines.
+tmpfile(3s) tmpfile: create a temporary file.
+tmpnam(3s) tmpnam, tempnam: create a name for a temporary file.
+trig(3m) sin (_lsin), cos (_lcos), tan (_ltan), asin (_lasin), acos (_lacos), atan (_latan), atan2 (_latan2): trigonometric functions.
+tsearch(3c) tsearch, tdelete, twalk: manage binary search trees.
+ttyname(3c) ttyname, isatty: find name of a terminal.
+ttyslot(3c) ttyslot: find the slot in the utmp file of the current user.
+ungetc(3s) ungetc: push character back into input stream.
+userexit(3x) userexit: user routine for intercepting FORTRAN runtime errors..
+utmp(3n) mkutmp, rmutmp: make and delete /etc/utmp entry.
+writev(3b) writev: write output.
+xcmd(3n) xcmd, xsh: remote execution via XNS.
+xdr(3r) xdr: library routines for external data representation.
+xnsconnect(3n) xnsconnect: make XNS connection.
+xnsfile(3n) xnsfile,xnspathname: find an available network channel or return channel number.
+xnsioctl(3n) xnsioctl: ioctls for XNS and Ethernet.
+xnslib(3n) xnslib: XNS network support subroutines.
+xnslib(3x) xcmd, xnsconnect, xnseof, xnsfile, xnslisten, xnsread, xnswrite, xsh: XNS network support routines.
+xnswrite(3n) xnswrite: write to XNS connection.
+ypclnt(3r) yp_bind, yp_unbind, yp_get_default_domain, yp_match, yp_first, yp_next, yp_all, yp_order, yp_master, yperr_string, ypprot_err: yellow pages client interface.
+yppasswd(3x) yppasswd: update Yellow Pages user password.

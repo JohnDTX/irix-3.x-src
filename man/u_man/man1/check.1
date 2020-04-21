@@ -1,0 +1,35 @@
+'\"macro stdmacro
+.TH CHECK 1
+.SH NAME
+check \- check RCS status of a file
+.SH SYNOPSIS
+.B check
+[
+.B \-l
+] [ rcsdir ]
+.SH DESCRIPTION
+.I check
+displays RCS checkout information
+for files in the current directory.
+This includes the revision level,
+checkout status of the file,
+and who the file is checked out to.
+\f2check\fP assumes \f2./RCS\fP
+is the default RCS directory.
+A different RCS directory
+can be specified with the
+.I rcsdir
+argument.
+The
+.B \-l
+switch causes
+.I check
+to display only the names
+of files under RCS control.
+.SH "SEE ALSO"
+.nf
+.na
+ci(1), co(1), ident(1), merge(1), rcs(1), rcsdiff(1),
+rcsmerge(1), rlog(1), rcsfile(4).
+.fi
+.ad

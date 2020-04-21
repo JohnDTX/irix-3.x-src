@@ -1,0 +1,4 @@
+htons(x)
+{
+	return (x);
+}

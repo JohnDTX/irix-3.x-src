@@ -1,0 +1,76 @@
+# This file is shipped as "/usr/people/guest/rhosts", and therefore is not
+# active.  It can be edited as appropriate and copied or renamed to
+# ".rhosts" to activate it.
+# 
+# The .rhosts file in a user's home directory is used to control access
+# by remote rsh and rlogin commands.  It contains local additions to the
+# hosts.equiv file, which controls access in a more global manner.  Both
+# hosts.equiv and .rhosts use the same format and semantics, which are
+# described in more detail in hosts.equiv(4).
+#
+# When rsh or rlogin attempt to access this machine as "guest", the
+# /etc/hosts.equiv file, and then the .rhosts file in guest's home
+# directory, are checked to see if permission should be granted.  If so,
+# no password is required and the command proceeds.  If not, rsh will
+# fail, and rlogin will ask for guest's password.
+#
+# The .rhosts file is ignored if it is not owned by the user in whose
+# home directory it resides; in this case, it must be owned by guest.
+# 
+# Lines in .rhosts consist of a hostname possibly followed by a username.
+# Some implementations require a specific format: hostname, a single space,
+# username, and a newline.  Comments are permissible.
+#
+# Permission is granted if both the hostname and username "match".  The
+# special names "+" always match.  A host or user name can be preceded by
+# a "-" to specifically deny access.  When no username is given, the match
+# succeeds if the remote and local user names are the same.
+#
+# Please note that the "+" and "-" forms are not necessarily available in
+# other TCP/IP implementations, so these notes and examples may not apply
+# to other machines on your network.
+
+# EXAMPLES:
+
+# A simple case, where no checking is desired.  This line is all that is
+# required to grant permission to any user on any remote machine:
+
++ +
+
+# To grant permission to ourselves coming in from any other host:
+
++
+
+# To grant permission to specific users coming in from any other host:
+
++ user1
++ user2
+
+# To grant permission to ourselves coming in from three specific hosts:
+
+host1
+host2
+host3
+
+# To grant permission to anyone on specific hosts:
+
+host4 +
+host5 +
+
+# To grant permission to certain users on specific hosts:
+
+host6 user3
+host6 user4
+host7 user3
+
+# To deny permission to a specific users of a specific machine (make sure
+# the denial comes earlier in the file than a line that might grant
+# permission):
+
+host8 -user4
+host8 +
+
+# To deny a specific host while accepting all others:
+
+-host9
++ +

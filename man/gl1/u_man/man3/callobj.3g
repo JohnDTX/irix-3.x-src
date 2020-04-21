@@ -1,0 +1,34 @@
+.TH callobj 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I callobj
+- instantiate an object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "callobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine callob(obj)"
+.B "integer obj"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure callobj(obj: Object);"
+.sp
+.SH DESCRIPTION
+.I Callobj
+draws an instance of an object.  Its argument is the 
+object name.
+If
+.I callobj
+specifies an undefined object, the command is ignored.
+.PP
+Global attributes are not saved before a \f2callobj\f1.  Thus, if
+attributes like color are changed within an object, the change may
+affect the caller as well.  Use \f2pushattributes\f1 and \f2popattributes\f1
+to preserve global attributes across \f2callobj\f1 commands.
+.SH "SEE ALSO"
+.I makeobj, pushattributes, popattributes

@@ -1,0 +1,69 @@
+'\"macro stdmacro
+.TH DUP 2 
+.SH NAME
+dup \- duplicate an open file descriptor
+.SH SYNOPSIS
+.B int dup (fildes)
+.br
+.B int fildes;
+.SH DESCRIPTION
+.I Fildes\^
+is a
+file descriptor
+obtained from a
+.IR creat ,
+.IR open ,
+.IR dup ,
+.IR fcntl ,
+or
+.I pipe\^
+system call.
+.I Dup\^
+returns a new
+file descriptor
+having the following in common with the original:
+.IP "" .3i
+Same open file (or pipe).
+.IP
+Same file pointer
+(i.e., both file descriptors share one file pointer).
+.IP
+Same access mode (read, write or read/write).
+.PP
+The new
+file descriptor
+is set to remain open across
+.I exec\^
+system calls.
+See
+.IR fcntl\^ (2).
+.PP
+The
+file descriptor
+returned is the lowest one available.
+.PP
+.I Dup\^
+will fail if one or more of the following are true:
+.IP "" .3i
+.I Fildes\^
+is not a valid open
+file descriptor.
+.SM
+\%[EBADF]
+.IP
+Forty (40)
+file descriptors
+are currently open.
+.SM
+\%[EMFILE]
+.SH "RETURN VALUE"
+Upon successful completion a non-negative integer,
+namely the
+file descriptor,
+is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+creat(2), close(2), exec(2), fcntl(2), open(2), pipe(2).
+.\"	@(#)dup.2	5.1 of 11/1/83

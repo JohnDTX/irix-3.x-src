@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH CHOWN 2
+.SH NAME
+chown \- change owner and group of a file
+.SH SYNOPSIS
+.B int chown (path, owner, group)
+.br
+.B char \(**path;
+.br
+.B int owner, group;
+.SH DESCRIPTION
+.I Path\^
+points to a
+path name
+naming a file.
+The owner
+.SM ID
+and group
+.SM ID
+of the named file
+are set to the numeric values contained in
+.I owner\^
+and
+.I group\^
+respectively.
+.PP
+Only processes with effective user
+.SM ID
+equal to the file owner or
+super-user may change the ownership of a file.
+.PP
+If
+.I chown\^
+is invoked by other than the super-user, the set-user-\s-1ID\s0
+and set-group-\s-1ID\s0
+bits of the file mode, 04000 and 02000 respectively,
+will be cleared.
+.PP
+.I Chown\^
+will fail and the owner and group of the named file will
+remain unchanged if one or more of the following are true:
+.IP "" .3i
+A component of the
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+The named file does not exist.
+.SM
+\%[ENOENT]
+.IP
+Search permission is denied on a
+component of the
+path prefix.
+.SM
+\%[EACCES]
+.IP
+The effective user
+.SM ID
+does not match the owner of the file
+and the effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.IP
+The named file resides on a read-only file system.
+.SM
+\%[EROFS]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+chmod(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#16,D0
+.B movl	path,A0
+.B movl	owner,D1
+.B movl	group,A1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)chown.2	5.1 of 10/19/83

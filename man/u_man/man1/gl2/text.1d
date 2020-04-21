@@ -1,0 +1,29 @@
+'\"macro stdmacro
+.TH TEXT 1D
+.SH NAME
+text \- dragging and scrolling of pixel text                
+.SH SYNOPSIS
+.nf
+.B /usr/people/demos/text
+.fi
+.SH DESCRIPTION
+.PP
+Raster text is put under mouse control for fast dragging and scrolling
+operation.
+Besides showing the speed at which the IRIS can drag characters 
+on the screen, it also
+shows
+the fine clipping of characters at viewport boundaries. 
+.sp
+.sp
+	Mouse buttons		Function
+.sp
+	left			drag text in x & y via mouse x,y-motion 
+.br
+	right 			scroll text up & down via mouse y-motion   
+.sp
+.fi
+To exit, press all three mouse buttons simultaneously.
+.SH HARDWARE CONFIGURATION
+A minimum configuration of 8 bitplanes is required
+to run this demonstration program.

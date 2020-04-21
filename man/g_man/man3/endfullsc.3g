@@ -1,0 +1,32 @@
+.TH endfullscrn 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B endfullscrn 
+\- ends full-screen mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "endfullscrn()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine endful"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure endfullscrn;"
+.SH DESCRIPTION
+.B endfullscrn
+ends full-screen mode and returns the screenmask and viewport to the boundaries
+of the current graphics window. 
+.B endfullscrn 
+leaves the current transformation unchanged.
+.SH "SEE ALSO"
+endpupmode, fullscrn, pupmode
+.sp
+\f2Using Mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode. 

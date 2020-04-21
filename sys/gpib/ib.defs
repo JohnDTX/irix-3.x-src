@@ -1,0 +1,350 @@
+#
+# undef DEBUG ib_debug	/* enable debugging */
+# define MBMAPGET 1		/* use NEW BUFFERING SYSTEM */
+
+/* ----- definitions for the abstract tlc device */
+
+/* steps for automaton */
+struct step
+{
+    short opcode;
+    long opa;
+    long opb;
+};
+
+/* instructions for automaton */
+# define XWAIT		0
+# define XCWAIT		1
+# define XSTORE		2
+# define XFETCH		3
+# define XMASK		4
+# define XFUNC		5
+
+# define MAXINSTR	40
+
+/* structure for abstract device */
+struct tlc
+{
+			/* status */
+    long csr;		/*SR+ADSR+ISR2+ISR1*/
+    long lcsr;		/*latched bits from .csr*/
+    char *base;		/*base addr of dev regs*/
+    char unit;		/*logical unit number*/
+    u_char iTslot;	/*current talker if any*/
+    short iLmap;	/*current listener if any*/
+    short icmd;		/*current use*/
+    u_char tags[MAXIBSLOTS];/*ieee addrs*/
+    int (*func)();	/*hi level intr routine*/
+    long funcarg;	/*arg to hi level intr routine*/
+    long events;	/*latched bits of interest to servers*/
+    char error;		/*error code*/
+    char cic;		/*am cic*/
+    char present;	/*am present*/
+    char endi;		/*end received*/
+    short Cflags;	/*flags*/
+
+			/* automaton */
+    long atcsr;		/*running csr when building it*/
+    short atcnt;	/*size remaining of it*/
+    struct step *atac;	/*running pc when building it*/
+    struct step *atpc;	/*pc when running it*/
+    struct step steps[MAXINSTR];/*steps constituting it*/
+    short atclkint;	/*clock interval for automaton*/
+    char atgonged;	/*cmd timed out*/
+    char atclk;		/*clk is running*/
+    char atdone;	/*cmd done*/
+    char atdoneintr;	/*got done intr*/
+
+			/* parameter pseudo regs */
+    short cmdalarm;	/*cmd timeout if non-0*/
+    short retryalarm;	/*retry timeout if non-0*/
+    u_char Tslot;	/*talker*/
+    short Lmap;		/*listeners*/
+    short xxxcmd;	/*not used*/
+    long maddr;		/*memory addr*/
+    long vaddr;		/*virtual maddr*/
+    short bc;		/*byte count*/
+    short tc;		/*transferred*/
+    u_char ppbit;	/*ppr*/
+    u_char spmr;	/*spmr*/
+    u_char dir;		/*data in*/
+    u_char dor;		/*data out*/
+    u_char ix;		/*not used*/
+
+			/*reg stash*/
+    u_char iregs[NIBIREGS];
+    u_char oregs[NIBOREGS];
+    u_char xregs[NIBXREGS];
+};
+# define ippr	xregs[1]
+# define icr1	oregs[IB_CR1]
+# define icr0	oregs[IB_CR0]
+# define iregb	xregs[2]
+# define irege	xregs[3]
+# define ispmr	oregs[IB_SPMR]
+# define itag	tags[MYSLOT]
+
+# define MYSLOT	0		/*slotno for host iface*/
+
+
+/* commands for abstract device */
+# define LSTNU		1
+# define TALKU		2
+# define ABORTU		3
+# define RESETU		4
+# define INITU		5
+# define TRIGU		6
+# define CONNECTU	7
+# define PEEKU		8
+# define POKEU		9
+# define SPOLLU		10
+# define PPOLLU		11
+# define DCLRU		12
+# define PASSCTLU	13
+# define TAKECTLU	14
+# define PPEU		15
+# define SRQU		16
+# define IFCU		17
+# define IDLEU		18
+# define PPDU		19
+# define UNCONNECTU	20
+# define ETALKU		21
+# define FHSU		22
+# define SERVU		23
+# define RENU		24
+# define GTLU		25
+# define TESTU		26
+
+/* .Cflags */
+# define TLC_VALID	(1<<1)		/*is valid*/
+# define TLC_SC		(1<<2)		/*is system ctlr*/
+# define TLC_CONNECT	(1<<4)		/*is connected*/
+# define TLC_TALK	(1<<5)		/*is talker*/
+# define TLC_LSTN	(1<<6)		/*is listener*/
+# define TLC_SRQ	(1<<7)		/*can srq*/
+# define TLC_AINIT	(1<<10)		/*do autoinit*/
+# define TLC_GONG	(1<<11)		/*tlcgong running*/
+# define TLC_RUN	(1<<12)		/*is running*/
+# define TLC_PIO	(1<<13)		/*is in pio mode*/
+# define TLC_TICKER	(1<<14)		/*tlc_ticker wanted*/
+# define TLC_TICKING	(1<<15)		/*tlc_ticker running*/
+
+/* bit mask */
+# define msk(x)		(~(~0<<(x)))
+
+/* bits per byte */
+# define NBBY		8
+
+/* macros for mutex */
+# define USEPRI		register int oldpri
+# define RAISE		oldpri = spl5()
+# define LOWER		splx(oldpri)
+
+/* busfix() compensates for multibus byte-swapping */
+# define busfix(x)		((x)^01)
+
+/* macros for device register access */
+# define _INREG(f)		(*(u_char*)(ip+busfix(f)))
+# define _OUTREG(f,x)		(*(u_char*)(ip+busfix(f))=(x))
+
+
+/* defs for pseudo-csr */
+# define SRSHIFT	(3*NBBY)
+# define ADSRSHIFT	(2*NBBY)
+# define ISR2SHIFT	(1*NBBY)
+# define ISR1SHIFT	(0*NBBY)
+
+# define CSR_DMADONE	(SR_DMADONE<<SRSHIFT)
+# define CSR_INTR_	(SR_INTR_<<SRSHIFT)
+# define CSR_DMAFIN_	(SR_DMAFIN_<<SRSHIFT)
+# define CSR_NXM	(SR_NXM<<SRSHIFT)
+# define CSR_BIT0_	(SR_BIT0<<SRSHIFT)
+# define CSR_NDAC_	(SR_NDAC_<<SRSHIFT)
+# define CSR_TICK	(SR_JUNK1<<SRSHIFT)	/*fake set by tlctimer()*/
+# define CSR_POLLING	(SR_JUNK0<<SRSHIFT)	/*fake set by tlctimer()*/
+# define CSR_CIC	(ADSR_CIC<<ADSRSHIFT)
+# define CSR_ATN_	(ADSR_ATN_<<ADSRSHIFT)
+# define CSR_SPMS	(ADSR_SPMS<<ADSRSHIFT)
+# define CSR_LPAS	(ADSR_LPAS<<ADSRSHIFT)
+# define CSR_TPAS	(ADSR_TPAS<<ADSRSHIFT)
+# define CSR_LA		(ADSR_LA<<ADSRSHIFT)
+# define CSR_TA		(ADSR_TA<<ADSRSHIFT)
+# define CSR_MINOR	(ADSR_MINOR<<ADSRSHIFT)
+# define CSR_ANYI	(ISR2_ANYI<<ISR2SHIFT)
+# define CSR_SRQI	(ISR2_SRQI<<ISR2SHIFT)
+# define CSR_LO		(ISR2_LO<<ISR2SHIFT)
+# define CSR_RMT	(ISR2_RMT<<ISR2SHIFT)
+# define CSR_CRI	(ISR2_CRI<<ISR2SHIFT)
+# define CSR_LOCHGI	(ISR2_LOCHGI<<ISR2SHIFT)
+# define CSR_RMTCHGI	(ISR2_RMTCHGI<<ISR2SHIFT)
+# define CSR_ADCHGI	(ISR2_ADCHGI<<ISR2SHIFT)
+# define CSR_CPTI	(ISR1_CPTI<<ISR1SHIFT)
+# define CSR_APTI	(ISR1_APTI<<ISR1SHIFT)
+# define CSR_DETI	(ISR1_DETI<<ISR1SHIFT)
+# define CSR_ENDI	(ISR1_ENDI<<ISR1SHIFT)
+# define CSR_DCI	(ISR1_DCI<<ISR1SHIFT)
+# define CSR_ERRI	(ISR1_ERRI<<ISR1SHIFT)
+# define CSR_ORI	(ISR1_ORI<<ISR1SHIFT)
+# define CSR_IRI	(ISR1_IRI<<ISR1SHIFT)
+/* ----- */
+
+
+/* buf queue */
+struct bufq
+{
+    short bq_flags;		/*+00 flags for waiting, etc*/
+    struct buf *bq_head;	/*+02 ptr to head buf*/
+    struct buf *bq_tail;	/*+06 ptr to tail buf*/
+};				/*+0A*/
+
+# ifdef MBMAPGET		/* NEW BUFFERING SYSTEM */
+
+/* buf redefines */
+# define BQ_MINE	(1<<13)	/*property of ib driver*/
+# define BQ_END		(1<<1)	/*last of a string of bufs*/
+# define BQ_START	(1<<2)	/*first of a string of bufs*/
+# define BQ_ONQ		(1<<3)	/*buf is on a queue*/
+# define BQ_ABORT	(1<<4)	/*buf is aborted*/
+# define BQ_WANTED	(1<<5)	/*buf is wanted (after DONE)*/
+# define BQ_DONE	(1<<6)	/*buf is done*/
+# define BQ_ERROR	(1<<7)	/*buf had error*/
+# define BQ_ASYNC	(1<<9)	/*buf goes on .raq when DONE*/
+# define BQ_QLSTN	(1<<10)	/*buf gets buffered data first*/
+# define BQ_PHYS	(1<<11)	/*physio buf*/
+struct bjam	/*structure for jamming stuff in buf .b_blkno*/
+{
+    u_char j0;
+    u_char j1;
+    u_short j2;
+};
+# define JAM		b_blkno
+# define BJAM(bp)	((struct bjam *)&(bp)->JAM)
+# define DEV(bp)	(BJAM(bp)->j0)
+# define NPOLL(bp)	(BJAM(bp)->j1)
+# define POLLMASK(bp)	(BJAM(bp)->j2)
+# define TSLOT(bp)	(BJAM(bp)->j1)
+# define LMAP(bp)	(BJAM(bp)->j2)
+# define USE(bp)	((bp)->b_error)
+# define BFLAGS(bp)	((bp)->b_cyl)
+# define b_head		av_forw
+# define b_tail		av_back
+
+# define IBBUFSIZE	SBUFSIZE
+# define KVADDR(bp)	((bp)->b_un.b_addr)
+# define MBVADDR(bp)	((bp)->b_iobase)
+# define GET_EBLK(bp)	(bp = getdmablk(IBBUFSIZE>>BBSHIFT))
+/*
+# define B_RELSE(bp)	(USE(bp)=0,bp->b_resid=0,bp->b_bcount=IBBUFSIZE,\
+			(bp)->JAM=0,BFLAGS(bp)=0,brelse(bp))
+ */
+# define B_RELSE(bp)	brelse(bp)
+
+# else  MBMAPGET		/* OLD BUFFERING SYSTEM */
+
+/* buf redefines */
+# define BQ_MINE	(B_INVAL>>0)	/*property of ib driver*/
+# define BQ_END		(B_INVAL>>1)	/*last of a string of bufs*/
+# define BQ_START	(B_INVAL>>2)	/*first of a string of bufs*/
+# define BQ_ONQ		(B_INVAL>>3)	/*buf is on a queue*/
+# define BQ_ABORT	(B_INVAL>>4)	/*buf is aborted*/
+# define BQ_WANTED	(B_INVAL>>5)	/*buf is wanted (after DONE)*/
+# define BQ_DONE	(B_INVAL>>6)	/*buf is done*/
+# define BQ_ERROR	(B_INVAL>>7)	/*buf had error*/
+# define BQ_ASYNC	(B_INVAL>>9)	/*buf goes on .raq when DONE*/
+# define BQ_QLSTN	(B_INVAL>>10)	/*buf gets buffered data first*/
+# define BQ_PHYS	(B_INVAL>>11)	/*physio buf*/
+struct bjam	/*structure for jamming stuff in buf .b_blkno*/
+{
+    char j0;
+    char j1;
+    short j2;
+};
+# define JAM		b_blkno
+# define BJAM(bp)	((struct bjam *)&(bp)->JAM)
+# define DEV(bp)	(BJAM(bp)->j0)
+# define NPOLL(bp)	(BJAM(bp)->j1)
+# define POLLMASK(bp)	(BJAM(bp)->j2)
+# define TSLOT(bp)	(BJAM(bp)->j1)
+# define LMAP(bp)	(BJAM(bp)->j2)
+# define USE(bp)	((bp)->b_error)
+# define BFLAGS(bp)	((bp)->b_flags)
+# define b_head		av_forw
+# define b_tail		av_back
+
+# define IBBUFSIZE	SBUFSIZE
+# define KVADDR(bp)	((bp)->b_un.b_addr)
+# define MBVADDR(bp)	VTOP((bp)->b_un.b_addr)
+# define GET_EBLK(bp)	(bp = geteblk())
+# define B_RELSE(bp)	brelse(bp)
+
+# endif MBMAPGET
+
+
+/* per-connection info */
+struct ibconn
+{
+    short c_flags;		/*+00 flags*/
+#	define COOKEDF		(1<<6)
+#	define RAWF		(1<<7)
+#	define WAITF		(1<<9)
+#	define BUSYF		(1<<10)
+#	define OPENF		(1<<11)
+
+    char c_dev;			/*+02 minor dev*/
+
+    u_char c_Tslot;		/*+03 who talks when this ibconn listens*/
+    short c_Lmap;		/*+04 who listens when this ibconn talks*/
+
+    struct bufq c_rq;		/*+06 input queue*/
+    struct ibvars *c_if;	/*+10 ptr to ibvars[]*/
+    struct buf *c_curbuf;	/*+14 current buf*/
+};				/*+18*/
+
+/* per-controller global vars */
+struct ibvars
+{
+				/* abstract device regs */
+    struct tlc tlc;
+
+    short ibflags;		/*driver flags*/
+#	define STARTEDF		(1<<3)	/*driver was started*/
+#	define LOCKF		(1<<7)	/*is locked*/
+#	define EVWANTF		(1<<9)	/*waiting for event*/
+
+    short use;			/*current use*/
+    char udev;			/*current dev*/
+    u_char uTslot;		/*current talker*/
+    short uLmap;		/*current listeners*/
+    u_char ppollstat;		/*current pollstat*/
+    struct buf *curbuf;		/*current buf within .ioq*/
+    struct bufq ioq;		/*queue of i/o bufs*/
+    struct bufq raq;		/*read-ahead queue*/
+    struct bufq freeq;		/*free bufs*/
+    short nfreebufs;		/*# bufs on freeq*/
+    short maxfreebufs;		/*self-imposed limit on .freeq*/
+    short nbufs;		/*# bufs in raq*/
+    short maxbufs;		/*self-imposed limit on .nbufs*/
+    short nconn;		/*# open ibconns*/
+    short nrawconn;		/*# open raw ibconns*/
+
+    char basedev;		/*devnum of first ibconn on this iface*/
+    struct ibconn *baseconn;	/*ptr to first ibconn on this iface*/
+    struct ibnode ibnodes[MAXIBSLOTS];/*ibnode info*/
+};
+
+
+/*----- macros and definitions*/
+# define RP	(&vp->tlc)
+
+# define IBPRI	(PZERO+5)	/*sleep priority, killable*/
+
+/*
+ * macros for decoding minor dev nums:
+ * lower 3 bits are the node (physical slot) number;
+ * upper bits are the controller number.
+ */
+# define unitnum(x)		(minor(x)>>3)
+# define slotnum(x)		(minor(x)&msk(3))
+# define maketlc(u,s)		((u)<<3|(s))
+# define NIBCONN		(1<<3)
+/*----- */

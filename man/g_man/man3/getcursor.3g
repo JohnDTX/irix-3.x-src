@@ -1,0 +1,50 @@
+.TH getcursor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getcursor
+\- returns the cursor characteristics
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getcursor(index, color, wtm, b)"
+.B "short *index;"
+.B "Colorindex *color, *wtm;"
+.B "Boolean *b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getcur(index, color, wtm, b)"
+.B "integer*2 index, color, wtm"
+.B "logical b"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getcursor (var index: Short;"
+.B "var color, wtm: Colorindex; var b: Boolean;
+.SH DESCRIPTION
+.B getcursor
+returns four values: the cursor glyph (\f2index\f1); the
+color (\f2color\f1) and the writemask (\f2wtm\f1) of the glyph, and a 
+boolean value (\f2b\f1) indicates whether the system automatically
+displays the cursor. 
+.PP
+\f2index\f1, \f2color\f1, \f2wtm\f1 and \f2b\f1
+are the addresses of locations
+where the
+cursor variables are returned.
+.PP
+The default is the glyph index
+0 in the cursor table, displayed with the color 1, drawn in the 
+first available bitplane,
+and automatically updated
+on each vertical retrace.  This routine is undefined in RGB mode.
+.SH "SEE ALSO"
+defcursor, setcursor
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

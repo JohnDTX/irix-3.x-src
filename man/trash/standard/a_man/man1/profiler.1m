@@ -1,0 +1,97 @@
+.TH PROFILER 1M
+.SH NAME
+prfld, prfstat, prfdc, prfsnap, prfpr \- operating system profiler
+.SH SYNOPSIS
+.B /etc/prfld
+[ namelist ]
+.br
+\f3/etc/prfstat\fP [ \f3on\fP | \f3off\fP ]
+.br
+.B /etc/prfdc
+file
+[ period [ off_hour ] ]
+.br
+.B /etc/prfsnap
+file
+.br
+.B /etc/prfpr
+file [ cutoff [ namelist ] ]
+.SH DESCRIPTION
+.IR Prfld ,
+.IR prfstat ,
+.IR prfdc ,
+.IR prfsnap ,
+and
+.I prfpr\^
+form a system of programs
+to facilitate an activity study of the
+.SM UNIX
+operating system.
+.PP
+.I Prfld\^
+is used to initialize the recording
+mechanism in the system.
+It generates a table
+containing the starting address of each
+system subroutine as extracted from
+.IR namelist .
+.PP
+.I Prfstat\^
+is used to enable or disable the sampling mechanism.
+Profiler overhead is less than 1% as calculated
+for 500 text addresses.
+.I Prfstat\^
+will also reveal the number of
+text addresses
+being measured.
+.PP
+.I Prfdc\^
+and
+.I prfsnap\^
+perform the data collection function of the profiler
+by copying the current value of all the text address counters
+to a file where the data can be analyzed.
+.I Prfdc\^
+will store the counters into
+.I file\^
+every
+.I period\^
+minutes and will turn off at
+.I off_hour
+(valid values for
+.I off_hour
+are
+.BR 0 \- 24 ).
+.I Prfsnap\^
+collects data at the time of invocation only,
+appending the counter values to
+.IR file .
+.PP
+.I Prfpr\^
+formats the data collected by
+.I prfdc\^
+or
+.IR prfsnap .
+Each text address is converted to the nearest text symbol
+(as found in
+.IR namelist )
+and is printed if the percent activity
+for that range is greater than
+.IR cutoff .
+.SH FILES
+.ta \w'/dev/prf\ \ \ 'u
+/dev/prf	interface to profile data and text addresses
+.br
+/unix	default for namelist file
+.\"	@(#)profiler.1m	5.1 of 10/17/83
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/a_man/man1/RCS/profiler.1m,v 1.1 89/03/27 16:40:36 root Exp $
+.\" $Log:	profiler.1m,v $
+Revision 1.1  89/03/27  16:40:36  root
+Initial check-in for 3.7
+
+Revision 1.0  85/05/01  16:34:16  robinf
+Initial Revision
+
+.\" Revision 1.2  85/01/08  12:26:31  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

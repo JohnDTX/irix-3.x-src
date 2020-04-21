@@ -1,0 +1,28 @@
+.TH curson 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I curson
+- turn the cursor on
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curson()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curson"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curson;"
+.sp
+.SH DESCRIPTION
+.I Curson
+requests the system to automatically update and display a cursor.
+\f2Curson\f1 commands are usually paired with \f2cursoff\f1 commands,
+though there is no harm in calling \f2curson\f1 when the automatic
+cursor is already visible.
+.SH "SEE ALSO"
+.I attachcursor, cursoff, getcursor, setcursor
+.SH NOTE
+This command can only be used in immediate mode.

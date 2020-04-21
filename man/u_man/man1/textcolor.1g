@@ -1,0 +1,20 @@
+'\"macro stdmacro
+.TH TEXTCOLORS 1G
+.SH NAME
+textcolors \- set the colors used by a text window
+.SH SYNOPSIS
+.B textcolors 
+textc backgroundc highlightc cursorc
+.SH DESCRIPTION
+There a four color indexes associated with each text window.
+.I textcolors\^
+sets the color index to be used for printed text, the background,
+highlighted text, and the cursor.
+The color indexes given must be between 0 and 255.
+.SH EXAMPLE
+.IP
+textcolors 0 7 4 4
+.PP
+Let's assume that color index 0 is black, 7 is white and 4 is blue.
+This command will make text print black on a white background. 
+Highlighted text and the cursor will be displayed in blue.

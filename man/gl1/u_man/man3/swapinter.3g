@@ -1,0 +1,35 @@
+.TH swapinterval 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I swapinterval
+- define a minimum time between buffer swaps
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "swapinterval(i) "
+.B "short i;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine swapin(i)"
+.B "integer*2 i"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure swapinterval(i: Short);"
+.sp
+.SH DESCRIPTION
+.I Swapinterval
+establishes a minimum time between buffer swaps.
+If the user specifies a swap interval of 5,
+the screen will be refreshed at least
+five times between execution of successive
+\f2swapbuffers\f1 commands.   
+This command provides a way to change frames at a steady rate if a new
+image can be created within one swap interval.  The default interval is 1.
+\f2Swapinterval\fP is valid only in double buffer mode.
+It is ignored in single buffer or RGB mode.
+.SH "SEE ALSO"
+.I doublebuffer, swapbuffers, sync
+.SH NOTE
+This command can only be used in immediate mode.

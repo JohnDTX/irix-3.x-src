@@ -1,0 +1,62 @@
+
+#
+# fontmap table for the APS-5. Read by makei10 program.
+#
+
+synonyms
+	A	*A
+	B	*B
+	E	*E
+	Z	*Z
+	Y	*Y
+	I	*I
+	K	*K
+	M	*M
+	N	*N
+	O	*O
+	R	*R
+	T	*T
+	U	*U
+	X	*X
+	*e	xe
+	*t	xh
+	*k	xk
+	aa	\'
+	ga	\`
+	.	.
+
+build fi fl Fl Fi ff end
+
+map R  into	R	S
+map I  into	I	S
+map B  into	B	S
+map H  into	H	S
+map CW into	CW
+map S  into	S	R
+map S1 into	S	R
+map GR into	S	R
+
+map PA into	PA	S
+map PB into	PB	S
+map PI into	PI	S
+map PO into	PO	S
+map CE into	PA	S
+map CI into	PX	S
+map HI into	HI	S
+map HB into	HK	S
+map G  into	H	S
+map GI into	HI	S
+map BI into	PX	S
+map SM into	CW	S
+map CT into	CW	S
+map C  into	H	S
+map SC into	PI	S
+map TB into	HK	S
+map GS into	PI	S
+map GB into	HK	S
+
+map MR into	PA	S
+map MI into	PI	S
+map MB into	PB	S
+map MX into	PX	S
+

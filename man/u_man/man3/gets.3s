@@ -1,0 +1,74 @@
+'\"macro stdmacro
+.TH GETS 3S 
+.SH NAME
+gets, fgets \- get a string from a stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B char \(**gets (s)
+.br
+.B char \(**s;
+.PP
+.B char \(**fgets (s, n, stream)
+.br
+.B char \(**s;
+.br
+.B int n;
+.br
+.SM
+.B FILE
+.B \(**stream;
+.SH DESCRIPTION
+.I Gets\^
+reads characters
+from the standard input stream,
+.IR stdin ,
+into the array pointed to by
+.IR s ,
+until a new-line character is read
+or an end-of-file condition is encountered.
+The new-line character is discarded
+and the string is terminated with a
+null character.
+.PP
+.I Fgets\^
+reads 
+characters from the
+.I stream\^
+into the array pointed to by
+.IR s ,
+until
+.IR n \-1
+characters are read, or
+a new-line character is read and transferred to
+.IR s ,
+or an end-of-file condition is encountered.
+The string is then terminated with a
+null character.
+.SH SEE ALSO
+ferror(3S),
+fopen(3S),
+fread(3S),
+getc(3S),
+scanf(3S).
+.SH DIAGNOSTICS
+If end-of-file is encountered
+and no characters have
+been read, no characters are transferred to
+.I s\^
+and a 
+.SM NULL
+pointer is returned.
+If a read error occurs, such as trying to use these functions
+on a file that has not been opened for reading, a
+.SM NULL
+pointer is returned.
+Otherwise
+.I s\^
+is returned.
+.SH NOTE
+.I Gets\^
+deletes the new-line ending its input, but
+.I fgets\^
+keeps it.
+.\"	@(#)gets.3s	5.1 of 10/25/83

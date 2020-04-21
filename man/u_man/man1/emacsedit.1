@@ -1,0 +1,90 @@
+'\"macro stdmacro
+.TH EMACSEDIT 1
+.SH NAME
+emacsedit \- an editor for use in Emacs shell windows
+.SH SYNOPSIS
+.B
+emacsedit
+.I
+args
+.SH DESCRIPTION
+.PP
+.I
+emacsedit
+is intended to be used as "the editor" that is invoked by programs running
+under a shell window, such as \f2mail\f1(1).   It works in conjunction with the
+process.ml (shell windows) package, which sets up an unexpected process
+handler to catch EIPC messages.   When invoked, 
+.I
+emacsedit
+tries to send an EIPC message to the Emacs session that is running on the
+terminal specified by the environment variable EMACSEDIT_TTY (which is set
+up by process.ml for shells running in shell windows).  The EIPC message
+contains the arguments that were given to
+.I
+emacsedit.
+The Emacs session will edit the file given by the argument in a recursive
+edit.  When the recursive edit is exited (^C, ^X^C, etc.), Emacs will write
+the file, send a message to the
+.I
+emacsedit
+to let it know it has finished, and return to the shell window.
+.PP
+.I
+emacsedit
+can be used from outside of Emacs.
+.I
+emacsedit
+simply starts up a fresh Emacs on the controlling terminal
+if the environment variable EMACSEDIT_TTY is not set, or if the EIPC
+connection cannot be made for some reason.  The lack of EMACSEDIT_TTY
+means that this incarnation of
+.I
+emacsedit
+was not invoked by an Emacs shell window.  It will start up a new Emacs on
+the terminal.  If there is one already, they will fight for the terminal.
+.PP
+Failure to open a connection to the Emacs session running on this terminal
+may mean one of the following:
+.IP - 17
+There is no Emacs session running on this terminal.
+.I
+emacsedit
+starts one up and tries to send EIPC messages to it every two seconds
+for a maximum of 40 seconds, after which it gives up and exits.
+If the Emacs accepts the connection after it has started up, then
+it will edit the message using the same mechanism invoked by
+.I
+emacsedit
+from a shell window.  When you exit that mode via ^C, it writes your
+message out and exits, returning you to the mail session.
+.IP - 17
+.I
+emacsedit
+was invoked from a shell window, but then the invoking Emacs session
+refused to accept the connection.  This is almost certainly an accident;
+Emacs should always be ready to accept connections from programs run within
+shell windows.  In this case, starting up a new Emacs is clearly
+the wrong thing to do...
+.IP - 17
+There was some other problem, such as insufficient system buffer space.
+A new Emacs gets started even if there is already another one running.
+If there is, they will wind up fighting for the terminal.
+.SH EXAMPLES
+.PP
+To use emacsedit as your editor in berkeley Mail under 4.2bsd, add a line
+to your .mailrc file that reads as follows (using the path where emacsedit
+resides on your system, of course):
+.PP
+    set VISUAL=/usr/lib/emacs/emacsedit
+.PP
+This causes the Mail program to invoke emacsedit on the text of the message
+when you type ~v at the start of a line while typing in a new message.
+.SH SEE ALSO
+.IP "emacs(1)" 17
+the Emacs editor
+.SH BUGS
+Starting up a fresh Emacs if the EIPC connection cannot be made is not
+really the brightest thing for it to do, because the new Emacs winds up
+fighting the existing one for the terminal.   Since that doesn't happen
+that often, we'll have to live with it for now.  

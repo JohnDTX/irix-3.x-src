@@ -1,0 +1,38 @@
+#
+# NFS exported filesystem database (see EXPORTS(4) for more information).
+#
+# Entries in this file consist of lines containing the following fields:
+#
+# filesystem	[ netgroup ] [ hostname ] [ options ] ...
+#
+# Filesystem must be left-justified and should name the directory on which
+# a local filesystem is mounted.  Lines beginning with white space continue
+# the previous line's entry.
+#
+# Netgroup(4) and hostname refer to machines or collections of machines to
+# which filesystem is exported.
+#
+# Options begin with a hyphen and concatenate with comma.  Valid options
+# include the following:
+#	ro		readonly export
+#	rw		read/write export
+#	rootid=id	client uid 0 becomes id in filesystem
+#	hide		filesystem is not visible to clients from superior
+#			exported filesystem
+#	nohide		filesystem is visible to clients from exported
+#			parent filesystem
+# The default options are:
+#	-rw,rootid=nobody,hide
+#
+# Some example entries:
+#	/	-ro
+#	/cad	-rw,rootid=guest	cadusers cadsrc
+#	/usr	-ro,nohide
+#
+# A system having such exports would permit clients to mount / and see
+# all files in /usr, because of the nohide option.  Clients mounting /
+# could not see any files in /cad, however, because hide is the default.
+# Only a client belonging to the netgroup cadusers, or the client named
+# cadsrc, may mount /cad.  Clients could write on /cad via NFS, but not
+# on / or /usr.
+#

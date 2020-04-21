@@ -1,0 +1,419 @@
+#! /bin/sh
+#
+# Install [ -r root ] [ -cleanup ] [ entries ... ]
+#
+# Installation consists of swapping in the non-overwritable files, running
+# ranlib on all libraries, and installing kernels as vmunix and defaultboot.
+# The special case for libraries is "libg.a", which is not a library, although
+# its name would indicate that it is.  The default entries are all those named
+# in the "toc" file.
+#
+# The manual cat directories are now always cleared.
+
+case `devnm /usr` in
+*0a*)	echo WARNING: /usr is apparently not mounted. ;;
+esac
+
+case $1 in
+-r)	shift ; root=$1 ; shift ;;
+*)	root=/ ;;
+esac
+
+cd $root
+
+cleanup=false
+reboot=false
+
+if test $# -eq 0 
+then
+	set -- `awk '{ print $1 }' dist/toc` 
+else
+	if test $1 = "-cleanup"
+	then
+		cleanup=true
+		set -- ""
+	else
+		set -- `for e in $*
+			do
+				none=true
+				if grep -s "^$e	" dist/toc 
+				then echo $e ; none=false 
+				fi
+				if grep -s "^$e%	" dist/toc
+				then echo $e% ; none=false
+				fi
+				if $none 
+				then
+					echo "entry $e not found; ignored" 1>&2
+				fi
+			done
+		`
+	fi
+fi
+
+
+#  Clear manual cat directories
+if test -f /usr/man/[au]_man/cat?/*
+then
+	echo 'Clearing manual "cat" directories'
+	find /usr/man/[au]_man/cat? -type f -print |
+	xargs rm -f
+fi
+if test -f /usr/man/local/[au]_man/cat?/*
+then
+	echo 'Clearing local manual "cat" directories'
+	find /usr/man/local/[au]_man/cat? -type f -print |
+	xargs rm -f
+fi
+
+for e in $*
+do
+	cd $root
+
+	if test ! -f dist/list.$e 
+	then
+		echo $e: unknown entry 
+		continue 
+	else
+		case $e in
+		$prev%)	;;
+		*)	prev=$e 
+			echo Installing $e
+			;;
+		esac
+	fi
+
+	if test -f dist/fluff.$e
+	then
+		xargs rm -rf < dist/fluff.$e 2> /dev/null
+	fi
+
+	if test -x dist/instcmd.$e
+	then
+		dist/instcmd.$e
+	fi
+
+	if grep -s '^bin/ln$' dist/list.$e
+	then
+		echo ; echo "Install: installing new cp/ln/mv" ; echo
+		rm -f bin/cp bin/mv
+		bin/ln bin/ln bin/cp
+		bin/ln bin/ln bin/mv
+		chown root bin/ln ; chgrp sys bin/ln ; chmod 4755 bin/ln
+	fi
+
+	#
+	#  Install Shared Text Files
+	#
+	if grep -s '+$' dist/list.$e
+	then
+		echo ; echo "Install: shared-text files" ; echo
+
+		sed -n '/+$/s:+$::p' dist/list.$e |
+		while read f
+		do
+			if test -f $f+
+			then
+				echo $f+
+				rm -f $f
+				if test -f $f	#if shared text file is busy
+				then
+					mv $f $f%
+					reboot=true
+				fi
+				mv $f+ $f
+			fi
+		done
+	fi
+
+
+	#
+	#  Install Configuration Files 
+	#
+	if grep -s '.-$' dist/list.$e
+	then
+		echo ; echo "Install: configuration files" ; echo
+
+		sed -n '/-$/s:-$::p' dist/list.$e |
+		while read f
+		do
+			if test -f $f- 
+			then
+				type=`grep '^'$f'	' dist/configs | awk '{print $2}'`
+				echo $f-
+				case $type in
+				suggest)
+					if cmp -s $f- $f, ; then rm -f $f, ; fi
+					if test -f $f 
+					then 
+						if cmp -s $f $f- 
+						then
+							rm -f $f-
+						else 
+							mv $f- $f,
+						fi
+					else
+						mv $f- $f
+					fi
+				;; # end suggest
+				noupdate)
+					if test -f $f
+					then
+						rm -f $f-
+					else
+						mv $f- $f
+					fi
+				;; # end noupdate
+				update|*)
+					if cmp -s $f- $f= ; then rm -f $f= ; fi
+					if test -f $f 
+					then 
+						if cmp -s $f $f- 
+						then
+							rm -f $f-
+						else 
+							mv $f $f=
+							mv $f- $f
+						fi
+					else
+						mv $f- $f
+					fi
+				;; # end update|*
+				esac
+			fi
+		done
+	fi
+
+	if grep -s '/lib[^/]*\.a$' dist/list.$e
+	then
+		echo ; echo "Install: ranlib libraries" ; echo
+
+		grep '/lib[^/]*\.a$' dist/list.$e |
+		sed -e '/libg\.a/d' -e 's:/\([^/]*\)$:	\1:' |
+		while read d f
+		do
+			if test -f $d/$f
+			then (
+				echo $d/$f
+				cd $d ; ranlib $f
+			) fi 2>&1 | grep -v 'ranlib: cannot open -t'
+		done
+	fi
+
+	if grep -s '^kernels/' dist/list.$e
+	then
+		echo ; echo "Install: installing new kernel" ; echo
+
+		grep '^kernels/' dist/list.$e |
+		sed -n '/+$/s:+$::p' |
+		while read f
+		do
+			if test -f $f
+			then
+				kerneldev=`devnm /kernels | awk '{print "/dev/" $1;}'`
+				if dist/isefs $kerneldev 
+				then 
+					dist/ieck $kerneldev `ls -i $f | awk '{print $1;}'` > /dev/null
+				fi
+				rm -f vmunix defaultboot
+				ln $f vmunix
+				ln $f defaultboot
+				echo $f installed as /vmunix and /defaultboot.
+			fi
+		done
+		reboot=true
+	fi
+
+	if grep -s '^dev/MAKEDEV$' dist/list.$e && test -f dev/MAKEDEV
+	then
+		echo ; echo "Install: making new devices" ; echo
+		d1=`devnm $root/dev | awk '{print $1}'`
+		t1=`devnm $root/tmp | awk '{print $1}'`
+		tmp=tmp
+		if test ! -d $tmp ; then mkdir $tmp ; fi
+		if test "$d1" != "$t1"
+		then
+			tmp=tmpdev ; rm -rf $tmp ; mkdir $tmp
+			reboot=true 
+		fi
+		rm -rf newdev olddev
+		mkdir newdev 
+		chown bin newdev ; chgrp bin newdev ; chmod 755 newdev
+		cp dev/MAKEDEV newdev
+		( cd newdev ; MAKESHELL=/bin/sh ./MAKEDEV -s )
+		mvdir dev olddev
+		mv newdev dev
+		mv `find olddev ! -type d -print` $tmp
+		rm -rf olddev
+	fi
+
+	if test "$reboot" = false
+	then
+		after=`grep '@$' dist/list.$e`
+		for fname in $after
+		do
+			if test -f $fname 
+			then
+				reboot=true ; break
+			fi
+		done
+	fi
+done
+
+if test -x /dist/Modes
+then
+	/dist/Modes 2>&-
+fi
+
+if $reboot
+then echo "
+	NOTE:
+
+	There are some installation tasks to be done that cannot be
+	performed with the old system running.  After rebooting the
+	system with the new kernel and bringing it up multi-user, log
+	in as root and enter the following command:
+
+		/dist/Install -cleanup
+"
+	exit 0
+fi
+
+cd $root
+
+if $cleanup
+then
+	rm -rf tmpdev
+
+	set -- `ls -it bin/cc bin/f77 bin/pc 2> /dev/null`
+
+	if test $# -ge 4 -a "$1" -ne "$3"
+	then
+		echo ; echo "Install: linking /$2 and /$4" ; echo
+		rm -f $4 ; ln $2 $4
+	fi
+
+	if test $# -ge 6 -a "$1" -ne "$5"
+	then
+		echo ; echo "Install: linking /$2 and /$6" ; echo
+		rm -f $6 ; ln $2 $6
+	fi
+
+	# make /usr/include/machine symbolic link
+	case `uname -t` in
+	2???T|3???)	dir=ipII ;;
+	*)		dir=pmII ;;
+	esac
+	if test -d usr/include/$dir
+	then  (
+		echo ; echo "Install: linking usr/include/machine" 
+		echo
+		cd usr/include
+		rm -rf machine
+		ln -s $dir machine
+	) fi
+
+	# Remove the 'after' files--files that were needed by the installation.
+	#
+	# With the introduction of the newstyle "stat" call, we can only
+	# put these programs in place if the newstyle kernel is in place.
+	# "dist/newstat" is true if the kernel supports newstyle stat.
+
+	if dist/newstat
+	then
+		cat dist/list.* | grep '@$' |
+		while read fname
+		do
+			if test ! -f $fname ; then continue ; fi
+			oname=`expr $fname : '\(.*\)@'`
+			if test ! -f $oname ; then continue ; fi
+			case $fname in
+			bin/ln@)
+				rm -f bin/cp bin/mv 
+				ln bin/ln@ bin/cp
+				ln bin/ln@ bin/mv
+				mv bin/ln@ bin/ln
+				;;
+			*)
+				rm -f $oname
+				if test -f $oname ; then mv $oname /tmp ; fi
+				mv $fname $oname
+			esac
+		done
+	else
+		echo
+		echo 'The new kernel is apparently not properly installed.'
+		echo 'You must Install the standard system (upd), reboot,'
+		echo 'and rerun /dist/Install -cleanup.'
+		echo
+		echo 'Hit return to continue: \c' ; read x
+	fi
+
+	# Remove shared text files that were busy during the installation.
+	cat dist/list.* | sed -n '/+$/s:+$:%:p' | xargs rm -f
+
+	# Execute the "cleanup" custom commands
+	if test -x dist/instcmd.cln
+	then
+		dist/instcmd.cln
+	fi
+
+	echo ; echo "***** Configuration files installed *****"
+	echo "The following are the configuration files installed on"
+	echo "your system.  These files contain site specific information"
+	echo "which you may have to incorporate for your installation."
+	echo "Your old configuration files have been saved in the"
+	echo "files with trailing equals signs (=)."
+	echo
+	cat dist/list.* | grep -e '-$' | sed -n '/-$/s:-$::p' |
+	while read filename
+	do
+		if test -f $filename -a -f $filename= 
+		then
+			echo $filename $filename= |
+				awk '{ printf "	%-20s  %s\n", $1, $2 }'
+		fi
+	done
+
+	echo ; echo "***** Suggested configuration files installed *****"
+	echo "The following are suggested configuration files installed on"
+	echo "your system.  These files contain site specific information"
+	echo "which should be incorporated into your existing configuration"
+	echo "files.  Your old configuration files are unchanged; the suggested"
+	echo "configuration files are marked with a trailing comma (,)."
+	echo
+	cat dist/list.* | grep -e '-$' | sed -n '/-$/s:-$::p' |
+	while read filename
+	do
+		if test -f $filename -a -f $filename, 
+		then
+			echo $filename $filename, |
+				awk '{ printf "	%-20s  %s\n", $1, $2 }'
+		fi
+	done
+
+	echo ; echo "***** Configuration files not yet installed *****"
+	echo "The following are configuration files which did not install"
+	echo "properly on your system.  The new configuration files are"
+	echo "denoted by a trailing dash (-)."
+	echo
+	echo "NOTE: If any files are listed below, you should rerun"
+	echo "/dist/Install on the images that you just installed."
+	echo
+	configs=0
+	list=`cat dist/list.* | grep -e '-$' | sed -n '/-$/s:-$::p'`
+	for filename in $list
+	do
+		if test -f $filename -a -f $filename-
+		then
+			echo $filename- $filename |
+				awk '{ printf "	%-20s  %s\n", $1, $2 }'
+			configs=1
+		fi
+	done
+	if test $configs = 0
+	then
+		echo "	All configuration files were installed correctly."
+	fi
+	echo
+fi

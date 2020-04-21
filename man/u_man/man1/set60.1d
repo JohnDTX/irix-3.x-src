@@ -1,0 +1,24 @@
+'\"macro stdmacro
+.TH SET60 1D
+.SH NAME
+set60, set30, setntsc \- set video output type
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/mexdemos/bin/set60 
+.br
+.B /usr/people/mexdemos/bin/set30
+.br
+.B /usr/people/mexdemos/bin/setntsc
+.fi
+.SH DESCRIPTION
+.PP
+These programs set the video output of the IRIS to one of the three possible modes.  \f2set60\f1 sets the output to 60 Hz non-interlaced, \f2set30\f1 sets it to 30 Hz interlaced, and \f2setntsc\f1 sets it to RS-170 NTSC video.
+.SH NOTE
+.PP
+The IRIS can be set up to display only two out of the three types of output (unless the user swaps boards).  The users can pick which two display modes they want when they order their system.  This means that only two of these three commands are going to 
+affect the display.  Typing a command that causes a mode that is not installed on the system will have no effect.
+.SH WARNING
+.PP
+When one of these commands are executed, the video output is set to that type.  If the display device is not of that type, the screen will display garbage.  The keyboard will still accept input.  Enter the command to set the video to the correct mode.  This will restore the image on the screen.
+

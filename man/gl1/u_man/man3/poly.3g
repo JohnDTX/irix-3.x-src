@@ -1,0 +1,66 @@
+.TH poly  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I poly
+- outline a polygon
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "poly(n, parray) "
+.B "long n; "
+.B "Coord parray[][3];"
+.IP 
+.B "polyi(n, parray) "
+.B "long n; "
+.B "Icoord parray[][3];"
+.IP 
+.B "poly2(n, parray) "
+.B "long n; "
+.B "Coord parray[][2];"
+.IP 
+.B "poly2i(n, parray) "
+.B "long n; "
+.B "Icoord parray[][2];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine poly(n, parray)"
+.B "integer n"
+.B "real parray(3,n)"
+.IP 
+.B "subroutine polyi(n, parray)"
+.B "integer n"
+.B "integer parray(3,n)"
+.IP 
+.B "subroutine poly2(n, parray)"
+.B "integer n"
+.B "real parray(2,n)"
+.IP 
+.B "subroutine poly2i(n, parray)"
+.B "integer n"
+.B "integer parray(2,n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure poly(n: integer; var parray: Coord3array);"
+.IP 
+.B "procedure polyi(n: integer; var parray: Icoord3array);"
+.IP 
+.B "procedure poly2(n: integer; var parray: Coord2array);"
+.IP 
+.B "procedure poly2i(n: integer; var parray: Icoord2array);"
+.sp
+.SH DESCRIPTION
+\f2Poly\f1 takes two arguments:  an 
+array of points and the number of points
+in that array.
+A polygon is represented
+as an array of points.  The first and last points are automatically connected
+to close the polygon.  The points can be expressed as integers or real
+numbers, in
+2D or 3D space.
+Two-dimensional polygons are drawn with \f3z\f1=0.
+The polygon is outlined using the current linestyle, 
+linewidth, color, and writemask.
+.SH "SEE ALSO"
+.I polf, rect, rectf

@@ -1,0 +1,35 @@
+.TH RGBcolor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B RGBcolor
+\- sets the current color in RGB mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "RGBcolor(red, green, blue) "
+.B "short red, green, blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine RGBcol(red, green, blue)"
+.B "integer*4 red, green, blue"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure RGBcolor(red, green, blue: longint);"
+.SH DESCRIPTION
+\f3RGBcolor\f1 sets the current color in RGB mode.  \f2red\f1, \f2green\f1,
+\f2blue\f1 are each 8-bit values.  The system writes these
+numbers directly into the bitplanes whenever it draws a pixel.
+These values control the intensity of red, green, and 
+blue displayed on the screen.
+.PP
+\f3RGBcolor\f1 is available only in RGB mode.
+.SH "SEE ALSO"
+color, gRGBcolor, RGBwritemask
+.sp
+.I Programming Guide, 
+Section 6.3, Colors and Writemasks 

@@ -1,0 +1,86 @@
+#
+# Makefile for GF2 microcode sources
+#
+
+CC       = cc -DNOZPOLY -DNOZSCAN
+INCLUDE  = -I../include
+INCLUDES = ../include/mas.h \
+	   ../include/fbcparams.h \
+	   ../include/fbc.h \
+	   ../include/fbc.mic.h\
+	   ../include/consts.h
+
+CFLAGS   = -DUC4 -DFBC $(DEFINES) $(INCLUDE)
+
+.SUFFIXES : .E
+
+SRCS     =	\
+		attributes.c\
+		lowmem.c\
+		dispatch.c\
+		vectors.c\
+		polydraw.c\
+		polyclose.c\
+		points.c\
+		block.c\
+		hitrept.c\
+		char.c\
+		chdraw.c\
+		cursor.c\
+		pixels.c\
+		mvppixels.c\
+		readpixels.c\
+		fixchar.c\
+		divide.c\
+		viewport.c\
+		copyfont.c\
+		diag.c\
+		stm.c\
+		modes.c\
+		copypixels.c\
+		ldivide.c\
+		depthvec.c\
+		zvectors.c
+
+MICS =		\
+		attributes.o\
+		dispatch.o\
+		lowmem.o\
+		vectors.o\
+		block.o\
+		pixels.o\
+		mvppixels.o\
+		readpixels.o\
+		cursor.o\
+		copypixels.o\
+		copyfont.o\
+		viewport.o\
+		char.o\
+		chdraw.o\
+		fixchar.o\
+		diag.o\
+		divide.o\
+		stm.o\
+		hitrept.o\
+		modes.o\
+		ldivide.o\
+		points.o\
+		depthvec.o\
+		zvectors.o
+
+
+all: $(INCLUDES) $(MICS) 
+
+modes.o: ../include/version.h
+
+.c.o: 
+	$(CC) $(CFLAGS) -c $< 
+
+.c.E: 
+	$(CC) $(CFLAGS) -E $<  >$*.E
+
+
+# remove files that can be re-created
+
+clean :
+	rm -f $(OBJS) *.out *.CKP *.BAK .emacs* *.o

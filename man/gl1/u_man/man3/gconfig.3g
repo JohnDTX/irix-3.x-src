@@ -1,0 +1,37 @@
+.TH gconfig 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gconfig
+- reconfigure the IRIS
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gconfig()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gconfi"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gconfig;"
+.sp
+.SH DESCRIPTION
+.I Gconfig
+uses the map mode, display mode, and number of requested planes to compute 
+and allocate available planes and define the mapping from colors
+to bitplanes.
+.I Doublebuffer,
+.I multimap,
+.I onemap,
+.I RGBmode,
+.I setplanes,
+and
+.I singlebuffer
+do not take effect until \f2gconfig\f1 is called.  After the \f2gconfig\f1
+call, the writemask, color, and cursor color and writemask are all undefined.
+The contents of the color map are unchanged.
+.SH "SEE ALSO"
+.I doublebuffer, multimap, onemap, RGBmode, setplanes, singlebuffer
+.SH NOTE
+This command can only be used in immediate mode.

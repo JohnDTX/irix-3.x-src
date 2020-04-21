@@ -1,0 +1,32 @@
+From elvin!woo Mon Sep 23 17:09:29 1985
+Received: by olympus.UUCP (4.12/4.7)
+	id AA01802; Mon, 23 Sep 85 17:09:24 pdt
+Received: by elvin.UUCP (4.12/4.7)
+	id AA11381; Mon, 23 Sep 85 17:10:13 pdt
+From: elvin!woo (Mason Woo)
+Message-Id: <8509240010.AA11381@elvin.UUCP>
+Date: 23 Sep 1985 1710-PDT (Monday)
+To: olympus!gb
+Cc: 
+Subject: Pascal
+Status: R
+
+Greg, I'm spending the week on the hotline.  I got a call about
+Pascal on GL2-W2.3, and I'm stumped.  The customer is trying to
+compile the test program which is found in the Pascal Release Notes,
+but it doesn't compile.  Specifically, the program gets errors on
+the #include <pglmacs.h> line.  The # sign is undefined.  The 
+pglconsts.h, pgltypes.h, pglmacs.h, pglprocs.h files are not anywhere
+to be found.  I also have some notes which Mietta used to help
+some Swedish customers a few weeks back.  These notes consist of a 
+README, an assembler file, several .h files, and a test program.
+My questions are:
+
+1)  Is there any chance that these programs will work or is it totally
+hopeless?
+2)  Do customers get these .h files with the Pascal option?  He has
+all the documentation but seemingly none of the .h files.  Does he
+have to write his own .h files?
+
+Mason Woo (elvin!woo)
+

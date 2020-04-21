@@ -1,0 +1,69 @@
+tocrc needs changing to capitalize these subsections:
+1d
+The following pages have bad NAME sections:
+bc(1) bc: arbitrary-precision arithmetic language.
+bs(1) bs: a compiler/interpreter for modest-sized programs.
+checkcw(1) checkcw: verifies constant-width text prepared by cw(1) for troff.
+col(1) col: filter reverse line-feeds.
+csh(1) csh: a shell (command interpreter) with C-like syntax.
+cube(1d) cube: real-time display of famous cube puzzle.
+cw(1) cw: prepare constant-width text for troff.
+diff3(1) diff3: 3-way differential file comparison.
+edge(1G) edge: window-based debugger.
+extcentry(1) extcentry: extract FORTRAN-callable entry points from a C file.
+hp(1) hp: handle special functions of HP 2640 and 2621-series terminals.
+ipcs(1) ipcs: report inter-process communication facilities status.
+light(1d) light: demonstrates real-time lighting and shadows.
+macref(1) macref: produce cross-reference listing of macro files.
+merge(1) merge: three-way file merge.
+mkf2c(1) mkf2c, mkc2f: generate C-FORTRAN interface routines.
+ndx(1) ndx: create a subject-page index for a document.
+sdiff(1) sdiff: side-by-side difference program.
+shadow(1d) shadow: full-screen armchair pilot's view of the dogfight.
+su(1) su: become super-user or another user.
+superbreak(1d) superbreak: 3-D version of the game "breakout".
+umask(1) umask: set file-creation mode mask.
+uuto(1C) uuto, uupick: public unix system-to-unix system file copy.
+yacc(1) yacc: yet another compiler-compiler.
+zshadecar(1d) zshadecar, zshadeabstract, zshadeegg, zshadejet: shading and z-buffering demo.
+acctcms(1M) acctcms: command summary from per-process accounting records.
+acctcon(1M) acctcon1, acctcon2: connect-time accounting.
+inetd(1M) inetd: internet ``super-server''.
+mkcentpr(1M) mkcentpr: register a Centronics-interface printer with LP.
+multi(1M) multi: switch the system to multi-user mode.
+ncheck(1M) ncheck: generate names from i-numbers.
+rc.getdate(1M) rc.getdate: user-configurable system date initialization.
+single(1M) single: switch the system to single-user mode.
+uuclean(1M) uuclean: uucp spool directory clean-up.
+select(2) select: synchronous I/O multiplexing - TCP.
+shutdown(2) shutdown: shut down part of a full-duplex connection.
+socket(2) socket: create an endpoint for communication - TCP.
+statfs(2) statfs, fstatfs: get file system information - TCP.
+sync(2) sync: update super-block.
+a64l(3C) a64l, l64a: convert between long integer and base-64 ASCII string.
+atof(3C) atof (_latof): convert ASCII string to floating-point number.
+dial(3C) dial, undial: establish and relinquish an out-going terminal line connection.
+drand48(3C) drand48, erand48, lrand48, nrand48, mrand48, jrand48, srand48, seed48, lcong48: generate uniformly distributed pseudo-random numbers.
+ecvt(3C) ecvt (_d_ecvt), fcvt (_d_fcvt), gcvt (_d_gcvt): convert floating-point number to string.
+frexp(3C) frexp (_lfrexp), ldexp (_lldexp), modf (_lmodf): manipulate parts of floating-point numbers.
+l3tol(3C) l3tol, ltol3: convert between 3-byte integers and long integers.
+matherr(3M) matherr: error-handling function.
+rand(3C) rand, srand: simple random-number generator.
+setfpe(3X) setfpe, fpecleanup: FORTRAN and Pascal floating-point exception handling system.
+setjmp(3C) setjmp, longjmp: non-local goto.
+acct(4) acct: per-process accounting file format.
+cshrc(4) cshrc: csh system-wide .login file.
+greek(5) greek: graphics for the extended TTY-37 type-box.
+ttt(6) ttt, cubic: tic-tac-toe.
+wump(6) wump: the game of hunt-the-wumpus.
+dsd(7) dsd: st-506 disk/tape/floppy controller.
+floppy(7) floppy: st-506 disk/tape/floppy controller.
+ip(7P) ip: Internet Protocol - TCP.
+qic(7) qic: st-506 disk/tape controller.
+sii(7) sii: Interphase Storager 2 esdi/st-506 disk/tape/floppy controller.
+siq(7) siq: Interphase Storager 2 qic-02 tape controller.
+csh(1) eval: re-evaluate shell data.
+csh(1) switch: multi-way command branch.
+sh(1) case: multi-way command branch.
+sh(1) eval: re-evaluate shell data.
+sh(1) readonly: make shell variables read-only.

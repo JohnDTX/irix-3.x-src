@@ -1,0 +1,642 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: JPHASE.1.TEXT                            *)
+(*                                                                           *)
+(*          (C) Copyright 1984, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               31-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure phase1;
+  var firstbyte: integer; lftndata: pcommon;
+  
+  procedure incode(LibraryFlag: Boolean; firstbyte: integer);
+    var i: integer; DoneFlag: Boolean;
+
+    { +----+ }
+    { | 80 | }
+    { +----+ }
+    
+    procedure head1block;
+      var blocksize,size: longint; lname: alfa8; comment: string63;
+          lmod: pmodlist; mblock,mbyte: integer;
+    begin
+    moduleloc := nxttaddr;
+    mblock := inblock + (inbyte - 1) div 512;
+    mbyte := (inbyte - 1) mod 512;
+    blocksize := next3bytes;
+    reada8(lname); reada8(lname); size := next4bytes;
+    new(lmod);
+    with lmod^ do begin
+         modblock := mblock; modbyte := mbyte; nextmodule := nil;
+         end;
+    if modulelist = nil
+    then modulelist := lmod
+    else lastmodule^.nextmodule := lmod;
+    lastmodule := lmod;
+    reads63(comment,blocksize - 24);
+    if DebugFlag
+    then writeln(output,'Head Block ',lname,'   ',comment);
+    end; {head1block}
+    
+
+    { +----+ }
+    { | 81 | }
+    { +----+ }
+    
+    procedure end1block;
+      var blocksize: integer;
+    begin
+    blocksize := next3bytes; nxttaddr := nxttaddr + next4bytes;
+    if blocksize <> 8 then error('End block size <> 8');
+    if LibraryFlag then DoneFlag := TRUE;
+    end; {end1block}
+    
+    { +----+ }
+    { | 84 | }
+    { +----+ }
+    
+    procedure start1block;
+      var lloc, globalsize, blocksize: longint; comment: string63;
+          lsymbol: psymbol;
+    begin
+    blocksize := next3bytes; lloc := next4bytes; globalsize := next4bytes;
+    reads63(comment,blocksize - 12);
+    if StartFlag
+    then error('Multiple start locations')
+    else begin
+         StartFlag := TRUE;
+         new(lsymbol);
+         with lsymbol^ do begin
+              symname.linkno := -1; symname.nmlen := 6; symname.n4 := '$STA';
+              new(symname.tail,0); symname.tail^.a4 := 'RT  ';
+              llink := nil; rlink := nil; Defined := TRUE;
+              loc := lloc + moduleloc;
+              end;
+         entername(lsymbol);
+         end;
+    end; {start1block}
+
+    { +----+ }
+    { | 85 | } { Self-relocating }
+    { +----+ }
+    
+    procedure code1block;
+      var blocksize: longint;
+    begin
+    blocksize := next3bytes; skip(blocksize - 4);
+    end; {code1block}
+    
+    
+    { +----+ }    { +----+ }
+    { | B0 | }    { | 82 | }
+    { +----+ }    { +----+ }
+
+    procedure entry1block(LongNames: Boolean);
+      var blocksize,lloc: longint; lsymbol: psymbol; s: string63;
+          i: integer; lname,uname: alfa8; comment: string63;
+    begin
+    blocksize := next3bytes;
+    if LongNames
+    then begin lloc := next4bytes; readlinkid; end
+    else begin
+         reada8(lname); reada8(uname);
+         glinkid.linkno := -1; glinkid.nmlen := 0;
+         glinkid.n4 := '    '; glinkid.tail^.a4 := '    ';
+         for i := 1 to 8 do
+             if lname[i] <> ' '
+             then begin
+                  glinkid.nmlen := glinkid.nmlen + 1;
+                  if i <= 4
+                  then glinkid.n4[i] := lname[i]
+                  else glinkid.tail^.a28[i-4] := lname[i];
+                  end;
+         lloc := next4bytes;
+         reads63(comment,blocksize - 24);
+         end;
+    lsymbol := lookupname;
+    if lsymbol = nil
+    then begin
+         if glinkid.n4[1] <> ' ' {Don't enter block data name}
+         then begin
+           new(lsymbol);
+           with lsymbol^ do
+                begin symname := glinkid;
+                case glinkid.nmlen of
+                  0,1,2,3,4:   symname.tail := nil;
+                  5,6,7,8:     begin
+                               new(symname.tail,0);
+                               symname.tail^.a4 := glinkid.tail^.a4;
+                               end;
+                  9,10,11,12:  begin
+                               new(symname.tail,1);
+                               symname.tail^.a8 := glinkid.tail^.a8;
+                               end;
+                  13,14,15,16: begin
+                               new(symname.tail,2);
+                               symname.tail^.a12 := glinkid.tail^.a12;
+                               end;
+                  17,18,19,20: begin
+                               new(symname.tail,3);
+                               symname.tail^.a16 := glinkid.tail^.a16;
+                               end;
+                  21,22,23,24: begin
+                               new(symname.tail,4);
+                               symname.tail^.a20 := glinkid.tail^.a20;
+                               end;
+                  25,26,27,28: begin
+                               new(symname.tail,5);
+                               symname.tail^.a24 := glinkid.tail^.a24;
+                               end;
+                  29,30,31,32: begin
+                               new(symname.tail,6);
+                               symname.tail^.a28 := glinkid.tail^.a28;
+                               end;
+                end; {case}
+                llink := nil; rlink := nil;
+                Defined := TRUE; loc := moduleloc + lloc;
+                end;
+           entername(lsymbol);
+           end;
+         end
+    else with lsymbol^ do
+              if Defined
+              then begin
+                   makelname(symname,s); error(concat('Double defined: ',s));
+                   end
+              else begin Defined := TRUE; loc := moduleloc + lloc; end;
+    end; {entry1block}
+
+    { +----+ }    { +----+ }    { +----+ }
+    { | B1 | }    { | 83 | }    { | 89 | }
+    { +----+ }    { +----+ }    { +----+ }
+    
+    procedure extern1block(LongNames: Boolean; FShortRef: Boolean);
+      var blocksize,bytesleft: longint; lsymbol: psymbol; lref: preflist;
+          i: integer; lname,uname: alfa8;
+    begin
+    blocksize := next3bytes;
+    if LongNames
+    then readlinkid
+    else begin
+         reada8(lname); reada8(uname);
+         glinkid.linkno := -1; glinkid.nmlen := 0;
+         glinkid.n4 := '    '; glinkid.tail^.a4 := '    ';
+         for i := 1 to 8 do
+             if lname[i] <> ' '
+             then begin
+                  glinkid.nmlen := glinkid.nmlen + 1;
+                  if i <= 4
+                  then glinkid.n4[i] := lname[i]
+                  else glinkid.tail^.a28[i-4] := lname[i];
+                  end;
+         end;
+    lsymbol := lookupname;
+    if lsymbol = nil
+    then begin
+         new(lsymbol);
+         with lsymbol^ do
+              begin symname := glinkid;
+              case glinkid.nmlen of
+                0,1,2,3,4:   symname.tail := nil;
+                5,6,7,8:     begin
+                             new(symname.tail,0);
+                             symname.tail^.a4 := glinkid.tail^.a4;
+                             end;
+                9,10,11,12:  begin
+                             new(symname.tail,1);
+                             symname.tail^.a8 := glinkid.tail^.a8;
+                             end;
+                13,14,15,16: begin
+                             new(symname.tail,2);
+                             symname.tail^.a12 := glinkid.tail^.a12;
+                             end;
+                17,18,19,20: begin
+                             new(symname.tail,3);
+                             symname.tail^.a16 := glinkid.tail^.a16;
+                             end;
+                21,22,23,24: begin
+                             new(symname.tail,4);
+                             symname.tail^.a20 := glinkid.tail^.a20;
+                             end;
+                25,26,27,28: begin
+                             new(symname.tail,5);
+                             symname.tail^.a24 := glinkid.tail^.a24;
+                             end;
+                29,30,31,32: begin
+                             new(symname.tail,6);
+                             symname.tail^.a28 := glinkid.tail^.a28;
+                             end;
+              end; {case}
+              llink := nil; rlink := nil;
+              Defined := FALSE;
+              end;
+         entername(lsymbol);
+         end;
+    if LongNames
+    then bytesleft := blocksize - glinkid.nmlen - 7
+    else bytesleft := blocksize - 20;
+    if odd(bytesleft) then bytesleft := bytesleft - 1;
+    while bytesleft > 0 do begin
+          new(lref);
+          with lref^ do begin
+               if FShortRef
+               then begin
+                    refloc := nextword + moduleloc;
+                    bytesleft := bytesleft - 2;
+                    end
+               else begin
+                    refloc := next4bytes + moduleloc;
+                    bytesleft := bytesleft - 4;
+                    end;
+               srefto := lsymbol; nextref := symrefs;
+               symrefs := lref; symrefcount := symrefcount + 1;
+               end;
+          end;
+    end; {extern1block}
+    
+    { +----+ }
+    { | B3 | } { FORTRAN Data Area Relocated by Function Address }
+    { +----+ }
+    
+    procedure fdfrel1block;
+      var blocksize: integer; lfdfreloc: pfdreloc; lsymbol: psymbol;
+          dataname: pcommon; doffset: longint;
+    begin
+    blocksize := next3bytes;
+    readlinkid; dataname := lookupcommon(ftndatatree);
+    doffset := next4bytes;
+    readlinkid; lsymbol := lookupname;
+    if lsymbol = nil
+    then begin
+         if glinkid.n4[1] <> ' ' {Don't enter block data name}
+         then begin
+           new(lsymbol);
+           with lsymbol^ do
+                begin symname := glinkid;
+                case glinkid.nmlen of
+                  0,1,2,3,4:   symname.tail := nil;
+                  5,6,7,8:     begin
+                               new(symname.tail,0);
+                               symname.tail^.a4 := glinkid.tail^.a4;
+                               end;
+                  9,10,11,12:  begin
+                               new(symname.tail,1);
+                               symname.tail^.a8 := glinkid.tail^.a8;
+                               end;
+                  13,14,15,16: begin
+                               new(symname.tail,2);
+                               symname.tail^.a12 := glinkid.tail^.a12;
+                               end;
+                  17,18,19,20: begin
+                               new(symname.tail,3);
+                               symname.tail^.a16 := glinkid.tail^.a16;
+                               end;
+                  21,22,23,24: begin
+                               new(symname.tail,4);
+                               symname.tail^.a20 := glinkid.tail^.a20;
+                               end;
+                  25,26,27,28: begin
+                               new(symname.tail,5);
+                               symname.tail^.a24 := glinkid.tail^.a24;
+                               end;
+                  29,30,31,32: begin
+                               new(symname.tail,6);
+                               symname.tail^.a28 := glinkid.tail^.a28;
+                               end;
+                end; {case}
+                llink := nil; rlink := nil; Defined := FALSE;
+                end;
+           entername(lsymbol);
+           end;
+         end;
+    new(lfdfreloc);
+    with lfdfreloc^ do begin
+      dname := dataname; daddr := doffset; rname := @lsymbol^;
+      next := fdfreloclist; fdfreloclist := lfdfreloc;
+      end;
+    CConstructs := TRUE;
+    end; {fdfrel1block}
+
+    { +----+ }    { +----+ }
+    { | B4 | }    { | 8A | } { FORTRAN Data Area Definition Block }
+    { +----+ }    { +----+ }
+
+    procedure fddef1block(LongNames: Boolean);
+      var blocksize: integer; lftndata: pcommon; comsize: longint;
+          i: integer; uname: alfa8; comment: string63;
+    begin
+    blocksize := next3bytes;
+    if LongNames
+    then begin readlinkid; comsize := next4bytes; end
+    else begin
+         reada8(uname);
+         glinkid.linkno := -1; glinkid.nmlen := 0;
+         glinkid.n4 := '    '; glinkid.tail^.a4 := '    ';
+         for i := 1 to 8 do
+             if uname[i] <> ' '
+             then begin
+                  glinkid.nmlen := glinkid.nmlen + 1;
+                  if i <= 4
+                  then glinkid.n4[i] := uname[i]
+                  else glinkid.tail^.a28[i-4] := uname[i];
+                  end;
+         comsize := next4bytes;
+         reads63(comment,blocksize - 16);
+         end;
+    if comsize > 0
+    then begin
+         comsize := (comsize + 3) and $fffffffc;
+         lftndata := lookupcommon(ftndatatree);
+         if lftndata^.size < comsize then lftndata^.size := comsize;
+         end;
+    end; {fddef1block}
+    
+    { +----+ }
+    { | B5 | } { FORTRAN Data Area Initialization Block }
+    { +----+ }
+    
+    procedure fdinit1block;
+      var skipcount,blocksize,i: longint; junk: integer;
+          lftndata: pcommon; lmodlist: pmodlist; ExitFlag: Boolean;
+          thisdata,lastdata,lpdata: pdatainit;
+    begin
+    new(lmodlist);
+    with lmodlist^ do begin
+         modblock := inblock + (inbyte - 1) div 512;
+         modbyte := (inbyte - 1) mod 512; nextmodule := nil;
+         end;
+    blocksize := next3bytes; readlinkid;
+    lftndata := lookupcommon(ftndatatree);
+    new(lpdata);
+    with lpdata^ do begin
+         datamodule := lmodlist; dataloc := next4bytes; datanext := nil;
+         if lftndata^.initlist = nil
+         then lftndata^.initlist := lpdata
+         else if dataloc < lftndata^.initlist^.dataloc
+              then begin
+                   datanext := lftndata^.initlist;
+                   lftndata^.initlist := lpdata;
+                   end
+              else begin
+                   if dataloc > lftndata^.lastinit^.dataloc
+                   then thisdata := lftndata^.lastinit
+                   else thisdata := lftndata^.initlist;
+                   ExitFlag := FALSE;
+                   repeat
+                          lastdata := thisdata; thisdata := thisdata^.datanext;
+                          if thisdata <> nil
+                          then ExitFlag := thisdata^.dataloc > dataloc
+                          else ExitFlag := TRUE;
+                   until ExitFlag;
+                   lpdata^.datanext := thisdata; lastdata^.datanext := lpdata;
+                   end;
+         lftndata^.lastinit := lpdata;
+         end;
+    if odd(blocksize) then blocksize := blocksize + 1;
+    skipcount := blocksize - 11 - glinkid.nmlen;
+    if not odd(glinkid.nmlen) then skipcount := skipcount - 1;
+    for i := 1 to skipcount do
+        junk := nextbyte;
+    end; {fdinit1block}
+    
+    
+    { +----+ }    { +----+ }
+    { | B6 | }    { | 8C | }  { FORTRAN Data Area Reference Block }
+    { +----+ }    { +----+ }
+    
+    procedure fdref1block(LongNames: Boolean);
+      var blocksize,bytesleft: longint; lcommon: pcommon; lref: preflist;
+          i: integer; uname: alfa8;
+    begin
+    blocksize := next3bytes;
+    if LongNames
+    then begin
+         readlinkid;
+         bytesleft := blocksize - glinkid.nmlen - 7;
+         if odd(bytesleft) then bytesleft := bytesleft - 1;
+         end
+    else begin
+         reada8(uname);
+         glinkid.linkno := -1; glinkid.nmlen := 0;
+         glinkid.n4 := '    '; glinkid.tail^.a4 := '    ';
+         for i := 1 to 8 do
+             if uname[i] <> ' '
+             then begin
+                  glinkid.nmlen := glinkid.nmlen + 1;
+                  if i <= 4
+                  then glinkid.n4[i] := uname[i]
+                  else glinkid.tail^.a28[i-4] := uname[i];
+                  end;
+         bytesleft := blocksize - 12;
+         end;
+    lcommon := lookupcommon(ftndatatree);
+    while bytesleft > 0 do begin
+          new(lref);
+          with lref^ do begin
+               refloc := next4bytes + moduleloc; bytesleft := bytesleft - 4;
+               crefto := lcommon; nextref := comrefs;
+               comrefs := lref; comrefcount := comrefcount + 1;
+               end;
+          end;
+    end; {fdref1block}
+    
+    { +----+ }
+    { | B7 | } { FORTRAN Data Area Relocation Block }
+    { +----+ }
+    
+    procedure fdrel1block;
+      var blocksize: integer; lfdreloc: pfdreloc;
+    begin
+    blocksize := next3bytes;
+    new(lfdreloc);
+    with lfdreloc^ do begin
+      readlinkid; dname := lookupcommon(ftndatatree);
+      daddr := next4bytes;
+      readlinkid; rname := lookupcommon(ftndatatree);
+      next := fdreloclist; fdreloclist := lfdreloc;
+      end;
+    CConstructs := TRUE;
+    end; {fdrel1block}
+
+
+    { +----+ }
+    { | 86 | }
+    { +----+ }
+
+    procedure reloc1block;
+      var blocksize: longint; lsymbol: psymbol; lref: preflist;
+    begin
+    blocksize := next3bytes - 4;
+    new(lsymbol);
+    with lsymbol^ do begin
+        Defined := TRUE; loc := moduleloc;
+        end;
+    while blocksize > 0 do begin
+          new(lref);
+          with lref^ do begin
+               refloc := next4bytes + moduleloc;
+               srefto := lsymbol; nextref := symrefs;
+               symrefs := lref; symrefcount := symrefcount + 1;
+               end;
+          blocksize := blocksize - 4;
+          end;
+    end; {reloc1block}
+
+
+    { +----+ }
+    { | A0 | } { Var/type Def }
+    { +----+ }
+    
+    procedure vartyp1block;
+      var blocksize: longint; lmod: pmodlist; mblock,mbyte: integer;
+    begin
+    mblock := inblock + (inbyte - 1) div 512;
+    mbyte := (inbyte - 1) mod 512;
+    new(lmod);
+    with lmod^ do begin
+         nextmodule := nil; modblock := mblock; modbyte := mbyte;
+         end;
+    if vartypelist = nil
+    then vartypelist := lmod
+    else lastvartype^.nextmodule := lmod;
+    lastvartype := lmod;
+    blocksize := next3bytes;
+    if odd(blocksize) then blocksize := blocksize + 1;
+    skip(blocksize - 4);
+    end; {vartyp1block}
+    
+    { +----+ }
+    { | A1 | } { Break Points }
+    { +----+ }
+    
+    procedure bpoint1block;
+      var blocksize: longint; lmod: pmodlist; mblock,mbyte: integer;
+    begin
+    mblock := inblock + (inbyte - 1) div 512;
+    mbyte := (inbyte - 1) mod 512;
+    new(lmod);
+    with lmod^ do begin
+         nextmodule := nil; modblock := mblock; modbyte := mbyte;
+         end;
+    if bpointlist = nil
+    then bpointlist := lmod
+    else lastbpoint^.nextmodule := lmod;
+    lastbpoint := lmod;
+    blocksize := next3bytes;
+    if odd(blocksize) then blocksize := blocksize + 1;
+    skip(blocksize - 4);
+    end; {bpoint1block}
+    
+  begin {incode}
+  DoneFlag := FALSE; i := firstbyte;
+  while (i <> 0) and not DoneFlag do begin
+        if DebugFlag
+        then writeln('*** Block ',i:2 hex);
+        case i of
+          $80: head1block;
+          $81: end1block;
+          $82: entry1block(FALSE);
+          $83: extern1block(FALSE,FALSE);
+          $84: start1block;
+          $85: code1block;
+          $89: extern1block(FALSE,TRUE);
+          $8A: fddef1block(FALSE);
+          $8C: fdref1block(FALSE);
+          $B0: entry1block(TRUE);
+          $B1: extern1block(TRUE,FALSE);
+          $B3: fdfrel1block;
+          $B4: fddef1block(TRUE);
+          $B5: fdinit1block;
+          $B6: fdref1block(TRUE);
+          $B7: fdrel1block;
+          $86: reloc1block;
+          $A0: vartyp1block;
+          $A1: bpoint1block;
+        otherwise: begin
+                   error('Bad Block');
+                   writeln('*** Value = ',i:2 hex,' ***');
+                   DoneFlag := TRUE;
+                   end;
+        end; {case}
+        i := nextbyte;
+        end;
+  end; {incode}
+  
+  procedure timedate;
+    var systime, syspid: longint; lsymbol: psymbol; i: integer;
+        maparray: packed array[1..64] of char;
+  begin {timedate}
+  maparray:='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_%';
+  new(lsymbol);
+  if (HOSTOS = MERLIN) or (HOSTOS = UNOS)
+  then begin
+       syspid := nxttaddr and $fff; {lowest 12 bits}
+       systime := ord(lsymbol) and $ffffff; {lowest 24 bits}
+       end
+  else if HOSTUSCORE
+       then begin
+            syspid := _getpid and $fff; {lowest 12 bits}
+            systime := _time(0) and $ffffff; {lowest 24 bits}
+            end
+       else begin
+            syspid := getpid and $fff; {lowest 12 bits}
+            systime := time(0) and $ffffff; {lowest 24 bits}
+            end;
+  with lsymbol^ do begin
+       symname.linkno := -1; symname.nmlen := 8; symname.n4 := '%T  ';
+       new(symname.tail,1); symname.tail^.a8 := '        ';
+       symname.n4[3] := maparray[(syspid and $3f) + 1];
+       symname.n4[4] := maparray[(syspid div 64) + 1];
+       for i := 1 to 4 do begin
+           symname.tail^.a8[i] := maparray[(systime and $3f) + 1];
+           systime := systime div 64;
+           end;
+       llink := nil; rlink := nil; Defined := TRUE; loc := 0;
+       end;
+  entername(lsymbol);
+  end; {timedate}
+ 
+  procedure unitblock;
+    var junk,lbyte,lblock,lcommonsize,firstbyte: integer;
+        lname: alfa8;
+  begin
+  junk := next3bytes;
+  reada8(lname);
+  lblock := nextword; lblock := lblock*256 + nextbyte; lbyte := nextbyte;
+  if odd(lblock) then lbyte := lbyte + 256;
+  lblock := lblock div 2;
+  junk := next4bytes; junk := next4bytes;
+  lcommonsize := next4bytes;
+  inblock := lblock; inbyte := lbyte;
+  readinfile('unit file');
+  firstbyte := nextbyte;
+  incode(FALSE,firstbyte);
+  end; {unitblock}
+  
+  procedure libmodblock(firstbyte: integer);
+  begin {libmodblock}
+  fatal_error('Library modules not supported');
+  end; {libmodblock}
+  
+begin {phase1}
+firstbyte := nextbyte;
+if DebugFlag
+then writeln('First byte = ',firstbyte:2 hex);
+if firstbyte = 128 { Normal }
+then incode(FALSE,firstbyte)
+else if firstbyte = 146 { Unit Block }
+     then unitblock
+     else if firstbyte = 144 { Library Module Block }
+          then libmodblock(firstbyte)
+          else error('Bad block');
+glinkid.linkno := -1; glinkid.nmlen := 8;
+glinkid.n4 := '//re'; glinkid.tail^.a8 := 'gs//    ';
+lftndata := lookupcommon(ftndatatree);
+if CHIP = M68020 then lftndata^.size := 68 else lftndata^.size := 100;
+timedate;
+end; {phase1}
+
+

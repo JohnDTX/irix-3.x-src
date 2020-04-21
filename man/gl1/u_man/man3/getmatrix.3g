@@ -1,0 +1,29 @@
+.TH getmatrix  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getmatrix
+- return the current transformation matrix
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getmatrix(m) "
+.B "Matrix m;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getmat(m)"
+.B "real m(4,4)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getmatrix(var m: Matrix);"
+.sp
+.SH DESCRIPTION
+.I Getmatrix
+copies the transformation matrix from the top of the stack to an 
+array provided
+by the user.  The matrix stack is unchanged.
+.SH "SEE ALSO"
+.I loadmatrix, multmatrix
+.SH NOTE
+This command can only be used in immediate mode.

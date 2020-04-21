@@ -1,0 +1,46 @@
+* The Cray 2
+direct	navier-hy	c415	ff00 0;
+direct	navier1-hy	c200	ff00 0;
+* direct	navier2-hy	????	ff00 0;
+* User space tcp connection.
+* direct	unavier-hy	c400	ff00 0;
+* Iris Workstations
+direct	wks-hy		2200	ff00 0;
+direct	annie-hy	2201	ff00 0;
+direct	ect-hy		2202	ff00 0;
+direct	igor-hy		2203	ff00 0;
+direct	wk01-hy		4500	ff00 0;
+direct	wk02-hy		4503	ff00 0;
+* For arcane reasons, 3 and 4 were temporarily switched.
+direct	wk03-hy		4501	ff00 0;
+direct	wk04-hy		4502	ff00 0;
+* direct	wk05-hy		4500	ff00 0;
+direct	wk06-hy		4403	ff00 0;
+direct	wk07-hy		4402	ff00 0;
+direct	wk08-hy		4401	ff00 0;
+direct	wk09-hy		4400	ff00 0;
+direct	wk10-hy		4203	ff00 0;
+direct	wk11-hy		4202	ff00 0;
+direct	wk12-hy		4201	ff00 0;
+direct	wk13-hy		4200	ff00 0;
+direct	wk14-hy		4303	ff00 0;
+direct	wk15-hy		4302	ff00 0;
+direct	wk16-hy		4301	ff00 0;
+direct	wk17-hy		4300	ff00 0;
+* The Amdahls
+direct	sscdev-hy	2530	ff00 0;
+direct	ssctst1-hy	2534	ff00 0;
+direct	ssctst2-hy	2538	ff00 0;
+direct	ssctst3-hy	253c	ff00 0;
+direct	sscdev-alt-hy	1070	ff00 0;
+direct	ssctst1-alt-hy	1074	ff00 0;
+direct	ssctst2-alt-hy	1078	ff00 0;
+direct	ssctst3-alt-hy	107c	ff00 0;
+* direct	tuts-hy		2040	ff00 0;
+* Vaxes
+direct	fred-hy		1264	ff00 0;
+direct	wilbur-hy	2401	ff00 0;
+direct	orville-hy	2400	ff00 0;
+direct	a-amelia-hy	1201	ff00 0;
+* direct	euler-hy	2600	ff00 0;
+

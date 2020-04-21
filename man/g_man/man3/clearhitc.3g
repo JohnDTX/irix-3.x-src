@@ -1,0 +1,33 @@
+.TH clearhitcode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B clearhitcode
+\- sets the system hitcode to zero
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clearhitcode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clearh"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clearhitcode;"
+.SH DESCRIPTION
+.B clearhitcode
+clears the global variable 
+.I hitcode,
+which records clipping plane hits
+in picking and selecting modes.
+.SH "SEE ALSO"
+gethitcode, gselect, pick 
+.sp
+.I Programming Guide,
+Section 9.2, Picking
+.SH NOTE
+This routine is available only in immediate mode.

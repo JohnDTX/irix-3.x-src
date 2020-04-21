@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH SYS_ID 4
+.SH NAME
+sys_id \- system identification
+.SH SYNOPSIS
+.B /etc/sys_id
+.SH DESCRIPTION
+The file
+.I /etc/sys_id
+contains the name that the system will be known as on communications
+networks such as
+.SM UUCP,
+.SM TCP,
+and 
+.SM XNS.
+The name should be no more than eight lower-case letters and digits
+(to maintain compatibility with foreign networks)
+and be terminated with a trailing newline.
+During system startup this file is read by
+.I /etc/rc
+and supplied as a parameter to
+\f2hostname\f1(1).
+Various network programs do 
+.IR gethostname (2)
+or
+.IR uname (2)
+system calls to determine the name of the local system.
+.SH FILES
+/etc/sys_id
+.SH SEE ALSO
+hostname(1), gethostname(2), uname(2).

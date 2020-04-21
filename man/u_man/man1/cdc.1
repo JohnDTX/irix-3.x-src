@@ -1,0 +1,247 @@
+'\"macro stdmacro
+.tr ~
+.ds P UNIX
+.nr f 0
+.de SP
+.if n .ul
+\%[\f3\-\\$1\f1\\c
+.if n .ul 0
+\\$2\\$3
+..
+.de C1
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS 5
+.TP 15
+\\$1
+\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.de A1
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS 5
+.TP 15
+\f3\-\\$1\f1[\f2\\$2\^\f1]
+\\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.de A2
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS 5
+.TP 15
+\f3\-\\$1\f1\f2\\$2\^\f1
+\\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.ds W) \f2\s-1WARNINGS\s+1\^\f1
+.ds X) \f2\s-1EXAMPLE\s+1\^\f1
+.ds M) \f3\s-1MR\s+1\f1
+.ds S) \s-1SCCS\s+1
+.ds I) \f2\s-1SID\s+1\f1
+.TH CDC 1
+.SH NAME
+cdc \- change the delta commentary of an \s-1SCCS\s+1 delta
+.SH SYNOPSIS
+.B cdc
+\f3\-r\f1\c
+.SM SID
+.SP m [mrlist]]
+.SP y [comment]]
+files
+.SH DESCRIPTION
+.I Cdc\^
+changes the
+.IR "delta commentary" ,
+for the \*(I) specified by the
+.B \-r
+keyletter,
+of each
+named \*(S) file.
+.PP
+.I "Delta commentary\^"
+is defined to be the Modification Request (\*(M)) and comment
+information normally specified via the
+.IR delta\^ (1)
+command
+.RB ( \-m
+and
+.B \-y
+keyletters).
+.PP
+If a directory is named,
+.I cdc\^
+behaves as though each file in the directory were
+specified as a named file,
+except that non-\*(S) files
+(last component of the path name does not begin with \f3s.\f1)
+and unreadable files
+are silently ignored.
+If a name of
+.B \-
+is given, the standard input is read (see \%\*(W));
+each line of the standard input is taken to be the name of an \*(S) file
+to be processed.
+.PP
+Arguments to
+.IR cdc ,
+which may appear in any order, consist of
+.I keyletter\^
+arguments, and file names.
+.PP
+All the described
+.I keyletter\^
+arguments apply independently to each named file:
+.TP "\w'\-\f3y\f1[\f2comment\f1]\ \ 'u"
+\-\f3r\s-1\f2SID\f1\s+1 
+Used to specify the
+.IR S \s-1CCS\s+1
+.IR ID entification
+(\*(I))
+string
+of a delta for
+which the delta commentary is to be changed.
+.TP 
+\-\f3m\f1[\f2mrlist\f1]
+If the \*(S) file has the
+.B v
+flag set
+(see
+.IR admin\^ (1))
+then a
+list of \*(M) numbers to be added and/or deleted in
+the delta commentary of
+the \*(I) specified by the
+.B \-r
+keyletter
+.I may\^
+be supplied.
+A null \*(M) list has no effect.
+.IP "" \w'\-\f3y\f1[\f2comment\f1]\ \ 'u
+\f3\*(M)\f1
+entries are added to the list of \*(M)s in the same manner as that of
+.IR delta\^ (1).
+In order to delete an \*(M), precede the \*(M) number
+with the character \f3!\f1 (see \*(X)).
+If the \*(M) to be deleted is currently in the list of \*(M)s, it is
+removed
+and changed into a ``comment'' line.
+A list of all deleted \*(M)s is placed in the comment section
+of the delta commentary and preceded by a comment line stating
+that they were deleted.
+.IP "" \w'\-\f3y\f1[\f2comment\f1]\ \ 'u
+If
+.B \-m
+is not used and the standard input is a terminal, the prompt
+.B \s-1MR\s+1s?
+is issued on the standard output before the standard input
+is read; if the standard input is not a terminal, no prompt is issued.
+The \f3\s-1MR\s+1s?\f1 prompt always precedes the \f3comments?\f1 prompt
+(see
+.B \-y
+keyletter).
+.IP "" \w'\-\f3y\f1[\f2comment\f1]\ \ 'u
+\f3\*(M)s\f1
+in a list are separated by blanks and/or tab characters.
+An unescaped new-line character terminates the \*(M) list.
+.IP "" \w'\-\f3y\f1[\f2comment\f1]\ \ 'u
+Note
+that if the
+.B v
+flag has a value
+(see
+.IR admin\^ (1)),
+it is taken to be the name of a program (or shell procedure) which validates
+the correctness of the \*(M) numbers.
+If a non-zero exit status is returned from the \*(M) number validation program,
+.I cdc\^
+terminates
+and the delta commentary remains unchanged.
+.TP "\w'\-\f3y\f1[\f2comment\f1]\ \ 'u"
+\-\f3y\f1[\f2comment\f1]
+Arbitrary
+text used to replace the \f2comment\^\f1(s) already existing
+for the delta specified by the
+.B \-r
+keyletter.
+The previous comments are kept and preceded by a comment
+line stating that they were changed.
+A null \f2comment\^\f1 has no effect.
+.IP "" \w'\-\f3y\f1[\f2comment\f1]\ \ 'u
+If
+.B \-y
+is not specified and the standard input is a terminal, the
+prompt \f3comments?\f1 is issued on the standard output before
+the standard input is read;
+if the standard input is not a terminal, no prompt is issued.
+An unescaped new-line character terminates the \f2comment\^\f1 text.
+.PP
+.\"The exact permissions necessary to modify the \*(S) file
+.\"are documented in the
+.\".IR "Source Code Control System User's Guide" .
+The basic permissions to modify the SCCS file are as follows:  
+(1) if you made the delta, you can change its delta commentary;
+or (2)
+if you own the file and directory you can modify the delta commentary.
+.SH EXAMPLE
+.RS .3i
+cdc \-r1.6 \-m"bl78-12345 !bl77-54321 bl79-00001" \-ytrouble s.file
+.RE
+.PP
+adds bl78-12345 and bl79-00001 to the \*(M) list, removes bl77-54321
+from the \*(M) list, and adds the comment \f3trouble\f1 to delta 1\f3.\f16
+of s\f3.\f1file.
+.PP
+.RS .3i
+cdc \-r1\f3.\f16 s\f3.\f1file
+.br
+\s-1MR\s+1s? !bl77-54321 bl78-12345 bl79-00001
+.br
+comments? trouble
+.RE
+.PP
+does the same thing.
+.DT
+.SH WARNINGS
+If \*(S) file names are supplied to the
+.I cdc\^
+command via the standard input
+(\f3\-\f1 on the command line),
+then the
+.B \-m
+and
+.B \-y
+keyletters must also be used.
+.SH FILES
+.PD 0
+.TP \w'x-file\ \ \ \ 'u
+x-file
+(see
+.IR delta\^ (1))
+.TP
+z-file
+(see
+.IR delta\^ (1))
+.PD
+.SH SEE ALSO
+admin(1),
+delta(1),
+get(1),
+help(1),
+prs(1),
+sccsfile(4).
+.br
+.\""Source Code Control System User's Guide\^"
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.tr ~~
+.\"	@(#)cdc.1	5.1 of 11/7/83

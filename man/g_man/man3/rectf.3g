@@ -1,0 +1,70 @@
+.TH rectf 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rectf
+\- fills a rectangular area
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rectf(x1, y1, x2, y2)  "
+.B "Coord x1, y1, x2, y2;"
+.IP 
+.B "rectfi(x1, y1, x2, y2)  "
+.B "Icoord x1, y1, x2, y2;"
+.IP
+.B "rectfs(x1, y1, x2, y2)"
+.B "Scoord x1, y1, x2, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rectf(x1, y1, x2, y2)"
+.B "real x1, y1, x2, y2"
+.IP 
+.B "subroutine rectfi(x1, y1, x2, y2)"
+.B "integer*4 x1, y1, x2, y2"
+.IP
+.B "subroutine rectfs(x1, y1, x2, y2)"
+.B "integer*2 x1, y1, x2, y2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rectf(x1, y1, x2, y2: Coord);"
+.IP
+.B "procedure rectfi(x1, y1, x2, y2: Icoord);"
+.IP
+.B "procedure rectfs(x1, y1, x2, y2: Scoord);"
+
+.SH DESCRIPTION
+.B rectf
+produces a filled rectangular region, using the current pattern,
+color, and writemask.
+The sides of the rectangle are parallel to the
+.I x
+and
+.I y
+axes of the object coordinate system.
+Since a rectangle 
+is a 2-D shape, 
+.B rectf
+takes only 2-D arguments and sets the
+.I z
+coordinate
+to zero.
+The points
+.I (x1, y1)
+and
+.I (x2, y2)
+are the opposite corners of the rectangle.
+The current graphics position is set to 
+.I (x1, y1)
+after the region is drawn.
+.PP
+In backface mode, you must specify the lower-left and upper-right corners.
+.SH "SEE ALSO"
+polf, rect, rdr, rmv
+.sp
+.I Programming Guide,
+Section 3.5, Rectangles

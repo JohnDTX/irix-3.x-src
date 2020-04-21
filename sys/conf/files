@@ -1,0 +1,158 @@
+bfs/bfs_alloc.c		optional bfs
+bfs/bfs_bmap.c		optional bfs
+bfs/bfs_dir.c 		standard
+bfs/bfs_inode.c		optional bfs
+bfs/bfs_mount.c		optional bfs
+com/com_dir.c 		standard
+com/com_fio.c		standard
+com/com_inode.c		standard
+com/com_nami.c		standard
+com/com_pipe.c		standard
+com/com_pncc.c		standard
+com/com_rdwr.c		standard
+debug/dbg_assert.c	optional debug
+debug/dbg_flags.c	optional debug
+debug/dbg_param.c	optional debug
+debug/dbg_printf.c	optional debug
+efs/efs_alloc.c		optional efs
+efs/efs_bit.c 		optional efs
+efs/efs_bmap.c 		optional efs
+efs/efs_dir.c		optional efs2
+efs/efs_inode.c 	optional efs
+efs/efs_mount.c 	optional efs
+efs/efs_subr.c 		optional efs
+gl0/conio.c		optional glzero
+gl0/mouse.c		optional glzero
+gl1/blink.c		optional glone
+gl1/conio.c		optional glone
+gl1/dials.c		optional glone
+gl1/fbc.c		optional glone device-driver
+gl1/font.c		optional glone
+gl1/ge.c		optional glone device-driver
+gl1/grsys.c		optional glone
+gl1/kb.c		optional glone
+gl1/kgl.c		optional glone device-driver
+gl1/mouse.c		optional glone device-driver
+gl1/term.c		optional glone
+gl1/textport.c		optional glone
+gl1/win.c		optional glone
+gl2/mouse.c		optional gltwo
+gl2/unix_gr.c		optional gltwo
+gl2/win.c		optional gltwo
+gl2/sgigsc.c		optional sgigsc
+gl2/hack.c		optional sgigsc
+net/af.c		optional tcp
+net/if.c		optional tcp
+net/if_loop.c		optional loop
+net/netisr.c		optional tcp
+net/raw_cb.c		optional tcp
+net/raw_usrreq.c	optional tcp
+net/route.c		optional tcp
+netinet/if_ether.c	optional ether
+netinet/in.c		optional tcp
+netinet/in_pcb.c	optional tcp
+netinet/in_proto.c	optional tcp
+netinet/ip_icmp.c	optional tcp
+netinet/ip_input.c	optional tcp
+netinet/ip_output.c	optional tcp
+netinet/raw_ip.c	optional tcp
+netinet/tcp_debug.c	optional tcp
+netinet/tcp_input.c	optional tcp
+netinet/tcp_output.c	optional tcp
+netinet/tcp_subr.c	optional tcp
+netinet/tcp_timer.c	optional tcp
+netinet/tcp_usrreq.c	optional tcp
+netinet/udp_usrreq.c	optional tcp
+nfs/nfs_dir.c		optional nfs
+nfs/nfs_fio.c		optional nfs
+nfs/nfs_inode.c		optional nfs
+nfs/nfs_mount.c		optional nfs
+nfs/nfs_nami.c		optional nfs
+nfs/nfs_compat.c	optional nfs
+nfs/nfs_rdwr.c		optional nfs
+nfs/nfs_server.c	optional nfs
+nfs/nfs_subr.c		optional nfs
+nfs/nfs_xdr.c		optional nfs
+rpc/auth_kern.c		optional nfs
+rpc/authu_prot.c	optional nfs
+rpc/clnt_kudp.c		optional nfs
+rpc/kudp_fast.c		optional nfs
+rpc/rpc_prot.c		optional nfs
+rpc/subr_kudp.c		optional nfs
+rpc/svc.c		optional nfs
+rpc/svc_auth.c		optional nfs
+rpc/svc_auth_u.c	optional nfs
+rpc/svc_kudp.c		optional nfs
+rpc/xdr.c		optional nfs
+rpc/xdr_array.c		optional nfs
+rpc/xdr_mbuf.c		optional nfs
+rpc/xdr_mem.c		optional nfs
+socket/sys_socket.c	optional tcp
+socket/uipc_dom.c	optional tcp
+socket/uipc_43.c	optional tcp
+socket/uipc_proto.c	optional tcp
+socket/uipc_soc.c	optional tcp
+socket/uipc_soc2.c	optional tcp
+socket/uipc_sys.c	optional tcp
+socket/uipc_usr.c	optional unixdomain
+streams/clone.c		standard
+streams/sduart.c	standard device-driver
+streams/spty.c		optional pty
+streams/strcall.c	optional ustrm
+streams/strcallsub.c	standard
+streams/strconf.c	standard
+streams/stream.c	standard
+streams/streamio.c	standard
+streams/stty_ld.c	standard
+sys/acct.c		standard
+sys/clock.c		standard
+sys/compat.c		optional tcp
+sys/fio.c		standard
+sys/fstyp.c		standard
+sys/fs_bio.c		standard
+sys/fs_conf.c		standard
+sys/fs_dsort.c		standard
+sys/fs_flock.c		standard
+sys/fs_inode.c		standard
+sys/fs_mount.c		standard
+sys/fs_nami.c		standard
+sys/fs_subr.c		standard
+sys/ipc.c		standard
+sys/kern_mbuf.c		optional tcp
+sys/lock.c		standard
+sys/main.c		standard
+sys/malloc.c		standard
+sys/msg.c		standard
+sys/panic.c		standard
+sys/prof.c		optional prof
+sys/sem.c		standard
+sys/shm.c		standard
+sys/sig.c		standard
+sys/slp.c		standard
+sys/subr.c		standard
+sys/subr_rmap.c		standard
+sys/sys1.c		standard
+sys/sys2.c		standard
+sys/sys3.c		standard
+sys/sys4.c		standard
+sys/sysent.c		standard
+sys/tty_ld1.c		optional xns
+sys/tty_linesw.c	optional xns
+sys/tty_clist.c		optional xns
+sys/tty_partab.c	optional xns
+sys/tty_subr.c		optional xns
+sys/tty_sys.c		standard
+sys/utssys.c		standard
+vm/vm_drum.c 		standard
+vm/vm_mem.c 		standard
+vm/vm_misc.c		standard
+vm/vm_mon.c 		standard
+vm/vm_page.c 		standard
+vm/vm_proc.c 		standard
+vm/vm_pt.c 		standard
+vm/vm_sched.c 		standard
+vm/vm_subr.c 		standard
+vm/vm_sw.c 		standard
+vm/vm_swap.c 		standard
+vm/vm_swp.c 		standard
+vm/vm_text.c 		standard

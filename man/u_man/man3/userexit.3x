@@ -1,0 +1,39 @@
+'\"macro stdmacro
+.TH USEREXIT 3X 
+.SH NAME
+userexit \- user routine for intercepting FORTRAN runtime errors.
+.SH SYNOPSIS
+.B subroutine userexit(addr,errcode)
+.br
+.B integer*4 addr
+.br
+.B integer*2 errcode
+.SH DESCRIPTION
+The routine 
+.I userexit\^
+is called in the early stages of FORTRAN runtime error processing, prior
+to closing open files.  A dummy copy of 
+.I userexit\^
+is provided in the FORTRAN library.  Users may perform their own
+cleanup operations by including a private version of 
+.I userexit\^
+in their program.
+.PP
+.I userexit\^
+is called with two parameters.  The first parameter, 
+.I addr,\^
+is the address at which the error occurred.  The second parameter,
+.I errcode,\^
+is the FORTRAN error code.  FORTRAN run-time error codes
+with their corresponding messages are found in the
+file 
+.I /usr/lib/ftnrterrs.\^
+.PP
+The routine 
+.I userexit\^
+will only be called once.  If 
+a FORTRAN runtime error is encountered after 
+.I userexit\^
+has been called, the program will abort.
+.SH FILES
+/usr/lib/ftnrterrs

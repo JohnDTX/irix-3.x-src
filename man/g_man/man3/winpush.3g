@@ -1,0 +1,34 @@
+.TH winpush 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winpush
+\- places the current graphics window behind all other windows
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winpush()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winpus"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winpush;"
+.SH DESCRIPTION
+.B winpush
+places the current graphics window behind all other windows.
+Multiple windows appear as a stack of windows
+that can obscure one another.
+.B winpush
+takes the current graphics window from the stack and places it 
+at the bottom.
+.SH "SEE ALSO"
+winpop
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

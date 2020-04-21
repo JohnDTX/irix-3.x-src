@@ -1,0 +1,94 @@
+'\"macro stdmacro
+.TH RATFOR 1
+.SH NAME
+ratfor \- rational Fortran dialect
+.SH SYNOPSIS
+.B ratfor
+[ option ... ]
+[ filename ... ]
+.SH DESCRIPTION
+.I Ratfor
+converts a rational dialect of Fortran into ordinary irrational Fortran.
+.I Ratfor
+provides control flow constructs essentially identical to those in C:
+.TP
+statement grouping:
+.nf
+{ statement; statement; statement }
+.TP
+decision-making:
+if (condition) statement [ else statement ]
+.br
+switch (integer value) {
+	case integer:	statement
+	...
+	[ default: ]	statement
+}
+.TP
+loops:
+while (condition) statement
+for (expression; condition; expression) statement
+do limits statement
+repeat statement [ until (condition) ]
+break
+next
+.LP
+and some syntactic sugar to make programs easier to read and write:
+.TP
+free form input:
+multiple statements/line; automatic continuation
+.TP
+comments:
+# this is a comment
+.TP
+translation of relationals:
+>, >=, etc., become .GT., .GE., etc.
+.TP
+return expression to caller from function:
+return (expression)
+.TP
+define:
+define name replacement
+.TP
+include:
+include filename
+.LP
+'fi
+The option
+.B "\-h"
+causes quoted strings to be turned into
+.B 27H
+constructs.
+The
+.B "\-C"
+option copies comments to the output and attempts to format them neatly.
+Normally, continuation lines are marked with an
+.B "&"
+in column 1; the option
+.I "\-6x"
+makes the continuation character
+.I x
+and places it in column 6.
+.I Ratfor\^
+is best used with
+.IR f77 (1).
+.SH "SEE ALSO"
+f77(1)
+.br
+B. W. Kernighan and P. J. Plauger,
+.IR "Software Tools" ,
+Addison-Wesley, 1976.
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/ratfor.1,v 1.1 89/03/27 16:48:50 root Exp $
+.\" $Log:	ratfor.1,v $
+Revision 1.1  89/03/27  16:48:50  root
+Initial check-in for 3.7
+
+.\" Revision 1.4  86/04/11  09:10:07  celia
+.\" removed bad ref.
+.\" 
+.\" Revision 1.3  85/08/06  16:08:22  robinf
+.\" Cosmetic changes
+.\" 
+.\" Revision 1.2  85/02/04  19:58:20  bob
+.\" Edited to conform to System V.
+.\" 

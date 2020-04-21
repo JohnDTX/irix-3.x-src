@@ -1,0 +1,40 @@
+.TH multimap 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B multimap
+\- organizes the color map as 16 small maps
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "multimap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine multim"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure multimap;"
+.SH DESCRIPTION
+.B multimap
+organizes the color map as 16
+small maps, each with a maximum of 256 RGB entries.
+The number of entries in each map is 
+the total number of available colors, which is determined by the 
+number of bitplanes divided by 16.
+.B multimap
+does not take effect until
+.B gconfig
+is called.
+.SH "SEE ALSO"
+gconfig, getcmmode, getmap, onemap, setmap
+.sp
+.I Programming Guide,
+Section 6.2, Color Maps 
+.SH NOTE
+This routine is available only in immediate mode.
+.sp
+Do not use under the window manager.

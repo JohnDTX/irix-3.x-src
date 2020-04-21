@@ -1,0 +1,22 @@
+#
+MAKEPATH=../../kgl
+
+OBJS=	bitmask.o bitpad.o change.o channel.o cursor.o devices.o \
+	dials.o dividetab.o errorhand.o fbc.o font.o ge.o gr.o \
+	grioctl.o init.o keyboard.o kfontram.o kgl.o lpen.o mouse.o \
+	printf.o queue.o retrace.o swizzletab.o textport.o
+
+TARGETS= ../libkgl${PREF}.a
+
+LCOPTS= -OkKS
+LCINCS= -I../../include 
+LCDEFS= -DIP2 -DUNIX -DKERNEL
+LCOPTS= -OkKS
+include ${ROOT}/usr/include/make/commondefs
+GCOPTS = -Z$(CC_CPUTYPE)
+
+../libkgl${PREF}.a: ${OBJS}
+	rm -f $@
+	ar cu $@ ${OBJS}
+	strip $@
+	ranlib $@

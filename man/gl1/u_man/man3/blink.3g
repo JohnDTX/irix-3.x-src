@@ -1,0 +1,46 @@
+.TH blink 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I blink
+-  change the color map entry at a selectable rate
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "blink(rate, color, red, green, blue) "
+.B "short rate; "
+.B "Colorindex color; "
+.B "RGBvalue red, green, blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine blink(rate, color, red, green, blue)"
+.B "integer*2 rate, color, red, green, blue"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure blink(rate: Short; color: Colorindex; red, green, blue: RGBvalue);"
+.sp
+.SH DESCRIPTION
+.I Blink
+specifies a blink rate, a color map index, and
+red, green, and blue values.  Every \f3rate\f1 vertical retraces, the
+color located at index \f3color\f1 in the current colormap is updated.
+Its value is either the original value or the new value
+supplied by the \f3red\f1, \f3green\f1, and \f3blue\f1 arguments. 
+.PP
+Up to twenty colors can blink simultaneously, each at a different
+rate.  The blink rate can be changed by calling
+.I blink
+again with the same 
+.B color
+and a different
+.B rate.
+Calling \f2blink\f1 with
+\f3rate\f1=0 when
+\f3color\f1 specifies a blinking colormap
+entry terminates the blinking and restores
+the original color.
+.SH "SEE ALSO"
+.I mapcolor, color
+.SH NOTE
+This command can only be used in immediate mode.

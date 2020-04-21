@@ -1,0 +1,36 @@
+.TH getzbuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getzbuffer
+\- indicates whether z-buffering is on or off
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getzbuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getzbu()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getzbuffer: Boolean;"
+.SH DESCRIPTION
+.B getzbuffer
+returns the current value of the z-buffer flag. 
+FALSE
+(0),
+the default value, indicates that z-buffering is off. 
+TRUE 
+(1), indicates that z-buffering is on.
+.SH "SEE ALSO"
+setdepth,
+zbuffer,
+zclear
+.sp
+\f2Programming Guide\fP, Section 12.1, Z-Buffer Mode
+.SH NOTE
+This routine is available only in immediate mode.

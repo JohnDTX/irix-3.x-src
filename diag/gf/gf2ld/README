@@ -1,0 +1,4 @@
+This directory is for making "gf2" -- the console for the PM1-based GL2 IRIS.
+Contains .b's, and a minimum of special .c's.
+
+BE SURE TO update header.c anytime you make a substantive change to gf2.

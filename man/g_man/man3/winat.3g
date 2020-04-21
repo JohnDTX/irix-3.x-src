@@ -1,0 +1,29 @@
+.TH winat 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winat 
+\- returns the indentifier of the window beneath the cursor 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long winat();"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function winat()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function winat(): longint;"
+.SH DESCRIPTION
+.B winat 
+returns the graphics window identifier (gid) of the window beneath the
+current position of the cursor.
+.SH "SEE ALSO"
+winget
+.sp
+\f2Using mex\fP, 
+Chapter 2, Programming with mex

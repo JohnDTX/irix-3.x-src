@@ -1,0 +1,38 @@
+.TH picksize 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B picksize
+\- sets the dimensions of the picking region
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "picksize(deltax, deltay) "
+.B "short deltax, deltay;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine picksi(deltax, deltay)"
+.B "integer*4 deltax, deltay"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure picksize(deltax, deltay; longint);"
+.SH DESCRIPTION
+.B picksize
+has two arguments, \f2deltax\f1 and \f2deltay\f1, which define the
+dimensions of the picking region in pixels.  
+The picking region is rectangular.
+It is
+centered at the current cursor position, the 
+origin of the cursor glyph.  In picking mode, any objects
+that intersect the picking region are reported in the event queue.
+.SH "SEE ALSO"
+pick
+.sp
+.I Programming Guide,
+Section 9.2, Picking
+.SH NOTE
+This routine is available only in immediate mode.

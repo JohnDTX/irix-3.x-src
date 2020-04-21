@@ -1,0 +1,52 @@
+.SUFFIXES:	.asm .o
+
+COMMOBJS=\
+	ubuf.o ugotoxy.o uio.o umem.o 20umisc.o utexti.o utexto.o\
+	20muinit.o pascheck.o pasmath.o pasmove.o passcomp.o passet.o\
+	pastext.o pastring.o nan.o
+
+SOBJS=\
+	pasdpwr10.o paspwr10.o add.o cmp.o dadd.o dcmp.o\
+	div.o dmul.o dpk.o dvmd.o fpk.o ipk.o mod.o mul.o\
+	pasrio.o d13.o f13.o 
+
+HOBJS=\
+	junpwr10.o junflt.o jundbl.o juninit.o\
+	pasrio.o d13h.o f13h.o f13ph.o
+
+.asm.o:
+	../bin/asm68k -s $<
+	/usr/lib/jlinker $*.obj -o$@
+
+.p.o:
+	pc -c $(PFLAGS) $<
+
+all:	common software hardware
+
+common:	$(COMMOBJS)
+
+software:	$(SOBJS)
+	make $(SOBJS) ;\
+	mv $(SOBJS) $(COMMOBJS) ../lib.software ;\
+	cd ../lib.software ;\
+	ar rv ../libp.a $(COMMOBJS) $(SOBJS)
+	rm $(SOBJS)
+
+hardware:	$(HOBJS)
+	make $(HOBJS) PFLAGS=-Zf ;\
+	mv $(HOBJS) $(COMMOBJS) ../lib.hardware ;\
+	cd ../lib.hardware ;\
+	ar rv ../libphwfp.a $(COMMOBJS) $(HOBJS)
+	rm *.o
+
+d13h.o:	d13h.s
+	/lib/cpp > d13h.cpp d13h.s -P -I../include
+	./as20 -o d13h.o d13h.cpp
+
+f13h.o:	f13h.s
+	/lib/cpp > f13h.cpp f13h.s  -I../include
+	./as20 -o f13h.o f13h.cpp
+
+dbg.o:	dbg.s
+	/lib/cpp > dbg.cpp dbg.s  -I../include
+	./as20 -o dbg.o dbg.cpp

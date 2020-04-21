@@ -1,0 +1,193 @@
+'\"macro stdmacro
+.TH TEST 1
+.SH NAME
+test \- condition evaluation command
+.SH SYNOPSIS
+.B test
+expr
+.br
+[ expr ]
+.SH DESCRIPTION
+.I Test\^
+evaluates the expression
+.I expr\^
+and, if its value is true, returns a zero (true) exit status; otherwise, a
+non-zero (false) exit status is returned;
+.I test\^
+also
+returns a non-zero exit status if there are no arguments.
+The following primitives are used to construct
+.IR expr :
+.TP "\w'\f3\-t\ \f1[\^\f2fildes\f1\^]\ \ 'u"
+.BI \-r " file\^"
+true if \f2file\^\f1 exists and is readable.
+.TP
+.BI \-w " file\^"
+true if \f2file\^\f1 exists and is writable.
+.TP
+.BI \-x " file\^"
+true if
+.I file\^
+exists and is executable.
+.TP
+.BI \-f " file\^"
+true if \f2file\^\f1 exists and is a regular file.
+.TP
+.BI \-d " file\^"
+true if \f2file\^\f1 exists and is a directory.
+.TP
+.BI \-c " file\^"
+true
+if
+.I file\^
+exists and is a character special file.
+.TP
+.BI \-b " file\^"
+true if
+.I file\^
+exists and is a block special file.
+.TP
+.BI \-p " file\^"
+true if
+.I file\^
+exists and is a named pipe (fifo).
+.TP
+.BI \-u " file\^"
+true if
+.I file\^
+exists and its set-user-\c
+.SM ID
+bit is set.
+.TP
+.BI \-g " file\^"
+true if
+.I file\^
+exists and its set-group-\c
+.SM ID
+bit is set.
+.TP
+.BI \-k " file\^"
+true if
+.I file\^
+exists and its sticky bit is set.
+.TP
+.BI \-s " file\^"
+true if \f2file\^\f1 exists and has a size greater than zero.
+.TP
+.BR \-t " [\^\f2fildes\f1\^]"
+true if the open file whose file descriptor number is
+.I fildes\^
+(1 by default)
+is associated with a terminal device.
+.TP
+.BI \-z " s1\^"
+true if the length of string
+.I s1\^
+is zero.
+.TP
+.BI \-n " s1\^"
+true if the length of the string
+.I s1\^
+is non-zero.
+.TP
+.IB s1 " = " s2\^
+true
+if strings
+.I s1\^
+and
+.I s2\^
+are identical.
+.TP
+.IB s1 " != " s2\^
+true
+if strings
+.I s1\^
+and
+.I s2\^
+are
+.I not\^
+identical.
+.TP
+.I s1\^
+true if
+.I s1\^
+is
+.I not\^
+the null string.
+.TP
+.IB n1 "\^\-eq " n2\^
+true if the integers
+.I n1\^
+and
+.I n2\^
+are algebraically equal.
+Any of the comparisons
+.BR \-ne ,
+.BR \-gt ,
+.BR \-ge ,
+.BR \-lt ,
+and
+.BR \-le
+may be used in place of
+.BR \-eq .
+.PP
+These primaries may be combined with the
+following operators:
+.TP "\w'\f3\-t\ \f1[\^\f2fildes\f1\^]\ \ 'u"
+.B !
+unary negation operator.
+.TP
+.B \-a
+binary
+.I and\^
+operator.
+.TP
+.B \-o
+binary
+.I or\^
+operator
+.RB ( \-a
+has higher precedence than
+.BR \-o ).
+.TP
+.BR "(\|" "expr" "\|)"
+parentheses for grouping.
+.PP
+Notice that all the operators and flags are separate
+arguments to
+.IR test .
+Notice also that parentheses are meaningful
+to the shell and, therefore, must be escaped.
+Also realize that
+.I test
+is both a builtin of the Bourne shell and an executable program in /bin
+that may be used by either shell.
+.SH EXAMPLE
+.DT
+.PP
+.I Test\^
+is typically used in shell scripts 
+.RI ( sh (1)), 
+as in the following example
+which prints the message "foo is a dir" if \f2foo\f1 is a 
+directory.
+.IP "" 5
+if test -d foo 
+.br
+then
+.br
+	echo "foo is a dir"
+.br
+fi
+.SH "SEE ALSO"
+find(1), sh(1).
+.SH WARNING
+In the second form of the command (i.e., the one that uses
+[\|],
+rather than the word
+.IR test ),
+the square brackets must be delimited by blanks.
+.\"	@(#)test.1	5.1 of 11/10/83
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/test.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:50:46 $

@@ -1,0 +1,32 @@
+#! /bin/sh
+#
+# Script to initialize the xns software
+#
+# $Source: /d2/3.7/src/etc/RCS/rc.xns,v $
+# $Revision: 1.1 $
+# $Date: 89/03/27 15:38:36 $
+#
+
+if test -r /dev/ttyn0 && ( > /dev/ttyn0 ) 2> /dev/null; then
+	case `uname -t` in
+	2300|2300T|3010)
+		;;
+	*)
+		echo "XNS daemons:\c"
+#
+# Replace the command line for xnsd with the following if you
+# wish to disable incoming 'xx' and 'xsh' sessions.  Refer to
+# the xnsd manual page for further information.
+#     		/etc/xnsd -xx -xsh /usr/local/boot;	echo " xnsd\c"
+#
+     		/etc/xnsd /usr/local/boot;		echo " xnsd\c"
+#
+# Install the lines below if booting iris terminals from the net
+# from this workstation (/usr/local/boot is used)
+#    		/etc/sgbounce `cat /etc/sys_id` /usr/local/boot
+#							echo " sgbounce\c"
+
+		echo "."
+		;;
+	esac
+fi

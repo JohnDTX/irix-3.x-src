@@ -1,0 +1,59 @@
+'\"macro stdmacro
+.TH CUSERID 3S
+.SH NAME
+cuserid \- get character login name of the user
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B char \(**cuserid (s)
+.br
+.B char \(**s;
+.SH DESCRIPTION
+.I Cuserid\^
+generates a character-string representation of the login
+name of the owner of the current process.
+If
+.I s\^
+is a
+.SM NULL
+pointer, this representation is generated in an
+internal static area, the address of which is returned.
+Otherwise,
+.I s\^
+is assumed to point to an array of at least
+.B L_cuserid
+characters; the representation is left in this array.
+The constant
+.B L_cuserid
+is defined in the
+.B <stdio.h>
+header file.
+.SH DIAGNOSTICS
+If the login
+name
+cannot be found,
+.I cuserid\^
+returns a
+.SM NULL
+pointer; if
+.I s\^
+is not a
+.SM NULL
+pointer, a null character
+.B (\e0)
+will be placed at
+.IR s[0] .
+.SH SEE ALSO
+getlogin(3C), getpwent(3C).
+.SH BUGS
+.PP
+.I Cuserid\^
+uses 
+.IR getpwnam (3C);
+thus the results of a user's call to the latter will be
+obliterated by a subsequent call to the former.
+.PP
+The name
+.I cuserid\^
+is rather a misnomer.
+.\"	@(#)cuserid.3s	5.1 of 10/19/83

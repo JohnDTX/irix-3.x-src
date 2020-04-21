@@ -1,0 +1,13 @@
+etc/swap
+usr/bin/cflow
+usr/boot
+usr/lib/clstat.o
+usr/lib/gl2/lib.prim
+usr/lib/libcrypt.a
+usr/lib/libcrypt_p.a
+usr/lib/libglxprom.a
+usr/lib/libpm2prom.a
+usr/local/boot
+usr/man/u_man/man1/cflow.1
+usr/people/gifts/lib
+usr/src/des

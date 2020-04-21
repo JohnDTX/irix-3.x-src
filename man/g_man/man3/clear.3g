@@ -1,0 +1,28 @@
+.TH clear 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B clear
+\- clears the viewport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clear()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clear"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clear;"
+.SH DESCRIPTION
+\f3clear\f1 sets the screen area in the current viewport 
+to the current color using the current writemask and pattern. 
+.SH "SEE ALSO"
+rect, rectf
+.sp
+.I Programming Guide,
+Section 3.2, Clearing the Viewport

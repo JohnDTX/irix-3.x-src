@@ -1,0 +1,64 @@
+'\"macro stdmacro
+.TH SINH 3M
+.SH NAME
+sinh (_lsinh), cosh (_lcosh), tanh (_ltanh) \- hyperbolic functions
+.SH SYNOPSIS
+.B #include <math.h>
+.PP
+.B float sinh (x)
+.br
+.B float x;
+.PP
+.B long float _lsinh (x)
+.br
+.B long float x;
+.PP
+.B float cosh (x)
+.br
+.B float x;
+.PP
+.B long float _lcosh (x)
+.br
+.B long float x;
+.PP
+.B float tanh (x)
+.br
+.B float x;
+.PP
+.B long float _ltanh (x)
+.br
+.B long float x;
+.SH DESCRIPTION
+.I Sinh (_lsinh),
+.I cosh (_lcosh)\^
+and
+.I tanh (_ltanh)\^
+return respectively the hyberbolic sine, cosine and tangent
+of their floating point argument.
+.SH DIAGNOSTICS
+.I Sinh, _lsinh, cosh,\^
+and
+.I _lcosh\^
+check their input for NaN or \(if, or values which would cause overflow, 
+raising a floating point
+exception via
+.I fpsigset (3C).
+The operation is set to 
+.I MATH,\^
+the type set to 
+.I INVALID_OP_A (NaN),\^
+.I INVALID_OP_F2 (\(if),\^
+or 
+.I OVERFL,\^
+and the code for the function raising the exception is set in 
+.I _mathfunc_id.\^
+.I Tanh (_ltanh)\^
+calls 
+.I sinh (_lsinh),\^
+and 
+.I cosh (_lcosh).\^
+Thus, errors which occur when using the hyperbolic tangent will be signalled
+by these other hyperbolic functions.
+.SH SEE ALSO
+fpsigset(3C).
+.\"	@(#)sinh.3m	5.1 of 10/21/83

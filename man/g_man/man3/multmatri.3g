@@ -1,0 +1,33 @@
+.TH multmatrix 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B multmatrix
+\- premultiplies the current transformation matrix
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "multmatrix(m) "
+.B "Matrix m;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine multma(m)"
+.B "real m(4,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure multmatrix(var m: Matrix);"
+.SH DESCRIPTION
+.B multmatrix
+premultiplies
+the current top of the transformation stack by the given 
+matrix (\f2m\f1).  If \f2T\fP is 
+the current matrix, \f3multmatrix(M)\f1 replaces \f2T\fP with \f2M\(**T\f1.
+.SH "SEE ALSO"
+loadmatrix, popmatrix, pushmatrix
+.sp
+.I Programming Guide,
+Section 4.5, User-Defined Transformations

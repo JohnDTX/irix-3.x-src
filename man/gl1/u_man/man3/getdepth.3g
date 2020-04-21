@@ -1,0 +1,29 @@
+.TH getdepth 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getdepth
+- return the parameters of the \f2setdepth\f1 command
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getdepth(near, far)"
+.B "Screencoord *near, *far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "getdep(near, far)"
+.B "integer*2 near, far"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getdepth(var near, far: Screencoord);"
+.sp
+.SH DESCRIPTION
+.I Getdepth
+returns the two parameters of the \f2setdepth\f1 command:  \f3near\f1
+and \f3far\f1.  For a more detailed description,
+see \f2setdepth\f1.
+.SH "SEE ALSO"
+.I setdepth
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,35 @@
+'\"macro stdmacro
+.TH NFSD 1M
+.SH NAME
+nfsd, biod \- NFS daemons
+.SH SYNOPSIS
+.nf
+.B /etc/nfsd [nservers]
+.LP
+.ft B
+.B /etc/biod [nservers]
+.fi
+.SH DESCRIPTION
+.IX  "network file system"  "nfsd daemon"  ""  "\fLnfsd\fP daemon"
+.IX  "network file system"  "biod daemon"  ""  "\fLbiod\fP daemon"
+.IX  "nfsd daemon"  ""  "\fLnfsd\fP daemon"
+.IX  "biod daemon"  ""  "\fLbiod\fP daemon"
+.IX  "daemons"  "nfsd daemon"  ""  "\fLnfsd\fP daemon"
+.IX  "daemons"  "biod daemon"  ""  "\fLbiod\fP daemon"
+.I Nfsd
+starts the 
+.IR NFS 
+server daemons that handle client filesystem requests.
+.I Nservers
+is the number of file system request daemons to start.  This number should
+be based on the load expected on this server.  Four seems to be a good number.
+.LP
+.I Biod
+starts
+.I nservers
+asynchronous block I/O daemons.  This command is used on a NFS client to
+buffer cache handle read-ahead and write-behind.  The magic number for
+.I nservers
+in here is also four.
+.SH "SEE ALSO"
+mountd(1M), exports(4)

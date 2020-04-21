@@ -1,0 +1,620 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: U.PHASE2.2.TEXT                           *)
+(*                                                                           *)
+(*          (C) Copyright 1982, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               16-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  procedure isymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if ENVIRONMENT = IDRIS
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   iout(0,4); { symbol value 0 since undefined }
+                   iout(8,1); { global undefined }
+                   for i := 1 to 8 do
+                       if username[i] = ' '
+                       then iout(0,1) { Null pad }
+                       else iout(ord(username[i]),1);
+                   iout(0,3); { Null pad }
+                   end;
+              isymtab(llink);
+              isymtab(rlink);
+              end;
+  end; {isymtab}
+  
+  procedure isymtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if ENVIRONMENT = IDRIS
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if username = '_main   '
+                   then lname := '%main   '
+                   else lname := username;
+                   iout(seg^.segbaseaddr + loc,4); { symbol value }
+                   iout(13,1); { global defined }
+                   for i := 1 to 8 do
+                       if lname[i] = ' '
+                       then iout(0,1) { Null pad }
+                       else iout(ord(lname[i]),1);
+                   iout(0,3); { Null pad }
+                   end;
+              isymtab2(llink);
+              isymtab2(rlink);
+              end;
+  end; {isymtab2}
+  
+  procedure usymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   if ENVIRONMENT = UNISOFT
+                   then begin
+                     iout(32,1); {undefined external}
+                     if ALIGNMENT = DOUBLEWORD
+                     then iout(0,3)   {alignment characters}
+                     else iout(0,1);  {alignment character }
+                     end
+                   else begin {ENVIRONMENT = SANTACRUZ}
+                     iout(32,2); {undefined external}
+                     iout(0,2);  {padding }
+                     end;
+                   iout(0,4); { symbol value 0 since undefined }
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then iout(ord(username[i]),1);
+                   iout(0,1); { Null terminator }
+                   end;
+              usymtab(llink);
+              usymtab(rlink);
+              end;
+  end; {usymtab}
+  
+  procedure usymtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if username = '_main   '
+                   then lname := '%main   '
+                   else lname := username;
+                   if ENVIRONMENT = UNISOFT
+                   then begin
+                     iout(34,1); {defined external}
+                     if ALIGNMENT = DOUBLEWORD
+                     then iout(0,3)   {alignment characters}
+                     else iout(0,1);  {alignment character }
+                     end
+                   else begin {ENVIRONMENT = SANTACRUZ}
+                     iout(34,2); {defined external}
+                     iout(0,2);  {padding }
+                     end;
+                   iout(seg^.segbaseaddr + loc,4); {symbol value}
+                   for i := 1 to 8 do
+                       if lname[i] <> ' '
+                       then iout(ord(lname[i]),1);
+                   iout(0,1); { Null terminator }
+                   end;
+              usymtab2(llink);
+              usymtab2(rlink);
+              end;
+  end; {usymtab2}
+  
+  procedure rsymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then iout(ord(username[i]),1)
+                       else iout(0,1);
+                   iout(-22528,2); {global (un)defined external}
+                   iout(0,4); { symbol value zero since undefined }
+                   end;
+              rsymtab(llink);
+              rsymtab(rlink);
+              end;
+  end; {rsymtab}
+  
+  procedure rsymtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if username = '_main   '
+                   then lname := '%main   '
+                   else lname := username;
+                   for i := 1 to 8 do
+                       if lname[i] <> ' '
+                       then iout(ord(lname[i]),1)
+                       else iout(0,1);
+                   iout(-24064,2); {global defined text rel}
+                   iout(seg^.segbaseaddr + loc,4); { symbol value }
+                   end;
+              rsymtab2(llink);
+              rsymtab2(rlink);
+              end;
+  end; {rsymtab2}
+  
+  procedure lsymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if ENVIRONMENT = ALTOS
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   iout(stringpos,4); {position of name in string table}
+                   iout(0,4); { symbol value 0 since undefined }
+                   iout(8,1); { undefined external }
+                   iout(0,3); iout(0,4); { filler for supplemenary info }
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then stringpos := stringpos + 1;
+                   stringpos := stringpos + 1;
+                   end;
+              lsymtab(llink);
+              lsymtab(rlink);
+              end;
+  end; {lsymtab}
+  
+  procedure lsymtab2(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if ENVIRONMENT = ALTOS
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   iout(stringpos,4); {position of name in string table}
+                   iout(seg^.segbaseaddr + loc,4); {symbol value}
+                   iout(11,1); { text external }
+                   iout(0,3); iout(0,4); { filler for supplemenary info }
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then stringpos := stringpos + 1;
+                   stringpos := stringpos + 1;
+                   end;
+              lsymtab2(llink);
+              lsymtab2(rlink);
+              end;
+  end; {lsymtab2}
+  
+  procedure llsymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY) or
+     (ENVIRONMENT = NBI)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   iout(stringpos,4); {position of name in string table}
+                   iout(1,1); { ntype 1, undefined external }
+                   iout(0,1); { unused }
+                   iout(0,2); { descriptor }
+                   iout(0,4); { symbol value 0 since undefined }
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then stringpos := stringpos + 1;
+                   stringpos := stringpos + 1;
+                   end;
+              llsymtab(llink);
+              llsymtab(rlink);
+              end;
+  end; {llsymtab}
+  
+  procedure llsymtab2(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY) or
+     (ENVIRONMENT = NBI)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   iout(stringpos,4); {position of name in string table}
+                   iout(5,1); { ntype 5, text external }
+                   iout(0,1); { unused }
+                   iout(0,2); { descriptor }
+                   iout(seg^.segbaseaddr + loc,4); {symbol value}
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then stringpos := stringpos + 1;
+                   stringpos := stringpos + 1;
+                   end;
+              llsymtab2(llink);
+              llsymtab2(rlink);
+              end;
+  end; {llsymtab2}
+  
+  procedure qusymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = QU68000) or (ENVIRONMENT = MULTI)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   for i := 1 to 8 do
+                       if username[i] = ' '
+                       then iout(0,1) { Null pad }
+                       else iout(ord(username[i]),1);
+                   if ENVIRONMENT = QU68000
+                   then begin
+                        iout(0,4); iout(0,4); { Null pad }
+                        iout(32,2); { global undefined }
+                        end
+                   else begin iout(32,1); iout(0,1); end;
+                   iout(0,4); { symbol value 0 since undefined }
+                   end;
+              qusymtab(llink);
+              qusymtab(rlink);
+              end;
+  end; {qusymtab}
+  
+  procedure qusymtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if (ENVIRONMENT = QU68000) or (ENVIRONMENT = MULTI)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if username = '_main   '
+                   then lname := '%main   '
+                   else lname := username;
+                   for i := 1 to 8 do
+                       if lname[i] = ' '
+                       then iout(0,1) { Null pad }
+                       else iout(ord(lname[i]),1);
+                   if ENVIRONMENT = QU68000
+                   then begin
+                        iout(0,4); iout(0,4); { Null pad }
+                        iout(34,2); { global defined }
+                        end
+                   else begin iout(34,1); iout(0,1); end;
+                   iout(seg^.segbaseaddr + loc,4); { symbol value }
+                   end;
+              qusymtab2(llink);
+              qusymtab2(rlink);
+              end;
+  end; {qusymtab2}
+  
+  procedure lstrtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = ALTOS) or (ENVIRONMENT = LANDL) or
+     (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = NBI)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   for i := 1 to 8 do
+                       if username[i] <> ' '
+                       then iout(ord(username[i]),1);
+                   iout(0,1); { Null terminator }
+                   end;
+              lstrtab(llink);
+              lstrtab(rlink);
+              end;
+  end; {lstrtab}
+  
+  procedure lstrtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if (ENVIRONMENT = ALTOS) or (ENVIRONMENT = LANDL) or
+     (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = NBI)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if username = '_main   '
+                   then lname := '%main   '
+                   else lname := username;
+                   for i := 1 to 8 do
+                       if lname[i] <> ' '
+                       then iout(ord(lname[i]),1);
+                   iout(0,1); { Null terminator }
+                   end;
+              lstrtab2(llink);
+              lstrtab2(rlink);
+              end;
+  end; {lstrtab2}
+  
+  procedure csymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if ENVIRONMENT = UNOS
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   iout(16,2); {global undefined external}
+                   iout(0,4); { symbol value zero since undefined }
+                   for i := 1 to 16 do
+                       if i <= 8
+                       then
+                         if username[i] <> ' '
+                         then iout(ord(username[i]),1)
+                         else iout(0,1)
+                       else iout(0,1);
+                   end;
+              csymtab(llink);
+              csymtab(rlink);
+              end;
+  end; {csymtab}
+  
+  procedure csymtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if ENVIRONMENT = UNOS
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if username = '_main   '
+                   then lname := '%main   '
+                   else lname := username;
+                   iout(18,2); {global defined external}
+                   iout(seg^.segbaseaddr + loc,4); { symbol value text relative }
+                   for i := 1 to 16 do
+                       if i <= 8
+                       then
+                         if lname[i] <> ' '
+                         then iout(ord(lname[i]),1)
+                         else iout(0,1)
+                       else iout(0,1);
+                   end;
+              csymtab2(llink);
+              csymtab2(rlink);
+              end;
+  end; {csymtab2}
+  
+  procedure asymtab2(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if ENVIRONMENT = ADVENTURE
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   ioutname(username);
+                   iout(seg^.segbaseaddr + loc,4); { symbol value text relative }
+                   ioutone(ord('R'));    { entry address is relocatable }
+                   ioutone(ord('N'));    { entry point indicator }
+                   end;
+              asymtab2(llink);
+              asymtab2(rlink);
+              end;
+  end; {asymtab2}
+  
+  procedure tsymtab(fsymbol: psymbol);
+    var i: integer;
+  begin
+  if (ENVIRONMENT = CT) or (ENVIRONMENT = NCR) or (ENVIRONMENT = ARETE) or
+     (ENVIRONMENT = PLEXUS)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if not Defined
+              then begin
+                   for i := 1 to 8 do
+                     if username[i] <> ' '
+                     then iout(ord(username[i]),1)
+                     else iout(0,1);
+                   iout(0,4); { symbol value 0 since undefined }
+                   iout(0,2); { section number, 0 is undefined }
+                   iout(0,2); { type }
+                   iout(2,1); { storage class external }
+                   iout(0,1); { #auxilary entrys }
+                   end;
+              tsymtab(llink);
+              tsymtab(rlink);
+              end;
+  end; {tsymtab}
+  
+  procedure tsymtab2(fsymbol: psymbol);
+    var i: integer; lname: alfa8;
+  begin
+  if (ENVIRONMENT = CT) or (ENVIRONMENT = NCR) or (ENVIRONMENT = ARETE) or
+     (ENVIRONMENT = PLEXUS)
+  then
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if Defined and (username = linkname)
+              then begin
+                   if UNDERSCORE
+                   then if username = '_main   '
+                        then lname := '%main   '
+                        else lname := username
+                   else if username = 'main    '
+                        then lname := '%main   '
+                        else lname := username;
+                   for i := 1 to 8 do
+                     if lname[i] <> ' '
+                     then iout(ord(lname[i]),1)
+                     else iout(0,1);
+                   iout(seg^.segbaseaddr + loc,4); {symbol value}
+                   iout(1,2); { section number, 1 is text }
+                   iout(0,2); { type }
+                   iout(2,1); { storage class external }
+                   iout(0,1); { #auxilary entrys }
+                   end;
+              tsymtab2(llink);
+              tsymtab2(rlink);
+              end;
+  end; {tsymtab2}
+  
+  function mergeintlists(alist,blist: pintlist): pintlist;
+    var lpint: pintlist;
+  begin
+  if (alist <> nil) and (blist <> nil)
+  then begin
+       if alist^.intval <= blist^.intval
+       then begin
+            lpint := alist;
+            alist := alist^.nextint;
+            end
+       else begin
+            lpint := blist;
+            blist := blist^.nextint;
+            end;
+       mergeintlists := lpint;
+       while (alist <> nil) and (blist <> nil) do
+             if alist^.intval <= blist^.intval
+             then begin
+                  lpint^.nextint := alist;
+                  lpint := alist;
+                  alist := alist^.nextint;
+                  end
+             else begin
+                  lpint^.nextint := blist;
+                  lpint := blist;
+                  blist := blist^.nextint;
+                  end;
+       if alist = nil
+       then lpint^.nextint := blist
+       else lpint^.nextint := alist;
+       end
+  else if alist = nil
+       then mergeintlists := blist
+       else mergeintlists := alist;
+  end; {mergeintlists}
+  
+  function mergepatchlists(alist,blist: ppatchlist): ppatchlist;
+    var lpatch: ppatchlist;
+  begin
+  if (alist <> nil) and (blist <> nil)
+  then begin
+       if alist^.patchloc <= blist^.patchloc
+       then begin
+            lpatch := alist;
+            alist := alist^.nextpatch;
+            end
+       else begin
+            lpatch := blist;
+            blist := blist^.nextpatch;
+            end;
+       mergepatchlists := lpatch;
+       while (alist <> nil) and (blist <> nil) do
+             if alist^.patchloc <= blist^.patchloc
+             then begin
+                  lpatch^.nextpatch := alist;
+                  lpatch := alist;
+                  alist := alist^.nextpatch;
+                  end
+             else begin
+                  lpatch^.nextpatch := blist;
+                  lpatch := blist;
+                  blist := blist^.nextpatch;
+                  end;
+       if alist = nil
+       then lpatch^.nextpatch := blist
+       else lpatch^.nextpatch := alist;
+       end
+  else if alist = nil
+       then mergepatchlists := blist
+       else mergepatchlists := alist;
+  end; {mergepatchlists}
+  
+  procedure walkfcommon(ffcommon: pfcommon);
+    var lref: preflist; 
+  begin
+  if ffcommon <> nil
+  then 
+    with ffcommon^ do begin
+      walkfcommon(llink);
+      lref := reflist;
+      while lref <> nil do begin
+        if lref^.refseg = thisseg^.segnum
+        then 
+          if TextResident
+          then insertfpatch(ftextpatchlist,reladdr,lref^.refloc)
+          else
+            if initlist <> nil
+            then insertfpatch(fdatapatchlist,reladdr,lref^.refloc)
+            else 
+              if AtAbsolute
+              then begin
+                if not InRelocation
+                then
+                  if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+                  then insertfpatch(fbsspatchlist,reladdr,lref^.refloc)
+                  else
+                    if ENVIRONMENT = ALTOS
+                    then insertfpatch(fbsspatchlist,
+                                      reladdr - datasize,
+                                      lref^.refloc)
+                    else insertfpatch(fbsspatchlist,
+                                      reladdr - totalcodesize - datasize,
+                                      lref^.refloc);
+                end
+              else insertfpatch(fbsspatchlist,reladdr,lref^.refloc);
+        lref := lref^.nextref;
+        end;
+      walkfcommon(rlink);
+      end;
+  end; {walkfcommon}
+  
+

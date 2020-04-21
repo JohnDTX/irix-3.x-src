@@ -1,0 +1,55 @@
+.TH chunksize 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B chunksize
+\- specifies minimum object size in memory
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "chunksize(chunk)"
+.B "long chunk;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine chunks(chunk)"
+.B "integer*4 chunk"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure chunksize(chunk: longint);"
+.SH DESCRIPTION
+.B chunksize
+specifies the minimum object size in memory.
+You can call it only once after graphics initialization 
+(i.e., 
+.B ginit
+or
+.B winopen )
+and before the first
+.BR makeobj .
+.I chunk 
+is the unit size (in bytes) by which an object grows.
+.sp
+Use
+.B chunksize
+only if there is a limited amount of memory.
+.B chunksize
+is typically used when an application has many objects.
+If
+.B chunksize 
+is set too small, large items (e.g., large polygons)
+do not fit into the display list as each must fit entirely into
+a single chunk.
+Some experimentation may be necessary to determine the
+optimal chunksize for an application.
+The default chunk size is 1020 bytes.
+.SH "SEE ALSO"
+compactify, ginit, makeobj
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

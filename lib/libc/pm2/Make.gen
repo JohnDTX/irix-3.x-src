@@ -1,0 +1,66 @@
+# Makefile for pm2 libc
+#
+include ${ROOT}/usr/include/make/commondefs
+
+# Make MAKEPATH to get at all the directories we need
+# This is icky, but it gets the job done...
+# This has to be all on one line, due to a bug in /bin/make
+MAKEPATH=../gen:../imath:../../m68k/sys:../../m68k/swfp:../../common/gen:../../common/print:../../common/stdio:../../common/sys:../../common/compat:../../common/hack:../../common/4.2
+
+# Special objects that need special handling
+SPECIAL= cuexit.o exit.o fakcu.o
+
+# Objs is list of libc.a objects, without SPECIAL including
+OBJS=	index.o rindex.o oopendir.o oclosedir.o oreaddir.o oseekdir.o \
+	otelldir.o oscandir.o blt.o _d_ecvt.o _d_gcvt.o _lfrexp.o \
+	_lldexp.o _lmodf.o a64l.o abort.o abs.o assert.o atof.o atoi.o \
+	atol.o bsearch.o clock.o closedir.o ctime.o ctype.o \
+	dial.o drand48.o ecvt.o execvp.o exportfs.o frexp.o \
+	ftok.o ftw.o gcvt.o getcwd.o getenv.o getgrent.o getgrgid.o \
+	getgrnam.o getlogin.o getopt.o getpw.o getpwent.o getpwnam.o \
+	getpwuid.o getut.o getwd.o hsearch.o isatty.o l3.o l64a.o ldexp.o \
+	lsearch.o newmalloc.o memccpy.o memchr.o memcmp.o memcpy.o memset.o \
+	mktemp.o mntent.o modf.o mon.o nlist.o opendir.o perror.o putpwent.o \
+	qsort.o rand.o readdir.o scandir.o seekdir.o sleep.o ssignal.o \
+	strcat.o strchr.o strcmp.o strcpy.o strcspn.o strlen.o strncat.o \
+	strncmp.o strncpy.o strpbrk.o strrchr.o strspn.o strtok.o strtol.o \
+	swab.o tell.o telldir.o tolower.o toupper.o tsearch.o ttyname.o \
+	ttyslot.o errlst.o doprnt.o fprintf.o printf.o sprintf.o clrerr.o \
+	ctermid.o cuserid.o data.o doscan.o fdopen.o fgetc.o fgets.o \
+	filbuf.o findiop.o flsbuf.o fopen.o fputc.o fputs.o fread.o fseek.o \
+	ftell.o fwrite.o getchar.o getpass.o gets.o getw.o popen.o putchar.o \
+	puts.o putw.o rew.o scanf.o setbuf.o tempnam.o tmpfile.o tmpnam.o \
+	ungetc.o system.o execl.o execle.o execv.o msgsys.o semsys.o \
+	shmsys.o signal.o hostident.o bcmp.o bcopy.o bswap.o bzero.o \
+	mcount.o setjmp.o aldiv.o almul.o alrem.o auldiv.o aulmul.o \
+	aulrem.o ldiv.o lmul.o lrem.o smul.o uldiv.o ulmul.o ulrem.o \
+	usmul.o _lfabs.o fabs.o fakehwerr.o float.o \
+	fltused.o fpecleanup.o fperror.o fpsignal.o fpsubs.o access.o \
+	acct.o alarm.o asyncdmn.o cerror.o chdir.o chmod.o chown.o chroot.o \
+	close.o creat.o dup.o exect.o execve.o fcntl.o fork.o fstat.o \
+	fstatfs.o ftruncate.o getdents.o getdomn.o getegid.o geteuid.o \
+	getfh.o getgid.o gethostn.o getmsg.o getpgrp.o getpid.o getppid.o \
+	getuid.o getvers.o grsys.o ioctl.o kill.o link.o lseek.o lstat.o \
+	mkdir.o mknod.o mount.o netlink.o nfsmount.o nfssvc.o nice.o \
+	oldfstat.o oldlstat.o oldstat.o \
+	open.o pause.o phys.o pipe.o sysfs.o poll.o profil.o ptrace.o \
+	putmsg.o read.o readlink.o reboot.o rename.o rmdir.o sbrk.o \
+	setdomn.o setgid.o sethostn.o plock.o setuid.o sigrte.o sigtrap.o \
+	stat.o statfs.o stime.o symlink.o sync.o syscall.o time.o times.o \
+	truncate.o ulimit.o umask.o umount.o uname.o unlink.o ustat.o \
+	utime.o wait.o write.o setpgrp.o sginap.o
+
+SRCDIR=	../..
+LCOPTS= -O -ZI -ZN 
+LCINCS= -I${ROOT}/usr/include/bsd
+
+TARGETS= ../libc${PREF}.a
+
+.s.o:
+	/lib/cpp -P $< | m4 ${M4PROF} | ${AS} -i -o $*.o
+
+../libc${PREF}.a: ${OBJS} ${SPECIAL}
+	rm -f $@
+	ar cr $@ `lorder ${OBJS} | tsort` ${SPECIAL}
+	strip $@
+	ranlib $@

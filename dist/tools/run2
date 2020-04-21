@@ -1,0 +1,3 @@
+#! /bin/sh
+
+./newboot -m iris -e /d0 -r /d0/d/d/dest.2000 -d md0c  ../lists.2000/boot

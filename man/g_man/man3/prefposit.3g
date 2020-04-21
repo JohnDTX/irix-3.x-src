@@ -1,0 +1,46 @@
+.TH prefposition 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B prefposition 
+\- specifies the preferred location and size of a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "prefposition(x1, x2, y1, y2)"
+.B "long x1, x2, y1, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine prefpo(x1, x2, y1, y2)"
+.B "integer*4 x1, x2, y1, y2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure prefposition(x1, x2, y1, y2: longint);"
+.SH DESCRIPTION
+.B prefposition
+specifies the preferred location and size of a graphics window.
+You specify the location in screen coordinates (\f2x1\f1, \f2x2\f1, \f2y1\f1,
+\f1y2\f1).
+.sp
+Call
+.B prefposition
+at the beginning of a graphics program that runs under the window manager. 
+Use
+.B prefposition
+in conjuction with 
+.B winconstraints
+to modify the enforced size and location after the window has been created.
+.B prefposition
+is ignored if
+.B winopen 
+is not called, or if the window manager is not running.
+.SH "SEE ALSO"
+winconstraints, winopen 
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

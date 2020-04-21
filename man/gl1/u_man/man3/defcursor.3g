@@ -1,0 +1,35 @@
+.TH defcursor  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I defcursor
+- define a cursor glyph
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defcursor(n, curs) "
+.B "short n; "
+.B "Cursor curs;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defcur(n, curs) "
+.B "integer*2 n, curs(16)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defcursor(n: Short; curs: Cursor);"
+.sp
+.SH DESCRIPTION
+.I Defcursor
+defines a cursor glyph.  
+The arguments are a table index and a 16\(mu16 bitmap
+whose origin is the lower left corner.
+The index into the table is used as the cursor character's name
+in subsequent cursor commands.  
+By default, an arrow is defined as cursor 0.
+To replace a cursor, define
+the new one to have the same index as the old one.
+.SH "SEE ALSO"
+.I  deflinestyle, defobjfont, defrasterfont, deftexture, getcursor, setcursor
+.SH NOTE
+This command can only be used in immediate mode.

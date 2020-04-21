@@ -1,0 +1,105 @@
+'\"macro stdmacro
+.TH GETC 3S
+.SH NAME
+getc, getchar, fgetc, getw \- get character or word from stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int getc (stream)
+.br
+.SM
+.B FILE\*S \(**stream;
+.PP
+.B int getchar (\|)
+.PP
+.B int fgetc (stream)
+.br
+.SM
+.B FILE\*S \(**stream;
+.PP
+.B int getw (stream)
+.br
+.SM
+.B FILE\*S \(**stream;
+.SH DESCRIPTION
+.I Getc\^
+returns the next character (i.e. byte) from the named input
+.IR stream .
+It also moves the file pointer, if defined,
+ahead one character
+in
+.IR stream .
+.I Getc\^
+is a macro and so cannot be used 
+if a function is necessary; for example one cannot have a function
+pointer point to it.
+.PP
+.I Getchar\^
+returns the next character from the standard input stream,
+.IR stdin .
+As in the case of
+.IR getc ,
+.I getchar\^
+is a macro.
+.PP
+.I Fgetc\^
+performs the same function as
+.IR getc ,
+but is a genuine function.
+.I Fgetc\^
+runs more slowly than
+.IR getc ,
+but takes less space per invocation.
+.PP
+.I Getw\^
+returns the next word (32-bit integer on a 68000) 
+from the named input
+.IR stream .
+It returns the constant
+.SM
+.B EOF
+upon end-of-file or error, but as that is a valid
+integer value,
+.I feof\^
+and
+.IR ferror\^ (3S)
+should be used to check the success of
+.IR getw .
+.I Getw\^
+increments the associated file pointer, if defined,
+to point to the next word.
+.I Getw\^
+assumes no special alignment in the file.
+.SH SEE ALSO
+fclose(3S),
+ferror(3S),
+fopen(3S),
+fread(3S),
+gets(3S),
+putc(3S),
+scanf(3S).
+.SH DIAGNOSTICS
+These functions return the integer constant
+.SM
+.B EOF
+at end-of-file or upon an error.
+.SH BUGS
+Because it is implemented as a macro,
+.I getc\^
+treats incorrectly a
+.I stream\^
+argument with side effects.
+In particular,
+.B getc(\(**f\(pl\(pl)
+doesn't work sensibly.
+.I Fgetc\^
+should be used instead.
+.br
+Because of possible differences in word length and byte ordering,
+files written using
+.I putw\^
+are machine-dependent,
+and may not be read using
+.I getw\^
+on a different processor.
+.\"	@(#)getc.3s	5.1 of 10/25/83

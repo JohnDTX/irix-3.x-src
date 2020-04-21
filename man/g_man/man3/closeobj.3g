@@ -1,0 +1,47 @@
+.TH closeobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B closeobj
+\- closes an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "closeobj()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine closeo"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure closeobj;"
+.SH DESCRIPTION
+.B closeobj
+closes an object that is open.
+Use
+.B makeobj
+to create and open a new object.
+All display list routines between
+.B makeobj
+and
+.B closeobj
+become part of the object definition.
+Use \f3editobj\f1 to open
+an existing object for editing.
+Use
+.B closeobj
+to terminate the editing session.
+.PP
+If no object is open, 
+.B closeobj 
+is ignored.
+.SH "SEE ALSO"
+editobj, makeobj
+.sp
+.I Programming Guide,
+Section 8.1, Defining an Object 
+.SH NOTE
+This routine is available only in immediate mode.

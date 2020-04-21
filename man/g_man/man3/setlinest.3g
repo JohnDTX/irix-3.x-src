@@ -1,0 +1,38 @@
+.TH setlinestyle 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B setlinestyle
+\- selects a linestyle pattern
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setlinestyle(index) "
+.B "short index;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setlin(index)"
+.B "integer*4 index"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setlinestyle(index: longint);"
+.SH DESCRIPTION
+.B setlinestyle
+selects a linestyle pattern.
+.I index
+is an index into the linestyle table
+built by
+\f3deflinestyle\fP. 
+There is always a current
+linestyle; it draws lines and curves, and outlines
+rectangles, polygons, circles, and arcs.  The default linestyle is 0,
+which is a solid line.  It cannot be redefined.
+.SH "SEE ALSO"
+deflinestyle, getlstyle, linewidth, lsbackup, resetls
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles

@@ -1,0 +1,29 @@
+.TH setdepth 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setdepth
+- set up a 3D viewport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setdepth(near, far)"
+.B "Screencoord near, far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setdep(near, far)"
+.B "integer*2 near, far"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setdepth(near, far: Screencoord);"
+.sp
+.SH DESCRIPTION
+The \f2viewport\f1 command specifies a mapping from the left, right,
+bottom, and top clipping planes in world coordinates
+to screen coordinate values.
+\f2Setdepth\f1 completes this mapping for homogeneous world coordinates.
+The two arguments map the near and far clipping planes to the desired
+screen coordinate values.  The default is \f2setdepth(0,1023)\f1.
+.SH "SEE ALSO"
+.I pushviewport, popviewport, screenpnt 

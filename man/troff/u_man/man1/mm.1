@@ -1,0 +1,313 @@
+'\"macro stdmacro
+.TH MM 1
+.SH NAME
+mm \- prints documents formatted with the mm macros
+.SH SYNOPSIS
+.B mm
+[ options ] [ files ]
+.SH DESCRIPTION
+Use
+.I mm
+to format documents using
+.I nroff
+and the
+.I mm
+text-formatting macro package.
+.I mm
+has options to specify
+preprocessing by
+.IR tbl (1)
+and/or
+.IR neqn ,
+and postprocessing by various terminal-oriented output filters.
+The proper pipelines and the
+required arguments and flags for
+.I nroff
+and
+.I mm
+are generated, depending on the options you select.
+.PP
+.I Options\^
+for
+.I mm\^
+are given below.
+Any other arguments or flags (e.g.,
+.BR \-rC3 )
+are passed
+to
+.I nroff
+You may use such options in any order, but you
+must put them before the
+.I files
+arguments.
+If you do not specify arguments,
+.I mm\^
+prints a list of its options.
+.PP
+.PD 0
+.TP 9
+.BI \-T tty_type
+Specifies the type of output terminal.
+Here is a list of recognized values for
+.IR tty_type .
+.RS
+.TP p
+.B 2631
+Hewlett-Packard 2631 printer in regular mode
+.TP
+.B 2631\-c
+Hewlett-Packard 2631 printer in compressed mode
+.TP
+.B 2631\-e
+Hewlett Packard 2631 printer in expanded mode
+.TP
+.B 300
+DASI-300 printer
+.TP
+.B 300-12
+DASI-300 terminal set to 12-pitch (12 characters per inch)
+.TP
+.B 300s
+DASI-300s printer (300S is a synonym)
+.TP
+.B 300s-12
+DASI-300s printer set to 12-pitch (12 characters per inch) (300S is a synonym)
+.TP
+.B 37
+Teletype Model 37 terminal
+.TP
+.B 382
+DTC-382
+.TP
+.B 4000a
+Trendata 4000a terminal (4000A is a synonym)
+.TP
+.B 450
+DASI-450 (Diablo Hyterm) printer
+.TP
+.B 450-12 
+DASI-450 terminal set to 12-pitch (12 characters per inch)
+.TP
+.B 832
+Anderson Jacobson 832 terminal
+.TP
+.B 8510 
+C.ITOH printer
+.TP
+.B tn300
+GE Terminet 300 terminal
+.TP
+.B X
+printers equipped with TX print train
+.TP
+.B lp
+generic name for printers that can underline and tab.  \f3lp\f1
+is the default device for 
+.IR mm .
+All text sent to
+.B lp 
+requiring reverse linefeeds, such as those having tables, must
+be processed with
+.IR col (1),
+invoked with 
+.IR mm 's
+.B \-c
+option.  
+.PP
+If you do not use this option,
+.I mm
+uses the value of the shell variable
+.B $TERM
+from the environment
+(see
+.IR environ (5))
+as the value of
+.I tty_type
+if
+.B $TERM
+is set; otherwise,
+.I mm
+uses
+.B 450
+as the value of
+.IR tty_type .
+If you specify several terminal types, the last one takes precedence.
+.RE
+.PP
+.TP 9
+.B \-12
+indicates that the document is to be produced in 12-pitch.
+You may use this option when 
+.SM
+.B $TERM
+is set to one of
+.BR 300 ,
+.BR 300s ,
+and
+.BR 450 .
+(You must manually set the pitch switch on the
+.SM DASI
+300 and 300s terminals to
+.B 12
+if you use this option).
+.TP
+.B \-c
+causes
+.I mm\^
+to invoke
+.IR col ;
+note that
+.I col
+is invoked automatically by
+.I mm\^
+unless
+.I tty_type
+is one of
+.BR 300 ,
+.BR 300s ,
+.BR 450 ,
+.BR 37 ,
+.BR 4000a ,
+.BR 382 ,
+and
+.BR X .
+.TP
+.B \-e
+Causes
+.B mm\^
+to invoke
+.BR neqn ;
+also causes
+.B neqn
+to read the
+.B /usr/pub/eqnchar
+file (see
+.BR eqnchar (5)).
+.TP
+.B \-t
+Causes
+.B mm\^
+to invoke
+.IR tbl (1).
+.TP
+.B \-E
+Invokes the
+.B \-e
+option of
+.IR nroff .
+.PD
+.PP
+As an example (assuming that 
+the shell variable
+.SM
+.B $TERM
+is set in the environment to
+.BR 450 ),
+the two command lines below are equivalent:
+.RS
+.PP
+mm \|\-t \|\-rC3 \|\-12 \|\f2 files\f1
+.br
+tbl \f2files \||\| nroff \|\-mm \|\-T450\-12 \|\-h \|\-rC3\f1
+.RE
+.PP
+.B mm\^
+reads the standard input
+when you specify
+.B \-
+instead of any 
+.IR files .
+(Mentioning other files together with
+.B \-
+leads to undesired results.)
+This option allows you to use
+.B mm\^
+as a filter, for example:
+.PP
+.RS
+cat \|\f2files\f1 \||\| mm \|\-
+.RE
+.PP
+.SH HINTS
+.PD 0
+.TP 5
+1.
+.I Mm\^
+invokes
+.I nroff
+with the
+.B \-h
+flag.
+With this flag,
+.I nroff
+assumes that the terminal has tabs set
+every 8 character positions.
+.TP
+2.
+Use the
+.BI \-o list\^
+option of
+.I nroff
+to specify ranges of pages to be output.
+Note, however, that if you invoke
+.IR mm ,
+with
+one or more of the
+.BR \-e ,
+.BR \-t ,
+and
+.B \-
+options,
+.I together\^
+with the
+.BI \-o list\^
+option of
+.I nroff
+you may cause a harmless ``broken pipe'' diagnostic
+if you do not specify the last page of the document in
+.IR list .
+.TP
+3.
+If you use the
+.B \-s
+option of
+.I nroff
+(to stop between pages of output),
+use line-feed (rather than return or new-line)
+to restart the output.
+The
+.B \-s
+option of
+.I nroff
+does not work with the
+.B \-c
+option of
+.IR mm ,
+or if
+.I mm\^
+automatically invokes
+.I col
+(see
+.B \-c
+option above).
+.TP
+4.
+If you lie to
+.I mm\^
+about the kind of terminal its output will be printed on,
+you will get (often subtle) garbage;
+however, if you are redirecting output into a file, use the
+.B \-T37
+option, and then use the appropriate terminal filter when you actually print that file.
+.PD
+.br
+.ne 4
+.SH FILES
+/usr/pub/terminal	list of supported terminals
+.SH SEE ALSO
+checkmm(1), col(1), env(1), eqn(1), greek(1), mmt(1), mvt(1), neqn(1), nroff(1), tbl(1),
+profile(4), mm(5), term(5).
+.PP
+The section entitled ``mm'' in the \f2Documenter's Workbench User's Guide\f1.
+.PP
+The section entitled ``mm'' in the \f2Documenter's Workbench Reference Manual\f1.

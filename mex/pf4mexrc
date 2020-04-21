@@ -1,0 +1,18 @@
+#include <device.h>
+bindfunc hogmode PADPF4
+reservebut PADPF4
+bindfunc popattach LEFTMOUSE
+bindfunc movegrow MIDDLEMOUSE
+reservebut RIGHTMOUSE
+bindfunc menu RIGHTMOUSE
+bindindex inborder 7
+bindindex hiinborder 7
+bindindex titletextin 7
+bindindex titletextout 0
+bindindex hititletextin 7
+bindindex hititletextout 0
+bindindex hioutborder 1
+bindindex outborder 0
+bindcolor menu 10 10 10 
+bindcolor menuback 220 220 220 
+bindcolor cursor 255 0 0 

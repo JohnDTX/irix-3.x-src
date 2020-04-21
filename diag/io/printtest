@@ -1,0 +1,9 @@
+date >> /dev/cent
+cat printtext >> /dev/cent &
+if ( $status ) then
+date >>testresults
+echo "PRINTTEST FAILED" >>testresults
+else
+date >>testresults
+echo "PRINTING SUCCESSFUL" >>testresults
+endif

@@ -1,0 +1,132 @@
+'\"macro stdmacro
+.TH MVT 1
+.SH NAME
+mvt \- typeset view graphs and slides
+.SH SYNOPSIS
+.B mvt
+[ options ] [ files ]
+.SH DESCRIPTION
+This command is similar to
+.IR mmt (1),
+except that it typesets its input with the
+.B mv
+macro package for view graphs and slides.
+.B mvt
+has options to specify
+preprocessing by
+.IR tbl (1)
+and/or
+.IR pic (1)
+and/or
+.IR eqn (1)
+and/or
+.IR grap (1) .
+The proper pipelines and the
+required arguments and flags for
+.IR troff (1)
+and
+for
+the macro packages
+are generated, depending on the options selected.
+.PP
+.I Options\^
+specific to 
+.B mvt
+are given below.
+Any other arguments or flags that you give
+.B mvt
+are passed
+to
+.IR troff .
+Options can occur in any order,
+but they must appear before any
+.I files\^
+arguments.
+If you give no arguments, 
+.B mvt
+prints a list of its options.
+.PP
+.PD 0
+.TP 10
+.B \-e
+invokes
+.IR eqn ;
+also causes
+.I eqn
+to read the
+.B /usr/pub/eqnchar
+file (see
+.IR eqnchar (5)).
+.TP
+.B \-t
+invokes
+.IR tbl .
+.TP
+.B \-p
+Invokes
+.IR pic .
+.TP
+.B \-g
+invokes
+.IR grap , 
+which in turn calls
+.IR pic .
+.TP
+.BI \-T tty_type
+creates output for 
+typesetter
+.I tty_type
+(see
+.IR troff (1)).
+.TP
+.BI \-D dest
+directs the output to \f2troff\f1 device \f2dest\f1 (see \f2troff\f1(1)).
+Supported values for 
+.I dest
+are:
+.B 4014
+(TEKTRONIX 4014 terminal via the
+.IR tc (1)
+filter).
+.TP
+.B \-z
+Invokes no output filter
+to process or redirect the output of
+.IR troff (1).
+.PD
+.PP
+.B mvt
+reads the standard input
+when you specify
+.B \-
+instead of any 
+.IR files .
+.SH HINT
+Use the
+.BI \-o list\^
+option of
+.I troff
+to specify ranges of pages to be output.
+Note, however, that if you call
+.B mvt
+with one or more of the
+.BR \-e ,
+.BR \-t ,
+.BR \-p ,
+.BR \-g
+and
+.B \-
+options,
+together with the
+.BI \-o list\^
+option of
+.I troff
+you may cause a harmless ``broken pipe'' diagnostic
+if the last page of the document is not specified in
+.IR list .
+.SH SEE ALSO
+eqn(1), grap(1), mmt(1), pic(1), tbl(1), tc(1), troff(1),
+eqnchar(5), mv(5).
+.PP
+The section entitled ``mv'' in the \f2Documenter's Workbench User's Guide\f1.
+.\"	%W% of %G%

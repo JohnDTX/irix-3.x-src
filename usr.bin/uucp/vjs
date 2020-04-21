@@ -1,0 +1,182 @@
+# makefile for UUCP
+
+#
+#
+include ${ROOT}/usr/include/make/commondefs
+# @(#)$Header: /d2/3.7/src/usr.bin/uucp/RCS/vjs,v 1.1 89/03/27 18:31:09 root Exp $
+# $Log:	vjs,v $
+# Revision 1.1  89/03/27  18:31:09  root
+# Initial check-in for 3.7
+# 
+# Revision 1.8  87/05/29  17:01:55  andre
+# fixed minor install bugs
+# 
+# Revision 1.7  87/05/04  11:25:34  andre
+# 3.6 Product, New 5.3 Style Installs Added, Native Installs done
+# 
+# Revision 1.3  86/08/27  15:58:51  paulm
+# Add Yellow Pages libraries to the load list to pick
+# up YP versions of getpwent, getgrent and so forth.
+# 
+# Revision 1.2  85/06/17  12:35:49  bob
+# Changed so that logent.o is after uucpname.o since uucpname now references
+# logent.
+# 
+# Revision 1.1  85/06/17  12:03:25  bob
+# Initial revision
+# 
+# Revision 1.15  85/02/06  20:26:40  bob
+# Fixed to install configuration files (L.sys, L-devices, etc.) only if non-
+# existent or null length. Thus developer's files aren't trashed and the
+# release isn't left with non-existent or null length files.
+# 
+
+LIB	= /usr/lib/uucp
+LIBXNS	= -lxns
+BIN	= /usr/bin
+SPOOL	= /usr/spool/uucp
+XQTDIR	= /usr/lib/uucp/.XQTDIR /usr/spool/uucp/.XQTDIR \
+	  /usr/spool/uucppublic /usr/spool/uucppublic/receive
+PKON	= pkon.o
+
+DIRS	= $(LIB) $(SPOOL) $(XQTDIR)
+
+COMMANDS= $(COMBIN) $(COMLIB)
+
+COMBIN	= uucp uulog uuname uustat uusub uux uuencode uudecode
+
+COMLIB	= uucico uuclean uuxqt
+
+DATAFIL	= L.cmds L-devices L-dialcodes L.sys \
+	USERFILE uudemon.day uudemon.hr uudemon.wk
+
+ZLIB	=  L_stat L_sub R_stat R_sub SEQF
+
+ZSPOOL	= AUDIT LOGFILE SYSLOG ERRLOG oAUDIT oLOGFILE oSYSLOG oERRLOG
+
+HFILES	= uucp.h uucpdefs.h
+
+OFILES	= assert.o cpmv.o expfile.o gename.o getpwinfo.o \
+	prefix.o shio.o ulockf.o xqt.o
+
+OUUCP	= uucpdefs.o uucp.o gwd.o chkpth.o getargs.o uucpname.o logent.o\
+	versys.o us_crs.o
+
+OUUX	= uucpdefs.o uux.o gwd.o anyread.o chkpth.o getargs.o getprm.o\
+	uucpname.o logent.o versys.o
+
+OUUXQT	= uucpdefs.o uuxqt.o mailst.o getprm.o gnamef.o uucpname.o \
+	logent.o chkpth.o getargs.o anyread.o
+
+OUUCICO	= uucpdefs.o cico.o conn.o cntrl.o pk0.o pk1.o gio.o anyread.o \
+	anlwrk.o chkpth.o getargs.o gnamef.o gnsys.o gnxseq.o \
+	imsg.o sysacct.o systat.o \
+	mailst.o uucpname.o logent.o us_crs.o us_rrs.o us_sst.o ub_sst.o \
+	line.o pkdefs.o gtcfile.o xio.o fwdchk.o versys.o
+
+OUULOG	= uucpdefs.o uulog.o prefix.o xqt.o ulockf.o gnamef.o assert.o logent.o
+
+OUUCLEAN= uucpdefs.o uuclean.o gnamef.o prefix.o mailst.o getpwinfo.o\
+	 getargs.o assert.o
+
+OUUNAME	= uuname.o uucpname.o logent.o uucpdefs.o
+
+OUUSTAT	= uucpdefs.o uustat.o gnamef.o getpwinfo.o cpmv.o \
+	assert.o ulockf.o logent.o
+
+OUUSUB	= uucpdefs.o uusub.o getpwinfo.o xqt.o
+
+YPLIBS	= -lsun -lbsd -ldbm
+
+EMPTYFILES = ${ZLIB} ${LIB}/SEQF ${ZSPOOL}
+
+all:	$(COMMANDS)
+
+install:all $(DIRS) progbin proglib datalib logfiles
+
+progbin:
+	${INSTALL} -u uucpadm -g uucpadm -m 4111 -F ${BIN}  \
+	-idb "std.sw.unix mr" "${COMBIN}"
+# install programs in /usr/bin
+
+proglib:
+# install other programs in /usr/lib/uucp
+	${INSTALL} -u uucpadm -g uucpadm -m 4111 -F ${LIB}  \
+	-idb "std.sw.unix mr" "uucico uuxqt"
+	${INSTALL} -u uucpadm -g uucpadm -m 111 -F ${LIB}  \
+	-idb "std.sw.unix mr" "uuclean"
+
+datalib:
+# install data files
+	${INSTALL} -u uucpadm -g uucpadm -m 400 -F ${LIB}  \
+	-idb "std.sw.unix mr" "L.sys L.cmds USERFILE" ;\
+	${INSTALL} -u uucpadm -g uucpadm -m 444 -F ${LIB}  \
+	-idb "std.sw.unix mr" "L-devices L-dialcodes";\
+	${INSTALL} -u uucpadm -g uucpadm -m 755 -F ${LIB}  \
+	-idb "std.sw.unix mr" "uudemon.day uudemon.hr uudemon.wk" 
+
+logfiles:
+	touch SEQF ${ZSPOOL}
+	${INSTALL} -u uucpadm -g uucpadm -m 644 -F ${LIB}  \
+	-idb "std.sw.unix mr" "${ZLIB}"
+	${INSTALL} -u uucpadm -g uucpadm -m 600 -F ${LIB}  \
+	-idb "std.sw.unix mr" SEQF
+	${INSTALL} -u uucpadm -g uucpadm -m 644 -F ${SPOOL}  \
+	-idb "std.sw.unix mr" "${ZSPOOL}"
+# install directories
+	chmod 777 $(XQTDIR)
+
+$(DIRS):
+	${INSTALL} -dir $@ -u uucpadm -g uucpadm -m 755 -F  \
+	-idb "std.sw.unix mr" 
+
+${EMPTYFILES}: touch $@
+
+ub_sst.o uusub.o: uusub.h
+
+cico.o:	uusub.h uust.h uucp.h
+
+anlwrk.o cntrl.o us_crs.o us_rrs.o \
+us_sst.o uucp.o uustat.o:	uust.h uucp.h
+
+anyread.o assert.o chkpth.o cico.o conn.o cpmv.o expfile.o gename.o \
+getpwinfo.o gio.o gnamef.o gnsys.o gnxseq.o gwd.o imsg.o ioctl.o \
+mailst.o sdmail.o shio.o \
+systat.o ulockf.o uuclean.o uucpdefs.o uucpname.o logent.o uulog.o uuname.o \
+uux.o uuxqt.o versys.o xqt.o:	uucp.h
+
+tags:	*.c
+	-ctags *.c
+
+clean:
+	rm -f *.o
+
+clobber:clean
+	rm -f $(COMMANDS)
+
+uucp:	$(OUUCP) $(OFILES) 
+	$(CC) $(LDFLAGS) $(OUUCP) $(OFILES) -o $@ $(YPLIBS)
+
+uux:	$(OUUX) $(OFILES) 
+	$(CC) $(LDFLAGS) $(OUUX) $(OFILES) -o $@ $(YPLIBS)
+
+uuxqt:	$(OUUXQT) $(OFILES) 
+	$(CC) $(LDFLAGS) $(OUUXQT) $(OFILES) -o $@ $(YPLIBS)
+
+uucico:	$(OUUCICO) $(OFILES) $(PKON)
+	$(CC) $(LDFLAGS) $(OUUCICO) $(OFILES) $(PKON) $(LIBXNS) -o $@ $(YPLIBS)
+
+uulog:	$(OUULOG)
+	$(CC) $(LDFLAGS) $(OUULOG) -o $@ $(YPLIBS)
+
+uuclean:$(OUUCLEAN)
+	$(CC) $(LDFLAGS) $(OUUCLEAN) -o $@ $(YPLIBS)
+
+uuname: $(OUUNAME) 
+	$(CC) $(LDFLAGS) $(OUUNAME) -o $@ $(YPLIBS)
+
+uustat:	$(OUUSTAT) 
+	$(CC) $(LDFLAGS) $(OUUSTAT) -o $@ $(YPLIBS)
+
+uusub:	$(OUUSUB) 
+	$(CC) $(LDFLAGS) $(OUUSUB) -o $@ $(YPLIBS)

@@ -1,0 +1,1012 @@
+.fonts @3 _2 !7 $8
+.title GFLD,  GF2LD,  GFPM2,  GF2PM2
+.title Loader/Debugger for GF Boards:  User's Guide
+.author Mark S. Grossman
+.sp .5
+.ce
+15 March 1985
+
+.heading LATEST  CHANGES
+.ta \w'$gt$_n_    'u
+.nf
+$m$_n_	toggle monitor mode; or set DC reg to _n_
+$ia$	initialize and abort test (e.g. after pipe hung)
+$gt$_n_	new test vectors
+$Gv$	depth-cued vectors - use after gt9
+$GD$	depth-cued dots - use after gt9
+$T$	GE token port test
+$ir$	initializes scratch tables
+.fi
+.sp
+===========================================================
+.sp
+
+This program is a 68000-based tool for FBC-based debugging of IRIS
+hardware and microcode.  To run it, download one of the following:
+.begin-example
+@gfld@                  ( GF1 version -- in boot directory )
+@gfpm2@                ( GF1 version for workstation )
+@gf2ld@                 ( GF2 version for PM1)
+@gf2pm2@               ( GF2 version for PM2)
+.end-example
+
+The program is an interactive command interpreter with some built-in
+facilities for testing the Geometry Engine pipeline and FBC operation.  It
+compiles two different ways, for use with wirewrap GE and FBC boards or with
+GF1 boards.  It has a nested keyboard macro feature for encapsulating and
+repeating command sequences.
+.paragraph
+This document describes the features of all versions of the program, with
+differences noted as necessary.
+
+.heading STRING NOTATION
+
+In this document, special fonts and symbols are used as syntactical tools
+for describing command lines:
+.begin-example
+
+$text$		Literal text in the command line.
+_word_		Some substring, referred to in the text description as _word_.
+		_Word_ may be one or several characters.
+[$x$]		Character $x$ is optional.
+[$x$,$y$]	Either the character $x$ or $y$.
+[_n1..n2_]	Any number from _n1_ to _n2_.
+.end-example
+
+.section 1 COMMANDS
+
+Each command line starts with a one-character command (_cmd_).  This by
+itself may invoke a test sequence.  It may also be followed by one or more
+modifiers consisting of single characters or numeric values.  For example,
+print and store commands are followed by a one-letter operand (_which_),
+followed optionally by a one-letter mode (_how_).  _How_, which usually
+designates verbose text ($t$) or not-verbose ($n$), defaults to $n$.
+.paragraph
+The general form of a print/store command line is:
+.begin-example
+	_cmd_[_which_][_how_][_field_][_sep_][_val_]
+.end-example
+
+Each field option represents one typed (or stored) letter in a command line.
+
+.heading COMMAND SUMMARY
+.begin-example
+$?$	help -- print command list
+$b$	bpc command
+$B$	breakpoint set
+$c$	call macro
+$C$	macro diagnostic
+$d$	dismiss program interrupt
+$f$	data file and FIFO operations
+$g$	geometry system command
+$G$	geometry system: special test vector
+$i$	initialize ge/fbc hardware
+$I$	initialize scratch tables
+$m$	toggle monitor mode
+$M$	force GE mask word
+$o$	open microcode location
+$p$	print
+$q$	quit current command level
+$Q$	quick GE confidence test
+$r$	ram read/write tests
+$s$	store
+$S$	setup for GE tests
+$t$	canned board test procedure
+$T$	GE port token flag test
+$U$	unset breakpoint(s)
+$v$	user test vector definition
+$V$	force microcode version no.
+$w$	write microcode buffer to hardware
+$W$	write microcode, preserving breakpoints
+<CR>	print next microcode location
+!\^!$r$	(control-r) - re-init screen if iris screen is default
+.end-example
+
+@meta-commands:@
+.begin-example
+$/$		start (multi-line) macro definition
+$/$_c_	 	end macro definition; macro is named _c_
+.end-example
+
+.need 10
+@WHICH summary ( for p and s commands )@
+.begin-example
+$c$	DI bus, fbccode field (4 bits) (GF1)
+$f$	status flag register
+$i$	DI bus (16 bits)
+$m$	microcode memory
+$b$	block of microcode
+$o$	output register
+$p$	pixel data (GF1)
+.end-example
+
+@General Remarks@
+.sp
+@Nota bene -- important notes@
+.number-list
+
+.item
+Note that command symbols are case-sensitive; there are only a few
+upper-case commands.
+
+.item
+A $?$ can be typed in place of or after a command letter in most
+cases in order to obtain help on the command or option.
+
+.item
+Some actions may cause an FBC or GE interrupt to be generated.  If
+this interrupt is not expected by the test code, a special command
+mode is entered.  See below, @INTERRUPT COMMANDS@.
+
+.item
+Note (GF2) that microcode is built up in a local 1Kx4 wd. buffer;
+contents are transfered to the alpha hardware using $w$.
+A working version of microcode is brought into the buffer
+along with the program.
+
+.item
+Macro calls can be nested to 32 levels.  It is best if macro calls
+in general do not cause interrupts or require typed input.
+
+.item
+White space is ignored in directly typed input, but should be absent
+in macro bodies.
+
+.item
+Numeric fields are hex, with lower-case letters, terminated by any
+@non-white@ non-numeric or by <CR>.
+
+.end-list
+
+.section 1 TESTS
+
+$t$
+.sp
+For a quick go/no-go test of the GF1 hardware, just type $t$<CR> --
+This will attempt to initalize the FBC and GE system, test the
+scratch ram several times, draw some test pictures, and exercise
+the geometry pipeline.  It executes approximately the equivalent of:
+.begin-example
+$sffb  si$_n_  $pi$             (16 tests) (GF2)
+$rm$					(GF2)
+$w$					(GF2)
+$is$
+$rs$					(5 times)
+$bt$
+$if$
+$gm0$
+$gm2$
+$gm1$
+$T$					(GF2)
+$cs$
+$cf$
+$cP$					(with extra checks)
+cp
+.end-example
+
+A number of special error messages may appear.  Their meanings are
+as follows:
+.begin-example
+reset error
+		The FBC didn't reach state 40 after initialization.
+.sp
+no frame buffer
+		The acknowledge line from the Update Control was found high
+		or floating.
+.sp
+GE(s) missing:
+		With the GE reset active, some GE's are trapping.
+.sp
+GEREQFBC not clear
+		Spurious request out of the tail FIFO to the FBC.
+.sp
+pipeline or FBC inrjust error -
+		means that a word of data sent down the pipe did not
+		appear or was not readable in the FBC's "RJUST" input reg.
+		Prints the bad data.
+.sp
+FBC inljust error
+		data reached the FBC but the value in the "LJUST" register
+		was wrong.
+.sp
+not enough GE's -- skipping test
+		the test vector requires (10 or) 12 GE's to run.
+.sp
+feedback error: ...
+		the FBC feeds vector results back twice;
+		the two reads differed. (GF1)
+.sp
+Error at word _w_
+		not all of the GE test vector could be sent.
+.sp
+no feedback from GE test
+		no interrupt occurred to feed test data back to host.
+.sp
+Error on wd. _w_: _d_ should be _v_ (q to quit)
+		the GE output was wrong at word _w_ in the sequence.
+.end-example
+
+.need 14
+Other hardware test commands include:
+.begin-example
+$Q$		quick GE pipe confidence test for workstation lacking dumb tty
+$i$		basic FBC functionality
+$rs$		scratch ram test  (e.g. $is  rs$)
+$rm$		microcode ram test  (GF2)
+$T$		GE port/token test
+$gt$_n_		picture-drawing test  (e.g.  $ir  gC  gt$_n_)
+$gm$_n_		multibus-based drawing  (e.g.  $if  gm0 gm1 gm2$)
+			$gm0$ clears the screen.
+			$gm1$ draws a white circle.
+			$gm2$ draws 8 dashed vectors along the diagonal.
+$Gb$		transformed boxes  (e.g. $ii  gC  Gb$)
+.end-example
+
+.paragraph
+$T$
+.sp
+Token test.
+Once GE pipe has been shown to basically work,
+the token test can be run.  It prints these errors:
+.begin-example
+no initial clear
+		Token active without having been sent.
+.sp
+unprovoked interrupt
+		Token interrupt enabled and a spurious one
+		came, before or after a word sent.
+.sp
+no interrupt
+		After a token sent, no interrupt occurred.
+.sp
+TOKEN\_BIT\_ doesn't go active
+		After token sent, flag bit not active.
+.sp
+can't clear
+		Token flag bit can't be cleared.
+.end-example
+
+Also, see below under @TEST SEQUENCES@.
+
+.section 1 INIT
+
+$i$[_mode_]
+.sp
+Before doing any operations that use the FBC or GE pipe, perform
+an $i$.  This will set up everything on the GF board to a clean
+state.  It does not assume that there is any BPC hardware in the
+system.  The number (GEfound) and arrangement (GEmask) of GE's
+on the board is reported, followed by the scratch size and microcode
+version.
+.paragraph
+The microcode must be loaded via the $w$ command before any init
+command (GF2).  The w is needed only after power-up or microstore
+testing.  If an init command is done befor the $w$, do a $V$ command
+to reset the microcode version number.
+.paragraph
+Depending on the hardware present in the system, the flag registers
+can be set up in an optimum way by specifying the _mode_ explicitly:
+.begin-example
+$r$	run mode
+	For when all hardware is available and useable.  Runs findge()
+	to determine which GE chips are present in system, and reports
+	results.  Initializes color map. Also performs an $I$ to
+	initalize scratch tables.
+.sp
+$f$	frame buffer mode
+	If the bit plane hardware is present and useable, but the GE system
+	is not.  Like $ir$ reset, but doesn't try sending to GE pipe.  Inits
+	color map.
+.sp
+$b$	bpc command mode
+	For when testing of individual BPC commands is desired (the $b$
+	commands)
+.sp
+$s$	standalone mode
+	For when no GE system or BPC is present or useable. Will not attempt
+	to initialize color map.
+.sp
+$d$	dummy pipe mode
+	For when dummy wafers are installed as FIFOs, but all other hardware
+	is useable.  Does not run findge().  Useful with $SD$, $gP$, and $gd$
+	commands.
+.sp
+$i$	interrupt mode
+	Enables FIFO high-water interrupts.  For running $G$ drawing tests,
+	$ga$ tests, and $gB$ tests.  Initializes color map on DC board.
+.sp
+$I$	interrupt standalone mode
+	Same as i but assumes no BPC hardware.
+.sp
+$a$	abort testing
+	If some test causes the pipe to hang (with HIWATER stuck high),
+	a new command shell will be entered.  Type ia before exiting this
+	level in order to attempt to unhang the test.
+.sp
+$t$	tests library reset procedure.
+.end-example
+
+.paragraph
+$I$
+.sp
+Initializes any scratch ram tables used by the microcode.  Microcode
+must be written on the board and FBC must be in a command input
+state.  Performed automatically by $ir$.
+
+.section 1 WRITE
+
+$w  W$
+.sp
+To use the ram-microcoded FBC or GF2, a $w$ must be performed at
+least once after system power-up.  This transfers the current compiled-in
+microcode to the microcode ram.  The contents are verified after writing
+(GF2).  The $W$ command preserves any breakpoints set by the user.
+
+.section 1 PRINT
+
+In successive print commands, _which_ defaults to the previous
+command if not typed.
+
+.section 2 Print Microcode
+
+$p$[$m$][_how_][_addr_]
+.paragraph
+Prints microcode buffer contents, address _addr_.
+_How_ can be:
+.begin-example
+$n$ 	numeric value of state divided into 16-bit chunks, i.e
+.sp
+	@printout:@       40      3cc0       e5       30
+.sp
+	= @bits:@       0-15    16-31     32-47    48-55
+	= @field:@       0          1          2          3
+.sp
+			The @field@ designation (0..3) is used in the numeric
+			@STORE@ command below.
+.sp
+$t$	text. Prints each micro field in symbolic notation.
+	The fields are represented by capitalized 3-letter
+	designations:
+.sp
+		$ALU$   2903 opcode, alu part
+		$BRA$   branch address (DI field)
+		$CDN$   condition code
+		$CIN$   carry-in
+		$CLK$   clock period  (GF1 only)
+		$DST$   2903 opcode, destination part
+		$FBC$   FBCCODE field: onboard/output commands
+		$HIB$   !``!HIGHBYTE!''! signal for alu output ctrl; !``!SWAPBYTE!''! on GF2
+		$IOC$   I/O operation
+		$MXA$   alu A port selection
+		$MXB$   alu B port selection
+		$RAM$   ram operation
+		$RGA$   alu A port register no.
+		$RGB$   alu B port register no.
+		$RJU$   right-justified input reg selection; carry/clock control on GF2
+		$SEQ$   sequencer opcode
+.sp				
+<CR>	previous mode
+.end-example
+
+The _addr_ parameter can be:
+.begin-example
+_n_     the desired address in hex
+.sp
+$ \.$		the "current addr" pointer - the previously
+$ \.\+$_n_	printed or stored location.  Relative address-
+$ \.\-$_n_	ing from '.' can be used, e.g. $.-3f$.
+.sp
+$,$		equivalent to $.+1$
+		NOTE: $t$ must be explicit (preceding) if text mode
+		desired
+.sp
+<CR>		defaults to 0
+.end-example
+In all cases of addr, the "current addr" ('.') is set to
+whatever address is calculated.
+
+.paragraph
+@SPECIAL:@ if previous _cmd/which_ was $pm$, and just a <CR> is entered,
+the next _addr_ in sequence will be printed.
+
+.section 2 Print Flags
+
+$p$[$f$][$t$]
+.sp
+Reads and prints flag register. Optional verbose text mode prints
+the meaning of each bit.
+
+.section 2 Print Command Code
+
+$p$[$c$]	(GF1 only)
+.sp
+Prints DI bus bits corresponding to the fbc code register
+output.  The code is enabled onto the bus by setting the
+flag register to the proper value using $sf$.
+
+.section 2 Print I Data (DI Bus)
+
+$p$[$i$]
+.sp
+Reads and prints DI bus status.  Useful after
+setting flags to spy on input or output registers.
+
+.section 2 Print Output
+
+$p$[$o$]
+Reads and prints FBC output register.  The FBC should be at an interrupted
+or I/O-wait state to guarantee stable results and avoid disturbing control
+flow.
+
+.section 2 Print Pixel
+
+$p$[$p$]	(GF1 only)
+.sp
+Prints value of pixel data currently present on bit plane boards after a
+pixel microcode interrupt.
+
+.section 1 OPEN
+
+$o$[$m$]_addr_
+.sp
+Works like $p$[$m$]_addr_ but nothing is printed. Useful for macro
+bodies for patching, etc.
+
+
+.section 1 STORE
+
+In successive store commands, _which_ defaults to the previous
+command input if not typed.
+
+.section 2 Store Microcode
+
+$s$[$m$][$t$][_field_][_sep_][_val_]
+.sp
+Stores into a designated field of the PREVIOUSLY PRINTED OR OPENED
+microcode address.
+The field is specified either as one of four 16-bit data slices
+(_how_ = $n$ or omitted) or as a particular field (_how_ = $t$).
+.begin-example
+_how_ = $n$ (numeric)
+	_field_ is 0,1,2, or 3 (see @PRINT@ command)
+	_sep_ is any non-numeric non-white char.
+	_val_ is a hex number.
+.sp
+_how_ = $t$ (text)
+	_field_ is $?$ to print out a list of the choices, or a 3-letter field mnemonic.
+	_sep_ is omitted, or white space.
+	_val_ is a hex value appropriate to the field,
+		or $?$ to print a list of possible values and
+		their meanings, after which the desired _val_
+		is re-prompted.
+.end-example
+
+.section 2 Store Block of Microcode
+
+$s$[$b$][$t$][_field_][_sep_][_val_][_low_][_high_]
+.sp
+stores into a designated field of all microcode addresses from _low_
+to _high_.  Otherwise, same as [$s$][$m$]....
+
+.section 2 Store Flags
+
+$s$[$f$][_val_]
+
+store flag register with _val_ (defaults to 0).
+If $sf?$ is typed, a description of the writeable flags appears.
+
+.section 2 Store Input Data
+
+$s$[$i$][_val_]
+.sp
+store input register with _val_. Use in flag-blocked mode to input
+commands and data to the FBC.
+
+.section 1 FILE/FIFO
+
+$fo$[_flag_][_sep ignorewords_]
+.sp
+This causes any errors collected as a result of geometry system
+testing (e.g. $ge1, gp$) to be reported, and the error
+file to be reset.  If _flag_ is zero or omitted, only the total no.
+of errors is printed; otherwise if there are any errors the user may
+type a character to see each error.  _Ignorewords_, which defaults to
+0, is used to specify the number of expected test vector items to
+ignore before starting to compare expected and received values.
+.sp 2
+$fb$[_flag_]
+.sp
+Similar to $fo$ to be used after $gB$ commands.  _Ignorewords_ is not
+specified.
+.sp 2
+$ft$[_pattern_]
+.sp
+Tests all basic functions of FIFOs with installed GE's configured
+as passers.
+Prints word number after which pipeline fills.
+This should be 152 for a 12-GE system, and 2 less for each missing GE.
+On GF2, shd be 148 for a 12-GE system, and 2 less for each missing GE.
+Used by $cf$.  _Pattern_ is an integer (0..5) which specifies a particular
+data pattern to run: all zeros, checkerboards, etc.  Example:
+.begin-example
+	$S  ft1  fo$
+.end-example
+.sp
+$fq$
+.sp
+After using the $gp$ or similar testing commands, an $fq$ may need
+to be performed to allow the normal handling of interrupts to
+be resumed.
+
+.section 1 GEOMETRY ENGINES
+
+Commands relating to the Geometry Engine section of the system.
+GE commands range from very simple flag manipulation to very complex
+test sequences.  The general form of GE commands is:
+.begin-example
+  $g$ _which_[_n1_][_sep n2_]
+.end-example
+Possibilities for what follows the $g$ are:
+.begin-example
+$?$	help
+	print list of commands and size of
+	GE test vectors (no. of words expected)
+.sp
+$f$[$t$]	print flag reg (with text breakdown of bits)
+.sp
+$s$ _n1_	store flag reg with _num_
+$s?$	gives breakdown of bits.
+.sp
+$d$ _n1_	send the short datum _n1_ down the geometry pipeline
+.sp
+$E$ _n1_	send _n1_ down with token bit set.
+.sp
+$p$	run pipeline complete functional test vector.  Follow with $fo$.
+.sp
+$P$	run pipeline PassThru test
+	Send a test vector for all 10 or 12 GE's in the pipe
+	(as determined by running $ir$ or $S$).  Use $fo$ to retrieve
+	results.  Before each word is sent, the input FIFO high water
+	flag is tested.  The $gw$ command affects the delay
+	between words (GF1).
+	These tests are best called by saying $S  c$[$p$,$P$].
+.sp
+$t$ _n1_	run test data file _n1_ thru pipeline.
+	The tests for GF2 are:
+               0      setup and clear screen
+               1      set up 4 viewports, fat lines
+               2      8 colored vectors
+               3      block clear, characters
+               4      cursor, more characters
+               5      circular polygon
+               6      outline polygon
+               7      block fill, pixel copy
+               8      pixel read/write
+               9      4 depth-cued vectors
+               a      hitmode test
+               b      Z-buffering test (GF2 - 8 CD planes must be installed)
+.sp
+$m$ _n1_	run alternate data file _n1_ thru FBC only, via	Multibus.
+                0      Setup, clear screen
+                1      circle polygon
+                2      vectors
+                3      text (tops chopped off)
+.sp
+$w$ _n1_	specify inter-word wait for 'm' tests.  (GF1)
+$wr$	When gfld is first loaded, wait is initialized
+	to 400 (slow).  Use _n1_ of 1 for fast sending when
+	$gt$ and $gv$ are used.  Set to at least 400 for $t$
+	and $gm$ tests.  set to $r$ for random wait times
+	when looking for noise problems.
+.sp
+$i$	hard-reset geometry pipeline only.
+.sp
+$C$ _low_[_sep high_]
+	configure pipeline with chip nos. _low_ to _high_
+	active and the rest passing data.  If low is 0, all
+	chips are active.  If high is omitted it is set to low.
+	$gCa$ isolates chip 10 (last clipper on GF1).
+	$gC1-4$ isolates the four matrix multipliers.
+	@NOTE:@ $gC$ only configures chips that were detected when $S$ was called.
+	$gCd$ initializes all installed chips to be passers.
+.sp
+$T$	set GE test mode.  When gfld is first loaded, or
+	after typing $gT$[$0$], $gC$ works as described above
+	to test one or more GE's; after saying $gT$_n_,
+	GE number _n_ can be configured as chip _chipno_ by
+	invoking $gC$_chipno_.  This allows any one GE in the pipe
+	to be tested as any chip type.  In this mode the
+	line prompt is !`!T!'!.  Error message printed if chip
+	_n_ is not installed.
+.sp
+$D$	for debugging, prints out the sequence of config words
+	sent to the GE's when the $gC$ command is typed.  Note
+	however that words for all 12 GE's, whether installed
+	or not, are listed (GF1).  Mode toggles.  Also prints
+	words sent by gefind(), other routines (GF2).
+.sp
+$v$ _n_	sends the contents of the user test vector down
+	the pipe _n_ times.  The user test vector is set up
+	by the $v$ commands (see).
+.sp
+$l$	continuous pipeline test: repeatedly sends the
+	user test vector down the pipe (GF2).
+.sp
+$e$ _num_[_sep num_]          (note -- $e$ not typed in GF1 version)
+	perform a test on isolated geometry engines.
+	After initiating the feedback microcode ($S$) and executing
+	$gC1$, doing a $ge1$ will perform a test on the first matrix
+	multiplier. (See Appendix.)
+	The command $gea$ tests chip 10 (scaler).
+	The numbers given here and the numbers used with $gC$ should
+	always match.  However, $gT$_n_ may be called to test a
+	particular chip in the pipe as a non-standard type.
+.sp
+$B$ _low_[_sep high_[_sep prefixes_]]
+	This works like a combination of $gC$ _low sep high_
+	and $ge$ _low sep high_ but faster. It pre-loads the pipe, which
+	has been blocked at the FBC input, with _prefixes_
+	no-op words.  Then the block is opened after the pipe has
+	been filled to the high water mark with the selected
+	test vector; then the rest of the test vector is sent
+	at high speed.  This provides a pipe test in which
+	the GE's never have to wait for input.  Use directly
+	after an $S$ command (no $gC$ needed).
+.sp
+$a$[_which_][_section_][$0$,$1$]          (GF2)
+	Geometry Accelerator tests.  Set up and run test
+	vectors for GA's.
+.sp
+	$ga$[$0..f$]         send down one of the test vectors.
+                         Perform the appropriate pipe configuration sequence
+                         for testing either head or tail GA, then send the test.
+                         If $f$ included, does faster testing akin to $gB$.
+                         Follow with $fb$ to retrieve results and set up for next test.
+                         Precede with $SI$ the first time.
+.sp
+	$ga$[$h$,$t$][$c$,$f$][$0$,$1$]
+                         defeat $S$ command's idea of whether
+                         GA's are installed.  Enable or
+                         disable a section of one of the GA's.
+                         $0$ is for disable, $1$ is for enable:
+.sp .5
+                                $gahc0$    disable head cfp
+                                $gatf1$    enable tail fifo
+                                ...          etc.
+.sp .5
+                $gar$    reset all GA sections to !``!enabled!''!.
+.sp .5
+                        Use this after each $SI$ command as needed.
+$x$ _n1_	examine input data for GE test vector _n1_ appropriate
+	to the number of chips installed (10 or 12).  $gxd$ would give
+	expected output data for chip 12.
+.end-example
+
+.section 1 RAM
+
+The $r$ tests comprise microcode memory diagnostics (GF2) and scratch ram
+diagnostics.
+.begin-example
+$rs$	Perform test of scratch ram.  Depends on working ram test
+	microcode.  Do an $is$ first, then any number of $rs$.  Runs
+	constant 0's, constant 1's, 2 checkerboard patterns, and a
+	random data test.
+.sp
+$rm$ _n_	Performs test of  microcode rams on a GF2.  _n_ specifies
+	the number of locations to test in the random data part of
+	the test.
+.sp
+$rv$	Verifies that contents of microcode rams match buffer copy (GF2)
+	Reports any differences one at a time.
+.sp
+$rl$_dat_	Looping scratch test.  Allows scoping of writing word _dat_
+	to scratch.  Forever.
+.sp
+$rd$ _n_	Dump scratch.  Displays 16 words of scratch ram starting from
+	location _n_.  FBC must be in a command input state.  Prompts
+	for whether you want to see the following 16 locations.
+.sp
+$r2$	2903 register display.  Displays (non-destructively) contents
+	of 2903 registers.  FBC must be in a command input state.
+.sp
+$rr$_loc_	read microstore location _loc_ and print contents.  The
+	location format is _saaa_ where _s_ is the slice number (0..3)
+	and _aaa_ is the state address within the slice (000..fff).  Slices
+	0..2 take 4 hex digits worth of data, slice 3 only 2.
+.sp
+$rw$ _loc sep dat_
+	write microstore location _loc_ with data _dat_.
+	The _loc_ format is as for $rr$.
+.end-example
+
+.section 1 VECTOR
+
+$v$_op_[_in-out_]
+.sp
+This set of commands allows construction of test vectors or configuration
+sequences that can be rapidly deployed via the $gv$ command.
+A separate input and output vector can be constructed, and the latter
+can be used to check pipeline output via $fo$.
+.begin-example
+$v?$	displays a list of $v$ commands, @and@ initializes the input
+	vector to all-8's.  There is a max of 100 words
+	in each vector.
+.sp
+$vi$_dat_
+$vo$_dat_  set the next word in sequence in the input or output
+	vector to _dat_ and bump the word pointer.
+	The starting point for storing can be set via $vd$.
+.sp
+$vpi$	prints contents of input vector
+$vpo$	ditto output vector
+.sp
+$vdi$ _n_   These point to the last word in the desired vector.  That is,
+$vdo$ _n_	it moves a pointer to word _num_ for entering new data, and
+	limits the vector to _num_ words.
+	$vdi0$ describes a 0-length input vector, so that the
+	next $vi$ will specify the first vector word.  $vd$
+	can be used to move the word pointer for editing vectors.
+.end-example
+
+.section 1 BPC COMMANDS
+
+These are meaningful only if $ib$ is first performed.
+.begin-example
+$bs$ _regno sep data_
+	Strobes the BPC register _regno_ with given _data_.
+	Type $b?$ for a listing of register numbers.
+.sp
+$bc$ _cmdno sep data_
+	Issues the BPC command _cmdno_, supplying the given _data_.
+	Type $b?$ for a listing of the command codes.
+.sp
+$bb$ _regno_
+	Reads and prints the contents of buffer_ regno_.  (GF2)
+.sp
+$br$ _cmdno_
+	Performs command _cmdno_ as a read, and prints the data returned
+	by the Update Control.
+.sp
+$bt$	Performs a floating-1 test in font ram location 0 as a test of the
+	interface data path.
+.end-example
+
+
+.section 1 INTERRUPT COMMANDS
+
+Interrupts may be caused by microcode instructions, diagnostics,
+GE or FIFO signals, or by the onset of vertical retrace.
+Many of the test routines like $rs$, $T$, etc. generate interrupts
+that are automatically intercepted.  When an unexpected
+interrupt occurs, a message is printed and
+the user is given options as to how to proceed.
+
+.begin-example
+continue -- <CR>
+	Just dismiss the interrupt and continue (with microcode execution).
+.sp
+command -- $c$
+	Enter a command subshell before dismissing the interrupt. Exit
+	this subshell by typing $q$.  While in this subshell, interrupts
+	won't be reported by prompt message, and the command line prompt
+	will be changed to !`!>!'!.
+	If your commands clear the source of the interrupt, you will return
+	to the outer command level after the $q$ is typed. Otherwise
+	a new interrupt may be generated.
+.sp
+go -- $g$      (Obsolete)
+	Use after a startup interrupt. Does interrupt acknowledge to
+	generate 1 clock for microsequencer load. Then sets FBC to normal
+	run mode and dismisses interrupt.
+.sp
+debug -- $d$
+	Like "go" -- but sets FBC to blocked-interface run mode.  Can be
+	used after a startup interrupt (old FBC) or when things are stuck.
+.sp
+print -- $p$
+	Prints the value of the output register and fbccode flags.
+	Interrupt is then dismissed, and microcode execution continued.
+	Repeats this printing/dismissing sequence until there are no more
+	interrupts arriving rapidly. 
+	Useful for displaying feedback sequences.
+	To print only a single output, use the response $P$.
+.sp
+quit -- $q$
+	On PM1 version, resets hardware and restarts program at the top.
+	Pn PM2 version, resets hardware and attempts to clean up before
+	returning to command level.
+.end-example
+
+.section 1 MACROS
+
+Just about any of the commands described here can be placed in macro sequences
+and called with one simple line.  This allows convenient structuring and
+repeating of command sequences.
+
+.begin-example
+$/$_command-line_ <CR> [_more-lines_ <CR> ...] $/$_name_
+	store a macro labeled _name_.  The macro body consists of
+	one or more _command-line_s.  While entering the macro body,
+	the command line prompt is changed to a !`!,!'!.
+.sp
+$c$ _name_ [_reps_]
+	call macro labeled _name_.  Repeat _reps_ times.
+	There are a few predefined macros useful for testing the Geometry
+	Engines.  The sequence to test a complete, normally configured
+	pipeline is:
+.sp .5
+                $S$
+                $cp$ (or $cP$)     ( runs a pipeline test. See 'g' commands )
+                $cp100$                  ( run test 256 more times )
+.sp .5
+	Other predefined macros:
+.sp .5
+                $cf$    runs $cP$, filling up the pipe.  Test of the FIFOs.
+                        Substitute for $cP$ above.
+.sp .5
+                $ci$    cycles input handshake to give FBC a word from Multibus,
+                        i.e. after $si$_data_.
+.sp .5
+                $cO$    no-op; time waster.
+.sp .5
+                $c$_n_   isolated test of GE number [1..c].  Substitute for $cP$
+                         above.  Depending on state of $gT$ toggle, will
+                         either test each GE individually or test the first
+                         GE as each type.  See Appendix.
+.sp .5
+                $c\#$    use to read back the results of a GE test vector
+                        command like $gp$, $ge$_n_, or $gB$.  Prints !``!0 errors in <n>
+                        words!''! if all received values match the expected
+                        results.  Otherwise successive errors can be viewed
+                        by hitting !`!y!'!.  Hit any other character to quit.
+                        (Performs $fo$)
+.sp .5
+                $c\$$   Same as $c\#$ but simply reports no. of errors and
+                        continues.
+.sp .5
+                $cd$,$ct$,$cT$,$cg$,$cG$        see below, @TEST SEQUENCES@.
+.sp
+$C$ _num_
+	If _num_ is 0, prints a list of all the names of the currently defined
+	macros and an index number for each.  Set _num_ to the index to see
+	the contents of a particular macro.
+.end-example
+
+.section 1 BREAKPOINTS
+
+A breakpoint is an FBC interrupt and optional load of the FBC output
+register for printout.  If inserted into running code, the interrupt
+commands may be used to print the value or deterine control flow.
+Any use of the FBC field controlling the MAR and UC commands is
+temporarily overridden.
+.sp
+$B$[$p$,$n$]
+.sp .5 
+$B$ sets a breakpoint at the current microcode address.  Set the current
+address using an $om$ or $pm$ command.  This operation may destroy the
+current state of the FBC, so an init command is needed before running
+again.  $Bn$ inserts a breakpoint but does not change the FBC output
+register.  $Bp$ gives a list of the currently set breakpoints.
+.sp
+
+$U$[_which_][_loc_]
+.sp .5
+$U$ unsets the breakpoint at the current microcode location.
+$Ua$ unsets all breakpoints.  It is the same as $w$.
+$Ul$ _loc_ unsets the breakpoint at location _loc_.
+.sp .5
+The $W$ command may be used after modifying the microcode when
+user wants to keep the same breakpoints set.
+
+.section 1 DRAWING TESTS
+
+Precede any of these by $ir  gC$.  Then any number of $gt$'s or $G$'s
+may be run in any order except as noted.  $gt$ descriptions are for GF2.
+.begin-example
+$gt0$	Initializes for drawing, clears screen to black.  (Use $gt5$ on GF1)
+.sp .5
+$gt1$	Sets up 4 screenmasks for subsequent drawing - a rectangle in each
+	corner of the screen (4 different sizes).
+.sp .5
+$gt2$	Draws 8 colored vectors, one stippled.  If gt1 precedes, lines are
+	fat.  (Use $gt6$ on GF1)
+.sp .5
+$gt3$	Clears part of screen and draws !``!sgi s UUU!''! mid-screen.
+	(Use $gt7$ on GF1)
+.sp .5
+$gt4$	Adds "UUU" to string and draws IRIS logo cursor.  (Use $gt8$ on GF1)
+.sp .5
+$gt5$	Draws circular polygon.  (Use $gt2$ on GF1)
+.sp .5
+$gt6$	Outlines circular polygon.  If $gt1$ precedes, lines are fat
+	and in multiple screen pieces.
+.sp .5
+$gt7$	Clears part of screen to white and draws wedge-shaped strip.
+	Tests pixel copy.
+.sp .5
+$gt8$	Draws multicolored bar. Tests pixel write and read.  UC must not
+	be busy drawing to work properly.
+.sp .5
+$gt9$	Draws depthcued vectors in an M shape.
+.sp .5
+$gta$	Tests hit mode.  Do not use $gt9$ before.  There may be 3 identical 
+	errors reported.  UC must be non-busy to work properly.
+.sp .5
+$gtb$	Draws Z-buffered picture of 2 polygons and some lines.
+	Needs some CD planes.
+.sp 1.5
+$Gb$ _n_	Draws spiral of red and white squares _n_ times.
+.sp .5
+$Gd$ _n_	Draws a colored square and an L-shaped pattern of dots _n_ times.
+	Default _n_ is a few seconds worth.
+.sp .5
+$Gp$ _n_	Fills the screen with 16-spaced dots in passtru mode _n_ times.
+.sp .5
+$Gv$ _x_	Draws a ramp of depth-cued vectors.  Precede with $gt9$.
+	The value _x_ specifies the width of the bottom part of the pattern.
+.sp .5
+$GD$	Draws a ramp of depth-cued dots at the top of the screen.
+.sp .5
+$Gc$ _x_	Copies a triangular area of the screen to the bottom center of the
+	screen.  The value _x_ is the x coordinate of the left vertex of the
+	source area.
+.sp .5
+$Gr$ _n_	Slides the cursor glyph along a diagonal path on the screen  (GF2).
+	Tests Multibus !``!side-door!''! mechanism and vertical retrace interrupts.
+.end-example
+
+.section 1 TEST SEQUENCES
+
+Here are a few useful command sequences, presented in order of
+functional independence.
+.begin-example
+t	See description of $t$ command in Section 2.
+.sp
+$S  cP cp ct cg$
+	GE and GA pipe test sequence.
+	$S$ should accurately report the number and position of installed custom chips.
+	$cP$ runs a passthru test.
+	$cp$ runs a full test vector, checking only the output of the pipe.
+	$ct$ runs a full test vector, checking one GE configured at a time.
+	$cg$ runs the full set of GA test vectors.
+.sp
+$SI  cT cG$
+	The $cT$ call is a more stringent version of $ct$.  See $gB$ command.
+	The $cG$ call is a more stringent version of $cg$.  See $gaF$ command.
+.sp
+$S  gT$_n_$  ct$      or     $SI  gT$_n_$  cT$
+	Example of how to test complete functionality of the _n_th GE
+	in the pipe, with all other chips configured as passers.
+.sp
+$cd$
+	Performs the equivalent of 
+                $ir  gC  gt  gt1-7  gt1-7 ....$
+	to test the ability of the system to draw rapidly using
+	passthru commands.  Should work with any combination of GE's and
+	dummies.
+.sp
+$ir  gC  gt0  gt1 ... gt9  Gv  Gc  Gc300  Gc8  Gc308  gt  gta  gtb$
+$ii  gC  gt  Gd  Gb10  Gp10$
+	A recommended test sequence for microcode & drawing behavior.
+	Results are determined by observing what's drawn on the screen.
+.sp
+$is  gm  $[$ gm1  gm2  gm3$ ]
+	Quick way to clear the bitplanes.  Needs no GE's.
+	Extra tests are drawing tests that use the FBC Multibus port.
+.end-example
+
+.heading Appendix:  Geometry Engine Pipeline configuration
+.begin-example
+1	Matrix Multiplier 1
+2	Matrix Multiplier 2
+3	Matrix Multiplier 3
+4	Matrix Multiplier 4
+5	Clipper 0  (optional Z clipper)
+6	Clipper 1
+7	Clipper 2
+8	Clipper 3
+9	Clipper 4
+10	Clipper 5  (optional Z clipper)
+11	Scaler 0  (X and Y)
+12	Scaler 1  (X stero and Z)
+.end-example

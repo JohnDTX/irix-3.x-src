@@ -1,0 +1,85 @@
+.TH CRYPT 3C
+.SH NAME
+crypt, setkey, encrypt \- generate \s-1DES\s+1 encryption
+.SH SYNOPSIS
+.nf
+.B char \(**crypt (key, salt)
+.B char \(**key, \(**salt;
+.PP
+.B void setkey (key)
+.B char \(**key;
+.PP
+.B void encrypt (block, edflag)
+.B char \(**block;
+.B int edflag;
+.SH DESCRIPTION
+.I Crypt\^
+is the password encryption function.
+It is based on the
+.SM NBS
+Data Encryption Standard (\s-1DES\s+1), with
+variations intended (among other things) to frustrate use of hardware
+implementations of the
+.SM DES
+for key search.
+.PP
+.I Key\^
+is a user's typed password.
+.I Salt\^
+is a two-character string chosen from the
+set [\f3a-zA-Z0-9./\fP];
+this
+string is used to perturb the
+.SM DES
+algorithm in one of 4096
+different ways, after which the password
+is used as the key to encrypt repeatedly a constant string.
+The returned value points to the encrypted password.
+The first two characters are the salt itself.
+.PP
+The
+.I setkey\^
+and
+.I encrypt\^
+entries provide (rather primitive)
+access to the actual
+.SM DES
+algorithm.
+The argument of
+.I setkey\^
+is a character array of length 64 containing only the characters
+with numerical value 0 and 1.
+If this string is divided into groups of 8,
+the low-order bit in each group is ignored;
+this gives a 56-bit key which is set into the machine.
+This is the key that will be used
+with the above mentioned algorithm to encrypt or decrypt
+the string
+.I block\^
+with the function
+.IR encrypt .
+.PP
+The argument to the
+.I encrypt\^
+entry is a character array of length 64
+containing only the characters with
+numerical value 0 and 1.
+The argument array is modified in place
+to a similar array
+representing the bits of the argument after having been
+subjected to the
+.SM DES
+algorithm using the key set by
+.IR setkey .
+If
+.I edflag\^
+is zero, the argument is encrypted;
+if non-zero,
+it is decrypted.
+.SH SEE ALSO
+login(1), passwd(1), getpass(3C), passwd(4).
+.SH BUGS
+The return value
+points to static data that are overwritten
+by each call.
+.\"	@(#)crypt.3c	5.1 of 10/19/83

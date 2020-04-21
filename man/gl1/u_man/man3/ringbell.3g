@@ -1,0 +1,19 @@
+.TH ringbell 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2ringbell\fP - ring the bell
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "ringbell()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine ringbe"
+.sp
+.SH DESCRIPTION
+\f2Ringbell\fP rings the terminal bell.
+.SH "SEE ALSO"
+.I clkoff, clkon, lampoff, lampon, setbell
+.SH NOTE
+This command can only be used in immediate mode.

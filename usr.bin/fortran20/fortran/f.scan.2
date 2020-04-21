@@ -1,0 +1,496 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.SCAN.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               04-Apr-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+{ If the pattern matches, stmtbufp advances over the pattern so that later  }
+{ access to the current statement is to following characters.  If there is  }
+{ no match to the pattern, Match is a noop.                                 }
+
+function Match{*fst: string16): Boolean*};
+  var lstmtbufp: integer;
+      i,cnt:     integer;
+      MatchFlag: Boolean;
+begin
+lstmtbufp := stmtbufp;
+i := 1;
+cnt := length(fst);
+MatchFlag := TRUE;
+while (i <= cnt) and MatchFlag do begin
+      MatchFlag := fst[i] = getnonblank;
+      i := i + 1;
+      end;
+if MatchFlag
+then Match := TRUE
+else begin
+     Match := FALSE;
+     stmtbufp := lstmtbufp;
+     end;
+end; {Match}
+
+
+function IsHollerith{*: Boolean*};
+  var lstmtbufp: integer; lch: char;
+begin {IsHollerith}
+IsHollerith := FALSE; lstmtbufp := stmtbufp; lch := getnonblank;
+if chclass[ord(lch)] = DIGITCL
+then begin
+  repeat
+    lch := getnonblank;
+  until chclass[ord(lch)] <> DIGITCL;
+  IsHollerith := lch = 'H';
+  end;
+stmtbufp := lstmtbufp;
+end; {IsHollerith}
+
+
+{ Only called if IsHollerith, simulates quoted string fscan}
+
+procedure fscanhollerith;
+  var lch: char; lchval: chvaltype; chlenmodalfalen,i: integer;
+begin {fscanhollerith}
+fscan; lch := getnonblank; {Set intval, discard H}
+chlen := 0; chlenmodalfalen := 0;
+new(chval); lchval := chval; chval^.next := nil; chval^.chpart := '          ';
+for i := 1 to intval do begin
+  lch := getchar; if lch = EOLCH then lch := ' ';
+  if chlenmodalfalen = 10
+  then begin
+       new(lchval^.next); lchval := lchval^.next; lchval^.next := nil;
+       lchval^.chpart := '          '; chlenmodalfalen := 0;
+       end;
+  chlenmodalfalen := chlenmodalfalen + 1;
+  lchval^.chpart[chlenmodalfalen] := lch;
+  chlen := chlen + 1;
+  end;
+token := CCONSTSY;
+if (chlen < 1) or (chlen > 255) then error(297);
+notansi;
+end; {fscanhollerith}
+
+
+{ Token scanner, only called when locally recognizable tokens are expected }
+
+procedure fscan;
+  label 1;
+  var lch: char;
+      lchval: chvaltype;
+      lstmtbufp: integer;
+      Done: Boolean;
+      chlenmodalfalen,i: integer;
+      endstchr,tempchar: char;		{ GB 7/23/86 }
+      
+  { Dottoken sets token if a match with XXX. is found, otherwise is a noop }
+  
+  procedure dottoken;
+  begin
+  if lch in ['T','F','L','E','N','G','A','O']
+  then case lch of
+            'T': if Match('RUE.')
+                 then begin
+                      token := LCONSTSY; intval := 1;
+                      end;
+            'F': if Match('ALSE.')
+                 then begin
+                      token := LCONSTSY; intval := 0;
+                      end;
+            'L': if Match('T.')
+                 then token := LTSY
+                 else if Match('E.')
+                      then token := LESY;
+            'E': if Match('Q.')
+                 then token := EQSY
+                 else if Match('QV.')
+                      then token := EQVSY;
+            'N': if Match('E.')
+                 then token := NESY
+                 else if Match('EQV.')
+                      then token := NEQVSY
+                      else if Match('OT.')
+                           then token := NOTSY;
+            'G': if Match('E.')
+                 then token := GESY
+                 else if Match('T.')
+                      then token := GTSY;
+            'A': if Match('ND.') then token := ANDSY;
+            'O': if Match('R.') then token := ORSY;
+       end; {case}
+  end; {dottoken}
+  
+  procedure unsignednumber;
+    const DIGITMAX = 31;
+    var lstmtbufp,scale,k,i: integer; digits: alfa31;
+    
+    procedure getexp;
+      var Negative: Boolean; exp: integer;
+    begin
+    lch := getnonblank; Negative := FALSE; exp := 0;
+    if lch = '+'
+    then lch := getnonblank
+    else if lch = '-'
+         then begin lch := getnonblank; Negative := TRUE; end;
+    if chclass[ord(lch)] <> DIGITCL then error(13);
+    while chclass[ord(lch)] = DIGITCL do begin
+          if exp < 3276 then exp := exp*10 + ord(lch) - ord('0');
+          lch := getnonblank;
+          end;
+    if Negative then exp := -exp;
+    scale := scale + exp;
+    end; {getexp}
+    
+  begin {unsignednumber}
+  scale := 0; token := ICONSTSY; k := 0;
+  while (chclass[ord(lch)] = DIGITCL) and (k < DIGITMAX) do begin
+        if (k > 0) or (lch <> '0')
+        then begin k := k + 1; digits[k] := lch; end;
+        lch := getnonblank;
+        end;
+  if chclass[ord(lch)] = DIGITCL
+  then begin
+       error(13);
+       repeat
+              lch := getnonblank;
+       until chclass[ord(lch)] <> DIGITCL;
+       end;
+  if k = 0 then begin k := 1; digits[1] := '0'; end;
+  if lch = '.'
+  then begin
+       
+       { Remember state }
+       
+       lstmtbufp := stmtbufp;
+       lch := getnonblank;
+       dottoken;
+       lch := '.';
+       stmtbufp := lstmtbufp;
+       if token = ICONSTSY 
+       then begin
+	    if DoubPrecConst = TRUE then 
+			token := DCONSTSY 
+	    else
+           	token := RCONSTSY; 
+        lch := getnonblank;
+            while chclass[ord(lch)] = DIGITCL do begin
+                  if k < DIGITMAX
+                  then begin
+                       k := k + 1; digits[k] := lch; scale := scale - 1;
+                       end
+                  else if digits[1] = '0'
+                       then begin
+                            for i := 2 to DIGITMAX do digits[i-1] := digits[i];
+                            digits[DIGITMAX] := lch; scale := scale - 1;
+                            end;
+                  lch := getnonblank;
+                  end;
+            end
+       else token := ICONSTSY;
+       end;
+  if (lch = 'E') or (lch = 'e')
+  then begin
+	    if DoubPrecConst = TRUE then 
+			token := DCONSTSY 
+	    else
+           	token := RCONSTSY; 
+	    getexp;
+  end
+  else if (lch = 'D') or (lch = 'd')
+  	then begin token := DCONSTSY; getexp; end;
+  if token = ICONSTSY
+  then begin
+       intval := 0;
+       for i := 1 to k do
+       if (intval >= 214748365) or
+         ((intval >= 214748364) and (digits[i] > '8'))
+       then begin error(11); intval := 0; end
+       else intval := intval*10 + ord(digits[i]) - ord('0');
+       end
+  else begin
+       %a_2_d(digits,k,scale,dblval);
+       if token = RCONSTSY then realval := dblval;
+       end;
+  stmtbufp := stmtbufp - 1; { Always looks at look-ahead char }
+  end; {unsignednumber}
+  
+  procedure hexconstant;
+    var lch: char; k,n: integer;
+  begin
+  token := ICONSTSY; intval := 0; lch := getnonblank; k := 0;
+  if lch > 'a' then lch := chr(ord(lch) - 32);
+  while lch in ['0'..'9','A'..'F'] do begin
+    n := ord(lch) - ord('0');
+    if n > 9 then n := n - 7;
+    intval := intval*16 + n;
+    k := k + 1; lch := getnonblank;
+    if lch > 'a' then lch := chr(ord(lch) - 32);
+    if k = 9 then error(13);
+    end;
+  if k = 0 then error(294);
+  stmtbufp := stmtbufp - 1; { backupch }
+  notansi;
+  end; {hexconstant}
+  
+  
+  { Concatenates lch onto character constant chval }
+  
+  procedure concat;
+  begin
+  if chlenmodalfalen = 10
+  then begin
+       new(lchval^.next);
+       lchval := lchval^.next;
+       lchval^.next := nil;
+       lchval^.chpart := '          ';
+       chlenmodalfalen := 0;
+       end;
+  chlenmodalfalen := chlenmodalfalen + 1;
+  lchval^.chpart[chlenmodalfalen] := lch;
+  chlen := chlen + 1;
+  end; {concat}
+
+{ GB 7/23/86 - added getesc and hexoroctal procedures }
+
+  procedure hexoroctal(tempchar:char);
+  var k,n,radix,toomanydigs:integer;
+  begin
+  if (tempchar = 'O') then begin radix:=8; toomanydigs:=12; end
+  else begin radix:=16; toomanydigs:=9; end;
+  k := 0;
+  intval := 0;
+  lch := getnonblank;
+  if lch >= 'a' then lch := chr(ord(lch) - 32);
+  while lch <> '''' do begin
+    if (lch <> EOLCH) then begin
+      n := ord(lch) - ord('0');
+      if n > 9 then n := n - 7;
+      if (n > (radix-1)) then begin
+	error(300+radix);   { 308 = illegal octal dig. 316 = illegal hex dig }
+	n:=(radix   - 1); 
+	end;
+      intval := intval*radix + n;
+      k := k + 1; lch := getnonblank;
+      if lch >= 'a' then lch := chr(ord(lch) - 32);
+      { max number of digits is 8 (hex) or 11 (oct) }
+      if (k = toomanydigs) then error(13);
+    end else begin
+      error(radix+302); {hex/octal constant cannot span line}
+      lch := '''';
+    end;
+  end;
+  if k = 0 then error(301+radix); {309 = octal const expected. 317= hex const expected }
+  {stmtbufp := stmtbufp - 1; (dont backupch) }
+  notansi;
+  end;
+
+  { get an escape sequence and set lch to the final
+    character value }
+
+  procedure getesc;
+
+  begin
+  { Inline lch := getchar; folding error(15) code }
+                   
+  if stmtbufp < lalinep
+  then 
+	lch := chr(stmtbuf[stmtbufp])
+  else 
+	begin 
+	error(15); 
+	lch := endstchr; 
+	end;
+  stmtbufp := stmtbufp + 1; { Makes backing up easier }
+
+  case lch of
+
+    'n': lch := chr($a);
+    't': lch := chr($9);
+    'b': lch := chr($8);
+    'f': lch := chr($c);
+    '0': lch := chr(0);
+    otherwise: ;
+  end { case };
+  notansi;
+  end;
+  
+begin {fscan}
+
+1: { Inline lch := getnonblank; }
+
+repeat
+       if stmtbufp < lalinep
+       then lch := chr(stmtbuf[stmtbufp])
+       else lch := EOLCH;
+       stmtbufp := stmtbufp + 1; { Makes backing up easier }
+until lch <> ' ';
+if (lch >= 'a') and (lch <= 'z')
+then lch := chr(ord(lch) - 32);
+
+case chclass[ord(lch)] of
+  LETCL: begin
+      i := 0;
+      { GB 7/23/86 - added following section: }
+      token := IDENTSY;
+      if ((( lch = 'O') or (lch = 'Z') or (lch = 'X')) and (HexOctConstsLegal)) then
+	begin
+	tempchar := lch;
+	lch := getnonblank;
+	if (lch = '''') then begin token := ICONSTSY; hexoroctal(tempchar); end
+	else
+	  begin
+	  { back out the last character read }
+	  if (lch <> EOLCH) then stmtbufp := stmtbufp - 1;
+	  lch := tempchar;
+	  end;
+	end;
+      if (token <> ICONSTSY) then begin
+      { GB - end of addition }
+        repeat
+               i := i + 1;
+               ident[i] := lch;
+
+               
+               { Inline lch := getnonblank; }
+       
+               repeat
+                      if stmtbufp < lalinep
+                      then lch := chr(stmtbuf[stmtbufp])
+                      else lch := EOLCH;
+                      stmtbufp := stmtbufp + 1; { Makes backing up easier }
+               until lch <> ' ';
+               if (lch >= 'a') and (lch <= 'z')
+               then lch := chr(ord(lch) - 32);
+               
+        until (chclass[ord(lch)] < LETCL) or (i = MAXIDLEN);
+        ident[0] := chr(i);
+        if i > 6 then notansi;
+        if chclass[ord(lch)] >= LETCL
+        then begin
+             error(14);
+             repeat
+                    lch := getnonblank;
+             until chclass[ord(lch)] < LETCL;
+             end;
+        stmtbufp := stmtbufp - 1; { backupch }
+        token := IDENTSY;
+	end; { GB 7/23/86 - additional end }
+      end;
+  
+  DIGITCL: unsignednumber;
+  
+  DOLLARSY: hexconstant;
+  
+  CCONSTSY: begin
+      endstchr := lch; { GB 7/23/86 }
+      chlen := 0;
+      chlenmodalfalen := 0;
+      new(chval);
+      lchval := chval;
+      chval^.next := nil;
+      chval^.chpart := '          ';
+      Done := FALSE;
+      repeat
+             lch := getchar;
+             if lch = EOLCH
+             then begin error(15); lch := endstchr; end; { GB 7/23/86 }
+             while lch <> endstchr do begin { GB 7/23/86 }
+		   if (lch = '\\') then getesc; { GB 7/23/86 }
+                   concat;
+                   
+                   { Inline lch := getchar; folding error(15) code }
+                   
+                   if stmtbufp < lalinep
+                   then lch := chr(stmtbuf[stmtbufp])
+                   else begin error(15); lch := endstchr; end;{ GB 7/23/86 }
+                   stmtbufp := stmtbufp + 1; { Makes backing up easier }
+                   end;
+             
+             lch := getchar;              { Found first ', is there another }
+             if lch = endstchr { GB 7/23/86 }
+             then concat                  { Double ' }
+             else begin
+                  { Back up over char after final ' }
+                  stmtbufp := stmtbufp - 1; Done := TRUE;
+                  end;
+      until Done;
+      if chlen = 0 then error(16);
+      if chlen > MAXCHAR then error(98);
+      token := CCONSTSY;
+      end;
+  
+  PERIODSY: begin
+            token := PERIODSY;
+            lstmtbufp := stmtbufp;
+            lch := getnonblank;
+            if chclass[ord(lch)] = DIGITCL
+            then begin
+                 stmtbufp := stmtbufp - 1; { backupch }
+                 lch := '.';
+                 unsignednumber;
+                 end
+            else dottoken;
+            if token = PERIODSY then stmtbufp := lstmtbufp;
+            end;
+            
+  STARSY: begin
+          lch := getnonblank;
+          if lch = '*'
+          then token := EXPSY
+          else begin
+               token := STARSY;
+               stmtbufp := stmtbufp - 1; { backupch }
+               end;
+          end;
+          
+  SLASHSY: begin
+           lch := getnonblank;
+           if lch = '/'
+           then token := CONCATSY
+           else begin
+                token := SLASHSY;
+                stmtbufp := stmtbufp - 1; { backupch }
+                end;
+           end;
+  
+  RPARENSY, COMMASY, 
+  PLUSSY, MINUSSY, COLONSY,
+  ASSIGNSY, LPARENSY, EOLNSY: token := chclass[ord(lch)];
+  
+  ERRSY: begin error(17); goto 1; end;
+
+end; {case}
+end; {fscan}
+
+
+{ Getlabel scans for a label, issuing an error if not found. }
+
+procedure getlabel{*var flabel: alfa6*};
+var llabel: alfa6; lch: char; i: integer;
+begin
+llabel := '      ';
+lch := getnonblank;
+while lch = '0' do
+      lch := getnonblank;
+if chclass[ord(lch)] <> DIGITCL
+then error(19);
+i := 1;
+while (chclass[ord(lch)] = DIGITCL) and (i <= 5) do begin
+      llabel[i] := lch;
+      i := i + 1;
+      lch := getnonblank;
+      end;
+if (chclass[ord(lch)] = DIGITCL)
+then begin
+     error(20);
+     while chclass[ord(lch)] = DIGITCL do
+           lch := getnonblank;
+  end;
+stmtbufp := stmtbufp - 1; { backupch }
+flabel := llabel;
+end; {getlabel}
+
+

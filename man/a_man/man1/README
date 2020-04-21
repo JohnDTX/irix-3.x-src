@@ -1,0 +1,15 @@
+This directory contains the on line manual pages for
+the administrator's portion of Section 1 of the Unix
+Programmer's manual.  All manual pages in this directory
+have the suffix 1M.
+
+To print a manual page in this directory, type:
+
+	eqn "filename(s)" | tbl | xroff -man5
+
+
+November 2, 1985.  Robinf.  I created a directory called tools.  This
+directory contains two shell scripts which can be used to check files
+in and out of the RCS directory.
+
+

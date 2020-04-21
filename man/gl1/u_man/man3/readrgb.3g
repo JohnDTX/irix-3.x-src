@@ -1,0 +1,48 @@
+.TH readRGB 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I readRGB
+- return values of specific pixels
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short readRGB(n, red, green, blue) "
+.B "short n; "
+.B "RGBvalue red[], green[], blue[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function readRG(n, red, green, blue)"
+.B "integer*2 n, red(n), green(n), blue(n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function readRGB(n: Short; var red, green, blue: RGBarray): Short;"
+.sp
+.SH DESCRIPTION
+.I ReadRGB
+is the RGB mode version of \f2readpixels\f1, and allows pixel values
+to be read from up to 24 bitplanes.  It returns
+\f3n\f1 RGB values in the \f3red\f1, \f3green\f1, and \f3blue\f1 
+arrays, starting
+at the current character position. In addition, it returns the 
+number of pixels read,  which may be less than 
+.B n
+if you attempt to read pixels with x >
+.I XMAXSCREEN.
+.PP
+As long as the current
+character position is inside the viewport when the \f2readRGB\f1
+command is issued, any number of RGB pixels can be read, including
+those outside the viewport. 
+.PP
+\f2ReadRGB\f1 will not advance to the next
+row of pixels when the cursor reaches the edge of the screen.
+The current character position is updated when the
+\f2readRGB\f1 command is executed.  The current character position is set to
+one pixel to the right of the last one read, or invalidated if the
+new position is outside the viewport.
+.SH "SEE ALSO"
+.I readpixels, writeRGB
+.SH NOTE
+This command can only be used in immediate mode.

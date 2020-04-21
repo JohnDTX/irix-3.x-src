@@ -1,0 +1,37 @@
+'\"macro stdmacro
+.TH YPPOLL 1M
+.SH NAME
+yppoll \- what version of a YP map is at a YP server host
+.SH SYNOPSIS
+.B yppoll
+[ \f3\-h \f1host ]
+[ \f3\-d \f1domain ] mapname
+.SH DESCRIPTION
+.I yppoll 
+asks a 
+.I ypserv 
+process what the order number is, and which host
+is the master YP server for the named map.  
+If the server is a
+v.1 YP protocol server, 
+.I yppoll
+uses the older protocol to communciate with 
+it.  In this case, it also uses the older diagnostic messages in
+case of failure.
+.SH OPTIONS
+.IP "\f3\-h \f2host\f1"
+Ask the 
+.I ypserv 
+process at
+.I host
+about the map parameters.  If 
+.I host 
+isn't specified, the YP server for the local host is used.
+That is, the default host is the one returned by
+.IR ypwhich (1).
+.IP "\f3\-d \f2domain\f1"
+Use
+.I domain
+instead of the default domain.
+.SH "SEE ALSO"
+ypserv(1M), ypfiles(4)

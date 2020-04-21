@@ -1,0 +1,25 @@
+.TH getfont  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getfont
+- return the current raster font number
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getfont()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getfon()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getfont: Short;"
+.sp
+.SH DESCRIPTION
+.I Getfont
+returns the index of the currently selected raster font.
+.SH "SEE ALSO"
+.I defrasterfont, font
+.SH NOTE
+This command can only be used in immediate mode.

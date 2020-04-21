@@ -1,0 +1,51 @@
+.TH doublebuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B doublebuffer
+\- sets the display mode to double buffer mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "doublebuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine double"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure doublebuffer;"
+.SH DESCRIPTION
+.B doublebuffer
+sets the display mode to double buffer mode.
+It does not take effect until 
+.B gconfig
+is called.
+In double buffer mode, the bitplanes are partitioned into two groups,
+the front bitplanes and the back bitplanes.  Double buffer mode displays
+only the front bitplanes.
+Drawing routines normally update only the back bitplanes;
+.B frontbuffer
+and
+.B backbuffer
+can override the default.
+.PP
+.B gconfig
+sets 
+.B frontbuffer
+= FALSE (0)
+and
+.B backbuffer
+= TRUE (1)
+in double buffer mode.
+.SH "SEE ALSO"
+backbuffer, frontbuffer, gconfig, getbuffer,
+getdisplaymode, RGBmode, singlebuffer, swapbuffers
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+.SH NOTE
+This routine is available only in immediate mode.

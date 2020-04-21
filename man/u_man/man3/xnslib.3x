@@ -1,0 +1,155 @@
+'\"macro stdmacro
+.TH XNSLIB 3X
+.SH NAME
+xnslib: xcmd, xnsconnect, xnseof, xnsfile, xnslisten, xnsread, xnswrite, xsh \- XNS network support routines
+.SH SYNOPSIS
+.nf
+.B "#include <xns/Xns.h>"
+.PP
+.B "extern char *xnsmsg"
+.PP
+.B "xcmd (host, command)"
+.B "char *host, *command;"
+.PP
+.B "xnsconnect (host, socket)"
+.B "char *host;"
+.B "int socket;"
+.PP
+.B "xnseof (fd)"
+.B "int fd;"
+.PP
+.B "int xnsfile()"
+.PP
+.B "int xnslisten (socket)"
+.B "int socket;"
+.PP
+.B "int xnsread(fd, buf, count, dtype, control)"
+.B "int fd, count;"
+.B "char *buf, *dtype, *control;
+.PP
+.B "int xnswrite(fd, buf, count, dtype, control)"
+.B "int fd, count, dtype, control;"
+.B "char *buf;
+.PP
+.B "int xsh(host)"
+.B "char *host;"
+.SH DESCRIPTION
+.I xcmd 
+makes a network connection on socket
+.I EXECSOCKET,
+on 
+.IR host , 
+and causes
+.I command 
+to be executed remotely.  If a connecti cannot be made, 
+it returns a \-1.  If execution is successful, a file
+descriptor is returned, to which the remote process is
+attached.  Reads and writes to this file descriptor 
+will retrieve/send data to/from a remote process.
+.PP
+.I xnsconnect
+creastes a connection with 
+.I host
+at the indicated socket number.  
+After it makes a
+.I "Sequenced Packet Protocol"
+(SPP) connection to the indicated socket at
+.IR host ,   
+it returns a
+file descriptor.
+If the connection is not made, it
+returns a \-1 and an error message is 
+left in
+.IR xnsmsg .
+.PP
+.I xnseof
+sends an SPP data packet.  The data packet is of zero length and
+has a data type value of
+.IR DST_EOF .
+.PP
+.I xnsfile
+is used by other routines in the library that make or accept 
+connections.  
+.I xnsfile
+returns a file descriptor that is intended to be
+used with device driver
+.IR ioctl (2)
+calls before reading and writing.
+.PP
+.I xnslisten
+waits for an SPP connection to the socket number specified by 
+the argument
+.I socket .
+A socket number can be in the range 100 to 2000.  When the
+connection is set up,
+.I xnslisten 
+returns a file descriptor. 
+.PP
+.I xnsread
+allows you to read an SPP stream and recover
+the data type
+.IR dtype ,
+and control bits
+.IR control ,
+for each packet.  
+The 
+.IR fd ,
+.IR buf ,
+and
+.I count 
+have similar meaning as the arguments to
+.IR read (2).
+.I dtype 
+and
+.I control 
+are the addresses in the application program where the
+extra information is to be stored.  
+.I xnsread 
+is the ``companion'' to 
+.I xnswrite
+That is, the 
+.I dtype
+and 
+.I control
+parameters passed by a sender to
+.I xnswrite 
+are returned to a reader on the opposite end of an SPP 
+connection.
+.PP
+.I xnswrite
+allows you to write an SPP stream while specifying
+a particular data type, 
+.I dtype
+and control bits
+.IR control .
+This data type
+can be recognized by the server and can be
+used to pase out-of-band information, for example.  
+.I buf 
+is the source
+of the bytes written to
+.IR fd .
+If 
+.I xnswrite 
+is not successful, a \-1 is returned.
+The data type, 
+.IR dtype ,
+is set to the default after each write.
+.PP
+.I xsh
+makes a network connection on socket
+.I XSHSOCKET 
+and starts a shell.  If a connection cannot
+be made, 
+.I xsh 
+returns a \-1.
+.PP
+To link with these routines, use the loader option
+.BR \-lxns .
+.SH FILES
+/usr/lib/libxns.a	XNS network support library
+.SH "SEE ALSO"
+xcp(1C), 
+xx(1C),
+ioctl(2),
+read(2).

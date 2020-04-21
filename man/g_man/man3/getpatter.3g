@@ -1,0 +1,31 @@
+.TH getpattern 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getpattern
+\- returns the index of the current pattern
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getpattern()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getpat"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getpattern: longint;"
+.SH DESCRIPTION
+.B getpattern
+returns the index of the current pattern from the table of 
+available patterns.
+.SH "SEE ALSO"
+defpattern, setpattern
+.sp
+.I Programming Guide,
+Section 5.2, Patterns
+.SH NOTE
+This routine is available only in immediate mode.

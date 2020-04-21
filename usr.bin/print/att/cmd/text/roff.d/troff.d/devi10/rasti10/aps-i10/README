@@ -1,0 +1,5 @@
+This directory contains font and description files for the APS-5,
+modified to be usable with the Imagen Imprint-10 raster tables
+in the directory above, for using the Imagen as aa APS simulator.
+These files were created by the use of the makei10.c program
+in the devi10 directory (grandparent of this one).

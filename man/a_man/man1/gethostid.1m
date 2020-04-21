@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH GETHOSTIDENT 1M
+.SH NAME
+gethostident \- print hostident value
+.SH SYNOPSIS
+.B gethostident
+[
+.B \-bc
+]
+.SH DESCRIPTION
+.I gethostident\^
+prints the 64-byte value returned by the
+.I gethostident\^
+system call, which is unique to the particular machine on
+which it is invoked (with a certain caveat -- see
+.IR gethostident (2)).
+Normally,
+.I gethostident
+writes 64 bytes, some of which are unprintable, directly to its standard output.
+.PP
+The
+.B \-b
+option causes the value to be printed as octal bytes, 16 per line.
+.PP
+The
+.B \-c
+option causes the value to be printed as characters, with
+unprintable characters (and backslash) printed as a backslash and three
+octal digits, and with a newline added at the end.
+.SH SEE ALSO
+gethostident(2).
+
+

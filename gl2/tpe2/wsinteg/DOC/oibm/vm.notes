@@ -1,0 +1,16 @@
+To do a vmdump when something fails:
+1.	log into the account from another terminal
+2.	insure CP READ state (ENTER will toggle to CP READ)
+3.	VMDUMP 0.END DSS
+4.	RL to see the vmdump exists
+5. 	Q RDR ALL * to get the 4 digit fileid(spoolid) of the vmdump
+6.	mount a tape on an available tape drive noting the reeladdress
+7.	at the operators console, or from a privileged account:
+	SPT DUMP reeladdress rdr spoolid
+	(e.g. spt dump 821 rdr 9846)
+8.	mark and mail vmdump tape to
+	Silicon Graphics 
+	(hotline VMDUMP tape)
+	2011 Stierlin Road
+	Mountain View, California 94043
+

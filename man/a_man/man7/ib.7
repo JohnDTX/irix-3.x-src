@@ -1,0 +1,232 @@
+'\"macro stdmacro
+.TH IB 7
+.SH NAME
+ib \- IEEE 488 interface
+.SH SYNOPSIS
+.B "device ib0 at mb0 csr 0x020 priority 5 vector ibintr"
+.br
+.B "device ib1 at mb0 csr 0x100 priority 5 vector ibintr"
+.SH DESCRIPTION
+This is the driver for the
+National Instruments GPIB-796 IEEE 488 bus controller.
+Talker and Listener functions are provided.
+The driver may be initialized to provide
+Controller functions as well.
+After initialization and startup
+(eg, with
+.IR iib (1M)),
+bytes written to the device file
+are talked to the corresponding listener,
+and bytes read from the device file
+are listened from the corresponding talker.
+The ``End'' bit is sent with the last byte
+of each write request.
+Read requests return up to the next ``End'' byte.
+Writes are synchronous.
+.PP
+From the driver's perspective,
+the 488 bus connects up to 8 ``nodes''
+of which its controller is the 0th.
+The low-order 3 bits of the minor device number
+are the correspondent's node number
+(this is not the same thing as its 488 address), 
+although this can be configured differently if desired.
+The remaining bits specify which controller
+if the workstation has more than one.
+.PP
+The driver must be fully initialized before
+it can be used for file i/o,
+since it
+needs a certain amount of ``system integrator''
+information to function.
+In particular,
+the driver will function as Controller In Charge
+if the initialization
+(see
+.IR IBIOSETNODE )
+designates it as System Controller.
+Startup marks the end of initialization.
+Initialization and miscellaneous functions are provided
+via
+.IR ioctl (2).
+Some of these functions are available only to the super-user.
+The codes and structures are defined in the
+standard include file
+.IR <sys/ib_ioctl.h>.
+.PP
+.IP "ioctl(fd,IBIOGETNODE,struct_sgnode_ptr)"
+.br
+Fills in the
+.I struct_sgnode_ptr\->node
+field with the driver's
+current idea of the per-node system integrator information
+for the node (physical slot) number given in the
+.I struct_sgnode_ptr\->slotno
+field.
+.IP "ioctl(fd,IBIOSETNODE,struct_sgnode_ptr)"
+.br
+Changes the driver's per-node system integrator information
+for the node number given in the
+.I struct_sgnode_ptr\->slotno
+field,
+according to the
+.I struct_sgnode_ptr\->node
+field.
+Super-user only,
+and only before startup.
+.IP "ioctl(fd,IBIOSTART,int_ptr)"
+.br
+Ends initialization and allows normal file i/o to occur
+if
+.I *int_ptr
+is non0,
+otherwise just re-enters initialization.
+Super-user only.
+.IP "ioctl(fd,IBIOINIT,0)"
+.br
+Initializes (or re-initializes) the driver's
+internal data structures.
+This call should only be made when no
+other processes are using the driver.
+Super-user only.
+.IP "ioctl(fd,IBIOPPC,int_ptr)"
+.br
+Remotely configures the given nodes for parallel polling.
+If bit
+.I i
+of
+.I *int_ptr
+is 1,
+node
+.I i
+is configured according to its
+.I n_ppr
+as set by the IBIOSETNODE ioctl.
+Only nodes with
+.I IBN_VALID
+and
+.I IBN_PPC
+set in the
+.I n_flags
+field are configured.
+By default,
+node
+.I i
+uses line
+.I i
+for parallel polling.
+This call is not interruptible.
+.IP "ioctl(fd,IBIOPOLL,char_15_ptr)"
+.br
+Fills in the given array with the responses from the
+last poll;
+position
+.I i
+is the response from node
+.IR i .
+Responses with the 0100 (octal) bit turned on
+are considered active;
+other responses are considered inactive and
+are ignored.
+If no poll has been done since the previous IBIOPOLL call,
+return is not until the next poll occurs.
+The driver performs polls automatically
+in response to Service Request events:
+a parallel poll is done first,
+followed by a serial poll of
+all matching nodes known to be capable of
+responding to a parallel poll,
+plus all nodes known to be incapable of responding
+to a parallel poll.
+Parallel poll responses are assumed to be ``in-phase,''
+ie, logic 1 when active.
+This call is effective only if issued from the
+Controller In Charge side.
+.IP "ioctl(fd,IBIOSRQ,int_ptr)"
+.br
+Raises Service Request with
+.IR *int_ptr
+as poll status.
+The poll status must have the 0100 (octal) bit turned on.
+Returns when serial-polled or timeout
+(currently about 10 seconds).
+This call is not interruptible.
+.IP "ioctl(fd,IBIOTAKECTL,0)"
+.br
+Waits for the interface to become Controller In Charge.
+Super-user only,
+and only after startup.
+This cannot take effect until the driver is quiescent.
+This call is not interruptible.
+.IP "ioctl(fd,IBIOPASSCTL,int_ptr)"
+.br
+Passes control to the node indicated by
+.IR *int_ptr .
+Super-user only,
+and only after startup.
+This cannot take effect until the driver is quiescent.
+This call is not interruptible.
+This call is effective only if issued from the
+Controller In Charge side.
+.IP "ioctl(fd,IBIOCUTOFF,0)"
+.br
+Unaddresses the current talker and listener.
+This does not interfere with normal driver operation
+(normally the driver does not unaddress the current
+talker or listener until another talker or listener
+is selected;
+this call unaddresses and forces re-addressing
+next time).
+This call is effective only if issued from the
+Controller In Charge side.
+.PP
+In general
+.IR iib (1M)
+is sufficient for dealing with
+ib driver ioctl's.
+.PP
+The most efficient blocksize for writes is 1024 bytes.
+Throughput may reach 110 *1024 bytes per second.
+The IEEE 488 ``compliance'' code for this device and driver
+is approximately
+.nf
+	SH1 AH1 C5 T8 L4 SR1 RL0 PP1
+.br
+.fi
+.SH FILES
+/dev/ib[0-9]
+.SH "SEE ALSO"
+iib(1M)
+.SH DIAGNOSTICS
+See
+.IR intro (2).
+.SH BUGS
+When the interface is not Controller In Charge,
+the driver has no knowledge of the actual
+destination when it talks
+or the actual source when it listens:
+data from write requests is talked
+to whatever node
+happens to be listening when the interface
+is addressed to talk;
+listened data is put in an anonymous queue,
+which is used to satisfy read requests
+as if it had come from the requested node.
+In practical terms,
+this means that when the interface is not
+Controller In Charge
+it only talks or listens to the actual
+Controller In Charge.
+.sp
+Due to hardware limitations,
+killing a program while it's listening
+may occasionally scramble subsequent transfers.
+.sp
+Due to hardware limitations,
+the driver may occasionally hang
+when addressed to listen.
+.sp
+Responds to Service Requests only when the file is open.
+.sp
+No raw i/o.
+No asynchronous i/o.

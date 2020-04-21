@@ -1,0 +1,986 @@
+'\"macro stdmacro
+.TH INTRO 2
+.de {n
+.HP
+\\$1  \\$2  \\$3
+.br
+..
+.SH NAME
+intro \- introduction to system calls and error numbers
+.SH SYNOPSIS
+.B #include \|<errno.h>
+.SH DESCRIPTION
+This section
+describes all of the system calls.
+Most of these calls have one or more error returns.
+An error condition is indicated by an otherwise
+impossible returned value.
+This is almost always \-1;
+the individual descriptions specify the details.
+An error number is also made available
+in the external variable
+.IR errno .
+.I errno\^
+is not cleared on successful calls, so it should be tested only
+after an error has been indicated.
+.PP
+There is a table of messages associated with each error, 
+and a routine for printing the message; see
+.IR perror\^ (3).
+All of the possible error numbers
+are not listed in each system call description because many
+errors are possible for most of the calls.
+The following is a complete list of the error numbers and
+their names as defined in
+.BR <errno.h> .
+.{n 1 \s-1EPERM\s+1 "Not owner"
+Typically this error indicates
+an attempt to modify a file in some way forbidden
+except to its owner or super-user.
+It is also returned for attempts
+by ordinary users to do things
+allowed only to the super-user.
+.{n 2 \s-1ENOENT\s+1 "No such file or directory"
+This error occurs when a file name is specified
+and the file should exist but doesn't, or when one
+of the directories in a path name does not exist.
+.{n 3 \s-1ESRCH\s+1 "No such process"
+No process can be found corresponding to that specified by
+.I pid\^
+in
+.I kill\^
+or
+.IR ptrace .
+.{n 4 \s-1EINTR\s+1 "Interrupted system call"
+An asynchronous signal (such as interrupt or quit),
+which the user has elected to catch,
+occurred during a system call.
+If execution is resumed
+after processing the signal,
+it will appear as if the interrupted system call
+returned this error condition.
+.{n 5 \s-1EIO\s+1 "I/O error"
+Some physical I/O error.
+This error may in some cases occur
+on a call following the one to which it actually applies.
+.{n 6 \s-1ENXIO\s+1 "No such device or address"
+I/O on a special file refers to a subdevice which does not
+exist,
+or beyond the limits of the device.
+It may also occur when, for example, a tape drive
+is not on-line or no disk pack is loaded on a drive.
+.{n 7 \s-1E2BIG\s+1 "Arg list too long"
+An argument list longer than 5,120 bytes
+is presented to a member of the
+.I exec\^
+family.
+.{n 8 \s-1ENOEXEC\s+1 "Exec format error"
+A request is made to execute a file
+which, although it has the appropriate permissions,
+does not start with a valid magic number (see
+.IR a.out\^ (4)).
+.{n 9 \s-1EBADF\s+1 "Bad file number"
+Either a file descriptor refers to no
+open file,
+or a read (respectively write) request is made to
+a file which is open only for writing (respectively reading).
+.{n 10 \s-1ECHILD\s+1 "No child processes"
+A
+.IR wait
+was executed by a process that had no existing or unwaited-for child processes.
+.{n 11 \s-1EAGAIN\s+1 "No more processes"
+A
+.IR fork
+failed because the system's process table is full
+or the user is not allowed to create any more
+processes.
+.{n 12 \s-1ENOMEM\s+1 "Not enough space"
+During an
+.IR exec ,
+.IR brk ,
+or
+.IR sbrk ,
+a program asks for more space than the system is able to supply.
+This is not a temporary condition; the maximum space size
+is a system parameter.
+The error may also occur if the arrangement
+of text, data, and stack segments
+requires too many segmentation registers, or
+if there is not enough swap space during a
+.IR fork .
+.{n 13 \s-1EACCES\s+1 "Permission denied"
+An attempt was made to access a file in a way forbidden
+by the protection system.
+.{n 14 \s-1EFAULT\s+1 "Bad address"
+The system encountered a hardware fault in attempting to
+use an argument of a system call.
+.{n 15 \s-1ENOTBLK\s+1 "Block device required"
+A non-block file was mentioned where a block device was required,
+e.g., in
+.IR mount .
+.{n 16 \s-1EBUSY\s+1 "Mount device busy"
+An attempt to mount a device that was already mounted or
+an attempt was made to dismount a device
+on which there is an active file
+(open file, current directory, mounted-on file, active text segment).
+It will also occur if an attempt is made to enable accounting when it is
+already enabled.
+.bp
+.{n 17 \s-1EEXIST\s+1 "File exists"
+An existing file was mentioned in an inappropriate context,
+e.g.,
+.IR link .
+.{n 18 \s-1EXDEV\s+1 "Cross-device link"
+A link to a file on another device
+was attempted.
+.{n 19 \s-1ENODEV\s+1 "No such device"
+An attempt was made to apply an inappropriate
+system call to a device;
+e.g., read a write-only device.
+.{n 20 \s-1ENOTDIR\s+1 "Not a directory"
+A non-directory was specified where a directory
+is required,
+for example in a path prefix or
+as an argument to
+.IR chdir\^ (2).
+.{n 21 \s-1EISDIR\s+1 "Is a directory"
+An attempt to write on a directory.
+.{n 22 \s-1EINVAL\s+1 "Invalid argument"
+Some invalid argument (e.g., dismounting a non-mounted device;
+mentioning an undefined signal in
+.IR signal ,
+or
+.IR kill ;
+reading or writing a file for which
+.I lseek\^
+has generated a negative pointer).
+Also set by the math functions described in the (3M) entries
+of this manual.
+.{n 23 \s-1ENFILE\s+1 "File table overflow"
+The system's table of open files is full,
+and temporarily no more
+.I opens\^
+can be accepted.
+.{n 24 \s-1EMFILE\s+1 "Too many open files"
+No process may have more than 40 file descriptors open at a time.
+.{n 25 \s-1ENOTTY\s+1 "Not a typewriter"
+The file mentioned in
+.I stty\^
+or
+.I gtty\^
+is not a terminal or one of the other devices to which these calls apply.
+.{n 26 \s-1ETXTBSY\s+1 "Text file busy"
+An attempt to execute a pure-procedure
+program which is currently open for writing
+(or reading).
+Also an attempt to open for writing a pure-procedure
+program that is being executed.
+.{n 27 \s-1EFBIG\s+1 "File too large"
+The size of a file exceeded the maximum
+file size (1,082,201,088 bytes) or
+.SM ULIMIT\*S;
+see
+.IR ulimit\^ (2).
+.{n 28 \s-1ENOSPC\s+1 "No space left on device"
+During a
+.I write\^
+to an ordinary file,
+there is no free space left on the device.
+.{n 29 \s-1ESPIPE\s+1 "Illegal seek"
+An
+.I lseek\^
+was issued to a pipe.
+This error should also be issued for other non-seekable devices.
+.bp
+.{n 30 \s-1EROFS\s+1 "Read-only file system"
+An attempt to modify a file or directory
+was made
+on a device mounted read-only.
+.{n 31 \s-1EMLINK\s+1 "Too many links"
+An attempt to make more than the maximum number of links (1000) to a file.
+.{n 32 \s-1EPIPE\s+1 "Broken pipe"
+A write on a pipe for which there is no process
+to read the data.
+This condition normally generates a signal;
+the error is returned if the signal is ignored.
+.\".{n 33 \s-1EDOM\s+1 "Math argument"
+.\"The argument of a function in the math package (3M)
+.\"is out of the domain of the function.
+.\".{n 34 \s-1ERANGE\s+1 "Result too large"
+.\"The value of a function in the math package (3M)
+.\"is not representable within machine precision.
+.{n 35 \s-1EWOULDBLOCK\s+1 "Operation would block"
+An operation which would cause a process to block was attempted
+on an object in non-blocking mode (see 
+.IR ioctl\^ (2)).
+.{n 36 \s-1EINPROGRESS\s+1 "Operation now in progress"
+An operation which takes a long time to complete (such as a
+.IR connect\^ (2))
+was attempted on a non-blocking object (see
+.IR ioctl\^ (2)).
+.{n 37 \s-1EALREADY\s+1 "Operation already in progress"
+An operation was attempted on a non-blocking object which
+already had an operation in progress.
+.{n 38 \s-1ENOTSOCK\s+1 "Socket operation on non-socket"
+.{n 39 \s-1EDESTADDRREQ\s+1 "Destination address required"
+A required address was omitted from an operation on a socket.
+.{n 40 \s-1EMSGSIZE\s+1 "Message too long"
+A message sent on a socket was larger than the internal message buffer.
+.{n 41 \s-1EPROTOTYPE\s+1 "Protocol wrong type for socket"
+A protocol was specified which does not support the semantics of the
+socket type requested.  For example, you cannot use the 
+.SM ARPA 
+Internet
+.SM UDP 
+protocol with type SOCK_STREAM.
+.{n 42 \s-1ENOPROTOOPT\s+1 "Bad protocol option"
+A bad option was specified in a 
+.IR getsockopt\^ (2)
+or
+.IR setsockopt\^ (2)
+call.
+.{n 43 \s-1EPROTONOSUPPORT\s+1 "Protocol not supported"
+The protocol has not been configured into the system or no
+implementation for it exists.
+.{n 44 \s-1ESOCKTNOSUPPORT\s+1 "Socket type not supported"
+The support for the socket type has not been configured into the system
+or no implementation exists.
+.{n 45 \s-1EOPNOTSUPP\s+1 "Operation not supported on socket"
+For example, trying to \f2accept\^\fP a connection on a datagram socket.
+.{n 46 \s-1EPFNOSUPPORT\s+1 "Protocol family not supported"
+The protocol family has not been configured into the system
+or no implementation exists.
+.{n 47 \s-1EAFNOSUPPORT\s+1 "Address family not supported by protocol family"
+An address incompatible with the requested protocol was used.
+For example, you shouldn't necessarily expect to be able to use 
+.SM PUP
+Internet addresses with 
+.SM ARPA
+Internet protocols.
+.{n 48 \s-1EADDRINUSE\s+1 "Address already in use"
+Only one usage of each address is normally permitted.
+.{n 49 \s-1EADDRNOTAVAIL\s+1 "Can't assign requested address"
+Normally results from an attempt to create a socket with an
+address not on this machine.
+.{n 50 \s-1ENETDOWN\s+1 "Network is down"
+A socket operation encountered a dead network.
+.{n 51 \s-1ENETUNREACH\s+1 "Network is unreachable"
+A socket operation was attempted to an unreachable network.
+.{n 52 \s-1ENETRESET\s+1 "Network dropped connection on reset"
+The host you were connected to crashed and rebooted.
+.{n 53 \s-1ECONNABORTED\s+1 "Software caused connection abort"
+A connection abort was caused internal to your host machine.
+.{n 54 \s-1ECONNRESET\s+1 "Connection reset by peer"
+A connection was forcibly closed by a peer.  This normally results
+from a peer executing a
+.IR shutdown\^ (2) 
+call.
+.{n 55 \s-1ENOBUFS\s+1 "No buffer space available"
+An operation on a socket or pipe performed because the system 
+lacked sufficient buffer space.
+.{n 56 \s-1EISCONN\s+1 "Socket is already connected"
+A 
+.I connect
+request was made on an already connected socket; or a
+.I sendto
+or 
+.I sendmsg
+request on a connected socket specified a destination other than the
+connected party.
+.{n 57 \s-1ENOTCONN\s+1 "Socket is not connected"
+A request to send or receive data was disallowed because the socket 
+was not connected.
+.{n 58 \s-1ESHUTDOWN\s+1 "Can't send after socket shutdown"
+A request to send data was disallowed because the socket had already
+been shut down with a previous
+.IR shutdown\^ (2)
+call.
+.{n 59 \s-1ETOOMANYREFS\s+1 "Too many references: can't splice"
+.{n 60 \s-1ETIMEDOUT\s+1 "Connection timed out"
+A 
+.I connect
+request failed because the connected party did not properly respond
+after a period of time. (The timeout period is dependent on the
+communication protocol.)
+.{n 61 \s-1ECONNREFUSED\s+1 "Connection refused"
+No connection could be made because the target machine actively
+refused it.
+.{n 62 \s-1ELOOP\s+1 "Too many levels of symbolic links"
+A path name lookup involved more than 8 symbolic links.
+.{n 63 \s-1ENAMETOOLONG\s+1 "File name too long"
+A component of a path name exceeded 255 characters, or an entire
+path name exceeded 1023 characters.
+.{n 64 \s-1EHOSTDOWN\s+1 "Host is down"
+.{n 65 \s-1EHOSTUNREACH\s+1 "No route to host"
+.{n 66 \s-1ENOTEMPTY\s+1 "Directory not empty"
+.{n 67 \s-1ENOMSG\s+1 "No message of desired type"
+.{n 68 \s-1EIDRM\s+1 "Identifier removed"
+.{n 69 \x-1EDQUOT\s+1 "Disc quota exceeded"
+.{n 70 \s-1ESTALE\s+1 "Stale NFS file handle"
+.{n 71 \s-1ETEXTABLEFULL\s+1 "Text table is full"
+.{n 72 \s-1EINODETABLEFULL\s+1 "Inode table is full"
+.{n 73 \s-1ENOFPA\s+1 "No fpa to run program"
+.{n 74 \s-1EGRBUSY\s+1 "Graphics already in use"
+.{n 75 \s-1ENOGR\s+1 "No graphics hardware present"
+.{n 76-79 \f2rfu\f1
+.{n 80 \s-1EDEADLK\s+1 "Deadlock condition"
+.{n 81 \s-1ENOLCK\s+1 "No record locks available"
+.{n 82 \s-1ENOSTR\s+1 "Device not a stream"
+.{n 83 \s-1ENODATA\s+1 "No data (for no delay io)" 
+.{n 84 \s-1ETIME\s+1 "Timer expired"
+.{n 85 \s-1ENOSR\s+1 "Out of streams resources"
+.{n 86 \s-1EBADMSG\s+1 "Trying to read unreadable message"
+.SH "DEFINITIONS"
+.SS "Process \s-1ID\s+1"
+Each active process in the system is uniquely identified by a
+positive integer called a process
+.SM ID\*S.
+The range of this
+.SM ID
+is from 0 to 29,999.
+.SS "Parent Process \s-1ID\s+1"
+A new process is created by a currently active
+process; see
+.IR fork\^ (2).
+The parent process
+.SM ID
+of a process is the process
+.SM ID
+of its creator.
+.SS "Process Group \s-1ID\s+1"
+Each active process is a member of a process group that is
+identified by a positive integer called the process group
+.SM ID\*S.
+This
+.SM ID
+is the process
+.SM ID
+of the group leader.
+This grouping permits the signaling of related processes; see
+.IR kill\^ (2).
+.SS "Tty Group \s-1ID\s+1"
+Each active process can be a member of a terminal group that
+is identified by a positive integer called the tty group
+.SM ID\*S.
+This grouping is used to terminate a group of related process upon termination
+of one of the processes in the group; see
+.IR exit\^ (2)
+and
+.IR signal\^ (2).
+.SS "Real User \s-1ID\s+1 and Real Group \s-1ID\s+1"
+Each user allowed on the system is 
+identified by a positive integer called a real user
+.SM ID\*S.
+.PP
+Each user is also a member of a group.
+The group is identified by a positive integer called the real group
+.SM ID\*S.
+.PP
+An active process has a real user
+.SM ID
+and real group
+.SM ID
+that are set to the real user
+.SM ID
+and real group
+.SM ID\*S,
+respectively, of the user responsible for the creation of the process.
+.SS "Effective User \s-1ID\s+1 and Effective Group \s-1ID\s+1"
+An active process has an effective user
+.SM ID
+and an effective group
+.SM ID
+that are used to determine file access permissions (see below).
+The effective
+user
+.SM ID
+and effective group
+.SM ID
+are equal to the process's real user
+.SM ID
+and real group
+.SM ID
+respectively, unless the process
+or one of its ancestors evolved from a file that had the set-user-\s-1ID\s+1
+bit or set-group
+.SM ID
+bit set; see
+.IR exec\^ (2).
+.SS Super-user
+A process is recognized as a
+.I super-user\^
+process and is granted special privileges if its effective user
+.SM ID
+is 0.
+.SS "Special Processes"
+The processes with a process
+.SM ID
+of 0 and a process
+.SM ID
+of 1 are special processes and are referred to as
+.IR proc0\^ " and " proc1 .
+.PP
+.I proc0\^
+is the scheduler.
+.I proc1\^
+is the initialization process 
+.RI ( init ).
+.I proc1
+is the ancestor of every other
+process in the system and is used to control the process structure.
+.SS "File Name"
+Names consisting of 1 to 14 characters may be used to name an ordinary file,
+special file or directory.
+.PP
+These characters may be selected from the set of all character values
+excluding \e0 (null) and the
+.SM ASCII
+code for
+.B /
+(slash).
+.PP
+Note that it is generally unwise to use
+.BR "*" ,
+.BR "?" ,
+.BR "[" ,
+or
+.B "]"
+as part of file names because of the special meaning attached to these
+characters by the shell.
+See
+.IR sh\^ (1).
+Although permitted, it is advisable to avoid the use of unprintable
+characters in file names.
+.SS "Path Name and Path Prefix"
+A path name is a null-terminated character string
+starting with an optional slash
+.RB ( / ),
+followed by
+zero or more directory names separated by slashes, optionally followed
+by a file name.
+.PP
+More precisely, a path name is a null-terminated character string
+constructed as follows:
+.PP
+.RS .3i
+<path-name>::=<file-name>\^\^|\^\^<path-prefix><file-name>\^|\^\^/
+.br
+<path-prefix>::=<rtprefix>\^\^|\^\^/<rtprefix>
+.br
+<rtprefix>::=<dirname>/\^\^|\^\^<rtprefix><dirname>/
+.RE
+.PP
+where <file-name> is a string of 1 to 14
+characters other than the
+.SM ASCII
+slash and null, and
+<dirname> is a string of 1 to 14 characters
+(other than the
+.SM ASCII
+slash and null)
+that names a directory.
+.PP
+If a path name begins with a slash, the path search begins at the
+.I root\^
+directory.
+Otherwise, the search begins from the current working directory.
+.PP
+A slash by itself names the root directory.
+.PP
+Unless specifically stated otherwise,
+the null path name is treated as if it named
+a non-existent file.
+.SS Directory.
+.PP
+Directory entries are called links.
+By convention, a directory contains at least two links,
+.B  .
+and
+.BR .. ,
+referred to as
+.I dot\^
+and
+.I dot-dot\^
+respectively.
+Dot refers to the directory itself and dot-dot refers to its parent
+directory.
+.SS "Root Directory and Current Working Directory."
+Each process has associated with it a concept of a root directory and
+a current working directory for the purpose of resolving path name searches.
+A process's root directory need not be the root directory of the root
+file system.
+.SS "File Access Permissions."
+.PP
+Read, write, and execute/search permissions on a file are
+granted to a process if one or more of the following is true:
+.RS .3i
+.PP
+The process's effective user
+.SM ID
+is super-user.
+.PP
+The process's effective user
+.SM ID
+matches the user
+.SM ID
+of the owner of the file
+and the appropriate access bit of the
+``owner'' portion (0700) of the file mode is set.
+.PP
+The process's effective user
+.SM ID
+does not match the user
+.SM ID
+of the owner of the file,
+and the process's effective group
+.SM ID
+matches the group of the file and
+the appropriate access bit of the ``group'' portion
+(070) of the file mode is set.
+.PP
+The process's effective user
+.SM ID
+does not match the user
+.SM ID
+of the owner of the file,
+and the process's effective group
+.SM ID
+does not match the group
+.SM ID
+of the file,
+and the appropriate access bit of the ``other'' portion (07) of the
+file mode is set.
+.RE
+.PP
+Otherwise, the corresponding permissions are denied.
+.SS "Message Queue Identifier"
+A message queue identifier (\f2msqid\fP) is a unique positive integer
+created by a
+.IR msgget\^ (2)
+system call.
+Each \f2msqid\fP has a message queue and a data structure associated with it.
+The data structure is referred to as
+.I msqid_ds\^
+and contains the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'ipc_perm msg_perm\ \ 'u
+.nf
+struct	ipc_perm msg_perm;	/\(** operation permission struct \(**/
+ushort	msg_qnum;	/\(** number of msgs on q \(**/
+ushort	msg_qbytes;	/\(** max number of bytes on q \(**/
+ushort	msg_lspid;	/\(** pid of last msgsnd operation \(**/
+ushort	msg_lrpid;	/\(** pid of last msgrcv operation \(**/
+time_t	msg_stime;	/\(** last msgsnd time \(**/
+time_t	msg_rtime;	/\(** last msgrcv time \(**/
+time_t	msg_ctime;	/\(** last change time \(**/
+		/\(** Times measured in secs since \(**/
+		/\(** 00:00:00 \s-1GMT\s+1, Jan. 1, 1970 \(**/
+.fi
+.RE
+.PP
+.I msg_perm
+is a \f2ipc_perm\fP structure that
+specifies the message operation permission (see below).
+This structure includes the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'semzcnt;\ \ \ \ 'u
+.nf
+ushort	cuid;	/\(** creator user id \(**/
+ushort	cgid;	/\(** creator group id \(**/
+ushort	uid;	/\(** user id \(**/
+ushort	gid;	/\(** group id \(**/
+ushort	mode;	/\(** r/w permission \(**/
+.fi
+.RE
+.PP
+.I msg_qnum
+is the number of messages currently on the queue.
+.I msg_qbytes
+is the maximum number of bytes allowed on the queue.
+.I msg_lspid
+is the process id of the last process that performed a
+.I msgsnd\^ 
+operation.
+.I msg_lrpid
+is the process id of the last process that performed a
+.I msgrcv\^
+operation.
+.I msg_stime
+is the time of the last
+.I msgsnd\^
+operation,
+.I msg_rtime
+is the time of the last
+.I msgrcv\^
+operation, and
+.I msg_ctime
+is the time of the last
+.IR msgctl\^ (2)
+operation that changed a member of the above structure.
+.SS "Message Operation Permissions"
+In the
+.IR msgop\^ (2)
+and 
+.IR msgctl\^ (2)
+system call descriptions, the permission required
+for an operation is given as ``{token}'', where ``token'' is the type
+of permission needed interpreted as follows:
+.PP
+.RS
+.PD 0
+.TP \w'00400\ \ \ \ 'u
+00400
+Read by user
+.TP
+00200
+Write by user
+.TP
+00060
+Read, Write by group
+.TP
+00006
+Read, Write by others
+.RE
+.PD
+.PP
+Read and Write permissions on a \f2msqid\fP are
+granted to a process if one or more of the following is true:
+.RS .3i
+.PP
+The process's effective user
+.SM ID
+is super-user.
+.PP
+The process's effective user
+.SM ID
+matches
+.I msg_perm.[c]uid
+in the data structure associated with
+.I msqid\^
+and the appropriate bit of the
+``user'' portion (0600) of
+.I msg_perm.mode
+is set.
+.PP
+The process's effective user
+.SM ID
+does not match
+.I msg_perm.[c]uid
+and the process's effective group
+.SM ID
+matches
+.I msg_perm.[c]gid
+and the appropriate bit of the ``group'' portion
+(060) of
+.I msg_perm.mode
+is set.
+.PP
+The process's effective user
+.SM ID
+does not match
+.I msg_perm.[c]uid
+and the process's effective group
+.SM ID
+does not match
+.I msg_perm.[c]gid
+and the appropriate bit of the ``other'' portion (06) of
+.I msg_perm.mode
+is set.
+.RE
+.PP
+Otherwise, the corresponding permissions are denied.
+.SS "Semaphore Identifier"
+A semaphore identifier (\f2semid\f1) is a unique positive integer created by a
+.IR semget\^ (2)
+system call.
+Each \f2semid\f1 has a set of semaphores and a data structure associated
+with it.
+The data structure is referred to as
+.I semid_ds\^
+and contains the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'ipc_perm msg_perm\ \ 'u
+.nf
+struct	ipc_perm sem_perm;	/\(** operation permission struct \(**/
+ushort	sem_nsems;	/\(** number of sems in set \(**/
+time_t	sem_otime;	/\(** last operation time \(**/
+time_t	sem_ctime;	/\(** last change time \(**/
+		/\(** Times measured in secs since \(**/
+		/\(** 00:00:00 \s-1GMT\s+1, Jan. 1, 1970 \(**/
+.fi
+.RE
+.PP
+.I sem_perm
+is a \f2ipc_perm\fP structure that
+specifies the semaphore operation permission (see below).
+This structure includes the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'semzcnt;\ \ \ \ 'u
+.nf
+ushort	cuid;	/\(** creator user id \(**/
+ushort	cgid;	/\(** creator group id \(**/
+ushort	uid;	/\(** user id \(**/
+ushort	gid;	/\(** group id \(**/
+ushort	mode;	/\(** r/a permission \(**/
+.fi
+.RE
+.PP
+The value of
+.I sem_nsems
+is equal to the number of semaphores in the set.
+Each semaphore in the set is referenced by a positive integer
+referred to as a
+.IR sem_num .
+\f2sem_num\f1 values run sequentially from 0 to the value of \f2sem_nsems\f1 minus 1.
+.I sem_otime
+is the time of the last
+.IR semop\^ (2)
+operation, and
+.I sem_ctime
+is the time of the last
+.IR semctl\^ (2)
+operation that changed a member of the above structure.
+.PP
+A semaphore is a data structure that contains the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'semzcnt;\ \ \ \ 'u
+.nf
+ushort	semval;	/\(** semaphore value \(**/
+short	sempid;	/\(** pid of last operation  \(**/
+ushort	semncnt;	/\(** # awaiting semval > cval \(**/
+ushort	semzcnt;	/\(** # awaiting semval = 0 \(**/
+.fi
+.RE
+.PP
+.I semval
+is a non-negative integer.
+.I sempid
+is equal to the process
+.SM ID
+of the last process that performed a semaphore operation on this semaphore.
+.I semncnt
+is a count of the number of processes that are currently suspended
+awaiting this semaphore's \f2semval\f1 to become greater than its current
+value.
+.I semzcnt
+is a count of the number of processes that are currently suspended
+awaiting this semaphore's \f2semval\f1 to become zero.
+.SS "Semaphore Operation Permissions"
+In the
+.IR semop\^ (2)
+and 
+.IR semctl\^ (2)
+system call descriptions, the permission required
+for an operation is given as ``{token}'', where ``token'' is the type
+of permission needed interpreted as follows:
+.PP
+.RS
+.PD 0
+.TP \w'00400\ \ \ \ 'u
+00400
+Read by user
+.TP
+00200
+Alter by user
+.TP
+00060
+Read, Alter by group
+.TP
+00006
+Read, Alter by others
+.RE
+.PD
+.PP
+Read and Alter permissions on a \f2semid\f1 are
+granted to a process if one or more of the following is true:
+.RS .3i
+.PP
+The process's effective user
+.SM ID
+is super-user.
+.PP
+The process's effective user
+.SM ID
+matches
+.I sem_perm.[c]uid
+in the data structure associated with
+.I semid\^
+and the appropriate bit of the
+``user'' portion (0600) of
+.I sem_perm.mode
+is set.
+.PP
+The process's effective user
+.SM ID
+does not match
+.I sem_perm.[c]uid
+and the process's effective group
+.SM ID
+matches
+.I sem_perm.[c]gid
+and the appropriate bit of the ``group'' portion
+(060) of
+.I sem_perm.mode
+is set.
+.PP
+The process's effective user
+.SM ID
+does not match
+.I sem_perm.[c]uid
+and the process's effective group
+.SM ID
+does not match
+.I sem_perm.[c]gid
+and the appropriate bit of the ``other'' portion (06) of
+.I sem_perm.mode
+is set.
+.RE
+.PP
+Otherwise, the corresponding permissions are denied.
+.SS "Shared Memory Identifier"
+A shared memory identifier (\f2shmid\f1) is a unique positive integer
+created by a
+.IR shmget\^ (2)
+system call.
+Each \f2shmid\f1 has a segment of memory (referred to as a shared memory
+segment)
+and a data structure associated with it.
+The data structure is referred to as
+.I shmid_ds\^
+and contains the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'ipc_perm msg_perm\ \ 'u
+.nf
+struct	ipc_perm shm_perm;	/\(** operation permission struct \(**/
+int	shm_segsz;	/\(** size of segment \(**/
+ushort	shm_cpid;	/\(** creator pid \(**/
+ushort	shm_lpid;	/\(** pid of last operation \(**/
+short	shm_nattch;	/\(** number of current attaches \(**/
+time_t	shm_atime;	/\(** last attach time \(**/
+time_t	shm_dtime;	/\(** last detach time \(**/
+time_t	shm_ctime;	/\(** last change time \(**/
+		/\(** Times measured in secs since \(**/
+		/\(** 00:00:00 \s-1GMT\s+1, Jan. 1, 1970 \(**/
+.fi
+.RE
+.PP
+.I shm_perm
+is a \f2ipc_perm\f1 structure that
+specifies the shared memory operation permission (see below).
+This structure includes the following members:
+.PP
+.RS .3i
+.ta \w'ushort\ \ 'u +\w'semzcnt;\ \ \ \ 'u
+.nf
+ushort	cuid;	/\(** creator user id \(**/
+ushort	cgid;	/\(** creator group id \(**/
+ushort	uid;	/\(** user id \(**/
+ushort	gid;	/\(** group id \(**/
+ushort	mode;	/\(** r/w permission \(**/
+.fi
+.RE
+.PP
+.I shm_segsz
+specifies the size of the shared memory segment.
+.I shm_cpid
+is the process id of the process that created the shared memory identifier.
+.I shm_lpid
+is the process id of the last process that performed a
+.IR shmop\^ (2)
+operation.
+.I shm_nattch
+is the number of processes that currently have this segment attached.
+.I shm_atime
+is the time of the last
+.I shmat\^
+operation,
+.I shm_dtime
+is the time of the last
+.I shmdt\^
+operation,
+and
+.I shm_ctime
+is the time of the last
+.IR shmctl\^ (2)
+operation that changed one of the members of the above structure.
+.SS "Shared Memory Operation Permissions"
+In the
+.IR shmop\^ (2)
+and 
+.IR shmctl\^ (2)
+system call descriptions, the permission required
+for an operation is given as ``{token}'', where ``token'' is the type
+of permission needed interpreted as follows:
+.PP
+.RS
+.PD 0
+.TP \w'00400\ \ \ \ 'u
+00400
+Read by user
+.TP
+00200
+Write by user
+.TP
+00060
+Read, Write by group
+.TP
+00006
+Read, Write by others
+.RE
+.PD
+.PP
+Read and Write permissions on a \f2shmid\f1 are
+granted to a process if one or more of the following is true:
+.RS .3i
+.PP
+The process's effective user
+.SM ID
+is super-user.
+.PP
+The process's effective user
+.SM ID
+matches
+.I shm_perm.[c]uid
+in the data structure associated with
+.I shmid\^
+and the appropriate bit of the
+``user'' portion (0600) of
+.I shm_perm.mode
+is set.
+.PP
+The process's effective user
+.SM ID
+does not match
+.I shm_perm.[c]uid
+and the process's effective group
+.SM ID
+matches
+.I shm_perm.[c]gid
+and the appropriate bit of the ``group'' portion
+(060) of
+.I shm_perm.mode
+is set.
+.PP
+The process's effective user
+.SM ID
+does not match
+.I shm_perm.[c]uid
+and the process's effective group
+.SM ID
+does not match
+.I shm_perm.[c]gid
+and the appropriate bit of the ``other'' portion (06) of
+.I shm_perm.mode
+is set.
+.RE
+.PP
+Otherwise, the corresponding permissions are denied.
+.SH SEE ALSO
+intro(3).
+.\"	@(#)intro.2	5.2 of 3/8/84

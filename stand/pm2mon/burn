@@ -1,0 +1,13 @@
+#! /bin/csh
+set promtype = AM27128A
+set promtype = AM27128
+set promtype = i27128
+if ( $#argv > 1 ) then
+    set promtype = $1
+    shift
+endif
+if ( $#argv != 1 ) then
+    echo arg cnt
+    exit
+endif
+exec /usr/src/prom/nprom -t$promtype -S2 -v < $1

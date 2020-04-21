@@ -1,0 +1,60 @@
+		    3278 EMULATION KEYBOARD MAPPING
+		    -------------------------------
+
+
+3278		iris		visual 50	wsiris rel x.4
+----		----		---------	-------------
+
+reshow		pad 3		ctrl "g"	pad 3
+attention	ctrl "a"	ctrl "a"	ctrl "a"
+backspace	back sp		back sp		back sp
+back_tab	shift tab	n/a		shift tab
+bar		"|"		"|"		"|"	
+broken bar	"]"		"]"		"]"
+clear		pad enter	pad enter	pad enter
+c_down		crs down	crs down	crs down
+c_left		crs left	crs left	crs left
+c_right		crs right	crs right	crs right
+c_up		crs up		crs up		crs up
+cent		"["		"["		"["
+cur_select	ctrl "x"	ctrl "x"	ctrl "x"
+delete		del		del		del
+dev_cancel	ctrl "n"	ctrl "n"	ctrl "n"
+dup		ctrl "u"	ctrl "u"	ctrl "u"
+enter		retrn		return		return
+erase_eof	pad 1		esc "/" 	pad 1
+er_input	pad 2		n/a		pad 2
+f_mark		ctrl "f"	ctrl "f"	ctrl "f"
+fwd_tab		tab		tab		tab
+home		pad .		n/a		pad .
+insert		ctrl "p"	ctrl "p"	ctrl "p"
+new_line	line feed	line feed	line feed
+pa1		ctrl PF1	esc f1		esc PF1
+pa2		ctrl PF1	esc f2		esc PF2
+pf1		PF1		esc 1		PF1
+pf2		PF2		esc 2		PF2
+pf3		PF3		esc 3		PF3
+pf4		PF4		esc 4		PF4
+pf5		pad 7		esc 5		pad 7
+pf6		pad 8		esc 6		pad 8
+pf7		pad 9		esc 7		pad 9
+pf8		pad -		esc 8		pad -
+pf9		pad 4		esc 9		pad 4
+pf10		pad 5		esc 0		pad 5
+pf11		pad 6		esc "-"		pad 6
+pf12		pad ,		esc "="		pad ,
+pf13		shift pf1
+pf14		shift pf2
+pf15		shift pf3
+pf16		shift pf4
+pf17		shift pad 7	
+pf18		shift pad 8
+pf19		shift pad 9
+pf20		shift pad -
+pf21		shift pad 4
+pf22		shift pad 5
+pf23		shift pad 6
+pf24		shift pad ,
+reset		pad 0		ctrl "r"	pad 0
+sys_req		ctrl "y"	ctrl "y"	ctrl "y"
+test		ctrl "t"	ctrl "t"	ctrl "t"

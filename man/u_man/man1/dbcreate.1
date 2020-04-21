@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH DBCREATE 1
+.SH NAME
+dbcreate \- create a database
+.SH SYNOPSIS
+.PP
+.B
+dbcreate
+.I
+database-name
+.SH DESCRIPTION
+.PP
+.I
+Dbcreate
+creates the named database, which is empty.  An Emacs database is stored
+in a set of three files.  The three files have a common prefix, which is
+the name used to refer to the database, and have the extensions 
+.I 
+".dir",
+.I
+".dat" , 
+and 
+.I
+".pag" .  
+For example, the database named info might be
+specified as /usr/lib/emacs/databases/info.  This database is actually
+stored in three files:  
+.I 
+info.dat , 
+.I 
+info.dir , 
+and 
+.I 
+info.pag.
+For information on the 
+Emacs
+database facility, see the following documents:
+.PP
+.RS 5
+.I
+Emacs Reference Manual
+.br
+.SH SEE ALSO
+Several utilities, in addition to dbcreate,
+are provided for manipulating the Emacs databases outside of Emacs.
+.IP "dbbuild(1)" 17
+builds a database from a shell command file.
+.IP "dbadd(1)" 17
+adds an entry to a database.
+.IP "dblist(1)" 17
+lists the keys in the database.
+.IP "dbprint(1)" 17
+prints the contents of a database entry.

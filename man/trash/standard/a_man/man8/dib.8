@@ -1,0 +1,49 @@
+.TH DIB 8
+.SH NAME
+dib \- dump ib driver data structures
+.SH SYNOPSIS
+dib [ -c ] [ -f ] [ -n unix ] [ -u N ] [ -v ]
+.SH DESCRIPTION
+.I Dib
+is an aid for debugging the ib driver
+(see
+.IR ib (4)).
+It prints out the current values of various
+kernel data structures used by the ib driver.
+.PP
+FLAGS
+.br
+.IP -c
+.br
+prints out per-minor-device input queues.
+.IP -f
+.br
+prints out buffer (freelist) information.
+.IP -n unix
+.br
+uses a different kernel namelist
+(default is
+.IR /nunix ).
+.IP -u N
+.br
+prints out structures relating to unit (board) N.
+.IP -v
+.br
+prints out driver globals.
+.PP
+The default is
+-c -f -n /nunix -u 0 -v .
+Good luck.
+.SH EXAMPLE
+.nf
+dib -u 1
+.br
+.fi
+.SH FILES
+/dev/kmem
+.br
+/nunix
+.SH "SEE ALSO"
+cib(8), ib(4), iib(1), tib(8).
+.SH BUGS
+Phase errors are possible.

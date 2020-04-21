@@ -1,0 +1,77 @@
+.TH move 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B move
+\- moves the current graphics position to a specified point
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "move(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "movei(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "moves(x, y, z) "
+.B "Scoord x, y, z;"
+.IP 
+.B "move2(x, y) "
+.B "Coord x, y;"
+.IP
+.B "move2i(x, y)"
+.B "Icoord x, y;"
+.IP 
+.B "move2s(x, y) "
+.B "Scoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine move(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine movei(x, y, z)"
+.B "integer*4 x, y, z"
+.IP 
+.B "subroutine moves(x, y, z)"
+.B "integer*2 x, y, z"
+.IP 
+.B "subroutine move2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine move2i(x, y)"
+.B "integer*4 x, y"
+.IP 
+.B "subroutine move2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.ne 13
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure move(x, y, z: Coord);"
+.IP
+.B "procedure movei(x, y, z: Icoord);"
+.IP
+.B "procedure moves(x, y, z: Scoord);"
+.IP
+.B "procedure move2(x, y: Coord);"
+.IP
+.B "procedure move2i(x, y: Icoord);"
+.IP
+.B "procedure move2s(x, y: Scoord);"
+.SH DESCRIPTION
+.B move
+moves (without drawing) the current graphics position
+to the point that \f2x\f1, \f2y\f1, \f2z\f1 specify.
+\f3move\f1 has six forms: 3-D floating point, 3-D integer, 2-D
+floating point, 2-D integer, 3-D short integer, and 2-D short integer.
+.B "move2(x,y)"
+is equivalent to 
+\f3move(x,y,0.0)\fP.
+.SH "SEE ALSO"
+draw, pnt, rdr, rmv
+.sp
+.I Programming Guide,
+Section 3.4, Lines

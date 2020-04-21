@@ -1,0 +1,46 @@
+.TH defpattern 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B defpattern
+\- defines patterns
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defpattern(n, size, mask) "
+.B "short n, size;"
+.B "short *mask;
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defpat(n, size, mask)"
+.B "integer*4 n, size
+.B "integer*2 mask((size*size)/16)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defpattern(n, size: Short; var mask: Short;"
+.SH DESCRIPTION
+.B defpattern
+defines an arbitrary pattern.
+\f2n\f1 specifies an index into a table of patterns.
+\f2size\f1 specifies the size of the pattern: 16, 32, or 64 for a 16x16-,
+32x32-, or 64x64-bit pattern, respectively.
+\f2mask\f1 is an array of shorts that form the actual
+bit pattern.  The pattern is described from left to right and
+bottom to top, just as characters are described in a raster font.
+By default, pattern 0 is a 16x16 solid pattern that cannot be
+changed.
+There is no performance penalty for non-solid patterns.
+.PP
+When using multiple windows, patterns, cursors, and fonts
+are available to all windows.
+.SH "SEE ALSO"
+defcursor, defrasterfont, deflinestyle, getpattern, setpattern
+.sp
+.I Programming Guide,
+Section 5.2, Patterns   
+.SH NOTE
+This routine is available only in immediate mode.

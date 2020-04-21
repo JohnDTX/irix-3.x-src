@@ -1,0 +1,24 @@
+STATUS=	0xFC9000
+
+	.text
+start:
+	moveq	#0,d1		| digit counter
+|
+| Set the status register
+|
+digit:	movw	STATUS, d2	| read current value of status register
+	andw	#0xFFF0, d2	| strip off old digit
+	orw	d1, d2		| add in the new digit
+	movw	d2, STATUS
+|
+| Delay about 2 seconds
+|
+	movl	#1000000 , d0
+delay:	subql	#1, d0
+	jne	delay
+|
+| Advance to next digit
+|
+	addql	#1,d1
+	andw	#0x0F,d1
+	jra	digit

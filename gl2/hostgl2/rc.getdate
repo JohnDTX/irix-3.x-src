@@ -1,0 +1,11 @@
+#! /bin/sh
+# This is a sample rc.getdate for those who wish to get the date over
+# an XNS network from an IRIS designated as a date server.  
+# Replace "host" with its name.
+echo "setenv TZ `cat /etc/TZ` ; date +%m%d%H%M.%S%y" | \
+	if xx host csh -tf 
+	then 
+		:	
+	else
+		echo x		# something to make date fail
+	fi

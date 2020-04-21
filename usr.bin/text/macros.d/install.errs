@@ -1,0 +1,21 @@
+CC_OPTS="-ZR /iris -ZI -ZN -I/iris/usr/include" \
+cc -n -O -s -o ntar ntar.c
+chmod +x macrunch
+./macrunch  an
+chmod +x macrunch
+./macrunch  an6
+chmod +x macrunch
+./macrunch  mmn
+chmod +x macrunch
+./macrunch  mmt
+chmod +x macrunch
+./macrunch  osdd
+chmod +x macrunch
+./macrunch  vmca
+chmod 755 /juniper/usr/lib/macros /juniper/usr/lib/tmac /juniper/usr/lib/me ; chgrp bin /juniper/usr/lib/macros /juniper/usr/lib/tmac /juniper/usr/lib/me ; chown bin /juniper/usr/lib/macros /juniper/usr/lib/tmac /juniper/usr/lib/me
+cp an an6 mmn mmt osdd vmca /juniper/usr/lib/macros/.
+cd /juniper/usr/lib/macros ; chmod 644 an an6 mmn mmt osdd vmca  ; chgrp bin an an6 mmn mmt osdd vmca  ; chgrp bin an an6 mmn mmt osdd vmca
+cp tmac.an tmac.an6 tmac.e tmac.m tmac.osd tmac.ptx tmac.s tmac.scover  tmac.sdisp tmac.skeep tmac.srefs tmac.v tmac.vcat /juniper/usr/lib/tmac/.
+cd /juniper/usr/lib/tmac ; chmod 644 tmac.an tmac.an6 tmac.e tmac.m tmac.osd tmac.ptx tmac.s tmac.scover  tmac.sdisp tmac.skeep tmac.srefs tmac.v tmac.vcat ; chgrp bin tmac.an tmac.an6 tmac.e tmac.m tmac.osd tmac.ptx tmac.s tmac.scover  tmac.sdisp tmac.skeep tmac.srefs tmac.v tmac.vcat ; chown bin tmac.an tmac.an6 tmac.e tmac.m tmac.osd tmac.ptx tmac.s tmac.scover  tmac.sdisp tmac.skeep tmac.srefs tmac.v tmac.vcat
+cp acm.me chars.me deltext.me eqn.me float.me footnote.me index.me  local.me null.me sh.me tbl.me thesis.me revisions /juniper/usr/lib/me/.
+cd /juniper/usr/lib/me ; chmod 644 acm.me chars.me deltext.me eqn.me float.me footnote.me index.me  local.me null.me sh.me tbl.me thesis.me revisions ; chgrp bin acm.me chars.me deltext.me eqn.me float.me footnote.me index.me  local.me null.me sh.me tbl.me thesis.me revisions ; chown bin acm.me chars.me deltext.me eqn.me float.me footnote.me index.me  local.me null.me sh.me tbl.me thesis.me revisions

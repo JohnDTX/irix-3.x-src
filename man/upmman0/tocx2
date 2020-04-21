@@ -1,0 +1,93 @@
+accept(2) accept: accept a connection on a socket.
+access(2) access: determine accessibility of a file.
+acct(2) acct: enable or disable process accounting.
+alarm(2) alarm: set a process's alarm clock.
+bind(2) bind: bind a name to a socket.
+brk(2) brk, sbrk: change data segment space allocation.
+chdir(2) chdir: change working directory.
+chmod(2) chmod: change mode of file.
+chown(2) chown: change owner and group of a file.
+chroot(2) chroot: change root directory.
+close(2) close: close a file descriptor.
+connect(2) connect: initiate a connection on a socket.
+creat(2) creat: create a new file or rewrite an existing one.
+dup(2) dup: duplicate an open file descriptor.
+exec(2) execl, execv, execle, execve, execlp, execvp: execute a file.
+exit(2) exit, _exit: terminate process.
+fcntl(2) fcntl: file control.
+fork(2) fork: create a new process.
+getdents(2) getdents: read directory entries and put in a file system independent format.
+getdomainname(2) getdomainname, setdomainname: get/set name of current domain.
+getdtablesize(2) getdtablesize: get descriptor table size.
+gethostid(2) gethostid, sethostid: get/set unique identifier of current host.
+gethostname(2) gethostname: get name of current host.
+getpagesize(2) getpagesize: get system page size.
+getpeername(2) getpeername: get name of connected peer.
+getpid(2) getpid, getpgrp, getppid: get process, process group, and parent process IDs.
+getsockname(2) getsockname: get socket name.
+getsockopt(2) getsockopt, setsockopt: get and set options on sockets.
+getuid(2) getuid, geteuid, getgid, getegid: get real user, effective user, real group, and effective group IDs.
+getversion(2) getversion: get version information from the operating system.
+intro(2) intro: introduction to system calls and error numbers.
+ioctl(2) ioctl: control device.
+ip2mapio(2) ip2mapio, ip2mapmem, ip2unmap: multibus mapping operations.
+kill(2) kill: send a signal to a process or a group of processes.
+link(2) link: link to a file.
+listen(2) listen: listen for connections on a socket.
+lseek(2) lseek: move read/write file pointer.
+mkdir(2) mkdir: make a directory.
+mknod(2) mknod: make a directory, or a special or ordinary file.
+mount(2) mount: mount a file system.
+msgctl(2) msgctl: message control operations.
+msgget(2) msgget: get message queue.
+msgop(2) msgsnd, msgrcv: message operations.
+nfsmount(2) nfsmount: mount an NFS file system.
+nfssvc(2) nfssvc, async_daemon: NFS daemons.
+nice(2) nice: change priority of a process.
+open(2) open: open for reading or writing.
+pause(2) pause: suspend process until signal.
+phys(2) phys: allow a process to access physical addresses.
+pipe(2) pipe: create an interprocess channel.
+plock(2) plock: lock process, text, or data in memory.
+profil(2) profil: execution time profile.
+ptrace(2) ptrace: process trace.
+read(2) read: read from file.
+readlink(2) readlink: read value of a symbolic link.
+reboot(2) reboot: reboot the system.
+recv(2) recv, recvfrom, recvmsg: receive a message from a socket.
+rename(2) rename: change the name of a file.
+rmdir(2) rmdir: remove a directory.
+select(2) select: synchronous I/O multiplexing - TCP.
+semctl(2) semctl: semaphore control operations.
+semget(2) semget: get set of semaphores.
+semop(2) semop: semaphore operations.
+send(2) send, sendto, sendmsg: send a message from a socket.
+sethostname(2) sethostname: set name of host cpu.
+setpgrp(2) setpgrp: set process group ID.
+setuid(2) setuid, setgid: set user and group IDs.
+sginap(2) sginap: timed sleep and processor yield function.
+shmctl(2) shmctl: shared memory control operations.
+shmget(2) shmget: get shared memory segment.
+shmop(2) shmat, shmdt: shared memory operations.
+shutdown(2) shutdown: shut down part of a full-duplex connection.
+signal(2) signal: specify what to do upon receipt of a signal.
+socket(2) socket: create an endpoint for communication - TCP.
+socketpair(2) socketpair: create a pair of connected sockets.
+stat(2) stat, lstat, fstat: get file status.
+statfs(2) statfs, fstatfs: get file system information - TCP.
+stime(2) stime: set time.
+symlink(2) symlink: make symbolic link to a file.
+sync(2) sync: update super-block.
+sysfs(2) sysfs: get file system type information.
+time(2) time: get time.
+times(2) times: get process and child process times.
+truncate(2) truncate, ftruncate: truncate a file to a specified length.
+ulimit(2) ulimit: get and set user limits.
+umask(2) umask: set and get file creation mask.
+umount(2) umount: unmount a file system.
+uname(2) uname: get name of current UNIX system.
+unlink(2) unlink: remove directory entry.
+ustat(2) ustat: get file system statistics.
+utime(2) utime: set file access and modification times.
+wait(2) wait: wait for child process to stop or terminate.
+write(2) write: write on a file.

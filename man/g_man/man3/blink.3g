@@ -1,0 +1,64 @@
+.TH blink 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B blink
+\- changes a color map entry at a selectable rate
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "blink(rate, i, red, green, blue) "
+.B "short rate, red, green, blue; "
+.B "Colorindex i; "
+.B "short red, green, blue
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine blink(rate, i, red, green, blue)"
+.B "integer*4 rate, i, red, green, blue"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure blink(rate: Short: color: Colorindex; 
+.br
+.B	red, green, blue: Short);
+.SH DESCRIPTION
+.B blink
+specifies blink rate, color map index, and
+red, green, and blue values.  \f2rate\f1 
+is measured in terms of vertical retraces.  The system updates the
+color located at index \f2i\f1 in the current color map 
+according to \f2rate\f1.  For example, if \f2rate\f1 is 3, the color
+changes (blinks) every third vertical retrace.
+Its value alternates between the original value and the new value
+supplied by \f2red\f1, \f2green\f1, and \f2blue\f1.
+The length of time between retraces varies according
+to the monitor used.  On the standard 60Hz monitor, there are
+60 retraces per second.  When using this monitor, a 
+rate of 60 would cause the color to change once every second. 
+.PP
+Up to 20 colors can blink simultaneously, each at a different
+rate.  
+You can change the blink rate by calling
+.B blink
+with the same 
+.I i 
+and a different
+.I rate.
+To terminate blinking and restore the original color when
+\f2i\f1 specifies a blinking colormap entry, call \f3blink\f1
+with \f2rate\f1 = 0.
+To terminate all blinking colors simultaneously, call
+\f3blink\fP with \f2rate\fP=-1.  When you set \f2rate\fP
+to -1, the other parameters are ignored.
+
+.ne 15 
+.SH "SEE ALSO"
+mapcolor, color
+.sp
+\f2Programming Guide\fP, Section 6.2, Color Maps
+.SH NOTE
+This routine
+available only in immediate mode.

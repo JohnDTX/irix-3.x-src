@@ -1,0 +1,68 @@
+.TH defrasterfont 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B defrasterfont
+\- defines a raster font
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defrasterfont(n, ht, nc, chars, nr, raster)"
+.B "short n, ht, nc, nr;"
+.B "Fontchar chars[];"
+.B "short raster[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defras(n, ht, nc, chars, nr, raster)"
+.B "integer*4 n, ht, nc, nr"
+.B "integer*2 raster(nr), chars(4*nc)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defrasterfont(n, ht, nc: Short; var chars: 
+.br
+.B	Fontchar; nr: Short; var raster: Short);
+.SH DESCRIPTION
+.B defrasterfont
+defines a raster font.
+\f2n\f1 is an index into
+the font table; \f2ht\f1 is an integer that specifies the maximum 
+height
+of characters in the font in pixels. \f2n\f1 becomes the font's
+internal name.  \f2nc\f1 gives the number of characters in
+the font and the number of elements in \f2chars\f1 array. 
+.PP
+\f2chars\f1
+contains a description of each character in the font.  The description
+includes the height and width of the character in pixels, the offsets from the
+character origin to the lower-left corner of the character's
+bounding box, an offset
+into the array of rasters, 
+and the amount to add to the current character position \f2x\fP after
+drawing the character.
+.PP
+\f2raster\f1 is an array of \f2nr\f1 shorts of bitmap information.
+It is a one-dimensional array of mask shorts, ordered left to right and
+bottom to top.  Mask bits are left-justified in the character's bounding
+box. 
+.PP
+To replace a raster font, specify the index of the previous font
+as the index for the new font.
+To
+delete a raster font, define a font with no characters. 
+The default font, 0, is a fixed-pitch font with a height of 16
+and width of 9.
+Font 0 cannot be redefined.
+.PP
+When using multiple windows, patterns, cursors, and fonts are
+available to all windows.
+.SH "SEE ALSO"
+charstr, font, getdescender, getfont, getheight, strwidth
+.sp
+.I Programming Guide,
+Section 5.3, Fonts
+.SH NOTE
+This routine is available only in immediate mode.

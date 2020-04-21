@@ -1,0 +1,55 @@
+.TH resetls 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B resetls 
+\- controls the continuity of linestyles 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "resetls(b)"
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine resetl(b)"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure resetls(b: Boolean);"
+.SH DESCRIPTION
+.B resetls
+affects the reinitialization of the linestyle pattern between segments.
+It takes one boolean argument.  
+TRUE(1),
+the default, indicates stippling of each line
+starts at the beginning of the linestyle pattern.
+FALSE(0)
+turns off the mode: the linestyle is
+not
+reset between segments, and the stippling of one segment
+continues from where it left off at the end of the previous segment.
+Calls to
+.B resetls
+initialize the linestyle,
+no matter what the argument,
+and invalidate the current graphics position.
+.PP
+Use
+.B resetls
+to approximate circles,
+arcs, and curves with many short lines.  
+If the linestyle is not reset between segments, the 
+pattern of the curve appears smooth and continuous. 
+Do not set the linewidth to 2 unless
+.B resetls
+is 
+TRUE(1).
+.SH "SEE ALSO"
+deflinestyle, getresetls, lsbackup, setlinestyle
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles

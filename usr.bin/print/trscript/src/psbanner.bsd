@@ -1,0 +1,195 @@
+#ifndef lint
+static char Notice[] = "Copyright (c) 1985 Adobe Systems Incorporated";
+static char *RCSID="$Header: /d2/3.7/src/usr.bin/print/trscript/src/RCS/psbanner.bsd,v 1.1 89/03/27 18:20:45 root Exp $";
+#endif
+/* psbanner.c
+ *
+ * Copyright (C) 1985 Adobe Systems Incorporated
+ *
+ * 4.2BSD lpr/lpd banner break page filter for PostScript printers
+ * (formerly "psof" in TranScript release 1.0)
+ *
+ * psbanner is used ONLY to print the "break page" --
+ * the job seperator/banner page; the "if" filter
+ * which invokes (pscomm) MUST be in
+ * the printcap database for handling communications.
+ *
+ * This filter does not actually print anything; it sends
+ * nothing to the printer (stdout).  Instead, it writes a
+ * file in the current working directory (which is the
+ * spooling directory) called ".banner" which, depending
+ * on the value of printer options BANNERFIRST and
+ * BANNERLAST, may get printed by pscomm filter when
+ * it is envoked.
+ *
+ * psbanner parses the standard input (the SHORT banner string)
+ * into PostScript format as the argument to a "Banner"
+ * PostScript procedure (defined in $BANNERPRO, from the environment)
+ * which will set the job name on the printer and print a
+ * banner-style job break page.
+ *
+ * NOTE that quoting characters into PostScript form is
+ * necessary.
+ *
+ * psbanner gets called with:
+ *	stdin	== the short banner string to print (see below)
+ *	stdout	== the printer (not used here)
+ *	stderr	== the printer log file
+ *	argv	== (empty)
+ *	cwd	== the spool directory
+ *	env	== VERBOSELOG, BANNERPRO
+ *
+ * An example of the "short banner string" input is:
+adobe:shore  Job: test.data  Date: Tue Sep 18 16:22:33 1984
+^Y^A
+ * where the ^Y^A are actual control characters signalling
+ * the end of the banner input and the time to do SIGSTOP
+ * ourselves so that the controlling lpd will
+ * invoke the next filter. (N.B. this is, regretably, NOT
+ * documented in any of the lpr/printcap/spooler manual pages.)
+ *
+ *
+ * I have decided to let the PostScript side try to parse the
+ * string if possible, since it's easier to change the PS code
+ * then to do so in C.  If you don't like the way the
+ * banner page looks, change the BANNERPRO file to
+ * do something else.
+ *
+ * Edit History:
+ * Andrew Shore: Sat Nov  9 14:04:05 1985
+ * End Edit History.
+ *
+ * RCSLOG:
+ * $Log:	psbanner.bsd,v $
+Revision 1.1  89/03/27  18:20:45  root
+Initial check-in for 3.7
+
+Revision 1.1  86/11/17  20:22:13  root
+Initial revision
+
+ * Revision 2.1  85/11/24  11:49:49  shore
+ * Product Release 2.0
+ * 
+ * Revision 1.1  85/11/20  01:02:26  shore
+ * Initial revision
+ * 
+ *
+ */
+
+#include <stdio.h>
+#include <signal.h>
+#include <strings.h>
+#include "transcript.h"
+#include "psspool.h"
+
+#ifdef BDEBUG
+#define debugp(x) fprintf x
+#else
+#define debugp(x)
+#endif BDEBUG
+
+private char	*prog;	/* invoking program name (i.e., psbanner) */
+private char	*pname;	/* intended printer ? */
+
+private char	bannerbuf[500];	/* PS'd short banner string */
+private char	*verboselog;	/* do log file reporting (from env) */
+private char	*bannerpro;	/* prolog file name (from env) */
+private int	VerboseLog;
+
+private VOID	on_int();
+
+main(argc,argv)
+	int argc;
+	char *argv[];
+{
+    register int c;
+    register char *bp;
+    register FILE *in = stdin;
+    int done = 0;
+
+    VOIDC signal(SIGINT, on_int);
+
+    VOIDC fclose(stdout); /* we don't talk to the printer */
+    prog = *argv; /* argv[0] == program name */
+    pname = *(++argv);
+
+    VerboseLog = 1;
+    if (verboselog = envget("VERBOSELOG")) {
+	VerboseLog = atoi(verboselog);
+    }
+
+    bannerpro = envget("BANNERPRO");
+
+    bp = bannerbuf;
+    while (!done) {
+	switch (c = getc (in)) {
+	    case EOF: /* this doesn't seem to happen */
+		done = 1;
+		break;
+	    case '\n':
+	    case '\f':
+	    case '\r': 
+		break;
+	    case '\t': 
+		*bp++ = ' ';
+		break;
+	    case '\\': case '\(': case '\)': /* quote chars for POSTSCRIPT */
+	        *bp++ = '\\';
+		*bp++ = c;
+		break;
+	    case '\031': 
+		if ((c = getc (in)) == '\1') {
+		    *bp = '\0';
+		    /* done, ship the banner line */
+		    if (bp != bannerbuf) DoBanner();
+		    VOIDC kill (getpid (), SIGSTOP);
+		    /* do we get continued for next job ? */
+		    debugp((stderr,"%s: continued %d\n",
+		    	prog,bp == bannerbuf));
+		    bp = bannerbuf;
+		    *bp = '\0';
+		    break;
+		}
+		else {
+		    VOIDC ungetc(c, in);
+		    *bp++ = ' ';
+		    break;
+		}
+	    default: 		/* simple text */
+		*bp++ = c;
+		break;
+	}
+    }
+ /* didn't expect to get here, just exit */
+ debugp((stderr,"%s: done\n",prog));
+ VOIDC unlink(".banner");
+ exit (0);
+}
+
+private DoBanner() {
+    register FILE *out;
+    
+    if ((out = fopen(".banner","w")) == NULL) {
+	fprintf(stderr,"%s: can't open .banner", prog);
+	VOIDC fflush(stderr);
+	exit (THROW_AWAY);
+    }
+    if (verboselog) {
+	fprintf(stderr, "%s: %s\n", prog, bannerbuf);
+	VOIDC fflush(stderr);
+    }
+    if (copyfile(bannerpro,out)) {
+	/* error copying file, don't print a break page */
+	fprintf(stderr,"%s: trouble writing .banner\n",prog);
+	VOIDC fflush(stderr);
+	VOIDC unlink(".banner");
+	return;
+    }
+    fprintf(out, "(%s)(%s)Banner\n", pname, bannerbuf);
+    VOIDC fclose(out);	/* this does a flush */
+}
+
+private VOID on_int() {
+    VOIDC unlink(".banner");
+    exit (THROW_AWAY);
+}

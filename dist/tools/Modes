@@ -1,0 +1,25 @@
+#! /bin/sh
+#
+# Set mode, owner, group moderately quickly.  "modelist" contains mode, owner,
+# group, and file or directory name (relative to root).
+
+modelist=${1-/dist/modelist}
+
+if test ! -f $modelist ; then exit ; fi
+
+cd /
+
+for a in `awk '{print $1}' $modelist | sort -u`
+do
+	awk "\$1 ~ /$a/ {print \$4}" $modelist | xargs -t chmod $a
+done
+
+for a in `awk '{print $3}' $modelist | sort -u`
+do
+	awk "\$3 ~ /^$a\$/ {print \$4}" $modelist | xargs -t chgrp $a
+done
+
+for a in `awk '{print $2}' $modelist | sort -u`
+do
+	awk "\$2 ~ /^$a\$/ {print \$4}" $modelist | xargs -t chown $a
+done

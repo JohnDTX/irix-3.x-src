@@ -1,0 +1,97 @@
+
+# lp interface for DASI 1640 terminal
+#
+#	All output is passed through the /usr/bin/450 filter
+#	unless the -f option is given (if processed already by
+#	450 driving table or filter).
+#	If the filter is not executable, then this interface will disable
+#	the lp printer which it was called to service.
+#
+#	SCCS @(#)1640	1.1
+# @(#)$Header: /d2/3.7/src/usr.bin/lp/model/RCS/1640,v 1.1 89/03/27 18:05:11 root Exp $
+# $Log:	1640,v $
+# Revision 1.1  89/03/27  18:05:11  root
+# Initial check-in for 3.7
+# 
+# Revision 1.2  85/03/15  15:19:56  bob
+# Added initial blank line (for csh) and what
+# 
+
+x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+printer=`basename $0`
+filter=/usr/bin/450
+pitch=10
+for i in $5
+do
+	case "$i" in
+	12 | -12)
+		pitch=12
+		;;
+	f | -f)
+		filter=/bin/cat
+		;;
+	esac
+done
+
+if [ -n "$filter" -a ! -x $filter ]
+then
+	disable -r"can't execute $filter filter" $printer
+	exit 1
+fi
+stty 1200 tabs cread opost onlcr ixon ixany ff1 cr2 nl0 0<&1
+
+case $pitch in
+10)
+	echo "\00334\033\037\015\c"
+	;;
+12)
+	echo "\00334\033\037\013\c"
+	;;
+esac
+
+tabs -T450
+(
+echo "\014\c"
+echo "$x\n$x\n$x\n$x\n"
+banner "$2"
+echo "\n"
+user=`grep "^$2:" /etc/passwd | line | cut -d: -f5`
+if [ -n "$user" ]
+then
+	echo "User: $user\n"
+else
+	echo "\n"
+fi
+echo "Request id: $1    Printer: $printer\n"
+date
+echo "\n"
+if [ -n "$3" ]
+then
+	banner $3
+fi
+echo "\014\c"
+copies=$4
+shift; shift; shift; shift; shift
+files="$*"
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "\014\c"
+	done
+	i=`expr $i + 1`
+done
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n$x\n$x\n$x\n$x"
+echo "$x\n$x\n$x\n$x\n"
+) | $filter
+errcode=$?
+echo "\00334\033\037\013\c"
+if [ $errcode -ne 0 ]
+then
+	disable -r"error code $errcode from $filter filter" $printer
+	exit 1
+fi
+exit 0

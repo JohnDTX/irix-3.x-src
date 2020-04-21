@@ -1,0 +1,20 @@
+ascii(5) ascii: map of ASCII character set.
+environ(5) environ: user environment.
+eqnchar(5) eqnchar: special character definitions for eqn and neqn.
+fcntl(5) fcntl: file control options.
+greek(5) greek: graphics for the extended TTY-37 type-box.
+intro(5) intro: introduction to miscellany.
+man(5) man: macros for formatting entries in this manual.
+me(5) me: macros for formatting papers.
+mm(5) mm: the MM macro package for formatting documents.
+mptx(5) mptx: the macro package for formatting a permuted index.
+ms(5) ms: text formatting macros.
+mv(5) mv: a troff macro package for typesetting view graphs and slides.
+nterm(5) nterm: terminal driving tables for nroff.
+regexp(5) regexp: regular expression compile and match routines.
+stat(5) stat: data returned by stat system call.
+term(5) term: conventional names for terminals.
+transcript(5) pscomm, psrv, pstext, psbanner, psinterface: TRANSCRIPT spooler filters for POSTSCRIPT printers.
+troff(5) troff: description of output language.
+types(5) types: primitive system data types.
+varargs(5) varargs: variable argument list.

@@ -1,0 +1,32 @@
+.TH gexit 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gexit
+\- terminates a program
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gexit()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gexit"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gexit;"
+.SH DESCRIPTION
+.B gexit
+is the final graphics routine in a program.  It
+waits 
+for the Geometry Pipeline to empty.
+.SH "SEE ALSO"
+finish, ginit, greset, winopen 
+.sp
+.I Programming Guide,
+Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.

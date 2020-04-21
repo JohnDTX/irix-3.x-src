@@ -1,0 +1,38 @@
+.TH attachcursor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B attachcursor
+\- attaches the cursor to two valuators
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "attachcursor(vx, vy) "
+.B "Device vx, vy;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine attach(vx, vy) "
+.B "integer*4 vx, vy"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure attachcursor(vx, vy: Device);"
+.SH DESCRIPTION
+.B attachcursor
+attaches the cursor to the movement of two valuators.
+\f2vx\f1 and \f2vy\f1 are both valuator device numbers.
+(See Appendix A, Valuators, for a list of device numbers.)
+The first valuator (\f2vx\f1) controls the horizontal motion of the cursor;
+the second valuator (\f2vy\f1) determines vertical motion.
+The values of \f2vx\f1 and \f2vy\f1 determine
+the cursor position in screen coordinates.
+.SH "SEE ALSO"
+noise, tie
+.sp
+.I Programming Guide, 
+Section 7.2, Initializing a Device
+.SH NOTE
+This routine is available only in immediate mode.

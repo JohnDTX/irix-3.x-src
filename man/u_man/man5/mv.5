@@ -1,0 +1,316 @@
+'\"macro stdmacro
+.if t .ds i ''
+.if n .ds i ""
+.TH MV 5
+.SH NAME
+mv \- a troff macro package for typesetting view graphs and slides
+.SH SYNOPSIS
+.B mvt
+[
+.B \-a
+] [ options ] [ files ]
+.PP
+.B troff
+[
+.B \-a
+] [
+.B \-rX1
+]
+.B \-mv
+[ options ] [ files ]
+.SH DESCRIPTION
+This package makes it easy to typeset view graphs
+and projection slides in a variety of sizes.
+A few macros (briefly described below) accomplish most
+of the formatting tasks needed in making transparencies.
+All of the facilities of
+.IR troff (1),
+.IR cw (1),
+.IR eqn (1),
+and
+.IR tbl (1)
+are available for more difficult tasks.
+.PP
+The output can be previewed on most terminals, and,
+in particular, on the Tektronix 4014,
+as well as on the Versatec printer.
+For these two devices, specify the
+.B \-rX1
+option
+(this option is automatically specified by the
+.IR mvt
+command\-q.v.\-when that command is invoked with the
+.B \-T4014
+or
+.B \-Tvp
+options).
+To preview output on other terminals, specify the
+.B \-a
+option.
+.PP
+The available macros are:
+.nr x \w#\f3.SW \|\fP#u
+.TP "\w#\f3\&.DV\fP\ \f1[\fPa\f1]\fP\ \f1[\fPb\f1]\fP\ \f1[\fPc\f1]\fP\ \f1[\fPd\f1]\fP\ \ #u"
+.BI \&.VS "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Foil-start macro;
+foil size is to be 7\*i\^\(mu7\*i;
+.I n\^
+is the foil number,
+.I i\^
+is the foil identification,
+.I d\^
+is the date;
+the foil-start macro resets all parameters (indent, point size, etc.)
+to initial default values, except for the values of
+.I i\^
+and
+.I d\^
+arguments
+inherited
+from a previous foil-start macro;
+it also invokes the
+.B \&.A
+macro (see below).
+.IP
+The naming convention for this
+and the following eight macros is that the first character of the name
+.RB ( V
+or
+.BR S )
+distinguishes between view graphs and slides, respectively,
+while the second character indicates whether the foil is square
+.RB ( S ),
+small wide
+.RB ( w ),
+small high
+.RB ( h ),
+big wide
+.RB ( W ),
+or big high
+.RB ( H ).
+Slides are ``skinnier'' than the corresponding view graphs:
+the ratio of the longer dimension to
+the shorter one is larger for slides than for view graphs.
+As a result, slide foils can be used for view graphs, but not vice versa;
+on the other hand, view graphs can accommodate
+a bit more text.
+.TP
+.BI \&.Vw "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 7\*i wide \(mu 5\*i high.
+.PD 0
+.TP
+.BI \&.Vh "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 5\*i\^\(mu7\*i.
+.TP
+.BI \&.VW "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 7\*i\^\(mu5.4\*i.
+.TP
+.BI \&.VH "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 7\*i\^\(mu9\*i.
+.TP
+.BI \&.Sw "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 7\*i\^\(mu5\*i.
+.TP
+.BI \&.Sh "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 5\*i\^\(mu7\*i.
+.TP
+.BI \&.SW "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 7\*i\^\(mu5.4\*i.
+.TP
+.BI \&.SH "\h#|\nxu#\f1[\fPn\f1]\fP \f1[\fPi\f1]\fP \f1[\fPd\f1]\fP"
+Same as
+.BR \&.VS ,
+except that foil size is 7\*i\^\(mu9\*i.
+.TP
+.BI \&.A "\h#|\nxu#\f1[\fPx\f1]\fP"
+Place text that follows at the first indentation level (left margin);
+the presence of
+.I x\^
+suppresses the \(12 line spacing from the preceding text.
+.TP
+.BI \&.B "\h#|\nxu#\f1[\fPm \f1[\fPs\f1] ]\fP"
+Place text that follows at the second indentation level;
+text is preceded by a mark;
+.I m\^
+is the mark (default is a large bullet);
+.I s\^
+is the increment or decrement to the point size of the mark
+with respect to the
+.I prevailing\^
+point size
+(default is 0);
+if
+.I s\^
+is 100, it causes the point size of the mark to be the same as that of the
+.I default\^
+mark.
+.TP
+.BI \&.C "\h#|\nxu#\f1[\fPm \f1[\fPs\f1] ]\fP"
+Same as
+.BR \&.B ,
+but for the third
+indentation level;
+default mark is a dash.
+.TP
+.BI \&.D "\h#|\nxu#\f1[\fPm \f1[\fPs\f1] ]\fP"
+Same as
+.BR \&.B ,
+but for the fourth indentation level;
+default mark is a small bullet.
+.TP
+.BI \&.T "\h#|\nxu#string"
+.I String\^
+is printed as an over-size, centered title.
+.TP
+.BI \&.I "\h#|\nxu#\f1[\fPin\f1]\fP \f1[\fPa \f1[\fPx\f1] ]\fP"
+Change the current text indent (does not affect titles);
+.I in\^
+is the indent (in inches unless dimensioned, default is 0);
+if
+.I in\^
+is signed, it is an increment or decrement;
+the presence of
+.I a\^
+invokes the
+.B \&.A
+macro (see below)
+and passes
+.I x\^
+(if any)
+to it.
+.TP
+.BI \&.S "\h#|\nxu#\f1[\fPp\f1]\fP \f1[\fPl\f1]\fP"
+Set the point size and line length;
+.I p\^
+is the point size (default is ``previous'');
+if
+.I p\^
+is 100, the point size reverts to the
+.I initial\^
+default for the current foil-start macro;
+if
+.I p\^
+is signed, it is an increment or decrement
+(default is 18 for
+.BR \&.VS ,
+.BR \&.VH ,
+and
+.BR \&.SH,
+and 14 for the other foil-start macros);
+.I l\^
+is the line length (in inches unless dimensioned;
+default is 4.2\*i for
+.BR \&.Vh ,
+3.8\*i for
+.BR \&.Sh ,
+5\*i for
+.BR \&.SH ,
+and 6\*i for the other foil-start macros).
+.TP
+.BI \&.DF "\h#|\nxu#n \|f \|\f1[\fPn \|f .\^.\^.\f1]\fP"
+Define font positions;
+may not appear within a foil's input text (i.e.,
+it may only appear after all the input text for a foil, but before the
+next foil-start macro);
+.I n\^
+is the position of font
+.IR f ;
+up to four
+.RI `` "n\ \|f\^" ''
+pairs may be specified;
+the first font named becomes the
+.I prevailing\^
+font;
+the initial setting is
+.RB ( H
+is a synonym for
+.BR G ):
+.IP
+      \&.DF  1  H  2  I  3  B  4  S
+.TP
+.BI \&.DV "\h#|\nxu#\f1[\fPa\f1]\fP \f1[\fPb\f1]\fP \f1[\fPc\f1]\fP \f1[\fPd\f1]\fP"
+Alter the vertical spacing between indentation levels;
+.I a\^
+is the spacing for
+.BR \&.A ,
+.I b\^
+is for
+.BR \&.B ,
+.I c\^
+is for
+.BR \&.C ,
+and
+.I d\^
+is for
+.BR \&.D ;
+all non-null arguments must be dimensioned;
+null arguments leave the corresponding spacing unaffected;
+initial setting is:
+.IP
+      \&.DV  .5v  .5v  .5v  0v
+.TP
+.BI \&.U "\h#|\nxu#str1 \f1[\fPstr2\f1]\fP"
+Underline
+.I str1\^
+and concatenate
+.I str2\^
+(if any) to it.
+.PD
+.PP
+The last four macros in the above list do not cause a break;
+the
+.B \&.I
+macro causes a break only if it is invoked with more than one argument;
+all the other macros cause a break.
+.PP
+The macro package also recognizes the following upper-case synonyms
+for the corresponding lower-case
+.I troff\^
+requests:
+.RS .2i
+\&.AD  .BR  .CE  .FI  .HY  .NA  .NF  .NH  .NX  .SO  .SP  .TA  .TI
+.RE
+.PP
+The
+.B Tm
+string produces the trademark symbol.
+.PP
+The input tilde
+.RB (\^ ~ \^)
+character is translated into a blank on output.
+.PP
+See the user's manual cited below for further details.
+.SH FILES
+/usr/lib/tmac/tmac.v
+.br
+/usr/lib/macros/vmca
+.SH SEE ALSO
+cw(1), eqn(1), mmt(1), tbl(1), troff(1).
+.br
+.I "A Macro Package for View Graphs and Slides\^"
+by T.\ A.\ Dolotta and D.\ W.\ Smith.
+.SH BUGS
+The
+.B \&.VW
+and
+.B \&.SW
+foils are meant to be 9\*i wide by 7\*i high,
+but because the typesetter paper is generally only 8\*i
+wide, they are printed 7\*i wide by 5.4\*i high
+and have to be enlarged by a factor of 9\(sl7 before use as view graphs;
+this makes them less than totally useful.
+.\"	@(#)mv.5	5.1 of 10/15/83

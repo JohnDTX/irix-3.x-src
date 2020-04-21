@@ -1,0 +1,39 @@
+#!/bin/sh
+# shell script to set up TranScript source distribution 
+# for installation on 4.2BSD UNIX
+
+mv Makefile.bsd Makefile
+mv config.bsd config
+mv printer.bsd printer
+
+mv etc/rmprinter.bsd etc/rmprinter
+mv etc/mkprinter.bsd etc/mkprinter
+
+mv lib/banner.bsd lib/banner.pro
+mv lib/Makefile.bsd lib/Makefile
+mv lib/troff.font/Makefile.bsd lib/troff.font/Makefile
+mv lib/ditroff.font/afmdit.bsd lib/ditroff.font/afmdit
+
+mv sh/ptroff.bsd sh/ptroff.sh
+mv sh/psroff.bsd sh/psroff.sh
+
+mv src/Makefile.bsd src/Makefile
+mv src/pscomm.bsd src/pscomm.c
+mv src/psbanner.bsd src/psbanner.c
+
+mv man/transcript.bsd man/transcript.8p
+
+cd lib;
+mv Cour.afm Courier.afm
+mv CourBo.afm Courier-Bold.afm
+mv CourBoO.afm Courier-BoldOblique.afm
+mv CourO.afm Courier-Oblique.afm
+mv Helv.afm Helvetica.afm
+mv HelvBo.afm Helvetica-Bold.afm
+mv HelvBoO.afm Helvetica-BoldOblique.afm
+mv HelvO.afm Helvetica-Oblique.afm
+mv TimesBo.afm Times-Bold.afm
+mv TimesBoI.afm Times-BoldItalic.afm
+mv TimesI.afm Times-Italic.afm
+mv TimesRo.afm Times-Roman.afm
+

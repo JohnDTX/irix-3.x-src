@@ -1,0 +1,31 @@
+.TH settexture  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I settexture
+- select a pattern for filling polygons, 
+rectangles, and curves
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "settexture(index)  "
+.B "short index;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine settex(index)"
+.B "integer*2 index"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure settexture(index: Short);"
+.sp
+.SH DESCRIPTION
+.I Settexture
+selects a screen texture from among those the user has defined
+with the command \f2deftexture\f1.  The default texture is texture 0.
+If the user has not redefined texture 0, it is a
+solid pattern.
+.PP
+If an undefined texture is specified, the command is ignored.
+.SH "SEE ALSO"
+.I color, deftexture, gettexture, writemask

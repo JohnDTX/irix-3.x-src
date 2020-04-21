@@ -1,0 +1,71 @@
+'\"macro stdmacro
+.TH NFSSTAT 1M
+.SH NAME
+nfsstat \- Network File System statistics
+.SH SYNOPSIS
+.B nfsstat
+[
+.B \-csnrdz
+]
+.SH DESCRIPTION
+.IX  "nfsstat command"  ""  "\fLnfsstat\fP \(em display network statistics"
+.IX  "NFS statistics"  "display"  ""  "display \(em \fLnfsstat\fP"
+.IX  "statistics of NFS"  display  ""  "display \(em \fLnfsstat\fP"
+.I Nfsstat
+displays statistical information about the
+Network File System (NFS) and
+Remote Procedure Call (RPC)
+interfaces to the kernel.
+It can also be used to reinitialize this information.
+If no options are given the default is
+.IP
+nfsstat \-csnr
+.PP
+That is, print everything 
+and reinitialize nothing.
+.SH OPTIONS
+.TP
+.B \-c
+Display client information.
+Only the client side NFS and RPC information will be printed.
+Can be combined with the
+.B \-n
+and
+.B \-r
+options to print client NFS or client RPC information only.
+.TP
+.B \-s
+Display server information.
+Works like the
+.B \-c
+option above.
+.TP
+.B \-n
+Display NFS information.
+NFS information for both the client and server side will be printed.
+Can be combined with the
+.B \-c
+and
+.B \-s
+options to print client or server NFS information only.
+.TP
+.B \-r
+Display RPC information.
+Works like the
+.B \-n
+option above.
+.TP
+.B \-z
+Zero (reinitialize) statistics.
+Can be combined with any of the above options to
+zero particular sets of statistics after printing them.
+.TP
+.B \-d
+The user must have write permission on
+.I /dev/kmem
+for this option to work.
+.SH FILES
+.ta \w'/dev/kmem\0\0\0'u
+/vmunix 	system namelist
+.br
+/dev/kmem	kernel memory

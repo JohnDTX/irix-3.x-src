@@ -1,0 +1,31 @@
+.TH getwritemask 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getwritemask
+\- returns the current writemask
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getwritemask()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getwri()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getwritemask: longint;"
+.SH DESCRIPTION
+.B getwritemask
+returns the current writemask.
+It is an integer with up to 12 significant bits, one for each available
+bitplane.  This routine is undefined in RGB mode.
+.SH "SEE ALSO"
+RGBwritemask, writemask
+.sp
+\f2Programming Guide\fP, Section 6.3, Colors and Writemasks
+.SH NOTE
+This routine is available only in immediate mode.

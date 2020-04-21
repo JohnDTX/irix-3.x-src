@@ -1,0 +1,39 @@
+'\" t
+.TH MNTTAB 4
+.SH NAME
+mnttab \- mounted file system table
+.SH SYNOPSIS
+.B #include <mnttab.h>
+.SH DESCRIPTION
+.I Mnttab\^
+contains a table of devices,
+mounted by the
+.IR mount (1M)
+command, in the following structure as defined by
+.BR <mnttab.h> :
+.PP
+.RS .3i
+.TS
+l l l.
+struct	mnttab {
+	char	mt_dev[10];
+	char	mt_filsys[10];
+	short	mt_ro_flg;
+	time_t	mt_time;
+};
+.TE
+.RE
+.PP
+Each entry is 26 bytes in length; the
+first 10 bytes are the null-padded name of the place where the
+.I "special file\^"
+is mounted; the next 10 bytes represent the null-padded root
+name of the mounted special file;
+the remaining 6 bytes contain the mounted
+.IR "special file" 's
+read/write permissions and the date on which it was mounted.
+.SH FILES
+/etc/mnttab
+.SH SEE ALSO
+mount(1M), setmnt(1M).
+.\"	@(#)mnttab.4	5.1 of 10/15/83

@@ -1,0 +1,90 @@
+'\"macro stdmacro
+.TH PROF 1 
+.SH NAME
+prof \- display profile data
+.SH SYNOPSIS
+.B prof
+[
+.B \-a
+] [
+.B \-l
+] [
+.BR \- "low [ " \- "high ]"
+] [ file ]
+.SH DESCRIPTION
+.I Prof\^
+interprets the file
+.B mon.out
+produced by the
+.IR monitor\^ (3C)
+subroutine.
+Under default modes,
+the symbol table in the
+named object file
+.RB ( a.out
+default)
+is read and correlated with the
+.B mon.out
+profile file.
+For each external symbol, the percentage
+of time spent executing between that symbol
+and the next
+is printed (in decreasing order),
+together with the number of times that routine was called
+and the number of milliseconds per call.
+.PP
+If the
+.B \-a
+option is used,
+all symbols are reported rather than
+just external symbols.
+If the
+.B \-l
+option
+is used,
+the output is listed by
+symbol value rather than
+decreasing percentage.
+.PP
+The optional arguments
+.I low\^
+and 
+.IR high ,
+by default 0 and 100, cause a selected
+percentage of the profile to be plotted
+with accordingly higher resolution.
+.PP
+In order for the number of calls to a routine to be tallied,
+the
+.B \-p
+option of
+.I cc\^
+must have been given when the file containing the
+routine was compiled.
+This option also arranges for the
+.B mon.out
+file to be produced automatically.
+.SH EXAMPLE
+.PP
+If 
+.B a.out
+has been compiled with the 
+.B \-p
+option and
+has been executed, then
+.IP
+prof a.out
+.PP
+would print profile information for each routine in 
+.BR a.out .
+.SH FILES
+.ta \w'mon.out\ \ \ \ 'u
+mon.out	for profile
+.br
+a.out	for namelist
+.DT
+.SH "SEE ALSO"
+cc(1), profil(2), monitor(3C).
+.SH BUGS
+Beware of quantization errors.
+.\"	@(#)prof.1	5.1 of 11/9/83

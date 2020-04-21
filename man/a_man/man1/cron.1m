@@ -1,0 +1,133 @@
+'\"macro stdmacro
+.TH CRON 1M
+.SH NAME
+cron \- clock daemon
+.SH SYNOPSIS
+.B /etc/cron
+.SH DESCRIPTION
+.I Cron\^
+executes commands at specified dates and times
+according to the instructions in the file
+.BR /usr/lib/crontab .
+Because
+.I cron\^
+never exits,
+it should be executed only once.
+This is best done by running
+.I cron\^
+from the initialization
+process through the file
+.B /etc/rc
+(see
+.IR init (1M)).
+.PP
+The file
+.B crontab
+consists of lines of six fields each.
+The fields are separated by spaces or tabs.
+The first five are integer patterns that
+specify in order:
+.RS .3i
+minute (0-59),
+.br
+hour (0-23),
+.br
+day of the month (1-31),
+.br
+month of the year (1-12),
+.br
+and day of the week (0-6, with 0=Sunday).
+.RE
+.PP
+Each of these patterns may
+contain:
+.RS .3i
+a number in the (respective) range indicated above;
+.br
+two numbers separated by a minus (indicating an inclusive range);
+.br
+a list of numbers separated by commas (meaning all of these numbers); or
+.br
+an asterisk (meaning all legal values).
+.RE
+.PP
+The sixth field is a string
+that is executed by the shell at the
+specified time(s).
+A
+.B %
+in this field is translated into a new-line
+character.
+Only the first line (up to a
+.B %
+or the end of line)
+of the command field is executed by the shell.
+The other lines are made available to the
+command as standard input.  A \\% yields %; \\\\ yields \\.  A newline preceded
+with a backslash and any following blanks or tabs are stripped out.  Other
+occurences of \\ are removed.
+.PP
+.I Cron\^
+examines
+.B crontab
+once a minute to see
+if it has changed;
+if it has,
+.I cron\^
+reads it.
+Thus it takes only a minute
+for entries to become effective.
+.SH EXAMPLE
+If you add this entry to
+.I /usr/lib/crontab ,
+old 
+.I vi
+and 
+.I ex
+``preserved'' files are removed at 5:03 a.m. every day of the year:
+.sp .5
+(note: this is actually one line)
+.sp .5
+\f7\s-23 5 * * * find /usr/preserve -local -type f -atime +30 -mtime\\
++30 -print -exec rm -f "{}" ";"\f1\s+2
+.bp
+.SH FILES
+/usr/lib/crontab
+.br
+/usr/adm/cronlog
+.SH SEE ALSO
+init(1M), sh(1).
+.SH DIAGNOSTICS
+A history of all actions by
+.I cron\^
+are recorded in
+.BR /usr/adm/cronlog .
+.SH BUGS
+.I Cron\^
+reads
+.B crontab
+only when
+it
+has changed, but it reads the in-core
+version of that table once a minute.
+A more efficient algorithm could be used.
+The overhead in running
+.I cron\^
+is about one percent of the
+.SM CPU\*S,
+exclusive of any commands executed by
+.IR cron .
+.\"	@(#)cron.1m	5.1 of 11/1/83
+.\" @(#)$Header: /d2/3.7/src/man/a_man/man1/RCS/cron.1m,v 1.1 89/03/27 16:20:21 root Exp $
+.\" $Log:	cron.1m,v $
+Revision 1.1  89/03/27  16:20:21  root
+Initial check-in for 3.7
+
+.\" Revision 1.1  86/09/03  15:22:34  robinf
+.\" Added comment markers to rcs comments
+.\" 
+.\"Revision 1.0  85/05/01  16:33:03  robinf
+.\"Initial Revision
+.\" Revision 1.2  84/11/15  10:10:13  bob
+.\" Fixed to properly display backslashes.
+.\" 

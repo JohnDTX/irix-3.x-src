@@ -1,0 +1,35 @@
+.TH noise  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I noise
+- filter valuator motion
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "noise(v, delta) "
+.B "Device v; "
+.B "short delta;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine noise(v, delta)"
+.B "integer*2 v, delta"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure noise(v: Device; delta: Short);"
+.sp
+.SH DESCRIPTION
+.I Noise
+determines how often queued valuators will make entries in the event queue.
+Some valuators are "noisy": an unmoving device may report small
+fluctuations in value.  The \f2noise\f1 command allows the user to set a
+lower limit on what constitutes a move.  That is, the value of a
+noisy valuator \f3v\f1 must change by at least \f3delta\f1 before the
+motion is considered significant. For example, 
+\f2noise(v,5)\f1 means that valuator \f3v\f1 must move at least 5 
+units before a new queue entry is made.
+.SH "SEE ALSO"
+.I qvaluator, setvaluator
+.SH NOTE
+This command can only be used in immediate mode.

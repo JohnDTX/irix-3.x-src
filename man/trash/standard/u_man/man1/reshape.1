@@ -1,0 +1,65 @@
+.TH RESHAPE 1
+.SH NAME
+reshape \- reshape the console textport
+.SH SYNOPSIS
+.B "reshape \-s"
+.br
+.B "reshape \-40"
+.br
+.B "reshape \-24"
+.br
+.B reshape
+.I "llx lly xlen ylen"
+.SH DESCRIPTION
+.PP
+.I Reshape
+allows the textport to be reshaped. The textport is the window that is used
+for non-graphics programs. Some programs, such as
+.IR vi ,
+assume that the window is a particular size according to the specified
+termcap entry. The entry
+.BR wsiris ,
+for example, assumes a window of 40 lines by 80 columns.
+One may add entries to
+.B /etc/termcap
+to support different window sizes.
+.P
+The
+.B \-s
+flag causes
+.I reshape
+to set the window to be 40 rows by 80 columns in the center of the screen.
+The
+.B \-40
+flag is equivalent to the
+.B \-s
+flag.
+The
+.B \-24
+flag causes
+.I reshape
+to set the window to be 24 rows of 80 columns in the center of the screen.
+.P
+Instead of selecting a standard configuration, the size and location may
+be set to any desired values.
+The x and y values of the lower left corner of the textport window
+may be specified with
+.I llx
+and
+.IR lly ,
+in screen coordinates (pixels).
+The size of the window may be specified with
+.I xlen
+and
+.I ylen
+which specify the number of columns and rows respectively, in characters.
+.SH "SEE ALSO"
+tpblank(1), tpon(1)
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/reshape.1,v 1.1 89/03/27 16:41:31 root Exp $
+.\" $Log:	reshape.1,v $
+Revision 1.1  89/03/27  16:41:31  root
+Initial check-in for 3.7
+
+.\" Revision 1.1  84/12/11  13:37:49  bob
+.\" Initial revision
+.\" 

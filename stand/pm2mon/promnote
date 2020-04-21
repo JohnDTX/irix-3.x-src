@@ -1,0 +1,90 @@
+Subject:  pm2 proms
+changes to the user interface -
+1. can boot any type file from any medium.  (this involves a
+   kluge for type 0407 files:
+   if the load address is one of 0x400, 0x1000, or 0x2000
+   and the entry point is given as 0, the program is entered
+   at the load address.  previously 0407 files were treated
+   differently depending on whether they came from the net
+   or from the disk; now they are treated differently based
+   on the entry / load address in the header).
+2. the "ls" feature of "b xxx/*" is separated into a "ls xxx"
+   command.
+3. code is present to boot from proms. "boot p.XXXX" where
+   XXXX is the mem address.
+4. "help" has been expanded.  specific help is available for
+   certain commands (eg "boot").  incorrect messages fixed.
+   help added for previously undocumented commands.
+5. reorganized debugger code.  display uarts by "du N" instead
+   of "es N".  display special regs by "xC" instead of "es C".
+   this makes it more like examining other regs.
+6. changed printouts to be more consistent.
+7. "n file" and "boot n:file" both work.
+8. "g.N:file" instead of g "file N" (IEEE 488 boot).
+
+bug fixes -
+1. adventure - "read" didn't get enet address
+2. tape boot didn't recognize some cpio tapes
+   also new bugfixes from chase
+3. net boot got returned name wrong
+4. debugger.c had an off-by-one array reference
+5. both netboot and diskboot treated '*' sloppily
+6. all drivers were sloppy with ':', eg "b /vmunix:new"
+7. disk driver had "old" code to reset excelan
+8. certain boot features probably wouldn't have worked.
+   calling nboot at hi priority.
+9. net driver now checks both new and old addresses for enet board.
+10.wait488 now checks for present (instead of bus error).
+11.net driver now accepts both DST_END and DST_OLDEND; DST_DATA and
+   DST_OLDDATA types.
+11.termulate/download didn't work.
+   also new bugfixes from gb
+12."harmless" bugs in tape driver and disk driver
+   mf (md) driver now sets up fake label correctly.
+
+structural changes -
+1. "irispm2.c" split into a new directory containing one
+   file for each individual command.  (to improve modularity).
+2. reorganized (replaced) parser, command switch, and help code.
+   (also for modularity).
+3. reorganized (replaced) debugger code.
+4. reorganized (replaced) much of boot code.
+   separated "downloading" from "driver" functions in all cases.
+   minor bugfixes.
+5. added "library" routines:
+   delay(n) delays approximately n milliseconds.
+   newline() calls printf("\n");
+   extern char z[] is a null string.
+   isnum(string,ptr) returns whether string is a numberstring
+	and stores its value in *ptr.
+   readargs(argcp,argvp) reads a line and passes back argc and argv.
+   strlcpy(s,t,l) copies from src to tgt but limited by l
+   atoci(string) interprets string as a c-style number but default hex
+6. use "ctype.h" where possible.
+7. use "blt" everywhere instead of "bcopy".
+   use "clear" everywhere instead of "nxzero", "bzero", etc.
+8. thus various files are superseded...
+9. boot/, dboot/ --> dev/
+   sys/, pm2/ --> gen/, pm2/ except for graphics
+10.hacked dev/*.[ch] to use mbmalloc() and vtop() consistently.
+11.moved stack+bss+i/o to LAST virtual chunk (and physical chunk);
+   allowing large programs to load.
+12.scanning mem now restores old contents to probed mem.
+   clearing mem now uses a window - this allows maximal phys mem
+   to be configured.
+13.various routines now use a moving window instead of mapping
+   all of mem.  unused virtual addresses are unmapped at startup.
+14.merged gl1, gl2 into a common interface switched at boot time.
+15.disk drivers changed to be ignorant of fs type.
+16.more "harmless" bugs fixed in ip driver
+17.^S / ^Q work
+18.prints out 68010 on error messages instead of 68000 where
+   appropriate
+19.fixed dutranslate - capslock affects only alpha keys!
+20.fixed autoboot from md: disk
+21.fixed (hope) delays to be consistent!
+22.fixed rs170 initial clear
+23.eliminated !* split screen
+24.fixed bug in handling <break> from user program.
+25.added code to disable intr from ikon.
+26.added efs support

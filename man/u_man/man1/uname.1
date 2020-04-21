@@ -1,0 +1,69 @@
+'\"macro stdmacro
+.TH UNAME 1
+.SH NAME
+uname \- print system name and version information
+.SH SYNOPSIS
+.B uname
+[
+.B \-snmkghta
+]
+.SH DESCRIPTION
+.I uname\^
+prints the name of the
+U\s-2NIX\s+2
+system on which it is executed to the standard output.
+The options cause selected information returned by
+.IR uname\^ (2)
+and
+.IR getversion\^ (2)
+to be printed:
+.TP "\w'\f3\-m\f1\ \ \ 'u"
+.B \-s
+print the system name (default).
+.TP
+.B \-n
+print the nodename (the nodename may be a name that the system is known by
+to a communications network).
+.TP
+.B \-r
+print the operating system release.
+.TP
+.B \-v
+print the operation system version.
+.TP
+.B \-m
+print the machine hardware name.
+.TP
+.B \-k
+print the kernel version.
+.TP
+.B \-h
+print the graphics hardware type.
+.TP
+.B \-g
+print the Graphics Library version.
+.TP
+.B \-t
+print the machine model name.
+.TP
+.B \-a
+print all the above information in the above order.
+.PP
+If multiple options are given, the information is printed in the
+order they are listed above.
+Information which can not be determined because of errors is printed
+as `<error>'.
+.SH EXAMPLE
+Executing
+.IP
+uname 
+.PP
+on a system named `unix' would print on the screen
+.IP
+unix
+.SH "FILES"
+/etc/model     The machine model name is read from here.
+.SH "SEE ALSO"
+hostname(1), getversion(2), uname(2), model(4)
+.\"	@(#)uname.1	5.1 of 11/14/83
+

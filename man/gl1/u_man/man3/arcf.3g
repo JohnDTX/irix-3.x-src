@@ -1,0 +1,49 @@
+.TH arcf 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I arcf
+- draw a filled circular arc
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "arcf(x, y, radius, startang, endang)"
+.B "Coord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.B "arcfi(x, y, radius, startang, endang)"
+.B "Icoord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine arcf(x, y, radius, stang, endang)"
+.B "real x, y, radius"
+.B "integer*2 stang, endang"
+.IP 
+.B "subroutine arcfi(x, y, radius, stang, endang)"
+.B "integer x, y, radius"
+.B "integer*2 stang, endang"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure arcf(x, y, radius: Coord; startang, endang: Angle);"
+.IP 
+.B "procedure arcfi(x, y, radius: Icoord; startang, endang: Angle);"
+.sp
+.SH DESCRIPTION
+.I Arcf
+draws a filled circular arc (pie section).  The arc is specified as a
+center point, a starting angle, an ending angle, and a radius.
+The
+angle is measured from the \f3x\f1-axis and specified in integral tenths of
+degrees.
+Positive angles
+describe counterclockwise rotations.  The arc is drawn using the current 
+color and writemask, and filled with the current texture.  Since
+an arc is a two-dimensional shape, these commands have only 2D forms.
+The arc is in the
+\f3x-y\f1 plane with \f3z\f1=0.  Arcs are drawn counterclockwise from
+\f3startang\f1 to \f3endang\f1, so the arc from 10\(de to 5\(de is
+a nearly complete circle.
+.SH "SEE ALSO"
+.I arc, circ, circf, curve

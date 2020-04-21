@@ -1,0 +1,49 @@
+'\" t
+.TH PATRAN 1D
+.SH NAME
+patran \- PATRAN simulation of the space shuttle
+.SH SYNOPSIS
+.B /usr/people/demos/patran
+.SH DESCRIPTION
+.PP
+A PATRAN shuttle model may be viewed under mouse control. The mouse buttons
+control rotation about the x, y and z axes, viewer distance, and z-clipping.
+Unless otherwise noted, only the x-movement of the mouse is a significant
+valuator when holding down a mouse button.
+Any key toggles opening & closing motion of the bay doors on the shuttle.
+.sp .5v
+.TS
+doublebox center;
+cB s
+lI | lI
+l | l.
+Commands
+_
+Mouse button	Function
+=
+Left	Rotation about x-axis with mouse x-motion
+Middle	Rotation about y-axis with mouse x-motion
+Right	Rotation about z-axis with mouse x-motion
+Left & middle	Translate object with mouse x & y motion
+Left & right	Zoom back
+Middle & right	Zoom forward
+All	Move near z-clipping plane with mouse x-motion
+.sp .1v
+.TE
+.SH "HARDWARE REQUIREMENTS"
+A minimum configuration of 8 bitplanes and 1.5 Megabytes of memory is required
+to run the shuttle.
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/patran.1d,v 1.1 89/03/27 16:41:27 root Exp $
+.\" $Log:	patran.1d,v $
+Revision 1.1  89/03/27  16:41:27  root
+Initial check-in for 3.7
+
+.\" Revision 1.3  84/12/14  13:54:58  bob
+.\" Changed wording.
+.\" 
+.\" Revision 1.2  84/12/13  17:06:07  bob
+.\" 
+.\" 
+.\" Revision 1.1  84/12/11  13:37:25  bob
+.\" Initial revision
+.\" 

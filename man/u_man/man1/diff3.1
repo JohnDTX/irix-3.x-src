@@ -1,0 +1,152 @@
+'\"macro stdmacro
+.TH DIFF3 1 
+.SH NAME
+diff3 \- 3-way differential file comparison
+.SH SYNOPSIS
+.B diff3
+[
+.B \-ex3
+]
+file1 file2 file3
+.SH DESCRIPTION
+.I Diff3\^
+compares three versions of a file,
+and publishes disagreeing ranges of text
+flagged with these codes:
+.RS .3i
+.TP "\w'\f3f :\f2 n1 , n2 \f3c\f1\ \ 'u"
+====
+all three files differ
+.TP
+====1
+.IR file1\^ " is different"
+.TP
+====2
+.IR file2\^ " is different"
+.TP
+====3
+.IR file3\^ " is different"
+.RE
+.PP
+The type of change suffered in converting a given range
+of a given file to some other is
+indicated in one of these ways:
+.RS .3i
+.TP "\w'\f3f :\f2 n1 , n2 \f3c\f1\ \ 'u"
+.IB f " : " n1 " a"
+Text is to be appended after line number
+.I n1\^
+in file
+.IR f ,
+where
+.I f\^
+= 1, 2, or 3.
+.TP
+.IB f " : " n1 " , " n2 " c"
+Text is to be
+changed in the range line
+.I n1\^
+to line
+.IR n2 .
+If 
+.I n1\^
+=
+.IR n2 ,
+the range may be abbreviated to
+.IR n1 .
+.RE
+.PP
+The original contents of the range follows immediately
+after a
+.B c
+indication.
+When the contents of two
+files are identical, the contents of the lower-numbered
+file is suppressed.
+.PP
+Under the
+.B \-e
+option,
+.I diff3\^
+publishes a script for the editor
+.I ed\^
+that will incorporate into
+.I file1\^
+all changes between
+.I file2\^
+and
+.IR file3 ,
+i.e., the changes that normally would be flagged ==== and ====3.
+Option
+.B \-x
+(\f3\-3\f1)
+produces a script to incorporate
+only changes flagged ==== (====3).
+The following command will apply the resulting script to
+.IR file1 .
+.IP
+(cat script; echo '1,$p') \(bv ed \- file1
+.SH EXAMPLE
+.PP
+If file "f1" contains the following text:
+.RS
+.nf
+This is a file.
+This is the first of three files.
+This is not the last file.
+.RE
+.bp
+.PP
+and file "f2" contains:
+.RS
+.nf
+This is a file.
+This is the second of three files.
+This is not the last file.
+.RE
+.PP
+and file "f3" contains:
+.RS
+.nf
+This is a file.
+This is the third of three files.
+This is the last file.
+.RE
+.PP
+then
+.IP
+diff3 f1 f2 f3
+.PP
+will return
+.RS
+.nf
+====
+1:2,3c
+.RS .3i
+This is the first of three files.
+This is not the last file.
+.RE
+2:2,3c
+.RS .3i
+This is the second of three files.
+This is not the last file.
+.RE
+3:2,3c
+.RS .3i
+This is the third of three files.
+This is the last file
+.RE
+.RE
+.SH FILES
+/tmp/d3\(**
+.br
+/usr/lib/diff3prog
+.SH "SEE ALSO"
+diff(1).
+.SH BUGS
+Text lines that consist of a single \f3.\fP will
+defeat
+.BR \-e .
+.br
+Files longer than 64K bytes won't work.
+.\"	@(#)diff3.1	5.1 of 11/17/83

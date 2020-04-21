@@ -1,0 +1,69 @@
+.TH NET 7P 
+.SH NAME
+net \- introduction to EXOS 8010 networking facilities
+.SH SYNOPSIS
+\f3#include <sys/socket.h>\f1
+.SH DESCRIPTION
+.de _d
+.if t .ta .6i 2.1i 2.6i
+.\" 2.94 went to 2.6, 3.64 to 3.30
+.if n .ta .84i 2.6i 3.30i
+..
+.de _f
+.if t .ta .5i 1.25i 2.5i
+.\" 3.5i went to 3.8i
+.if n .ta .7i 1.75i 3.8i
+..
+This section briefly describes the software architecture
+of the EXOS 8010 networking facilities.
+.PP
+All network protocols are associated with a specific protocol family.
+Future versions of the EXOS 8010 will be able to support multiple 
+protocol families; the current version only supports one. 
+A protocol family normally consists of a number
+of protocols, one per
+.IR socket (3N)
+type.  A protocol family is not required to support all socket types;
+it may have multiple
+protocols supporting the same socket abstraction. 
+.PP
+A protocol supports one of the \f2socket\f1(3N) abstractions.
+Specific protocols are accessed by requesting
+the appropriate protocol family and type when creating a socket.
+Protocols normally accept only one address format,
+usually determined by the inherent addressing structure of the 
+protocol family/network architecture.
+Certain semantics of the basic socket abstractions are protocol 
+specific.  
+All protocols support  
+the basic model for their particular socket type and may
+also provide nonstandard facilities or extensions.
+.PP
+The EXOS front-end processor's network interface
+is the lowest layer of the networking subsystem.  It  
+interacts with the actual data link hardware.
+This interface can support multiple protocol
+families and software address formats. 
+.SH PROTOCOLS
+The EXOS 8010 currently supports only the Internet protocol family;
+its family identifier is
+.sp 1
+.nf
+._d
+#define	PF_INET 2	/* internetwork: UDP, TCP, etc. */
+.sp 1
+.fi
+The 
+\f2sockproto\f1
+structure supplied at socket creation time
+should contain the value PF_INET:
+.sp 1
+.nf
+._f
+struct sockproto {
+	short	sp_family;	/* protocol family */
+	short	sp_protocol;	/* protocol within family */
+};
+.fi
+.SH SEE ALSO
+socket(3N), inet(7P)

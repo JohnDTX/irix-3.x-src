@@ -1,0 +1,158 @@
+'\"macro stdmacro
+.hw textangle
+.TH GPS 4
+.SH NAME
+gps \- graphical primitive string, format of graphical files
+.SH DESCRIPTION
+\s-1GPS\s+1 is a format used to store graphical data.
+Several routines have been developed to edit and display \s-1GPS\s+1
+files on various devices.  Also,
+higher level graphics programs such as \f2plot\f1 
+and \f2vtoc\f1
+produce \s-1GPS\s+1 format output files.
+.PP
+A \s-1GPS\s+1 is composed of five types of graphical data 
+or primitives.
+.SS \f3\s-1GPS PRIMITIVES\s+1\fP
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3lines\f
+The \f2lines\f1 primitive has a variable
+number of points from which zero or more connected line segments are produced.
+The first point given produces a \f2move\f1 to that
+location.
+(A \f2move\f1 is
+a relocation of the graphic cursor without drawing.)
+Successive points produce line segments from
+the previous point.
+Parameters are available to
+set \f2color\f1, \f2weight\f1, and \f2style\f1 (see below).
+.s1
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3arc\f1
+The
+\f2arc\f1 primitive has a variable number of points 
+to which a curve is fit.
+The first point
+produces a \f2move\f1 to that point.  If only
+two points are included a line connecting the points will result, if three points a circular
+arc through the points is drawn, 
+and if more than three, lines connect the points.
+(In the future, a spline will be fit to the points if they number greater than three.)
+Parameters are available to set \f2color, weight,\f1 and \f2style\f1.
+.s1
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3text\f1
+The
+\f2text\f1 primitive draws characters.  It requires a single 
+point which locates the center of the first character to be drawn.
+Parameters are \f2color\f1, \f2font\f1, \f2textsize\f1, and
+\f2textangle\f1.
+.s1
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3hardware\f1
+The \f2hardware\f1 primitive draws hardware
+characters or gives control commands to a hardware device.  A single 
+point locates the beginning location of the 
+\f2hardware\f1 string.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3comment\f1
+A \f2comment\f1 is
+an integer string that is included in a \s-1GPS\s+1 file but
+causes nothing to be displayed.  All \s-1GPS\s+1 files begin with
+a comment of zero length.
+.SS \f3\s-1GPS PARAMETERS\s+1\fP
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3color\f1
+\f2Color\f1 is an integer value set for
+\f2arc, lines,\f1 and \f2text\f1 primitives.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3weight\f1
+\f2Weight\f1 is an integer value set for
+\f2arc\f1 and \f2lines\f1 primitives to indicate line thickness.
+The value \f30\f1 is  narrow weight, \f31\f1 is bold, and \f32\f1
+is medium weight.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3style\f1
+\f2Style\f1 is an integer value set for
+\f2lines\f1 and \f2arc\f1 primitives to give one of the five
+different line styles that can be drawn on Tektronix 4010 series storage tubes.
+They are:
+.RS
+\f30\f1     solid
+.br
+\f31\f1     dotted
+.br
+\f32\f1     dot dashed
+.br
+\f33\f1     dashed
+.br
+\f34\f1     long dashed
+.RE
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3font\f1
+An integer value set for
+\f2text\f1 primitives to designate the text font to be used in
+drawing a character string.  (Currently \f2font\f1
+is expressed as a four-bit \f2weight\f1 value
+followed by a four-bit \f2style\f1 value.)
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3textsize\f1
+\f2Textsize\f1 is an integer value used in 
+\f2text\f1 primitives to express the size of the characters to
+be drawn.  \f2Textsize\f1 represents the height of characters
+in absolute \f2universe-units\f1
+and is stored at one-fifth this value in the size-orientation (\f2so\f1) word (see below).
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3textangle\f1
+\f2Textangle\f1 is a signed integer value used in 
+\f2text\f1 primitives to express rotation of the character string
+around the beginning point.  \f2Textangle\f1 is expressed in degrees from the positive x-axis and can be
+a positive or negative value.
+It is stored in the size-orientation (\f2so\f1) word as a value 256/360 of its absolute value.
+.SS \f3\s-1ORGANIZATION\s+1\fP
+.PP
+\s-1GPS\s+1 primitives are organized internally as follows:
+.PP
+.ta \w'\f3hardware\f1\ \ \ 'u
+.nf
+\f3lines\f2	cw  points  sw
+\f3arc\f2	cw  points  sw
+\f3text\f2	cw  point  sw  so  [string\|]
+\f3hardware\f2	cw  point  [string\|]
+\f3comment\f2	cw  [string\|\f1]
+.fi
+.DT
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3cw\f1
+\f2Cw\f1 is the control word
+and begins all primitives.  It consists of four bits that contain
+a primitive-type code and twelve bits that contain the
+word-count for that primitive.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3point\f1(\f3s\f1)
+\f2Point\f1(\f2s\f1\|)\f1 is one or more
+pairs of integer coordinates.
+\f2Text\f1 and \f2hardware\f1 primitives only 
+require a single \f2point\f1.  \f2Point\f1(\f2s\f1\|) are 
+values within a Cartesian plane or \f2universe\f1
+having 64K (\-32K to +32K) points on each axis.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3sw\f1
+\f2Sw\f1 is the style-word and is used in
+\f2lines, arc,\f1 and \f2text\f1 primitives.  The first
+eight bits contain \f2color\f1 information.  In \f2arc\f1 and
+\f2lines\f1 the last eight bits are divided as
+four bits \f2weight\f1 and four bits \f2style\f1.  In the
+\f2text\f1 primitive the last eight bits of \f2sw\f1 contain the \f2font\f1.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3so\f1
+\f2So\f1 is the size-orientation word used in
+\f2text\f1 primitives.  The first eight bits contain text size
+and the remaining eight bits contain text rotation.
+.TP \w'\f3hardware\f1\ \ \ 'u
+\f3string\f1
+\f2String\f1 is a null-terminated character string.
+If the string does not end on a word boundary an
+additional null is added to the \s-1GPS\s+1 file to insure
+word-boundary alignment.
+.\"	@(#)gps.4	5.1 of 10/15/83

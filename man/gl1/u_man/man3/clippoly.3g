@@ -1,0 +1,50 @@
+.TH clippoly  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I clippoly
+- clip a polygon
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long clippoly(mask, n, prepoly, postpoly)"
+.B "String mask; "
+.B "long n; "
+.B "Coord prepoly[][3], postpoly[][4];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer function clippo(mask, n, prepol, pstpol)"
+.B "character*(*) mask"
+.B "integer n"
+.B "real prepol(3,n), pstpol(4,n*2)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function clippoly(mask: String; n: integer; "
+.B "	var prepoly: Coord3array;"
+.B "	var postpoly: Coord4array): integer;"
+.sp
+.SH DESCRIPTION
+.I Clippoly
+selectively enables a subset of the six
+clipping planes. 
+\f3Mask\f1 is a string of characters specifying which clipping
+planes are enabled.
+This string is chosen from `l', `r', `b', `t', `n', and `f', which
+represent the left, right, bottom, top, near, and far
+clipping planes.  \f3Mask\f1 can 
+name from one to six planes, in
+any order. 
+.PP
+\f2Clippoly\f1 takes a polygon with \f3n\f1 
+vertices in \f3prepoly\f1, and
+returns the number of vertices in the clipped polygon.  The clipped
+polygon is returned in \f3postpoly\f1.
+Note that \f3postpoly\f1 should
+have room for \f3\&2\(mu\&n\f1 vertices; clipping can
+add up to \f3n\f1
+new vertices to the polygon.
+.SH "SEE ALSO"
+.I clipline, clippnt, screenpnt, transform
+.SH NOTE
+This command can only be used in immediate mode.

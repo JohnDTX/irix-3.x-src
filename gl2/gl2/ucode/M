@@ -1,0 +1,179 @@
+#
+# Makefile for GF2 microcode
+#
+
+MAS      = ./mas
+CODE	 = ./src
+CODEP	 = $(CODE)/polygons
+CODES	 = $(CODE)/scanconvert
+SMALLMK  = Makefile.noz
+
+CC       = cc
+CFLAGS   = $(DEFINES)
+
+SRCS =
+HDRS = 
+OBJS = gf2
+
+GF2MICS = \
+	$(CODE)/dispatch.o\
+	$(CODE)/lowmem.o\
+	$(CODE)/block.o\
+	$(CODE)/buffcopy.o\
+	$(CODE)/dbzline.o\
+	$(CODE)/stm.o\
+	$(CODE)/points.o\
+	$(CODE)/attributes.o\
+	$(CODE)/modes.o\
+	$(CODE)/hitrept.o\
+	$(CODE)/char.o\
+	$(CODE)/chdraw.o\
+	$(CODE)/diag.o \
+	$(CODE)/cursor.o\
+	$(CODE)/pixels.o\
+	$(CODE)/mvppixels.o\
+	$(CODE)/readpixels.o\
+	$(CODE)/fixchar.o\
+	$(CODE)/vectors.o\
+	$(CODE)/divide.o\
+	$(CODE)/ldivide.o\
+	$(CODE)/viewport.o\
+	$(CODE)/copypixels.o\
+	$(CODE)/copyfont.o\
+	$(CODE)/depthvec.o\
+	$(CODE)/zvectors.o\
+	$(CODE)/readrun.o\
+	$(CODE)/runlen.o
+
+POLYMICS = \
+		$(CODEP)/addsentinels.o\
+		$(CODEP)/advance.o\
+		$(CODEP)/dbzfillline.o\
+		$(CODEP)/dbzshadeline.o\
+		$(CODEP)/bumpindex.o\
+		$(CODEP)/checkmask.o\
+		$(CODEP)/computeslope.o\
+		$(CODEP)/filltrapzoid.o\
+		$(CODEP)/finishside.o\
+		$(CODEP)/getfrstsds.o\
+		$(CODEP)/polyclose.o\
+		$(CODEP)/polydraw.o\
+		$(CODEP)/polyexit.o\
+		$(CODEP)/shadeline.o\
+		$(CODEP)/shadetrap.o\
+		$(CODEP)/shfinishside.o\
+		$(CODEP)/shgetfrstsds.o\
+		$(CODEP)/shstartside.o\
+		$(CODEP)/shtraploop.o\
+		$(CODEP)/startside.o\
+		$(CODEP)/swap.o\
+		$(CODEP)/traploop.o\
+		$(CODEP)/zfillline.o\
+		$(CODEP)/zfilltrap.o\
+		$(CODEP)/zfinishside.o\
+		$(CODEP)/zgetfrstsds.o\
+		$(CODEP)/zshadeline.o\
+		$(CODEP)/zshadetrap.o\
+		$(CODEP)/zstartside.o\
+		$(CODEP)/ztraploop.o
+
+SCANMICS = \
+		$(CODES)/zscanline.o
+
+MACHOBJS =	$(MAS)/main.o\
+		$(MAS)/libh.o\
+		$(MAS)/endstate.o\
+		$(MAS)/defines.o\
+		$(MAS)/symbols.o\
+		$(MAS)/fbc.o\
+		$(MAS)/version.o
+
+WSOBJS	= $(MACHOBJS) $(MAS)/masws.o
+
+VAXOBS = $(MACHOBJS) $(MAS)/masvax.o
+
+all:	ws
+
+install: all
+	cp ucode.o $(DEST)/usr/lib/gl2/ucode.o
+	chmod 644 $(DEST)/usr/lib/gl2/ucode.o
+	chgrp sys $(DEST)/usr/lib/gl2/ucode.o
+	chown root $(DEST)/usr/lib/gl2/ucode.o
+
+ws: subws ws.x
+	./ws.x
+
+subws:
+	cd mas;CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include";\
+		export CC_OPTS; $(MAKE) ws
+	cd src;CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include" ;\
+		export CC_OPTS; $(MAKE)
+	cd $(CODEP);CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include" ;\
+		export CC_OPTS; $(MAKE)
+	cd $(CODES);CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include" ;\
+		export CC_OPTS; $(MAKE)
+
+ws.x: $(WSOBJS) $(GF2MICS) $(POLYMICS) $(SCANMICS)
+	rm -f ws.x
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include" \
+	$(CC) $(LDFLAGS) $(WSOBJS) $(GF2MICS) $(POLYMICS) $(SCANMICS) -o ws.x
+
+smallws: subsmallws sws.x
+	./sws.x
+
+subsmallws:
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd mas; $(MAKE) -f $(SMALLMK) ws
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd src; $(MAKE) -f $(SMALLMK)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd $(CODEP); $(MAKE) -f $(SMALLMK)
+ 	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd $(CODES); $(MAKE)
+
+sws.x: $(WSOBJS) $(GF2MICS) $(POLYMICS) $(SCANMICS)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS;\
+	rm -f sws.x;\
+	$(CC) $(LDFLAGS) $(WSOBJS) $(GF2MICS) $(POLYMICS) $(SCANMICS) -o sws.x;\
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"
+
+vax: subvax vax.x
+	./vax.x
+
+subvax:
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd mas; $(MAKE) vax
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd src; $(MAKE)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd $(CODEP); $(MAKE)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd $(CODES); $(MAKE)
+
+vax.x: $(VAXOBJS) $(GF2MICS) $(POLYMICS) $(SCANMICS)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include";\
+	rm -f vax.x;\
+	$(CC) $(LDFLAGS) $(VAXOBS) $(GF2MICS) $(POLYMICS) $(SCANMICS) -o vax.x;\
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"
+
+smallvax: subsmallvax svax.x
+	./svax.x
+
+subsmallvax:
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd mas; $(MAKE) -f $(SMALLMK) vax
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd src; $(MAKE) -f $(SMALLMK)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd $(CODEP); $(MAKE) -f $(SMALLMK)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include"; export CC_OPTS; cd $(CODES); $(MAKE)
+
+svax.x: $(VAXOBJS) $(GF2MICS) $(POLYMICS) $(SCANMICS)
+	CC_OPTS="-ZR /iris -DpmII -ZI -ZN -I/iris/usr/include";\
+	rm -f svax.x;\
+	$(CC) $(LDFLAGS) $(VAXOBS) $(GF2MICS) $(POLYMICS) $(SCANMICS) -o svax.x
+
+xcp:
+	xcp ucode.o olympus:/oh4/hdwr/diag/gf/gf2pm2/betacode.b
+	xcp ucode.sym olympus:/oh4/hdwr/diag/gf/gf2pm2/betacode.sym
+
+new: vax xcp
+
+# remove files that can be re-created
+
+clean :
+	cd mas; $(MAKE) clean
+	cd src; $(MAKE) clean
+	cd $(CODEP); $(MAKE) clean
+	cd $(CODES); $(MAKE) clean
+	rm -f $(OBJS) *.out *.CKP *.BAK .emacs* *.o *.x *.b *.sym
+

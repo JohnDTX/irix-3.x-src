@@ -1,0 +1,17 @@
+
+#! /bin/sh
+
+cd $1
+echo `pwd`
+for i in `ls`
+do
+	if test -f $i; then
+		ci -u1.1 -t/d3/3.7/src/Txt -m"Initial check-in for 3.7" RCS/$i,v $i
+	fi
+done
+for i in `ls`
+do
+	if test -d $i; then
+		/d3/3.7/src/tcheck `pwd`/$i
+	fi
+done

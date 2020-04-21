@@ -1,0 +1,38 @@
+# Makefile for ip2 libbsd
+#
+include ${ROOT}/usr/include/make/commondefs
+
+#
+# Make MAKEPATH to get at all the directories we need
+# The following must all be on one line (bug in make)
+#
+MAKEPATH=../../common/gen:../../common/inet:../../common/net:../../common/net/hosttable:../../common/sys:../../common/inet/RCS:../../common/net/RCS:../../common/net/hosttable/RCS:../../common/sys/RCS:../../common/gen/RCS:../../m68k/sys:../../m68k/sys/RCS
+
+# Objs is list of libbsd.a objects
+OBJS=	accept.o adjtime.o BSD_getime.o bind.o connect.o ctype_.o dup2.o \
+	ffs.o getdtab.o getgroups.o gethostent.o gethostid.o \
+	gethostnam.o getnetbya.o getnetbynm.o getnetent.o getpages.o \
+	getpeern.o getproto.o getprotoe.o getprotonm.o getservbyn.o \
+	getservbyp.o getservent.o getsockn.o getsocko.o gettimeday.o \
+	htonl.o htons.o in_addr.o in_lnaof.o in_mkaddr.o in_netof.o \
+	in_network.o in_ntoa.o insque.o listen.o ntohl.o \
+	ntohs.o random.o rcmd.o recv.o recvfrom.o \
+	recvmsg.o rexec.o ruserpass.o select.o send.o sendmsg.o \
+	sendto.o sethostid.o setsocko.o shutdown.o socket.o \
+	socketp.o syslog.o writev.o 
+
+SRCDIR=../..
+LCOPTS= -O
+LCINCS= -ZN -I${ROOT}/usr/include/bsd 
+
+TARGETS= ../libbsd${PREF}.a
+
+
+.s.o:
+	/lib/cpp -P $< | m4 ${M4PROF} | ${AS} -i -o $*.o
+
+../libbsd${PREF}.a: ${OBJS}
+	rm -f $@
+	ar cr $@ ${OBJS}
+	strip $@
+	ranlib $@

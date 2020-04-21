@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH GETHOSTIDENT 3C
+.SH NAME
+gethostident \- get the host's unique identification
+.SH SYNOPSIS
+.B rv = gethostident(addr)
+.br
+.B int rv;
+.br
+.B char addr[64];
+.SH DESCRIPTION
+.I gethostident
+returns the unique identifier for the given processor.
+This identifier is guaranteed
+to be unique within the Silicon Graphics workstation product family.
+This call is provided to support a rudimentary form of software
+protection.
+.PP
+Upon successful completion, the 64 bytes pointed to by \f3addr\f1 will be
+filled with the identifier, and 0 will be returned.  If the memory
+at \f3addr\f1 is inaccessable, then -1 will be returned and \f3errno\f1
+will be set to EFAULT.  If the machine is an IRIS 2000 or 3000 series
+workstation and the machine has no ethernet interface, -1 will be
+returned and \f3errno\f1 will be set to ENODEV.
+.SH CAVEAT
+.I gethostident
+is not suitable for serious
+software protection schemes.  For the IRIS 2000 and 3000 series, the
+64 bytes contain a constant pattern that is overwritten by
+the ethernet address of the IRIS's original ethernet interface.  If the
+IRIS is serviced and has its ethernet interface replaced, it is
+likely that the software protection schemes will disallow further
+use of the protected software.
+.SH NOTE
+.I gethostident 
+requires the 2.5 or 3.5 (or later) kernels. 

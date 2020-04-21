@@ -1,0 +1,66 @@
+'\"macro stdmacro
+.TH TAIL 1
+.SH NAME
+tail \- deliver the last part of a file
+.SH SYNOPSIS
+.B tail
+[
+.BR \(+- [number]\|[\| l\|bc\| [ \|f\| ]
+] ] [ file ]
+.SH DESCRIPTION
+.I Tail\^
+copies the named file to the standard output beginning
+at a designated place.
+If no file is named, the standard input is used.
+.PP
+Copying begins at distance
+.BI + number\^
+from the beginning, or
+.BI \- number\^
+from the end of the input
+(if
+.I number\^
+is null, the value 10 is assumed).
+.I Number\^
+is counted in units of lines, blocks, or characters,
+according to the appended option
+.BR l ,
+.BR b ,
+or
+.BR c .
+When no units are specified, counting is by lines.
+.PP
+With the
+.B \-f
+("follow") option, if the input file is not a pipe,
+the program will not terminate after the line of the input
+file has been copied, but will enter an endless loop, wherein it
+sleeps for a second and then attempts to read and copy
+further records from the input file.
+Thus it may be used to monitor the growth of a file that is
+being written by some other process.
+.SH EXAMPLE
+.IP
+tail \|\-f \|fred
+.PP
+will print the last ten lines of the file
+"fred", followed by any lines that are appended to
+"fred" between the time
+.I tail\^
+is initiated and killed.
+.IP
+tail \|\-15cf \|fred
+.PP
+will print the last 15 characters of the file
+"fred", followed by any lines that are appended to
+"fred" between the time
+.I tail\^
+is initiated and killed.
+.SH SEE ALSO
+dd(1).
+.SH BUGS
+Tails relative to the end of the file
+are treasured up in a buffer, and thus
+are limited in length.
+Various kinds of anomalous behavior may happen
+with character special files.

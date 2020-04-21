@@ -1,0 +1,78 @@
+.TH SADP 1
+.SH NAME
+sadp \- disk access profiler
+.SH SYNOPSIS
+.B sadp
+[
+.B \-th
+] [
+.B \-d
+device\|[\|\-drive] ]
+s [ n ]
+.SH DESCRIPTION
+.I Sadp\^
+reports disk access location and seek distance,
+in tabular or histogram form.
+It samples disk activity once every second during
+an interval of
+.I s\^
+seconds.
+This is done repeatedly
+if
+.I n\^
+is specified.
+Cylinder usage and disk distance are recorded in units
+of eight cylinders.
+.PP
+Valid values of
+.I device\^
+are
+.BR rp06 ,
+.BR rm05 ,
+and
+.BR disk .
+.I Drive\^
+specifies the disk drives
+and it
+may be:
+.IP
+a drive number in the range supported by
+.IR device ,
+.br
+two numbers separated by a minus (indicating an inclusive range),
+.ns
+.PP
+or
+.ns
+.IP
+a list of drive numbers separated by commas.
+.PP
+Up to eight disk drives may be reported.
+The
+.B \-d
+option may be omitted,
+if only one
+.I device\^
+is present.
+.PP
+The
+.B \-t
+flag causes the data to be reported in 
+tabular form.
+The
+.B \-h
+flag produces a histogram on the printer of the data.
+Default is
+.BR \-t .
+.SH EXAMPLE
+.IP
+sadp \|\-d rp06\|\-0 900 4 
+.PP
+will generate 4 tabular reports,
+each describing cylinder usage and seek distance of 
+.B rp06
+disk drive 0
+during a 15 minute interval.
+.SH FILES
+/dev/kmem
+.\"	@(#)sadp.1	5.1 of 11/9/83

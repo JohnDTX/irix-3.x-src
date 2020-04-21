@@ -1,0 +1,161 @@
+'\"macro stdmacro
+.TH REGCMP 3X
+.SH NAME
+regcmp, regex \- compile and execute regular expression
+.SH SYNOPSIS
+.B char \(**regcmp(string1 [, string2, .\|.\|.], 0)
+.br
+.B char \(**string1, \(**string2, .\|.\|.;
+.PP
+.B char \(**regex(re, subject[, ret0, .\|.\|.])
+.br
+.B char \(**re, \(**subject, \(**ret0, .\|.\|.;
+.PP
+.B extern char \(**loc1;
+.SH DESCRIPTION
+.I regcmp\^
+compiles a regular expression and returns a pointer to the compiled form.
+.IR malloc\^ (3C)
+is used to create space for the vector.
+It is the user's responsibility to free unneeded space so allocated.
+A
+.SM NULL
+return from
+.I regcmp\^
+indicates an incorrect argument.
+.IR regcmp\^ (1)
+has been written to generally preclude the need
+for this routine at execution time.
+.PP
+.I Regex\^
+executes a compiled pattern against the subject string.
+Additional arguments are passed to receive values back.
+.I Regex\^
+returns
+.SM NULL
+on failure or a pointer to the next unmatched character on success.
+A global character pointer
+.I loc1\^
+points to where the match began.
+.I regcmp\^
+and
+.I regex\^
+were mostly borrowed from the editor,
+.IR ed\^ (1);
+however, the syntax and semantics have been changed slightly.
+The following are the valid symbols and their associated meanings.
+.TP "\w'\f3( .\|.\|. )$\f2n\^\fP\ \ \ 'u"
+.B [\|]\|*\|.^
+These symbols retain their current meaning.
+.TP
+.B $
+Matches the end of the string, \f3\en\fP matches the new-line.
+.TP
+.B \-
+Within brackets the minus means
+.IR through .
+For example,
+.B [\^a\-z\^]
+is equivalent to
+.BR [\^abcd\|.\|.\|.xyz\^] .
+The \f3\-\fP can
+appear as itself only if used as the last or
+first character.
+For example, the character class expression
+.B [\^]\-\^]
+matches the characters
+.BR ] \ and\  \- .
+.TP
+.B +
+A regular expression followed by \f3+\fP means
+.IR "one or more times" .
+For example,
+.B [0\-9]+
+is equivalent to
+.BR [0\-9][0\-9]\(** .
+.TP
+.B "{m} {m,} {m,u}"
+Integer values enclosed in \f3{\|}\fP indicate the
+number of times the preceding regular expression is to be applied.
+.I m\^
+is the minimum number and
+.I u\^
+is a number, less than 256, which is the maximum.
+If only
+.I m\^
+is present (e.g., {m}),
+it indicates the exact number of times the regular
+expression is to be applied.
+{m,} is analogous to {m,infinity}.
+The plus (\f3+\fP) and star (\f3\(**\fP) operations are
+equivalent to {1,} and {0,} respectively.
+.TP
+.B "( .\|.\|. )$\f2n\^\fP"
+The value of the enclosed regular expression is
+to be returned.
+The value
+will be stored in the
+.RI ( n+1\^ )th
+argument following the subject argument.
+At present,
+at most ten enclosed regular expressions are allowed.
+.I Regex\^
+makes its assignments unconditionally.
+.TP
+.B "( .\|.\|. )"
+Parentheses are used for grouping.
+An operator, e.g.
+.BR \(** ", " + ", " {\|} ,
+can work on a single character or a regular
+expression enclosed in parenthesis.
+For example, (a\(**(cb+)\(**)$0.
+.PP
+By necessity, all the above defined symbols are special.
+They must, therefore, be escaped to be used as themselves.
+.SH EXAMPLE
+.IP
+.nf
+char \(**cursor, \(**newcursor, \(**ptr;
+	\&.\|.\|.
+newcursor = regex((ptr = regcmp("^\\n", 0)), cursor);
+free(ptr);
+.fi
+.PP
+matches a leading new-line in the subject string
+pointed at by cursor.
+.IP
+.nf
+char ret0[9];
+char \(**newcursor, \(**name;
+	\&.\|.\|.
+name = regcmp("([A\-Za\-z][A\-za\-z0\-9\_]{0,7})$0", 0);
+newcursor = regex(name, "123Testing321", ret0);
+.fi
+.PP
+matches through the string ``Testing3'' and will return
+the address of the character after the last matched character (cursor+11).
+The string ``Testing3'' will be copied to the
+character array
+.IR ret0 .
+.IP
+.nf
+#include "file.i"
+char \(**string, \(**newcursor;
+	\&.\|.\|.
+newcursor = regex(name, string);
+.fi
+.PP
+applies a precompiled regular expression in
+.B file.i
+(see
+.IR regcmp\^ (1))
+against
+.IR string .
+.PP
+This routine is kept in
+.BR /usr/lib/lib\s-1PW\s+1.a .
+.SH SEE ALSO
+ed(1),
+regcmp(1),
+malloc(3C).
+.\"	@(#)regcmp.3x	5.1 of 10/25/83

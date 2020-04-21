@@ -1,0 +1,54 @@
+.TH circf 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B circf
+\- draws a filled circle
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "circf(x, y, radius) "
+.B "Coord x, y, radius;"
+.IP 
+.B "circfi(x, y, radius) "
+.B "Icoord x, y, radius;"
+.IP 
+.B "circfs(x, y, radius) 
+.B "Scoord x, y, radius;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine circf(x, y, radius)"
+.B "real x, y, radius"
+.IP 
+.B "subroutine circfi(x, y, radius)"
+.B "integer*4 x, y, radius"
+.IP 
+.B "subroutine circfs(x, y, radius)"
+.B "integer*2 x, y, radius"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure circf(x, y, radius: Coord);"
+.IP
+.B procedure circfi(x, y, radius: Icoord);
+.IP
+.B procedure circfs(x, y, radius: Scoord);
+.SH DESCRIPTION
+.B circf
+draws a filled circle, using the current color, writemask, and pattern. 
+The circle has its center point at \f2(x,y)\f1 and a radius (\f2radius\f1),
+which are both 
+specified in world coordinates.  Since a circle is a 2-D shape,
+these routines have only 2-D forms (note that circles rotated 
+outside of the 2-D \f2x-y\fP planes appear as ellipses).
+The circle is drawn in the \f2x-y\fP plane, with \f2z\fP=0. 
+
+.ne 15
+.SH "SEE ALSO"
+arc, arcf, circ, crv
+.sp .5v
+.I Programming Guide,
+Section 3.7, Circles and Arcs

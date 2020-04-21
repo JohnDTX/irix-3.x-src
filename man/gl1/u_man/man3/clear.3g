@@ -1,0 +1,23 @@
+.TH clear  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I clear
+- clear the viewport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clear()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clear"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clear;"
+.sp
+.SH DESCRIPTION
+The \f2clear\f1 command sets the screen area within the current viewport 
+to the current color using the current writemask and texture. 
+.SH "SEE ALSO"
+.I rect, rectf

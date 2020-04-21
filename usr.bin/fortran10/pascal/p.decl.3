@@ -1,0 +1,802 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.DECL.3.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               22-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  procedure usesdecl(fsys: setofsys);
+    label 9;
+    var ExitFlag: Boolean; lpn: pn; ltoken: symbol; dummyheap: pboolean;
+      oldlevel: integer;
+    
+    function FindUnit(fname: identrec): Boolean;
+      label 5;
+      var lblock,lbyte,junk,i,size,textaddr: integer; FoundIt: Boolean;
+        lbuff: packed array[0..511] of char; lname: alfa8;
+      
+      function nextbyte: integer;
+        var i: integer;
+      begin
+      if lbyte > 511
+      then begin
+        lblock := lblock + lbyte div 512; lbyte := lbyte mod 512;
+        if blockread(sourcefile,lbuff,1,lblock) <> 1 then error(404);
+        end;
+      i := ord(lbuff[lbyte]); lbyte := lbyte + 1;
+      if i < 0 then i := i + 256;
+      nextbyte := i;
+      end; {nextbyte}
+      
+      function nextint(n: integer): integer;
+        var i,k: integer;
+      begin
+      k := 0;
+      for i := 1 to n do
+        k := k*256 + nextbyte;
+      nextint := k;
+      end; {nextint}
+      
+    begin {FindUnit}
+    makidalfa(lname,fname);
+    lblock := -1; lbyte := 512; i := nextbyte;
+    if i = 144
+    then { Library file }
+      while i = 144 do begin
+        size := nextint(3); FoundIt := TRUE;
+        for i := 1 to 8 do
+          if lname[i] <> chr(nextbyte) then FoundIt := FALSE;
+        if FoundIt
+        then begin
+          junk := nextint(4); junk := nextint(4);
+          textaddr := nextint(3) div 2;
+          filestack[topoffilestack].lastrelblkread := textaddr - 2;
+          inbufp := 1024; ch := ' '; EolSource := TRUE;
+          linestate := INLINE; scan;
+          goto 5;
+          end;
+        lbyte := lbyte + size - 12; i := nextbyte;
+        end
+    else
+      if i = 146
+      then begin { Unit file }
+        junk := nextint(3); FoundIt := TRUE;
+        for i := 1 to 8 do
+          if lname[i] <> chr(nextbyte) then FoundIt := FALSE;
+        if FoundIt
+        then begin
+          junk := nextint(4); textaddr := nextint(3) div 2;
+          filestack[topoffilestack].lastrelblkread := textaddr - 2;
+          inbufp := 1024; ch := ' '; EolSource := TRUE;
+          linestate := INLINE; scan;
+          end;
+        end
+      else FoundIt := FALSE;
+ 5: FindUnit := FoundIt;
+    end; {FindUnit}
+    
+  begin {usesdecl}
+  ExitFlag := FALSE; oldlevel := level;
+  repeat
+    if token = IDENTSY
+    then begin
+      if not Using
+      then begin
+        lpn := searchlocal(display[1].nametree);
+        if lpn = nil
+        then begin
+          if numunits < MAXUNITS then numunits := numunits + 1 else error(307);
+          level := -numunits;
+          new(lpn,IDENTNODE,UNITS);
+          with lpn^ do begin
+            node := IDENTNODE; copyident(lpn); next := unitlist; idtype := nil;
+            unitlist := lpn; class := UNITS; ulev := level; ulc := 0;
+            end;
+          enterid(lpn); scan; ltoken := token; Using := TRUE;
+          if ch <> ' ' then inbufp := inbufp - 1;
+          filestack[topoffilestack].nextchtoread := inbufp;
+          if topoffilestack = 5
+          then error(304)
+          else begin
+            topoffilestack := topoffilestack + 1;
+            with filestack[topoffilestack] do begin
+              lastrelblkread := -1; nextchtoread := 0; fname := ufname;
+              lineinfile  := 1;
+              end;
+            close(sourcefile); reset(sourcefile,ufname);
+            if ioresult <> 0
+            then begin
+              ufname := concat(ufname,'.obj');
+              reset(sourcefile,ufname);
+              if ioresult <> 0
+			  then begin
+			    (* GB (SGI) 2/14/86 - look for .j file also! *)
+				delete(ufname,length(ufname)-2,2);
+                reset(sourcefile,ufname);
+                if ioresult <> 0
+                then begin error(403); goto 9; end;
+              end;
+			end;
+            if FindUnit(lpn^.name)
+            then begin
+              curfile := ufname; curlineinfile := 1;
+              declarations(fsys + [IMPLESY],USESSY,lpn,dummyheap);
+              end
+            else error(190);
+         9: topoffilestack := topoffilestack - 1;
+            with filestack[topoffilestack] do begin
+              close(sourcefile); reset(sourcefile,fname);
+              inbufp := nextchtoread;
+              curfile := fname; curlineinfile := lineinfile; inbuf[512] := 0;
+              if blockread(sourcefile,inbuf,2,lastrelblkread) <= 0
+              then begin error(402); goto 999; end;
+              if HOSTOS = CPM
+              then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+              end;
+            ch := ' '; token := ltoken;
+            end;
+          end;
+        Using := FALSE;
+        if not (token IN fsys + [COMMASY,SEMISY])
+        then skip(20,fsys + [COMMASY,SEMISY]);
+        end { not Using }
+      else scan;
+      end
+    else skip(29,fsys + [COMMASY,SEMISY]);
+    if token = COMMASY then scan else ExitFlag := TRUE;
+  until ExitFlag;
+  if token = SEMISY then scan else error(36);
+  level := oldlevel;
+  end; {usesdecl}
+  
+  procedure labeldecl(fsys: setofsys);
+    var ExitFlag: Boolean; lplabrec: plabrec;
+  begin
+  ExitFlag := FALSE;
+  repeat
+    if token = ICONSTSY
+    then begin
+      if intval >= 10000 then error(178);
+      lplabrec := display[level].labels;
+      while lplabrec <> nil do
+        with lplabrec^ do
+          begin
+          if intval = labelno then error(156);
+          lplabrec := nextlabel;
+          end;
+      new(lplabrec);
+      with lplabrec^ do begin
+        nextlabel := display[level].labels;
+        labelno := intval; Defined := FALSE; globrefno := -1;
+        end;
+      display[level].labels := lplabrec;
+      scan;
+      end
+    else error(30);
+    if not (token IN fsys + [COMMASY,SEMISY])
+    then skip(20,fsys + [COMMASY,SEMISY]);
+    if token = COMMASY
+    then scan
+    else ExitFlag := TRUE;
+  until ExitFlag;
+  if token = SEMISY then scan else error(36);
+  end; {labeldecl}
+  
+  procedure constdecl(fsys: setofsys);
+    var lpn: pn; lpt: pt; lvalu: valu;
+  begin
+  if token <> IDENTSY
+  then skip(29,fsys + [IDENTSY]);
+  while token = IDENTSY do
+    begin
+    new(lpn,IDENTNODE,CONSTS);
+    with lpn^ do begin
+      copyident(lpn); next := nil; class := CONSTS; node := IDENTNODE;
+      end;
+    scan;
+    if token = EQSY then scan else error(37);
+    constant(fsys + [SEMISY],lvalu,lpt);
+    with lpn^ do
+      begin idtype := lpt; valueof := lvalu; end;
+    enterid(lpn);
+    if token = SEMISY
+    then begin
+      scan;
+      if not (token in fsys + [IDENTSY])
+      then skip(20,fsys + [IDENTSY]);
+      end
+    else error(36);
+    end;
+  end; {constdecl}
+  
+  procedure typedecl(fsys: setofsys);
+    var lpn,lpn2,lpn3: pn; lpt: pt; lname: idstring;
+  begin
+  if token <> IDENTSY
+  then skip(29,fsys + [IDENTSY]);
+  while token = IDENTSY do begin
+    new(lpn,IDENTNODE,TYPES);
+    with lpn^ do begin
+      copyident(lpn); next := nil; class := TYPES; node := IDENTNODE;
+      end;
+    scan;
+    if token = EQSY then scan else error(37);
+    typ(fsys + [SEMISY],lpt); lpn^.idtype := lpt; enterid(lpn);
+    lpn2 := forwplist;
+    while lpn2 <> nil do begin
+      if IdEQId(lpn2^.name,lpn^.name)
+      then begin
+        lpn2^.idtype^.pointerto := lpn^.idtype;
+        if lpn2 = forwplist
+        then forwplist := forwplist^.next
+        else lpn3^.next := lpn2^.next;
+        end
+      else lpn3 := lpn2;
+      lpn2 := lpn2^.next;
+      end;
+    if token = SEMISY
+    then begin
+      scan;
+      if not (token in fsys + [IDENTSY])
+      then skip(20,fsys + [IDENTSY]);
+      end
+    else error(36);
+    end;
+  if forwplist <> nil
+  then begin
+    error(114);
+    while forwplist <> nil do
+      with forwplist^ do begin
+        makidstr(lname,name);
+        if ListFlag
+        then writeln(listfile,'Type-id ',lname)
+        else writeln('Type-id ',lname);
+        forwplist := next;
+        end;
+    end;
+  end; {typedecl}
+  
+  procedure vardecl(fsys: setofsys);
+    var ExitFlag,UnitFlag,GoingUP,OddStack: Boolean; lpn,lpn2,lpn3,bigvars: pn;
+        lpt: pt; llc,lptsize: longint; lname: idstring;
+    
+    procedure varaddrs(fpn: pn);
+      var lsize: longint;
+    begin
+    if CHIP = N32000
+    then begin
+      if fpn <> nil
+      then
+        with fpn^ do begin
+          if (class = VARS) and (voff = 0) and (vlev >= 0)
+          then begin
+            lsize := fullbytes(idtype);
+            if lsize > 4
+            then
+              if GoingUP
+              then begin voff := llc; llc := llc + lsize; end
+              else begin llc := llc - lsize; voff := llc; end;
+            end;
+          varaddrs(llink); varaddrs(rlink);
+        end;
+      end;
+    end; {varaddrs}
+    
+  begin {vardecls}
+  with fpn^ do begin
+    UnitFlag := class = UNITS;
+    if UnitFlag then llc := ulc else llc := -lc;
+    OddStack := (parmbytes and 2) <> 0;
+    end;
+  GoingUP := UnitFlag or ((level = 1) and (CALLCXP or GLOBSTATIC));
+  bigvars := nil;
+  repeat
+    ExitFlag := FALSE; lpn2 := nil;
+    repeat
+      if token = IDENTSY
+      then begin
+        new(lpn,IDENTNODE,VARS);
+        with lpn^ do begin
+          copyident(lpn); next := lpn2; class := VARS; idtype := nil;
+          vlev := level; voff := 0; vkind := DRCT; node := IDENTNODE;
+          RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+          end;
+        enterid(lpn); lpn2 := lpn; scan;
+        end
+      else error(29);
+      if not (token in fsys + [COMMASY,COLONSY] + typedels)
+      then skip(20,fsys + [COMMASY,COLONSY,SEMISY] + typedels);
+      if token = COMMASY then scan else ExitFlag := TRUE;
+    until ExitFlag;
+    if token = COLONSY then scan else error(35);
+    typ(fsys + [SEMISY] + typedels,lpt);
+    if lpt <> nil
+    then begin
+      lptsize := fullbytes(lpt);
+      if (CHIP = N32000) or ((lptsize < 100) or UnitFlag)
+      then begin
+        while lpn2 <> nil do
+          with lpn2^ do
+            begin idtype := lpt; 
+            if (lptsize <= 4) or (CHIP <> N32000) or UnitFlag
+            then begin
+              if lptsize <> 1
+              then begin
+                if odd(llc)
+                then
+                  if GoingUP then llc := llc + 1 else llc := llc - 1;
+                if ALLIGN32
+                then
+                  if lptsize >= 4
+                  then
+                    if ((llc and 2) <> 0) <> OddStack
+                    then
+                      if GoingUP then llc := llc + 2 else llc := llc - 2;
+                end;
+              if GoingUP
+              then begin voff := llc; llc := llc + lptsize; end
+              else begin llc := llc - lptsize; voff := llc; end;
+              end
+            else voff := 0;
+            lpn2 := next; 
+            end;
+        end
+      else begin
+        lpn := lpn2;
+        while lpn <> nil do
+          begin lpn3 := lpn; lpn^.idtype := lpt; lpn := lpn^.next; end;
+        if bigvars = nil
+        then bigvars := lpn2
+        else begin
+          if lptsize <= fullbytes(bigvars^.idtype)
+          then begin lpn3^.next := bigvars; bigvars := lpn2; end
+          else begin
+            lpn := bigvars; ExitFlag := FALSE;
+            while not ExitFlag do
+              if lpn^.next = nil
+              then begin lpn^.next := lpn2; ExitFlag := TRUE; end
+              else
+                if lptsize <= fullbytes(lpn^.next^.idtype)
+                then begin
+                  lpn3^.next := lpn^.next; lpn^.next := lpn2; ExitFlag := TRUE;
+                  end
+                else lpn := lpn^.next;
+            end;
+          end;
+        end;
+      end;
+    if token = SEMISY
+    then begin
+      scan;
+      if not (token in fsys + [IDENTSY])
+      then skip(20,fsys + [IDENTSY]);
+      end
+    else error(36);
+  until (token <> IDENTSY) and not (token in typedels);
+  if odd(llc)
+  then
+    if GoingUP then llc := llc + 1 else llc := llc - 1;
+  if ALLIGN32
+  then
+    if ((llc and 2) <> 0) <> OddStack
+    then
+      if GoingUP then llc := llc + 2 else llc := llc - 2;
+  if CHIP = N32000 then if not UnitFlag then varaddrs(display[top].nametree);
+  if bigvars <> nil
+  then begin
+    ExitFlag := FALSE;
+    while (bigvars <> nil) and not ExitFlag do begin
+      lptsize := fullbytes(bigvars^.idtype);
+      if ALLIGN32 then lptsize := (lptsize + 3) and $7ffffffc;
+      if (CHIP = N32000) or (CHIP = M68020) or (llc - lptsize >= -30000)
+      then begin
+        if GoingUP
+        then begin bigvars^.voff := llc; llc := llc + lptsize; end
+        else begin llc := llc - lptsize; bigvars^.voff := llc; end;
+        bigvars := bigvars^.next;
+        end
+      else ExitFlag := TRUE;
+      end;
+    lpn := bigvars;
+    while lpn <> nil do begin
+      llc := llc - 4; lpn^.voff := llc; lpn^.vkind := INDRCT; lpn := lpn^.next;
+      end;
+    end;
+  if UnitFlag
+  then fpn^.ulc := llc
+  else begin fpn^.lc := abs(llc); display[level].bigvars := bigvars; end;
+  if forwplist <> nil
+  then begin
+    while forwplist <> nil do
+      with forwplist^ do begin
+        makidstr(lname,name);
+        if ListFlag
+        then writeln(listfile,'Type-id ',lname)
+        else writeln('Type-id ',lname);
+        forwplist := next;
+        end;
+    error(115);
+    end;
+  end; {vardecl}
+  
+  procedure pfhead(fsys: setofsys; ftoken: symbol; var fpn: pn;
+                   FormalFlag: Boolean);
+    var lpn,lpn2: pn; ForwFlag: Boolean; oldtop,oldlevel: levrange;
+      plist: pn; pbytes,n: integer; lsys: setofsys;
+    
+    procedure parameterlist(fsys,fsy: setofsys; var params: pn;
+                            var pbytes: integer);
+      var ExitFlag,LargeValue: Boolean; lkind: accesskind; ltoken: symbol;
+        oldlastpn,lastpn,llpn: pn; llc: integer; lpt: pt;
+        lptsize,framellc: longint;
+    begin
+    params := nil; lastpn := nil; llc := 0; framellc := 0;
+    if not (token in fsy + [LPARENSY])
+    then skip(23,fsys + fsy + [LPARENSY]);
+    if token = LPARENSY
+    then begin
+      if ForwFlag then error(116);
+      scan;
+      if (token <> IDENTSY) and (token <> VARSY) and
+         (token <> FUNCTSY) and (token <> PROCSY)
+      then skip(23,fsys + [IDENTSY,RPARENSY,VARSY,FUNCTSY,PROCSY]);
+      while (token = IDENTSY) or (token = VARSY) or
+            (token = FUNCTSY) or (token = PROCSY) do
+        begin
+        oldlastpn := lastpn; lpt := nil;
+        if (token = FUNCTSY) or (token = PROCSY)
+        then begin
+          ltoken := token; scan;
+          pfhead(fsys + [RPARENSY,SEMISY],ltoken,llpn,TRUE);
+          llpn^.pfdecl := FORMAL; lpt := llpn^.idtype; llpn^.CCall := FALSE;
+          if lastpn = nil
+          then params := llpn
+          else lastpn^.next := llpn;
+          lastpn := llpn;
+          end
+        else begin
+          if token = VARSY
+          then begin lkind := INDRCT; scan; end
+          else lkind := DRCT;
+          ExitFlag := FALSE;
+          repeat
+            if token = IDENTSY
+            then begin
+              new(llpn,IDENTNODE,VARS);
+              with llpn^ do begin
+                copyident(llpn);
+                next := nil; node := IDENTNODE; class := VARS;
+                vkind := lkind; vlev := level;
+                RefBelow := FALSE; RefParam := FALSE; InReg := FALSE;
+                refcount := 0;
+                end;
+              if lastpn = nil
+              then params := llpn
+              else lastpn^.next := llpn;
+              enterid(llpn); lastpn := llpn; scan;
+              end
+            else error(21);
+            if not (token in fsys + [COMMASY,COLONSY])
+            then skip(23,fsys + [COMMASY,SEMISY,RPARENSY,COLONSY]);
+            if token = COMMASY then scan else ExitFlag := TRUE;
+          until ExitFlag;
+          if token = COLONSY
+          then begin
+            scan;
+            if token = IDENTSY
+            then begin
+              llpn := searchall([TYPES]);
+              lpt := llpn^.idtype; scan;
+              end
+            else error(29);
+            if lpt <> nil
+            then
+              if (lkind = DRCT) and lpt^.Ftype
+              then error(119);
+            if not (token in fsys + [SEMISY,RPARENSY])
+            then skip(23,fsys + [SEMISY,RPARENSY]);
+            end
+          else error(35);
+          end;
+        if oldlastpn = nil
+        then llpn := params
+        else llpn := oldlastpn^.next;
+        while llpn <> nil do begin 
+          llpn^.idtype := lpt; LargeValue := FALSE;
+          if llpn^.class = VARS
+          then
+            if lkind = INDRCT
+            then lptsize := 4
+            else
+              if lpt <> nil
+              then begin
+                lptsize := fullbytes(lpt);
+                if (lptsize > 4) and (lpt^.form <> SETS) and (lpt <> doubleptr)
+                then begin
+                  framellc := framellc + lptsize;
+                  if framellc > 32767
+                  then begin error(315); framellc := 0; end;
+                  LargeValue := TRUE; lptsize := 4;
+                  end;
+                end
+              else lptsize := 2
+          else begin lptsize := 8; lpt := nil; end;
+          llc := llc - lptsize;
+          if odd(llc) then llc := llc - 1;
+          if llpn^.class = VARS
+          then
+            if LargeValue
+            then llpn^.voff := -framellc
+            else begin
+              llpn^.voff := llc;
+              if (CHIP = M68000) or (CHIP = M68020)
+              then
+                if lpt <> nil
+                then
+                  if (lpt^.form = SETS) and (lptsize = 1)
+                  then llpn^.voff := llpn^.voff + 1;
+              end
+          else llpn^.pfoff := llc;
+          llpn := llpn^.next; 
+          end;
+        if token = SEMISY
+        then begin
+          scan;
+          if not (token in fsys + [IDENTSY,VARSY,PROCSY,FUNCTSY])
+          then skip(23,fsys + [IDENTSY,RPARENSY,PROCSY,FUNCTSY]);
+          end;
+        end;
+      lpn^.lc := framellc;
+      if token = RPARENSY
+      then begin
+        scan;
+        if not (token in fsys + fsy)
+        then skip(20,fsy + fsys);
+        end
+      else error(32);
+      end;
+    if lpn^.pflev <> 1 then llc := llc - 4;
+    llc := llc - 8; pbytes := -llc; llpn := params;
+    if CALLCXP then llc := llc - 4;
+    while llpn <> nil do 
+      with llpn^ do begin
+        if class = VARS
+        then begin
+          if (vkind = DRCT) and (idtype <> nil)
+          then LargeValue := (fullbytes(idtype) > 4) and
+                 (idtype^.form <> SETS) and (idtype <> doubleptr)
+          else LargeValue := FALSE;
+          if not LargeValue then voff := voff - llc;
+          end
+        else pfoff := pfoff - llc;
+        llpn := next;
+        end;
+    end; {parameterlist}
+    
+  begin {pfhead}
+  if token = IDENTSY
+  then begin
+    lpn := searchlocal(display[top].nametree);
+    if lpn <> nil
+    then
+      begin
+      with lpn^ do
+        if class = PROC
+        then ForwFlag := (pfdeclkind = DECLARED) and
+                         (pfdecl = FORWDECL) and
+                         (ftoken = PROCSY)
+        else
+          if class = FUNC
+          then ForwFlag := (pfdeclkind = DECLARED) and
+                           (pfdecl = FORWDECL) and
+                           (ftoken = FUNCTSY)
+          else
+            begin ForwFlag := FALSE; error(153); end;
+      end
+    else ForwFlag := FALSE;
+    if ForwFlag = FALSE
+    then begin
+      new(lpn,IDENTNODE,PROC,DECLARED);
+      with lpn^ do begin
+        if ftoken = PROCSY then class := PROC else class := FUNC;
+        refcount := 0; RefBelow := FALSE; RefParam := FALSE; InReg := FALSE;
+        node := IDENTNODE; copyident(lpn); idtype := nil; next := nil;
+        pfdeclkind := DECLARED; pfdecl := DECL;
+        lc := 0; parmbytes := 0; floc := 0; lcbits := lcbitmap;
+        if level > 1 then pflev := level else pflev := 1;
+        if ((level > 1) or (InUnit and not InterFlag)) and
+           (ident.a4[1] <> '%')
+        then begin rtnno := locprocno; locprocno := locprocno + 1; end
+        else rtnno := -1;
+        if CCallFlag and (level <= 1) and (ident.a4[1] <> '%')
+        then CCall := TRUE
+        else CCall := FALSE;
+        end;
+      enterid(lpn);
+      end;
+    scan;
+    end
+  else { token <> IDENTSY }
+    begin error(29); new(lpn,IDENTNODE); lpn^ := ufctptr^; end;
+  oldtop := top; oldlevel := level;
+  if top < MAXDISPLAY
+  then begin
+    if level <= 0
+    then level := 2
+    else if level < MAXLEVEL
+         then level := level + 1
+         else error(303);
+    top := top + 1;
+    with display[top] do
+      begin nametree := nil; occur := PARAMS; end;
+    end
+  else error(303);
+  lsys := [SEMISY];
+  if FormalFlag then lsys := lsys + [RPARENSY];
+  if ftoken = FUNCTSY then lsys := lsys + [COLONSY];
+  parameterlist(fsys,lsys,plist,pbytes);
+  if not ForwFlag
+  then begin lpn^.pfarglist := plist; lpn^.parmbytes := pbytes; end;
+  if ftoken = FUNCTSY
+  then begin
+    if token = COLONSY
+    then begin
+      scan;
+      if token = IDENTSY
+      then begin
+        if ForwFlag then error(117);
+        lpn2 := searchall([TYPES]);
+        with lpn^ do begin
+          idtype := lpn2^.idtype;
+          if idtype <> nil
+          then
+            if idtype^.form > POINTERS
+            then begin error(118); idtype := nil; end;
+          n := fullbytes(idtype); lc := lc + n;
+          if (n > 1) and odd(lc) then lc := lc + 1;
+          floc := -lc;
+          end;
+        scan;
+        end
+      else skip(29,fsys + [SEMISY]);
+      end
+    else { token <> COLONSY }
+      if not ForwFlag then error(120);
+    end;
+  if not FormalFlag
+  then
+    if token = SEMISY then scan else error(36);
+  if not (token in fsys)
+  then skip(20,fsys);
+  top := oldtop; level := oldlevel; fpn := lpn;
+  end; {pfhead}
+  
+  procedure consttypevar(AllowLabs: Boolean);
+    var ExitFlag: Boolean;
+  begin
+  forwplist := nil; ExitFlag := FALSE;
+  repeat
+    if (Token = LABELSY) and AllowLabs
+    then begin scan; labeldecl(fsys); end
+    else
+      if token = CONSTSY
+      then begin scan; constdecl(fsys); end
+      else
+        if token = TYPESY
+        then begin scan; typedecl(fsys); end
+        else
+          if token = VARSY
+          then begin scan; vardecl(fsys); end
+          else ExitFlag := TRUE;
+  until ExitFlag;
+  end; {consttypevar}
+  
+  function getexitlabel: plabrec;
+    var llab: plabrec;
+  begin
+  new(llab);
+  with llab^ do begin
+    nextlabel := nil; labelno := 10000 + level;
+    globrefno := -1; Defined := TRUE;
+    end;
+  getexitlabel := llab;
+  end; {getexitlabel}
+  
+begin {declarations}
+case fsymbol of
+  PROGRAMSY: begin
+             with display[top] do begin
+               nametree := fpn; occur := BLK; labels := nil;
+               exitlabel := getexitlabel; rootlink := fpn; bigvars := nil;
+               ftypeno := nexttypeno;
+               end;
+             if token = USESSY then begin scan; usesdecl(fsys); end;
+             consttypevar(TRUE);
+             display[top].ltypeno := nexttypeno;
+             end;
+  PROCSY,
+  FUNCTSY:   begin
+             pfhead(fsys,fsymbol,fpn,FALSE); mark(heapmark);
+             if level <= 0
+             then level := 2
+             else if level < MAXLEVEL
+                  then level := level + 1
+                  else error(303);
+             if top < MAXDISPLAY
+             then begin
+               top := top + 1;
+               with display[top] do begin
+                 nametree := fpn^.pfarglist; occur := BLK; labels := nil;
+                 exitlabel := getexitlabel; rootlink := fpn; bigvars := nil;
+                 ftypeno := nexttypeno;
+                 end;
+               end
+             else error(303);
+             consttypevar(TRUE);
+             display[top].ltypeno := nexttypeno;
+             end;
+  UNITSY:    begin
+             InterFlag := TRUE;
+             with display[top] do begin
+               nametree := fpn; occur := BLK; labels := nil;
+               exitlabel := nil; rootlink := nil; bigvars := nil;
+               ftypeno := nexttypeno;
+               end;
+             fsys := fsys + [IMPLESY];
+             if token = USESSY then begin scan; usesdecl(fsys); end;
+             consttypevar(FALSE);
+             while (token = FUNCTSY) or (token = PROCSY) do begin
+               ltoken := token; scan;
+               pfhead(fsys + [IMPLESY],ltoken,lpn,FALSE);
+               lpn^.pfdecl := FORWDECL; lpn^.lcbits := -ord(lpn^.CCall);
+               end;
+             lastublock := filestack[topoffilestack].lastrelblkread;
+             lastubyte := inbufp; InterFlag := FALSE;
+             fsys := fsys - [IMPLESY];
+             if token = IMPLESY then scan else skip(52,fsys);
+             if CALLCXP
+             then begin
+                  lpn := fpn; new(fpn,IDENTNODE,UNITS);
+                  numunits := numunits + 1; level := -numunits;
+                  with fpn^ do begin
+                       node := IDENTNODE; class := UNITS; ulev := level;
+                       ulc := 0; llink := nil; rlink := nil;
+                       next := unitlist; idtype := nil;
+                       end;
+                  unitlist := fpn; makidstr(lstr,lpn^.name);
+                  if length(lstr) >= 31 then lstr[0] := chr(30);
+                  lstr := concat('$',lstr); makname(fpn,lstr);
+                  end;
+             consttypevar(FALSE);
+             if CALLCXP then fpn := lpn;
+             display[top].ltypeno := nexttypeno;
+             end;
+  USESSY:    begin
+             if token = INTERSY then scan else skip(53,fsys);
+             if token = USESSY then begin scan; usesdecl(fsys); end;
+             consttypevar(FALSE);
+             while (token = FUNCTSY) or (token = PROCSY) do begin
+               ltoken := token; scan;
+               pfhead(fsys + [IMPLESY],ltoken,lpn,FALSE);
+               lpn^.pfdecl := FORWDECL; lpn^.lcbits := -ord(lpn^.CCall);
+               end;
+             if token <> IMPLESY then error(52);
+             end;
+  MODULESY:  begin
+             with display[top] do begin
+               nametree := fpn; occur := BLK; labels := nil;
+               exitlabel := getexitlabel; rootlink := fpn; bigvars := nil;
+               ftypeno := nexttypeno;
+               end;
+             if token = USESSY then begin scan; usesdecl(fsys); end;
+             consttypevar(FALSE);
+             display[top].ltypeno := nexttypeno;
+             end;
+end;
+end; {declarations}
+
+

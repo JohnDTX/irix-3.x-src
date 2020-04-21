@@ -1,0 +1,60 @@
+'\"macro stdmacro
+.TH IDENT 1
+.SH NAME
+ident \- identify files
+.SH SYNOPSIS
+.B ident
+file ... 
+.SH DESCRIPTION
+.I Ident
+searches the named files for all occurrences of the pattern
+\f2$keyword:...$\f1, where \f2keyword\f1 is one of
+.nf
+
+        Author
+        Date
+        Header
+        Locker
+        Log
+        Revision
+        Source
+        State
+
+.fi
+These patterns are normally inserted automatically by the RCS command \f2co\f1(1),
+but can also be inserted manually.
+.PP
+\f2Ident\f1 works on text files as well as object files.
+For example, if the C program in file f.c contains
+.nf
+
+        char rcsid[] = "$\&Header:  Header information $";
+
+.fi
+and f.c is compiled into f.o, then the command
+.nf
+
+        ident  f.c  f.o
+
+will print
+
+        f.c:
+                $\&Header:  Header information $
+        f.o:
+                $\&Header:  Header information $
+
+.SH IDENTIFICATION
+Author: Walter F. Tichy,
+.br
+Purdue University, West Lafayette, IN, 47907.
+.br
+Copyright \(co 1982 by Walter F. Tichy.
+.SH SEE ALSO
+ci(1), co(1), rcs(1), rcsdiff(1), rcsintro(1), rcsmerge(1), rlog(1), rcsfile(4).
+.sp 0
+Walter F. Tichy, ``Design, Implementation, and Evaluation of a Revision Control
+System,'' in \f2Proceedings of the 6th International Conference on Software
+Engineering\f1, IEEE, Tokyo, Sept. 1982.
+
+
+

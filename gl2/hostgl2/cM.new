@@ -1,0 +1,89 @@
+##########################################################################
+#									 #
+# 		 Copyright (C) 1985, Silicon Graphics, Inc.		 #
+#									 #
+#  These coded instructions, statements, and computer programs  contain  #
+#  unpublished  proprietary  information of Silicon Graphics, Inc., and  #
+#  are protected by Federal copyright law.  They  may  not be disclosed  #
+#  to  third  parties  or copied or duplicated in any form, in whole or  #
+#  in part, without the prior written consent of Silicon Graphics, Inc.  #
+#									 #
+##########################################################################
+
+# use of /bin/m68k is a hack (under 4.2 there is no m68k program)
+
+ALL = librgl2.a sqiral drawing popup textinit dliris iftp irsh
+CFLAGS = -O
+DBGFLAGS = -DIO_DEBUG -DHEX
+
+CONFIGFILES =  wsirisrc mexrc sys_id TZ rc.getdate
+
+all: $(ALL)
+
+librgl2.a: io.o lib.o
+	rm -f librgl2.a
+	ar cr librgl2.a io.o lib.o
+	ranlib librgl2.a
+
+# 'debug' librgl2.a -- prints out a listing of all graphics i/o into the file
+#   protsave (or into $PROTSAVE if $PROTSAVE is defined in the environment)
+librgl2dbg.a: lib.o iodbg.o
+	ar crv librgl2dbg.a lib.o iodbg.o
+	ranlib librgl2dbg.a
+
+io.o: io.c rpc.h
+	-if [ -f /bin/m68k ] ; \
+		then x='-DMC68000 -DSYSTEM5' ; \
+		else x='-DVAX -DUNIX4_2' ; fi ; \
+	if [ ! -f /usr/include/xns/Xnsioctl.h ] ; \
+		then y=-DTCP_ONLY ; fi ; \
+	$(CC) $(CFLAGS) -c $$x $$y io.c 
+
+iodbg.o: io.c rpc.h
+	-ln io.c iodbg.c
+	-if [ -f /bin/m68k ] ; \
+		then x='-DMC68000 -DSYSTEM5' ; \
+		else x='-DVAX -DUNIX4_2' ; fi ; \
+	if [ ! -f /usr/include/xns/Xnsioctl.h ] ; \
+		then y=-DTCP_ONLY ; fi ; \
+	$(CC) $(CFLAGS) -c $(DBGFLAGS) $$x $$y io.c 
+	rm -f iodbg.c
+
+lib.o: decl.h 
+
+sqiral: sqiral.o librgl2.a
+	$(CC) $(CFLAGS) -o sqiral sqiral.o librgl2.a 
+
+drawing: drawing.o librgl2.a
+	$(CC) $(CFLAGS) -o drawing drawing.o librgl2.a 
+
+popup: popup.o librgl2.a
+	$(CC) $(CFLAGS) -o popup popup.o librgl2.a 
+
+textinit: textinit.o librgl2.a
+	$(CC) $(CFLAGS) -o textinit textinit.o librgl2.a 
+
+dliris: dliris.c boot.h remprom.h irisboot.h
+	$(CC) $(CFLAGS) -o dliris dliris.c
+
+iftp: iftp.c librgl2.a
+	-if [ -f /bin/m68k ] ; \
+	    then $(CC) $(CFLAGS) -o $@ -DMC68000 -DSYSTEM5 iftp.c librgl2.a;\
+	    else $(CC) $(CFLAGS) -o $@ -DVAX -DUNIX4_2 iftp.c librgl2.a ; fi 
+
+irsh: irsh.c librgl2.a
+	-if [ -f /bin/m68k ] ; \
+	    then $(CC) $(CFLAGS) -o $@ -DMC68000 -DSYSTEM5 irsh.c librgl2.a;\
+	    else $(CC) $(CFLAGS) -o $@ -DVAX -DUNIX4_2 irsh.c librgl2.a ; fi
+
+clean:
+	rm -f *.o *.a $(ALL) iodbg.c
+
+install-config-files: iftp irsh $(CONFIGFILES)
+	iftp w wsirisrc /.wsirisrc
+	iftp w mexrc /mexrc
+	iftp w sys_id /etc/sys_id
+	iftp w TZ /etc/TZ
+# uncomment if will be using rc.getdate
+#	iftp w rc.getdate /etc/rc.getdate
+#	irsh chmod a+x /etc/rc.getdate

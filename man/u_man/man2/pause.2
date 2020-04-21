@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH PAUSE 2 
+.SH NAME
+pause \- suspend process until signal
+.SH SYNOPSIS
+.B pause (\|)
+.SH DESCRIPTION
+.I Pause\^
+suspends the calling process until it receives a signal.
+The signal must be one that is not currently set to be ignored by the
+calling process.
+.PP
+If the signal causes termination of the calling process,
+.I pause\^
+will not return.
+.PP
+If the signal is
+.I caught\^
+by the calling process and control is returned from
+the signal catching-function (see
+.IR signal\^ (2)),
+the calling process
+resumes execution from the point of suspension;
+with a return value of
+\-1 from
+.I pause\^
+and
+.I errno\^
+set to
+.SM EINTR.
+.SH SEE ALSO
+alarm(2), kill(2), signal(2), wait(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#29,D0
+.B trap	#0
+.fi
+.DT
+.\"	@(#)pause.2	5.1 of 11/1/83

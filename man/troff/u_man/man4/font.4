@@ -1,0 +1,500 @@
+'\"macro stdmacro
+.\"	@(#)font.4	1.3
+.TH FONT 4
+.SH NAME
+font \- description files for troff
+.SH SYNOPSIS
+.B troff 
+.BR \-T tty_type
+\&...
+.SH DESCRIPTION
+.de CW
+.PP
+.nf
+.ta 5n 12n 20n 28n 36n 44n 52n 60n 68n
+..
+.de CE
+.PP
+.fi
+.ft P
+..
+For each phototypesetter that
+.IR troff (1)
+supports and that is available on your system,
+there is a directory that contains
+files describing the phototypesetter and its fonts.
+This directory is named
+.BI /usr/lib/font/dev tty_type
+where
+.I tty_type
+is the name of the phototypesetter.
+Currently, the only supported device for the IRIS is
+.B psc
+for the Apple LaserWriter. 
+.PP
+For a particular phototypesetter,
+.IR tty_type ,
+the ASCII file
+.BI /usr/lib/font/dev tty_type /DESC
+describes its characteristics.
+A binary version of this file (described below) is found in
+.BI /usr/lib/font/dev tty_type /DESC.out \f1.
+Each line of this ASCII file 
+starts with a word that identifies the characteristic, which is
+followed by appropriate specifiers.
+Blank lines and lines beginning
+with the
+.B #
+character are ignored.
+.PP
+The legal lines for
+.B DESC
+are:
+.RS
+.TP 20
+\f3res\f2 num \f1
+resolution of device in basic increments per inch
+.TP 20
+\f3hor\f2 num \f1
+smallest unit of horizontal motion
+.TP 20
+\f3vert\f2 num \f1
+smallest unit of vertical motion
+.TP 20
+\f3unitwidth\f2 num \f1
+pointsize in which widths are specified
+.TP 20
+\f3sizescale\f2 num \f1
+scaling for fractional pointsizes
+.TP 20
+\f3paperwidth\f2 num \f1
+width of paper in basic increments
+.TP 20
+\f3paperlength\f2 num \f1
+length of paper in basic increments
+.TP 20
+\f3biggestfont\f2 num \f1
+maximum size of a font
+.TP 20
+\f3sizes\f2 num num ... \f1
+list of pointsizes available on typesetter
+.TP 20
+\f3fonts\f2 num name ... \f1
+number of initial fonts followed by the names of the fonts.
+For example:
+.RS 20
+fonts 4 R I B S
+.RE
+.TP 20
+\f3charset\f1
+this always comes last in the file and is on a line
+by itself.
+Following it is the list of special character names for
+this device.
+Names are separated by a space or a newline.
+The list can be as long as necessary.
+Names not in this list
+are not allowed in
+the font description files.
+.RE
+.PP
+.B res
+is the basic resolution of the device in increments per inch.
+.B hor
+and
+.B vert
+describe the relationships between motions in the horizontal and
+vertical directions.
+If the device is capable of moving in single
+basic increments in both directions,
+both
+.B hor
+and
+.B vert
+would have values of 1.
+If the vertical motions only take place
+in multiples of two basic units while the horizontal motions take
+place in the basic increments,
+then
+.B hor
+would be 1,
+while
+.B vert
+would be 2.
+.B unitwidth
+is the pointsize in which all width tables in the
+font description
+files are given.
+.I troff
+automatically scales the widths from the
+.B unitwidth
+size to the pointsize it is working with.
+.B sizescale
+is not currently used and is 1.
+.B paperwidth
+is the width of the paper in basic increments.
+.B paperlength
+is the length of a sheet of paper in the basic increments.
+.B biggestfont
+is the maximum number of characters on a font.
+.PP
+For each font supported by the phototypesetter,
+there is also an ASCII file
+with the same name as the font
+(e.g.,
+.BR R ,
+.BR I ,
+.BR CW ).
+The format for
+a font description file is:
+.RS
+.PP
+.TP 20
+\f3name\f2 name \f1
+name of the font,
+such as
+.B R
+or
+.B CW
+.TP 20
+\f3internalname\f2 name \f1
+internal name of font
+.TP 20
+\f3special\f1
+sets flag indicating that the font is special
+.TP 20
+\f3ligatures\f2 name ...\f3 0\f1
+Sets flag indicating font has ligatures.
+The list of ligatures follows
+and is terminated by a zero.
+Accepted ligatures are:
+.BR ff\ fi\ fl\ ffi\ ffl .
+.TP 20
+\f3spacewidth\f2 num \f1
+width of space if something other than 1/3 of \e(em is desired as a space.
+.TP 20
+\f3charset\f1
+The charset must come at the end.
+Each line following the word
+.I charset
+describes one character in the font.
+Each line has one of two formats:
+.sp .25
+.nf
+.I name	width	kerning	code
+.br
+.I name	\f3"\fP
+.fi
+.sp .25
+where
+.I name
+is either a single ASCII character or a special
+character name from the list found in
+.IR DESC .
+The width is in basic increments.
+The kerning information is
+1 if the character descends
+below
+the line,
+2 if it rises above the letter 'a',
+and 3 if it both rises and
+descends.
+The kerning information for special characters is not used
+and so may be 0.
+The code is the number sent to the typesetter to produce the character.
+The second format is used to indicate that the character has more than
+one name.
+The double quote indicates that this name has the same values
+as the preceding line.
+The kerning and code fields are not used if the
+width field is a double quote character.
+The total number of different characters in this list should not
+be greater than the value of
+.B biggestfont
+in the DESC file (see above).
+.PP
+In the source version of
+.SM DOCUMENTER'S WORKBENCH
+Software,
+.I troff
+and its postprocessors
+read this information from binary files
+produced from the ASCII files
+by 
+.BR makedev ,
+a program distributed with
+.I troff
+source.
+For those having a source license and need to know,
+a description of the format of these files follows:
+.PP
+The file
+.B DESC.out
+starts with the
+.I dev
+structure,
+defined by
+.IR dev.h :
+.CW
+ /*
+dev.h: characteristics of a typesetter
+* /
+.sp .25
+\s-1struct dev {
+unsigned short	filesize;	 /* number of bytes in file, */
+			 /* excluding dev part */
+short	res;		 /* basic resolution in goobies/inch */
+short	hor;		 /* goobies horizontally */
+short	vert;
+short	unitwidth;	 /* size at which widths are given*/
+short	nfonts;	 	/* number fonts physically available */
+short	nsizes;	 	/* number of pointsizes */
+short	sizescale;		/* scaling for fractional pointsizes */
+short	paperwidth;	 /* max line length in units */
+short	paperlength;	/* max paper length in units */
+short	nchtab;		 /* number of funny names in chtab */
+short	lchname;		/* length of chname table */
+short	biggestfont;	 /* max # of chars in a font */
+short	spare2;		/* in case of expansiopn */
+}\s+1;
+.CE
+.sp
+.IR Filesize
+is just the size of everything in
+.I DESC.out
+excluding the
+.I dev
+structure.
+.I Nfonts
+is the number of different font positions available.
+.I Nsizes
+is the number of different pointsizes supported by this typesetter.
+.I Nchtab
+is the number of special character names.
+.I Lchname
+is the total number of characters,
+including nulls,
+needed to list all
+the special character names.
+At the end of the structure are two spares for later expansions.
+.PP
+Immediately following the
+.I dev
+structure are a number of tables.
+First is the
+.I sizes
+table,
+which contains
+.I nsizes
++ 1 shorts(a null at the end),
+describing the pointsizes of text
+available on this device.
+The second table is the
+.IR funny_char_index_table .
+It contains indices into the the table which follows it,
+the
+.IR funny_char_strings .
+The indices point to the beginning of each special character name
+which is stored in the
+.I funny_char_strings
+table.
+The
+.I funny_char_strings
+table is
+.I lchname
+characters long,
+while the
+.I funny_char_index_table
+is
+.I nchtab
+shorts long.
+.PP
+Following the
+.I dev
+structure will occur
+.I nfonts
+.I {font}.out
+files,
+which are used to initialize the font positions.
+These
+.I {font}.out
+files,
+which also exist as separate files,
+begin with a
+.I font
+structure and then are followed by four character arrays:
+.CW
+\s-1struct font {		/* characteristics of a font */
+char	 nwfont;		/* number of width entries */
+char	 specfont;	/* 1 == special font */
+char	  ligfont;		/* 1 == ligatures exist on this font */
+char	 namefont[10];	/* name of this font, e.g., R */
+char	 intname[10];	/* internal name of font, in ASCII */
+}\s+1;
+.CE
+The
+.I font
+structure tells how many defined characters there are in
+the font, whether the font is a "special" font and if it contains
+ligatures.
+It also has the ASCII name of the font,
+which should
+match the name of the file it appears in,
+and the internal
+name of the font on the typesetting device
+.RI ( intname ).
+The internal name is
+independent of the font position and name that
+.I troff
+knows about.
+For
+example, you might say mount R in position 4,
+but when asking
+the typesetter to actually produce a character from the R
+font,
+the postprocessor which instructs the typesetter would
+use
+.IR intname .
+.PP
+The first three character arrays are specific for the font and run
+in parallel.
+The first array,
+.IR widths ,
+contains the width of each character
+relative to
+.IR unitwidth .
+.I Unitwidth
+is defined in
+.IR DESC .
+The second array,
+.IR kerning ,
+contains kerning information.
+If a character rises
+above the letter 'a',
+02 is set.
+If it descends below the line,
+01 is set.
+The third array,
+.IR codes ,
+contains the code that is sent to
+the typesetter to produce the character.
+.PP
+The fourth array is defined by the device description in
+.IR DESC .
+It is the
+.IR font_index_table .
+This table contains indices into the
+.IR width ,
+.IR kerning ,
+and
+.I code
+tables for each character.
+The order that characters appear in these three
+tables is arbitrary and changes from one font to the next.
+In order for
+.I troff
+to be able to translate from ASCII and the special character names to these
+arbitrary tables,
+the
+.I font_index_table
+is created with an order which is constant for each device.
+The number of entries in this table is 96 plus the number of special
+character names for this device.
+The value
+96 is
+128 - 32,
+the number of printable characters in the
+ASCII alphabet.
+To determine whether a normal ASCII character exists,
+.I troff
+takes the ASCII value of the character,
+subtracts 32,
+and looks in the
+.IR font_index_table .
+If it finds a 0,
+the character is not defined in this font.
+If it
+finds anything else,
+that is the index into
+.IR widths ,
+.IR kerning ,
+and
+.I codes
+that describe that character.
+.PP
+To look up a special character name,
+for example
+.BR \e(pl ,
+the mathematical plus sign,
+and determine whether it appears
+in a particular font or not,
+the following procedure is followed.
+A
+.I counter
+is set to 0 and an index to a special character name
+is picked out of the
+.I counter'th
+position in the
+.IR funny_char_index_table .
+A string comparision is performed between
+.I funny_char_strings [ funny_char_index_table
+.I [ counter ] ]
+and the special character name,
+in
+our example
+.BR pl ,
+and if it matches,
+then
+.I troff
+refers to this character as ( 96 +
+.IR counter ).
+When it wants to
+determine whether a specific font supports this character,
+it
+looks in
+.IR font_index_table[(96 + counter)] ,
+(see below),
+to see whether there is a 0,
+meaning the character does not appear
+in this font,
+or number,
+which is the index into the
+.IR widths ,
+.IR kerning ,
+and
+.I codes
+tables.
+.PP
+Notice that since a value of 0 in the
+.I font_index_table
+indicates that a character does not exist,
+the 0th element of the
+.IR width ,
+.IR kerning ,
+and
+.I codes
+arrays are not used.
+For this reason the 0th element of the
+.I width
+array can be used for a special purpose,
+defining the width of a space
+for a font.
+Normally a space is defined by
+.I troff
+to be 1/3 of the width of the \e(em character,
+but if the 0th element
+of the
+.I width
+array is non-zero,
+then that value is used for the width of a space.
+.SH "SEE ALSO"
+troff(1),
+troff(5).
+.SH FILES
+.ta \w'/usr/lib/font/dev\f2tty_type\f1/DESC.out  'u
+.PD 0
+/usr/lib/font/dev\f2tty_type\f1/DESC.out	description file for phototypesetter \f2tty_type\f1
+.PP
+/usr/lib/font/dev\f2tty_type\f1/\f2font\f1.out	description file for font \f2font\1 of phototypesetter \f2tty_type\f1
+.PD
+.\"	%W% of %G%

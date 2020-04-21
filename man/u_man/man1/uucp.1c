@@ -1,0 +1,226 @@
+'\"macro stdmacro
+.TH UUCP 1C
+.SH NAME
+uucp, uulog, uuname \- unix to unix copy
+.SH SYNOPSIS
+.B uucp
+[ options ]
+source-files destination-file
+.PP
+.B uulog
+[ options ]
+.PP
+.B uuname
+[
+.B \-l
+]
+.SH DESCRIPTION
+.SS Uucp.
+.I Uucp\^
+copies files named by the
+.I source-file\^
+arguments to the
+.I destination-file\^
+argument.
+A file name may be a path name on your machine, or may
+have the form:
+.IP "" 5
+system-name!path-name
+.PP
+where
+.I system-name\^
+is taken from a list of system names which
+.I uucp\^
+knows about.
+The
+.I system-name\^
+may also be a list of names such as
+.IP
+system-name!system-name!...!system-name!path-name
+.PP
+in which case an attempt is made to send the file via the specified route,
+and only to a destination in \s-1PUBDIR\s+1 (see below).
+Care should be taken to insure that intermediate nodes in the
+route are willing to forward information.
+.PP
+The shell metacharacters
+.BR ? ,
+.B \(**
+and
+.B [\|.\|.\|.\|]
+appearing in
+.I path-name\^
+will be expanded on the appropriate system.
+.PP
+Path names may be one of:
+.RS .3i
+.TP "\w'(2)\^\ \ 'u"
+(1)
+a full path name;
+.TP
+(2)
+a path name preceded by
+.RI ~ user\^
+where
+.I user\^
+is a login name on the specified system
+and is replaced by that user's login directory;
+.TP
+(3)
+a path name preceded by
+.RI ~/ user\^
+where
+.I user\^
+is a login name on the specified system
+and is replaced by that user's directory under \s-1PUBDIR\s+1;
+.TP
+(4)
+anything else is prefixed by the current directory.
+.RE
+.PP
+If the result is an erroneous path name for the remote system,
+the copy will fail.
+If the
+.I destination-file\^
+is a directory, the last part of the
+.I source-file\^
+name is used.
+.PP
+If a simple
+.RI ~ user\^
+destination is inaccessible to 
+.IR uucp ,
+data is copied to a spool directory and the user
+is notified by
+.IR mail\^ (1).
+.PP
+.I Uucp\^
+preserves execute permissions across the transmission
+and gives 0666 read and write permissions (see
+.IR chmod\^ (2)).
+.PP
+The following options are interpreted by
+.IR uucp :
+.TP "\w'\f3\-m\|\f2file\f1\^\ \ 'u"
+.B \-d
+Make all necessary directories for the file copy (default).
+.TP 
+.B \-f
+Do not make intermediate directories for the file copy.
+.TP
+.B \-c
+Use the source file when copying out rather than
+copying the file to the spool directory (default).
+.TP
+.B \-C
+Copy the source file to the spool directory.
+.TP
+.BI \-m\| file\^
+Report status of the transfer in
+.IR file .
+If
+.I file\^
+is omitted, send mail to the requester when the copy is
+completed.
+.TP
+.BI \-n\| user\^
+Notify
+.I user\^
+on the remote system that a file was sent.
+.TP
+.BI \-e\| sys\^
+Send the
+.I uucp\^
+command to system
+.I sys\^
+to be executed there.
+(Note:  this will only be successful if the remote
+machine allows the
+.I uucp\^
+command to be executed by
+.BR /usr/lib/uucp/uuxqt .)
+.PP
+.I Uucp\^
+returns on the standard output a string which is the job
+number of the request.
+This job number can be used by
+.I uustat\^
+to obtain status or terminate the job.
+.SS Uulog.
+.PP
+.I Uulog\^
+queries a summary log
+of 
+.I uucp\^
+and
+.IR uux\^ (1C)
+transactions in the file
+.BR /usr/spool/uucp/\s-1LOGFILE\s+1 .
+.PP
+The options cause 
+.I uulog\^
+to print logging information:
+.TP "\w'\f3\-u\|\f2user\f1\^\ \ 'u"
+.BI \-s\| sys\^
+Print information about work involving system
+.IR sys .
+.TP
+.BI \-u\| user
+Print information about work done for the specified
+.IR user .
+.SS Uuname.
+.PP
+.I Uuname\^
+lists the uucp names of known systems.
+The
+.B \-l
+option returns the local system name.
+.SH EXAMPLE
+.IP
+uucp file1 green! /usr/spool/uucppublic/file2
+.PP
+sends "file1" from the local machine, via the uucp network,
+to the "green" machine, where it is saved as file
+"/usr/spool/uucppublic/file2".
+.SH FILES
+.PD 0
+.TP "\w'/usr/spool/uucppublic\ \ \ 'u"
+/usr/spool/uucp
+spool directory
+.TP
+/usr/spool/uucppublic
+public directory for receiving and sending (\s-1PUBDIR\s0)
+.TP
+/usr/lib/uucp/\(**
+other data and program files
+.PD
+.SH SEE ALSO
+mail(1), uux(1C).
+.SH WARNING
+The domain of remotely accessible files can
+(and for obvious security reasons, usually should)
+be severely restricted.
+You will very likely not be able to fetch files
+by path name;
+ask a responsible person on the remote system to
+send them to you.
+For the same reasons you will probably not be able
+to send files to arbitrary path names.
+As distributed, the remotely accessible files are
+those whose names begin
+.B /usr/spool/uucppublic
+(equivalent to
+.RB ~ uucp
+or just ~ ).
+.SH BUGS
+All files received by
+.I uucp\^
+will be owned by
+.IR uucp .
+.br
+The \f3\-m\fP option will only work sending files or receiving
+a single file.
+Receiving multiple files specified by special shell
+characters \f3? \(** \|[\|.\|.\|.\|]\fP will not activate
+the \f3\-m\fP option.
+.\"	@(#)uucp.1c	5.1 of 11/14/83

@@ -1,0 +1,264 @@
+
+
+
+     TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))	       UUUUNNNNIIIIXXXX SSSSyyyysssstttteeeemmmm VVVV		   TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))
+
+
+
+     NNNNAAAAMMMMEEEE
+	  trenter - enter a trouble report
+
+     SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+	  ttttrrrreeeennnntttteeeerrrr [----ssss]
+
+     DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+	  _T_r_e_n_t_e_r resides on any machine that must submit machine-
+	  readable trouble reports to Customer Support.	 It prompts
+	  the user for the data	needed to enter	the report, and	allows
+	  for correction of previously entered data, either _i_n-_l_i_n_e,
+	  or by	invoking a text	editor.	 _T_r_e_n_t_e_r also allows users to
+	  specify (in a	file), default values for fields that will
+	  likely remain	constant across	reports, such as name,
+	  address, company name, etc.  In addition, facilities are
+	  provided to assist local administrators in handling trouble
+	  report flow on their systems.
+
+	FFFFiiiieeeellllddddssss aaaannnndddd VVVVaaaalllluuuueeeessss
+	  Trouble reports consist simply of fields and associated
+	  values.  Each	field has a _f_i_e_l_d _n_a_m_e,	by which it may	be
+	  referenced.  When invoked, _t_r_e_n_t_e_r prompts for values	for
+	  the trouble report's fields.	The following table lists the
+	  prompts that are issued, along with their corresponding
+	  field	names.	All fields accept one line of input, except
+	  for the problem description, which is	a multi-line field,
+	  terminated with a line consisting of only ``.''.  The	items
+	  marked with a	star (****) are explained below.
+
+	  These	first nine fields identify the originator of the
+	  report.
+
+	  o+    Name (NAME) (*)
+
+	  o+    Company (CO) (*)
+
+	  o+    Phone (PHONE) (*)
+
+	  o+    Room Number (ROOM) (*)
+
+	  o+    Address (ADDR) (*)
+
+	  o+    City (CITY) (*)
+
+	  o+    State (STATE) (*)
+
+	  o+    Zip Code	(ZIP) (*)
+
+	  o+    Country (COUNTRY) (*)
+
+	  These	two fields are AT&T-assigned numbers to	identify the
+	  customer and the specific site.
+
+
+
+     Page 1					   (last mod. 11/3/83)
+
+
+
+
+
+
+     TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))	       UUUUNNNNIIIIXXXX SSSSyyyysssstttteeeemmmm VVVV		   TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))
+
+
+
+	  o+    Customer	ID (CID) (*)
+
+	  o+    Site ID (SID) (*)
+
+	  The next two fields identify the processor on	which the
+	  problem occurred.
+
+	  o+    CPU serial number (CPUNO) (*)
+
+	  o+    Machine type (MACH)
+
+	  The following	fields identify	the area in which the problem
+	  occurred.
+
+	  o+    Trouble Report Type (TYPE)
+	       Valid responses:	ddddoooocccc (documentation), eeeennnnhhhh
+	       (enhancement), ccccssss (customer support), ffffwwww	(firmware),
+	       hhhhddddwwww (hardware), sssswwww (software), or uuuunnnnkkkk (unknown).
+
+	  o+    WECo Product Name (PROD)
+	       Examples: UNIX, BASIC, etc.
+
+	  o+    Operating system	release	(OS_REL) (*)
+	       The release of UNIX on which the	problem	occurred.
+
+	  o+    Product release (PROD_REL)
+	       The release of the product given	in response to the
+	       WECo product prompt.  If	product	is _u_n_i_x, this prompt
+	       is not issued.
+
+	  The remaining	fields define the body of the trouble report.
+
+	  o+    Severity	(SEV)
+	       The severity of the problem (1-4).
+
+	  o+    Required	date (RDATE)
+	       If the severity of the report is	2, the required	date
+	       for the fix is prompted.	 The date given	must be	at
+	       least one week from the date of the trouble report.
+
+	  o+    Abstract	(ABS)
+	       One-line	description of the problem.
+
+	  o+    Description (DESC)
+	       Full description	of the problem.	 Note that description
+	       input will _n_o_t be passed	through	_n_r_o_f_f; however,
+	       _t_r_e_n_t_e_r will recognize the macros ....EEEESSSS and ....EEEEEEEE (example
+	       start, example end) indicating an indented example
+	       (these may be nested).
+
+	  o+    Attachments (yes	or no) (ATT)
+
+
+
+
+     Page 2					   (last mod. 11/3/83)
+
+
+
+
+
+
+     TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))	       UUUUNNNNIIIIXXXX SSSSyyyysssstttteeeemmmm VVVV		   TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))
+
+
+
+	  If ???? is given	in response to a prompt, a message explaining
+	  the field will be printed.
+
+	  If _t_r_e_n_t_e_r receives an interrupt during prompting, the
+	  trouble report will be aborted.
+
+	  After	a trouble report has been completed, the user is given
+	  an opportunity to edit any data that has been	supplied.
+	  Next,	a reprint of the trouble report	just entered may be
+	  requested.  Finally, the user	is asked whether another
+	  report is to be entered.  If so, the values for the starred
+	  items	in the field table above will be carried over from the
+	  first	report.
+
+	EEEEddddiiiittttiiiinnnngggg	FFFFiiiieeeelllldddd VVVVaaaalllluuuueeeessss
+	  In order to provide editing while responding to prompts, the
+	  following _e_s_c_a_p_e_s are	recognized on input:
+
+	  o+    ----_f_i_e_l_d
+	       Return to a field for which data	has previously been
+	       supplied.  If the field name is not specified, return
+	       to the previous field.  The value already assigned to
+	       the field is printed, and the user may enter either new
+	       data, or	another	editing	command.
+
+	  o+    !!!!eeee
+	       Invoke the editor _e_d(1) with any	text already supplied
+	       for the current prompt in the edit buffer (an alternate
+	       editor can be specified:	see "Specifying	Default
+	       Values" below).
+
+	  o+    >>>>
+	       Move down to the	first unfilled field.  This is useful,
+	       for example, when the ---- command has been	used to	fix a
+	       single field near the top of the	report,	and the	user
+	       wishes to quickly return	to the point where they	left
+	       off.
+
+	  o+    ====_f_i_e_l_d
+	       Print the value currently assigned to the given _f_i_e_l_d.
+
+	  o+    ????????
+	       Print a summary of editing functions.
+
+	  Editing commands are only recognized when they appear	at the
+	  beginning of the input line; they may	be escaped using a
+	  backslash (\\\\).
+
+	SSSSppppeeeecccciiiiffffyyyyiiiinnnngggg DDDDeeeeffffaaaauuuulllltttt VVVVaaaalllluuuueeeessss
+	  Users	may provide default values for any fields marked with
+	  (*) above.  These values are specified in a file ._t_r_d_e_f in
+	  the user's home directory.  Entries in this file are of
+
+
+
+     Page 3					   (last mod. 11/3/83)
+
+
+
+
+
+
+     TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))	       UUUUNNNNIIIIXXXX SSSSyyyysssstttteeeemmmm VVVV		   TTTTRRRREEEENNNNTTTTEEEERRRR((((1111MMMM))))
+
+
+
+	  form:
+
+		    _f_i_e_l_d====_v_a_l_u_e
+
+	  where	_f_i_e_l_d is a field name from the table above.
+
+	  The editor to	be used	for field editing can be overridden
+	  with a ._t_r_d_e_f	entry by assigning the name of the desired
+	  program to the field EEEEDDDDIIIITTTTOOOORRRR.
+
+	  During prompting, _t_r_e_n_t_e_r will print any values supplied for
+	  fields from a	._t_r_d_e_f file.  By default, it will stop at each
+	  such field and wait for either a carriage return (indicating
+	  confirmation), an edit command, or new data.	If invoked
+	  with a ----ssss option, _t_r_e_n_t_e_r will print the supplied values,
+	  but will not stop for	confirmation.
+
+	  Default values specified in ._t_r_d_e_f files may be changed, on
+	  a per-report basis, using the	editing	functions described
+	  above.
+
+     FFFFIIIILLLLEEEESSSS
+	  .trdef	      -	default	value file
+	  /usr/spool/trenter  -	spool directory
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     Page 4					   (last mod. 11/3/83)
+
+
+

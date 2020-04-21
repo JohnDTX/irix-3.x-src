@@ -1,0 +1,54 @@
+'\"macro stdmacro
+.TH YPMATCH 1
+.SH NAME
+ypmatch \- print the value of one or more keys from a yp map
+.SH SYNOPSIS
+.B ypmatch 
+[ \f3\-d \f1domain ]
+[ \f3\-k\f1 ]
+[ \f3\-t\f1 ] key\&.\|.\|. mname 
+.br
+.B ypmatch 
+.B \-x
+.SH DESCRIPTION
+.LP
+ypmatch prints the values associated with one or more keys from the 
+yellow pages (YP) map (database) specified by a
+.IR mname ,
+which may be either a
+.I mapname
+or an map 
+.IR nickname .
+.LP
+Multiple keys can be specified; the same map will be searched for 
+all.  The keys must be exact values insofar as capitalization and length
+are concerned.  No pattern matching is available.  
+If a key is not matched, a diagnostic message is produced.
+.SH OPTIONS
+.IP \f3\-d\f1
+Specify a domain other that the default domain.
+.IP \f3\-k\f1
+Before printing the value corresponding to a key, print the key itself, 
+followed by a
+colon (':').  This is useful only if the keys are not duplicated in the
+values, or you've specified so many keys that the output could
+be confusing.
+.IP \f3\-t\f1
+Inhibit translation of nickname to mapname.
+For example,
+.I "ypmatch \-t zippy passwd "
+will fail because there is no map named
+.IR passwd ,
+while
+.I "ypmatch zippy passwd "
+will be translated to
+.IR "ypmatch zippy passwd.byname".
+.IP \f3\-x\f1
+Display the map nickname table.
+This lists the nicknames (\f2mnames\f1)
+the command knows of, and indicates the
+.I mapname
+associated with each
+nickname.
+.SH "SEE ALSO"
+ypfiles(4), ypcat(1)

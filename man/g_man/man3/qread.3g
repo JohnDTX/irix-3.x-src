@@ -1,0 +1,36 @@
+.TH qread 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B qread
+\- reads the first entry in the event queue
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long qread(data)"
+.B "short *data;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function qread(data)"
+.B "integer*2 data"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function qread(var data: Short); longint;"
+.SH DESCRIPTION
+When there is an entry in the queue,
+.B qread
+returns the device number of queue entry,
+writes the data of the entry into 
+.I data,
+and removes the entry from the queue.
+.SH "SEE ALSO"
+qreset, qtest
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,54 @@
+'\" t
+.TH setmonitor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B setmonitor
+\- sets the monitor type
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setmonitor(type)"
+.B "short type;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setmon(type)"
+.B "integer*4 type"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setmonitor(type: Short);"
+.SH DESCRIPTION
+.B setmonitor
+sets the monitor to 30Hz interlaced,
+50Hz noninterlaced, 60Hz noninterlaced,
+NTSC, or PAL
+depending on whether 
+.I type 
+is HZ30, HZ60,
+NTSC, or PAL,
+respectively.
+Those constants are defined in the
+file
+.I get.h.
+.sp 
+.TS
+box, center;
+l l.
+TYPE	Monitor Type
+_
+HZ30	30Hz interlaced
+HZ50	50Hz noninterlaced
+HZ60	60Hz noninterlaced
+NTSC	NTSC
+PAL	PAL
+.TE
+.SH "SEE ALSO"
+getmonitor, getothermonitor
+.sp
+\f2Programming Guide\fP, Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.

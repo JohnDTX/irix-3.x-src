@@ -1,0 +1,38 @@
+.TH getsize 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getsize
+\- returns the size of a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getsize(x, y)"
+.B "long *x, *y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getsiz(x, y)"
+.B "integer*4 x, y"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getsize(var x, y: longint);"
+.SH DESCRIPTION
+.B getsize
+returns the dimensions (in pixels) 
+of the graphics window used by a graphics
+program.
+Call 
+.B getsize
+after
+\f3getport\fP.
+.SH "SEE ALSO"
+getorigin, getport, winopen
+.sp
+.I Using mex,
+Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

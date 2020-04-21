@@ -1,0 +1,119 @@
+main()
+	InitExceptionServer kernel
+	irisinit - context
+		ginit - kernel
+		color - kernel
+		clear - kernel
+		tpon - kernel
+		ttyinit - textctl
+			text_open("console",2) - textio
+				Send CREATE "sdemux" - kernel
+			textport -  kernel
+	pxdopen - pxdio
+		initpxd - pxdio
+			Send
+			initserial - hostio3279
+				fopen("/dev/tty2","w+") - kernel
+		read_open_init - pxv
+		update3270 - emulator
+			pxstat - pxdio
+				read_avail - pxv
+			emulint - emulint
+				pxdread - pxdio
+					readpxd - pxdio
+						Send
+			outbread - pxdio
+				reread - pxdio
+					readpxd
+		f13_diag - functions
+			pxdread
+		delay - pxdio
+		update3270
+		get_screen - pxdio
+		db_conopen - conio
+			normalize_kb - conio
+				send_x_key - pxdio
+				delay
+	Ready(Create(3, repainter, 500), 0)	/*** for graphics ***/
+	dbgmenu 
+		qoutb - dbgmenu
+			set_rglout_ptr(&rrcv) - pxdio
+			db_emulator - emulator
+				qkeys - conio
+					qdevice - kernel
+					qreset - kernel
+				cursoff - kernel
+				normalize_kb
+				clear_screen - conio
+					color
+					rectfi - kernel
+					xy - conio
+						cmov2i - kernel
+				get_screen - pxdio
+					get_it - pxdio
+						raise1 - pxv
+						delay
+						reset_signal - pxv
+					emulint
+					repaint - display
+				show_screen - display
+					charstr - kernel
+				dblator - emulator
+					conin - conio
+						qtest - kernel
+						qread - kernel
+					send_key - pxdio
+					pxstat - pxdio
+						emulint
+						outbread - pxdio
+						    reload - functions
+							readhost - term3279
+							    writehost - term3279
+				conclose(1) - conio
+					unqkeys - conio
+						unqdevice - kernel
+						qreset - kernel
+					gflush - kernel
+
+readhost
+  process *rp data in readhost forever
+	flushscreen - textctl
+	doprimitive - callfunc
+		receivef - irisio
+		switchtographics - context
+			grioctl(GR_SAFE)
+			lampon(LAMP_KBDLOCKED)
+	senddata - irisio
+		turndelay - irisio
+			Delay - kernel
+		sendB - irisio
+			puthostchar - hostio3279
+				flushhostbuffer - hostio3279
+				    send_binary_str - functions
+					send_str - functions
+		sendS
+			puthostchar
+		sendL
+			puthostchar
+		freearrays
+			free - kernel
+	putschreenchar - term.h
+		flushscreen - textctl
+			fillhostbuffer - hostio3279
+				set_rglout_ptr - pxdio
+				check context and process towrite
+					sendbreakchar - hostio3279
+						send_x_key(PA1) - emulator
+						xgexit - special3279
+					sendkbdchar - hostio3279
+						send_binary_str
+
+writehost
+	getc(stdin) - kernel
+	store in towrite
+
+#ifndef GL2 - pxdio
+initserial {};
+irisinit {};
+switchtographics {};
+#endif GL2

@@ -1,0 +1,28 @@
+.TH setdblights "" "Beta Release" "Silicon Graphics"
+.SH NAME
+.I setdblights
+- set the lights on the dial and button box
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setdblights(mask)"
+.B "long mask;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setdbl(mask)
+.B "integer*4 mask"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setdblights(mask: long);"
+.sp
+.SH DESCRIPTION
+.B setdblights
+turns on some combination of the lights on the dial and button box.
+Each bit in the mask corresponds to a light.
+To turn on lights 4, 7 and 22 and all the others off,
+the mask should be set to (1<<4)|(1<<7)|(1<<22)\(dn = 400090\(dx.
+.SH NOTE
+This command can be used only in immediate mode.

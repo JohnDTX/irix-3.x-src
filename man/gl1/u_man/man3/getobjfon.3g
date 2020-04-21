@@ -1,0 +1,25 @@
+.TH getobjfont 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getobjfont
+- return the number of the current object font
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getobjfont()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getobj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getobjfont: Short;"
+.sp
+.SH DESCRIPTION
+.I Getobjfont
+returns the index of the currently selected object font.
+.SH "SEE ALSO"
+.I defobjfont
+.SH NOTE
+This command can only be used in immediate mode.

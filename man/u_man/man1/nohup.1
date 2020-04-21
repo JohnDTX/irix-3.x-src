@@ -1,0 +1,50 @@
+'\"macro stdmacro
+.TH NOHUP 1
+.SH NAME
+nohup \- run a command immune to hangups (\f2sh\^\f1 only)
+.SH SYNOPSIS
+.B nohup
+command [ arguments ]
+.SH DESCRIPTION
+.I Nohup\^
+executes
+.I command\^
+immune to terminate (\s-1EOT\s+1, 
+control-D) signal from the controlling
+terminal.
+With
+.IR nohup ,
+the priority is automatically incremented by 5.
+.I Nohup\^
+should be used with processes running in background (with "&")
+in order to
+prevent it from responding to interrupts or
+stealing the input from
+the next person who logs in on the same terminal.
+In
+.IR csh ,
+processes run in background are automatically immune to hangups.
+.PP
+If output is not redirected by the user,
+it will be sent to
+.BR nohup.out .
+If 
+.B nohup.out
+is not writable in the current directory,
+output is redirected to
+.BR \s-1$HOME\s+1/nohup.out .
+.SH EXAMPLE
+.IP
+nohup  nroff -ms  docsfile \||\| lpr
+.PP
+runs the 
+.I nroff\^
+command shown, immune to hangups, quits, and interrupts.
+.SH FILES
+.ta \w'nohup.out\ \ \ 'u
+nohup.out	standard output and standard error file.
+.SH "SEE ALSO"
+csh(1),
+nice(1),
+nice(2).
+.\"	@(#)nohup.1	5.1 of 11/9/83

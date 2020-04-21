@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH WAIT 1 
+.SH NAME
+wait \- wait for background processes to complete
+.SH SYNOPSIS
+.B wait
+.SH DESCRIPTION
+Wait until all processes started with
+.B &
+have completed,
+and report on abnormal terminations.
+.PP
+Because the
+.IR wait\^ (2)
+system call
+must be executed in the parent process,
+the shell itself executes
+.IR wait ,
+without creating a new process.
+.SH EXAMPLE
+.IP
+wait
+.PP
+waits for all child processes to terminate.
+.SH "SEE ALSO"
+sh(1).
+.SH BUGS
+Not all the processes of a 3- or more-stage
+pipeline are children of the shell, and
+thus can't be waited for.
+.\"	@(#)wait.1	5.1 of 11/14/83

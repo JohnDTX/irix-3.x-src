@@ -1,0 +1,38 @@
+.TH pick  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I pick
+- put the system in picking mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pick(numnames) "
+.B "long numnames;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pick(numnam)"
+.B "integer numnam"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pick(numnames: integer);"
+.sp
+.SH DESCRIPTION
+.I Pick
+facilitates the use of the cursor as a pointing object.
+When an image
+is drawn in picking mode, the screen does not change.  Instead, a special
+viewing matrix is placed on the stack; it discards everything in the image 
+that does not intersect a small neighborhood around the lower
+left corner of the cursor.
+\f2Numnames\f1 specifies the maximum number of names to be
+saved by the system.
+.PP
+A name is a triplet of 32-bit numbers: an object identifier, a tag
+in the object, and an offset from the tag.  It identifies a
+drawing command that intersected the picking window.
+.SH "SEE ALSO"
+.I clearhitcode, endpick, endselect, gethitcode, picksize, select
+.SH NOTE
+This command can only be used in immediate mode.

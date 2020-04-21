@@ -1,0 +1,145 @@
+'\"macro stdmacro
+.TH FORK 2 
+.SH NAME
+fork \- create a new process
+.SH SYNOPSIS
+.B int fork (\|)
+.SH DESCRIPTION
+.I Fork\^
+causes creation of a new process.
+The new process (child process) is an
+exact copy of the calling process (parent process).
+This means the child process inherits the following attributes from the parent
+process:
+.PP
+.PD 0
+.RS .3i
+.PP
+environment
+.PP
+close-on-exec flag (see
+.IR exec (2))
+.PP
+signal handling settings (i.e.,
+.SM
+.BR SIG_DFL ", " SIG_ING ,
+function address)
+.PP
+set-user-\s-1ID\s+1 mode bit
+.PP
+set-group-\s-1ID\s+1 mode bit
+.PP
+profiling on/off status
+.PP
+nice value (see 
+.IR nice (2))
+.PP
+all attached shared memory segments (see
+.IR shmop (2))
+.PP
+process group
+.SM ID
+.PP
+tty group
+.SM ID
+(see 
+.IR exit (2)
+and
+.IR signal (2))
+.PP
+trace flag (see
+.IR ptrace "(2) request 0)"
+.PP
+time left until an alarm clock signal (see 
+.IR alarm (2))
+.PP
+current working directory
+.PP
+root directory
+.PP
+file mode creation mask (see
+.IR umask (2))
+.PP
+file size limit (see 
+.IR ulimit (2))
+.RE
+.PD
+.PP
+The child process differs from the parent process in the following ways:
+.RS 0.3i
+.PP
+The child process has a unique process
+.SM ID\*S.
+.PP
+The child process has a different parent process
+.SM ID
+(i.e., the
+process
+.SM ID
+of the parent process).
+.PP
+The child process has its own copy of the parent's file descriptors.
+Each of the child's file descriptors shares a common file pointer with the
+corresponding file descriptor of the parent.
+.PP
+All semadj values are cleared (see
+.IR semop (2)).
+.PP
+Process locks, text locks and data locks are not inherited by the child (see
+.IR plock (2)).
+.PP
+The child process's
+.IR utime , " stime" , " cutime" ,
+and
+.I cstime\^
+are set to 0 (see 
+.IR times (2)).
+.RE
+.PP
+.I Fork\^
+will fail and no child process will be created if one or more of the
+following are true:
+.RS 0.3i
+.PP
+The system-imposed limit on the total number of processes under execution
+would be exceeded.
+.SM
+\%[EAGAIN]
+.PP
+The system-imposed limit on the total number of processes under execution
+by a single user would be exceeded.
+.SM
+\%[EAGAIN]
+.RE
+.SH RETURN VALUE
+Upon successful completion,
+.I fork\^
+returns a value of 0 to the child process and returns the process
+.SM ID
+of the
+child process to the parent process.
+Otherwise, a value of \-1 is
+returned to the parent process, no child process is created, and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+exec(2), times(2), wait(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#2,D0
+.B trap	#0
+.fi
+.PP
+New process return.
+.br
+Old process return, new process ID in 
+.BR D0 .
+.br
+Carry bit cleared on success.
+.PP
+The return locations in the old and new process differ by one 16 bit word.
+The C-bit is set in the old process if a new process could not be
+created.
+.DT
+.\"	@(#)fork.2	5.1 of 10/19/83

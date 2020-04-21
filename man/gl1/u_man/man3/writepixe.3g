@@ -1,0 +1,37 @@
+.TH writepixels  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I writepixels
+- paint a row of pixels on the screen
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "writepixels(n, colors) "
+.B "short n; "
+.B "Colorindex colors[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine writep(n, colors)"
+.B "integer*2 n, colors(n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure writepixels(n: Short; var colors: Colorarray);"
+.sp
+.SH DESCRIPTION
+.I Writepixels
+paints a row of pixels on the screen,
+specifying the number of pixels to paint and a color for each
+pixel.  The current character position provides the starting location;
+it is updated to point to the pixel following the last one painted. 
+The current character position becomes undefined if the next pixel
+position is outside the viewport. 
+Pixels are painted from left to right, 
+and are clipped to the current screen mask.
+\f2Writepixels\f1 does not automatically wrap from one line to the
+next.  It can be used in single- and double-buffered display modes.
+.SH "SEE ALSO"
+.I scrmask, color, readpixels, writeRGB
+.SH NOTE
+This command can only be used in immediate mode.

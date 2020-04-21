@@ -1,0 +1,69 @@
+'\"macro stdmacro
+.TH TREK 6 
+.SH NAME
+trek \- trekkie game
+.SH SYNOPSIS
+.B /usr/games/trek
+[ [
+.B \-a
+] file ]
+.SH DESCRIPTION
+.I Trek
+is a game of space glory and war.
+Below is a summary of commands.
+For complete documentation,
+see
+.IR Trek
+by Eric Allman.
+.PP
+If a filename is given,
+a log of the game is written onto that file.
+If the
+.B \-a
+flag is given before the filename,
+that file is appended to,
+not truncated.
+.PP
+The game will ask you what length game
+you would like.
+Valid responses are \*(lqshort\*(rq, \*(lqmedium\*(rq, and \*(lqlong\*(rq.
+You may also type \*(lqrestart\*(rq,
+which restarts a previously saved game.
+You will then be prompted for the skill,
+to which you must respond
+\*(lqnovice\*(rq, \*(lqfair\*(rq, \*(lqgood\*(rq, \*(lqexpert\*(rq,
+\*(lqcommadore\*(rq, or \*(lqimpossible\*(rq.
+You should normally start out with a novice
+and work up.
+.PP
+In general,
+throughout the game,
+if you forget what is appropriate
+the game will tell you what it expects
+if you just type in
+a question mark.
+.SH "COMMAND SUMMARY"
+.ie t .ds f \f3
+.el .ds f \f2
+.ta  \w'\*fp\f1hasers \*fm\f1anual amt1 course1 spread1 ...\ \ 'u
+.nf
+\*fabandon\f1	\*fca\f1pture
+\*fcl\f1oak \*fu\f1p/\*fd\f1own
+\*fc\f1omputer request; ...	\*fda\f1mages
+\*fdestruct\f1	\*fdo\f1ck
+\*fhelp\f1	\*fi\f1mpulse course distance
+\*fl\f1rscan	\*fm\f1ove course distance
+\*fp\f1hasers \*fa\f1utomatic amount
+\*fp\f1hasers \*fm\f1anual amt1 course1 spread1 ...
+\*ft\f1orpedo course [\*fy\f1es] angle/\*fn\f1o
+\*fram\f1 course distance	\*fr\f1est time
+\*fshell\f1	\*fsh\f1ields \*fu\f1p/\*fd\f1own
+\*fs\f1rscan [\*fy\f1es/\*fn\f1o]
+\*fst\f1atus	\*fterminate\f1 \*fy\f1es/\*fn\f1o
+\*fu\f1ndock	\*fv\f1isual course
+\*fw\f1arp warp_factor
+.fi
+.DT
+.SH AUTHOR
+Eric Allman
+.\"	@(#)trek.6	5.1 of 10/18/83

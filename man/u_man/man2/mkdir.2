@@ -1,0 +1,120 @@
+'\"macro stdmacro
+.TH MKDIR 2
+.SH NAME
+mkdir \- make a directory
+.SH SYNOPSIS
+.B int mkdir (path, mode)
+.br
+.B char \(**path;
+.br
+.B int mode;
+.SH DESCRIPTION
+The routine 
+.I mkdir\^
+creates a 
+new directory with
+the name
+.I path\^.
+The mode of the new
+directory is 
+initialized from the
+.I mode\^.
+The protection part of the
+.I mode\^
+argument is modified by the
+process's
+mode mask
+[see
+.IR umask (2)].
+.PP
+The directory's owner ID is set to 
+the process's effective user ID.
+The directory's group ID is set to the 
+process's effective group ID.
+The newly created directory is empty
+with the possible exception
+of entries for "."
+and "..".
+.I mkdir\^
+will fail and no directory will be 
+created if one or more of the following
+are true:
+.TP 15
+.SM
+\%[ENOTDIR]
+A component of
+the
+path prefix
+is not a directory.
+.TP
+.SM
+\%[ENOENT]
+A component of the
+path prefix
+does not exist.
+.\".TP
+.\".SM
+.\"\%[ENOLINK]
+.\".I Path\^
+.\"points to a remote machine and the link to that
+.\"machine is no longer active.
+.\".TP
+.\".SM
+.\"\%[EMULTIHOP]
+.\"Components of \f2path\f1 require hopping to multiple
+.\"remote machines.
+.TP
+.SM
+\%[EACCES]
+Either
+a component of the
+path prefix
+denies search permission
+or write permission is
+denied on the parent 
+directory of the directory
+to be created.
+.TP
+.SM
+\%[ENAMETOOLONG]
+The path is longer than
+the maximum allowed.
+.TP
+.SM
+\%[EEXIST]
+The named file
+already exists.
+.TP
+.SM
+\%[EROFS]
+The path prefix resides
+on a read-only file system.
+.TP
+.SM
+\%[ENOSPC]
+The path prefix resides
+on a file system which is full.
+.TP
+.SM
+\%[EFAULT]
+.I Path\^
+points outside the allocated address space of the process.
+.TP
+.SM
+\%[EMLINK]
+The maximum number of links to the parent directory would be exceeded.
+.TP
+.SM
+\%[ELOOP]
+The path contains too many symbolic links.
+.TP
+.SM
+\%[EIO]
+An I/O error has occurred while accessing the file system.
+.SH DIAGNOSTICS
+
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of -1 is returned, and 
+.I errno
+is set to indicate the error.
+.Ee

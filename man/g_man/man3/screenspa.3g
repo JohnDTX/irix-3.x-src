@@ -1,0 +1,45 @@
+.TH screenspace 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B screenspace
+\- interprets graphics positions as absolute screen coordinates
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "screenspace()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine screen"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure screenspace;"
+.SH DESCRIPTION
+.B screenspace
+makes a program interpret graphics positions as absolute screen coordinates.
+This allows pixels and locations outside a program's graphics window 
+to be read.
+.B screenspace
+is equivalent to:
+.sp
+.nf
+.ft 7
+.ps -2
+int xmin, ymin;
+.sp
+getorigin(&xmin, &ymin);
+viewport(-xmin, XMAXSCREEN-xmin, -ymin, YMAXSCREEN-ymin);
+ortho2(-0.5, 1023.5, -0.5, 767.5);
+.ps
+.ft 1
+.fi
+.SH "SEE ALSO"
+getorigin, ortho2, viewport 
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

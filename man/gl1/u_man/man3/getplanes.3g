@@ -1,0 +1,25 @@
+.TH getplanes  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getplanes
+- return the number of available bitplanes
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getplanes()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getpla()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getplanes: Short;"
+.sp
+.SH DESCRIPTION
+.I Getplanes
+returns the number of available planes. 
+.SH "SEE ALSO"
+.I multimap, onemap, setplanes
+.SH NOTE
+This command can only be used in immediate mode.

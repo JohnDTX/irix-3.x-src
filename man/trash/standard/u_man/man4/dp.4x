@@ -1,0 +1,19 @@
+.TH DP 4X
+.SH NAME
+dp \- Datagram Protocol
+.SH SYNOPSIS
+.SH DESCRIPTION
+.SH DIAGNOSTICS
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xlogin(1C),
+xnsd(1M),
+xx(1C),
+xcmd(3X),
+xconnect(3X),
+xnsfile(3X),
+xnsioctl(2),
+xnslib(3X),
+xnswrite(3X)

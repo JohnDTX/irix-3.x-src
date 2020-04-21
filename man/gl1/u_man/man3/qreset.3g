@@ -1,0 +1,25 @@
+.TH qreset  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I qreset
+- empty the event queue
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qreset()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qreset"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qreset;"
+.sp
+.SH DESCRIPTION
+.I Qreset
+removes all entries from the event queue and discards them.
+.SH "SEE ALSO"
+.I qenter, qread, qtest
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,368 @@
+'\"macro stdmacro
+.TH EXEC 2 
+.SH NAME
+execl, execv, execle, execve, execlp, execvp \- execute a file
+.SH SYNOPSIS
+.B "int execl (path, arg0, arg1, ..., argn, 0)"
+.br
+.B char \(**path, \(**arg0, \(**arg1, ..., \(**argn;
+.PP
+.B int execv (path, argv)
+.br
+.B char \(**path, \(**argv[ ];
+.PP
+.B "int execle (path, arg0, arg1, ..., argn, 0, envp)"
+.br
+.B "char \(**path, \(**arg0, \(**arg1, ..., \(**argn, \(**envp[ ];"
+.PP
+.B int execve (path, argv, envp)
+.br
+.B char \(**path, \(**argv[ ], \(**envp[ ];
+.PP
+.B "int execlp (file, arg0, arg1, ..., argn, 0)"
+.br
+.B char \(**file, \(**arg0, \(**arg1, ..., \(**argn;
+.PP
+.B int execvp (file, argv)
+.br
+.B char \(**file, \(**argv[ ];
+.SH DESCRIPTION
+.I Exec\^
+in all its forms transforms the calling process into a new process.
+The new process is constructed from an ordinary, executable file called the
+.IR "new process file" .
+This file consists of a header (see
+.IR a.out\^ (4)),
+a text segment, and a data segment.
+The data segment contains an initialized portion and an uninitialized
+portion (bss).
+There can be no return from a successful 
+.I exec\^
+because the calling process is overlaid by the new process.
+.PP
+An interpreter file begins with a line of the form "#! \f2interpreter\fP".
+When an interpreter file is 
+\f2execve\fP'd,
+the system 
+\f2execve\fP's
+the specified
+.I interpreter\^,
+giving it the name of the originally exec'd file as an argument,
+shifting over the rest of the original arguments.
+.PP
+.I Path\^
+points to a path name that identifies the new process file.
+.PP
+.I File\^
+points to the new process file.
+The path prefix for this file is obtained by a search of the directories
+passed as the
+.I environment\^
+line "\s-1PATH\s+1 ="
+(see
+.IR environ\^ (5)).
+The environment
+is supplied by the shell (see
+.IR sh\^ (1)).
+The shell is invoked if a command file is found by
+.I execlp\^
+or
+.IR execvp .
+.PP
+.IR Arg0 ", " arg1 ", " ... ,
+.I argn\^
+are pointers to null-terminated character strings.
+These strings constitute the argument list available to the new process.
+By convention, at least
+.I arg0\^
+must be present and point to a string that is the same as
+.I path\^
+(or its last component).
+.PP
+.I Argv\^
+is an array of character pointers to null-terminated strings.
+These strings constitute the argument list available to the new process.
+By convention,
+.I argv\^
+must have at least one member, and it must point to a string that is the same as
+.IR path\^
+(or its last component).
+.I Argv\^
+is terminated by a null pointer and is directly usable in another
+.I execv\^
+because
+.IR argv\^ [\| argc\| ]
+is 0.
+.PP
+.I Envp\^
+is an array of character pointers to null-terminated strings.
+These strings constitute the environment
+for the new process.
+.I Envp\^
+is terminated by a null pointer.
+For
+.I execl\^
+and
+.IR execv ,
+the C run-time start-off routine places a pointer to the calling process's
+environment in the global cell:
+.br
+.B "	extern char \(**\(**environ;"
+.br
+and it is used to pass the calling process's environment to the new process.
+.PP
+File descriptors open in the calling process remain open in the new process,
+except for those whose
+\%close-on-exec 
+flag is set; see 
+.IR fcntl\^ (2).
+For those file descriptors that remain open, the file pointer is unchanged.
+.PP
+Signals set to terminate the calling process will be set to terminate the
+new process.
+Signals set to be ignored by the calling process will be set to be
+ignored by the new process.
+Signals set to be caught by the calling process will be set to terminate
+new process; see 
+.IR signal\^ (2).
+.PP
+If the set-user-\s-1ID\s+1
+mode bit of the new process file is set
+(see 
+.IR chmod\^ (2)),
+.I exec\^
+sets the effective user
+.SM ID
+of the new process to the owner
+.SM ID
+of the new process file.
+Similarly, if the set-group-\s-1ID\s+1 mode bit of the
+new process file is set, the effective group
+.SM ID
+of the new process
+is set to the group
+.SM ID
+of the new process file.
+The real user
+.SM ID
+and real group 
+.SM ID
+of the new process remain the same as those of the calling process.
+.PP
+The shared memory segments attached to the calling process will not be
+attached to the new process (see
+.IR shmop\^ (2)).
+.PP
+Profiling is disabled for the new process; see
+.IR profil\^ (2).
+.PP 
+The new process also inherits the following attributes from the calling process:
+.PP
+.PD 0
+.RS .3i
+.PP
+nice value (see 
+.IR nice\^ (2))
+.PP
+process
+.SM ID
+.PP
+parent process
+.SM ID
+.PP
+process group
+.SM ID
+.PP
+semadj values (see
+.IR semop\^ (2))
+.PP
+tty group
+.SM ID
+(see 
+.IR exit\^ (2)
+and
+.IR signal\^ (2))
+.PP
+trace flag (see
+.IR ptrace\^ "(2) request 0)"
+.PP
+time left until an alarm clock signal (see 
+.IR alarm\^ (2))
+.PP
+current working directory
+.PP
+root directory
+.PP
+file mode creation mask (see
+.IR umask\^ (2))
+.PP
+file size limit (see 
+.IR ulimit\^ (2))
+.PP
+.IR utime ,
+.IR stime ,
+.IR cutime ,
+and
+.I cstime\^
+(see 
+.IR times\^ (2))
+.RE
+.PD
+.PP
+From C, two interfaces are available.
+.I execl\^
+is useful when a known file with known arguments is
+being called;
+the arguments to
+.I execl\^
+are the character strings
+constituting the file and the arguments;
+the first argument is conventionally
+the same as the file name (or its last component).
+A 0 argument must end the argument list.
+.PP
+When a C program is executed,
+it is called as follows:
+.PP
+.RS
+.nf
+main(argc, argv, envp)
+int argc;
+char **argv, **envp;
+.fi
+.RE
+.PP
+where
+.IR argc ""
+is the argument count
+and
+.IR argv ""
+is an array of character pointers
+to the arguments themselves.
+As indicated,
+.IR argc ""
+is conventionally at least one
+and the first member of the array points to a
+string containing the name of the file.
+.PP
+.I Envp\^
+is a pointer to an array of strings that constitute
+the
+.I environment\^
+of the process.
+Each string consists of a name, an \*(lq=\*(rq, and a null-terminated value.
+The array of pointers is terminated by a null pointer.
+The shell
+.IR sh\^ (1)
+passes an environment entry for each global shell variable
+defined when the program is called.
+See
+.IR environ\^ (5)
+for some conventionally
+used names.
+The C run-time start-off routine places a copy of
+.I envp\^
+in the global cell
+.IR environ ,
+which is used
+by
+.I execv\^ 
+and
+.I execl\^
+to pass the environment to any subprograms executed by the
+current program.
+The
+.I exec\^
+routines use lower-level routines as follows
+to pass an environment explicitly:
+.RS
+.nf
+execve(file, argv, environ);
+execle(file, arg0, arg1, . . . , argn, 0, environ);
+.fi
+.RE
+.PP
+.I Execlp\^
+and
+.I execvp\^
+are called with the same arguments as
+.I execl\^
+and
+.IR execv ,
+but duplicate the shell's actions in searching for an executable
+file in a list of directories.
+The directory list is obtained from the environment.
+.PP
+.I Exec\^
+will fail and return to the calling process if one or more of the
+following are true:
+.IP "" .3i
+One or more components of the new process file's path name do not exist.
+.SM
+\%[ENOENT]
+.IP
+A component of the new process file's path prefix is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+Search permission is denied for a directory listed in the new process file's
+path prefix.
+.SM
+\%[EACCES]
+.IP
+The new process file is not an ordinary file.
+.SM
+\%[EACCES]
+.IP
+The new process file mode denies execution permission.
+.SM
+\%[EACCES]
+.IP
+The exec is not an
+.I execlp\^
+or
+.IR execvp ,
+and the new process file has the appropriate access permission
+but an invalid magic number in its header.
+.SM
+\%[ENOEXEC]
+.IP
+The new process file is a pure procedure (shared text) file that is
+currently open for writing by some process.
+.SM
+\%[ETXTBSY]
+.IP
+The new process requires more memory than is allowed by the system-imposed
+maximum
+.SM MAXMEM.
+.SM
+\%[ENOMEM]
+.IP
+The number of bytes in the new process's argument list and environment
+is greater than the system-imposed limit of 5120 bytes.
+.SM
+\%[E2BIG]
+.IP
+The new process file is not as long as indicated by the size values in its
+header.
+.SM
+\%[EFAULT]
+.IP
+.IR Path ,
+.IR argv ,
+or
+.I envp\^
+point to an illegal address.
+.SM
+\%[EFAULT]
+.SH RETURN VALUE
+.PP
+If 
+.I exec\^
+returns to the calling process an error has occurred; the return value
+will be \-1 and 
+.I errno\^
+will be set to indicate the error.
+.SH "SEE ALSO"
+exit(2), fork(2).
+.\"	@(#)exec.2	5.1 of 11/1/83

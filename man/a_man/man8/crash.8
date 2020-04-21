@@ -1,0 +1,237 @@
+'\"macro stdmacro
+.TH CRASH 8
+.SH NAME
+crash \- what to do when the system crashes
+.SH DESCRIPTION
+This entry gives at least a few clues about how to proceed if the
+system crashes.
+It can't pretend to be complete.
+.PP
+In restarting after a crash,
+always bring up the system single-user,
+as specified in
+.IR boot (8).
+Then
+perform an
+.IR fsck (1M)
+on all file systems which could have been in use at the time
+of the crash.
+If any serious file system problems are found, they should be repaired.
+When you are satisfied with the health of your disks,
+check and set the date if necessary,
+then come up multi-user.
+.PP
+To even boot \s-1UNIX\s+1 at all,
+certain files (and the directories leading to them)
+must be intact.
+First,
+the initialization program
+.B /etc/init
+must be present and executable.
+For
+.I init\^
+to work correctly,
+.BR /dev/console ,
+.B /bin/sh
+and
+.B /bin/env
+must be present.
+If one of these does not exist, the symptom is best described as thrashing.
+.I Init\^
+will go into a
+.I fork/exec\^
+loop trying to create a
+Shell with proper standard input and output.
+The file
+.B /etc/rc
+should also be there and be executable;
+the system will come up but
+will not be fully initialized without it.
+.PP
+If you cannot get the system to boot,
+a runnable system must be obtained from
+a backup medium.
+The root file system may then be doctored as
+a mounted file system as described below.
+If there are any problems with the root
+file system,
+it is probably prudent to go to a
+backup system to avoid working on a
+mounted file system.
+.PP
+.IR "Repairing disks" .
+The first rule to keep in mind is that an addled disk
+should be treated gently;
+it shouldn't be mounted unless necessary,
+and if it is very valuable yet
+in quite bad shape, perhaps it should be copied before
+trying surgery on it.
+This is an area where experience and informed courage count for much.
+.PP
+.IR fsck (1M)
+is adept at diagnosing and repairing file system problems.
+It first identifies all of the files
+that contain bad (out of range) blocks or
+blocks that appear in more than one file.
+Any such files are then identified by
+name and
+.I fsck\^
+requests permission to remove them from the
+file system.
+Files with bad blocks should be removed.
+In the case of duplicate blocks, all of the
+files except the most recently modified
+should be removed. The contents of the survivor
+should be checked after the file system is repaired
+to ensure that it contains the proper data.
+(Note that running
+.I fsck\^
+with the
+.B \-n
+option will cause it to report all problems
+without attempting any repair.)
+.PP
+.I fsck\^
+will also report on incorrect link counts and
+will request permission to adjust any that are
+erroneous. In addition, it will reconnect any
+files or directories that are allocated but have
+no file system references to a ``lost+found'' directory.
+Finally, if the free list is bad (out of range,
+missing, or duplicate blocks)
+.I fsck\^
+will, with the operators concurrence, construct a new one.
+.PP
+.IR "Why did it crash" ?
+.SM UNIX
+types a message
+on the console typewriter when it voluntarily crashes.
+Here is the current list of such messages.
+The message has the form ``panic:\ .\|.\|.'',
+possibly accompanied by other information.
+Left unstated in all cases
+is the possibility that hardware or software
+error produced the message in some unexpected way.
+.TP 3
+.B default_intr
+An interrupt has occured for which there is no device driver.
+.TP 3
+.B "I/O err in swap"
+While swapping a user process,
+a hard error occured on the swap disk.
+.TP 3
+.B "parity error"
+A parity error occured somewhere in the onboard memory.
+A message will precede this diagnostic to indicate
+where in physical memory the error occured.
+Unfortunately,
+UNIX can't diagnose the memory failure.
+If the error persists,
+the memory diagnostic should be used.
+.TP 3
+.B "iinit"
+The system was not able to read the root file system.
+This could either be a hardware or a software problem,
+but it most likely means that
+either the disk drive is damaged,
+or the root file system
+on the disk drive is damaged.
+.PP
+The following diagnostics indicate
+that something is wrong
+with the disk controller.
+.RS
+.nf
+.B "dsd: couldn't start!"
+.B "qicstart: couldn't start!"
+.B "dsd: no status posted"
+.B "dsdstatus"
+.B "dsdstart unknown type"
+.fi
+.RE
+.TP 3
+.B "riomap"
+The system attempted to issue a raw I/O request
+which was larger than the CPU can physically handle.
+.TP 3
+.B "getmajor"
+While attempting to boot,
+the system configured a disk drive
+which had no entry in the \f2bdevsw[]\fP array
+(the array of block devices).
+The system was incorrectly configured.
+.TP 3
+.B "out of memory during boot"
+The system is too large to run in the given memory.
+.PP
+The following diagnostics indicate that something
+is wrong with the buffer cache / inode tables.
+.RS
+.nf
+.B "devtab"
+.B "bflush: bad free list"
+.B "no fs"
+.B "no imt"
+.B "dsdattach: geteblk() failed"
+.fi
+.RE
+.TP 3
+.B "swap error: swapping beyond process"
+Something is wrong with the user memory management code.
+.TP 3
+.B "timeout table overflow"
+The system attempted to put a time driven event on a queue,
+and there was no room in the queue.
+If this happens often,
+then the system has been incorrectly configured.
+.TP 3
+.B "no procs"
+The system decided that it had a process slot available for a fork,
+and then redecided that it didn't.
+If this happens often,
+then the system has been incorrectly configured.
+.TP 3
+.B "init died!"
+The \f2init\fP process was killed.
+If done with a user program
+or the Shell \f2kill\fP command,
+then nothing is wrong.
+If this happens during the boot procedure,
+then something is wrong with the root file system.
+.TP 3
+.B "out of swap space"
+Too many processes for the given swap space.
+Try running a more modest number of processes.
+.PP
+The following diagnostics indicate
+problems with the kernel.
+.RS
+.nf
+.B "unexpected kernel trap"
+.B "kernel address error"
+.B "kernel bus error"
+.B "defrasterfont: font too large"
+.fi
+.RE
+.TP 3
+.B "syscall"
+The system attempted to do a system call,
+which is not allowed.
+The system was incorrectly configured.
+.PP
+The following diagnostics indicate
+that the Ethernet hardware/software has a bug.
+.RS
+.nf
+.B "nxpresent: cleared"
+.B "xns_ttstart"
+.fi
+.RE
+.TP 3
+.B "panic recursion"
+The system got a panic message
+while trying to inform the console of a panic.
+.SH SEE ALSO
+\f2IRIS Workstation Guide\fP
+.br
+adb(1), fsck(1M), boot(8).

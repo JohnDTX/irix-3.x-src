@@ -1,0 +1,62 @@
+.TH ROUTE 1 
+.SH NAME
+route \- manually manipulate the routing tables
+.SH SYNOPSIS
+.B /usr/bin/route
+[
+\f2command args\f1
+]
+.SH DESCRIPTION
+\f2route\f1 is a program used to manually manipulate the network
+routing tables.  
+.PP
+\f2route\f1 accepts three options:  \f2add\f1, to add a route;
+\f2delete\f1, to delete a route; and \f2show\f1,
+to show an existing route.
+All options have the following syntax:
+.PP
+.ti +0.5i
+route \f2option\f1 destination gateway
+.PP
+where \f2destination\f1 is a host or network to which the route is, 
+and \f2gateway\f1 is the gateway to which packets should be addressed.
+Routes to a particular host are distinguished from those to
+a network by interpreting the Internet address associated with
+\f2destination\f1.
+If \f2destination\f1 has a ``local address part'' of INADDR_ANY, 
+the route is assumed to be to a network; otherwise, it is presumed 
+to be a route to a host. 
+All symbolic names specified for a \f2destination\f1 or \f2gateway\f1
+are first looked up in the host name database, \f2hosts\f1(4).
+.PP
+\f2show\f1 can be used to display an individual route or all the 
+routes currently configured. An individual route
+is displayed by specifying the destination only.
+All the routes are displayed by not specifying a specific destination.
+.PP
+\f2add\f1 can be used to add a \f2default\f1 route. 
+If no route is available to get to a destination,
+this will be used as the default route. 
+The default route is indicated by using 0 as the destination address. 
+Typically, the default route will  be the address of a gateway.
+.PP
+\f2route\f1 uses the board device and BRDADDRT, BRDDELRT, BRDDISPRT,
+and BRDSHOWRT \f2ioctl\f1s to do its work.  
+As such, only the super user can modify the routing tables.
+.PP
+.SH DIAGNOSTICS
+.TP 5
+\f3add %s: gateway %s flags %x\f1
+The specified route is being added to the tables.  The
+values printed are from the routing table entry supplied
+in the \f2ioctl\f1 call.
+.TP 5
+\f3delete %s: gateway %s flags %x\f1
+As above, but when deleting an entry.
+A delete operation was attempted for an entry that
+wasn't present in the tables.
+.TP 5
+\f3routing table overflow\f1
+An add operation was attempted, but the EXOS FEP was
+low on resources and was unable to allocate memory
+to create the new entry.

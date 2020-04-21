@@ -1,0 +1,73 @@
+'\"macro stdmacro
+.if n .pH g1.machid @(#)machid	30.4 of 3/7/86
+.TH MACHID 1
+.SH NAME
+machid: pdp11, u3b, u3b15, u3b2, u3b5, vax, 4d60, mips, m68000, m68k \- get processor type truth value
+.SH SYNOPSIS
+.B pdp11
+.PP
+.B u3b
+.PP
+.B u3b15
+.PP
+.B u3b2
+.PP
+.B u3b5
+.PP
+.B vax
+.PP
+.B 4d60
+.PP
+.B mips
+.PP
+.B m68000
+.PP
+.B m68k
+.SH DESCRIPTION
+The following commands will return a true value (exit code of 0) if you are on
+a processor that the command name indicates.
+.RS
+.TP \w'pdp11\ \ \ 'u
+.B pdp11
+True if you are on a \s-1PDP\s+1-11/45 or \s-1PDP\s+1-11/70.
+.TP &
+.B u3b
+True if you are on a 3B20 computer.
+.TP &
+.B u3b15
+True if you are on a 3B15 computer.
+.TP &
+.B u3b2
+True if you are on a 3B2 computer.
+.TP &
+.B u3b5
+True if you are on a 3B5 computer.
+.TP &
+.B vax
+True if you are on a \s-1VAX\s+1-11/750 or \s-1VAX\s+1-11/780.
+.TP &
+.B 4d60
+True if you are on an \s-1IRIS\s+1 4D/60 computer.
+.TP &
+.B mips
+True if you are on a \s-1MIPS\s+1 or \s-1IRIS\s+1 4D/60 computer.
+.TP &
+.B m68000
+True if you are on a 68000 (\s-1IRIS\s+1 2xxx/3xxx) computer.
+.TP &
+.B m68k
+True if you are on a 68000 (\s-1IRIS\s+1 2xxx/3xxx) computer.
+.dt
+.RE
+.PP
+The commands that do not apply will return a false (non-zero) value.
+These commands are often used within makefiles (see
+.IR make (1))
+and shell procedures (see
+.IR sh (1))
+to increase portability.
+.SH SEE ALSO
+sh(1), test(1), true(1).
+.br
+make(1) in the
+.IR "Programmer's Reference Manual" .

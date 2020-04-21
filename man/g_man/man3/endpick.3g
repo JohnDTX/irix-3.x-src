@@ -1,0 +1,53 @@
+.TH endpick 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B endpick
+\- turns off picking mode 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long endpick(buffer)"
+.B "short buffer[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function endpic(buffer)"
+.B "integer*2 buffer(*)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function endpick(var buffer: Short): longint;"
+.SH DESCRIPTION
+.B endpick
+turns off picking mode.
+When a drawing routine draws in the picking region,
+the contents of the name stack are stored in
+.IR buffer ,
+along with the number of names in the stack.
+For example, if the name stack contained 5, 9, 17 when a hit occurred,
+the numbers 3, 5, 9, 17 are added to the buffer.  The magnitude of the
+value returned by 
+.B endpick
+is the number of such name lists in the buffer.
+If the value returned is positive, then all hits are recorded
+in the name lists;
+if it is negative,
+the buffer is not large enough to hold all the hits that occurred.
+.SH "SEE ALSO"
+clearhitcode, gethitcode, initnames, loadname, pick 
+.sp
+.I Programming Guide,
+Section 9.2, Picking
+.SH NOTE
+This routine is available only in immediate mode.
+.SH BUGS
+When using a debugger, do not stop the graphics
+between calls to  
+.B pick
+and
+.B endpick
+because the graphics are frozen and the results
+cannot appear on the screen.

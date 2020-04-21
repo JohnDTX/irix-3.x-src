@@ -1,0 +1,99 @@
+
+# Copyright (c) 1985 Adobe Systems Incorporated
+# PostScript and TranScript are trademarks of Adobe Systems Incorporated
+# RCSID: $Header: /d2/3.7/src/usr.bin/print/lp.spool/RCS/config,v 1.1 89/03/27 18:16:16 root Exp $
+#
+# this is a shell script that get's "sourced" when building and
+# installing TranScript software.  It sets up definitions of the
+# places that TranScript wants to do it's work.
+# This script is concerned with the software itself, not with
+# the printers.  Another script (???) is used to configure printers.
+#
+# If you change the values in this script, parts of the TranScript
+# system may need to be remade (recompiled), and reinstalled.
+
+# BINDIR
+#	This is a directory where TranScript user programs are put.
+#	It should be in the PATH of each user that want's to use them.
+#	Many UNIX sites will keep these kinds of programs separate
+#	from the regular UNIX utilites but in a well-known spot, like
+#	"/usr/local/bin", "/usr/local", etc.  Whatever you choose,
+#	make sure it's in people's search paths.  The TranScript
+#	installation sequence will write in this directory.
+BINDIR=/usr/bin
+
+# PSLIBDIR
+#	This is a directory where TranScript keeps lots of things:.
+#	spooler interface filters, font metrics files, prologue files,
+#	and executables needed by TranScript or administrators, but not
+#	by general users.
+PSLIBDIR=/usr/lib/ps
+
+# OWNER GROUP
+#	User and group names for installed files
+#	On System V systems, this is typically "bin" and "bin"
+OWNER=bin
+GROUP=bin
+
+# LINK
+#	some files have to be in both BINDIR and PSLIBDIR
+#	if BINDIR and PSLIBDIR are on the same file system,
+#	these will be linked together (with ln) if they are
+#	on different file systems, set LINK=cp so that
+#	copies will be made
+LINK=ln
+
+# PSTEMPDIR
+#	The temporary directory you want TranScript filters to use
+#	when necessary.  Sometimes this may need to hold a large print
+#	file, so choose a tmp directory on a filesystem with enough
+#	space.
+PSTEMPDIR=/usr/tmp
+
+# MAN1 MAN7 MAN8
+#	The places you want the on-line manual pages installed.
+#	If you want them all in the same place, 
+#	(e.g., /usr/man/manl), set them all to that.
+MAN1=/usr/man/u_man/man1
+MAN7=/usr/man/a_man/man7
+MAN8=/usr/man/a_man/man8
+
+# DITDIR
+#	DITDIR/devpsc is where the "ditroff" fonts used by 
+#	psdit and psroff go.
+DITDIR=/usr/lib/font
+
+# MAKEDEV 
+#	is the FULL pathname of the makedev program for ditroff
+#	(for Berkeley ditroff, this file is called "devconfig")
+#	You may have to go hunting to find it (maybe even recompile it)
+#	If you do not have ditroff (i.e., don't have makedev), set 
+#	MAKEDEV=boguscmd
+MAKEDEV=/usr/bin/makedev
+
+# TROFFFONTDIR
+#	This is the directory where the 
+#	utility "ptroff" and "pscat" find their fonts.
+#	DON'T make it /usr/lib/font if you can help it!
+TROFFFONTDIR=$PSLIBDIR/troff.font
+
+# BANNERFIRST BANNERLAST
+#	These determine the default actions to take with job banner pages.
+#	These pages (printed by the spooler to identify a job) may
+#	be printed either before the job itself (so that you know
+#	by looking in the output tray whose print job is active) or
+#	after the job (so that they stack nicely), or both, or neither.
+#	These flags may be set on a per-printer basis, so you don't need
+#	to worry about them much here.
+BANNERFIRST=0
+BANNERLAST=1
+
+# VERBOSELOG
+#	Indicates that verbose job logging should take place in the 
+#	printer log files.  It can be reset on a per-printer basis,
+#	so don't worry about it here.
+VERBOSELOG=1
+
+
+export BINDIR PSLIBDIR PSTEMPDIR TROFFFONTDIR DITDIR MAKEDEV \
+	MAN1 MAN7 MAN8 VERBOSELOG BANNERFIRST BANNERLAST LINK OWNER GROUP

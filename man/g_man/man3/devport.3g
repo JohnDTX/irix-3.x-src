@@ -1,0 +1,56 @@
+.TH devport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B devport 
+\- assigns a serial port to an external graphics device 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "devport(dev,portno)"
+.B "Device dev;"
+.B "long portno;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine devpor(dev,portno)"
+.B "integer*4 dev, portno"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure devport(dev, portno: longint);"
+.SH DESCRIPTION
+There are four serial ports on the back panel of the IRIS, ports 0 through 3.
+Port 0 connects the keyboard to the IRIS system. The remaining
+ports connect additional terminals or
+graphics peripherals, such as a dial and button box or 
+a digitizing tablet. 
+.PP
+The system software assumes that
+a dial and button box or a 
+digitizing tablet will be connected to port 3. However, if
+both a dial and button box and a digitizing tablet 
+are used with the IRIS, you must tell the system
+which port is being used for each device. 
+.B devport
+assigns a serial port to the specified device. You must
+specify a device number for the peripheral
+and a port number between 1 and 3. 
+(See Appendix A for device numbers.)  For example,
+.B devport(DIAL0,2)
+followed by 
+.B devport(BPAD0,3)
+indicates the dial and button box is connected to
+port 2 and the digitizing
+tablet is connected to port 3.
+.SH "SEE ALSO"
+The manual page for the following routine is located in the 
+.I Unix
+.I Programmer's
+.I Manual,
+Volume I:  devport(1)
+.SH "NOTE"
+Use this routine before using any  
+input peripherals.

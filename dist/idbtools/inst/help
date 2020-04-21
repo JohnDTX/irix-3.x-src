@@ -1,0 +1,145 @@
+@ _startup
+
+** Software Installation Tool
+
+The following words are specially recognized as answers to any of the
+questions the software installation tool will ask:
+
+	help		displays a message on how to answer the question
+	verbose		(default) display file names as they are installed
+	terse		don't display file names as they are installed
+	sh		spawn a UNIX shell
+	quit		terminates the installation
+
+@ _type
+
+There are two types of installation.  A "build" assumes that the disk
+is being initially built up; that is, before the installation started,
+the disk was (or was considered to be) empty of user-generated files
+and other useful data.  When a build is begun, new file systems must be
+made.  (Once the new, empty file systems are made, they need not be
+remade until all new software is installed, even if the installation is
+interrupted and restarted for some reason.)
+
+An "update" assumes that there are user-generated files on the disk,
+and/or user-altered system configuration files (/etc/passwd,
+/etc/sys_id, /etc/hosts, and so on.)  The existing file systems will be
+left as-is; previously installed software will be removed, except for
+configuration files, and user-generated files will be retained.  This
+is the typical case.
+
+@ _mkfs
+
+The root and user disk partitions must have file systems made on them
+before software can be loaded on them to be used under UNIX.  If the
+disk has already been in use, it will more than likely already have
+file systems on it.  Otherwise, file systems will have to be made.
+Making file systems destroys any data that may already be on the disk.
+You should make new file systems when you are starting a "build"; if
+you are continuing a previosly-started build, or are doing an update,
+you should not make file systems.  You can answer this question "y" to
+make new file systems, and "n" to leave the existing file systems as
+is.
+
+@ _more
+
+Answer "y" if there is more software to be installed; e.g. if there is
+more standard system software to be installed, or if there are options
+to be installed.  If all software has been installed, answer "n".
+
+@ _proceed
+
+Answer "n" if you want to review the software product, image, and
+subsystem selections again.  Answer "y" if you are satisfied with them
+and want to proceed with the installation.  You can type "quit" to
+abort the installation.
+
+@ _pselect
+
+A three-level hierarchy describes the software to be installed.  The
+first first level is a software product, the second are the images
+within the product, and the third are the subsystems within the
+images.  An image is a major division within the product; typically
+there is a "software" image and a "man page" image.  Each subsystem is
+a logically or physically related set of files to be installed (or
+removed) as a unit.
+
+This series of questions allows you to select specific products,
+images, and/or subsystems to be installed.  A "yes" or "no" answer at
+any level applies to all lower levels as well (i.e. answering "yes" to
+an image selects all subsystems within the image).  To pick and choose
+among the lower level items answer "p".  This will give you the
+opportunity to answer questions about each lower-level item (i.e. image
+or subsystem).
+
+@ _source
+
+A distribution source is a location from which the distribution is to
+be read.  This is normally cartridge tape; the name of the source would
+be "/dev/nrtape", which is the no-rewind tape device.  The second most
+likely source is a remote tape on a machine running the TCP/IP
+protocol, which would be "hostname:/dev/nrtape".
+
+@ _type
+
+When a disk is new, or is being treated as new, the installation type
+should be "build".  New file systems should be made when a build is
+started; you will be asked about this momentarily.
+
+When a disk is already in use and contains user files, and user-altered
+configuration files, the new software should be installed as an
+"update".  This will preserve as much of the existing disk data as
+possible, without removing user files or user-altered configuration
+files.
+
+Answer "b" to start fresh, and "u" to install software on a
+previously-running system.
+
+@ _pick
+ 
+The current series of questions allows you to select the software to be
+installed from the software product(s) currently being accessed.  You will
+select products, and then images within those products, and then subsystems
+within those images.  There are three possible answers for these questions:
+
+	pick	Select the product, image, or subsystem.  You will then be
+		asked about each lower-level image and/or subsystem.
+
+	yes	Select the product, image, or subsystem, and all lower-level
+		images and/or subsystems.
+
+	no	Reject the product, image, or subsystem, and all lower-level
+		images and/or subsystems.
+
+@ _space
+
+Because the estimated number of disk blocks required to install the selected
+software is greater than the number of disk blocks available, there is a
+chance that the installation will fail due to lack of disk space.  If this
+happens, the full file system will be left in an indeterminate state, and
+recovery and/or reinstallation procedures will be required.  Possibilities:
+
+	quit	Immediately terminate the installation tool.  Recommended
+		for those who need help in solving the problem.
+
+	sh	Escape to a UNIX subshell, from which "df" will report on
+		space available as you remove unneeded files from /root and
+		/root/usr.  Recommended only for those with UNIX experience.
+	
+	yes	Proceed with installation anyway.  Recommended for gamblers
+		when the numbers are close.
+
+	no	Discontinue current installation; remain in tool.  Recommended
+		when a smaller set of software can be installed.
+
+@ _required
+
+Certain software products contain subsystems that are required for basic
+system functionality.  Under any but the most unusual circumstances, these
+subsystems should be installed.  You have deselected one or more such
+subsystems by answering "n" to the subsystem, the image containing it, or
+the product itself.  You can pass through the series of questions for this
+product again by answering "y", and select the required subsystems, or
+ignore the warning if you have reason to do so, and proceed with the
+installation by answering "n".
+

@@ -1,0 +1,37 @@
+.TH qbutton 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I qbutton
+- queue a button
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qbutton(b)"
+.B "Device b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qbutto(b)"
+.B "integer*2 b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qbutton(b: Device);"
+.sp
+.SH DESCRIPTION
+.I Qbutton
+adds the given button to the list of queued devices.
+Whenever button \f3b\fP changes state (goes from 
+.I TRUE
+to 
+.I FALSE
+or vice versa), an entry is made in the event queue.
+The entry has a type (the device number) and some data,
+either 
+.I TRUE
+or 
+.I FALSE.
+.SH "SEE ALSO"
+.I getbutton, qkeyboard, qvaluator, setbutton, tie, unqbutton
+.SH NOTE
+This command can only be used in immediate mode.

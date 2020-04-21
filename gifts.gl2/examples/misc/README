@@ -1,0 +1,147 @@
+
+KNOBS - A DEMO PROGRAM USING THE DIAL & BUTTON BOX
+
+The purpose of the program is two-fold: 
+
+1. To exercise all the dials and all the buttons on the boxes as well as
+   the text display and the leds for each of the buttons.
+
+2. To show a simple example of interfacing to the Dial & Button Box using
+   the graphics library.
+
+The program is basically an enhanced version of "etch-a-sketch".  The dials 
+are used in pairs (one for X movement, one for Y movement). 
+
+Program start up:
+================
+
+When the program starts it clears the screen to a neutral "etch-a-sketch grey"
+and then procedes to light up all of the leds in the button array one at a  
+time.  It starts out with the led in the top left hand corner, goes across
+the row to the right, goes to the left side of the next row, and procedes
+until it gets to the bottom right hand corner, and then starts all over again.
+While this is happening, the text display should read "PRESS 31".
+
+To stop this process, press the button on the right end of the bottom row 
+(button 31).
+
+Dial pair selection:
+===================
+
+There are four pairs of valuators (dials) available to move and draw on the
+screen.  Only one of the pairs is available at any one time.  Which pair is
+active is determined by the four buttons on the left-most column of the 
+button array.  The top button of the column selects the top pair, the next
+button selects the next pair down, and so on.  The left dial of the pair 
+controls the X movement while the right one controls the Y movement.
+
+Choosing a pair will cause the led for the appropriate button to light up.
+
+Drawing color selection:
+=======================
+
+Lines can be drawn on the screen in any of 7 different colors.  There are two 
+ways to change the current line drawing color.  One is to press one of the 
+color selection buttons in the button array (the four buttons on the top row
+of the array and the three left-most buttons on the bottom row).  The other 
+way to change the color is to press the right mouse button.  For each time 
+the mouse button is pressed the color increments by one.  When the color is 
+color 7 (light blue) and the button is pressed, the color starts back at color
+1 (black). 
+
+In either case, choosing a new color will cause the button led for that color 
+to light up.
+
+Clearing the screen:
+===================
+
+To clear the screen, press the right-most button of the bottom row.
+
+Using the mouse buttons:
+=======================
+
+The left mouse button allows you to draw a line from the current screen 
+position to the position of the mouse cursor when the button is pressed.
+The line is drawn in the current line drawing color.  Although you can 
+place the mouse cursor anywhere on the screen, the line will not extend 
+beyond the X and Y limits given below:
+
+			MIN	MAX
+		       -----   -----
+		X:      100     924
+		Y:      100     678
+
+The middle mouse button allows you to move the current screen position 
+anywhere within the limits given above, but no line will be drawn from the 
+previous screen position to this new screen position.
+
+The right mouse button, as discussed before, allows you to cycle through
+the available drawing colors by pressing the button.  Each time the button 
+is pressed, the next color becomes the current drawing color.  The led for 
+the color selection buttons changes as the mouse button is pressed to 
+indicate which color is the current drawing color.
+
+Drawing circles and squares using the buttons:
+=============================================
+
+The remaining buttons which have not been described draw circles or squares
+of predetermined sizes and colors centered at the current screen position. 
+
+The five buttons in the second row from the top draw circles in various sizes.  
+The five buttons in the third row draw filled circles of various sizes.
+The five buttons in the fourth row draw squares of various sizes.
+The five buttons in the fifth row draw filled squares of various sizes.  
+
+For each of these rows, the buttons on the left draw the larger objects, while
+the buttons on the right draw the smaller objects.
+
+Each time any of these buttons is pressed, the text display will show either
+"CIRCLE" or "SQUARE" depending on the button you pushed.
+
+Summary of button functions:
+===========================
+
+Switch (button) numbers are shown in each location.
+
+
+                    ------  ------  ------  ------ 
+                    |    |  |    |  |    |  |    |
+                    |  0 |  |  1 |  |  2 |  |  3 |
+                    |    |  |    |  |    |  |    |
+                    ------  ------  ------  ------ 
+                     black   red     green   blue
+
+            ------  ------  ------  ------  ------  ------
+            |    |  |    |  |    |  |    |  |    |  |    |
+            |  4 |  |  5 |  |  6 |  |  7 |  |  8 |  |  9 |
+            |    |  |    |  |    |  |    |  |    |  |    |
+            ------  ------  ------  ------  ------  ------
+            pair 4  ----------- circles ------------------
+
+            ------  ------  ------  ------  ------  ------
+            |    |  |    |  |    |  |    |  |    |  |    |
+            | 10 |  | 11 |  | 12 |  | 13 |  | 14 |  | 15 |
+            |    |  |    |  |    |  |    |  |    |  |    |
+            ------  ------  ------  ------  ------  ------
+            pair 3  -------- filled circles --------------
+
+            ------  ------  ------  ------  ------  ------
+            |    |  |    |  |    |  |    |  |    |  |    |
+            | 16 |  | 17 |  | 18 |  | 19 |  | 20 |  | 21 |
+            |    |  |    |  |    |  |    |  |    |  |    |
+            ------  ------  ------  ------  ------  ------
+            pair 2  ----------- squares ------------------
+
+            ------  ------  ------  ------  ------  ------
+            |    |  |    |  |    |  |    |  |    |  |    |
+            | 22 |  | 23 |  | 24 |  | 25 |  | 26 |  | 27 |
+            |    |  |    |  |    |  |    |  |    |  |    |
+            ------  ------  ------  ------  ------  ------
+            pair 1  -------- filled squares --------------
+
+                    ------  ------  ------  ------ 
+                    |    |  |    |  |    |  |    |
+                    | 28 |  | 29 |  | 30 |  | 31 |
+                    |    |  |    |  |    |  |    |
+                    ------  ------  ------  ------ 
+                    yellow  magenta lt blue  clear

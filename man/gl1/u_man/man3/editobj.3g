@@ -1,0 +1,39 @@
+.TH editobj 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I editobj
+- open an object for editing
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "editobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine editob(obj)"
+.B "integer obj"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure editobj(obj: Object);"
+.sp
+.SH DESCRIPTION
+.I Editobj
+opens an object for editing.  A
+command pointer acts as a cursor for appending
+new commands.  The command pointer is
+initially set to the end of the object.  Graphics commands are
+appended to the object until either a \f2closeobj\f1 or pointer
+positioning command (\f2delete\f1, \f2insert\f1, or \f2replace\f1)
+is executed.  The user need not be concerned
+about storage allocation.
+Objects grow and shrink automatically as commands are added and deleted.
+.PP
+If 
+.I editobj
+specifies an undefined object, an error message is printed.
+.SH "SEE ALSO"
+.I delete, insert, replace
+.SH NOTE
+This command can only be used in immediate mode.

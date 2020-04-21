@@ -1,0 +1,104 @@
+'\"macro stdmacro
+.TH YPSET 1M
+.SH NAME
+ypset \- point ypbind at a particular server
+.SH SYNOPSIS
+.B ypset
+[
+.BR \-V1\| | \|\-V2
+] 
+[ \f3\-h \f1host ]
+[ \f3\-d \f1domain ] server
+.SH DESCRIPTION
+.I ypset 
+tells 
+.I ypbind 
+to get YP services for the specified
+.I domain 
+from the 
+.I ypserv 
+process running on 
+.IR server .
+If 
+.I server
+is down, or isn't running 
+.IR ypserv , 
+this is not discovered until a YP client process tries to 
+get a binding for the domain.  At this point, the binding set by
+.I ypset
+will be tested by 
+.IR ypbind .  
+If 
+the binding is invalid, 
+.I ypbind
+will attempt to rebind for the same domain.
+.LP
+.I ypset 
+is useful for binding a client node which is not on a broadcast net,
+or is on a broadcast net which isn't running a YP server host.  
+It also is useful for debugging YP client applications, for instance 
+where a YP map only exists at a single YP server host.  
+.LP
+In cases where several hosts on the local net are supplying YP services, it
+is possible for 
+.I ypbind 
+to rebind to another host even while you attempt to
+find out if the 
+.I ypset 
+operation succeeded.  That is, you can type
+"ypset host1", and then "ypwhich", which replies: "host2", which
+can be confusing.  This is a function of the YP subsystem's attempt to
+load-balance among the available YP servers, and occurs when
+.I host1
+does not respond to 
+.I ypbind 
+because it is not running 
+.I ypserv 
+(or is overloaded), and
+.IR host2 ,
+running
+.IR ypserv ,
+gets the binding.
+.LP
+.I server
+indicates the YP server to bind to, and
+can be specified
+as a name or an IP address.  If specified as a name,
+.I ypset 
+will attempt to use YP services to resolve the name to an IP address.  
+This will work only if
+the node has a current valid binding for the domain in question.  
+In most cases,
+.I server
+should be specified as an IP address.
+.LP
+Refer to \f2ypfiles\f1(4) and \f2ypserv\f1(1M) for an overview of the yellow
+pages.
+.SH OPTIONS
+.IP "\f3\-V1\f1" .8i
+Bind
+.I server
+for the (old) v.1 YP protocol.
+.IP "\f3\-V2\f1"
+Bind
+.I server
+for the (current) v.2 YP protocol.  
+.IP
+If no version is supplied, 
+.IR ypset ,
+first attempts to set the domain for the (current) v.2 protocol.
+If this attempt fails, 
+.IR ypset ,
+then attempts to set the domain for the (old) v.1 protocol.
+.IP "\f3\-h \f2host\f1"
+Set ypbind's binding on 
+.IR host ,
+instead of locally.  
+.I host
+can be specified as a name or as an IP address.  
+.IP "\f3\-d \f2domain\f1"
+Use
+.I domain ,
+instead of the default domain.
+.SH "SEE ALSO"
+ypwhich(1), ypserv(1M), ypfiles(4)

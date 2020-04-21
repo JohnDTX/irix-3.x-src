@@ -1,0 +1,124 @@
+Kipp:
+
+I don't think i understand the architecture of gsh.  I have a (ahem)
+slightly modified mex that reads my ".winit" file, which has the title,
+position, size, and optional non-standard command for my "standard"
+windows.  When my mex comes up, it generates these windows in standard
+places on the screen.
+
+If i use "gsh" as the command that mex execs when it fires up the
+windows, they don't survive.  Isn't gsh just a process?  Why is it
+dying?  And why does it keep saying "pututline returns NULL"?
+
+Shouldn't the window be unattached when it's shrunk?  I mean, you can't
+do a lot with it.
+
+And the gsh.icon looks pretty different when you don't have a whole
+lotta bit planes!  It's quite colorful.
+
+I know... i ask a lotta questions for somebody from New Jersey...
+
+One of my dreams is windows without mice.  I don't think mice are
+necessary for the bulk of operations.  I think they are a slow and
+painful way of telling the window manager what you want, because (1)
+the domain is so large and most of probably always go the same places
+anyway, and (2) you have to take your hands off the keyboard.  Taking
+your hands off the keyboard is not bad when window operations are
+relatively infrequent, but when you get into "bouncing all over the
+place" mode, it's bad.
+
+You've gone a long way toward making it possible to get away from the
+mouse by making the title settable by an escape sequence and so on.
+I'd like to do the other common operations without the mouse, too.
+Here's the scenario: log in and watch windows appear according to the
+specs in your startup file, e.g. the console in the center of a row of
+five windows equally spaced on a lower-left to upper-right diagonal,
+each running an arbitrary command with an arbitrary title, and be able
+to select them by smacking keypad keys (e.g. pf1 through pf4 to
+popattach the outer four windows, and enter to popattach the console.)
+Something else i had in my 3.3.1 version of mex was to look at the
+control and shift keys when a keypad key went down; control meant
+nopop, shift meant create (a standard window in a standard place
+according to the "init" file), and control-shift meant destroy.  This
+got me entirely away from the mouse, and it was real nice.  A real
+pleasure to use.
+
+- donl
+Kipp,
+
+Could you incorporate some sort of mex checking mechanism.  I found out
+today that starting up a gsh window without mex can become a tedious
+task to regain control of the console window.  Something that will complain
+that mex is not running will do quite nicely.
+
+Thanks!
+
+						--- Dave
+
+It would be really nice to add a function to gsh's 'shrink window'
+capability that would facilitate shrinking a window and having it notify
+you when a particular process is completed, say, by blinking.  It may be
+sufficient to have this behavior begin when the window recieves new output.
+Then, for example, you could disable messages, do a 'wait', shrink the window,
+and wait until the window starts blinking (or changes color, or something).
+
+-- gb
+Would it help non-cognoscenti if the error message gave the full pathname
+of the file with the bad magic number?
+Kipp,
+
+Occasionally I've had a need to open a gsh window within a shell script.
+One of the problems I've encountered is that I have a need to wait on the
+window until it is closed.  A -F flag which would startup the window int
+foreground mode would be a nice feature.  Also, an interesting feature
+might be to have a -T option which would report the terminal device which
+is associated with the window.  In this way, a shell script could write
+to and read from the window.
+
+Just some ideas that can wait.
+
+					--- Dave
+
+>From vjs  Mon Mar 17 10:08:53 1986 remote from olympus
+Received: by olympus.UUCP (4.12/4.7)
+	id AA03527; Mon, 17 Mar 86 10:08:53 pst
+Date: Mon, 17 Mar 86 10:08:53 pst
+From: olympus!vjs (Vernon Schryver)
+Message-Id: <8603171808.AA03527@olympus.UUCP>
+To: kipp
+Subject: window feature
+
+Sun has a sometimes nice feature in their windows.  The menu you get
+from within a text window includes a selection called (something like)
+'page mode on'.  It is a toggle, so that when you have selected it,
+the next time you try the menu, you see 'page mode off'.  It works
+very much as if the window automatically typed ^S each time the output
+from a single command fills the screen.  (It does the right thing on
+the second and subsequent screen loads.)  Because it is done by the
+windowing system, it does the right thing for the current size of the
+window.  Because it some how has a notion of 'command,' it does not
+hassle you if you simple do a bunch of little commands, which
+eventually start to scroll off the top of the screen.
+I wish I there was a 'move' entry on the gsh menu
+I finally figured out how 'clone' sometimes creates a wincwo with
+the wrong EOF character (stty -a says eof =^a).
+
+If you go to your console window, and say something like 'man getc', and
+leave that window with more(1) running, and then clone some other
+gsh window, you will find the new gsh window has EOF=^a.  This is 
+presumably because /dev/console has been set to RAW by more(1).
+have you considered 'de-attaching' a window when you shrink it?  After
+shrinking a window, the next thing you are likely to want to do is to
+either move it or attach or select another window.  De-attaching
+the shrunk window would make it easier to move.
+It's too bad that gsh does not take a quadruple of colors like textcolors
+so that I could set my cursor color.  Too bad there is not way to set the
+cursor color at all.
+how about making the default/initial position of windows vary?  They could
+'stack up'.  (this only applies with -I).  If their initial position 
+was something like their current position plus (1/4 inch, 1/4 inch)*pty number,
+they would stack.
+
+It's too bad the -I option does not accept an optional initial window
+position, or that there is no initial-window-position option.
+it would be nice if gsh would discard input while it is 'iconized'

@@ -1,0 +1,198 @@
+'\"macro stdmacro
+.TH SPELL 1
+.SH NAME
+spell, hashmake, spellin, hashcheck \- find spelling errors
+.SH SYNOPSIS
+.B spell
+[
+.B \-v
+] [
+.B \-b
+] [
+.B \-x
+] [
+.B \-l
+] [
+.BR + local_file
+] [ files ]
+.PP
+.B /usr/lib/spell/hashmake
+.PP
+.B /usr/lib/spell/spellin
+n
+.PP
+.B /usr/lib/spell/hashcheck
+spelling_list
+.SH DESCRIPTION
+.I Spell\^
+collects words from the named
+.I files\^
+and looks them up in a spelling list.
+Words that neither occur among nor are derivable
+(by applying certain inflections,
+prefixes, and/or suffixes) from words in the spelling list
+are printed on the standard output.
+If no
+.I files\^
+are named,
+words are collected from the standard input.
+.PP
+.I Spell\^
+ignores most
+.IR troff\^ (1),
+.IR tbl\^ (1),
+and
+.IR eqn\^ (1)
+constructions.
+.PP
+Under the
+.B \-v
+option, all words not literally in the spelling list are printed,
+and plausible derivations from the words in the spelling list are indicated.
+.PP
+Under the
+.B \-b
+option, British spelling is checked.
+Besides preferring
+.IR centre ,
+.IR colour ,
+.IR programme ,
+.IR speciality ,
+.IR travelled ,
+etc.,
+this option insists upon
+.I -ise\^
+in words like
+.IR standardise ,
+Fowler and the
+.SM OED
+to the contrary
+notwithstanding.
+.PP
+Under the
+.B \-x
+option, every plausible stem is printed with
+.B =
+for each word.
+.PP
+By default,
+.I spell\^
+(like
+.IR deroff\^ (1))
+follows chains of included files
+.RB ( .so
+and
+.B .nx
+.IR troff\^ (1)
+requests),
+.I unless\^
+the names of such included files begin with
+.BR /usr/lib .
+Under the
+.B \-l
+option,
+.I spell\^
+will follow the chains of
+.I all\^
+included files.
+.PP
+Under the
+.BI + local_file\^
+option, words found in
+.I local_file\^
+are removed from
+.IR spell\| 's
+output.
+.I Local_file\^
+is the name of a user-provided file that contains a sorted list of words,
+one per line.
+With this option, the user can
+specify a set of words
+that are correct spellings (in addition to
+.IR spell\| 's
+own spelling list)
+for each job.
+.PP
+The spelling list is based on many sources,
+and while more haphazard than an ordinary
+dictionary, is also more effective with respect to
+proper names and popular technical words.
+Coverage of
+the specialized vocabularies of biology,
+medicine, and chemistry is light.
+.PP
+Pertinent auxiliary files may be specified by
+name arguments, indicated below with their
+default settings (see
+.SM
+.IR FILES ).
+Copies of all output
+are accumulated in the history file.
+The stop list filters out misspellings (e.g., thier=thy\-y+ier)
+that would otherwise pass.
+.PP
+Three routines help maintain and check the hash lists used by
+.IR spell :
+.TP "\w'\f3hashcheck\fP\ \ \ 'u"
+.B hashmake
+Reads a list of words from the standard input and
+writes the corresponding nine-digit hash code on the standard output.
+.TP
+.B spellin
+Reads
+.I n\^
+hash codes from the standard input and writes a compressed spelling list on the
+standard output.
+.TP
+.B hashcheck
+Reads a compressed
+.I spelling_list\^
+and recreates the nine-digit hash codes for all the words in it;
+it writes these codes on the standard output.
+.SH EXAMPLE
+.IP
+spell filea fileb filec > misteaks
+.PP
+would put a list of the words from 
+"filea", "fileb" and "filec" that
+were not part of the on-line dictionary into 
+file "misteaks".
+The on-line dictionary rejects technical terms and
+proper names it does not know and treats them as
+misspellings.
+.SH FILES
+.PD 0
+.TP "\w'H_SPELL=/usr/lib/spell/spellhist\ \ 'u"
+.SM D_SPELL\*S=/usr/lib/spell/hlist[ab]
+hashed spelling lists, American & British
+.TP
+.SM S_SPELL\*S=/usr/lib/spell/hstop
+hashed stop list
+.TP
+.SM H_SPELL\*S=/usr/lib/spell/spellhist
+history file
+.TP
+/usr/lib/spell/spellprog
+program
+.PD
+.SH SEE ALSO
+deroff(1),
+eqn(1),
+sed(1),
+sort(1),
+tbl(1),
+tee(1),
+troff(1).
+.SH BUGS
+The spelling list's coverage is uneven;
+new installations will probably wish to
+monitor the output for several months to gather
+local additions;
+typically, these are kept in a separate local file
+that is added to the hashed
+.I spelling_list\^
+via
+.IR spellin .
+.br
+The British spelling feature was done by an American.
+.\"	@(#)spell.1	5.1 of 11/10/83

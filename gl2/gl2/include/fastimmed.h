@@ -1,0 +1,9 @@
+#define UNIX
+#define IP2
+#define DC4
+#define UC4
+#include "gl2/globals.h"
+#include "gl2/gltypes.h"
+#include "gl2/immed.h"
+#include "gl2/imsetup.h"
+#include "gl2/glerror.h"

@@ -1,0 +1,188 @@
+'\"macro stdmacro
+.TH EX 1
+.SH NAME
+ex, edit \- text editor
+.SH SYNOPSIS
+.B ex
+[
+.B \-
+] [
+.B \-v
+] [
+.B \-t 
+tag
+] [
+.B \-r
+] [
+.BR \+command
+]
+name ...
+.br
+.B edit
+[
+ex options
+]
+.SH DESCRIPTION
+.I Ex\^
+is the root of a family of editors:
+.IR edit ,
+.I ex\^
+and
+.IR vi .
+.I Ex\^
+is a superset of
+.IR edit ,
+with the most notable extension being a display editing facility.
+Display based editing is the focus of
+.IR vi .
+.PP
+If you have not used
+.IR ed ,
+or are a casual user, you will find that the editor
+.I edit\^
+is convenient for you.
+It avoids some of the complexities of
+.I ex\^
+used mostly by systems programmers and persons very familiar with
+.IR ed .
+.PP
+If you have a \s-2CRT\s0 terminal, you may wish to use a display
+based editor; in this case
+see
+.IR vi\^ (1),
+which is a command which focuses on the display editing portion of
+.IR ex .
+.PP
+The following options are recognized:
+.TP
+.B \-
+suppresses all interactive-user feedback, as when processing editor
+scripts in command files.
+.TP "\w'\f3\-v\f1\ \ 'u"
+.B \-v
+Equivalent to using
+.I vi\^
+rather than 
+.IR ex .
+.TP
+.B \-t
+Equivalent to an initial
+.I tag\^
+command, editing the file containing the
+.I tag\^
+and positioning the editor at its definition.
+.TP
+.B \-r
+Used in recovering after an editor or system crash, retrieving
+the last saved version of the named file.  If no file is
+specified, a list of saved files will be reported.
+.TP
+.BI + command
+Indicates that the editor should begin by executing the
+specified command.  If
+.I command\^
+is omitted, then it defaults to $, positioning
+the editor at the last line of the first file initially.
+Other useful commands here are scanning patterns of the form
+"/pat" or line numbers, e.g., +100 to start at line 100.
+.PP
+.I Name\^
+arguments indicate files to be edited.
+.SS Documentation
+The document,
+.IR "Edit: A tutorial\^",
+provides a comprehensive introduction to
+.I edit\^
+assuming no previous knowledge of computers or the \s-2UNIX\s0 system.
+.PP
+The
+.I "Ex Reference Manual\^"
+is a comprehensive and complete manual for the command mode features
+of
+.IR ex ,
+but you cannot learn to use the editor by reading it.
+For an introduction to
+more advanced forms of editing using the command mode of
+.IR ex ,
+see the editing documents written by Brian Kernighan for the editor
+.IR ed ;
+the material in the introductory and advanced documents works also with
+.IR ex .
+.PP
+.I "An Introduction to Display Editing with Vi\^"
+introduces the display editor
+.I vi\^
+and provides reference material on
+.IR vi .
+In addition, the
+.I "Vi Quick Reference\^"
+card summarizes the commands
+of
+.I vi\^
+in a useful, functional way, and is useful with the
+.IR Introduction .
+.SH FILES
+.PD 0
+.TP "\w'/usr/lib/ex3.7preserve\ \ \ \ 'u"
+/usr/lib/ex3.7strings
+error messages
+.TP
+/usr/lib/ex3.7recover
+recover command
+.TP
+/usr/lib/ex3.7preserve
+preserve command
+.TP
+/etc/termcap
+describes capabilities of terminals
+.TP
+\&~/.exrc
+editor startup command file, user- created in home directory
+.TP
+/tmp/EX\f2nnnnn\f1
+editor temporary
+.TP
+/tmp/Rx\f2nnnnn\f1
+named buffer temporary
+.TP
+/usr/preserve
+preservation directory
+.PD
+.SH EXAMPLE
+.IP
+ex text
+.PP
+would invoke the editor with the file named "text".  
+.SH SEE ALSO
+awk(1),
+ed(1),
+grep(1),
+sed(1),
+vi(1)
+.SH BUGS
+The
+.I undo\^
+command causes all marks to be lost on lines changed and then restored
+if the marked lines were changed.
+.PP
+.I Undo\^
+never clears the buffer modified condition.
+.PP
+The
+.I z\^
+command prints a number of logical rather than physical lines.
+More than a screen full of output may result if long lines are present.
+.PP
+File input/output errors don't print a name if the command line "\f3\-\f1"
+option is used.
+.PP
+There is no easy way to do a single scan ignoring case.
+.PP
+The editor does not warn if text is placed in named buffers and not used
+before exiting the editor.
+.PP
+Null characters are discarded in input files, and cannot appear in resultant
+files.
+.SH AUTHOR
+William Joy and Mark Horton.
+.\"	@(#)ex.1	5.1 of 11/18/83

@@ -1,0 +1,33 @@
+.TH qtest 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B qtest
+\- checks the contents of the event queue
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long qtest() "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function qtest()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function qtest: longint;"
+.SH DESCRIPTION
+.B qtest
+returns zero if the queue is empty.
+Otherwise, it returns
+the device number of the first entry.
+The queue remains unchanged.
+.SH "SEE ALSO"
+qenter, qread, qreset
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

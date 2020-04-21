@@ -1,0 +1,29 @@
+.TH getopenobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getopenobj
+\- returns the current open object 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Object getopenobj()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getope()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getopenobj: Object;"
+.SH DESCRIPTION
+.B getopenobj
+returns the number of the object that is currently open for editing. If no
+object is open, it returns -1.
+.SH SEE ALSO
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

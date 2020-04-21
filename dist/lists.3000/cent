@@ -1,0 +1,14 @@
+usr/lib/print/mprint
+usr/lib/print/tprint
+usr/lib/print/vprint
+usr/lib/print/patterns
+usr/man/a_man/man1/mkcentpr.1m
+usr/man/a_man/man1/mknetpr.1m
+usr/man/a_man/man1/rmprinter.1m
+usr/spool/lp/etc/lib/centinterface
+usr/spool/lp/etc/lib/netprinterface
+usr/spool/lp/etc/util/addclient
+usr/spool/lp/etc/util/log.rotate
+usr/spool/lp/etc/util/mkcentpr
+usr/spool/lp/etc/util/mknetpr
+usr/spool/lp/etc/util/rmprinter

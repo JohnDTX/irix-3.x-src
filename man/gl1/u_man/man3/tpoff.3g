@@ -1,0 +1,20 @@
+.TH tpoff 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2tpoff\fP - turn off the textport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "tpoff()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine tpoff"
+.sp
+.SH DESCRIPTION
+\f2Tpoff\fP turns off the textport.
+.SH "SEE ALSO"
+.I pagecolor, pagewritemask, textcolor,
+.I textport, textwritemask, tpon
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,39 @@
+'\"macro stdmacro
+.TH STIME 2 
+.SH NAME
+stime \- set time
+.SH SYNOPSIS
+.B int stime (tp)
+.br
+.B long \(**tp;
+.SH DESCRIPTION
+.I Stime\^
+sets the system's idea of the time and date.
+.I Tp\^
+points to the value of time as
+measured in seconds from 00:00:00 \s-1GMT\s0 January 1, 1970.
+.PP
+.I Stime\^
+will fail if the effective user
+.SM ID
+of the calling process is not super-user.
+.SM
+\%[EPERM]
+.SH RETURN VALUE
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+time(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#25,D0
+.B movl	tp,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)stime.2	5.1 of 10/19/83

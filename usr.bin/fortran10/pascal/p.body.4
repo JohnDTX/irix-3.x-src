@@ -1,0 +1,442 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.BODY.4.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               26-Aug-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+      procedure callstdfunc;
+        
+        procedure newtemp(var fpn: pn; fpt: pt);
+          var llc,lsize: integer;
+        begin
+        lsize := fullbytes(fpt);
+        if odd(lsize) then lsize := lsize + 1;
+        if (CALLCXP or GLOBSTATIC) and (level = 1)
+        then begin
+             llc := currentproc^.lc;
+             if odd(llc) then llc := llc + 1;
+             currentproc^.lc := llc + lsize;
+             end
+        else begin
+             llc := -currentproc^.lc;
+             if odd(llc) then llc := llc - 1;
+             llc := llc - lsize; currentproc^.lc := -llc;
+             end;
+        new(fpn,IDENTNODE,VARS);
+        with fpn^ do begin
+          node := IDENTNODE; class := VARS;
+          vkind := DRCT; vlev := level; voff := llc;
+          RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+          end;
+        end; {newtemp}
+        
+        function IsArgvStr(fpn: pn): Boolean;
+        begin
+        IsArgvStr := FALSE;
+        if fpn <> nil
+        then
+          with fpn^ do
+            if node = UNNODE
+            then
+              if unop = 12{POINTER}
+              then
+                if unarg <> nil
+                then
+                  with unarg^ do
+                    if (CHIP = M68000) or (CHIP = M68020)
+                    then begin
+                      if node = TRINODE
+                      then
+                        if triop = 16{INDEX}
+                        then IsArgvStr := tri1 = argvpn;
+                      end
+                    else begin
+                      if node = INDEXNODE
+                      then
+                        if indexop = 9{INDEX}
+                        then IsArgvStr := inxaddr = argvpn;
+                      end;
+        end; {IsArgvStr}
+        
+        function newstrpt(fsize: integer): pt;
+          var lpt: pt;
+        begin
+        if fsize > 255 then fsize := 255;
+        new(lpt,STRINGS);
+        with lpt^ do begin
+          typeno := 0; Marked := FALSE;
+          bytes := ((fsize + 2) div 2)*2; bits := 0;
+          Ftype := FALSE; form := STRINGS; stringlen := fsize;
+          end;
+        newstrpt := lpt;
+        end; {newstrpt}
+        
+        procedure math;
+          var DoubleFlag: Boolean;
+        begin
+        leftparen; expression(fsys); DoubleFlag := gattr.typtr = doubleptr;
+        if CompTypes(gattr.typtr,intptr) then float(gattr);
+        gattr.treeptr := newbinnode(ord(DoubleFlag),gattr.treeptr,nil);
+        if (gattr.typtr <> realptr) and not DoubleFlag
+        then error(122);
+        rightparen;
+        end; {math}
+        
+        procedure xchr;
+        begin
+        leftparen; expression(fsys); makescsize(gattr,2);
+        gattr.treeptr := newbinnode(0{???ARGS},gattr.treeptr,nil);
+        if not CompTypes(gattr.typtr,intptr)
+        then error(122);
+        rightparen; gattr.typtr := charptr; gattr.asize := 2;
+        end; {xchr}
+        
+        procedure xodd;
+        begin
+        leftparen; expression(fsys); makescsize(gattr,1);
+        gattr.treeptr := newbinnode(0{???ARGS},gattr.treeptr,nil);
+        if not CompTypes(gattr.typtr,intptr)
+        then error(122);
+        rightparen; gattr.typtr := boolptr; gattr.asize := 1;
+        end; {xodd}
+        
+        procedure xord(Ord4Flag: Boolean);
+        begin
+        leftparen; expression(fsys);
+        if gattr.typtr <> nil
+        then
+          if (gattr.typtr^.form > POINTERS) or (gattr.typtr = realptr) or
+             (gattr.typtr = doubleptr)
+          then error(122);
+        if gattr.asize <= 1
+        then gattr.typtr := sintptr
+        else if gattr.asize = 2
+             then gattr.typtr := intptr
+             else gattr.typtr := lintptr;
+        if Ord4Flag then makescsize(gattr,4);
+        gattr.treeptr := newbinnode(0{???ARGS},gattr.treeptr,nil);
+        rightparen;
+        end; {xord}
+        
+        procedure predsucc;
+        begin
+        leftparen; expression(fsys); minsize2(gattr);
+        gattr.treeptr := newbinnode(0{???ARGS},gattr.treeptr,nil);
+        gattr.treeptr^.binsubop := gattr.asize;
+        if gattr.typtr <> nil
+        then
+          if (gattr.typtr^.form > SUBRANGE) or (gattr.typtr = realptr) or
+             (gattr.typtr = doubleptr)
+          then error(122);
+        rightparen;
+        end; {predsucc}
+        
+        procedure abssqr(fkey: integer);
+          var lop: integer; lpn: pn;
+        begin
+        leftparen; expression(fsys);
+        if CompTypes(gattr.typtr,intptr)
+        then begin
+          minsize2(gattr);
+          if gattr.asize <= 2 then lop := 76 {ABS2} else lop := 77 {ABS4};
+          end
+        else if gattr.typtr = realptr
+          then lop := 136 {FABS4}
+          else if gattr.typtr = doubleptr
+            then lop := 137 {FABS8}
+            else begin error(122); lop := 76; end;
+        if fkey = 14 {SQR}
+        then begin
+          lop := lop + 2; {ABS-->**I} new(lpn,CSTNODE);
+          lpn^.node := CSTNODE; lpn^.csttype := intptr;
+          lpn^.cstvalu.ivalu := 2;
+          end
+        else lpn := nil;
+        gattr.treeptr := newbinnode(lop,gattr.treeptr,lpn);
+        rightparen;
+        end; {abssqr}
+        
+        procedure eofeoln(fkey: integer);
+        begin
+        if token = LPARENSY
+        then begin
+          scan; variable(fsys,FALSE);
+          gattr.treeptr := newbinnode(0{???ARGS},gattr.treeptr,nil);
+          if gattr.typtr <> nil
+          then
+            with gattr.typtr^ do
+              if form <> FILES
+              then error(175)
+              else
+                if fkey = 6 { EOLN }
+                then
+                  if not CompTypes(fileof,charptr)
+                  then error(122);
+          rightparen;
+          end
+        else gattr.treeptr := newbinnode(0{???ARGS},inputptr,nil);
+        gattr.typtr := boolptr; gattr.asize := 1;
+        end; {eofeoln}
+        
+        procedure roundtrunc;
+          var DoubleFlag: Boolean;
+        begin
+        leftparen; expression(fsys); DoubleFlag := gattr.typtr = doubleptr;
+        gattr.treeptr := newbinnode(ord(DoubleFlag),gattr.treeptr,nil);
+        if (gattr.typtr <> realptr) and not DoubleFlag
+        then error(122);
+        rightparen; gattr.typtr := lintptr; gattr.asize := 4;
+        end; {roundtrunc}
+        
+        procedure xpointer;
+        begin
+        leftparen; expression(fsys); makescsize(gattr,4);
+        gattr.treeptr := newbinnode(0{???ARGS},gattr.treeptr,nil);
+        if not CompTypes(gattr.typtr,intptr)
+        then error(122);
+        rightparen; gattr.typtr := nilptr; gattr.asize := 4;
+        end; {xpointer}
+        
+        procedure lenpos(fkey: integer);
+          var arglist: pn;
+        begin
+        arglist := nil;
+        leftparen; expression(fsys); newarg(arglist,0);
+        if not RealString(gattr) then error(122);
+        if fkey = 20 { POS }
+        then begin
+          comma; expression(fsys); newarg(arglist,0);
+          if not RealString(gattr) then error(122);
+          end;
+        rightparen;
+        gattr.treeptr := arglist; gattr.typtr := intptr; gattr.asize := 2;
+        end; {lenpos}
+        
+        procedure xconcat;
+          var arglist: pn; ExitFlag: Boolean; lpt: pt; maxsize: integer;
+        begin
+        arglist := nil; ExitFlag := FALSE; maxsize := 0; leftparen;
+        repeat
+          expression(fsys); newarg(arglist,0);
+          if RealString(gattr)
+          then maxsize := maxsize + gattr.typtr^.stringlen
+          else error(122);
+          if IsArgvStr(gattr.treeptr) then maxsize := 255;
+          if token = COMMASY then scan else ExitFlag := TRUE;
+        until ExitFlag;
+        rightparen;
+        lpt := newstrpt(maxsize);
+        newtemp(gattr.treeptr,lpt); newarg(arglist,0);
+        gattr.treeptr := arglist; gattr.typtr := lpt;
+        end; {xconcat}
+        
+        procedure xcopy;
+          var arglist: pn; lpt: pt;
+        begin
+        arglist := nil;
+        leftparen; expression(fsys); newarg(arglist,0);
+        if not RealString(gattr) then error(122);
+        if IsArgvStr(gattr.treeptr)
+        then lpt := newstrpt(255)
+        else lpt := gattr.typtr;
+        comma; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        comma; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        rightparen; newtemp(gattr.treeptr,lpt); newarg(arglist,0);
+        gattr.treeptr := arglist; gattr.typtr := lpt;
+        end; {xcopy}
+        
+        procedure blockrw;
+          var arglist: pn;
+        begin
+        arglist := nil;
+        leftparen; variable(fsys,FALSE); newarg(arglist,0);
+        if gattr.typtr <> nil
+        then if gattr.typtr^.form <> FILES then error(175)
+          else if gattr.typtr^.fileof <> nil then error(122);
+        comma; variable(fsys,FALSE); newarg(arglist,0);
+        comma; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        if token = COMMASY
+        then begin
+          scan;
+          expression(fsys);
+          makescsize(gattr,2); newarg(arglist,0);
+          if not CompTypes(gattr.typtr,intptr) then error(122);
+          end;
+        rightparen; gattr.treeptr := arglist;
+        gattr.typtr := intptr; gattr.asize := 2;
+        end; {blockrw}
+        
+        procedure xioresmem(fkey: integer);
+        begin
+        gattr.treeptr := nil;
+        if fkey = 25 {IORESULT}
+        then begin gattr.typtr := intptr; gattr.asize := 2; end
+        else begin gattr.typtr := lintptr; gattr.asize := 4; end;
+        end; {xioresmem}
+        
+        procedure xsizeof;
+          var lpn,arglist: pn; TypeFlag: Boolean; lpt: pt;
+        begin
+        arglist := nil; leftparen;
+        if token = IDENTSY
+        then begin
+          PrintErrors := FALSE; lpn := searchall([TYPES]); PrintErrors := TRUE;
+          TypeFlag := lpn <> nil;
+          end;
+        if TypeFlag
+        then begin lpt := lpn^.idtype; scan; end
+        else begin variable(fsys,FALSE); lpt := gattr.typtr; end;
+        new(lpn,CSTNODE);
+        with lpn^ do begin
+          node := CSTNODE; csttype := intptr;
+          cstvalu.ivalu := fullbytes(lpt);
+          end;
+        gattr.treeptr := lpn; gattr.typtr := intptr; newarg(arglist,0);
+        rightparen; gattr.treeptr := arglist; gattr.asize := 4;
+        end; {xsizeof}
+        
+        procedure xpwrof;
+          var arglist: pn;
+        begin
+        arglist := nil;
+        leftparen; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        rightparen; gattr.treeptr := arglist;
+        gattr.typtr := realptr; gattr.asize := 4;
+        end; {xpwrof}
+        
+        procedure scaneqne;
+          var arglist: pn;
+        begin
+        arglist := nil;
+        leftparen; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        comma; expression(fsys); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,charptr) then error(122);
+        comma; variable(fsys,FALSE); newarg(arglist,0);
+        
+   (*-->if gattr.typtr <> nil
+        then
+          with gattr.typtr^ do
+            if form = ARRAYS
+            then begin
+              if (arrayof <> charptr) or not PckdArr
+              then error(122);
+              end
+            else if gattr.typtr <> charptr then error(122);<--*)
+        
+        rightparen; gattr.treeptr := arglist;
+        gattr.typtr := intptr; gattr.asize := 2;
+        end; {scaneqne}
+        
+        procedure ubusy;
+          var arglist: pn;
+        begin
+        arglist := nil;
+        leftparen; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        rightparen; gattr.treeptr := arglist;
+        gattr.typtr := boolptr; gattr.asize := 1;
+        end; {ubusy}
+        
+        procedure callchain;
+          var i: integer; arglist: pn;
+        begin
+        arglist := nil;
+        leftparen; expression(fsys); newarg(arglist,0);
+        if not RealString(gattr) then error(122);
+        for i := 0 to 1 do begin
+          comma; variable(fsys,FALSE); newarg(arglist,0);
+          if gattr.typtr <> nil
+          then if gattr.typtr^.form <> FILES then error(175);
+          end;
+        comma; variable(fsys,FALSE); newarg(arglist,0);
+        comma; expression(fsys);
+        makescsize(gattr,2); newarg(arglist,0);
+        if not CompTypes(gattr.typtr,intptr) then error(122);
+        rightparen; gattr.treeptr := arglist;
+        gattr.typtr := intptr; gattr.asize := 2;
+        end; {callchain}
+        
+        procedure nannuminf;
+          var DoubleFlag: Boolean;
+        begin
+        leftparen; expression(fsys); DoubleFlag := gattr.typtr = doubleptr;
+        if CompTypes(gattr.typtr,intptr) then float(gattr);
+        gattr.treeptr := newbinnode(ord(DoubleFlag),gattr.treeptr,nil);
+        if (gattr.typtr <> realptr) and not DoubleFlag
+        then error(122);
+        rightparen;
+        gattr.typtr := boolptr; gattr.asize := 1;
+        end; {nannuminf}
+        
+      begin {callstdfunc}
+      with fpn^ do
+        case key of
+          1: { ABS      } abssqr(key);
+          2: { ARCTAN   } math;
+          3: { CHR      } xchr;
+          4: { COS      } math;
+          5, { EOF      }
+          6: { EOLN     } eofeoln(key);
+          7, { EXP      }
+          8: { LN       } math;
+          9: { ODD      } xodd;
+         10: { ORD      } xord(FALSE);
+         11: { PRED     } predsucc;
+         12: { ROUND    } roundtrunc;
+         13: { SIN      } math;
+         14: { SQR      } abssqr(key);
+         15: { SQRT     } math;
+         16: { SUCC     } predsucc;
+         17: { TRUNC    } roundtrunc;
+         18: { POINTER  } xpointer;
+         19, { LENGTH   }
+         20: { POS      } lenpos(key);
+         21: { CONCAT   } xconcat;
+         22: { COPY     } xcopy;
+         23, { BLOCKREA }
+         24: { BLOCKWRI } blockrw;
+         25: { IORESULT } xioresmem(key);
+         26: { SIZEOF   } xsizeof;
+         27: { PWROFTEN } xpwrof;
+         28, { SCANEQ   }
+         29: { SCANNE   } scaneqne;
+         30: { UNITBUSY } ubusy;
+         31: { MEMAVAIL } xioresmem(key);
+         32: { ORD4     } xord(TRUE);
+         33, { CALL     }
+         34: { CHAIN    } callchain;
+         35, { ISNAN    }
+         36, { ISNUM    }
+         37: { ISINF    } nannuminf;
+        end
+      end; {callstdfunc}
+      
+    begin {call}
+    fsys := fsys + [COMMASY,RPARENSY];
+    with fpn^ do
+      if pfdeclkind = STANDARD
+      then
+        if class = PROC
+        then callstdproc
+        else callstdfunc
+      else callnonstandard;
+    end; {call}
+    
+
+                                                                                                                                                                                                                                                                                                                                 

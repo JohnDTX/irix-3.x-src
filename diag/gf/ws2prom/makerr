@@ -1,0 +1,4 @@
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM2 -DPROMALONE -O -c -DGF2 -DDC4 -DUC4 -DEPROM testall.c
+"testall.c", line 186: warning: illegal pointer combination, op =
+cc68 -s -r -o gf2prom main.b -i/ws/pmII/stand/crtstand.b gl2rams.b testall.b  header.b gl2initall.b gl2bpctest.b  reset.b  mch.b betacode.b gl2bustests.b /ws/pmII/stand/libstand.a
+/oh3/engr/bin/Make: 29311 Terminated

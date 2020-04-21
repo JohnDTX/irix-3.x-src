@@ -1,0 +1,34 @@
+.TH gettp 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gettp
+\- returns the location of the current textport 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gettp(left, right, bottom, top)"
+.B "Screencoord *left, *right, *bottom, *top;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gettp(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gettp(var left, right, bottom, top: 
+.br
+.B	Screencoord);
+.SH DESCRIPTION
+.B gettp
+returns the location of the current texport in screen
+coordinates.
+.SH SEE ALSO
+textport
+.sp
+\f2Programming Guide\fP, Section 14, Textports 
+.SH NOTE
+This routine is available only in immediate mode.

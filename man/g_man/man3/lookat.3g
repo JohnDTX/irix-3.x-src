@@ -1,0 +1,41 @@
+.TH lookat 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B lookat
+\- defines a viewing transformation
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lookat(vx, vy, vz, px, py, pz, twist) "
+.B "Coord vx, vy, vz, px, py, pz; "
+.B "Angle twist;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lookat(vx, vy, vz, px, py, pz, twist)"
+.B "real vx, vy, vz, px, py, pz"
+.B "integer*4 twist"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lookat(vx, vy, vz, px py pz: Coord; 
+.br
+.B	twist: longint);
+.SH DESCRIPTION
+.B lookat
+defines the viewpoint and a reference point on the line of sight
+in world coordinates.
+The viewpoint is at \f2(vx, vy, vz)\f1.  
+The viewpoint and reference point \f2(px, py, pz)\f1
+define the line of sight.  \f2twist\f1 
+measures right-hand rotation about the z-axis in the 
+eye coordinate system.
+.SH "SEE ALSO"
+polarview
+.sp
+.I Programming Guide,  
+Section 4.2, Viewing Transformations
+

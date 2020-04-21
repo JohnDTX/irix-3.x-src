@@ -1,0 +1,36 @@
+.TH foreground 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B foreground 
+\- keeps a graphical process in the foreground 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "foreground()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine foregr"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure foreground"
+.SH DESCRIPTION
+Call \f3foreground\f1 before calling \f3winopen\f1 or
+\f3getport\fP. It keeps the process in 
+the foreground, 
+so that you can interact with it from the keyboard.
+\f3winopen\f1 normally runs a process in the 
+background.
+When the process is in the foregound, it interacts in 
+the usual way with the UNIX input/output routines.
+.SH "SEE ALSO"
+getport, winopen
+.sp
+.I Using mex ,
+Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

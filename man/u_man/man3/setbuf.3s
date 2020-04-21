@@ -1,0 +1,59 @@
+'\"macro stdmacro
+.TH SETBUF 3S 
+.SH NAME
+setbuf \- assign buffering to a stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B void setbuf (stream, buf)
+.br
+.SM
+.B FILE
+.B \(**stream;
+.br
+.B char \(**buf;
+.SH DESCRIPTION
+.I Setbuf\^
+is used after a stream has been opened but before it
+is read or written.
+It causes the character array pointed to by
+.I buf\^
+to be used instead of an automatically allocated buffer.
+If
+.I buf\^
+is a
+.SM NULL
+character pointer input/output will be completely unbuffered.
+.PP
+A constant 
+.SM
+.B BUFSIZ,
+defined in the
+.B <stdio.h>
+header file,
+tells how big an array is needed:
+.PP
+.RS
+char buf[\s-1BUFSIZ\s0];
+.RE
+.PP
+A buffer is normally obtained from
+.IR malloc (3C)
+at the time of the first
+.I getc\^
+or
+.IR putc (3S)
+on the file,
+except that the standard error stream
+.I stderr\^
+is normally not buffered.
+.PP
+Output streams directed to terminals
+are always line-buffered unless they are unbuffered.
+.SH "SEE ALSO"
+fopen(3S), getc(3S), malloc(3C), putc(3S).
+.SH NOTE
+A common source of error is allocating buffer space
+as an ``automatic'' variable in a code block, and then
+failing to close the stream in the same block.
+.\"	@(#)setbuf.3s	5.1 of 10/21/83

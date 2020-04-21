@@ -1,0 +1,61 @@
+#! /bin/sh
+#
+# Verify that critical system files are present.
+
+files="\
+/defaultboot
+/dev/console
+/dev/null
+/dev/syscon
+/dev/systty
+/dev/tty
+/etc/gettydefs
+/etc/group
+/etc/inittab
+/etc/ioctl.syscon
+/etc/passwd
+"
+
+progs="\
+/bin/cpio
+/bin/csh
+/bin/sh
+/bin/su
+/bin/sync
+/etc/bcheckrc
+/etc/getty
+/etc/init
+/etc/rc
+/etc/rc.s0
+/etc/rc.tcp
+/etc/reboot
+"
+
+message="No obviously missing critical files; OK to reboot."
+err="Missing critical files -- correct problems before rebooting."
+
+for f in $files
+do
+	case $f in
+	/dev/*)	if test ! -b $f -a ! -c $f
+		then
+			echo $f missing. ; message=$err
+		fi
+		;;
+	*)	if test ! -s $f
+		then
+			echo $f missing or zero length. ; message=$err
+		fi
+		;;
+	esac
+done
+
+for f in $progs
+do
+	if test ! -s $f -o ! -x $f
+	then
+		echo $f missing, not executable or zero length. ; message=$err
+	fi
+done
+
+echo $message

@@ -1,0 +1,93 @@
+'\"macro stdmacro
+.TH SACT 1
+.SH NAME
+sact \- print current \s-1SCCS\s+1 file editing activity
+.SH SYNOPSIS
+.B sact
+files
+.SH DESCRIPTION
+.I Sact\^
+informs the user of any impending deltas to a named
+.SM SCCS
+file.
+This situation occurs when
+.IR get\^ (1)
+with the
+.B \-e
+option has been previously executed without a subsequent
+execution of
+.IR delta\^ (1).
+If a directory is named on the command line,
+.I sact\^
+behaves as though each file in the directory were
+specified as a named file, except that
+non-\s-1SCCS\s+1
+files and unreadable files are silently ignored.
+If a name of
+.B \-
+is given, the standard input is read with each line
+being taken as the name of an
+.SM SCCS
+file to be processed.
+.PP
+The output for each named file consists of five fields
+separated by spaces.
+.RS .3i
+.TP "\w'Field 3\ \ \ \ 'u"
+Field 1
+specifies the
+.SM SID
+of a delta that currently exists in the
+.SM SCCS
+file to which changes will be made to make the
+new delta.
+.TP
+Field 2
+specifies the
+.SM SID
+for the new delta to be created.
+.TP
+Field 3
+contains the logname of the user who will
+make the delta (i.e., executed a
+.I get\^
+for editing).
+.TP
+Field 4
+contains the date that
+.B "get \-e"
+was executed.
+.TP
+Field 5
+contains the time that
+.B "get \-e"
+was executed.
+.RE
+.SH EXAMPLE
+.PP
+If the user has done a 
+.BR "get \-e" ,
+but not a 
+.B delta
+to merge the new changes, doing a 
+.IP
+sact s.test1.c
+.PP
+would show:
+.IP
+1.2 1.3 eryk 82/11/10 16:10:35
+.PP
+indicating that a new version numbered 1.3 is in the process
+of being made from version numbered 1.2 by user "eryk".
+The 
+.B get \-e
+for the file was done on 82/11/10 at 16:10:35.
+.SH "SEE ALSO"
+delta(1),
+get(1),
+unget(1).
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.\"	@(#)sact.1	5.1 of 11/9/83

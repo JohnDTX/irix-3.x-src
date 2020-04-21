@@ -1,0 +1,56 @@
+'\"macro stdmacro
+.TH FLOW 1D
+.SH NAME
+flow \- display of complex scientific data base
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/flow  
+.br
+.BR /usr/people/mexdemos/flow    \0\0(GL2 only)
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+.I Flow
+displays about 20,000 data points and a few vectors.
+The data is a three-dimensional display of the values of the Navier-Stokes
+equations for turbulent fluid flow in a channel.
+The calculation was done at NASA-Ames on, of all things, the Illiac-IV.
+.PP
+Simple mouse motions control the display.
+Press LEFTMOUSE, move the cursor, and release the button to redraw the image
+with new altitude and azimuth.
+Use MIDDLEMOUSE to control distance and twist.
+RIGHTMOUSE starts a sequence of many short twists.
+Any keyboard key switches the display from single-buffer mode (the initial
+state) to double-buffer mode or back.  Use ESC to exit from the
+program.
+.SH "DISPLAY OPTIONS (GL2 only)"
+.PP
+Upon entry into the program,
+.I flow
+is set for NTSC or high resolution output, depending on the currently
+selected monitor.
+The display monitor can be altered during program execution by
+pressing the proper control character.
+.sp
+.sp
+	Key 		Display Monitor
+.sp
+	CTRL-a		60 HZ monitor
+.br
+	CTRL-b		30 HZ monitor
+.br 
+	CTRL-c		NTSC (RS-170A) display
+.br
+	CTRL-d		PAL (European Video) display
+.sp
+.SH "WINDOW MANAGER (GL2 only)"
+.PP
+The window manager version of flow runs only under the
+60 Hz display options.
+.SH AUTHOR
+.PP
+Phil Gustafson and Herb Kuta

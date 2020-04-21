@@ -1,0 +1,35 @@
+.TH popname 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B popname
+\-  pops a name off the name stack
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popname()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popnam"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popname;"
+.SH DESCRIPTION
+.B popname
+removes the top name from the name stack.  It is used in picking and
+selecting.
+.PP
+.B popname
+is ignored outside of picking and selecting mode.
+.SH "SEE ALSO"
+gselect,
+loadname,
+pushname,
+pick
+.sp
+.I Programming Guide,
+Section 9.2, Picking

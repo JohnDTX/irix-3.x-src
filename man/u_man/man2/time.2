@@ -1,0 +1,48 @@
+'\"macro stdmacro
+.TH TIME 2 
+.SH NAME
+time \- get time
+.SH SYNOPSIS
+.B long time ((long \(**) 0)
+.PP
+.B long time (tloc)
+.br
+.B long \(**tloc;
+.SH DESCRIPTION
+.I Time\^
+returns the value of time in seconds since 00:00:00 \s-1GMT\s0, January 1, 1970.
+.PP
+If
+.I tloc\^
+(taken as an integer) is non-zero, the return value is also stored in the
+location to which
+.I tloc\^
+points.
+.PP
+.I Time\^
+will fail if
+.I tloc\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.SH RETURN VALUE
+Upon successful completion,
+.I time\^
+returns the value of time.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+stime(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#13,D0
+.B trap	#0
+.B tstl	tloc	|  time(0)?
+.B beq	1$	|  yes, return
+.B movl	tloc,A0
+.B movl	D0,A0@
+.fi
+.DT
+.\"	@(#)time.2	5.1 of 10/19/83

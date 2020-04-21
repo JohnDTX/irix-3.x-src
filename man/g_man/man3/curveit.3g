@@ -1,0 +1,37 @@
+.TH curveit 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B curveit
+\- draws a curve segment
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curveit(iterationcount)"
+.B "short iterationcount;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curvei(count)"
+.B "integer*4 count"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curveit(iterationcount: Short);"
+.SH DESCRIPTION
+.B curveit
+iterates the forward differences of the matrix on top of the transformation
+matrix stack 
+.I iterationcount 
+times; it issues a draw routine with each iteration.
+.B curveit
+accesses low-level hardware capabilities for curve
+drawing.  
+.SH "SEE ALSO"
+crv, resetls
+.sp
+.I Programming Guide, 
+Section 11.2, Drawing Curves
+

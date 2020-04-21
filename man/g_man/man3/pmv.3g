@@ -1,0 +1,94 @@
+.TH pmv 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pmv
+\- polygon move
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pmv(x, y, z)"
+.B "Coord x, y, z;"
+.IP
+.B "pmvi(x, y, z)"
+.B "Icoord x, y, z;"
+.IP
+.B "pmvs(x, y, z)"
+.B "Scoord x, y, z;"
+.IP
+.B "pmv2(x, y)"
+.B "Coord x, y;"
+.IP
+.B "pmv2i(x, y)"
+.B "Icoord x, y;"
+.IP
+.B "pmv2s(x, y)"
+.B "Scoord x, y;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pmv(x, y, z)"
+.B "real x, y, z"
+.IP
+.B "subroutine pmvi(x, y, z)"
+.B "integer*4 x, y, z"
+.IP
+.B "subroutine pmvs(x, y, z)"
+.B "integer*2 x, y, z"
+.IP
+.B "subroutine pmv2(x, y)"
+.B "real x, y"
+.IP
+.B "subroutine pmv2i(x, y)"
+.B "integer*4 x, y"
+.IP
+.B "subroutine pmv2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pmv(x, y, z: Coord);"
+.IP
+.B "procedure pmvi(x, y, z: Icoord);"
+.IP
+.B "procedure pmvs(x, y, z: Scoord);"
+.IP
+.B "procedure pmv2(x, y: Coord);"
+.IP
+.B "procedure pmv2i(x, y: Icoord);"
+.IP
+.B "procedure pmv2s(x, y: Scoord);
+.SH DESCRIPTION
+.B pmv
+moves the starting point of a filled polygon.
+You draw a typical polygon with a 
+\f3pmv\fP,
+a sequence of 
+\f3pdr\fP, 
+and close it with a 
+\f3pclos\fP.
+For example, the following sequence draws a square:
+.RS
+.sp
+.nf
+.ft 7
+.ps -2
+(0.0, 0.0, 0.0);
+pdr(1.0, 0.0, 0.0);
+pdr(1.0, 1.0, 0.0);
+pdr(0.0, 1.0, 0.0);
+pclos();\f1
+.ps
+.ft 1
+.fi
+.RE
+.sp
+All polygons must be convex.
+.SH "SEE ALSO"
+pclos, pdr, rpdr, rpmv
+.sp
+.I Programming Guide,
+Section 3.6, Polygons

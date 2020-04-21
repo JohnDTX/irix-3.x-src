@@ -1,0 +1,35 @@
+.TH isobj 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I isobj
+- tell whether a given object identification names an object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean isobj(obj)"
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function isobj(obj)"
+.B "integer obj"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function isobj(obj: Object): Boolean;"
+.sp
+.SH DESCRIPTION
+.I Isobj
+returns 
+.I TRUE
+if \f3obj\f1 names an object and 
+.I FALSE
+if it 
+does not.  It will return 
+.I TRUE
+any time after the \f2makeobj\f1 call
+for the object.
+.SH "SEE ALSO"
+.I genobj, istag, makeobj
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,63 @@
+'\"macro stdmacro
+.TH MEX 1G
+.SH NAME
+mex \- manage windows on the IRIS
+.SH SYNOPSIS
+.B mex 
+[ 
+.B \-d
+]
+[ 
+.B \-t
+titlefont ]
+.SH DESCRIPTION
+.PP
+.I mex
+(Multiple EXposure) is the IRIS window manager.
+When it is started, the existing textport is put into a window
+called the
+.I console
+which is the same size and location as the original textport.
+The console can be used to create, compile, and execute graphics
+programs, and to interact with other system utilities.
+You can change the size and location of the console, but you cannot
+delete it.
+.PP
+Normally, when the first program that does double buffering is started, all
+single buffer windows will be redrawn. 
+Similarly, when the last double buffered window is destroyed, all remaining
+windows are redrawn.
+The 
+.B \-d
+option causes the window manager to always remain in double buffer mode. 
+This will eliminate the redrawing behavior described above.  It is possible
+there will be some sacrifice on systems with fewer than 24 bitplanes.
+.PP
+With the 
+.B \-t
+option the font the window manager uses for titles may be specified. 
+A set of font files are provided in 
+.I /usr/lib/gl2/fonts.
+.PP
+After
+.I mex
+has been started, you can create additional shell windows and run graphics
+programs that create graphports.
+The directory 
+.I /usr/people/gifts/mextools 
+contains a set of
+demonstration programs and tools to use with the window manager.
+.SH EXAMPLE
+.IP
+mex \-d \-t /usr/lib/gl2/fonts/small7.fnt
+.PP
+Starts the window manager in double buffer mode.  A small font 7 pixels
+high will be used to title windows.
+.SH "FILES"
+/usr/lib/gl2/fonts/*
+.br
+/usr/people/gifts/mextools/*
+.SH "SEE ALSO"
+loadfont(1G).
+
+

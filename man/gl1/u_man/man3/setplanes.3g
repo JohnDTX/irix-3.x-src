@@ -1,0 +1,63 @@
+.TH setplanes  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setplanes
+- set the number of available planes
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setplanes(p) "
+.B "short p;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setpla(p)"
+.B "integer*2 p"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setplanes(p: Short);"
+.sp
+.SH DESCRIPTION
+.I Setplanes
+explicitly sets the number of available
+planes.  If the user requests more
+bitplanes than the system can allocate, the number
+defaults to the maximum available.  
+.TS
+center box;
+c || c s s s s
+c || c s s s s
+c || c s|c s|c 
+c || c s|c s|c 
+c || c|c|c|c|c
+n || n|n|n|n|n .
+\^	maximum available planes
+installed	=	
+planes	single buffer mode	double buffer mode	RGB mode
+\^	_	_	\^	
+\^	multimap	onemap	multimap	onemap	\^
+=
+4	4	4	2	2	4
+_
+8	8	8	4	4	8
+_
+12	8	12	6	6	12
+_
+16	8	12	8	8	16
+_
+20	8	12	8	10	20
+_
+24	8	12	8	12	24
+.TE
+Although planes are installed in groups of four, \f2setplanes(p)\f1
+where 0\(<=\f2p\f1\(<=maximum\ available\ planes allocates exactly
+\f2p\f1 planes, and \f2getplanes\f1 returns \f2p\f1.
+.PP
+\f2Setplanes\f1 can be invoked at any
+time.  It takes effect on the next call to \f2gconfig\f1. 
+.SH "SEE ALSO"
+.I doublebuffer, gconfig, getplanes,
+.I multimap, onemap, setmap, singlebuffer
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH RWALL 3X
+.SH NAME
+rwall \- write to specified remote machines
+.SH SYNOPSIS
+.nf
+.B #include <rpcsvc/rwall.h>
+.PP
+.B rwall(host, msg)
+.B char *host, *msg;
+.fi
+.SH DESCRIPTION
+.I Rwall
+causes
+.I host
+to print the string
+.I msg
+to all its users.
+It returns 0 if successful.
+.SH RPC INFO
+.nf
+program number:
+	WALLPROG
+.PP
+procs:
+	WALLPROC_WALL
+		Takes string as argument (wrapstring), returns no arguments.
+		Executes \f2wall\fP on remote host with string.
+versions:
+	RSTATVERS_ORIG
+.SH FILES
+/usr/lib/librpcsvc.a	RPC services library
+.SH SEE ALSO
+rwall(1M), shutdown(1M), rwalld(1M).
+.SH NOTE
+To compile and link a program that calls any of these routines,
+use a compile command of the form:
+.RS
+\f3cc \-I/usr/include/sun \-I/usr/include/bsd \f2prog.c\f3 \-lrpcsvc \-lsun \-lbsd\f1
+.RE

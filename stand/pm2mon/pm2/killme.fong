@@ -1,0 +1,1 @@
+cc -c -O -DMC68000 -DPM2 -DQPROM -I../include common.c

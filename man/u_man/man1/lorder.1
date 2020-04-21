@@ -1,0 +1,57 @@
+'\"macro stdmacro
+.TH LORDER 1
+.SH NAME
+lorder \- find ordering relation for an object library
+.SH SYNOPSIS
+.B lorder
+file ...
+.SH DESCRIPTION
+The input
+is one or more object or library archive
+.I files\^
+(see
+.IR ar\^ (1)).
+The standard output
+is a list of pairs of object file names,
+meaning that the first file of the pair refers to
+external identifiers defined in the second.
+The output may be processed by
+.IR tsort\^ (1)
+to find an ordering of
+a library suitable for one-pass access by
+.IR ld\^ (1).
+Note that the link editor 
+.IR ld\^ (1)
+is capable of multiple passes over an archive in the portable archive format
+(see
+.IR ar\^ (4))
+and does not require that
+.IR lorder\^ (1)
+be used when building an archive.  The usage of 
+the
+.IR lorder\^ (1)
+command may, however, allow for a slightly more efficient access of
+the archive during the link edit process.
+.SH EXAMPLE
+.IP
+ar \|cr \|library \|`\|lorder \|\(**.o \|| \|tsort`
+.PP
+builds a new library from existing
+.B \&.o
+files.
+.SH FILES
+.ta \w'\(**symref, \(**symdef\ \ \ \ 'u
+\(**symref, \(**symdef	temporary files
+.DT
+.SH "SEE ALSO"
+ar(1),
+ld(1),
+tsort(1), ar(4).
+.SH BUGS
+Object files whose names do not end with
+.BR .o ,
+even when
+contained in library archives, are overlooked.
+Their global symbols and references are attributed to
+some other file.
+.\"	@(#)lorder.1	5.1 of 11/8/83

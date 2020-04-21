@@ -1,0 +1,32 @@
+.TH getvaluator 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getvaluator
+\- returns the current state of a valuator
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long  getvaluator(dev)"
+.B "Device dev;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getval(dev)"
+.B "integer*4 dev"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getvaluator(dev: Device); longint;"
+.SH DESCRIPTION
+\f3getvaluator\f1 returns the current value (an integer) of the valuator
+.I dev.
+.SH "SEE ALSO"
+getbutton
+.sp
+\f2Programming Guide\fP,
+Section 7.3, Polling a Device
+.SH NOTE
+This routine is available only in immediate mode

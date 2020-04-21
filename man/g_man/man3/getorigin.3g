@@ -1,0 +1,36 @@
+.TH getorigin 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getorigin
+\- returns the position of a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getorigin(x, y)"
+.B "long *x, *y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getori(x, y)"
+.B "integer*4 x, y"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getorigin(var x, y: longint);"
+.SH DESCRIPTION
+.B getorigin
+returns the position of the lower-left corner of a graphics window.
+Call \f3getorigin\f1 after 
+graphics initialization.
+.PP
+When the window manager is not running, \f3getorigin\fP returns (0, 0).
+.SH "SEE ALSO"
+getport, getsize, winopen
+.sp
+.I Using mex,
+Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

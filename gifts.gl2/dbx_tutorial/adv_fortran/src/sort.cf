@@ -1,0 +1,4 @@
+int cmprec(index0,index1)
+int *index0,*index1;
+{}
+

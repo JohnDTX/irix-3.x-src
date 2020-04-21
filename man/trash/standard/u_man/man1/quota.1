@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.\" @(#)quota.1 1.1 85/12/28 SMI; from UCB 4.2
+.TH QUOTA 1  "21 August 1985"
+.UC 4
+.SH NAME
+quota \- display disk usage and limits
+.SH SYNOPSIS
+.B quota
+[
+.B \-v
+] [
+user
+]
+.SH DESCRIPTION
+.IX "quota command"  ""  "\fLquota\fP \(em display disk usage and limits"
+.IX "file system"  "display disk usage and limits quota" ""  "display disk usage and limits \(em \fLquota\fP"
+.IX display  "disk usage and limits quota"  ""  "disk usage and limits \(em \fLquota\fP"
+.IX  "limits of disk space quota"  ""  "limits of disk space \(em \fLquota\fP"
+.I Quota
+displays users' disk usage and limits. 
+Only the super-user may use the optional
+.I user
+argument to view the limits of users other than himself.
+.LP
+.I Quota
+without options displays only warnings 
+about mounted file systems where usage is over quota.
+.SH OPTIONS
+.IP \f3\-v\fP
+display user's quotas on all mounted file systems where quotas exist.
+.SH FILES
+.ta 2i
+\f2quotas\fP	quota file at the file system root
+.DT
+.SH "SEE ALSO"
+quotactl(2), quotaon(8), edquota(8), rquotad(8c)

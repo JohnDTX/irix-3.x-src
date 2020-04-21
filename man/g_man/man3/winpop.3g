@@ -1,0 +1,33 @@
+.TH winpop 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winpop
+\- moves the current graphics window in front of all other windows 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winpop()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winpop"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winpop;"
+.SH DESCRIPTION
+Multiple windows appear as a stack of windows
+that 
+can obscure each other. 
+.B winpop
+takes the current graphics window from the stack of windows and places it 
+on top.
+.SH "SEE ALSO"
+winpush
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

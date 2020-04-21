@@ -1,0 +1,220 @@
+This directory contains source for the troff postprocessor
+for the Imagen Imprint-10 laser printer.  It also contains
+the source for the font tables and DESC file for that device.
+
+There are also programs that can be used with printers that accept Impress,
+whether they were made by Imagen or not.
+
+----------------------------------------
+
+
+You may have some changes to make to the source code I've supplied. Most
+of them will have to be made in files init.h or dimpress.h. I'll
+list the more obvious ones, although there undoubtedly are some I've forgotten.
+As set up now, devi10.mk will create "di10" to generate input for the
+Imagen Imprint-10 in a way completely compatible to the di10 in DWB 1.0.
+
+
+FILE init.h
+
+    FONTDIR	- Needs to be defined as the normal troff font directory
+		  on your system. I've set it to "/usr/lib/font" which is
+		  probably correct for your system. The font directory can
+		  be set at run time (in dimpress and troff) using the -F
+		  option.
+
+    BITDIR	- Directory for Imagen-style raster files
+		  ("/usr/lib/raster"). The post-processor (dimpress) will
+		  look for new raster files for device "xxx" in directory
+		  rastxxx located in BITDIR. The -B option can be used to
+		  do run time setting of *bitdir.
+
+    OLDBITDIR	- The is the directory where you'll find the old Imprint-10
+		  raster file directory rasti10.  (/usr/lib/font/devi10)
+
+    IPR		- Full pathname for the ipr program on your system. I've set
+		  it to "/usr/bin/ipr" but that might not be right for you.
+		  If you're not running Imagen's spooling package you don't
+		  have to worry about this guy - just make sure you always
+		  call dimpress with the -t option.
+
+
+FILE dimpress.h
+
+    PR_INIT	- This defines the default values to use with the printers
+		  that are directly supported by dimpress. If you want to
+		  add a new printer just make up an appropriate line (look
+		  at the definition of Prdata) and add it to PR_INIT. The
+		  list must be terminated by an entry that has NULL defined
+		  for the value of prname, so make sure you don't put anything
+		  after the current last line. You also may not agree with
+		  some of the default values I've picked for the different
+		  printers. If you don't, change them in PR_INIT before you
+		  compile dimpress.
+
+		  The only difference between i240 and i10 is that when you
+		  use -Ti10 dimpress looks in OLDBITDIR for a raster directory
+		  called rasti10, while with -Ti240 it looks in BITDIR for
+		  rasti240. The -Ti10 option should be used to run Imprint-10s
+		  using the old raster files. That's the only option you'll
+		  need to use if you've got OLDBITDIR defined properly.
+		N.B.  this is the default setup, as distributed.
+
+    PR_NUM	- In dimpress.c pr_num refers to the line in PR_INIT (actually
+		  the index in prdata[]) that will be used as the default
+		  printer.
+----------------------------------------
+
+
+The programs included in this directory are:
+
+
+    dimpress.c	troff post-processor that generates version 2.0 Impress
+		commands. Code came from di10.c (originally dcan.c) and has
+		been extensively modified. It can now generate output using
+		raster files in either the old (versetec) or new (Imagen's)
+		format. Reasonable output will be produced on any printers
+		that accept Impress, independent of the resolution of the
+		raster files being used.  Creates an output file in /tmp/dimpa*
+		and calls ipr to put its output in spool directory.
+		ipr and its subsidiary programs are supplied by Imagen.
+
+		The known printers are i300, i240, i480, and i10. i10 and
+		i240 are really the same printers, except that i10 assumes
+		everything is being run the old way (like di10). In other
+		words the raster files are the old format and they're hidden
+		away in the font directory. The i240 really just assumes the
+		raster files are in *bitdir/rast240.
+
+		The drawing routines have also been rewritten to take
+		advantage of graphics primitives available in Impress. You
+		should be able to use them if you're running 1.9 or any
+		newer versions. The new routines are in file impdraw.c
+		and you may use that by redefining $(DRAW) in devi10.mk.
+		If you've got an older printer that doesn't
+		support the graphics commands let the makefile use
+		draw.c instead.
+
+		A file called RASTDATA defines the format and resolution of
+		the raster files. dimpress expects to find it wherever it's
+		reading raster files. If the file can't be read dimpress
+		(routine rastsetup()) assumes the raster files are the old
+		format and 240 dpi resolution. It really should be an error
+		but RASTDATA is new and won't be part of the old raster file
+		directory unless you add it.
+
+		Right now RASTDATA can include two commands that are
+		understood by routine rastsetup(). The first is the string
+		"format" which should be followed by either "old" or "rst".
+		The second string is "resolution" which is followed by a
+		number that specifies the raster file resolution. Everything
+		else is skipped.
+
+
+    makei10	Builds ASCII font and device files for other typesetters,
+		like the APS-5, that can be used by dimpress when it's
+		trying to print files using the new raster files. The
+		real problem here is that dimpress (in routine put1())
+		assumes that the code field in the font files it's using
+		is also the glyph number for the character in any raster
+		files that are being used. That's obviously not true unless
+		the raster files and the font files were generated together,
+		If dimpress used the normal
+		APS-5 files from /usr/lib/font/devaps you'd be guaranteed
+		to get garbage.
+
+		Obviously there are a bunch of different ways to get around
+		the mapping problem. I chose to hide extra font files, built
+		from the APS-5 and i300 files, in the raster file directory.
+		When dimpress tries to process a troff output file that
+		was generated for printing on device 'xxx' it first looks
+		for a devxxx directory in the raster file directory and
+		if it doesn't find it there then it uses the normal devxxx
+		directory in /usr/lib/font.
+
+		makei10 reads the binary '.out' files for the 202 or i10,
+		and the ASCII font and device files for the APS, and writes a new
+		set of ASCII files for the APS into a directory called
+		devaps in the directory with the raster files.  makei10
+		expects to find the ASCII font files for the APS in
+		directory devaps below the parent of the working directory.
+		Only "di10" will read the new set of font tables for the APS.
+		Troff will still use the files in the original devaps directory.
+		Once you've run 'makei10' you'll still have to run
+		makedev before 'di10' will be happy.
+		Was written with tabs set to every fourth column, so
+		things will look a little funny unless your tabs are
+		set the same way.
+	
+		N.B.  It is not necessary to run this program if you are
+		content with the distributed set of font files in 
+		devi10/rasti10/devaps.
+
+
+    readrast	Simple program that reads raster files in Imagen's Rst
+		format and dumps bitmap and other glyph information to
+		stdout in ASCII. Individual glyphs can be selected using
+		the -o option. If none are selected all the glyphs in each
+		of the input files will be displayed (and that can take a
+		long time).
+
+		Example: readrast -o1,5,7-10 R.8 I.14
+
+
+    printrast	Another simple program that reads raster files in Imagen's
+		format and writes Impress commands needed to display glyph
+		bitmaps and other info on an Imagen printer. Output goes
+		to stdout. A simple document header is prepended to the file
+		if the -H option is used. The resolution of the printer we
+		want to use to print the file should be specified using the
+		-r option. Raster files are all assumed to be in the current
+		directory (actually ".").
+
+		Example: printrast -H -r300 R.10 I.10 B.10 CW.18 >xxx
+
+
+    buildrast	A fairly involved program that reads an ASCII control file
+		and raster files supplied directly from Imagen (Rst format
+		and Tex character set) and builds raster and font files that
+		that troff and dimpress use.
+
+		Individual fonts or sizes can be selected using the -f and
+		-s options respectively. If neither is used all the fonts in
+		all the point sizes listed in RASTi300 (or whatever file is
+		the argument) will be built. troff's ASCII files are only
+		built when the current size that buildrast is working on is
+		equal to the unitwidth value set in RASTi300. The DESC file
+		is built at the end after all the raster files have been
+		finished.
+
+		In the example below the original raster files are assumed
+		to be in the current directory. All the new stuff will be
+		put in directories ./devi300 and ./rasti300. If you're keeping
+		Imagen's raster files somewhere else, which might not be
+		all that unusual because they take up at least 17,000
+		blocks, use the '-S dir' option to set the directory.
+
+		Example: buildrast RASTi300
+
+
+
+You'll probably only need to compile dimpress and makedev unless you want
+to play around with the raster files.
+
+
+----------------------------------------
+
+
+In most cases dimpress can replace di10, although there are a few
+differences in the way the options are handled. The important changes are,
+
+
+ 1: The -x and -y options set offsets in inches rather than pixels, as was
+    the case in di10.
+
+ 2: The -f option used to set the raster table directory has been changed to
+    -B. For the time being -f will be supported in dimpress but its use isn't
+    recommended.
+
+ 3: The -e, -b, -B, -h, -H, -L, and -S options in di10 have been removed.
+

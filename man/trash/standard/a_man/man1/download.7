@@ -1,0 +1,56 @@
+.TH DOWNLOAD 7
+.SH NAME
+download \- EXOS 8010 download device
+.SH SYNOPSIS
+.B #include <ex_ioctl.h>
+.br
+.B ioctl(file_descriptor,EXIOCDLOAD,&(dladdr));
+.br
+.B long dladdr;
+.br 
+.B ioctl(file_descriptor,EXIOCSTART,&(startaddr));
+.br 
+.B long startaddr;
+.SH DESCRIPTION
+.I download 
+is a special file for initializing
+the EXOS 8010 board and downloading
+protocol specific code to the board.
+Opening this device initializes host communications
+with the board.
+The following
+.IR ioctl (2)
+commands are relevant:
+.RS
+.IP "EXIOCDLOAD" 12
+starts downloading and sets the address
+where the code will be downloaded.  The system call is:
+.sp
+.nf
+.in +.5i
+ioctl(file_descriptor,EXIOCDLOAD,&(dladdr));
+long dladdr;
+.in -.5i
+.fi
+.IP "EXIOCSTART" 12
+starts executing the code which has been downloaded
+at a specified address.  The system call is:
+.sp
+.nf
+.in +.5i
+ioctl(file_descriptor,EXIOCSTART,&(startaddr));
+long startaddr;
+.in -.5i
+.fi
+.RE
+.PP
+A
+.I write
+to this device transfers the code to the board.
+A
+.I read
+does nothing here.
+.SH FILES
+/dev/EXOS/download
+.SH SEE ALSO
+ioctl(2)

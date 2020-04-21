@@ -1,0 +1,59 @@
+.TH scrmask 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B scrmask 
+\- defines a clipping mask for fine character clipping
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "scrmask(left, right, bottom, top)"
+.B "Screencoord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine scrmas(left, right, bottom, top)"
+.B "integer*4 left, right, bottom, top"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure scrmask(left, right, bottom, 
+.br
+.B	top: Screencoord);
+.SH DESCRIPTION
+.B scrmask
+provides fine character clipping.  
+.B viewport
+sets the same area for both the viewport and the screenmask,
+which 
+.I left, right, bottom, 
+.I top
+define.
+.B scrmask
+sets only the screenmask, 
+which must be
+placed entirely within the viewport.
+.PP
+Strings that begin outside the viewport are clipped out;
+this is called
+gross clipping.
+Strings that begin inside the
+viewport but outside the screenmask
+are clipped to the pixel boundaries
+of the screenmask;
+this is called
+fine clipping.
+All drawing routines are also clipped to the viewport,
+but 
+.B scrmask
+is only useful
+for characters; gross clipping is sufficient
+for all other primitives.
+.SH "SEE ALSO"
+getscrmask, viewport
+.sp
+.I Programming Guide,
+Section 4.4, Viewports
+

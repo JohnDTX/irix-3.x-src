@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH SU 1
+.SH NAME
+su \- become super-user or another user
+.SH SYNOPSIS
+.B su
+[
+.B \-
+] [ name [ arg .\|.\|. ] ]
+.SH DESCRIPTION
+.I Su\^
+allows one to become another user without logging off.
+The default user
+.I name\^
+is
+.B root
+(i.e., super-user).
+.PP
+To use
+.IR su ,
+the appropriate password must be supplied
+(unless one is already super-user).
+If the password is correct,
+.I su\^
+will execute a new shell with the user \s-1ID\s0 set to
+that of the specified user.
+To restore normal user \s-1ID\s0 privileges,
+type an
+.SM
+.B EOF
+to the new shell.
+.PP
+Any additional arguments are passed to the shell,
+permitting the super-user to run shell procedures
+with restricted privileges
+(an
+.I arg\^
+of the form
+.B \-c
+.I string\^
+executes
+.I string\^
+via the shell).
+When additional arguments are passed,
+.B /bin/sh
+is always used.
+When no additional arguments are passed,
+.I su\^
+uses the shell specified in the password file.
+.PP
+An initial
+.B \-
+flag causes the environment to be changed
+to the one that would be expected if the user actually logged in again.
+This is done by invoking the shell with an
+.I arg0\^
+of
+.B \-su
+causing the
+.B .profile
+in the home directory of the new user \s-1ID\s0 to be executed.
+Otherwise, the environment is passed along with the possible exception of
+.SM
+.BR $PATH \*S,
+which is set to
+.B /usr/local/bin:/usr/bin:/bin:/etc
+for root.
+Note that the
+.B .profile
+can check
+.I arg0\^
+for
+.B \-sh
+or
+.B \-su
+to determine how it was invoked.
+.SH EXAMPLE
+.IP
+su bob
+.PP
+would cause the system to prompt for Bob's password;
+if the password is typed in correctly, Bob's identity is
+substituted for yours, so far as the system is concerned.
+.SH FILES
+.ta \w'$HOME/.profile\ \ \ 'u
+/etc/passwd	system's password file
+.br
+.SM $HOME\*S/.profile	user's profile
+.br
+\&~/.cshrc	read by csh
+.br
+\&~/.login	read by login csh
+.SH SEE ALSO
+env(1), login(1), sh(1), environ(5).
+.\"	@(#)su.1	5.1 of 11/10/83

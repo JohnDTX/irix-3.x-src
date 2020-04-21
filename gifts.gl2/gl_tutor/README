@@ -1,0 +1,52 @@
+Compile (make) these programs in standalone mode (outside of MEX) and
+when finished run the program "whichmex" will invoke the correct
+version of MEX for your system configuration.
+
+There is a Makefile here for building (compiling) the tutorial 
+demonstration programs and the workshop programs.  The Makefile
+will compile the programs in the directory src.  Then the executables 
+will be placed into two directories, online and workshop.  The 
+online directory will be for the On Line Tutor programs.  The
+workshop directory will be for the workshop programs.  If needed,
+the online and workshop directories will be created.
+
+Salespeople who wish to use the On Line Tutors only for demonstration
+purposes will not have access to the workshop directory.
+
+Here are a list of Makefile commands and what they do:
+	make clean -- goes through entire tree (starting at src) and
+removes executables.  Has no effect on directories online and workshop.
+	make neat -- similar to make clean.  Goes through entire src
+tree and removes object files, leftover debris from editing, but not
+any executables.
+	make install -- erases contents of online and workshop directories.
+Goes through and compiles entire src tree and creates all programs for
+online and workshop directories.  Does not use floating point accelerator.
+	make all -- same as install.
+	make float -- same as install, but for systems with floating 
+point accelerator.
+	make sales -- install only the online tree.  This make switch
+is for salespeople, who won't utilize the workshop programs.
+
+Compilation instructions for different audiences:
+
+	for a person who wants all the programs in the tutorial, but
+doesn't have a floating point accelerator:
+		make clean
+		make install
+		make neat
+	for a person who wants all the programs in the tutorial and
+does have a floating point accelerator:
+		make clean
+		make float
+		make neat
+	for a salesperson who wants the On Line Tutors as demonstration
+programs
+		make clean
+		make sales
+		make neat
+
+Once the compilation is complete run whichmex.
+
+Mason Woo--May 26, 1986
+VGU --  July 27, 1986

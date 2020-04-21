@@ -1,0 +1,55 @@
+'\"macro stdmacro
+.TH BCOPY 1M
+.SH NAME
+bcopy \- interactive block copy
+.SH SYNOPSIS
+.B /etc/bcopy
+.SH DESCRIPTION
+.I Bcopy\^
+dates from a time when neither the
+.SM UNIX
+file system nor
+disk drives were as reliable as they are now.
+.I Bcopy\^
+copies from and to files starting at arbitrary block (512-byte) boundaries.
+.PP
+The following questions are asked:
+.PP
+.PD 0
+.RS .3i
+.TP "\w@offset:\ \ \ @u"
+.B to:
+(you name the file or device to be copied to).
+.TP
+.B offset:
+(you provide the starting ``to'' block number).
+.TP
+.B from:
+(you name the file or device to be copied from).
+.TP
+.B offset:
+(you provide the starting ``from'' block number).
+.TP
+.B count:
+(you reply with the number of blocks to be copied).
+.RE
+.PD
+.PP
+After
+.B count
+is exhausted, the
+.B from
+question is repeated
+(giving you a chance to concatenate blocks at the
+.BR to + offset + count
+location).
+If you answer
+.B from
+with a carriage return, everything starts over.
+.PP
+Two consecutive carriage returns terminate
+.IR bcopy .
+.SH SEE ALSO
+cpio(1),
+dd(1).
+.\"	@(#)bcopy.1m	5.1 of 10/17/83

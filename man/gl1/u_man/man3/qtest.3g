@@ -1,0 +1,27 @@
+.TH qtest  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I qtest
+- check contents of the event queue
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Device qtest() "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function qtest()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function qtest: Device;"
+.sp
+.SH DESCRIPTION
+.I Qtest
+returns zero if the
+queue is empty.  Otherwise, the device number of the first entry is
+returned, and the queue remains unchanged.
+.SH "SEE ALSO"
+.I qenter, qread, qreset
+.SH NOTE
+This command can only be used in immediate mode.

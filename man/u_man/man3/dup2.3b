@@ -1,0 +1,73 @@
+'\"macro stdmacro
+.\" Copyright (c) 1980 Regents of the University of California.
+.\" All rights reserved.  The Berkeley software License Agreement
+.\" specifies the terms and conditions for redistribution.
+.\"
+.\"	@(#)dup.2	6.3 (Berkeley) 5/13/86
+.\"
+.TH DUP2 3B
+.UC 4
+.SH NAME
+dup2 \- duplicate a file descriptor
+.SH SYNOPSIS
+.nf
+.ft B
+dup2(oldd, newd)
+int oldd, newd;
+.fi
+.SH DESCRIPTION
+.I Dup2
+duplicates an existing file descriptor.
+The argument \f2oldd\fP is a small non-negative integer index in
+the per-process descriptor table.  The value must be less
+than the size of the table, which is returned by
+.IR getdtablesize (2).
+The value of
+.IR newd
+desired for the new descriptor is specified.
+If this descriptor is already
+in use, the descriptor is first deallocated as if a
+.IR close (2)
+call had been done.
+.PP
+The file referenced by the descriptor does not distinguish
+between references using \f2oldd\fP and \f2newd\fP in any way.
+Thus if \f2newd\fP and \f2oldd\fP are duplicate references to an open
+file,
+.IR read (2),
+.IR write (2)
+and
+.IR lseek (2)
+calls all move a single pointer into the file,
+and append mode, non-blocking I/O and asynchronous I/O options
+are shared between the references.
+If a separate pointer into the file is desired, a different
+reference to the file must be obtained by issuing an
+additional
+.IR open (2)
+call.
+The close-on-exec flag on the new file descriptor is unset.
+.SH "RETURN VALUE
+The value \-1 is returned if an error occurs in either call.
+The external variable
+.I errno
+indicates the cause of the error.
+.SH "ERRORS
+.I Dup2
+fails if:
+.TP 15
+[EBADF]
+\f2Oldd\fP or
+\f2newd\fP is not a valid active descriptor
+.TP 15
+[EMFILE]
+Too many descriptors are active.
+.SH "SEE ALSO"
+accept(2),
+open(2),
+close(2),
+fcntl(2),
+pipe(2),
+socket(2),
+socketpair(2),
+getdtablesize(2)

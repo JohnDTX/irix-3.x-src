@@ -1,0 +1,38 @@
+.TH newtag 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B newtag
+\- creates a new tag in an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "newtag(newtag, oldtag, offset)"
+.B "Tag newtag, oldtag;"
+.B "long offset;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine newtag(newtag, oldtag, offset)
+.B "integer*4 newtag, oldtag, offset"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure newtag(newtag, oldtag: Tag; offset: 
+.br
+.B	Offset);
+.SH DESCRIPTION
+.B newtag
+creates a new tag
+.I offset
+positions beyond
+.I oldtag.
+.SH "SEE ALSO"
+maketag
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

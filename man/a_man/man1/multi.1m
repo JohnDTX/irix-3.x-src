@@ -1,0 +1,25 @@
+'\"macro stdmacro
+.TH MULTI 1M
+.SH NAME
+multi \- switch the system to multi-user mode
+.SH SYNOPSIS
+.B /etc/multi
+.SH DESCRIPTION
+.I Multi
+switches the system to multi-user mode if it was in single-user mode
+or causes it to re-read its
+.B /etc/inittab
+file and turn the appropriate
+.IR getty s
+on and off.
+.I Multi
+is a shell script that invokes
+.BR /etc/telinit .
+.SH "SEE ALSO"
+single(1M),
+init(1M),
+getty(1M),
+inittab(4).
+.\" $Source: /d2/3.7/src/man/a_man/man1/RCS/multi.1m,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:21:06 $

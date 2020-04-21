@@ -1,0 +1,34 @@
+.TH getmatrix 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getmatrix
+\- returns the current transformation matrix
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getmatrix(m) "
+.B "Matrix m;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getmat(m)"
+.B "real m(4,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getmatrix(var m: Matrix);"
+.SH DESCRIPTION
+.B getmatrix
+copies the transformation matrix from the top of the stack to a 
+user-specified array. 
+The matrix stack does not change.
+.SH "SEE ALSO"
+loadmatrix, multmatrix, popmatrix, pushmatrix
+.sp
+.I Programming Guide,
+Section 4.5, User-Defined Transformations
+.SH NOTE
+This routine is available only in immediate mode.

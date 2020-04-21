@@ -1,0 +1,43 @@
+.TH gflush 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gflush
+\- forces all unsent routines down the network
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gflush()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gflush"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gflush;"
+.SH DESCRIPTION
+At the host, communication software buffers most graphics routines
+for efficient block transfer of data to the IRIS.
+.B gflush
+delivers all buffered, untransmitted graphics data to the IRIS.
+Certain graphics routines (notably those that return values)
+flush the host buffer when they execute.
+Use
+.B gflush
+only on an IRIS terminal.
+.SH "SEE ALSO"
+finish
+.sp
+.I Programming Guide ,
+Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.
+.P
+.B gflush
+has no effect if it is run locally.
+
+
+

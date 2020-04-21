@@ -1,0 +1,34 @@
+.TH pagewritemask 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B pagewritemask 
+\- sets the writemask for the textport background
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pagewritemask(pmask) "
+.B "Colorindex pmask;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pagewr(pmask)"
+.B "integer*4 pmask"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pagewritemask(pmask: longint);"
+.SH DESCRIPTION
+.B pagewritemask
+sets the textport background writemask.
+It is undefined under the window manager.
+.SH "SEE ALSO"
+color, pagecolor, textcolor, textport,
+textwritemask, tpoff, tpon, writemask
+.sp
+.I Programming Guide,
+Chapter 14, Textports.
+.SH NOTE
+This routine is available only in immediate mode.

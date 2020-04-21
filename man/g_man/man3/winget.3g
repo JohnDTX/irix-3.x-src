@@ -1,0 +1,29 @@
+.TH winget 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winget
+\- returns the identifier of the current graphics window
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long winget()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function winget()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function winget: longint;"
+.SH DESCRIPTION
+.B winget
+returns the identifier of the current graphics window.
+.SH "SEE ALSO"
+winset
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,57 @@
+# This Makefile contains a few defines that select differing parts of
+# include files. These are:  -DUNIX -DUC4 -DDC4
+# 
+# UNIX is because this is a unix based system (we also make a V kernel
+# 	based terminal)
+# UC4 and DC4 are revision levels of the graphics hardware
+# 	(update and display controller).
+
+CFILES=backface.c bounce.c box.c boxcirc.c clear.c \
+	colored.c curve1.c curve2.c curve3.c db.c depthcue.c \
+	doily.c draw.c feedback1.c feedback2.c \
+	feedback3.c first.c iobounce.c parse.c patch1.c pick1.c \
+	plotexample.c point.c popup.c popuputils.c rectcirc.c \
+	select1.c shade1.c text.c tpbig.c traceexample.c trans.c \
+	vlsi.c zbuffer1.c zoing.c
+
+OFILES=backface.o bounce.o box.o boxcirc.o clear.o \
+	colored.o curve1.o curve2.o curve3.o db.o depthcue.o \
+	doily.o draw.o feedback1.o feedback2.o \
+	feedback3.o first.o iobounce.o parse.o patch1.o pick1.o \
+	plotexample.o point.o popup.o popuputils.o rectcirc.o \
+	select1.o shade1.o text.o tpbig.o traceexample.o trans.o \
+	vlsi.o zbuffer1.o zoing.o
+
+PROGS=backface bounce box boxcirc clear \
+	colored curve1 curve2 curve3 db depthcue \
+	doily draw feedback1 feedback2 \
+	feedback3 first iobounce patch1 pick1 \
+	plotexample point popup popuputils rectcirc \
+	select1 shade1 text tpbig traceexample \
+	vlsi zbuffer1 zoing
+
+LDFLAGS=-s -Zg
+CFLAGS=-O
+
+all:	parse.o $(PROGS)
+
+clean:
+	rm -f *.o $(PROGS)
+
+.c:
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+
+parse.o: parse.c
+	cc $(CFLAGS) -I/usr/include/gl2 -DUNIX -DUC4 -DDC4 -c parse.c
+
+plotexample.o: plotexample.c 
+	cc $(CFLAGS) -I/usr/include/gl2 -DUNIX -DUC4 -DDC4 -c plotexample.c
+
+plotexample:	plotexample.o	parse.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.o parse.o -lplot
+
+traceexample:	traceexample.o	parse.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.o parse.o 
+
+popuputils:	popuputils.o trans.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.o trans.o

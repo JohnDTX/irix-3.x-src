@@ -1,0 +1,85 @@
+#include "gl.h"
+#include "device.h"
+
+Device	xstart, ystart, xend, yend;
+
+main()
+{
+    Device	dummy, xnew, ynew;
+    short	drawing = 0;
+
+    ginit();
+    mapcolor(0, 0, 0, 0);
+    mapcolor(1, 255, 0, 0);
+    mapcolor(2, 255, 255, 0);
+    mapcolor(3, 255, 255, 0);
+    color(0);
+    writemask(0xfff);
+    cursoff();
+    clear();
+    curson();
+    writemask(2);
+    qdevice(LEFTMOUSE);
+    qdevice(MIDDLEMOUSE);
+    qdevice(RIGHTMOUSE);
+    tie(LEFTMOUSE, MOUSEX, MOUSEY);
+    tie(MIDDLEMOUSE, MOUSEX, MOUSEY);
+
+    while(1) {
+	if (qtest()) {
+	    switch(qread(&dummy)) {	/* read event */
+		case RIGHTMOUSE:	/* quit */
+		    eraseoldline();
+		    gexit();
+		    exit(0);
+		case MIDDLEMOUSE:	/* move */
+		    eraseoldline();
+		    qread(&xstart);
+		    qread(&ystart);
+		    qread(&dummy);	/* these three reads clear out */
+		    qread(&dummy);	/* the button up report */
+		    qread(&dummy);
+		    drawing = 1;
+		    break;
+		case LEFTMOUSE:	/* draw */
+		    eraseoldline();
+		    qread(&xend);
+		    qread(&yend);
+		    qread(&dummy);	/* these three reads clear out */
+		    qread(&dummy);	/* the button up report */
+		    qread(&dummy);
+		    writemask(1);
+		    cursoff();
+		    move2i(xstart, ystart);
+		    draw2i(xend, yend);
+		    curson();
+		    xstart = xend;
+		    ystart = yend;
+		    writemask(2);
+		    break;
+	    }
+	}
+	if (drawing) {
+	    xnew = getvaluator(MOUSEX);
+	    ynew = getvaluator(MOUSEY);
+	    eraseoldline();
+	    xend = xnew;
+	    yend = ynew;
+	    cursoff();
+	    move2i(xstart, ystart);
+	    draw2i(xend, yend);
+	    gsync();
+	    curson();
+	}
+    }
+}
+
+eraseoldline()
+{
+    color(0);
+    cursoff();
+    move2i(xstart, ystart);
+    draw2i(xend, yend);
+    curson();
+    color(3);
+}

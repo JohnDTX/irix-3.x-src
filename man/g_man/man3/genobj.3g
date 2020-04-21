@@ -1,0 +1,39 @@
+.TH genobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B genobj
+\- returns a unique integer for use as an object identifier 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Object genobj()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function genobj()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function genobj: Object;"
+.SH DESCRIPTION
+Object identifiers can be up to 31 bits
+and must be unique within a program.
+.B genobj
+generates unique 31-bit integer numbers.
+Be cautious
+if you use a combination of user-defined and
+\f3genobj\f1-defined numbers to generate object numbers.
+.B genobj
+will not generate an object name that is currently in use.
+If there is any question, use \f3isobj\f1 before
+using your own numbers.
+.SH "SEE ALSO"
+callobj, gentag, isobj, makeobj
+.sp
+.I Programming Guide,
+Section 8.1, Defining an Object
+.SH NOTE
+This routine is available only in immediate mode.

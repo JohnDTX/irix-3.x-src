@@ -1,0 +1,26 @@
+.TH ACCEPT 3N
+.SH NAME
+accept \- accept a connection on a socket
+.SH SYNOPSIS
+\f3#include <sys/socket.h>
+.sp
+accept(s, from)
+.br
+int s;
+.br
+struct sockaddr *from;\f1
+.SH DESCRIPTION
+This call accepts a connection on socket \f2s\f1.
+This call is used with connection-based socket types (SOCK_STREAM).
+Upon return, \f2*from\f1 points to the initiating entity's address.
+.PP
+\f2accept\f1 blocks until another process calls \f2connect\f1
+(with the appropriate address).
+.SH SEE ALSO
+connect(3N), socket(3N), ip(7P), inet(7P), udp(7P), tcp(7P)
+.SH DIAGNOSTICS
+Zero is returned if a connection is accepted;
+-1 is returned if an error occurs.
+Some important errors returned to errno are
+EOPNOTSUPP, if the socket is not a type supporting this operation,
+and EISCONN, if the socket is already connected.

@@ -1,0 +1,34 @@
+.TH unqbutton 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I unqbutton
+- unqueue a button
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "unqbutton(b) "
+.B "Device b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine unqbut(b)"
+.B "integer*2 b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure unqbutton(b: Device);"
+.sp
+.SH DESCRIPTION
+.I Unqbutton
+unqueues the button \f3b\f1.
+When the button is removed from the queue, its state changes
+(from 
+.I TRUE
+to
+.I FALSE
+or vice versa) are no longer recorded in the event queue.
+Buttons are queued with the \f2qbutton\f1 command.
+.SH "SEE ALSO"
+.I getbutton, qbutton, setbutton, tie, unqkeyboard, unqvaluator
+.SH NOTE
+This command can only be used in immediate mode.

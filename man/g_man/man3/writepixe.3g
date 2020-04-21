@@ -1,0 +1,56 @@
+.TH writepixels 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B writepixels
+\- paints a row of pixels on the screen
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "writepixels(n, colors) "
+.B "short n; "
+.B "Colorindex colors[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine writep(n, colors)"
+.B "integer*4 n"
+.B "integer*2 colors(n)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure writepixels(n: Short; var colors: 
+.br
+.B	 Colorindex);
+.SH DESCRIPTION
+.B writepixels
+paints a row of pixels on the screen;
+\f2n\f1 specifies the number of pixels to paint and 
+\f2color\fP is an array of color indices.
+The starting location is the current character position.
+The system updates the current character position to the pixel
+that follows the last painted pixel.
+The current character position becomes undefined if the updated pixel
+position is greater than XMAXSCREEN.
+.PP
+The system paints pixels from left to right, 
+and clips to the current screenmask.
+.PP
+.B writepixels
+does not automatically wrap from one line to the next.
+It can be used in single buffer and double buffer modes.
+.PP
+Use 
+.B writeRGB 
+in RGB mode.
+
+.ne 15
+.SH "SEE ALSO"
+color, readpixels, scrmask, writeRGB
+.sp .5v
+.I Programming Guide,
+Section 3.9, Writing and Reading Pixels
+.SH NOTE
+This routine is available only in immediate mode.

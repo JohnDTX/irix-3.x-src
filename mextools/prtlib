@@ -1,0 +1,16 @@
+Makefile 
+Makefile.IP2 
+Makefile.PM2 
+RCS/
+colormod.c 
+fontlib.c 
+gamma.c 
+getapixel.c 
+getset.c 
+ipc.c 
+parse.c 
+percent.c 
+rectlib.c 
+redraw.c 
+subview.c 
+turtle.c 

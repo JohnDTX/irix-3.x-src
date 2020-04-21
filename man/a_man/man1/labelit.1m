@@ -1,0 +1,86 @@
+'\"macro stdmacro
+.TH LABELIT 1M
+.SH NAME
+labelit \- label a file system
+.SH SYNOPSIS
+.B /etc/labelit
+special [\ fsname volume [\ \f3\-n\fP\ ]\ ]
+.SH DESCRIPTION
+.I labelit\^
+can be used to provide initial labels for unmounted disk
+or tape file systems.
+The
+.I special\^
+argument should be the physical disk partition or tape (e.g.:
+.I /dev/rmd0\^,
+.I /dev/rmt1\^,
+etc.).
+The
+.I fsname\^
+argument is the mounted name (e.g.:
+.I root\^,
+.I usr\^,
+etc.) of the file system being labeled.
+The
+.I volume\^
+argument names the physical volume name.
+Bell file systems and Extent file systems are both supported
+(see
+.IR fs (4)).
+With the optional arguments omitted,
+.I labelit\^
+prints current label values.
+The
+.B \-n
+option provides for initial labeling of new tapes and
+destroys the previous contents of the tape.
+.SH EXAMPLE
+.IP
+labelit /dev/rmt1 oldsys save
+.PP
+relabels the file system mounted on 
+.I /dev/rmt1
+with a new 
+.I fsname 
+of 
+.I oldsys 
+and a new 
+.I volname 
+of \f2save\f1.
+.SH "SEE ALSO"
+fs(4)
+.\"	@(#)volcopy.1m	5.1 of 10/17/83
+.\" @(#)$Header: /d2/3.7/src/man/a_man/man1/RCS/labelit.1m,v 1.1 89/03/27 16:20:45 root Exp $
+.\" $Log:	labelit.1m,v $
+Revision 1.1  89/03/27  16:20:45  root
+Initial check-in for 3.7
+
+.\" Revision 1.3  86/03/24  17:05:09  lori
+.\" brendan's changes
+.\" 
+.\" Revision 1.2  86/03/10  15:29:30  celia
+.\" herb's edits
+.\" 
+.\" Revision 1.1  86/02/24  13:50:12  lori
+.\" v2.0 UPM for 2.4/3.4 release
+.\" 
+.\" Revision 1.5  85/09/25  13:43:26  robinf
+.\" Final version for Turbo Option
+.\" 
+.\" Revision 1.4  85/08/15  12:29:24  robinf
+.\" Updates after 1st review for Turbo option
+.\" 
+.\" Revision 1.3  85/07/26  11:10:41  locke
+.\" cosmetic changes
+.\" 
+.\" Revision 1.2  85/07/12  17:20:17  robinf
+.\" Update for IRIS 3400
+.\" 
+.\" Revision 1.1  85/05/01  17:02:15  robinf
+.\" Updates from 2000 Series workstation guide, Version 1.0
+
+.\" Revision 1.2  85/03/12  01:13:10  bob
+.\" Changed to reflect that there is no longer "hit DEL to abort" or the
+.\" sleep(10).
+.\" Changed device names to SGI standards.
+.\"

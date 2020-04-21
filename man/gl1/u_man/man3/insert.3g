@@ -1,0 +1,34 @@
+.TH insert  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I insert
+- insert commands in an object at the chosen location
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "insert(t, offst) "
+.B "Tag t; "
+.B "Offset offst;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine insert(t, offst)"
+.B "integer t, offst"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure insert(t: Tag; offst: Offset);"
+.sp
+.SH DESCRIPTION
+.I Insert
+takes a tag \f3t\f1
+and an offset \f3offst\f1 as arguments, and positions an editing
+pointer on the indicated command.
+Subsequent graphics commands are added before the
+indicated command.  \f2Closeobj\f1 or another positioning command 
+(\f2delete\f1, \f2insert\f1 or \f2replace\f1) terminates
+the insertion.
+.SH "SEE ALSO"
+.I closeobj, delete, editobj, replace
+.SH NOTE
+This command can only be used in immediate mode.

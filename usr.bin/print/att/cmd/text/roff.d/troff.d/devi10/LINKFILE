@@ -1,0 +1,19 @@
+
+#
+# This file is read by maketables or can be executed on its own to
+# link any missing .out files to appropriate existing .out files.
+#
+
+
+rm -f G.out
+ln H.out G.out
+
+rm -f GI.out
+ln HI.out GI.out
+
+rm -f HB.out
+ln HK.out HB.out
+
+rm -f HM.out
+ln HK.out HM.out
+

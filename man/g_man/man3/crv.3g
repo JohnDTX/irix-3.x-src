@@ -1,0 +1,43 @@
+.TH crv 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B crv
+\- draws a curve
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "crv(geom)"
+.B "Coord geom[4][3];"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine crv(geom)"
+.B "real geom(3,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure crv(var geom: Coord);"
+.IP
+.SH DESCRIPTION
+.B crv
+draws a cubic spline  
+curve segment using the current curve
+basis and precision. 
+.B
+rcrv
+draws the rational spline.
+.I geom
+specifies the four control points of the curve segment.
+.SH "SEE ALSO"
+curvebasis, 
+curveprecision, 
+crvn,
+defbasis, 
+rcrv,
+rcrvn
+.sp
+.I Programming Guide,
+Section 11.2, Drawing Curves

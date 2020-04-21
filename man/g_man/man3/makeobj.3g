@@ -1,0 +1,43 @@
+.TH makeobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B makeobj
+\- creates an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "makeobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine makeob(obj)"
+.B "integer*4 obj"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure makeobj(obj: Object);"
+.SH DESCRIPTION
+\f3makeobj\f1 creates a graphics object.
+.B makeobj
+takes one argument,
+a 31-bit integer that is associated with the object.
+If \f2obj\f1 is the number of an existing object,
+the contents of that object are deleted. 
+.PP
+When
+.B makeobj
+executes, the object number is entered into
+a symbol table and memory is allocated for a display list.  Subsequent
+graphics routines are compiled into the display list instead 
+of executing.  
+.SH "SEE ALSO"
+callobj, chunksize, closeobj, genobj, isobj 
+.sp
+.I Programming Guide,
+Section 8.1, Defining an Object
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,152 @@
+'\"macro stdmacro
+.TH SGILABEL 1M
+.SH NAME
+sgilabel \- print or update the SGI disk drive label
+.SH SYNOPSIS
+.B sgilabel
+disk ...
+.br
+.B sgilabel
+[
+.B \-b
+bootfs ] [
+.B \-n
+name ] [
+.B \-p
+fs:base,size ] 
+.br
+	 [
+.B \-r
+rootfs ] [
+.B \-s
+serial ] [
+.B \-S
+swapfs ]
+disk
+.SH DESCRIPTION
+.I sgilabel
+has two uses:
+it either updates the disk label on one drive or
+prints zero or more disk labels or partition sizes.
+A disk may be given as a file system device pathname (e.g.,
+.I /dev/md0a\^
+),
+a pathname suffix (\c
+.I md0a\^
+),
+or a disk drive name (\c
+.I md0\^
+).
+.PP
+If
+.I disk
+denotes a drive 
+(e.g.,
+.I md0\^
+,
+.I ip1\^
+),
+.I sgilabel
+will print out the whole drive label.
+This information includes the drive name, serial number,
+type of drive and controller, size (cylinders/heads/sectors),
+and the sizes of each file system on the drive.
+.PP
+If
+.I disk
+denotes a file system
+(e.g.,
+.I md0a\^
+,
+.I /dev/ip1d\^
+),
+.I sgilabel
+will print out the size of the file system partition
+and the size of a cylinder (both in 512 byte blocks).
+.PP
+If
+.B \-n
+.I name
+is given,
+the drive name in the label is set to
+.IR name .
+Using the
+.B \-p
+option, a partition (file system) may be created on a disk.  The partition
+parameters are:
+.TP
+.I fs
+a file system specification either of the form
+.B a\^
+through
+.B h\^
+or
+.B 0\^
+through
+.B 7\^ ;
+the letters correspond to the final character in file system device names,
+while the numbers correspond to minor devices
+.TP
+.I base
+the partition base in sectors
+.TP
+.I size
+the partition length in sectors
+.PP
+More than one
+.B \-p
+option may be given.
+If
+.B \-r
+.I rootfs
+is given, the disk label root file system field is set to
+.IR rootfs ;
+.I rootfs
+is specified as with the
+.B \-p
+option.
+Likewise,
+.B \-b
+and
+.B \-S
+may be used to set the disk label boot and swap file system fields,
+respectively.
+If
+.B \-s
+.I serial
+is given,
+the drive serial number in the label is set to
+.IR serial .
+.SH FILES
+.ta \w'/dev/md*h\ \ 'u
+/dev/md*h	The \f2h\fP partition accesses the label
+.br
+/dev/ip*h	The \f2h\fP partition accesses the label
+.br
+/dev/si*h	The \f2h\fP partition accesses the label
+.\" @(#)$Header: /d2/3.7/src/man/a_man/man1/RCS/sgilabel.1m,v 1.1 89/03/27 16:21:47 root Exp $
+.\" $Log:	sgilabel.1m,v $
+Revision 1.1  89/03/27  16:21:47  root
+Initial check-in for 3.7
+
+.\" Revision 1.9  86/03/25  11:18:44  lori
+.\" brendan
+.\" 
+.\" Revision 1.8  86/03/06  14:08:30  lori
+.\" cosmetic change for v2.0 UPM
+.\" 
+.\" Revision 1.7  86/02/26  12:16:43  lori
+.\" v2.0 UPM for 2.4/3.4 release
+.\" 
+.\" Revision 1.4  85/08/07  15:20:35  robinf
+.\" Cosmetic changes
+.\" 
+.\" Revision 1.3  85/07/12  17:15:23  robinf
+.\" Update for IRIS 3400
+.\" 
+.\" Revision 1.2  85/05/02  18:21:04  robinf
+.\" Updates from 2000 Series Workstation Guide
+.\" 
+.\" Revision 1.1  84/12/16  08:08:43  bob
+.\" Initial revision
+.\"

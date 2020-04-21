@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH CURVE 1D
+.SH NAME
+curve \- fast interactive cubic curve display
+.SH SYNOPSIS
+.B /usr/people/demos/curve
+.SH DESCRIPTION
+.PP
+.I Curve\^
+rapidly draws any of several cubic curves.
+All control uses the mouse and mouse buttons.
+.PP
+To change the display, press the right mouse button to display a popup menu.
+Move the cursor till the menu option you select is highlighted and release
+the button.
+To get rid of the menu without changing the display, move the cursor clear of
+the menu and release the button.
+.PP
+.I Add Point
+and
+.I Delete Point
+place basis points on the plane.
+To add one or more points, select
+.I Add
+.IR Point ,
+move the cursor to the point locations, and press the left mouse button once
+for each new point.
+Each point will be labeled with a marker.
+As soon as four or more points are selected, they cubic curve they determine
+with the current basis is drawn.
+If
+.I "Delete Point"
+is selected, the nearest basis point to the cursor and the portion of the
+curve affected by that point are colored.
+left mouse button will delete the point.
+.PP
+In
+.I Move Point
+mode, the point nearest the cursor and the affected part of the curve are
+colored.
+The left mouse button will move the point to the cursor.
+Hold the left mouse button down to drag the curve.
+.PP
+Select
+.I Motion
+to give each point a random direction and velocity.
+Select
+.I Freeze
+to stop it.
+.I
+.IR Basis ,
+.IR Linestyle ,
+and
+.IR Precision
+each present their own popup menus.
+Vary their parameters with the right mouse button.
+Return to the main menu from any of these with
+.IR Quit .
+.PP
+.I Markers Off
+turns off the basis point markers.
+.I Markers On
+restores them.
+.I Smear
+simulates families of curves.
+.I No Smear
+restores the single curve.
+.I 3\-D
+and
+.I 2\-D
+select a 3-D box or the initial plane for the display.
+.PP
+.I Initialize
+reselects the initial state.
+.I Quit
+(from the main menu) terminates the program.
+.SH AUTHORS
+.PP
+Rocky Rhodes and Herb Kuta
+.SH BUGS
+.PP
+The Bezier curve looks wrong if more than four points are specified.
+It is not.
+It is discontinuous, but that's the way M. Bezier designed it.
+.SH "HARDWARE REQUIREMENTS"
+Eight bitplanes and 1.5 Megabytes of memory are required to run
+.IR curve .
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/curve.1d,v 1.1 89/03/27 16:44:52 root Exp $
+.\" $Log:	curve.1d,v $
+Revision 1.1  89/03/27  16:44:52  root
+Initial check-in for 3.7
+
+.\" Revision 1.1  84/12/11  13:35:44  bob
+.\" Initial revision
+.\" 

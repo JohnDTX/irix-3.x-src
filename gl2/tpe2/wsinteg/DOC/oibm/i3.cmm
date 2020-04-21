@@ -1,0 +1,217 @@
+  
+		"3270 Terminal Emulation"
+
+	The IBM 3278/79 terminal emulation program for the IRIS is called t3279.
+After the IBM kernel has been booted on the IRIS, the emulation program can
+be run by typing t3279.  The IRIS now looks and acts like an IBM 3279 terminal.
+The keyboard differences are discussed in Section 3.1.
+
+	Typing t3279 brings up the 24-entry menu described below. Menu items 1,
+2, 3, 4, 5, 6, 7, 8, 11, 17, 19, 33, and 34 are discussed in this document. The
+other items should be used only with instructions from a Silicon Graphics
+representative.
+
+
+Menu item 1 redraws the menu.
+
+Menu item 2 establishes a connection to the mainframe and starts
+3270 emulation. The messags size of any received message is displayed on the
+status line.
+
+Menu items 3 and 4 are identical, and either can be used for file transfer
+and remote graphics.
+
+Menu items 33 and 34 are identical, and either can be used for file transfer
+and remote graphics. Keyboard indicators L1(input from mainframe) and L2(output
+to mainframe) show i/o activity.
+
+Menu item 5 performs Geometry Link diagnostics (see Section 2.6). Item 5 has
+one argument; a decimal number which specifies how many times the test is run.
+Each successful run displays a period (.). The error number displayed if the
+test fails is an index to the trouble. After the diagnostics are performed, the
+system automatically performs menu item 6.
+
+Menu item 6 tests the static receive RAM and returns a pass or an error code (indicating the pattern that failed).
+
+Menu item 17 prepares an IRIS text file for upload. A new expanded text file
+based on 80 col records is created in the current directory. The expansion
+replaces tabs and line feeds with blanks. The resulting file can be uploaded
+into FB form on the mainframe. Note that the UNIX routines pr and dd do not
+remove line feeds resulting in 81 col mainframe records.
+
+Menu item 19 closes and reopens the Geometry Link card. This item causes a
+mainframe response by generating ``Unit Check'' status on the 3274/6.
+
+
+	The menu items listed below can be used for development applications.
+These can be used after the GL2-W2.4, GL2-T2.4 (2300 only), GL2-W3.4, and
+GL2-T3.4 release.
+ 
+
+Menu item 7 displays a file in one of the following options:
+	 a or d or g ASCII
+	 e EBCDIC
+	 o Highlight the RGL commands
+
+Menu item 8 allows you to select the following types of 3278 emulation:
+	 b the 3 x 4 function key keypad
+	 g graphport
+	 t textport
+	 v v50 textport keys
+
+Menu item 11 allows you to restart logs in use with the following options:
+	 d 3278 text
+	 g graphic LOGFILE
+	 o RDDATA log
+
+Menu item 11 allows you to terminate logs in use with the following options:
+	 d 3278 text
+	 g graphic LOGFILE
+	 o RDDATA log
+
+
+
+		"Keyboard Differences"
+
+	The keys on the main section of the IRIS keyboard are the same in 3270
+emulation as they are otherwise with the following exceptions:
+
+	unshifted open bracket ([) is cent sign (\(ct)
+	unshifted close bracket (]) is solid bar (|)
+	shifted TAB is BACKTAB
+	shifted "NO SCRL" is INSERT
+	unshifted SETUP is UNIX passthru
+
+The shift and caps lock keys operate like those on a typewriter.  Note that
+ "CAPS LOCK" shifts the numbers to symbols. The following keys repeat their
+character automatically when they are held down:
+	TAB, HYPHEN, UNDERSCORE, BACKSPACE, RETURN, SPACE, and the four "arrow
+keys" above the top keyboard rank. These have the indicated functions. Note
+that the left arrow key and the BACKSPACE key have the same function.
+
+		"Program Function Keys"
+
+There are 24 Program Function keys available during IBM emulation. Application
+programs can define actions to be performed when these keys are pressed. The
+Program Function keys are located to the right of the main keyboard.
+
+	IRIS keys	unshifted	shifted
+ 
+	PF1		PF1		PF13
+	PF2		PF2		PF14
+	PF3		PF3		PF15
+	PF4		PF4		PF16
+	7		PF5		PF17
+	8		PF6		PF18
+	9		PF7		PF19
+	-		PF8		PF20
+	4		PF9		PF21
+	5		PF10		PF22
+	6		PF11		PF23
+	,		PF12		PF24
+
+	Table 3-1:  Program Function Keys
+
+
+		"Program Access Keys"
+
+	PA1 and PA2 are Program Access keys, which provide a means of
+communicating with a program. To operate these keys, hold down the control key
+while typing the PF1 or PF2 key (CTRL-PF1 or CTRL-PF2). When these keys are
+pressed, the "INPUT INHIBITED" indicator comes on and the keyboard is disabled.
+The program then responds to the signal. The Program Access keys are located
+to the right of the main keyboard.
+
+	IRIS keys	unshifted	shifted	control\fP
+ 
+	PF1		(PF1)or(PF13)	PA1
+	PF2		(PF2)or(PF14)	PA2
+
+	Table 3-2:  Program Access Keys
+
+
+		"Other Special-purpose Keys"
+
+The "ERASE-EOF" (Erase to End of Field) key (on the numeric keypad, 1) blanks
+the character positions in the input field in which the cursor is located.
+All positions from the cursor location to the end of the field are erased.
+
+The "ERASE-INPUT" key (on the numeric keypad, 2) blanks all input fields on
+the screen. The cursor moves to the first character location in the first field.
+If the screen is unformatted, "ERASE-INPUT" blanks all the character positions
+and moves the cursor to the first position on the top line.
+
+The RESHOW key (on the numeric keypad, 3) redisplays the current screen.
+
+The RESET key (on the numeric keypad, 0) is used to recover from
+``Do Not Enter'' conditions and to cancel certain operations.
+
+The HOME key (on the numeric keypad, .) positions the cursor in the topmost
+unprotected field of the display.
+
+The CLEAR key (on the numeric keypad, ENTER) blanks every character position on
+the screen, establishes an unformated display, and moves the cursor to HOME.
+While the CLEAR key is pressed, the INPUT INHIBITED indicator comes on and the
+keyboard is disabled.  The indicator stays on until the program turns it off.
+
+	The special-purpose keys with the IRIS labels and 3270 functions are
+displayed in Table 3-3.
+
+	IRIS Key	3270 Function\fP
+ 
+	1		ERASE EOF
+	2		ERASE INPUT
+	3		RESHOW
+	0		RESET
+	.		HOME
+	ENTER		CLEAR
+
+	Table 3-3:  Special-purpose Keys
+
+
+		"Control Keys"
+		
+	Table 3-4 shows the functions of the control keys.
+
+	Key		Function\fP
+	 
+	CTRL A		ATTENTION
+	CTRL C		DEVICE CANCEL
+	CTRL D		exit emulation
+	CTRL F		FIELD MARK
+	CTRL R		SYSTEM REQUEST
+	CTRL S 		CURSOR SELECT
+	CTRL T		TEST
+
+	Table 3-4:  Control Keys
+
+		 "Escaping to the Shell"
+
+You can be in one of three keyboard/display situations:
+
+t3279 Menu, 3270 Emulation Mode, or Remote Graphics Library Program.
+
+Each of the above situations requires a different sequence of commands to
+escape to a UNIX shell.
+
+	 	"Terminating t3279"
+
+From the RGL, use the following command sequence while holding down the
+ SETUP key; ESCAPE and DEL to return to 3270 Emulation Mode. Press BREAK to
+ return to UNIX. Type ESCAPE ! to return to the UNIX shell and remain in RGL.
+
+From the t3279 Menu, use BREAK , KILL , or INTERRUPT (These are stty keyboard
+values).
+
+From 3270 Emulation Mode, press CNTL-d to get to the menu.  Press BREAK to get
+to the UNIX shell.
+
+		"Escaping to the UNIX Shell from a Remote Graphics Program"
+
+While holding down the SETUP key (to allow subsequent keystokes to be processed
+via the standard input of the shell), type ESC ! to return to the UNIX shell
+and remain in Remote Graphics Library program on the mainframe. If you do not
+have textport, you will not be able to see on screen what you have typed in the
+shell. In this case, terminate RGL and the t3279 program.
+
+

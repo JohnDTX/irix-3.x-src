@@ -1,0 +1,14 @@
+ ibdone wak-bp .-no-work . -1[$88449010] *1[$88449010] $1AC2 tlcinterp0/12- !1[$88448010]-ok ibuintr[$E] ibustop($8) 1 tlc_pioinit-fhs -got 1024, <00 01 02 03 04 05 06 07> Qdel Qque end .-no-work . }}
+ unslp-bp ibtalk($1) ibstrategy($1) *0[$48CA0002] $3ABE ibuintr[$8] ibustart($1) 2 StartSdma [$52440 1024] tlcinterp12/12- $C<-$40 $D<-$24 $E<-$05 $8<-$00 $9<-$FC $5<-$90 $B<-$06 $F<-$C8 $1<-$04 $2<-$20 $A<-$5A $A<-$5B !0[$48CA0000]-ok .
+{{ -1[$A8449001] *1[$A8449001] $3AC2 ibuintr[$8]-no-work . }}
+ slp-bp iblisten($9) ibstrategy($9) *1[$A8440001] $3AC2 ibuintr[$8] ibustart($9) 1 unbuf Qpop Qque ibdone Qfree Qalloc qasync Qpush ibustart($8) 1 StartRdma [$4EC40 1024] tlcinterp12/12- $C<-$40 $D<-$EC $E<-$04 $8<-$00 $9<-$FC $5<-$92 $B<-$91 $F<-$C0 $1<-$14 $2<-$10 $A<-$4A $A<-$4B !1[$28440000]-ok .
+{{ -0[$C8CA0002] *0[$C8CA0002] $1ABE tlcinterp0/12- !0[$C8CA0002]-ok ibuintr[$C] ibustop($1) 2 tlc_pioinit -sent 1024, <00 01 02 03 04 05 06 07> end ibdone wak-bp .-no-work . -1[$88449010] *1[$88449010] $1AC2 tlcinterp0/12- !1[$88448010]-ok ibuintr[$E] ibustop($8) 1 tlc_pioinit-fhs -got 1024, <00 01 02 03 04 05 06 07> Qdel Qque end .-no-work . }}
+ unslp-bp ibtalk($1) ibstrategy($1) *0[$48CA0002] $3ABE ibuintr[$8] ibustart($1) 2 StartSdma [$51840 1024] tlcinterp12/12- $C<-$40 $D<-$18 $E<-$05 $8<-$00 $9<-$FC $5<-$90 $B<-$06 $F<-$C8 $1<-$04 $2<-$20 $A<-$5A $A<-$5B !0[$48CA0000]-ok .
+{{ -1[$A8449001] *1[$A8449001] $3AC2 ibuintr[$8]-no-work . }}
+ slp-bp iblisten($9) ibstrategy($9) *1[$A8440001] $3AC2 ibuintr[$8] ibustart($9) 1 unbuf Qpop Qque ibdone Qfree Qalloc qasync Qpush ibustart($8) 1 StartRdma [$53840 1024] tlcinterp12/12- $C<-$40 $D<-$38 $E<-$05 $8<-$00 $9<-$FC $5<-$92 $B<-$91 $F<-$C0 $1<-$14 $2<-$10 $A<-$4A $A<-$4B !1[$28440000]-ok .
+{{ -0[$C8CA0002] *0[$C8CA0002] $1ABE tlcinterp0/12- !0[$C8CA0002]-ok ibuintr[$C] ibustop($1) 2 tlc_pioinit -sent 1024, <00 01 02 03 04 05 06 07> end ibdone wak-bp .-no-work . -1[$88449010] *1[$88449010] $1AC2 tlcinterp0/12- !1[$88448010]-ok ibuintr[$E] ibustop($8) 1 tlc_pioinit-fhs -got 1024, <00 01 02 03 04 05 06 07> Qdel Qque end .-no-work . }}
+ unslp-bp ibtalk($1) ibstrategy($1) *0[$48CA0002] $3ABE ibuintr[$8] ibustart($1) 2 StartSdma [$4A040 1024] tlcinterp12/12- $C<-$40 $D<-$A0 $E<-$04 $8<-$00 $9<-$FC $5<-$90 $B<-$06 $F<-$C8 $1<-$04 $2<-$20 $A<-$5A $A<-$5B !0[$48CA0000]-ok .
+{{ -1[$A8449001] *1[$A8449001] $3AC2 ibuintr[$8]-no-work . }}
+ slp-bp _ibclose($1) *0[$48CA0000] $1ABE tlcinterp0/12- !0[$48CA0000]-ok ibuintr[$C] ibustop($1) 2 . ifclose
+ _ibclose($9) ifclose
+ timeout !0[$E8CA0000+$E8CA0000] tlc_pioinit !0[$E8CA0000+$E8CA0000] Takectl Connect(...255,00) *0[$E8CA0000] $2A9E tlcinterp5/5- $5<-$11 !0[$A88A8804+$A88A8804] err-atcnt4 tlc_recov ibuintr[$8] ibustop($1) 2 tlc_pioinit -sent 2, <00 01 02 03 04 05 06 07> -ioerr end tlc_recov ibdone Qfree .-no-work .

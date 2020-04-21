@@ -1,0 +1,106 @@
+'\"macro stdmacro
+.TH JET 1D
+.SH NAME
+jet \- depthcued wireframe model of a jet fighter 
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/jet  
+.PP
+.BR /usr/people/mexdemos/jet \0\0(GL2 only)
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+.I Jet 
+displays a wireframe model of a jet airplane.  The image includes
+660 vectors and can be displayed with constant intensity or depth
+cueing.
+Operator controls adjust the viewing position and enable or disable depth
+cuing.
+.PP
+The standalone version
+uses as many colors as it can find on the system, upwards of 4000 different
+intensities can be available depending upon the configuration of the system.
+This is admittedly overkill.
+The standard window manager version of jet is depth cued using
+32 gamma corrected shades of red.  
+.PP
+Most of the user interface is through the mouse and its buttons.
+The mouse buttons control rotation about the x, y and z axes and
+viewer distance.
+Unless otherwise noted, the x-movement of the mouse is a significant
+valuator when holding down the mouse button.
+.sp
+.sp
+.nf
+	Mouse buttons		Function
+.sp
+	left			rotation about x-axis through mouse x-motion
+.br
+	middle			rotation about y-axis through mouse x-motion
+.br
+	right 			rotation about z-axis through mouse x-motion
+.br
+	left & middle 		translate object through mouse x & y motion 
+.br
+	left & right 		zoom back
+.br
+	middle & right		zoom forward
+.br
+    	all			quit the program
+.sp
+.fi
+The operator also uses some keyboard keys to control the jet.
+.sp
+.sp
+.nf
+	Keyboard		Function
+.br
+	ENTER			turn depth cueing on and off
+.br
+	m			turn constant rotation on and off
+.br
+	up arrow		dramatically increase range of depth cueing
+.br
+	right arrow		increase range of depth cueing
+.br
+	down arrow		dramatically decrease range of depth cueing
+.br
+	left arrow		decrease range of depth cueing
+.br
+	ESC			quit the program
+.sp
+.fi
+.SH "DISPLAY OPTIONS (GL2 only)"
+.PP
+Upon entry into the program,
+.I jet
+is set for NTSC or high resolution output, depending on the currently
+selected monitor.
+The display monitor can be altered during program execution by
+pressing the proper control character.
+.nf
+.sp
+.sp
+	Key 		Display Monitor
+.sp
+	CTRL-a		60 HZ monitor
+.br
+	CTRL-b		30 HZ monitor
+.br 
+	CTRL-c		NTSC (RS-170A) display
+.br
+	CTRL-d		PAL (European Video) display
+.fi
+.sp
+.SH "WINDOW MANAGER (GL2 only)"
+.PP
+There is a window manager version of jet which runs without the
+aforementioned display options.
+If the jet is in constant motion, it stays in motion, even if
+the window is detached.  The arrow keys (up, down, left and right)
+are not used in the window manager version of jet, because
+the window manager version uses a fixed, abridged color ramp
+for depth cueing.

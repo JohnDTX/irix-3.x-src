@@ -1,0 +1,43 @@
+.TH gbegin 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gbegin
+\- initializes the system without altering the color map
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gbegin()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gbegin"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gbegin;"
+.SH DESCRIPTION
+.B gbegin
+initializes the graphics environment for the calling program as 
+.B ginit
+does, however, 
+.B gbegin
+does not change the color map.
+This is useful under the window manager because it does not
+interfere with other programs that use the current color map.
+.B gbegin
+also does not call
+\f3setcursor\fP.
+.PP
+Under the window manager, it is preferable to use 
+.B winopen 
+for initialization functions.
+.SH "SEE ALSO"
+ginit, greset, winopen
+.sp
+.I Programming Guide,
+Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,28 @@
+autoconf(7) autoconf: diagnostics from the autoconfiguration code.
+drum(7) drum: paging device.
+dsd(7) dsd: st-506 disk/tape/floppy controller.
+duart(7) duart: on board serial ports.
+floppy(7) floppy: st-506 disk/tape/floppy controller.
+ib(7) ib: IEEE 488 interface.
+icmp(7p) icmp: Internet Control Message Protocol.
+inet(7p) inet: Internet protocol family.
+intro(7) intro: introduction to special files.
+intro(7p) networking: introduction to networking facilities.
+ip(7p) ip: Internet Protocol - TCP.
+iph(7) iph: Interphase 2190 smd disk controller.
+lo(7) lo: software loopback network interface.
+mem(7) mem, kmem: main memory.
+mtio(7) mtio: magnetic tape interface.
+nfs(7) nfs: network file system.
+null(7) null: data sink.
+nx(7) nx: XNS Ethernet driver.
+pty(7) pty: pseudo terminal driver.
+qic(7) qic: st-506 disk/tape controller.
+sif(7) sif: Interphase Storager 2 floppy controller.
+sii(7) sii: Interphase Storager 2 esdi/st-506 disk/tape/floppy controller.
+siq(7) siq: Interphase Storager 2 qic-02 tape controller.
+tcp(7p) tcp: Internet Transmission Control Protocol.
+termio(7) termio: general terminal interface.
+tty(7) tty: controlling terminal interface.
+udp(7p) udp: Internet User Datagram Protocol.
+xns(7) xns: interface to XNS Sequenced Packet Protocol.

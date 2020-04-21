@@ -1,0 +1,35 @@
+'\"macro stdmacro
+.TH ID 1
+.SH NAME
+id \- print user and group \s-1ID\s+1s and names
+.SH SYNOPSIS
+.B id
+.SH DESCRIPTION
+.I Id\^
+writes a message on the standard output
+giving the user and group \s-1ID\s+1s
+and the corresponding names
+of the invoking
+process.
+If the effective and real \s-1ID\s+1s do not match, both
+are printed.
+.SH EXAMPLE
+.IP
+id guest
+.PP
+will return
+.IP
+uid=100 (guest) gid=100 (users)
+.PP
+where "100" and "guest" are the user's 
+.SM ID 
+number and name and
+"100" and "users" are the user's group 
+.SM ID
+number and group name.
+These values are set up in the administrative file 
+.BR /etc/passwd .
+.SH SEE ALSO
+logname(1),
+getuid(2).
+.\"	@(#)id.1	5.1 of 11/8/83

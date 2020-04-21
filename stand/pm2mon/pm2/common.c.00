@@ -1,0 +1,244 @@
+#include "pmII.h"
+#include "mem.h"
+#include "common.h"
+#include "IrisConf.h"
+#include "Qglobals.h"
+
+# define repeat		do
+# define until(x)	while(!(x))
+
+# undef  DEBUG do_debug
+# include "dprintf.h"
+
+
+extern unsigned long memory_summary();
+
+
+/*
+
+	check memory and clear it if this is a power-up.
+
+	returns true if memory needed to be cleared.
+
+	NOTE this doesn't clear stack+bss; the startup routine is assumed
+	to have done it.
+
+*/
+check_memory()
+{
+    register int verbose;
+
+    /* if (!memory_trashed()) return 0; */
+
+    verbose = VERBOSE(_commdat->config) != 0;
+
+    memchk(verbose);
+    memclr(verbose);
+
+    /*
+     * get a summarized copy of the new memory layout
+     * and copy it into the stashed location
+     */
+    _commdat->membits = memory_summary();
+
+    return 1;
+}
+
+char *text_phstart, *text_phend;
+char *stack_phstart, *stack_phend;
+
+extern char InProm;
+extern char edata[], end[];
+
+memclr(verbose)
+    int verbose;
+{
+    register i;
+
+    if( verbose ) printf("clearing memory:");
+
+    bcopy(memfound,_commdat->memfound,sizeof _commdat->memfound);
+
+    /*
+     * get physical addresses of sacred areas.
+     * assumptions:
+     *		if !InProm, text < data and contiguous;
+     *		if !InProm, tsize + dsize <= 2*ROMSIZE;
+     *		if !InProm, text origin aligned on 2*ROMSIZE boundary;
+     *		stack < bss and contiguous;
+     *		currently using only the highest page of stack+bss.
+     */
+    text_phstart = (char *)ROM0;
+    text_phend = (char *)ROM0+4*ROMSPACING;
+    if( !InProm )
+    {
+	text_phstart = edata-1; text_phend = edata;
+	getregion(&text_phstart, &text_phend, 2*ROMSIZE);
+    }
+    stack_phstart = end-1; stack_phend = end;
+    getregion(&stack_phstart, &stack_phend, ptoa(1));
+    stack_phend = stack_phstart + ptoa(1);
+
+    /* zero the memory */
+    for( i = 0; i < MAX_MEM_CHUNKS; i++ )
+	if( memfound[i] )
+	{
+	    register char *startbyte,*endbyte,*nextbyte;
+	    char *seg,*nextseg;
+
+	    if( verbose ) putchar('X');
+
+	    seg = (char *)(i*MEM_CHUNK_SIZE);
+	    startbyte = seg;
+	    nextseg = startbyte+MEM_CHUNK_SIZE;
+
+	    /* map in this chunk */
+	    mapmem(VIRT_FIRST_MAGIC_PAGE
+		    ,atop((long)startbyte),MEM_CHUNK_PAGES);
+
+	    /*
+	     * clear this chunk, watching out for
+	     * sacred areas (assumed disjoint, and
+	     * not crossing chunk boundaries).
+	     */
+	    repeat
+	    {
+		nextbyte = endbyte = nextseg;
+
+		/* don't clear the stack+bss */
+		if( startbyte <= stack_phstart && stack_phstart < endbyte )
+		{
+		    endbyte = stack_phstart;
+		    nextbyte = stack_phend;
+		}
+
+		/* don't clear program */
+		if( !InProm )
+		if( startbyte <= text_phstart && text_phend < endbyte )
+		{
+		    endbyte = text_phstart;
+		    nextbyte = text_phend;
+		}
+
+		/* don't clear the common area */
+		if( startbyte <= (char *)0 && (char *)0 < endbyte )
+		{
+		    endbyte = (char *)0;
+		    nextbyte = _commend;
+		}
+
+dprintf((" clr $%x-$%x",startbyte,endbyte));
+		if( startbyte < endbyte )
+		{
+		    startbyte -= (long)seg; endbyte -= (long)seg;
+		    bzero(ptoa(VIRT_FIRST_MAGIC_PAGE)+startbyte
+			    ,endbyte-startbyte);
+		    /* startbyte += (long)seg; endbyte += (long)seg; */
+		}
+		startbyte = nextbyte;
+	    }
+	    until( startbyte >= nextseg );
+	}
+	else
+	{
+	    if( verbose ) putchar('.');
+	}
+
+
+    /* clear to the end of the common area. */
+    _commdat->memfound[MAX_MEM_CHUNKS] = 0;
+    _commdat->pad = 0;
+    _commdat->addr488 = 0;
+    /*_commdat->dcconfig = 0;*/
+
+    if( _commdat->reboot != MAGIC_REBOOT_VALUE )
+    {
+	_commdat->reboot = 0;	    
+	_commdat->boottype = 0;
+	bzero(_commdat->bootstr,_commend-_commdat->bootstr);
+    }
+
+    if( verbose ) newline();
+}
+
+getregion(_s, _e, grain)
+    char **(_s), **(_e);
+    int grain;
+{
+    register char *s, *e;
+    unsigned short ppage, pprot;
+
+dprintf((" getregion($%x-$%x,$%x)",*_s,*_e,grain));
+    s = *_s; e = *_e;
+    s -= (long)s % grain;		/* round down start */
+    getmap(atop((long)s),&ppage,&pprot);/* get its physical page # */
+    *_s = (char *)ptoa(ppage);		/* convert to byte addr */
+    *_e += *_s - s;			/* remap the end */
+dprintf(("-->$%x-$%x\n",*_s,*_e));
+}
+
+
+short
+find_multibus_window()
+{	
+	/* The multibus window is at zero for the master
+	   processor. Slaves address must be determined
+	   by a method to be taken up later. */
+	if (BOOTENV(_commdat->config) == ENV_SLAVE) {
+		_commdat->flags &= ~MASTER;
+		_commdat->mbw = 0x200;
+		_commdat->mblog = 0x210;
+		_commdat->mbphys = 0;
+		_commdat->nmbpages = (_commdat->membits > 1)?0xf0:0x70;
+	}
+	else {
+		_commdat->flags |= MASTER;
+		_commdat->mbw = 0;
+		_commdat->mbphys = atop(MBMEMOFFSET);
+		_commdat->mblog = atop(MBMEMOFFSET);
+		_commdat->nmbpages = N_MBMEM_PAGES;
+	}
+	return(_commdat->mblog); 
+}
+
+
+
+/*
+
+	beginning at physical 0x200, there is a small global communication
+	area that is used to control the state of the world between resets.
+	Part of this consists of TWO complete pieces of information 
+	indicating where physical memory is located. These are compared, 
+	and the results of this comparison used to indicate whether or
+	not we have just been powered up.  memory_summary's job is to
+	assemble the abbreviated copy from the other one.
+	memory_trashed will compare the result of memory_summary to
+	the current abbreviated copy. If the two copies match, a
+	warm start is assumed and memory_trashed returns FALSE.  
+
+*/
+
+unsigned long
+memory_summary()
+{
+
+	register int i;
+	register unsigned long membits,bitmask;
+
+	membits = 0; bitmask = 1;
+
+	for( i = 0; i < MAX_MEM_CHUNKS; i++ )
+	{
+	    if( _commdat->memfound[i] )
+		membits |= bitmask;
+	    bitmask <<= 1;
+	}
+
+	return membits;
+}
+
+int
+memory_trashed()
+{
+	return memory_summary() != _commdat->membits;
+}

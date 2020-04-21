@@ -1,0 +1,31 @@
+.TH multimap  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I multimap
+- treat the color map as sixteen small maps
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "multimap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine multim"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure multimap;"
+.sp
+.SH DESCRIPTION
+.I Multimap
+organizes the color map as sixteen
+small maps, each with a maximum of 256 RGB entries.
+The number of entries in each map is 2\u\s-2\&p\s0\d,
+where \f2p\fP is the number of available planes.  Specification and 
+limitation of available planes is discussed in the \f2setplanes\f1
+manual page.  \f2Multimap\f1 does not take effect until \f2gconfig\f1
+is called.
+.SH "SEE ALSO"
+.I gconfig, getcmmode, getmap, onemap, setmap, setplanes
+.SH NOTE
+This command can only be used in immediate mode.

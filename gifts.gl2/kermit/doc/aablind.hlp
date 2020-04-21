@@ -1,0 +1,616 @@
+Date: Tue 1 Oct 85 14:17:51-EDT
+From: Frank da Cruz <SY.FDC@CU20B.ARPA>
+Subject: Use of Kermit by the Blind
+To: Info-Kermit@CU20B.ARPA
+cc: Info-IBMPC@USC-ISIB.ARPA, Info-Micro@BRL-VGR.ARPA
+
+I've had a call from Kenneth Reed at NASA in Greenbelt, MD (phone 301-344-8414)
+asking how Kermit can be used effectively by blind people.  Back in the days
+when computers had terminals, you could put a device like a Votrax or DECtalk
+or whatever between the terminal and the computer, and it could try to speak
+the letters and numbers, or words, as they went by.  But microcomputers don't
+generally have a place to attach such a device.  Kenneth says his Apple II
+has a special card that somehow gets characters just before they're about to
+be put on the screen and presumably can transmit them to a speaking device,
+but that's just for the Apple.
+
+I'm sure there has been a lot of discussion about this elsewhere, but I must
+have missed it.  How can blind people use microcomputer applications in
+general?  Obviously, graphics-oriented stuff is mostly out (and therefore,
+presumably, also the Macintosh).  In MS-DOS, maybe there are console drivers
+that can intercept characters, strip out (or interpret) formatting information,
+and send the text out the serial port to, say, a Votrax, or maybe there are IBM
+PC boards that "speak the screen" directly.  Anyhow, Kenneth's department is
+selecting microcomputers and he'd like to see them pick one that text oriented
+applications (like Kermit) can be adapted to give comprehensible audible
+output.  If you have any information, please post it and also give Kenneth a
+call at the number listed.
+
+By the way, the way the Kermit file transfer display is done is important here.
+On MS-DOS systems, a "form" is put up on the screen at the beginning of the
+file transfer, and then numbers and messages are filled in and updated
+randomly throughout.  If one were to read this stuff in sequence as it appeared
+on the screen, it would be a pretty confusing jumble.  Also, you'd need a
+pretty fast talker at high baud rates...  The serial output of local-mode Unix
+Kermit or DEC-20 Kermit would be a lot more comprehensible when interpreted
+by a voice device.
+
+------------------------------
+
+Date: Wed, 2 Oct 85 06:21:51 MDT
+From: halff@utah-cs.arpa (Henry M. Halff)
+Subject: Re: Use of Kermit by the Blind
+References: <1835@brl-tgr.ARPA>
+
+Let me suggest that your friend contact the following firm.
+
+	Talking Computers, Inc.
+	6931 North 27th Road
+	Arlington, VA 22213
+	703-241-8224
+
+The fellow that runs the firm is Doug Wakefield.  His business is putting
+speech synthesizers on computers for blind people.  He pretty much specializes
+in IBM PC's, but he might be able to help with Apples.  The software that he
+uses should have no problem with a screen display like Kermit's since the
+user can, at any time, get a readout of the entire screen or any line
+on the screen.
+
+Hope this helps.
+
+Henry M. Halff
+Halff Resources, Inc.
+halff@utah-cs.ARPA
+
+------------------------------
+
+Date: Wed, 2 Oct 1985  22:52 MDT
+From: "Frank J. Wancho" <WANCHO@SIMTEL20.ARPA>
+Subject: Use of Kermit by the Blind
+
+Frank,
+
+Have Ken contact Anda Lee in Florida.  She is blind and runs a BBS.
+Her numbers are:
+
+Office: 800-237-2774 x8492
+Home:   813-885-4420
+BBS:    813-885-4369
+
+She called me last year because she was having some trouble bringing up my
+RBSS4.  I talked to her for about an hour about sections of the code before she
+up and told me she was blind.  I couldn't tell up to that point.  She has a
+VOTRAX-like device she uses and also markets...
+
+I haven't talked to her in a long time, so I don't know if those numbers are
+current.
+
+--Frank
+
+------------------------------
+
+Date: Sat, 5 Oct 85 10:28:24 mst
+From: Kelvin Nilsen <kelvin%arizona.csnet@CSNET-RELAY.ARPA>
+Subject: Kermit for the Blind
+
+hate to sound like a pest, but it seems that versacom might be able to offer
+some assistance here too.  
+
+versacom does not run windows!  all i/o to the terminal is serialized through
+the bios, write tty (except of course when it comes to terminal emulation).
+this makes it possible to run versacom on a pc from a terminal and connect
+to another system to transfer files.  for example:
+
+
+	  vt100                   dumb tty emulation
+	+-------------+             +---------+            +----------+
+	|home terminal|- 1200 baud -|office pc|-19200 baud-|office vax|
+	+-------------+             +---------+            +----------+
+
+xon/xoff handshaking is supported on both ports, in both directions and works
+independently.  the amount of information reported by file transfers can be
+each packet, or each file transfered.
+
+anyway, this capability makes possible two solutions to the problem you 
+mentioned.  first, attach a votrax-type terminal to one of the com ports
+of the pc.  second, modify versacom to send bios tty output to an internal
+voice synthesizer instead of or in addition to the bios tty output.
+
+alternatively, it sounds like the SOURCE people have a version of UNIX-kermit
+that runs on the PC.  it seems that would offer similar capabilities.  Who
+knows how robust and user friendly that implementation is?
+
+kelvin nilsen
+
+------------------------------
+
+DATE: October 07, 1985 11:29:44 EDT
+FROM: NUNNALLY%VPIVM1.BITNET@WISCVM.ARPA
+SUBJECT: TERMINAL FOR THE BLIND
+
+WE ARE TRYING SEVERAL DIFFERENT PRODUCTS FOR THE BLIND HERE AT VA. TECH
+ONE IS A PACKAGE ON THE IBM PC CALL ED FREEDOM. VERY NICE PACKAGE.
+WORKS OUTSIDE OF ALMOST ANY OTHER PACKAGE ON THE PC. WE USE THE TERM
+EMULATOR YTERM WITH IT NO PROBLEMS.
+WE ALSO USE THE AUDIOTRONICS TALKING KEYBOARD FOR THE PC. HAVING SOME
+SPEED INTERFACE PROBLEMS. QUESTIONS CALL 703-961 5961.
+
+------------------------------
+
+Date:  5 Oct 1985 1454-PDT (Saturday)
+From: randy@uw-bluechip.arpa (William Randy Day)
+Subject: Re: Use of Kermit by the Blind
+
+I am part of a research project here at the University of Washington aimed
+at developing software for deaf-blind (both deaf and blind) users.
+The presentation problem is severe. As you say, graphics-oriented
+software is out. As you describe in you posting, even ``non-graphics''
+programs like kermit can prove incomprehensible if a straight screen
+output to speech translation is made. We have come to the conclusion
+that a simple hardware/software translation unit sitting on top of 
+normal software is inadequate, particularly for our severely handicapped
+target group. We have taken the custom software approach.
+
+I know this is Kenneth Reed's ball and not yours, but your message didn't have
+an email address for Kenneth. Besides, I don't have an answer, just a comment.
+
+Randy Day.
+UUCP: {decvax|ihnp4}!uw-beaver!uw-june!randy
+ARPA: randy@washington
+CSNET: randy%washington@csnet-relay
+
+------------------------------
+
+Date:     Mon, 7 Oct 85 20:31:19 EDT
+From:     Doug Gwyn (VLD/VMB) <gwyn@BRL.ARPA>
+To:       info-kermit@cu20b.ARPA
+Subject:  terminals for the blind
+
+I don't know why nobody seems to be mentioning the VersaBraille (another
+company makes a similar device).  I used to have a blind programmer working for
+me, and we tried various talking terminals, optical scanners, and so forth.
+Her conclusion was that the VersaBraille (with communications software
+cassette) was much easier and faster, although for graphics (yes!) she resorted
+to an optical scanner (sorry, I forget the trade name).
+
+This topic really seems orthogonal to KERMIT, other than to the extent to which
+it points out the silliness of fancy user interfaces in what was supposed to be
+a file transfer program.
+
+------------------------------
+
+From: Peter da Silva <peter%graffiti.uucp@BRL.ARPA>
+Newsgroups: net.micro
+Subject: Re: Use of Kermit by the Blind
+Date: 2 Oct 85 16:54:45 GMT
+To: info-micro@BRL-VGR.ARPA
+
+Attach the votrax to the printer port & turn on echoprint, perhaps? ^PrtSc on
+the IBM, ^P on CP/M.
+
+------------------------------
+
+Date: Wednesday, 9 Oct 85 07:59:43 PDT
+From: Robert Jaquiss <robertj%tektronix.csnet@CSNET-RELAY.ARPA>
+To: INFO-KERMIT@cu20b.columbia.edu
+Subject: EQUIPMENT FOR THE BLIND
+
+     I am a blind programmer at Tektronix Inc.  I have used Kermit on several
+occasions.  For my work I use a Thiel braille printer from Maryland Computer
+Services.  To the computer it looks like a teletype that can send and receive
+upper and lowercase.  Of course graphics are useless cursor movement is
+impossible.  It is possible to deal with num- bered or lttered menus where you
+select the item you want by entering some character.  I have a Versabraille as
+a backup terminal on which I have also used kermit it worked fine.  The micro I
+am using runs CP/M so I don't have to contend with menus.
+
+     Here are some equipment sources that have reliable hardware.  Maryland
+Computer Services sells a very good braille printer.  They have a specially
+modified HP150 [an MS-DOS PC with a touch-screen] that talks and a accessory
+for a PC that will allow users to use screen oriened software.  Telesensory
+Systems Inc. sells the Versabraille (a refreshable braille display) and the
+Optacon (a hand held scanner that will show you the shape of letters).  Vtek
+sells a tactile display device for use on a ibm PC or Apple.
+
+        Maryland Computer Services Inc.
+        2010 rock Springs Road
+        Forest Hills, Md. 21050
+        Phone (301) 879-3366
+
+        Telesensory Systems Inc.
+        455 N. Bernardo
+        Mountainview, Ca. 94039
+        Phone (415) 960-0920
+
+        Vtek
+        1610 26th
+        Santa Monica, Ca. 90404
+        Phone (213) 829-6841
+
+     If you need moe help call me at (503)  627-6346  (work)
+or (503) 640-6473 (home).
+
+        Robert S. Jaquiss
+
+ucbvax!tektronix!robertj (uucp)
+robert jaquiss@tektronix (csnet)
+robert jaquiss.tektronix@rand-relay (arpanet)
+
+------------------------------
+
+Date: Fri, 11 Oct 85 9:34:53 EDT
+From: Robert I. Isakower (IMD-SEAD) <isakower@Ardc.ARPA>
+Subject: Use of Kermit by the Blind
+
+The following letter was sent to Kennith Reed 10/10/85 at your request.
+9 October 1985
+
+Dear Mr. Reed,
+
+Recently  a request was forwarded to me from Frank da Cruz asking if I 
+had any information on the use of Kermit or the MS-DOS system by the Blind.
+
+Perhaps this request was directed to me because I have tunnel vision (Retinitis
+Pigmentosa).  I also have a degenerative hearing problem which places very
+demanding requirements on any voice synthesizers used with visual aids for my
+eyesight problems.  I have found SMOOTHTALKER on the Mac difficult to
+understand.  DECTALK provides, for my personal use, the best voice output.
+Please realize that I am not a judge of what constitutes good speech because
+everything sounds to me as if it were coming from a distorted radio receiver.
+
+The following information that I am including in my letter are my notes and
+results of my own findings of a computer show that I attended in Ewing, New
+Jersey this past September.  I have no corporate nor financial interest in any
+of the company products and the information and comments that I am offering is
+my personal opinion.
+
+I sincerely hope that my enclosure will be of some assistance to you in your
+research.  If I can be of any further assistance, please feel free to contact
+me.
+		Robert I. Isakower
+		C,  Technical Systems Division
+
+Four vendors featuring "talking computers" were at the show for aids for the
+blind and the visually impaired.  I was unable to get prices for all the
+equipment.
+
+VTEK (formerly VISUALTEK)
+1625 Olympic Boulevard
+Santa Monica, CA   90404
+1-800-345-2256
+
+     VOYAGER Electronic Magnifiers:  $2,395 to $2,895
+
+     Large Print Display Processor  (*) :  $2,695
+(This device magnifies, up to 16X, whatever is on the screen, with 
+character enhancement.  It recognizes the ASCII code and redraws it as 
+a solid line vector, instead of an enlarged matrix of dots and spaces.)
+
+     MBOSS-1 Braille Printer:  $3,225
+
+     Braille Display Processor (*):  $3,495
+This is a neat paperless braille output with a 20 cell tactile refreshable 
+braille readout.  It will provide the braille equivalent of 20 contiguous 
+character spaces on the computer display.  Audio signals indicate the
+"position" of the 20 cell braille window on the video display.
+
+     (*) for APPLE II, II+, IIe and IBM PC, PC-XT, PC-AT
+
+COMPUTER CONVERSATIONS
+2350 N. Fourth St.
+Columbus, Ohio   43202
+(614) 263-4324 (after 6 PM)
+
+     ENHANCED PC TALKING PROGRAM:  $500
+
+     Written by a blind programmer, (Ronald Hutchinson), this is interfacing
+software only, and requires the user's own computer, voice synthesizer, and
+application progams.  Application programs are the programs that you wish to
+use in a speaking mode and would be an additional expense with all talking
+computers.  This company's program interfaces with the most used computers,
+speech synthesizers and application software in the marketplace.  The company
+will offer to recommend the configuration best suited to your needs and budget.
+
+MARYLAND COMPUTER SERVICES
+2010 Rock Spring Rd
+Forest Hill, Maryland    21050
+(301) 879-3366
+
+     TOTAL TALK PC (microcomputer, display, speech synthesizer, keyboard)
+
+AUDIODATA/IBM PC KEYBOARD (2 slider keys, speech synthesizer, speaker, and
+display magnification with optional low cost monitor)-provides audio output
+from your IBM PC.  The vertical slider key locates the desired line and the
+horizontal key locates the character on the line. In this manner, the user can
+hear the screen, one line at a time, character by character.
+
+     THIEL BRAILLE (high speed-120 cps) EMBOSSER
+
+     CRANMER-PERKINS BRAILLER (4000 character memory typewriter, braille 
+printer, plotter, smart terminal, portable):  $2,350.
+
+     READY READER optical character reader (typewritten material to braille 
+or voice):  $11,500.
+
+     MCS computer systems are based upon Hewlett-Packard computers which are
+very well constructed.  Unfortunately, none of the above equipment was
+demonstrated to me, for one reason or another.
+
+A fourth vendor was demonstrating a speech synthesizer that works with 
+the APPLE II.  I wasn't stirred by it and left early, not being offerred 
+any literature.
+
+COMMENTS: VTEK and MCS have been around a long time, know the business of
+electronic visual aids, have the most varied product line and are probably
+my best bet for the future.  They have equipment for both the visually
+impaired and the totally blind.  MCS's AUDIODATA/IBM KEYBOARD promises the
+simplest, cheapest and quickest fix for IBM PC users. Although it is a very
+competitive computer marketplace, a small software manufacturer and system
+iterfacing company such as Computer Conversations, probably with lower
+production costs and more self-motivating talent, cannot be discounted.
+Another company that should be investigated is the one that manufactures a
+portable tactile (pins) readout device called the OPTICON.  I've watched
+this used with great success and speed on printouts and teletypewriters (on
+line), and I heard of some sort of adaptation to a computer display.  Note
+that the OPTICON is difficult to learn to use.
+
+------------------------------
+
+Date: Monday, 7 October 1985  22:53-MDT
+From: Dan_Bower%RPI-MTS.Mailnet@MIT-MULTICS.ARPA
+To: Info-IBMPC@MIT-MC
+Subject:  Output Devices for the Blind
+
+This is in response to the comments about making Kermit, etc. run via a voice
+interpreter.  Although this idea is good, what about some sort of tactile
+display?  A device called a Braille Writer (?) takes a serial input and
+displays it in a mechanical braille display: 1 row of 20 characters.  The
+display consists of a large 'dot matrix', where the dots are pins attached to
+coils.  To display a character, it charges the proper coils pushing the proper
+arrangement of blunt pins out of their sockets.
+
+To use Kermit with such a thing, why not a 25x80 set of character matrices that
+accepts the same inputs as a monochrome monitor?  Technically, it is a
+relatively simple problem.  In practicality, it will probably never hit the
+market.  The development costs would be comparable to those of new printers or
+monitors, but the market is orders of magnitude smaller that for devices for
+sighted people.  If it was developed privately, the unit cost would be terribly
+high.  With the present government attitude towards spending money on
+charitible projects, it would likely never come to pass via Uncle Sam.
+
+Boy would I like to see someone prove me wrong on this one...
+
+[This is way off the subject for INFO-IBMPC, but am bending the rules a bit.
+Perhaps the people interested in this subject can get together on some
+appropriate forum. -wab]
+
+[This is not so off the subject, given the most commonly available engine for
+any project is a pc; certainly it is more relevant here than Info-Kermit.
+-elmo, feudal editor]
+
+------------------------------
+
+From: Sheldon Talmy <talmy@rand-unix.ARPA>
+Date: 19 Oct 85 18:36:58 PDT (Sat)
+Subject: Kermit for the blind
+
+In response to your msg about, "Kermit for the blind", there is a great deal
+being done for the visually handicapped in conjunction with computers.
+
+One company I suggest is IRTI:
+
+Innovative Rehabilitation Technologies Inc.
+26699 Snell Lane, Los Altos Hills,Ca, 94022
+415-948-8588
+
+They have a huge catalog of products for the visually impaired, including
+synths & entire turn-key systems.  If nothing else, the man who owns the
+company is an excellent resource for info on the latest products.
+
+I've been writing articles on computers for the handicapped for the last couple
+of years, & have gathered several sources for products, that are ready to go
+now.  If I can be of any help, send me a msg, & I'll be happy to assist you.  
+
+I note from other messages on the subject, that some research is going on that
+could conceivably come under the heading of "re-inventing the wheel".
+As i'm involved in the field, I might possibly be able to save time & effort,
+so contact me if you like.
+
+
+Shel Talmy<>Talmy@Rand-Unix
+
+------------------------------
+
+Date: 02 Nov 85 19:52:51 EST (Sat)
+From: dave@mimsy.umd.edu
+To: Info-Kermit@cu20b.ARPA
+Cc: Info-IBMPC@usc-isib.ARPA, Info-Micro@brl-vgr.ARPA
+Subject: man-machine interfaces for the blind
+
+     the following companies have experts in understanding the specific 
+problems of developing and using man-machine interfaces for the blind.
+
+Automated Functions, Inc.	Washington, D.C.
+Maryland Computer Services	Gambrills, Maryland
+Talking Computers    	        Arlington, Virginia
+Telesensory Systems Inc.	Palo Alto, California
+
+    I own a Macintosh, but find it very difficult to use myself.  I own 
+it because, nevertheless, it is the best tool for the application for which 
+I got it.  I have heard of a blind Mac user who reads the screen with an 
+OPTACON.
+
+    Dave Stoffel
+    Amber Research Group, Inc.
+
+------------------------------
+
+Date: 17-Jan-86 19:06:10-EST
+From: BLACK J EMMETT <BLACKJE@ge-crd.arpa>
+Subject: computer use by blind people...
+To: <SY.FDC@CU20B.ARPA>
+
+I can recall having "chatted" with a person on the SOURCE who was using an old
+TI-99/4a with voice synthesizer...  which "read" the screen to him...
+
+Although possibly difficult to find, the price is likely to be quite low for a
+"dumb" voice terminal using the TI...  I've seen a number of ads offering TI's
+for sale...
+
+------------------------------
+
+Date: Wednesday, 1 January 1986  18:04-MST
+From: Mark Becker <Cent.Mbeck@oz.ai.mit.edu>
+To: KPetersen@SIMTEL20.ARPA
+Subject: BBS's for the handicapped
+
+    Keith, are you aware of any bulletin boards anywhere that support
+both ASCII and Baudot code?
+
+     I know of one in southern Maryland run by a Dick Barth... that's the HEX
+(for Handicapped Educational eXchange) machine.  It supports ASCII at 300 baud
+*and* 45.45 baud Baudot code.  His machine, build a couple of years ago from a
+Gov't grant, has quite a population of hearing-impaired and blind people using
+it.
+
+     The Baudot modems aren't anywhere near Bell 103 or 212A; they use
+something called a Weibrecht (sp?) standard.  Mark tone at 1400 Hz, space at
+1600 Hz.  Also, they are *half* duplex.
+
+     Please forward this as you see fit - I'm curious if more than one of these
+"modified" BBS systems exist.
+
+     Dick's hardware is oriented around a Smoke Signal Broadcasting frame with
+a 15 MByte disk attached.
+
+Regards,
+Mark
+
+------------------------------
+
+Date: Thursday, 6 March 1986 9:56am 
+From: Frank da Cruz <SY.FDC@CU20B.ARPA>
+Subject: BYTE Articles on Computing for the Blind
+
+The March 1986 issue of BYTE Magazine has a couple articles in this area.  One
+is called "Computing for the Blind User" by Aries Arditi and Arthur E.
+Gillman.  It's an overview of the problems and solutions.  The other is a
+review of Braille-Edit, by Henry Brugsch.  The first article includes a list of
+products:
+
+Screen Talk
+Computer Aids Corp.
+124 West Washington, Lower Arcade
+Fort Wayne, IN  46802
+Phone 219-422-2424
+
+The Enhanced PC Talking Program
+Computer Conversations
+2350 North Fourth Street
+Columbus, OH  43202
+Phone 614-263-4324
+
+Total Talk PC
+Maryland Comuter Services
+2010 Rock Spring Road
+Forest Hill, MD  21050
+Phone 301-879-3366
+
+Braille-Edit
+Raised Dot Computing Inc.
+408 South Baldwin Street
+Madison, WI  53707
+Phone 608-257-9595
+
+Echo+
+Street Electronics
+1140 Mark Avenue
+Carpinteria, CA 93013
+Phone 805-684-4593
+
+VERT
+Versabraille
+Telesensory Systems Inc.
+455 North Bernardo Avenue
+Mountain View, CA  94043
+Phone 415-960-0920
+
+Personal Speech System
+Type-'N-Talk
+Votrax Inc.
+1394 Rankin Drive
+Troy, MI  48083
+Phone 313-588-2050
+
+------------------------------
+
+Date: Thursday, 6 March 1986 9:56am 
+From: Frank da Cruz <SY.FDC@CU20B.ARPA>
+Subject: Catalogs
+
+Two catalogs I came across recently, both somewhat dated but perhaps useful
+nonetheless.  There may be newer editions of each.
+
+TASH - Technical Aids & Systems for the Handicapped, Inc. (1984)
+70 Gibson Drive, Unit 1
+Markham, Ontario
+CANADA  L3R 2Z3
+Phone 416-475-2212
+
+The TASH catalog is mainly useful to the physically impaired.  It includes all
+sorts of alternate keyboards, switches, foot treadles, joysticks, etc, designed
+to allow data to be input to a computer by people who don't have full use of
+their hands.  Some devices are very simple, like "keylocks", which hold control
+or shift key down.
+
+IBM Directory of Services and Specialized Equipment
+for the Physically Impaired (1st Ed, 1982)
+G320-0024-0
+IBM Corporation
+Department 63C/028
+Kingston, NY  12401
+
+This publication is more than 400 pages long, and is not limited to computing
+aspects.  It also discusses aids for daily living, cooking, clocks, etc.  There
+are large sections on the blind, the deaf, the deaf and blind, etc.  There is a
+20-page list of agencies and organizations serving the physically impaired.
+It does not seem to be IBM-oriented in any way -- many products are listed from
+other vendors, even competitors.  It invites submissions from readers for
+future editions; I'm submitting this collection of messages, up to and
+including this one.
+
+------------------------------
+
+10-May-86 00:52:15-EDT,1599;000000000001
+Return-Path: <BARTH@MC.LCS.MIT.EDU>
+Received: from MC.LCS.MIT.EDU by CU20B.COLUMBIA.EDU with TCP; Sat 10 May 86 00:52:10-EDT
+Date: Sat, 10 May 86 00:53:31 EDT
+From: Richard Barth <BARTH@MC.LCS.MIT.EDU>
+Subject: Discussion group for technology for the handicapped
+To: SY.FDC@CU20B.COLUMBIA.EDU,
+    nu025213%ndsuvm1.bitnet@WISCVM.WISC.EDU
+cc: BARTH@MC.LCS.MIT.EDU, MBECK@MC.LCS.MIT.EDU
+Message-ID: <[MC.LCS.MIT.EDU].909134.860510.BARTH>
+
+>    A mailing list has been set up at North Dakota State University for
+>    discussing computer and other technology for people with any kind
+>    of handicap, plus meetings, conferences, funding agencies, and so
+>    forth.  It is run by Bob Puyear, NU025213@NDSUVM1.BITNET (via Arpanet,
+>    NU025213%NDSUVM1.BITNET@WISCVM.WISC.EDU), who will add you to the
+>    mailing list if you send him a request to do so.  To send mail directly
+>    to the list itself, replace NU025213 by L$HCAP in the addresses above.
+>
+
+wPlease add me to the list. I operate a computer bulletin board system in
+Silver Spring MD called the Handicapped Educational Exchange (HEX); data
+line is (301) 593-7033. It accepts calls at 300 baud ASCII (8N1) or in
+TTY/TDD format. It serves as a clearinghouse for information on the use of
+computers to aid the disabled. One of the reasons why I (very recently) got
+onto the net was so that I would be able to trade information with others
+having similar interests. I'll be putting out an announcement about HEX as
+soon as I get the feel of your group. Meanwhile, I'm glad to know you're
+around.
+
+    -------
+
+ 

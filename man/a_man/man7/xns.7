@@ -1,0 +1,117 @@
+'\"macro stdmacro
+.TH XNS 7
+.SH NAME
+xns \- interface to XNS Sequenced Packet Protocol
+.SH SYNOPSIS
+.B "psuedo-device xns"
+.SH DESCRIPTION
+This is the Sequenced Packet Protocol (SPP) interface to the
+ethernet driver.
+Connection setup is accomplished via calls to
+.IR ioctl (2).
+Whereupon,
+.IR write (2)
+transmits data;
+.IR read (2)
+passes back received data;
+and
+.IR close (2)
+terminates the connection.
+Typewriter (tty) processing is optional on both input and output.
+
+By default,
+the system writes data using the data stream type
+.I DST_DATA.
+Other data stream types may be sent using the
+.I NXWRITE
+call (see below).
+The system uses the data stream type
+.I DST_END
+to end connections.
+Reading data of type
+.I DST_END
+returns 0;
+a subsequent read causes the signal
+.I SIGHUP
+to be sent to the reader.
+Writing data of type
+.I DST_END
+is analogous to sending an end-of-file,
+with the side-effect of disabling further writes from this side.
+Writing to a dead connection gives an error;
+a subsequent write causes the signal
+.I SIGHUP
+to be sent to the writer.
+The system automatically sends
+.I DST_END
+as part of
+.IR close (2).
+Data stream types and socket numbers are defined in the include file
+.IR "<xns/Xnsioctl.h> ."
+
+In the following descriptions,
+.B fd
+is a file descriptor referring to an ethernet pseudo-device
+(see
+.IR nx (7)).
+.IP "ioctl(fd, NXSOCKET, short_ptr)"
+.br
+Sets the receive socket number to the short integer pointed at by
+.IR "short_ptr ."
+Sets error EISCONN (see
+.IR intro (2))
+if the socket number was already set on this pseudo-device.
+.IP "ioctl(fd, NXSOCKWAIT, 0)"
+.br
+Waits for an incoming connection.
+The socket number must have been specified by a previous
+.I NXSOCKET call.
+.IP "ioctl(fd, NXCONNECT, xns_setup_ptr)"
+.br
+Makes an outgoing connection using the
+hostname and socket number in the
+.IR "struct xns_setup"
+pointed at by
+.B xns_setup_ptr.
+.PP
+These several calls enable and disable typewriter (tty) processing:
+.IP "ioctl(fd, NXIOSLOW, 0)"
+.br
+Requests tty output processing on subsequent writes.
+.IP "ioctl(fd, NXIOFAST, 0)"
+.br
+Requests bypassing of tty output processing on subsequent writes.
+.IP "ioctl(fd, NXBLOCKOFF, 0)"
+.br
+Requests tty input processing on subsequent reads.
+.IP "ioctl(fd, NXBLOCKIO, 0)"
+.br
+Requests bypassing of tty input processing on subsequent reads.
+.PP
+These calls provide access to SPP's out-of-band data:
+.IP "ioctl(fd, NXREAD, xnsio_ptr)"
+Reads from a connection:
+in-band data is passed back using the pointer and count
+in the
+.IR "struct xnsio"
+pointed at by
+.B xnsio_ptr;
+the data length, data stream type, and control byte
+are passed back directly in the same
+.IR "struct xnsio."
+.IP "ioctl(fd, NXWRITE, xnsio_ptr)"
+Writes to a connection:
+the in-band data is specified by the pointer and count
+in the
+.IR "struct xnsio"
+pointed at by
+.B xnsio_ptr;
+the data stream type and control byte
+occur directly in the same
+.IR "struct xnsio."
+.SH FILES
+xns/Xns.h, xns/Xnsioctl.h		- include files
+.SH "SEE ALSO"
+.na
+ioctl(2),
+nx(7).

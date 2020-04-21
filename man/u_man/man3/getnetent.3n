@@ -1,0 +1,129 @@
+'\"macro stdmacro
+.\" Copyright (c) 1983 Regents of the University of California.
+.\" All rights reserved.  The Berkeley software License Agreement
+.\" specifies the terms and conditions for redistribution.
+.\"
+.\"	@(#)getnetent.3n	6.3 (Berkeley) 5/19/86
+.\"
+.TH GETNETENT 3N
+.UC 5
+.SH NAME
+getnetent, getnetbyaddr, getnetbyname, setnetent, endnetent \- get network entry
+.SH SYNOPSIS
+.nf
+.B #include <netdb.h>
+.PP
+.B struct netent *getnetent()
+.PP
+.B struct netent *getnetbyname(name)
+.B char *name;
+.PP
+.B struct netent *getnetbyaddr(net, type)
+.B long net;
+.B int type;
+.PP
+.B setnetent(stayopen)
+.B int stayopen;
+.PP
+.B endnetent()
+.fi
+.SH DESCRIPTION
+.IR Getnetent ,
+.IR getnetbyname ,
+and
+.I getnetbyaddr
+each return a pointer to an object with the
+following structure
+containing the broken-out
+fields of a line in the network data base,
+.IR /etc/networks .
+.RS
+.PP
+.nf
+struct	netent {
+	char		*n_name;	/* official name of net */
+	char		**n_aliases;	/* alias list */
+	int		n_addrtype;	/* net number type */
+	unsigned long	n_net;		/* net number */
+};
+.ft R
+.ad
+.fi
+.RE
+.PP
+The members of this structure are:
+.TP \w'n_addrtype'u+2n
+n_name
+The official name of the network.
+.TP \w'n_addrtype'u+2n
+n_aliases
+A zero terminated list of alternate names for the network.
+.TP \w'n_addrtype'u+2n
+n_addrtype
+The type of the network number returned; currently only AF_INET.
+.TP \w'n_addrtype'u+2n
+n_net
+The network number.  Network numbers are returned in machine byte
+order.
+.PP
+.I Getnetent
+reads the next line of the file, opening the file if necessary.
+.PP
+.I Setnetent
+opens and rewinds the file.  If the
+.I stayopen
+flag is non-zero,
+the net data base will not be closed after each call to 
+.I getnetbyname
+or
+.IR getnetbyaddr .
+.PP
+.I Endnetent
+closes the file.
+.PP
+.I Getnetbyname
+and
+.I getnetbyaddr
+sequentially search from the beginning
+of the file until a matching
+net name or
+net address and type is found,
+or until EOF is encountered.
+Network numbers are supplied in host order.
+.SH FILES
+/etc/networks
+.SH "SEE ALSO"
+networks(4)
+.SH DIAGNOSTICS
+Null pointer
+(0) returned on EOF or error.
+.SH BUGS
+All information
+is contained in a static area
+so it must be copied if it is
+to be saved.  Only Internet network
+numbers are currently understood.
+Expecting network numbers to fit
+in no more than 32 bits is probably
+naive.
+.SH NOTE
+There are two versions of the primitives
+documented in this manual entry:  a vanilla
+version and a Yellow Pages version.
+The programmatic interface of both versions
+is identical.
+The vanilla version gets its information from an ASCII
+file in
+.IR /etc .
+The Yellow Pages version knows about
+Sun's Yellow Pages distributed
+lookup service.
+If you want the Yellow Pages version, link
+the program according to the instructions
+for (3Y) primitives as described in
+.IR intro (3).
+Refer to
+.IR ypserv (1M)
+and the
+.I NFS User's Guide
+for more information about the Yellow Pages.

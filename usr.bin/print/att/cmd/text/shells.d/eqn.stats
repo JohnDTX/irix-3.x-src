@@ -1,0 +1,35 @@
+'\"#ident	"@(#)shells:eqn.stats	1.3"
+.H 1 "Measures of Central Tendency: Mean, Median and Mode"
+.P
+The mean is the arithmetic average for a set of scores.
+The formula for computing a mean (M) is
+.sp 2
+.DS
+.EQ
+M ~=~ {sum from {i~=~1} to n {x sub i} } over n
+.EN 
+.DE
+.P
+The median divides ranked scores into halves.
+Given that the \f2median interval\f1
+is the score interval that contains the n/2nd largest score when scores 
+are ordered by size, the formula for computing a median (Md) is
+.sp 4
+.DS
+.EQ
+Md ~=~ left ( pile {Lower~real above limit~of above median~interval}
+       right ) 
+       +
+       left ( pile {width~of above median above interval}
+       right )  
+       left [ 
+            {(n / 2) - left ( pile {Cumulative 
+                                    above frequency~up\ to 
+                                    above the~median~interval} 
+                       right )} 
+             over { pile {frequency~in above median~interval} }
+        right ] 
+.EN
+.DE
+.P
+The mode is the most frequently occurring score in a group of scores.

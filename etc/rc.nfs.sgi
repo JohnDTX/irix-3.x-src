@@ -1,0 +1,68 @@
+#! /bin/sh
+#
+# Initialize the nfs software.
+#
+
+#
+# Use sgi.com as Yellow Pages domain for SGI internal use
+#
+domainname sgi.com
+
+PATH=$PATH:/usr/etc/yp:.
+nfs=/usr/etc/nfs
+
+#
+# Fire up NFS daemons if they are present and executable.
+# The portmapper is the sine qua non, since RPC doesn't work without him.
+# Now that inetd supports RPC, rc.tcp must start portmap.  Therefore
+# rc.tcp must be invoked before this script.
+#
+if test -x /etc/havenfs && /etc/havenfs; then
+	echo "NFS daemons:\c"
+
+	# NFS server daemons
+	if test -x $nfs/nfsd; then
+		$nfs/nfsd 4;				echo " nfsd\c"
+	fi
+
+	# NFS client bio daemons
+	if test -x $nfs/biod; then
+		$nfs/biod;
+		$nfs/biod;
+		$nfs/biod;
+		$nfs/biod;				echo " biod\c"
+	fi
+
+	# Remove the comment marks from the following
+	# if ... fi statement on machines that are
+	# Yellow Pages clients.  Do this after the
+	# Yellow Pages server(s) have been set up and
+	# are providing YP services.
+
+	# Yellow Pages binder - must background because it may get stuck
+	# before forking.
+#	if test -x $nfs/ypbind; then
+#		$nfs/ypbind &				echo " ypbind\c"
+#	fi
+
+	# Remove the comment marks from the following
+	# if ... fi statement on machines that are 
+	# Yellow Pages servers:
+
+	# Yellow Pages server
+#	if test -x $nfs/ypserv; then
+#		$nfs/ypserv &				echo " ypserv\c"
+#	fi
+
+	# Remove the comment marks from the following
+	# if ... fi statement on the machine that is the 
+	# master server for the Yellow Pages passwd file:
+
+	# Yellow Pages passwd update daemon
+#	if test -x $nfs/rpc.passwd; then
+#		$nfs/rpc.passwd /etc/passwd -m passwd &	echo " rpc.passwd\c"
+#	fi
+
+	echo "."
+	/etc/mount -avt nfs
+fi

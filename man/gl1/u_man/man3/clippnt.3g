@@ -1,0 +1,56 @@
+.TH clippnt  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I clippnt
+- clip an array of points
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clippnt(mask, n, pretrans, postrans, index)"
+.B "String mask; "
+.B "long n; "
+.B "Coord pretrans[][3], postrans[][4];"
+.B "Boolean index[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clippn(mask, n, pretra, postra, index)"
+.B "character*(*) mask"
+.B "integer n"
+.B "real pretra(3,n), postra(4,n)"
+.B "logical index(n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clippnt(mask: String; n: integer; "
+.B "	var pretrans: Coord3array;"
+.B "	var postrans: Coord4array;"
+.B "	var index: Boolarray);"
+.sp
+.SH DESCRIPTION
+.I Clippnt
+selectively enables a subset of the six
+clipping planes. \f3Mask\f1 is a string of characters specifying which clipping
+planes are enabled.
+This string is chosen from `l', `r', `b', `t', `n', and `f', which
+represent the left, right, bottom, top, near, and far
+clipping planes.  \f3Mask\f1 can 
+name from one to six planes, in
+any order. 
+.PP
+\f2Clippnt\f1 takes an array of \f3n\f1 points 
+in \f3pretrans\f1.  
+The transformed
+and partially clipped points are returned in \f3postrans\f1 such that if
+\f3pretrans[i]\f1 was not clipped out, \f3postrans[i]\f1 
+is the transformed value.
+.PP
+\f3Index\f1 is an array of boolean values that show 
+which entries in \f3postrans\f1
+contain valid data.  If \f3index[i]\f1=FALSE, \f3pretrans[i]\f1 
+was clipped out and
+\f3postrans[i]\f1 is undefined.
+.SH "SEE ALSO"
+.I clipline, clippoly, screenpnt, transform
+.SH NOTE
+This command can only be used in immediate mode.

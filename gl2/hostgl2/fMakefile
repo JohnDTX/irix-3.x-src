@@ -1,0 +1,48 @@
+##########################################################################
+#									 #
+# 		 Copyright (C) 1985, Silicon Graphics, Inc.		 #
+#									 #
+#  These coded instructions, statements, and computer programs  contain  #
+#  unpublished  proprietary  information of Silicon Graphics, Inc., and  #
+#  are protected by Federal copyright law.  They  may  not be disclosed  #
+#  to  third  parties  or copied or duplicated in any form, in whole or  #
+#  in part, without the prior written consent of Silicon Graphics, Inc.  #
+#									 #
+##########################################################################
+
+#
+# N.B. If you use 'F' extension files, on 4.2 UNIX, remove the files
+# with 'f' extensions.  The compiler uses 'foo.f' as a temporary name
+# and gets very upset if a file of that name already exists.
+
+FFLAGS  = -C -O -u -Nx400
+
+DEMOS = sqiral drawing popup textinit
+LIB = libfrgl2.a
+ALL = $(LIB) $(DEMOS)
+
+all: $(ALL)
+
+$(LIB): io.o lib.o fsys.o
+	rm -f $(LIB)
+	ar cr $(LIB) io.o lib.o fsys.o
+	ranlib $(LIB)
+
+io.o: fio.h frpc.h
+
+demos: $(DEMOS)
+
+sqiral: sqiral.F $(LIB)
+	f77 $(FFLAGS) -w sqiral.F -o sqiral $(LIB)
+
+drawing: drawing.F $(LIB)
+	f77 $(FFLAGS) -w drawing.F -o drawing $(LIB)
+
+popup: popup.F $(LIB)
+	f77 $(FFLAGS) -w popup.F -o popup $(LIB)
+
+textinit: textinit.F $(LIB)
+	f77 $(FFLAGS) -w textinit.F -o textinit $(LIB)
+
+clean:
+	rm -f *.o $(ALL)

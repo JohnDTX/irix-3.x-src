@@ -1,0 +1,55 @@
+.TH objdelete 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B objdelete
+\- deletes routines from an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "objdelete(tag1, tag2) "
+.B "Tag tag1, tag2; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine objdel(tag1, tag2)"
+.B "integer*4 tag1, tag2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure objdelete(tag1, tag2: Tag);"
+.SH DESCRIPTION
+.B objdelete
+is an object editing routine.
+It removes the routines that are between
+.I tag1
+and
+.I tag2
+from an object.
+.B objdelete
+removes any tags defined between
+.I tag1
+and
+\f2tag2\f1, although 
+.I tag1
+and 
+.I tag2
+remain.
+.PP
+If no object is open for editing when 
+.B objdelete 
+is called, it is ignored.
+.PP
+.B objdelete
+leaves the pointer at
+the end of the object
+after it executes.
+.SH "SEE ALSO"
+editobj, objinsert, objreplace
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

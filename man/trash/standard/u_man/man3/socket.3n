@@ -1,0 +1,220 @@
+.TH SOCKET 3N 
+.SH NAME
+socket \- create an end point for communication
+.SH SYNOPSIS
+\f3#include <sys/socket.h>
+.sp
+s = socket(type, pf, addr, options);
+.br
+int s, type;
+.br
+struct sockproto *pf;
+.br
+struct sockaddr *addr;
+.br
+int options;\f1
+.SH DESCRIPTION
+\f2socket\f1 creates a communication end point and returns a descriptor,
+much like a file descriptor.  
+The socket has a \f2type\f1
+that defines the semantics for communication.  
+Currently defined types are SOCK_STREAM, for sequenced, reliable,
+two-way, connection-based streams with an out-of-band mechanism;
+SOCK_DGRAM, for datagrams, connectionless, unreliable messages of
+a fixed (typically small) maximum length; and SOCK_RAW, for
+access to internal network interfaces.
+SOCK_RAW is only accessible by the super user and is not described here.
+.PP
+\f2pf\f1 causes a specific protocol to be used with the socket.
+Currently only one protocol supports each socket type.
+\f2pf\f1 should be set equal to NULL.
+.PP
+The \f2addr\f1 parameter specifies the socket address.  
+A socket address is a discriminated union 16 bytes long.
+The first two bytes indicate the format of remaining bytes.
+.PP
+The only variant to this rule is an Internet address \f2(sockaddr_in)\f1.
+The first field of this variable type is AF_INET (this address is 
+part of the Internet address family), which is defined in 
+\f2<sys/socket.h>\f1.
+.PP
+The second and third fields are a 16-bit socket number (see 
+\f2<netinet/in.h>\f1 for a list of common sockets) and a 32-bit
+Internet host address, respectively.
+The socket number and host address are in network byte order.
+.PP
+If no socket address is specified, the system assigns one.  
+It does this at connection
+time to simplify the routing decisions required of the connected socket.
+If the socket number is omitted, a unique socket number is supplied.
+The socket numbers 0 through IPPORT_RESERVED\-1
+are reserved for the super user.
+.PP
+The procedure \f2rhost\f1(3N)
+can be used to convert host names to Internet addresses, and 
+\f2raddr\f1(3N) to convert addresses to standard host names.
+.PP
+Sockets of type SOCK_STREAM are full-duplex byte streams, similar
+to two-way pipes.  
+Typically, a stream is created via \f2socket\f1
+and connected to another socket via a call to \f2connect\f1(3N) or
+\f2accept\f1(3N).
+Then a sequence of \f2read\f1 and \f2write\f1 calls exchanges data.  
+Finally, \f2close\f1(2) terminates the connection.
+.PP
+A typical sequence is
+.sp
+.nf
+.ta 1.5i 2.5i
+	CLIENT		SERVER
+.sp
+	socket()	socket()
+	connect()	accept()
+	write()		read() 
+	read()   	write()
+   	.		.      
+   	.		.
+	close()		
+.fi
+.PP
+Out-of-band data may also be transmitted, as described below.
+.PP
+Sockets of the type SOCK_STREAM ensure that data
+are not lost or duplicated.  
+If a piece of data (for which the
+peer protocol has buffer space) cannot be successfully transmitted
+within a reasonable length of time (one minute), the connection is 
+considered broken and calls indicate an error with \-1 returns.  
+ETIMEDOUT is the specific code in the global variable errno.
+.PP
+The protocols optionally keep sockets ``warm'' by forcing transmissions
+roughly every minute in the absence of other activity.
+An error is flagged if no response can be elicited on an otherwise
+idle connection for an extended period (five minutes).
+A SIGPIPE signal is raised if a process \f2writes \f1
+on a broken stream.  
+This causes naive processes, which do not handle the signal, to exit.
+.PP
+SOCK_DGRAM sockets send datagrams to correspondents named in 
+\f2send\f1(3N) calls.  
+It is also possible to receive datagrams at such a socket with
+\f2receive\f1(3N).
+.PP
+A typical sequence is
+.sp
+.nf
+.ta 1.5i 2.5i
+	SENDER		RECEIVER
+.sp
+	s=socket()	s=socket()
+    	.		.          
+    	.		.          
+	send(s)		receive(s)
+    	.		.          
+    	.		. 
+	receive(s)	send(s)
+.sp
+.fi
+.PP
+\f2connect\f1 can be used with datagram sockets
+to fix the recipient/sender for future communication.
+Once a datagram has been connected, \f2read\f1 can be used in place of
+\f2send\f1, and \f2write\f1 can be used in place of \f2receive\f1.
+.PP
+The subroutine \f2socketaddr\f1(3N)
+can be used to determine the address of a socket.
+.PP
+The socket options are OR-ed together in \f2options\f1:
+.TP 5
+SO_ACCEPTCONN 
+must be used with SOCK_STREAM sockets 
+that accept connections.  Only sockets that indicate SO_ACCEPTCONN
+as a creation parameter can \f2accept\f1(3N);
+such sockets cannot \f2connect\f1(3N).
+.TP 5
+SO_DEBUG
+enables TCP debugging code, which sends \f2printf\f1 messages to
+the host console that detail protocol events and state transitions.
+.TP 5
+SO_DONTLINGER
+allows \f2close\f1(2) operations on a socket to finish immediately.  
+Otherwise, the system blocks a process waiting for data to drain
+(or return EWOULDBLOCK if the socket is marked NONBLOCKING) when a 
+\f2close\f1 is attempted.  
+See also the SIOCSLINGER ioctl below.
+.TP 5
+SO_KEEPALIVE
+causes "keep alive" to be used to time-out dead connections.
+If this option is not specified, timing out dead connections
+is the responsibility of the user process.
+.TP 5
+SO_SMALL
+causes TCP to use 512-kbyte windows.
+This option is typically used for low-throughput utilities such
+as \f2rlogin\f1.
+.PP
+The following ioctl requests are supported.  Parameter sizes are
+shown in parentheses.
+.PP
+FIONREAD (long) returns a byte count of data in a socket's receive
+buffer.  The host can use this to determine whether it can
+read data from the socket without blocking indefinitely.
+.PP
+FIONBIO (int) enables or disables nonblocking I/O, depending on the
+value of the parameter.  If 1, then nonblocking I/O is enabled on the
+socket.  If 0, then it is disabled.
+.PP
+SIOCDONE (int) shuts down input, output, or both on the designated 
+socket, depending on the value of the parameter.
+
+.KS
+.nf
+	\f3Value	Effect\f1
+
+	0	Shutdown input
+	1	Shutdown output
+	2	Shutdown input and output
+.fi
+.KE
+.PP
+An SIOCDONE on input throws away any buffered receive data and causes
+subsequent read requests to return EOF.  
+An SIOCDONE on output causes
+subsequent write requests to return an EPIPE error.
+.PP
+SIOCSKEEP (int) enables or disables keep-alives on a TCP connection,
+depending on the value of the parameter.  
+If 1, keep-alives are enabled on the socket.  
+If 0, keep-alives are disabled.  
+SIOCGKEEP returns 1 if keep-alives are enabled, 0 otherwise.
+.PP
+SIOCSLINGER (int) enables or disables lingering on SOCK_STREAM sockets
+and establishes how many seconds a connection lingers during closing.  
+If the parameter is 0xFFFF, a close request blocks
+indefinitely until all send data are acknowledged.  
+If 0, then lingering is disabled and a close request resets 
+the connection.  
+A value between 0 and 32767 establishes a limit (in seconds) on the 
+close request.  
+If this time expires before the connection closes normally,
+the connection is reset.  
+Do not use other values.  
+SIOCGLINGER returns the effective lingering value, which is 
+interpreted in the same way.  
+See also the SO_DONTLINGER option, documented above.
+.PP
+SIOCSENDOOB (char) sends one byte of data on a SOCK_STREAM socket
+connection.  
+SIOCRCVOOB returns one byte of out-of-band data.
+.PP
+SIOCATMARK (int) returns 1 if the host can obtain out-of-band data on
+the SOCK_STREAM socket with an SIOCRCVOOB request and nonurgent data
+with a read request.  
+If it returns 0, the host must issue further
+read requests to drain urgent data.
+.PP
+SIOCSPGRP (int) associates a process group ID with a socket.
+Subsequent to this request, when out-of-band date arrives on the
+socket, processes in this group receive a SIGURG signal.
+.SH SEE ALSO
+accept(3N), connect(3N), receive(3N), send(3N), socketaddr(3N), inet(7P)

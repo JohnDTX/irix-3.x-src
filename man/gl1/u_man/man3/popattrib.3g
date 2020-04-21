@@ -1,0 +1,40 @@
+.TH popattributes  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I popattributes
+- pop the attribute stack
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popattributes()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popatt"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popattributes;"
+.sp
+.SH DESCRIPTION
+.I Popattributes
+restores the most recently saved values (those pushed by 
+\f2pushattributes\f1) of the global state
+variables:
+.TS
+center ;
+l l.
+backbuffer	linewidth
+color	object font
+raster font	reset linestyle
+frontbuffer	RGB color
+linestyle	RGB writemask
+linestyle backup	texture
+writemask
+.TE
+.PP
+An error message is printed if you attempt to pop an empty attributes stack.
+.SH "SEE ALSO"
+.I backbuffer, color, defcursor,deffont, frontbuffer, 
+.I linewidth, lsbackup, object font, pushattributes, resetls, RGBcolor, 
+.I RGB writemask, setlinestyle, settexture, writemask

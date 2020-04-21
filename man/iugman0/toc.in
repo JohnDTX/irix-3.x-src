@@ -1,0 +1,81 @@
+.\" toc.in - typeset Vol 1 Table of Contents
+.\"	     set number register a to 0 (-ra0 switch to xroff) to get Vol 1A's
+.\"	     TOC or to 1 (-ra1) to get Vol 1B's TOC.
+.\"
+.\" 	     Thu Apr 10 10:59:17 1986  Charles (Herb) Kuta at SGI
+.fp 4 B
+.tr ~
+.ll 4.7i
+.lt 4.7i
+.ps 12
+.vs 14
+.po .975i
+.pl 8.9375i
+.de HD
+.po 0
+.lt 7.4i
+.\"	tl '\(rn\(rn''\(rn\(rn'
+.lt
+.po
+'sp 18p
+.if e .tl '\\*(ET''\\*(SG'
+.if o .tl '\\*(SG''\\*(ET'
+.ps
+'sp 18p
+.ns
+..
+.de FO
+'sp .25i
+.ft 4
+.af % i
+.if e .tl '\\*(Dt'%'\\*(Ed'
+.if o .tl '\\*(Ed'%'\\*(Dt'
+.ps
+.ft
+'bp
+..
+.wh 0 HD
+.wh -60p FO
+.if \n(nl .bp
+.br
+.ds ET \f2Table \|of \|Contents\fP
+.ds SG Silicon Graphics
+.ds Ed Preliminary
+.ds Dt February \|1987
+.ce
+\f3TABLE \|OF \|CONTENTS\fP
+.nr x .5i
+.in +\nxu
+.nf
+.ta \n(.lu-\nxuR
+.ps 11
+.vs 13
+.de xx
+\\$1\f3 \a \fP\\$2
+..
+.de t
+.sp 1v
+.ne .5i
+.cs 3
+.ti -.5i
+.ss 18
+\f4\\$2. \\$3\fP
+.ss 12
+.if t .sp .5v
+.cs 3 36
+.so \\$1
+..
+.if !\na \{.t toc1 1 "Commands"
+.t toc6 6 "Demos and Games"\}
+.if \na = 1 \{ .t toc2 2 "System Calls"
+.t toc3 3 "Subroutines"
+.t toc4 4 "File Formats"
+.t toc5 5 "Miscellaneous Facilities"\}
+.if \na = 2 \{
+.t toc1m 1M "System Maintenance Commands"
+.t toc7 7 "Special Files"\}
+.\".t toc8 8 "System Maintenance Procedures" \}
+.in -.5i
+.cs 3
+.if n .ta 8n 16n 24n 32n 40n 48n 56n 64n 72n 80n
+.if t .ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i

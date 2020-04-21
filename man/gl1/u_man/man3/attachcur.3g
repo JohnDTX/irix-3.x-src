@@ -1,0 +1,30 @@
+.TH attachcursor 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I attachcursor
+- attach the cursor to two valuators
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "attachcursor(vx, vy) "
+.B "Device vx, vy;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine attach(vx, vy) "
+.B "integer*2 vx, vy"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure attachcursor(vx, vy: Device);"
+.sp
+.SH DESCRIPTION
+.I Attachcursor
+attaches the cursor to the movement of two valuators.
+It takes two arguments, both valuator device numbers.
+The first valuator controls the horizontal motion of the cursor;
+the second argument determines vertical motion.
+.SH "SEE ALSO"
+.I noise, tie
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,32 @@
+.TH SEND 3N 
+.SH NAME
+send \- send message to a socket
+.SH SYNOPSIS
+\f3#include <sys/socket.h>
+.sp
+send(s, to, msg, len)
+.br
+int s;
+.br
+struct sockaddr *to;
+.br
+char *msg;
+.br
+int len;\f1
+.SH DESCRIPTION
+\f2send\f1 transmits a message to another socket from
+a SOCK_DGRAM or SOCK_RAW socket.
+\f2to\f1 is the target address and \f2len\f1 is the message length.
+If the message is too long to pass automatically through the
+underlying protocol, the error EMSGSIZE is returned and
+the message is not transmitted.
+.PP
+Due to the model of communication used by datagram and raw sockets,
+\f2send\f1 cannot indicate whether a message was received.
+However, some locally detected errors may be recorded             
+in the external variable \f2errno\f1.
+.PP
+If the transmitting socket does not have enough space to hold a message,
+\f2send\f1 blocks transmission until enough space is available.
+.SH SEE ALSO
+receive(3N), socket(3N), udp(7P), inet(7P)

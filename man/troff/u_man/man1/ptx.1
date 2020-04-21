@@ -1,0 +1,137 @@
+'\"macro stdmacro
+.TH PTX 1
+.SH NAME
+ptx \- make permuted index
+.SH SYNOPSIS
+.B ptx
+[ options ] [ input [ output ] ]
+.SH DESCRIPTION
+.I Ptx\^
+generates the file
+.I output\^
+that can be
+processed with a text formatter 
+.RB ( nroff or troff )
+to produce a permuted index of file
+.IR input\^ .
+It has three phases: the first does the permutation, generating
+one line for each keyword in an input line.
+The keyword is rotated to the front.
+The permuted file is then
+sorted.
+Finally, the sorted lines are rotated so the keyword
+comes at the middle of each line.
+.I Ptx\^
+output is in the form:
+.br
+.IP
+\&\f3.xx\fP "\^" "before keyword" "keyword" "after keyword"
+.PP
+where
+.B \&.xx
+is assumed to be an
+.IR nroff (1)\^
+or
+.IR troff (1)
+macro provided by the user,
+or provided by
+.IR ptx (1).
+The
+.B mptx
+macro package provides the
+.B .xx
+macro definitions. The
+.I "before keyword\^"
+and
+.I "after keyword"
+fields incorporate as much of the line as will fit
+around the 
+.I keyword 
+when it is printed.
+The first field and the last field,
+at least one of which is always the empty string,
+are wrapped-around to fit
+in the unused space at the opposite end of the line.
+.PP
+The following \f2options\f1 can be applied:
+.TP 11
+.BR \-f
+Fold upper and lower case letters for sorting.
+.TP
+.BR \-t
+Prepare the output for the phototypesetter.
+.TP
+.BI \-w " n\^"
+Use the next argument,
+.IR n ,
+as the length of the output line.
+The default line length is 72 characters for
+.I nroff\^
+and 100 for
+.IR troff .
+.TP
+.BI \-g " n\^"
+Use the next argument,
+.IR n ,
+as the number of characters that
+.I ptx\^
+will reserve in its calculations for each gap
+among the four parts of the line as finally printed.
+The default gap is 3.
+.TP
+.BI \-o " only\^"
+Use as keywords only the words given in the \f2only\f1 file.
+.TP
+.BI \-i " ignore\^"
+Do not use as keywords any words given in the
+.I
+ignore
+file.
+If the
+.B \-i
+and
+.B \-o
+options are missing, use
+.B /usr/lib/eign
+as the
+.I
+ignore
+file.
+.TP
+.BI \-b " break\^"
+Use the characters in the
+.I
+break
+file to separate words.
+Tab, new-line, and space characters are
+.I always\^
+used as break characters.
+.TP
+.BR \-r
+Take any leading non-blank characters of each input line to
+be a reference identifier (as to a page or chapter),
+separate from the text of the line.
+Attach that identifier as a 5th field on each output line.
+.SH FILES
+/bin/sort
+.br
+/usr/lib/eign
+.br
+/usr/lib/tmac/tmac.ptx
+.PD
+.SH SEE ALSO
+.PD 0
+nroff(1), troff(1),
+mm(5), mptx(5).
+.PD
+.SH BUGS
+Line length counts do not account for overstriking or
+proportional spacing.
+.br
+Lines that contain tildes (\f3~\fP) are botched,
+because
+. I ptx
+uses that character internally.
+.B ptx
+does not discard non-alpha-numeric characters.
+.\"	%W% of %G%

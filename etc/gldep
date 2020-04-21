@@ -1,0 +1,31 @@
+#! /bin/sh
+
+case $GLHDWR in
+gl1)	hdwr=1 ;;
+gl2)	hdwr=2 ;;
+both)	hdwr="1 2" ;;
+*)	echo "Bad value for GLHDWR." ; exit 1 ;;
+esac
+
+if test $machine = juniper
+then
+	for f in $*
+	do
+		sed "s:2400::g" $f > $DEST/etc/$f
+		chmod 444 $dest/etc/$f
+		chgrp sys $dest/etc/$f
+		chown root $dest/etc/$f
+	done
+else
+	for h in $hdwr
+	do
+		eval dest='$DEST'$h
+		for f in $*
+		do
+			sed "s:`expr 3 - $h`400:${h}400:g" $f > $dest/etc/$f
+			chmod 444 $dest/etc/$f
+			chgrp sys $dest/etc/$f
+			chown root $dest/etc/$f
+		done
+	done
+fi

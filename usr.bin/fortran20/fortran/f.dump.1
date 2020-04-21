@@ -1,0 +1,1063 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.DUMP.1.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               13-May-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure patchicode(fblock,fbyte,fval: integer);
+  var lbuff: array[0..511] of byte;
+begin
+while fbyte >= 512 do
+      begin fblock := fblock + 1; fbyte := fbyte - 512; end;
+if fblock = icodeblock
+then icodebuff[fbyte] := fval
+else begin
+     if blockread(icodefile,lbuff,1,fblock) <> 1 then error(409);
+     lbuff[fbyte] := fval;
+     if blockwrite(icodefile,lbuff,1,fblock) <> 1 then error(407);
+     end;
+end; {patchicode}
+
+procedure maklcstr(var fstr: idstring);
+  var i: integer; ch: char;
+begin
+if fstr[1] <> '%'
+then for i := 1 to length(fstr) do begin
+         ch := fstr[i];
+         if (ch >= 'A') and (ch <= 'Z')
+         then fstr[i] := chr(ord(ch) + 32);
+         end;
+end; {maklcstr}
+
+procedure outs(fstr: idstring);
+  var i: integer;
+begin
+for i := 0 to length(fstr) do
+    out(ord(fstr[i]));
+end; {outs}
+
+procedure louts(fstr: idstring);
+  var i: integer;
+begin
+for i := 0 to length(fstr) do
+    lout(ord(fstr[i]));
+end; {louts}
+
+procedure outs8(fstr: idstring);
+  var i: integer;
+begin
+for i := 1 to 8 do
+    if i <= length(fstr)
+    then out(ord(fstr[i]))
+    else out(ord(' '));
+end; {outs8}
+
+{$S }
+
+procedure makstrid(var fid: identrec; fstr: idstring);
+  var i,n,x: integer;
+begin
+with fid do begin
+     n := length(fstr); len := n;
+     if n <= 8
+     then begin
+          all := '        ';
+          for i := 1 to n do all[i] := fstr[i];
+          end
+     else begin
+          for i := 1 to 4 do a[i] := fstr[i];
+          x := (n and $fc) + 4;
+          case (n-1) div 4 of
+            1: new(tail,1);
+            2: new(tail,2);
+            3: new(tail,3);
+            4: new(tail,4);
+            5: new(tail,5);
+            6: new(tail,6);
+          otherwise:
+               begin
+               if n > MAXIDLEN
+               then begin error(9291); n := MAXIDLEN; end;
+               new(tail,0); x := MAXIDLEN;
+               end;
+          end; {case}
+          for i := 5 to n do tail^.a[i-4] := fstr[i];
+          for i := n + 1 to x do tail^.a[i-4] := ' ';
+          end;
+     end;
+end; {makstrid}
+
+procedure makidstr(var fstr: idstring; fid: identrec);
+  var i,n: integer;
+begin
+fstr[0] := chr(fid.len);
+if fid.len <= 8
+then for i := 1 to fid.len do fstr[i] := fid.all[i]
+else begin
+     for i := 1 to 4 do fstr[i] := fid.a[i];
+     for i := 5 to fid.len do fstr[i] := fid.tail^.a[i-4];
+     end;
+end; {makidstr}
+
+{$S DUMP}
+
+function idEQstr(fid: identrec; fstr: idstring): Boolean;
+  var i,n: integer;
+begin
+n := length(fstr);
+if n = fid.len
+then if n <= 8
+     then begin
+          for i := 1 to n do
+              if fid.all[i] <> fstr[i]
+              then begin idEQstr := FALSE; exit(idEQstr); end;
+          idEQstr := TRUE;
+          end
+     else begin
+          if (fid.all[1] <> fstr[1]) or (fid.all[2] <> fstr[2]) or
+             (fid.all[3] <> fstr[3]) or (fid.all[4] <> fstr[4])
+          then begin idEQstr := FALSE; exit(idEQstr); end;
+          for i := 5 to n do
+              if fid.tail^.a[i-4] <> fstr[i]
+              then begin idEQstr := FALSE; exit(idEQstr); end;
+          idEQstr := TRUE;
+          end
+else idEQstr := FALSE;
+end; {idEQstr}
+
+function idLTstr(fid: identrec; fstr: idstring): Boolean;
+  var i,n,minn: integer;
+begin
+n := length(fstr);
+if n < fid.len then minn := n else minn := fid.len;
+if fid.len <= 8
+then begin
+     for i := 1 to minn do
+         if fid.all[i] < fstr[i]
+         then begin idLTstr := TRUE; exit(idLTstr); end
+         else if fid.all[i] > fstr[i]
+              then begin idLTstr := FALSE; exit(idLTstr); end;
+     end
+else begin
+     if minn > 4 then i := 4 else i := minn;
+     for i := 1 to i do
+         if fid.all[i] < fstr[i]
+         then begin idLTstr := TRUE; exit(idLTstr); end
+         else if fid.all[i] > fstr[i]
+              then begin idLTstr := FALSE; exit(idLTstr); end;
+     for i := 5 to minn do
+         if fid.tail^.a[i-4] < fstr[i]
+         then begin idLTstr := TRUE; exit(idLTstr); end
+         else if fid.tail^.a[i-4] > fstr[i]
+              then begin idLTstr := FALSE; exit(idLTstr); end;
+     end;
+idLTstr := fid.len < n;
+end; {idLTstr}
+
+{$S }
+
+function idEQid(aid,bid: identrec): Boolean;
+begin
+if aid.len = bid.len
+then if aid.a = bid.a
+     then if aid.len <= 8
+          then idEQid := aid.b = bid.b
+          else case (aid.len-1) div 4 of
+                 1: idEQid := aid.tail^.a4 = bid.tail^.a4;
+                 2: idEQid := aid.tail^.a8 = bid.tail^.a8;
+                 3: idEQid := aid.tail^.a12 = bid.tail^.a12;
+                 4: idEQid := aid.tail^.a16 = bid.tail^.a16;
+                 5: idEQid := aid.tail^.a20 = bid.tail^.a20;
+                 6: idEQid := aid.tail^.a24 = bid.tail^.a24;
+               otherwise:
+                    idEQid := aid.tail^.a = bid.tail^.a;
+               end {case}
+     else idEQid := FALSE
+else idEQid := FALSE;
+end; {idEQid}
+
+function idLTid(aid,bid: identrec): Boolean;
+begin
+if aid.a < bid.a
+then idLTid := TRUE
+else if aid.a = bid.a
+     then if aid.len <= 8
+          then if bid.len <= 8
+               then idLTid := aid.b < bid.b
+               else idLTid := aid.b <= bid.tail^.a4
+          else if bid.len <= 8
+               then idLTid := aid.tail^.a4 < bid.b
+               else if aid.len < bid.len
+                    then case (aid.len-1) div 4 of
+                           2: idLTid := aid.tail^.a8 <= bid.tail^.a8;
+                           3: idLTid := aid.tail^.a12 <= bid.tail^.a12;
+                           4: idLTid := aid.tail^.a16 <= bid.tail^.a16;
+                           5: idLTid := aid.tail^.a20 <= bid.tail^.a20;
+                           6: idLTid := aid.tail^.a24 <= bid.tail^.a24;
+                         otherwise:
+                              idLTid := aid.tail^.a <= bid.tail^.a;
+                         end {case}
+                    else case (bid.len-1) div 4 of
+                           2: idLTid := aid.tail^.a8 < bid.tail^.a8;
+                           3: idLTid := aid.tail^.a12 < bid.tail^.a12;
+                           4: idLTid := aid.tail^.a16 < bid.tail^.a16;
+                           5: idLTid := aid.tail^.a20 < bid.tail^.a20;
+                           6: idLTid := aid.tail^.a24 < bid.tail^.a24;
+                         otherwise:
+                              idLTid := aid.tail^.a < bid.tail^.a;
+                         end {case}
+     else idLTid := FALSE;
+end; {idLTid}
+
+{$S DUMP}
+
+procedure dumpsymbols(ustr: idstring; procn: pn);
+  var i,j,iblock,ibyte,lnumtypes: integer;
+  
+  procedure dumptvs(fpn: pn; VarFlag: Boolean);
+    var ltypeno,r,i,mtypeno: integer; loffset,llo,lhi: longint;
+        lbound: pbound; lcommon: pn; lstr: idstring;
+	parmp: pn;
+	listp: pnlist;
+  begin
+  if fpn <> nil
+  then with fpn^ do begin
+            dumptvs(rlink,VarFlag);
+            if nkind = VARS
+            then begin
+                 case idtype.typ of
+                   INTEGR:    if idtype.siz = 4
+                              then ltypeno := -3
+                              else if idtype.siz = 2
+                                   then ltypeno := -2
+                                   else ltypeno := -1;
+                   REEL:      if idtype.siz = 4
+                              then ltypeno := -9
+                              else ltypeno := -10;
+                   LOGICAL:   if idtype.siz = 4
+                              then ltypeno := -13
+                              else if idtype.siz = 2
+                                   then ltypeno := -12
+                                   else ltypeno := -11;
+                   COMPLEX:   ltypeno := -15;
+                   CHARACTER: begin
+                              if idtype.siz <= 255
+                              then ltypeno := -100 - idtype.siz
+                              else begin
+                                   ltypeno := lnumtypes + nexttypeno;
+                                   lnumtypes := lnumtypes + 1;
+                                   if not VarFlag
+                                   then begin
+                                        out2(ltypeno); out(9);
+                                        out2(idtype.siz);
+                                        end;
+                                   end;
+                              end;
+                 end; {case}
+                 if bounds <> nil
+                 then begin
+                      mtypeno := ltypeno; ltypeno := lnumtypes + nexttypeno;
+                      lnumtypes := lnumtypes + 1;
+                      if not VarFlag
+                      then begin
+                           r := 0; lbound := bounds;
+                           while lbound <> nil do
+                                 begin r := r + 1; lbound := lbound^.next; end;
+                           out2(ltypeno); out(10); out(r); out2(mtypeno);
+                           lbound := bounds;
+                           while lbound <> nil do
+                                 with lbound^ do begin
+                                      r := 0;
+                                      if lo.bkind = CONSTBOUND
+                                      then llo := lo.i
+                                      else begin
+                                           r := 1; llo := lo.adjboff;
+                                           end;
+                                      if hi.bkind = CONSTBOUND
+                                      then lhi := hi.i
+                                      else begin
+                                           r := r + 2; lhi := hi.adjboff;
+                                           end;
+                                      out(r); out4(llo); out4(lhi);
+                                      if r = 0
+                                      then out4(esize)
+                                      else out4(sizoff);
+                                      lbound := next;
+                                      end;
+                           end;
+                      end;
+                 if VarFlag
+                 then begin
+                      makidstr(lstr,name); outs(lstr); out2(ltypeno);
+                      if InReg
+                      then begin
+                           if Indirect or (bounds <> nil) or AddrNeeded or
+		{ changed by jim t at SGI for dbx
+                              (idtype.siz > 4) or (incommon <> nil)
+                           then r := 3
+		}
+                              (idtype.siz > 4) or (incommon <> nil) then 
+			   begin
+				if isparam then
+					r := 8
+				else
+					r := 3;
+			   end
+                           else r := 2;
+                           if (CHIP = M68000) or (CHIP = M68020)
+                           then if refcount < 32
+                                then r := r + (7 - refcount)*16
+                                else r := r + (43 - refcount)*16
+                           else if refcount < 32
+                                then r := r + (7 - refcount)*16
+                                else r := r + (47 - refcount)*16;
+                           out(r);
+                           end
+                      else begin
+                           if Indirect then r := 225 else r := 224;
+                           if (procn^.rtnlev = 1) and (CHIP <> N32000)
+                           then r := r - 16;
+                           loffset := addr; lcommon := incommon;
+                           if lcommon <> nil
+                           then if lcommon^.nkind <> COMMON
+                                then lcommon := nil;
+                           if lcommon <> nil
+                           then begin
+                                r := 4; makidstr(lstr,lcommon^.name);
+                                lstr := concat('/',lstr,'/');
+                                end
+                           else if ((loffset > 32767) and (CHIP = M68000)) or
+                                   (nlev = SAVEDVAR)
+                                then begin
+                                     r := 4; makidstr(lstr,procn^.name);
+                                     end;
+                           out(r);
+                           if r = 4
+                           then begin out2(-1); outs(lstr); out4(loffset); end
+                           else out2(loffset);
+                           end;
+                      end;
+                 end;
+            dumptvs(llink,VarFlag);
+            end;
+  end; {dumptvs}
+  
+begin {dumpsymbols}
+out($FD{LinkBlock}); out(160{SymbBlock}); out(0);
+iblock := icodeblock; ibyte := icodebyte; out2(0);
+outs(originalfile);
+out(1{FORTRAN}); out(VERSNO); out(VERSSUBNO);
+if level = STFUNVAR then out(2) else out(1);
+{ added by jim t at sgi for dbx }
+out(procn^.rtnlev);
+out2(procn^.rtnno); outs(ustr);
+out2(-1); outs('');
+outs(ustr);
+lnumtypes := 0;
+dumptvs(localtree,FALSE); out2(0);
+lnumtypes := 0;
+dumptvs(localtree,TRUE); out(0);
+nexttypeno := nexttypeno + lnumtypes;
+i := (icodeblock - iblock)*512 + icodebyte - ibyte + 2;
+patchicode(iblock,ibyte,i div 256);
+patchicode(iblock,ibyte + 1,i mod 256);
+if odd(i) then out(0);
+end; {dumpsymbols}
+
+procedure dump(fproctree: pstmt; procn: pn; StmtFunFlag: Boolean);
+  type pextrec = ^extrec;
+       extrec = record next: pextrec;
+                       username: identrec;
+                       linkno,extno: integer;
+                end;
+  var i,j: integer;
+      lname,lname2: idstring;
+      nextfmtno,nextextno: integer;
+      extlist: pextrec;
+      returnlab,lab1: integer;
+      lstmt: pstmt;
+      lcommon: pn;
+      lc: longint;
+      GlobLabs: Boolean;
+      deltapb: integer;
+      
+  procedure lout3(fval: addrrange);
+    var c: array[0..3] of byte;
+  begin
+  moveleft(fval,c,4);
+  if HOSTSEX = MALE
+  then begin lout(c[1]); lout(c[2]); lout(c[3]); end
+  else begin lout(c[2]); lout(c[1]); lout(c[0]); end;
+  end; {lout3}
+  
+  function nextlabel: integer;
+  begin
+  nextlabel := nextilabno;
+  nextilabno := nextilabno + 1;
+  end; {nextlabel}
+  
+  procedure localref(foffset: addrrange);
+  begin
+  if abs(foffset) > 32767
+  then begin
+       if CHIP = M68000 then error(1101);
+       lout(4{BIGOFF});
+       if level = LOCALVAR then lout(2) else lout(3);
+       lout3(foffset);
+       end
+  else begin
+       lout(2{LOCAL}); lout2(foffset);
+       end;
+  end; {localref}
+  
+  procedure localoffset(foffset: addrrange);
+  begin
+  if foffset > 32767
+  then error(1100)
+  else lout2(foffset);
+  end; {localoffset}
+  
+  procedure fieldref(foffset: addrrange);
+  begin
+  if abs(foffset) <= 32767
+  then begin lout(15{FIELD}); lout2(foffset); end
+  else begin lout(8{BIGFLD}); lout3(foffset); end;
+  end; {fieldref}
+  
+  procedure loutname6(fname: alfa6);
+    var i: integer;
+  begin
+  for i := 1 to 6 do lout(ord(fname[i])); lout(ord(' ')); lout(ord(' '));
+  end; {loutname6}
+  
+  procedure outintcnst(fval: longint);
+    var c: array[0..3] of byte;
+  begin
+  moveleft(fval,c,4);
+  if (fval <= 127) and (fval >= -128)
+  then lout(24{CNST1})
+  else begin
+       if (fval <= 32767) and (fval >= -32768)
+       then lout(25{CNST2})
+       else begin
+            lout(26{CNST4});
+            if HOSTSEX = MALE
+            then begin lout(c[0]); lout(c[1]); end
+            else begin lout(c[3]); lout(c[2]); end;
+            end;
+       if HOSTSEX = MALE then lout(c[2]) else lout(c[1]);
+       end;
+  if HOSTSEX = MALE then lout(c[3]) else lout(c[0]);
+  end; {outintcnst}
+  
+  procedure outchcnst(fchcnst: chvaltype; flen: integer);
+    var i,j: integer;
+  begin
+  lout(29{PAOCCST}); j := 0;
+  if flen <= 127 then lout(flen) else lout2($8000 + flen);
+  for i := 1 to flen do begin
+      if j = 10 then begin fchcnst := fchcnst^.next; j := 0; end;
+      j := j + 1; lout(ord(fchcnst^.chpart[j]));
+      end;
+  end; {outchcnst}
+  
+  procedure outcnst(fvalu: valu; ftype: ftntype);
+    var i,j: integer; c: array[0..7] of byte;
+  begin
+  case ftype.typ of
+       INTEGR,
+       LOGICAL:   outintcnst(fvalu.ival);
+       REEL:      begin
+                  if ftype.siz = 4 then lout(26{CONST4}) else lout(27{CONST8});
+                  moveleft(fvalu.rval,c,ftype.siz);
+                  if HOSTSEX = MALE
+                  then for i := 0 to ftype.siz - 1 do lout(c[i])
+                  else for i := ftype.siz - 1 downto 0 do lout(c[i]);
+                  end;
+       CHARACTER: outchcnst(fvalu.cval,fvalu.clen);
+       COMPLEX:   begin
+                  lout(208{CMPLX}); lout(0);
+                  lout(26{CONST4}); moveleft(fvalu.cimag,c,4);
+                  if HOSTSEX = MALE
+                  then for i := 0 to 3 do lout(c[i])
+                  else for i := 3 downto 0 do lout(c[i]);
+                  lout(26{CONST4}); moveleft(fvalu.creal,c,4);
+                  if HOSTSEX = MALE
+                  then for i := 0 to 3 do lout(c[i])
+                  else for i := 3 downto 0 do lout(c[i]);
+                  end;
+  end; {case}
+  end; {outcnst}
+  
+  function findextno(fid: identrec; rtnno,flev: integer): integer;
+    var lext: pextrec; MatchFlag: Boolean;
+    
+    function newext(fid: identrec; rtnno,flev: integer): pextrec;
+      var lext: pextrec; lstr: idstring;
+    begin
+    makidstr(lstr,fid);
+    out($F1); out2(nextextno); out(flev); out2(rtnno); outs(lstr);
+    new(lext);
+    with lext^ do begin
+         next := nil; linkno := rtnno;
+         username := fid; extno := nextextno;
+         end;
+    nextextno := nextextno + 1; newext := lext;
+    end; {newext}
+    
+  begin {findextno}
+  if extlist = nil
+  then begin lext := newext(fid,rtnno,flev); extlist := lext; end
+  else begin
+       lext := extlist; MatchFlag := FALSE;
+       repeat
+              with lext^ do
+                   if (rtnno = linkno) and idEQid(fid,username)
+                   then MatchFlag := TRUE
+                   else begin
+                        if next = nil
+                        then begin
+                             next := newext(fid,rtnno,flev);
+                             MatchFlag := TRUE;
+                             end;
+                        lext := next;
+                        end;
+       until MatchFlag;
+       end;
+  findextno := lext^.extno;
+  end; {findextno}
+  
+  procedure dumpjsrid(fop,flev,rtnno: integer; fid: identrec);
+  begin
+  lout(fop); lout2(findextno(fid,rtnno,flev));
+  end; {dumpjsrid}
+  
+  procedure dmpcjsrid(fparambytes,ftyp: integer; fid: identrec);
+    var lstr: idstring;
+  begin
+  makidstr(lstr,fid); maklcstr(lstr); makstrid(fid,lstr);
+  lout(229{CCALL}); lout2(findextno(fid,-1,1));
+  lout2(fparambytes); lout(ftyp);
+  end; {dmpcjsrid}
+  
+  procedure call(fname: alfa8);
+    var lid: identrec; i: integer;
+  begin
+  lid.all := fname;
+  i := 8; while fname[i] = ' ' do i := i - 1; lid.len := i;
+  lout(177 {UPCALL}); lout2(findextno(lid,-1,2));
+  end; {call}
+  
+  procedure expression(fexpr: pn); forward;
+  
+  procedure push4(farg: pn);
+  begin
+  lout(186 {VPARM4});
+  expression(farg);
+  end; {push4}
+  
+  procedure push8(farg: pn);
+  begin
+  lout(187 {VPARM8});
+  expression(farg);
+  end; {push8}
+  
+  procedure pusha(farg: pn; fsize: integer);
+  begin
+  if IsAddress(farg)
+  then lout(183{REFPARM})
+  else begin lout(215{EXADPRM}); lout(fsize); end;
+  expression(farg);
+  end; {pusha}
+  
+  procedure dumpucall(fproc,fargs: pn);
+    var actuals: pn; lop,ftyp,lpbytes: integer;
+        lstr: idstring; lid: identrec; DoCCall: Boolean;
+  begin
+  actuals := fargs; lpbytes := 0;
+  lout(190 {PARMLST});
+  if CCallFlag and (fproc^.rtnlev <= 2) and (fproc^.name.a[1] <> '%')
+  then begin
+       DoCCall := TRUE;
+       if fproc^.Indirect then lout(179{SAVESP});
+       end
+  else DoCCall := FALSE;
+  if fproc^.nkind = FUNCT
+  then begin
+       lop := 176; {UFUNCALL}
+       lout(182{FCTNRES});
+       if fproc^.idtype.typ = CHARACTER
+       then ftyp := 0
+       else begin
+            ftyp := fproc^.idtype.siz;
+            if (fproc^.idtype.typ = REEL) or
+               (fproc^.idtype.typ = COMPLEX)
+            then ftyp := ftyp + 32;
+            end;
+       lout(ftyp);
+       end
+  else begin lop := 177; {UPROCALL} ftyp := 0; end;
+  while actuals <> nil do begin
+        case actuals^.binop of
+          0: { Address of non-character variable }
+             begin
+             lout(183{REFPARM}); expression(actuals^.leftarg);
+             lpbytes := lpbytes + 4;
+             end;
+          1: { Address of character variable or expression }
+             begin
+             lout(218{FCHPARM}); expression(actuals^.leftarg);
+             lpbytes := lpbytes + 8;
+             end;
+          2: { Address of non-character expression }
+             begin
+             lout(215{EXADPRM}); lout(actuals^.binsubop);
+             expression(actuals^.leftarg);
+             lpbytes := lpbytes + 4;
+             end;
+          3: { Address of procedure/function }
+             begin
+             with actuals^.leftarg^ do
+               if Indirect
+               then begin { Passing formal as argument }
+                 lout(187{VPARAM8}); expression(actuals^.leftarg);
+                 end
+               else begin
+                 lid := name;
+                 if CCallFlag and (lid.a[1] <> '%') and (rtnno < 0)
+                 then begin
+                      makidstr(lstr,lid); maklcstr(lstr); makstrid(lid,lstr);
+                      end;
+                 dumpjsrid(191{PFPARM},2,rtnno,lid);
+                 end;
+             lpbytes := lpbytes + 8;
+             end;
+          4: { Address of local label }
+             begin
+             lout(183{REFPARM});
+             lout(204{ADRILAB}); lout2(actuals^.leftarg^.labp^.ilabno);
+             lpbytes := lpbytes + 4;
+             end;
+          5: { Address of intrinsic function }
+             begin
+             dumpjsrid(191{PFPARM},2,-1,intname[actuals^.leftarg^.ifunno]);
+             lpbytes := lpbytes + 8;
+             end;
+          6: { Address of hollerith }
+             begin
+             lout(183{REFPARM});
+             outchcnst(actuals^.leftarg^.cstvalu.cval,
+                       actuals^.leftarg^.cstvalu.clen);
+             lpbytes := lpbytes + 4;
+             end;
+        end; {case}
+        actuals := actuals^.rightarg;
+        end;
+  if DoCCall
+  then if fproc^.Indirect
+       then begin
+            lout(231{CFORMCALL}); lout2(0); lout(ftyp);
+            lout(12{UPARR}); lout(15{FIELD}); lout2(4); expression(fproc);
+            end
+       else dmpcjsrid(lpbytes,ftyp,fproc^.name)
+  else if fproc^.Indirect
+       then begin { Calling formal procedure }
+            if fproc^.nkind = FUNCT
+            then lout(180{FFUNCALL})
+            else lout(181{FPROCALL});
+            expression(fproc);
+            end
+       else dumpjsrid(lop,fproc^.rtnlev,fproc^.rtnno,fproc^.name);
+  end; {dumpucall}
+  
+  procedure dumpsfcall(key: integer; fargs: pn);
+    var thisarg,nextarg: pn; lsize,lop: integer; CallFlag: Boolean;
+    
+    procedure trans(k: integer);
+    begin
+    CallFlag := FALSE; lout(143{TRANS}); lout(k);
+    expression(thisarg);
+    end; {trans}
+    
+  begin {dumpsfcall}
+  thisarg := fargs^.leftarg;
+  if fargs^.rightarg <> nil then nextarg := fargs^.rightarg^.leftarg;
+  CallFlag := key in [13,14,17,19,21..55,59,67..83,88,93..106];
+  {*} if key in [25..42,44,45,47,48,50,51,53,54] then CallFlag := FALSE;
+  if CallFlag
+  then begin
+       if key in [13,17,21,23,25,27,29,31,33,35,37,39,41,44,47,50,53,59,67,69,
+                  70,72,73,76,78,79,81,82,88,93,94,97,101..106]
+       then lsize := 4
+       else if key in [19,22,24,26,28,30,32,34,36,38,40,42,43,45,46,48,49,
+                       51,52,54,55,68,71,74,75,77,80,83,95,96,98,99]
+            then lsize := 8
+            else if key = 14
+                 then lsize := 0
+                 else if key = 100
+                      then lsize := 1
+                      else begin error(1100 + key); lsize := 0; end;
+       if key in [19,21..55,59,67,68,70,71,73..77,79,80,82,83,94..99]
+       then lsize := lsize + 32; { Floating point result }
+       lout(190 {PRMLIST}); lout(182 {FCTNRES}); lout(lsize);
+       end;
+  case key of
+    1: { NOP    } ;
+    2: { IFIX   } begin lout(58 {TRUNC44}); expression(thisarg); end;
+    3: { IDINT  } begin lout(59 {TRUNC84}); expression(thisarg); end;
+    4: { INT(C) } begin
+                  lout(58 {TRUNC44}); lout(210); lout(0); {REALPRT};
+                  expression(thisarg);
+                  end;
+    5: { FLOAT  } begin lout(56 {FLOAT44}); expression(thisarg); end;
+    6: { NOP    } ;
+    7: { SNGL   } begin lout(55 {REAL84}); expression(thisarg); end;
+    8: { REA(C) } begin lout(210); lout(0); {REALPRT}; expression(thisarg); end;
+    9: { DBL(I) } begin lout(57 {FLOAT48}); expression(thisarg); end;
+   10: { DBL(R) } begin lout(54 {REAL48}); expression(thisarg); end;
+   11: { NOP    } ;
+   12: { DBL(C) } begin
+                  lout(54 {REAL48}); lout(210); lout(0); {REALPRT}
+                  expression(thisarg);
+                  end;
+   13: { ICHAR  } begin lout(218 {FCHPARM}); expression(thisarg); end;
+   14: { CHAR   } begin
+                  lout(183 {REFPARM}); lop := chartmploc + fargs^.binop;
+                  if level = LOCALVAR
+                  then localref(lop)
+                  else begin lout(3 {INTER}); lout(1); lout2(lop); end;
+                  lout(184 {VPARM1}); expression(thisarg);
+                  end;
+   15: { NINT   } begin lout(60 {ROUND44}); expression(thisarg); end;
+   16: { IDNINT } begin lout(61 {ROUND84}); expression(thisarg); end;
+   17: { LEN    } begin lout(218 {FCHPARM}); expression(thisarg); end;
+   18: { AIMAG  } begin lout(210); lout(1); {IMAGPRT} expression(thisarg); end;
+   19, { CONJG  }
+   22, { DINT   }
+   24: { DNINT  } push8(thisarg);
+   20: { NOP    } ;
+   21, { AINT   }
+   23: { ANINT  } push4(thisarg);
+   25: { ALOG10 } trans(18);
+   26: { DLOG10 } trans(19);
+   27: { TAN    } trans(12);
+   28: { DTAN   } trans(13);
+   29: { ASIN   } trans(14);
+   30: { DASIN  } trans(15);
+   31: { ACOS   } trans(16);
+   32: { DACOS  } trans(17);
+   33: { ATAN   } trans(8);
+   34: { DATAN  } trans(9);
+   35: { SINH   } trans(20);
+   36: { DSINH  } trans(21);
+   37: { COSH   } trans(22);
+   38: { DCOSH  } trans(23);
+   39: { TANH   } trans(24);
+   40: { DTANH  } trans(25);
+   41: { SQRT   } trans(10);
+   42: { DSQRT  } trans(11);
+   44: { EXP    } trans(6);
+   45: { DEXP   } trans(7);
+   47: { ALOG   } trans(4);
+   48: { DLOG   } trans(5);
+   50: { SIN    } trans(0);
+   51: { DSIN   } trans(1);
+   53: { COS    } trans(2);
+   54: { DCOS   } trans(3);
+   43, { CSQRT  }
+   46, { CEXP   }
+   49, { CLOG   }
+   52, { CSIN   }
+   55, { CCOS   }
+   59: { CABS   } pusha(thisarg,8);
+   56: { IABS   } begin lout(77 {IABS4}); expression(thisarg); end;
+   57: { ABS    } begin lout(136 {RABS4}); expression(thisarg); end;
+   58: { DABS   } begin lout(137 {RABS8}); expression(thisarg); end;
+   66: { MOD    } begin
+                  lout(73 {IMOD4}); expression(thisarg);
+                  expression(nextarg);
+                  end;
+   67, { AMOD   }
+   69, { ISIGN  }
+   70, { SIGN   }
+   72, { IDIM   }
+   73, { DIM    }
+   75, { DPROD  }
+   78, { MAX    }
+   79, { AMAX   }
+   81, { MIN    }
+   82, { AMIN   }
+   93, { I4**I4 }
+   94, { R4**I4 }
+   97: { R4**R4 } begin push4(thisarg); push4(nextarg); end;
+   68, { DMOD   }
+   71, { DSIGN  }
+   74, { DDIM   }
+   80, { DMAX   }
+   83: { DMIN   } begin push8(thisarg); push8(nextarg); end;
+   76: { ATAN2  } begin pusha(thisarg,4); pusha(nextarg,4); end;
+   77: { DATAN2 } begin pusha(thisarg,8); pusha(nextarg,8); end;
+   88: { INDEX  } begin
+                  lout(218 {FCHPARM}); expression(thisarg);
+                  lout(218 {FCHPARM}); expression(nextarg);
+                  end;
+   89, { LLT    }
+   90, { LGT    }
+   91, { LLE    }
+   92: { LGE    } begin
+                  lout(219 {FCHCMP}); lout(key - 89);
+                  expression(thisarg); expression(nextarg);
+                  end;
+   95, { D8**I4 }
+   96, { C8**I4 }
+   98, { D8**D8 }
+   99: { C8**C8 } begin
+                  pusha(thisarg,8);
+                  if key >= 98 then lop := 8 else lop := 4;
+                  pusha(nextarg,lop);
+                  end;
+  100: { PEEK   } pusha(thisarg,4);
+  101, { ISNUM  }
+  102, { ISNUM  }
+  103, { ISNAN  }
+  104, { ISNAN  }
+  105, { ISINF  }
+  106: { ISINF  } begin
+                  if odd(key)
+                  then push4(thisarg)
+                  else push8(thisarg);
+                  end;
+  107, { IOR    }
+  108, { IAND   }
+  110: { IEOR   } begin
+                  lout(fargs^.binop); expression(thisarg); expression(nextarg);
+                  end;
+  109: { INOT   } begin
+                  lout(fargs^.binop); expression(thisarg);
+                  end;
+  111: { ISHFT  } begin
+                  lout(211); lout(0); expression(thisarg); expression(nextarg);
+                  end;
+  112, {*ISHFTC }
+  113, {*IBITS  }
+  114, {*BTST   }
+  115, {*IBSET  }
+  116: {*IBCLR  } ;
+  end; {case}
+  if CallFlag
+  then begin
+       dumpjsrid(176 {UFCALL},2,-1,intname[key]);
+       end;
+  end; {dumpsfcall}
+  
+  procedure expression{*fexpr: pn*};
+    var lop: integer; lcommon,lpn: pn; loffset: addrrange;
+        llev: levelclass;
+    
+    procedure outinxbnd(fbrec: brec);
+    begin
+    with fbrec do
+         case bkind of
+           CONSTBOUND:   outintcnst(i);
+           ADJUSTBOUND:  localref(adjboff);
+           ASSUMEDBOUND: error(9872);
+         end; {case}
+    end; {outinxbnd}
+    
+    procedure outinxsz(fpb: pbound);
+    begin
+    with fpb^ do
+         if (lo.bkind = CONSTBOUND) and
+            (hi.bkind = CONSTBOUND)
+         then outintcnst(hi.i - lo.i + 1)
+         else localref(sizoff);
+    end; {outinxsz}
+    
+  begin {expression}
+  with fexpr^ do
+       case node of
+         IDENTNODE:
+           case nkind of
+             VARS,
+             SUBR,
+             FUNCT,
+             EXTERN:
+               begin
+               if nkind = VARS
+               then begin
+                    loffset := addr; llev := nlev; lcommon := incommon;
+                    if Indirect then lout(12{UPARR});
+                    if lcommon <> nil
+                    then if lcommon^.nkind <> COMMON
+                         then lcommon := nil;
+                    end
+               else begin
+                    lcommon := nil;
+                    if Indirect
+                    then begin { Calling parameteric routine }
+                         loffset := parambytes;
+                         llev := level;
+                         end
+                    else begin { Function Result Variable }
+                         if idtype.typ = CHARACTER
+                         then begin
+                              lout(12{UPARR});
+                              if rtnlev = 3
+                              then begin { Statement Function }
+                                   llev := STFUNVAR;
+                                   loffset := parambytes + deltapb + 4;
+                                   end
+                              else begin
+                                   llev := LOCALVAR; loffset := -4;
+                                   end;
+                              end
+                         else begin
+                              llev := LOCALVAR;
+                              if idtype.siz = 8
+                              then loffset := -8
+                              else loffset := -4;
+                              end;
+                         end;
+                    end;
+               if InReg and not StmtFunFlag
+               then begin
+                    if not Indirect
+                    then if (bounds <> nil) or AddrNeeded or 
+                            (incommon <> nil) or (idtype.siz > 4)
+                         then lout(12{UPARR});
+                    lout(7{REGREF}); lout(refcount);
+                    end
+               else case llev of
+                      COMMONVAR:
+                         if (lcommon^.InReg) and (loffset <= 32767) and
+                            not StmtFunFlag
+                         then begin
+                              lout(15{FIELD}); lout2(loffset); lout(12{UPARR});
+                              lout(7{REGREF}); lout(lcommon^.refcount);
+                              end
+                         else begin
+                              lout(5{FCOMMON});
+                              if lcommon^.commonno > 127
+                              then lout2(lcommon^.commonno or $8000)
+                              else lout(lcommon^.commonno);
+                              lout3(loffset);
+                              end;
+                      SAVEDVAR:
+                         begin
+                     {:: What if address of saved area is in a register ? }
+                         lout(5{FTNDREF}); lout(1); lout3(loffset);
+                         end;
+                      LOCALVAR:
+                         if StmtFunFlag
+                         then begin
+                              fieldref(loffset);
+                              lout(12{UPARR}); localref(8 + deltapb);
+                              end
+                         else localref(loffset);
+                      STFUNVAR:
+                         localref(loffset);
+                   end; {case}
+               end;
+           end; {case}
+         UNNODE:
+           begin
+           lout(unop);
+           if unop = 210 {CMPLXUN}
+           then lout(unsubop)
+           else if unop = 223 {MAKFCH}
+                then if unsubop = 0
+                     then if (unarg^.node = TRINODE) and
+                             (unarg^.triop = 214 {FINDEX})
+                          then begin
+                               lpn := unarg;
+                               while lpn^.tri1^.node = TRINODE do
+                                     lpn := lpn^.tri1;
+                               lout2(-1); localref(lpn^.tript^.sizoff);
+                               end
+                          else if unarg^.node = INDEXNODE
+                               then begin
+                                    lout2(-1);
+                                    localref(unarg^.inxaddr^.addr - 4);
+                                    end
+                               else lout2(0)
+                     else lout2(unsubop)
+                else if (unop = 217 {FCHTEMP}) or (unop = 213 {CHFRSLT}) or
+                        (unop = 15 {FIELD})
+                     then lout2(unsubop)
+                     else if (unop = 8{BIGFLD})
+                          then lout3(unsubop);
+           if unop <> 23 {NIL} then expression(unarg);
+           end;
+         BINNODE:
+           if binop = 176 {UFCALL}
+           then dumpucall(leftarg,rightarg)
+           else if binop = 178 {SCALL}
+                then dumpsfcall(binsubop,rightarg)
+                else begin
+                     lout(binop);
+                     if (binop = 209 {FCLXCMP}) or (binop = 208 {CMPLXBIN}) or
+                        (binop = 219 {FCHCMP})
+                     then lout(binsubop)
+                     else if (binop >= 150 {PAOCLT}) and
+                             (binop <= 155 {PAOCNE})
+                          then lout2(binsubop);
+                     expression(leftarg); expression(rightarg);
+                     end;
+         TRINODE:
+           if triop = 222 {SUBSTR}
+           then begin
+                lout(222); expression(tri1);
+                expression(tri2); expression(tri3);
+                end
+           else if triop = 214 {FINDEX}
+                then begin
+                     lout(214{FINDEX}); lop := 0;
+                     with tript^ do begin
+                          if BigIndex then lop := lop + 1;
+                          if BigElSize then lop := lop + 2;
+                          end;
+                     lout(lop);
+                     if tript^.esize <> 0
+                     then outintcnst(tript^.esize)
+                     else localref(tript^.sizoff);
+                     if tript^.lo.bkind = CONSTBOUND
+                     then outintcnst(tript^.lo.i)
+                     else localref(tript^.lo.adjboff);
+                     expression(tri1); expression(tri2);
+                     end;
+         INDEXNODE:
+           begin
+           case indexop of
+             9: {INDEX}
+                begin
+                lout(9); expression(inxexpr);
+                if inxaddr^.idtype.siz > 0
+                then outintcnst(inxaddr^.idtype.siz)
+                else localref(inxaddr^.addr - 4);
+                expression(inxaddr);
+                end;
+            10: {SACLE}
+                begin
+                lout(10); expression(inxexpr);
+                outinxsz(inxaddr^.inxbnds);
+                expression(inxaddr);
+                end;
+            11: {ADJINX}
+                begin
+                lout(11); lout(ord(InxCkBnd)*8 + inxexpsz);
+                expression(inxexpr); outinxbnd(inxbnds^.lo);
+                if InxCkBnd then outinxbnd(inxbnds^.hi);
+                end;
+           end; {case}
+           end;
+         CSTNODE:
+           outcnst(cstvalu,csttype);
+       end; {case}
+  end; {expression}
+  
+

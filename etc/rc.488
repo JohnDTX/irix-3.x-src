@@ -1,0 +1,14 @@
+#! /bin/sh
+#
+# Start up the IEEE-488 stuff
+#
+# $Source: /d2/3.7/src/etc/RCS/rc.488,v $
+# $Revision: 1.1 $
+# $Date: 89/03/27 15:38:28 $
+#
+
+if test -r /dev/ib0 && ( > /dev/ib0 ) 2> /dev/null; then
+	echo "IEEE-488 startup:\c"
+	/etc/iib -r
+	echo " 488 init ok."
+fi

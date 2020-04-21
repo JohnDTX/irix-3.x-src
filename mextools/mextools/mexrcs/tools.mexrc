@@ -1,0 +1,14 @@
+bindfunc pop 103
+bindfunc movegrow 102
+bindfunc menu 101
+bindindex inborder 7
+bindindex hiinborder 7
+bindindex titletextin 4
+bindindex titletextout 4
+bindindex hititletextin 4
+bindindex hititletextout 4
+bindindex hioutborder 1
+bindindex outborder 0
+bindcolor menu 20 20 20 
+bindcolor menuback 220 220 220 
+bindcolor cursor 255 0 0 

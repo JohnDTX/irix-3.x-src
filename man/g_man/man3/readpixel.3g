@@ -1,0 +1,61 @@
+.TH readpixels 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B readpixels
+\- returns values of specific pixels
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long readpixels(n, colors) "
+.B "short n; "
+.B "Colorindex colors[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function readpi(n, colors)"
+.B "integer*4 n"
+.B "integer*2 colors(n)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function readpixels(n: Short; var colors: 
+.br
+.B	Colorindex): longint;
+.SH DESCRIPTION
+.B readpixels
+attempts to read up to 
+.I n
+pixel values from the bitplanes.
+It reads them
+into the array 
+.I colors
+starting from the current character
+position along a single scan line (constant 
+\f2y\fP) in the direction of
+increasing
+\f2x\fP.
+.B readpixels
+returns the number of pixels actually read, which is
+the number requested if the starting point
+is at least the same number from the edge of the screen.
+The values of pixels read outside the screen are undefined.
+.B readpixels
+updates the current character position
+to one pixel to the right of the last one read; the current
+character position is undefined if
+the new position is outside the viewport.
+.PP
+In double buffer mode, only the back buffer is read.
+Use
+.B readRGB
+to read pixels in RGB mode.
+.SH "SEE ALSO"
+readRGB, writepixels
+.sp .5v
+.I Programming Guide,
+Section 3.9, Writing and Reading Pixels
+.SH NOTE
+This routine is available only in immediate mode.

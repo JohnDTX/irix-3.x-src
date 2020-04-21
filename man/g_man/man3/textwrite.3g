@@ -1,0 +1,40 @@
+.TH textwritemask 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B textwritemask
+\- grants write permission for text drawn in the textport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textwritemask(tmask)"
+.B "Colorindex tmask;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textwr(tmask)"
+.B "integer*4 tmask"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure textwritemask(tmask: longint);"
+.SH DESCRIPTION
+.B textwritemask
+grants write permission
+for text drawn in the textport.
+It does not affect
+text drawn using
+.B charstr.
+.PP
+.B textwritemask
+is undefined under the window manager.
+.SH "SEE ALSO"
+pagecolor, pagewritemask, textcolor,
+textport, tpoff, tpon, writemask
+.sp
+.I Programming Guide,
+Chapter 14, Textports
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,37 @@
+.TH getmcolor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getmcolor
+\- returns a color map entry
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getmcolor(i, red, green, blue)
+.B "Colorindex i;"
+.B "short *red, *green, *blue;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getmco(i, red, green, blue)"
+.B "integer*4 i"
+.B "integer*2 red, green, blue"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getmcolor(color: Colorindex; var r, g, b: 
+.br
+.B	Short);
+.SH DESCRIPTION
+.B getmcolor
+returns the red,
+green, and blue components of a color map entry.
+.SH "SEE ALSO"
+mapcolor
+.sp
+.I Programming Guide,
+Section 6.2, Color Maps 
+.SH NOTE
+This routine is available only in immediate mode.

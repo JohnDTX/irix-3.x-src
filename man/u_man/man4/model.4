@@ -1,0 +1,20 @@
+'\"macro stdmacro
+.TH MODEL 4
+.SH NAME
+model \- model identification
+.SH SYNOPSIS
+.B /etc/model
+.SH DESCRIPTION
+The file
+\f2/etc/model\f1
+contains model name of the system.
+This file is used by
+.IR uname (1)
+to return the machine model name.
+It is created, if necessary, by
+.IR brc (1M)
+prompting the user.
+.SH FILES
+/etc/model
+.SH SEE ALSO
+brc(1M), uname(1).

@@ -1,0 +1,45 @@
+.TH resetls  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I resetls
+- control the continuity of linestyles
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "resetls(b) "
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine resetl(b)"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure resetls(b: Boolean);"
+.sp
+.SH DESCRIPTION
+.I Resetls
+modifies the use of the linestyle pattern.
+It affects the re-initialization of the linestyle between segments.  
+\f2Resetls\f1 has one boolean argument.  
+.I FALSE
+turns the mode
+off: the linestyle
+will \f2not\f1 be reset between segments.  
+.I TRUE,
+the default, means that each line
+will start with a fresh copy of the pattern.  Calls to \f2resetls\f1 have
+the side effect of initializing the linestyle, no matter what the argument,
+and of invalidating the current graphics position.
+.PP
+.I Resetls
+is used most often when approximating circles, arcs, and curves 
+with many short lines.  
+If the linestyle is not reset between segments, the 
+pattern of the curve appears smooth and continuous. 
+The linewidth should not be set to 2 unless \f2resetls\f1
+is 
+.I TRUE.
+.SH "SEE ALSO"
+.I deflinestyle, getresetls, lsbackup, setlinestyle

@@ -1,0 +1,102 @@
+'\"macro stdmacro
+.TH EXIT 2 
+.SH NAME
+exit, _exit \- terminate process
+.SH SYNOPSIS
+.B void exit (status)
+.br
+.B int status;
+.br
+.B void _exit (status)
+.br
+.B int status;
+.SH DESCRIPTION
+.I Exit\^
+terminates the calling process with the following consequences:
+.IP "" .3i
+All of the file descriptors open in the calling process are closed.
+.IP
+If the parent process of the calling process is executing a
+.IR wait ,
+it is notified of the calling process's
+termination and the low order eight bits (i.e., bits 0377) of
+.I status\^
+are made available to it; see
+.IR wait (2).
+.IP
+If the parent process of the calling process is not executing a
+.IR wait ,
+the calling process is transformed into a zombie process.
+A
+.I "zombie process\^"
+is a process that only occupies a slot in the process table,
+it has no other space allocated either in user or kernel space.
+The process table slot that it occupies is partially overlaid with
+time accounting information
+(see
+.BR <sys/proc.h> )
+to be used by
+.IR times.
+.IP
+The parent process
+.SM ID
+of all of the calling process's existing
+child processes  and zombie processes is set to 1.
+This means the initialization process (see
+.IR intro (2))
+inherits each of these processes.
+.IP
+Each attached shared memory segment is detached and the value of
+.B shm_nattach
+in the data structure associated with its shared memory identifier
+is decremented by 1.
+.IP
+For each semaphore for which the calling process has set a semadj value (see
+.IR semop (2)),
+that semadj value is added to the semval of the specified semaphore.
+.IP
+If the process has a process, text, or data lock, an
+.I unlock\^
+is performed (see
+.IR plock (2)).
+.IP
+An accounting record is written on the accounting file if the system's 
+accounting routine is enabled; see
+.IR acct\^ (2).
+.IP
+If the process
+.SM ID\*S,
+tty group
+.SM ID\*S,
+and process group
+.SM ID
+of the calling process are equal, the
+.SM
+.B SIGHUP
+signal is sent to each processes that has a process group
+.SM ID
+equal to that of the calling process.
+.PP
+The C function
+.I exit\^
+may cause cleanup actions before the process exits.
+The function
+.I _exit\^
+circumvents all cleanup.
+.SH "SEE ALSO"
+signal(2), wait(2).
+.SH WARNING
+See
+.SM
+.I WARNING\^
+in
+.IR signal (2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#1,D0
+.B movl	status,A0
+.B trap	#0
+.fi
+.DT
+.\"	@(#)exit.2	5.1 of 10/19/83

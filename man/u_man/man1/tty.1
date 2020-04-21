@@ -1,0 +1,44 @@
+'\"macro stdmacro
+.TH TTY 1
+.SH NAME
+tty \- get the terminal's name
+.SH SYNOPSIS
+.B tty
+'\" [
+'\" .B \-l
+'\" ]
+[
+.B \-s
+]
+.SH DESCRIPTION
+.I Tty\^
+prints the path name of the user's terminal.
+.\" The
+.\" .B \-l
+.\" option prints the synchronous line number to which the user's terminal is
+.\" connected,
+.\" if it is on an active synchronous line.
+The
+.B \-s
+option inhibits printing of the terminal's path name,
+allowing one to test just the exit code.
+.SH EXIT CODES
+2	if invalid options were specified,
+.br
+0	if standard input is a terminal,
+.br
+1	otherwise.
+.SH DIAGNOSTICS
+.\" ``not on an active synchronous line'' if the standard input is not a
+.\" synchronous terminal and
+.\" .B \-l
+.\" is specified.
+.br
+``not a tty'' if the standard input is not a terminal
+and
+.B \-s
+is not specified.
+.\"	@(#)tty.1	5.2 of 5/18/82
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/tty.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:51:00 $

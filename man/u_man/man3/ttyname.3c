@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH TTYNAME 3C 
+.SH NAME
+ttyname, isatty \- find name of a terminal
+.SH SYNOPSIS
+.B char \(**ttyname (fildes)
+.br
+.B int fildes;
+.PP
+.B int isatty (fildes)
+.br
+.B int fildes;
+.SH DESCRIPTION
+.I Ttyname\^
+returns a pointer to a string containing the null-terminated path name
+of the terminal device associated with file descriptor
+.IR fildes .
+.PP
+.I Isatty\^
+returns 1 if
+.I fildes\^
+is associated with a terminal device, 0 otherwise.
+.SH FILES
+/dev/tty\(**
+.SH DIAGNOSTICS
+.I Ttyname\^
+returns a
+.SM NULL
+pointer if
+.I fildes\^
+does not describe a terminal device in directory
+.BR /dev .
+.SH BUGS
+The return value points to static data
+whose content is overwritten by each call.
+.\"	@(#)ttyname.3c	5.1 of 10/21/83

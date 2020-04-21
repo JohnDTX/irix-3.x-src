@@ -1,0 +1,5 @@
+for i in p.body.1 p.body.2 p.body.3 p.body.4 p.body.5 p.decl.1 p.decl.2 p.decl.3 p.dump.1 p.dump.2 p.init p.misc.0 p.misc.1 p.misc.2 p.opt pascal.p 
+do
+	echo ------------- $i -------------
+	diff $i /usr/src/usr.bin/fortran20/pascal
+done

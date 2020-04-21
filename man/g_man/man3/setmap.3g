@@ -1,0 +1,35 @@
+.TH setmap 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B setmap
+\- selects one of the 16 small color maps
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setmap(mapnum) "
+.B "short mapnum; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setmap(mapnum)"
+.B "integer*4 mapnum"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setmap(mapnum: Short);"
+.SH DESCRIPTION
+.B setmap
+selects one of the 16 small maps, numbered 0 through 15 in
+multimap mode.
+.B setmap
+is ignored in onemap mode.
+.SH "SEE ALSO"
+getmap, multimap, onemap
+.sp
+.I Programming Guide,
+Section 6.2, Color Maps 
+.SH NOTE
+This routine is available only in immediate mode.

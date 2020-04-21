@@ -1,0 +1,18 @@
+'\"macro stdmacro
+.TH HOSTNAME 1
+.SH NAME
+hostname \- set or print name of current host system
+.SH SYNOPSIS
+.B hostname
+[ nameofhost ]
+.SH DESCRIPTION
+The
+.I hostname\^
+command prints the name of the current host, as given before the
+"login" prompt.
+The super-user can set the hostname by giving an argument; this
+is usually done in the startup script 
+.B /etc/rc.
+.SH SEE ALSO
+gethostname(2), sethostname(2)
+.\"	@(#)hostname.1	5.1 of 11/17/83

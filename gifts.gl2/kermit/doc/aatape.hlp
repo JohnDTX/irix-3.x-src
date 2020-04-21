@@ -1,0 +1,163 @@
+AATAPE.HLP                                                           (3 Oct 85)
+
+                    COLUMBIA UNIVERSITY KERMIT DISTRIBUTION
+
+
+As of June 1985, the Kermit distribution has grown so big that it will not fit
+on a single 2400' reel of tape at 1600 bpi.  Two tapes are now necessary.  The
+files have been divided into two groups: one group for mainframe/minicomputer
+Kermit implementations (Tape B), the other group for everything else --
+microcomputer/workstation implementations, manuals, tools, etc (Tape A).
+See the file AAFILES.HLP for an explanation of where the files are and what
+they're called.
+
+All tapes are 9-track, 1600 bpi, odd parity, 2400-foot half-inch reels.
+Blocksize is marked on the external label, and will be between 2K and 10K
+depending upon various factors.
+
+Your tape is in one of the following formats, as you requested.  The format
+should be clearly marked on the external label.
+
+ANSI -- ANSI standard label, volume label KERMIT, ASCII encoding, format D,
+  variable length records.  Readable by most computer systems, should be
+  readable by all since it's a national standard format.  On VAX/VMS, readable
+  with the DCL COPY command. The ANSI tape format is described in detail below.
+
+OS -- IBM OS standard label, volume label KERMIT, EBCDIC encoding, format
+  VB, variable length records.  Format described in detail below.
+
+CMS -- IBM VM/CMS VMFPLC2 format.
+
+TAR -- Unix Tar format, produced on a VAX running 4.2BSD Unix, 10K blocksize.
+
+DUMPER -- DEC-20 DUMPER format.
+
+BACKUP -- DEC-10 Backup/Interchange format (NOT VAX/VMS Backup!).
+
+The CMS, TAR, DUMPER, and BACKUP formats are internal formats for specific
+operating systems.  The DUMPER and BACKUP tapes may include savesets containing
+certain binary files; the CMS tape may contain the CMS Kermit MODULE file.
+The other formats contain only "printable" files -- program source, binaries in
+"hex" or other printably-encoded format along with conversion programs,
+documentation, etc.
+
+Each Kermit distribution tape, Tape A and Tape B, comes with a directory
+listing showing names of all the files that are on it, in the order in which
+they appear on the tape.  In addition, the file AAFILES.HLP lists the files
+and gives a fuller explanation of the naming conventions, and some information
+about the various Kermit implementations.
+
+ANSI and OS are the two formats most commonly used for exchanging information
+on tape between unlike systems.  These formats are now described in some
+detail; in case you don't have a utility handy to read your ANSI or OS tape,
+the following information should be sufficient to allow a programmer to write a
+procedure to get the information from the tape.
+
+- ANSI LABELED TAPES -
+
+All systems are supposed to be able to read ANSI labeled tapes, which,
+according to ANSI standard X3.27-1978: "Magnetic Tape Labels and File
+Structure for Information Exchange", should be the universal medium
+for exchange between mainframe computers.  Our tape is written on any of
+several types of computers, including a VAX with Unix (using an ANSI
+tape-writing utility), a VAX with VMS (using the COPY command), or a
+DECSYSTEM-20 (using the WRITEL program), and conform to the ANSI standard,
+level 3.  The tape is written as follows:
+
+              Tracks:  9
+             Density:  1600 bits per inch
+              Parity:  Odd
+  Character Encoding:  ASCII (ANSI X3.4-1968)
+
+ANSI labels (each label is an 80-byte record, encoded in ASCII):
+
+Each label begins with a 4-character identifier, like VOL1, HDR1, EOV1, etc.
+- Volume label  (VOL1): Volume name is KERMIT, in character positions 5-10.
+    The volume label appears only at the beginning of the tape.
+- File Header 1 (HDR1): File name is in character positions 5-21.
+- File Header 2 (HDR2): Record Format (F, D, or S) in 5 (it's always "D"),
+                        Block length in 6-10, ASCII numeric, leading 0's.
+                        Record length in 11-15, ditto.
+  After HDR1 and HDR2 comes a single tape mark (tm) then the contents of the
+  file, terminated by another tm.  The (HDR1, HDR2, tm, file data, tm) sequence
+  is repeated for each file.  At the end of file, there may be EOF1 and EOF2
+  labels; if present, they may be ignored.
+
+- At the end of tape may be EOV1 and EOV2 labels to indicate end of volume,
+  followed by a double tape mark.
+
+Record Format: "D" -- variable length records with a 4-digit ASCII length field
+  at the beginning of each record (the length includes the length field
+  itself), line terminators stripped, and no record crossing a block boundary.
+  The record may be padded at the end with 0 to 3 circumflex characters,
+  which are NOT included in the length field.  A null record ("blank line")
+  is indicated by "0004" followed immediately by the length field of the
+  next line.  "F" (fixed length record) format, although simpler to read, is
+  not used because the Kermit distribution will not fit on a 2400-foot
+  fixed-block tape because of the space wasted by padding each record with
+  blanks.  Only printable files (text, program source, text formatter source,
+  or hex) are included on this tape. 
+
+Record Length:  Variable, maximum 300 (no lines of text or program source in
+  the Kermit distribution are more than 300 characters long; very few are
+  longer than 200).
+
+Block Length:  2048, 4096, or 8192 (marked on the external label).  Because
+  of the variable format used, most blocks will NOT be completely filled.
+
+- OS STANDARD LABELED TAPES -
+
+The tape is written on either a VAX running Unix, using a local utility,
+or an IBM 370-Series machine running VM/CMS, using MOVEFILE.
+
+The tape is written as follows:
+
+Tracks:   9
+Density:  1600 bits per inch
+Parity:   Odd
+
+Character Encoding:  EBCDIC
+
+Labels (each label is an 80-byte record, encoded in EBCDIC):
+Each label begins with a 4-character identifier, like VOL1, HDR1, EOV1, etc.
+  Volume label  (VOL1): Volume name is KERMIT, in character positions 5-10.
+    The volume label appears only at the beginning of the tape.
+  File Header 1 (HDR1): File name is in character positions 5-21.
+  File Header 2 (HDR2): Record Format in 5 (it's always "V"),
+                        Block length in 6-10, printable EBCDIC digits,
+				      filled to 5 columns with leading zeroes.
+                        Record length in 11-15, printable EBCDIC digits,
+				      filled with leading zeroes.
+			Blocking attribute in 39 (always "B").
+  After HDR1 and HDR2 comes a single tape mark (tm) then the contents
+  of the file, terminated by another tm.  Finally, there are EOF1 and
+  EOF2 labels, also terminated by a tm.  The (HDR1, HDR2, tm, file
+  data, tm, EOF1, EOF2, tm) sequence is repeated for each file.
+
+  At the end of the tape there is a double tape mark.
+
+Block Format: "B" -- Each block begins with a 4-byte length field (the
+  length includes the block length field) which is the actual length
+  of the block.  The length field is encoded as two binary bytes (high
+  order byte first) followed by two zero bytes.  Following the length
+  are as many records as will fit in the block; no record spans
+  multiple blocks.
+
+Record Format: "V" -- variable length records with a 4-byte length field
+  at the beginning of each record (the length includes the length
+  field itself), line terminators stripped, and no record crossing a
+  block boundary.  The length field is encoded the same was as the
+  block length field, above.  "F" (fixed length record) format,
+  although simpler to read, is not used because the Kermit
+  distribution will not fit on a 2400-foot fixed-block tape because of
+  the space wasted by padding each record with blanks.
+
+Record Length:  Variable, maximum 300 (no lines of text or program source in
+  the Kermit distribution are more than 300 characters long)
+
+Block Length:  Maximum of 8192 bytes.
+
+Only printable files (text, program source, text formatter source, or hex) are
+included on this tape.
+
+[End of AATAPE.HLP]

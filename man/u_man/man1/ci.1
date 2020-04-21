@@ -1,0 +1,203 @@
+'\"macro stdmacro
+.TH CI 1
+.SH NAME
+ci \- check in RCS revisions
+.SH SYNOPSIS
+.B ci
+[ options ]
+file ...
+.SH DESCRIPTION
+.I ci
+stores new revisions into RCS files.
+Each file name ending in `,v' is taken to be an RCS file, all others
+are assumed to be working files containing new revisions.
+\f2Ci\f1 deposits the contents of each working file
+into the corresponding RCS file.
+.PP
+Pairs of RCS files and working files may be specified in 3 ways (see also the
+example section of \f2co\f1(1)).
+.PP
+1) Both the RCS file and the working file are given. The RCS file name is of
+the form \f2path1/workfile\f1,v
+and the working file name is of the form
+\f2path2/workfile\f1, where 
+\f2path1/\f1 and
+\f2path2/\f1 are (possibly different or empty) paths and
+\f2workfile\f1 is a file name.
+.PP
+2) Only the RCS file is given. 
+Then the working file is assumed to be in the current
+directory and its name is derived from the name of the RCS file
+by removing \f2path1/\f1 and the suffix `,v'.
+.PP
+3) Only the working file is given. 
+Then the name of the RCS file is derived from the name of the working file
+by removing \f2path2/\f1
+and appending the suffix `,v'.
+.PP
+If the RCS file is omitted or specified without a path, then \f2ci\f1
+looks for the RCS file first in the directory ./RCS and then in the current
+directory. 
+.PP
+For \f2ci\f1 to work, the caller's login must be on the access list,
+except if the access list is empty or the caller is the superuser or the
+owner of the file.
+To append a new revision to an existing branch, the tip revision on
+that branch must be locked by the caller. Otherwise, only a 
+new branch can be created. This restriction is not enforced
+for the owner of the file, unless locking is set to \f2strict\f1
+(see \f2rcs\f1(1)).
+A lock held by someone else may be broken with the \f2rcs\f1 command.
+.PP
+Normally, \f2ci\f1 checks whether the revision to be deposited is different
+from the preceding one. If it is not different, \f2ci\f1
+either aborts the deposit (if \f3\-q\f1 is given) or asks whether to abort
+(if \f3\-q\f1 is omitted). A deposit can be forced with the \f3\-f\f1 option.
+.PP
+For each revision deposited, \f2ci\f1 prompts for a log message.
+The log message should summarize the change and must be terminated with
+a line containing a single `.' or a control-D. Log messages
+are limited to 4096 characters.
+If several files are checked in, \f2ci\f1 asks whether to reuse the
+previous log message.
+If the standard input is not a terminal, \f2ci\f1 suppresses the prompt 
+and uses the same log message for all files.
+See also \f3\-m\f1.
+.PP
+The number of the deposited revision can be given by any of the options
+\f3\-r\f1, \f3\-f\f1, \f3\-k\f1, \f3\-l\f1, \f3\-u\f1, \f3\-q\f1 
+(see \f3\-r\f1), or \f3\-M\f1.
+.PP
+If the RCS file does not exist, \f2ci\f1 creates it and
+deposits the contents of the working file as the initial revision
+(default number: 1.1).
+The access list is initialized to empty.
+Instead of the log message, \f2ci\f1 requests descriptive text (see
+\f3\-t\f1 below).
+.TP 10
+.B \-r\f1[\f2rev\f1] 
+assigns the revision number \f2rev\f1 
+to the checked-in revision, releases the corresponding lock, and
+deletes the working file. This is also the default.
+.sp
+If \f2rev\f1 is omitted, \f2ci\f1 derives the new revision number from
+the caller's last lock. If the caller has locked the tip revision of a branch,
+the new revision is appended to that branch. The new revision number is obtained
+by incrementing the tip revision number.
+If the caller locked a non-tip revision, a new branch is started at
+that revision by incrementing the highest branch number at that revision.
+The default initial branch and level numbers are 1.
+If the caller holds no lock, but he is the owner of the file and locking
+is not set to \f2strict\f1, then the revision is appended to the trunk.
+.PP
+If \f2rev\f1 indicates a revision number, it must be higher than the latest
+one on the branch to which \f2rev\f1 belongs, or must start a new branch.
+.PP
+If \f2rev\f1 indicates a branch instead of a revision,
+the new revision is appended to that branch. The level number is obtained
+by incrementing the tip revision number of that branch.
+If \f2rev\f1 indicates a non-existing branch,
+that branch is created with the initial revision numbered \f2rev.1\f1.
+.PP
+Exception: On the trunk, revisions can be appended to the end, but
+not inserted.
+.TP 10
+.B \-f\f1[\f2rev\f1]
+forces a deposit; the new revision is deposited even it is not different
+from the preceding one.
+.TP 10
+.B \-k\f1[\f2rev\f1]
+searches the working file for keyword values to determine its revision number, 
+creation date, author, and state (see \f2co\f1 (1)), and assigns these 
+values to the deposited revision, rather than computing them locally.
+A revision number given by a command option overrides the number
+in the working file.
+This option is useful for software distribution. A revision that is sent to
+several sites should be checked in with the \f3\-k\f1 option at these sites to 
+preserve its original number, date, author, and state. 
+.TP 10
+.B \-l\f1[\f2rev\f1]
+works like \f3\-r\f1, except it performs an additional \f2co\f3 \-l\f1 for the
+deposited revision. Thus, the deposited revision is immediately
+checked out again and locked.
+This is useful for saving a revision although one wants to continue 
+editing it after the checkin.
+.TP 10
+.B \-u\f1[\f2rev\f1]
+works like \f3\-l\f1, except that the deposited revision is not locked.
+This is useful if one wants to process (e.g., compile) the revision
+immediately after checkin.
+.TP 10
+.B \-q\f1[\f2rev\f1] 
+quiet mode; diagnostic output is not printed.
+A revision that is not different from the preceding one is not deposited,
+unless \f3\-f\f1 is given.
+.TP 10
+.B \-M\f1[\f2rev\f1]
+use the files last-modified date for the revision instead of the
+current date.  If the 
+.B -l
+or
+.B -u
+options are also given, the file's last-modified date will be
+unchanged.
+.TP 10
+.BI \-m "msg"
+uses the string \f2msg\f1 as the log message for all revisions checked in.
+.TP 10
+.BI \-n "name"
+assigns the symbolic name \f2name\f1 to the number of the checked-in revision.
+\f2ci\f1 prints an error message if \f2name\f1 is already assigned to another
+number.
+.TP 10
+.BI \-N "name"
+same as \f3\-n\f1, except that it overrides a previous assignment of \f2name\f1.
+.TP
+.BI \-s "state"
+sets the state of the checked-in revision to the identifier \f2state\f1.
+The default is \f2Exp\f1.
+.TP
+.B \-t\f1[\f2txtfile\f1]
+writes descriptive text into the RCS file (deletes the existing text).
+If \f2txtfile\f1 is omitted, 
+\f2ci\f1 prompts the user for text supplied from the standard input,
+terminated with a line containing a single `.' or \s-2CTRL-d\s0.
+Otherwise, the descriptive text is copied from the file \f2txtfile\f1.
+During initialization, descriptive text is requested
+even if \f3\-t\f1 is not given.
+The prompt is suppressed if standard input is not a terminal.
+.SH DIAGNOSTICS
+For each revision,
+\f2ci\f1 prints the RCS file, the working file, and the number
+of both the deposited and the preceding revision.
+The exit status always refers to the last file checked in,
+and is 0 if the operation was successful, 1 otherwise.
+.SH "FILE MODES"
+An RCS file created by \f2ci\f1 inherits the read and execute permissions
+from the working file. If the RCS file exists already, \f2ci\f1
+preserves its read and execute permissions.
+\f2ci\f1 always turns off all write permissions of RCS files. 
+.SH FILES
+The caller of the command
+must have read/write permission for the directories containing
+the RCS file and the working file, and read permission for the RCS file itself.
+A number of temporary files are created.
+A semaphore file is created in the directory containing the RCS file.
+\f2ci\f1 always creates a new RCS file and unlinks the old one.
+This strategy makes links to RCS files useless.
+.SH IDENTIFICATION
+Author: Walter F. Tichy,
+.br
+Purdue University, West Lafayette, IN, 47907.
+.br
+Copyright \(co 1982 by Walter F. Tichy.
+.SH SEE ALSO
+.nf 
+.na
+co(1), ident(1), rcs(1), rcsdiff(1), rcsintro(1), rcsmerge(1), 
+rlog(1), rcsfile(4)
+.sp 0
+Walter F. Tichy, ``Design, Implementation, and Evaluation of a Revision Control
+System,'' in \f2Proceedings of the 6th International Conference on Software
+Engineering\f1, IEEE, Tokyo, Sept. 1982.
+

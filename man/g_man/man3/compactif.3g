@@ -1,0 +1,49 @@
+.TH compactify 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B compactify
+\- compacts the memory storage of an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "compactify(obj)"
+.B "Object obj;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine compac(obj)"
+.B "integer*4 obj"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B " procedure compactify(obj: Object);"
+.SH DESCRIPTION
+When you modify an open object using
+the object editing routines,
+its storage can become fragmented and inefficient.
+If there is too much wasted space,
+the system automatically calls
+.B compactify
+during the
+.B closeobj
+operation.
+.B compactify
+performs the compaction explicitly.
+Unless there is insertion to or deletion from an object,
+compaction is never necessary.
+Since 
+.B compactify
+requires a significant amount of time,
+do not call
+it unless storage space is critical.
+.SH "SEE ALSO"
+chunksize, closeobj
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine
+available only in immediate mode.

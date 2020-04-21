@@ -1,0 +1,39 @@
+.TH singlebuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B singlebuffer
+\- writes and displays all bitplanes
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "singlebuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine single"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure singlebuffer;"
+.SH DESCRIPTION
+.B singlebuffer
+invokes single buffer mode.  In single buffer mode,
+the system simultaneously updates and displays the image
+data in the active bitplanes. 
+Consequently, incomplete or changing pictures can appear on the screen.
+.B singlebuffer
+does not take effect until 
+.B gconfig
+is called.
+.SH "SEE ALSO"
+doublebuffer, gconfig, getdisplaymode, 
+gsync,
+RGBmode
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+.SH NOTE
+This routine is available only in immediate mode.

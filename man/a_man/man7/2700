@@ -1,0 +1,21 @@
+total 51
+drwxrwxr-x  3 glen     doc           512 Apr  4 15:30 ./
+drwxrwxr-x  5 bob      doc           512 Feb 25 13:06 ../
+-rw-rw-r--  1 diane    doc             0 Apr  4 15:30 2700
+-rw-------  1 bob      doc           269 Jan 25 17:31 Makefile
+drwxrwxr-x  2 bob      doc           512 Mar 21 14:56 RCS/
+-rw-rw-r--  1 glen     doc            89 May 28  1984 README
+-rw-r--r--  1 bob      doc          3078 Feb 13 13:16 autoconf.7
+-rw-r--r--  1 bob      doc           550 Feb 13 13:17 drum.7
+-rw-r--r--  1 bob      doc          2804 Feb 13 13:17 dsd.7
+-rw-r--r--  1 bob      doc           855 Feb 13 13:17 duart.7
+-rw-r--r--  1 bob      doc          2196 Feb 13 13:17 floppy.7
+-rw-rw-r--  1 glen     doc           658 May 18  1984 intro.7
+-rw-r--r--  1 bob      doc          2495 Feb 13 13:17 iph.7
+-rw-r--r--  1 bob      doc           745 Feb 13 13:17 kmem.7
+-rw-rw-r--  1 glen     doc           745 Feb 13 13:37 mem.7
+-rw-rw-r--  1 glen     doc           182 Feb 13 13:37 null.7
+-rw-r--r--  1 bob      doc           890 Feb 13 13:17 pty.7
+-rw-r--r--  1 bob      doc          2631 Feb 13 13:17 qic.7
+-r--r--r--  1 bob      doc         21638 Feb 25 16:42 termio.7
+-rw-rw-r--  1 glen     doc           594 May 18  1984 tty.7

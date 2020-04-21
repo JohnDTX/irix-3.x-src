@@ -1,0 +1,3 @@
+#! /bin/sh
+
+awk "/^$1/ {print \"Versions/\" \$2}" $L/versions

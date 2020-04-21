@@ -1,0 +1,14 @@
+Makefile 
+Makefile.gifts 
+close.c 
+filbuf.c 
+flsbuf.c 
+memimg.c 
+name.c 
+open.c 
+pix.c 
+rdwr.c 
+rle.c 
+row.c 
+scrsave.c 
+scrsave.o 

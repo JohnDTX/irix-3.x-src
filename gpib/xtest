@@ -1,0 +1,7 @@
+# exchange test
+xib -v -f /dev/ib01 \
+	-lttl 999 1024 1999 2048 \
+	&
+xib -f /dev/ib11 \
+	-tllt 999 1024 1999 2048 \
+	&

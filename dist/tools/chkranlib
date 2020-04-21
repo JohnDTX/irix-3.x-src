@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+# look for unranlibbed libraries, and ranlib them.
+#
+
+set -- `getopt "ai:s:" $*`
+all=false
+
+while test $# -gt 0
+do
+	case $1 in
+	-a) all=true ;;
+	-i) shift ; idb=$1 ;;
+	-s) shift ; sbase=$1 ;;
+	--) shift ; break ;;
+	*) break;
+	esac
+	shift
+done
+
+: ${idb?"idb envariable not set or specified"}
+: ${sbase?"sbase envariable not set or specified"}
+
+$ROOT/usr/sbin/idbscan 'if (dstpath =~ "*/lib*.a" && (!@2000 || @3000)) print (srcpath)' |
+while read name
+do
+	if test -f $sbase/$name
+	then
+		if $all
+		then
+			echo $name
+			ranlib $sbase/$name
+		else
+			if ar t $sbase/$name __.SYMDEF >/dev/null 2>/dev/null
+			then
+				:
+			else
+				echo $name
+				ranlib $sbase/$name
+			fi
+		fi
+	else
+		echo "$name: no such file or directory"
+	fi
+done

@@ -1,0 +1,26 @@
+'\"macro stdmacro
+.TH NFSSVC 2
+.SH NAME
+nfssvc, async_daemon \- NFS daemons
+.SH SYNOPSIS
+.nf
+.B nfssvc(sock)
+.B int sock;
+.PP
+.B async_daemon()
+.SH DESCRIPTION
+.I Nfssvc
+starts an NFS
+daemon listening on socket
+.IR sock .
+The socket must be AF_INET, and SOCK_DGRAM (protocol UDP/IP).
+The system call will return only if the process is killed.
+.LP
+.I Async_daemon
+implements the NFS daemon
+that handles asynchronous I/O for an NFS client.
+The system call never returns.
+.SH BUGS
+These two system calls allow kernel processes to have user context.
+.SH SEE ALSO
+mountd(1M)

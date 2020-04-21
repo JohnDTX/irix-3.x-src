@@ -1,0 +1,143 @@
+C ------------- PROGRAM MATRIX --------------
+
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+	
+	CALL INITIALIZE
+	CALL DRAWIMAGE
+ 100	IF (QTEST() .NE. 0) THEN
+		CALL DRAWIMAGE
+	ENDIF
+	CALL PROCESSINPUT
+	GOTO 100
+	
+	END
+
+
+	SUBROUTINE INITIALIZE
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+	
+	INTEGER WINID
+	CALL KEEPAS(1, 1)	
+	WINID = WINOPE('MATRIX',6)
+	
+	CALL DOUBLE
+	CALL GCONFI
+	CALL FRONTB(.TRUE.)
+	CALL COLOR(0)
+	CALL CLEAR
+	CALL FRONTB(.FALSE.)
+
+	CALL ORTHO(-100.0, 100.0, -100.0, 100.0, -100.0, 100.0)
+
+	RETURN
+	END
+
+
+	SUBROUTINE PROCESSINPUT
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+
+	INTEGER*2 VAL
+
+	IF (QREAD(VAL) .EQ. REDRAW) THEN
+		CALL RESHAP
+		CALL DRAWIMAGE
+	ENDIF
+	
+	RETURN
+	END
+
+
+	SUBROUTINE DRAWIMAGE
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+
+	CALL COLOR(0)
+	CALL CLEAR
+
+	CALL DRAWOBJECTS
+
+	CALL SWAPBU
+
+	RETURN
+	END
+
+
+	SUBROUTINE DRAWOBJECTS
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+	
+	CALL DRAWONE
+
+	CALL DRAWTWO
+
+	CALL DRAWTHREE
+
+	CALL DRAWFOUR
+
+	CALL DRAWFIVE
+
+	RETURN
+	END
+
+
+	SUBROUTINE DRAWONE
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+	
+	CALL COLOR(RED)
+	CALL ARCF(10.0, 30.0, 10.0, 0, 300)
+	RETURN
+	END
+
+
+	SUBROUTINE DRAWTWO
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+
+	CALL COLOR(GREEN)	
+	CALL RECTF(10.0, 10.0, 20.0, 20.0)
+	RETURN
+	END
+
+
+	SUBROUTINE DRAWTHREE
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+	
+	CALL COLOR(BLUE)	
+	CALL RECTF(-10.0, -50.0, -5.0, -20.0)
+	RETURN
+	END
+
+	
+	SUBROUTINE DRAWFOUR
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+
+	CALL COLOR(YELLOW)
+	CALL RECT(30.0, 30.0, 40.0, 40.0)
+	RETURN
+	END
+
+
+	SUBROUTINE DRAWFIVE
+
+$INCLUDE /usr/include/fgl.h
+$INCLUDE /usr/include/fdevice.h
+
+	CALL COLOR(WHITE)	
+	CALL RECT(-10.0, -10.0, 10.0, 10.0)
+	RETURN
+	END

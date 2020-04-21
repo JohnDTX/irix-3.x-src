@@ -1,0 +1,5 @@
+.wsirisrc
+usr/bin/iftp
+usr/bin/irsh
+usr/lib/librgl.a
+usr/lib/librgl2.a

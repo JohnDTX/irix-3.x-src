@@ -1,0 +1,41 @@
+.TH qenter 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B qenter
+\- creates an event queue entry
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qenter(qtype, val)"
+.B "short qtype, val;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qenter(qtype, val)"
+B "integer*4 qtype, val"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure quenter(qtype, val: longint);"
+.SH DESCRIPTION
+.B qenter
+takes two 16-bit integers,
+.I dev
+and
+.I value,
+and enters them into the event queue.
+There is no way to distinguish user-defined and system-defined
+entries unless disjointed sets of device numbers are used.
+.PP
+See Appendix A
+for a list of system-defined devices.
+.SH "SEE ALSO"
+qread, qreset, qtest
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

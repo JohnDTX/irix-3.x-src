@@ -1,0 +1,34 @@
+#
+MAKEPATH=../../common/compiler:../../common/curve:../../common/feedback:../../common/hardcopy:../../common/immediate:../../common/object:../../common/services:../../common/windows
+
+OBJS=	bbox.o buffer.o callfunc.o callobj.o character.o circle.o \
+	clear.o cmdname.o cmov.o config.o depthcue.o getcmdlen.o \
+	loadmatrix.o matrixstk.o matview.o movedraw.o multmatrix.o \
+	ortho.o ortho2.o persp.o pmovedraw.o points.o \
+	polygon.o rect.o rgbconfig.o rmovedraw.o rot.o rotate.o scale.o \
+	space.o spolygon.o translate.o util.o viewport.o window.o xfpt.o \
+	zbuffer.o itermat.o cmatrix.o csetting.o curve.o \
+	curvs.o defbasis.o diffmat.o dumpcurves.o patch.o prtmatrix.o \
+	psetting.o savecurves.o splinegl.o checkpick.o feedback.o \
+	getmatrix.o iterate.o pick.o picksize.o select.o capture.o \
+	color.o copy.o finish.o fontram.o getstuff.o gexit.o ginit.o \
+	initglob.o initmsg.o invertview.o pixels.o setcursor.o \
+	strwidth.o closeobj.o compactify.o delete.o delobj.o \
+	deltag.o freeall.o genobj.o gensysobj.o gentag.o hash.o initstack.o \
+	makeroom.o newtag.o objalloc.o object.o objedit.o suspendobj.o \
+	tagstuff.o blkqread.o galloc.o getcpos.o getgpos.o \
+	grioctl.o interp.o reset.o userserv.o xsin.o xtable.o \
+	hints.o menu.o winstuff.o
+
+TARGETS= ../libgl${PREF}.a
+
+LCOPTS= -O
+LCINCS= -I../../include
+LCDEFS= -DIP2 -DUNIX
+include ${ROOT}/usr/include/make/commondefs
+
+../libgl${PREF}.a: ${OBJS}
+	rm -f $@
+	ar cu $@ ${OBJS}
+	strip $@
+	ranlib $@

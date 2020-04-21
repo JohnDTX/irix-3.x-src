@@ -1,0 +1,24 @@
+.TH CHECKLIST 4
+.SH NAME
+checklist \- list of file systems processed by fsck
+.SH DESCRIPTION
+.I Checklist\^
+resides in directory
+.B /etc
+and contains a
+list of at most 15
+.I "special file\^"
+names.
+Each
+.I "special file\^"
+name is contained on a separate line and
+corresponds to a file system.
+Each file system will then be automatically processed
+by the
+.IR fsck (1M)
+command.
+.SH FILES
+/etc/checklist
+.SH SEE ALSO
+fsck(1M).
+.\"	@(#)checklist.4	5.1 of 10/15/83

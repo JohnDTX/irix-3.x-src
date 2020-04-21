@@ -1,0 +1,76 @@
+'\"macro stdmacro
+.TH SETUID 2 
+.SH NAME
+setuid, setgid \- set user and group \s-1ID\s+1s
+.SH SYNOPSIS
+.B int setuid (uid)
+.br
+.B int uid;
+.PP
+.B int setgid (gid)
+.br
+.B int gid;
+.SH DESCRIPTION
+.IR Setuid " (" setgid )
+is used to set the real user (group)
+.SM ID
+and
+effective user (group)
+.SM ID
+of the calling process.
+.PP
+If the effective user
+.SM ID
+of the calling process is super-user,
+the real user (group)
+.SM ID
+and effective user (group)
+.SM ID
+are set to
+.IR uid " (" gid ).
+.PP
+If the effective user
+.SM ID
+of the calling process is not super-user, but its real user (group)
+.SM ID
+is equal to
+.IR uid " (" gid ),
+the effective user (group)
+.SM ID
+is set to
+.IR uid " (" gid ).
+.PP
+.IR Setuid " (" setgid )
+will fail if the real user (group)
+.SM ID
+of the calling process is not equal to
+.IR uid " (" gid )
+and its effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.SH RETURN VALUE
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+getuid(2), intro(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#23,D0	| sys setuid
+.B movl	uid,A0
+.B trap	#0
+.PP
+Carry bit cleared on success.
+
+.B moveq	#46,D0	| sys setgid
+.B movl	gid,A0
+.B trap	#0
+.PP
+Carry bit set on failure and cleared on success.
+.fi
+.DT
+.\"	@(#)setuid.2	5.1 of 10/19/83

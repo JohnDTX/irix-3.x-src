@@ -1,0 +1,506 @@
+/* LINTLIBRARY */
+#define		_WS_GLTYPESONLY
+#include	<gl1/gl.h>
+/* @(#)$Header: /d2/3.7/src/usr.bin/lint/RCS/llib-lgl1,v 1.1 89/03/27 18:04:03 root Exp $ */
+/*
+ * $Log:	llib-lgl1,v $
+# Revision 1.1  89/03/27  18:04:03  root
+# Initial check-in for 3.7
+# 
+ * Revision 1.3  85/06/28  11:33:50  bob
+ * Check in and freeze Herb's work.
+ * 
+ * Revision 1.2  85/06/13  14:33:31  bob
+ * Fixed syntax errors.
+ * 
+ */
+
+void	ginit() {;}
+void	greset() {;}
+void	gflush() {;}
+void	finish() {;}
+void	gexit() {;}
+void	clear() {;}
+void	pushattributes() {;}
+void	popattributes() {;}
+void	pushviewport() {;}
+void	popviewport() {;}
+void	pushmatrix() {;}
+void	popmatrix() {;}
+/* ARGSUSED */
+void	viewport(left, right, bot, top)
+		Screencoord left, right, bot, top; {;}
+/* ARGSUSED */
+void	getviewport(left, right, bot, top)
+		Screencoord *left, *right, *bot, *top; {;}
+/* ARGSUSED */
+void	scrmask(left, right, bot, top)
+		Screencoord left, right, bot, top; {;}
+/* ARGSUSED */
+void	getscrmask(left, right, bot, top)
+		Screencoord *left, *right, *bot, *top; {;}
+/* ARGSUSED */
+void	perspectiv(fovy, aspect, near, far)
+		Angle fovy; float aspect; Coord near, far; {;}
+/* ARGSUSED */
+void	window(left, right, bot, top, near, far)
+		Coord left, right, bot, top, near, far; {;}
+/* ARGSUSED */
+void	ortho(left, right, bot, top, near, far)
+		Coord left, right, bot, top, near, far; {;}
+/* ARGSUSED */
+void	ortho2(left, right, bot, top)
+		Coord left, right, bot, top; {;}
+/* ARGSUSED */
+void	polarview(dist, azim, inc, twist)
+		Coord dist; Angle azim, inc, twist; {;}
+/* ARGSUSED */
+void	lookat(vx, vy, vz, px, py, pz, twist)
+		Coord vx, vy, vz, px, py, pz; Angle twist; {;}
+/* ARGSUSED */
+void	translate(x, y, z)
+		Coord x, y, z; {;}
+/* ARGSUSED */
+void	rotate(a, axis)
+		Angle a; char axis; {;}
+/* ARGSUSED */
+void	scale(x, y, z)
+		float x, y, z; {;}
+/* ARGSUSED */
+void	loadmatrix(m)
+		Matrix m; {;}
+/* ARGSUSED */
+void	getmatrix(m)
+		Matrix m; {;}
+/* ARGSUSED */
+void	multmatrix(m)
+		Matrix m; {;}
+/* ARGSUSED */
+void	pnt(x, y, z)
+		Coord x, y, z; {;}
+/* ARGSUSED */
+void	pnti(x, y, z)
+		Icoord x, y, z; {;}
+/* ARGSUSED */
+void	pnt2(x, y)
+		Coord x, y; {;}
+/* ARGSUSED */
+void	pnt2i(x, y)
+		Icoord x, y; {;}
+/* ARGSUSED */
+void	move(x, y, z)
+		Coord x, y, z; {;}
+/* ARGSUSED */
+void	movei(x, y, z)
+		Icoord x, y, z; {;}
+/* ARGSUSED */
+void	move2(x, y)
+		Coord x, y; {;}
+/* ARGSUSED */
+void	move2i(x, y)
+		Icoord x, y; {;}
+/* ARGSUSED */
+void	draw(x, y, z)
+		Coord x, y, z; {;}
+/* ARGSUSED */
+void	drawi(x, y, z)
+		Icoord x, y, z; {;}
+/* ARGSUSED */
+void	draw2(x, y)
+		Coord x, y; {;}
+/* ARGSUSED */
+void	draw2i(x, y)
+		Icoord x, y; {;}
+/* ARGSUSED */
+void	rect(x1, y1, x2, y2)
+		Coord x1, y1, x2, y2; {;}
+/* ARGSUSED */
+void	recti(x1, y1, x2, y2)
+		Icoord x1, y1, x2, y2; {;}
+/* ARGSUSED */
+void	rectf(x1, y1, x2, y2)
+		Coord x1, y1, x2, y2; {;}
+/* ARGSUSED */
+void	rectfi(x1, y1, x2, y2)
+		Icoord x1, y1, x2, y2; {;}
+/* ARGSUSED */
+void	poly(n, parray)
+		long n; Coord parray[][3]; {;}
+/* ARGSUSED */
+void	polyi(n, parray)
+		long n; Icoord parray[][3]; {;}
+/* ARGSUSED */
+void	poly2(n, parray)
+		long n; Coord parray[][3]; {;}
+/* ARGSUSED */
+void	poly2i(n, parray)
+		long n; Icoord parray[][3]; {;}
+/* ARGSUSED */
+void	polyf(n, parray)
+		long n; Coord parray[][3]; {;}
+/* ARGSUSED */
+void	polyfi(n, parray)
+		long n; Icoord parray[][3]; {;}
+/* ARGSUSED */
+void	polyf2(n, parray)
+		long n; Coord parray[][3]; {;}
+/* ARGSUSED */
+void	polyf2i(n, parray)
+		long n; Icoord parray[][3]; {;}
+/* ARGSUSED */
+void	circ(x, y, radius)
+		Coord x, y, radius; {;}
+/* ARGSUSED */
+void	circi(x, y, radius)
+		Icoord x, y, radius; {;}
+/* ARGSUSED */
+void	circf(x, y, radius)
+		Coord x, y, radius; {;}
+/* ARGSUSED */
+void	circfi(x, y, radius)
+		Icoord x, y, radius; {;}
+/* ARGSUSED */
+void	arc(x, y, radius, startang, endang)
+		Coord x, y, radius; Angle startang, endang; {;}
+/* ARGSUSED */
+void	arci(x, y, radius, startang, endang)
+		Icoord x, y, radius; Angle startang, endang; {;}
+/* ARGSUSED */
+void	arcf(x, y, radius, startang, endang)
+		Coord x, y, radius; Angle startang, endang; {;}
+/* ARGSUSED */
+void	arcfi(x, y, radius, startang, endang)
+		Icoord x, y, radius; Angle startang, endang; {;}
+/* ARGSUSED */
+void	curve(precision, basis, geom)
+		short precision; Matrix basis; Coord geom[4][3]; {;}
+/* ARGSUSED */
+void	curveit(iterate)
+		short iterate; {;}
+/* ARGSUSED */
+void	cmov(x, y, z)
+		Coord x, y, z; {;}
+/* ARGSUSED */
+void	cmovi(x, y, z)
+		Icoord x, y, z; {;}
+/* ARGSUSED */
+void	cmov2(x, y)
+		Coord x, y; {;}
+/* ARGSUSED */
+void	cmov2i(x, y)
+		Icoord x, y; {;}
+/* ARGSUSED */
+void	charstr(str)
+		String str; {;}
+/* ARGSUSED */
+void	objstr(str)
+		String str; {;}
+short	getheight() {;}
+/* ARGSUSED */
+long	strwidth(str)
+		String str; {;}
+/* ARGSUSED */
+void	writepixels(n, colors)
+		short n; Colorindex colors[]; {;}
+/* ARGSUSED */
+void	writeRGB(n, red, green, blue)
+		short n; RGBvalue red[], green[], blue[]; {;}
+/* ARGSUSED */
+short	readpixels(n, colors)
+		short n; Colorindex colors[]; {;}
+/* ARGSUSED */
+short	readRGB(n, red, green, blue)
+		short n; RGBvalue red[], green[], blue[]; {;}
+/* ARGSUSED */
+void	makeobj(obj)
+		Object obj; {;}
+void	closeobj() {;}
+Object	genobj() {;}
+/* ARGSUSED */
+Boolean	isobj(obj)
+		Object obj; {;}
+/* ARGSUSED */
+void	callobj(obj)
+		Object obj; {;}
+/* ARGSUSED */
+void	bbox(xmin, ymin, x1, y1, z1, x2, y2, z2)
+		Screencoord xmin, ymin; Coord x1, y1, z1, x2, y2, z2; {;}
+/* ARGSUSED */
+void	bboxi(xmin, ymin, x1, y1, z1, x2, y2, z2)
+		Screencoord xmin, ymin; Icoord x1, y1, z1, x2, y2, z2; {;}
+/* ARGSUSED */
+void	bbox2(xmin, ymin, x1, y1, x2, y2)
+		Screencoord xmin, ymin; Coord x1, y1, x2, y2; {;}
+/* ARGSUSED */
+void	bbox2i(xmin, ymin, x1, y1, x2, y2)
+		Screencoord xmin, ymin; Icoord x1, y1, x2, y2; {;}
+/* ARGSUSED */
+void	delobj(obj)
+		Object obj; {;}
+/* ARGSUSED */
+void	maketag(t)
+		Tag t; {;}
+Tag	gentag() {;}
+/* ARGSUSED */
+Boolean	istag(t)
+		Tag t; {;}
+/* ARGSUSED */
+void	editobj(obj)
+		Object obj; {;}
+/* ARGSUSED */
+void	delete(t, offst, count)
+		Tag t; Offset offst; short count; {;}
+/* ARGSUSED */
+void	insert(t, offst)
+		Tag t; Offset offst; {;}
+/* ARGSUSED */
+void	replace(t, offst)
+		Tag t; Offset offst; {;}
+/* ARGSUSED */
+void	modify(obj, tag, off, arg, a, b, v)
+		Object obj; Tag tag; Offset off; short arg; float a, b; Device v; {;}
+	singlebuffer() {;}
+void	doublebuffer() {;}
+void	RGBmode() {;}
+short	getdisplaymode() {;}
+/* ARGSUSED */
+void	backbuffer(b)
+		Boolean b; {;}
+/* ARGSUSED */
+void	frontbuffer(b)
+		Boolean b; {;}
+short	getbuffer() {;}
+void	gconfig() {;}
+void	gsync() {;}
+void	swapbuffers() {;}
+/* ARGSUSED */
+void	swapinterval(i)
+		short i; {;}
+/* ARGSUSED */
+void	setplanes(p)
+		short p; {;}
+short	getplanes() {;}
+void	onemap() {;}
+void	multimap() {;}
+short	getcmmode() {;}
+/* ARGSUSED */
+void	setmap(map)
+		short map; {;}
+short	getmap() {;}
+/* ARGSUSED */
+void	mapcolor(col, red, green, blue)
+		Colorindex col; RGBvalue red, green, blue; {;}
+/* ARGSUSED */
+void	blink(rate, col, red, green, blue)
+		short rate; Colorindex col; RGBvalue red, green, blue; {;}
+/* ARGSUSED */
+void	color(col)
+		Colorindex col; {;}
+Colorindex getcolor() {;}
+/* ARGSUSED */
+void	RGBcolor(red, green, blue)
+		RGBvalue red, green, blue; {;}
+/* ARGSUSED */
+void	gRGBcolor(red, green, blue)
+		RGBvalue *red, *green, *blue; {;}
+/* ARGSUSED */
+void	writemask(wtm)
+		Colorindex wtm; {;}
+Colorindex getwritemask() {;}
+/* ARGSUSED */
+void	RGBwritemask(red, green, blue)
+		RGBvalue red, green, blue; {;}
+/* ARGSUSED */
+void	gRGBmask(red, green, blue)
+		RGBvalue *red, *green, *blue; {;}
+/* ARGSUSED */
+void	deflinestyle(n, ls)
+		short n; Linestyle ls; {;}
+/* ARGSUSED */
+void	setlinestyle(index)
+		short index; {;}
+short	getlstyle() {;}	/* BUG: this should be Linestyle, not short */
+/* ARGSUSED */
+void	lsbackup(b)
+		Boolean b; {;}
+Boolean	getlsbackup() {;}
+/* ARGSUSED */
+void	resetls(b)
+		Boolean b; {;}
+Boolean	getresetls() {;}
+/* ARGSUSED */
+void	linewidth(n)
+		short n; {;}
+short	getlwidth() {;}
+/* ARGSUSED */
+void	deftexture(n, tex)
+		short n; Texture tex; {;}
+/* ARGSUSED */
+void	settexture(index)
+		short index; {;}
+short	gettexture() {;}
+/* ARGSUSED */
+void	defcursor(n, curs)
+		short n; Cursor curs; {;}
+/* ARGSUSED */
+void	setcursor(index, col, wtm)
+		short index; Colorindex col, wtm; {;}
+/* ARGSUSED */
+void	getcursor(index, col, wtm, b)
+		short *index; Colorindex *col, *wtm; Boolean *b; {;}
+/* ARGSUSED */
+void	RGBcursor(index, r, g, b, rmask, gmask, bmask)
+		short index; RGBvalue r, g, b, rmask, gmask, bmask; {;}
+/* ARGSUSED */
+void	gRGBcursor(index, r, g, b, rmask, gmask, bmask, bo)
+		short *index; RGBvalue *r, *g, *b, *rmask, *gmask, *bmask; Boolean *bo; {;}
+void	curson() {;}
+void	cursoff() {;}
+/* ARGSUSED */
+void	defrasterfont(n, ht, nc, chars, nr, raster)
+		short n, ht, nc, nr; Fontchar chars[]; Byte raster[]; {;}
+/* ARGSUSED */
+void	defobjfont(n, nc, chars)
+		short n, nc; Object chars[]; {;}
+/* ARGSUSED */
+void	font(fntnum)
+		short fntnum; {;}
+short	getfont() {;}
+/* ARGSUSED */
+void	objfont(fntnum)
+		short fntnum; {;}
+short	getobjfont() {;}
+char	keyboard() {;}
+void	qkeyboard() {;}
+void	unqkeyboard() {;}
+/* ARGSUSED */
+void	setvaluator(v, init, min, max)
+		Device v; short init, min, max; {;}
+/* ARGSUSED */
+short	getvaluator(v)
+		Device v; {;}
+/* ARGSUSED */
+void	qvaluator(v)
+		Device v; {;}
+/* ARGSUSED */
+void	unqvaluator(v)
+		Device v; {;}
+/* ARGSUSED */
+void	noise(v, delta)
+		Device v; short delta; {;}
+/* ARGSUSED */
+void	attachcursor(vx, vy)
+		Device vx, vy; {;}
+/* ARGSUSED */
+void	setbutton(v, value)
+		Device v; Boolean value; {;}
+/* ARGSUSED */
+Boolean	getbutton(b)
+		Device b; {;}
+/* ARGSUSED */
+void	qbutton(b)
+		Device b; {;}
+/* ARGSUSED */
+void	unqbutton(b)
+		Device b; {;}
+/* ARGSUSED */
+void	tie(b, v1, v2)
+		Device b, v1, v2; {;}
+/* ARGSUSED */
+void	qenter(qtype, val)
+		Device qtype; short val; {;}
+Device	qtest() {;}
+/* ARGSUSED */
+Device	qread(data)
+		short *data; {;}
+void	qreset() {;}
+/* ARGSUSED */
+void	mapw(vobj, sx, sy, wx1, wy1, wz1, wx2, wy2, wz2)
+		Object vobj; Screencoord sx, sy; Coord *wx1, *wy1, *wz1, *wx2, *wy2, *wz2; {;}
+/* ARGSUSED */
+void	mapw2(vobj, sx, sy, wx, wy)
+		Object vobj; Screencoord sx, sy; Coord *wx, *wy; {;}
+/* ARGSUSED */
+void	pick(num)
+		long num; {;}
+/* ARGSUSED */
+void	picksize(dx, dy)
+		short dx, dy; {;}
+/* ARGSUSED */
+long	endpick(buf)
+		long buf[]; {;}
+/* ARGSUSED */
+void	select(num)
+		long num; {;}
+/* ARGSUSED */
+long	endselect(buf)
+		long buf[]; {;}
+short	gethitcode() {;}
+void	clearhitcode() {;}
+/* ARGSUSED */
+void	transform(n, pre, post)
+		long n; Coord pre[][4], post[][4]; {;}
+/* ARGSUSED */
+void	clippnt(mask, n, pre, post, i)
+		String mask; long n; Coord pre[][3], post[][4]; Boolean i[]; {;}
+/* ARGSUSED */
+long	clipline(mask, n, pre, post, i)
+		String mask; long n; Coord pre[][3], post[][4]; Boolean i[]; {;}
+/* ARGSUSED */
+long	clippoly(mask, n, pre, post)
+		String mask; long n; Coord pre[][3], post[][4]; {;}
+/* ARGSUSED */
+void	screenpnt(n, pre, post, i)
+		long n; Coord pre[][3]; Screencoord post[][3]; Boolean i[]; {;}
+/* ARGSUSED */
+void	setdepth(zmin, zmax)
+		Screencoord zmin, zmax; {;}
+/* ARGSUSED */
+void	getdepth(zmin, zmax)
+		Screencoord *zmin, *zmax; {;}
+
+void	tpon() {;}
+void	tpoff() {;}
+void	clkon() {;}
+void	clkoff() {;}
+void	ringbell() {;}
+
+/* ARGSUSED */
+void	textport(left, right, bottom, top)
+		Screencoord left, right, bottom, top; {;}
+
+/* ARGSUSED */
+void	pagecolor(pcolor)
+		Colorindex pcolor; {;}
+
+/* ARGSUSED */
+void	textcolor(tcolor)
+		Colorindex tcolor; {;}
+
+/* ARGSUSED */
+void	pagewritemask(pmask)
+		Colorindex pmask; {;}
+
+/* ARGSUSED */
+void	textwritemawk(tmask)
+		Colorindex tmask; {;}
+
+/* ARGSUSED */
+void	setbell(mode)
+		char mode; {;}
+
+/* ARGSUSED */
+void	lampon(lamps)
+		char lamps; {;}
+
+/* ARGSUSED */
+void	lampoff(lamps)
+		char lamps; {;}
+
+/* ARGSUSED */
+void	setdblights(mask)
+		long mask; {;}
+
+/* ARGSUSED */
+void	dbtext(str)
+		char *str; {;}

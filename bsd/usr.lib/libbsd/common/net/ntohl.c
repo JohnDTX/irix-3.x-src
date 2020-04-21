@@ -1,0 +1,4 @@
+ntohl(x)
+{
+	return (x);
+}

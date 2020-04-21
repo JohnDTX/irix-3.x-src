@@ -1,0 +1,98 @@
+#
+# Configuration for 30X0 system
+#
+machine		"ip2"
+cpu		"IP2"
+timezone	8 dst
+maxusers	16
+
+config		vmunix	root on dsd
+
+controller	mb0	at nexus ?
+
+pseudo-device	fpa
+
+# GL2 support
+options		"GL2"
+library		"${ROOT}/usr/lib/gl2/ucode.o"
+library		"${ROOT}/usr/lib/libkgl3.a"
+pseudo-device	gltwo
+
+# Filesystem support
+pseudo-device	efs
+pseudo-device	bfs
+
+# Psuedo TTY's
+pseudo-device	pty
+
+# devices common to 1000's, 2000's, 3000's
+
+# Dsd tape controller
+controller	qic0	at mb0 csr 0x7F00	priority 1 vector dsdintr
+
+# Dsd floppy/winchester controller
+controller	dsd0	at mb0 csr 0x7F00	priority 1 vector dsdintr
+disk		md0	at dsd0 drive 1
+disk		md1	at dsd0 drive 2
+
+# devices common to 2000's, 3000's
+
+# Interphase 2190 smd controller
+controller	iph0	at mb0 csr 0x7010	priority 5 vector ipintr
+disk		ip0	at iph0 drive 0
+disk		ip1	at iph0 drive 1
+disk		ip2	at iph0 drive 2
+disk		ip3	at iph0 drive 3
+
+# Interphase storager 2 esdi disk controller
+controller	sii0	at mb0 csr 0x7200	priority 5 vector siiintr
+disk		si0	at sii0 drive 0
+disk		si1	at sii0 drive 1
+disk		sf0	at sii0 drive 2 flags 0x01
+
+# Interphase storager 2 qic02 tape controller
+controller	siq0	at mb0 csr 0x73fc	priority 5 vector siqintr
+tape		sq0	at siq0 drive 0
+
+# Ciprico Tapemaster 1000
+controller	tmt0	at mb0 csr 0x7090	priority 5 vector tmtintr
+tape		tm0	at tmt0 drive 0
+
+# Ikon Centronix controller 10085 rev a
+#device		ik0	at mb0 csr 0x70C0	priority 5 vector ikcintr
+
+# Gpib
+#device		ib0	at mb0 csr 0x0020	priority 5 vector tlcintr
+#device		ib1	at mb0 csr 0x0100	priority 5 vector tlcintr
+
+# Pxd IBM 3270 interface card
+#device		pxd0	at mb0 csr 0x7e00	priority 5 vector pxdintr
+
+# devices common to 3000's
+
+# Adaptec M 1530 SCSI adapter
+#device		ad0	at mb0 csr 0x7080	priority 5 vector adintr
+
+# Central Data 8-channel Serial I/O
+#device		cd0	at mb0 csr 0x7070	priority 5 vector cdintr
+
+# Tcp support
+options		"INET"
+device		ex0 	at mb0 csr 0x7ffc	priority 2 vector exintr
+device		ex1 	at mb0 csr 0x7ffe	priority 2 vector exintr
+pseudo-device	tcp
+pseudo-device	ether
+pseudo-device	loop
+
+# NFS support
+pseudo-device	nfs
+
+# Debugging support
+pseudo-device	debug
+options		OS_ASSERT
+options		OS_DEBUG
+options		OS_CDEBUG
+options		OS_METER
+options		NFSDEBUG
+options		RPCDEBUG
+

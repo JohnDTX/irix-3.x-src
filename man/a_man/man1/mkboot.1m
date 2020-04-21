@@ -1,0 +1,169 @@
+'\"macro stdmacro
+.TH MKBOOT 1M
+.SH NAME
+mkboot \- make a bootable tape for system restoration
+.SH SYNOPSIS
+.B /etc/mkboot
+[
+.B \-t
+]
+[
+.B \-u
+]
+[
+.B \-s
+standalonedir
+] [
+.B \-r
+rootdev
+] [
+filesys ...
+]
+.SH DESCRIPTION
+.I mkboot
+creates a tape with the contents of the disk at the time it is invoked.
+This tape can restore a system to a functional state,
+regardless of the contents of the disk.  
+You can use this tape to recover
+from a crash, or to bring up a new disk.
+.PP
+The contents of the tape depend on the model of the machine.
+For an IRIS 2400 or 2500, the first file is a cpio-format
+archive of necessary standalone programs; the second is a ``dd''
+image (see
+.IR dd (1))
+of 
+the special boot partition;
+the third is a ``dd'' image of the root file system;
+the fourth and succeeding files are cpio-format archives of
+any user file systems specified by the 
+.I filesys
+argument.
+.PP
+For an IRIS 2400T, 2500T, 3020, or 3030,
+the first file is a cpio-format archive of
+necessary standalone programs; the second is a ``dd'' image of the
+root file system; the third and succeeding files are cpio-format archives of
+any user file systems specified by the
+.I filesys
+argument.
+.PP
+The standalone programs are normally taken from 
+.IR /stand ;
+the \f3\-s\fP option specifies an alternate directory.  The root
+file system is normally \f3md0a\fP,
+\f3ip0a\fP, or \f3si0a\fP, depending on the system
+model; the \f3\-r\fP option specifies an alternate (block) device.
+.PP
+The \f3\-t\f1 option specifies a TCP host where the tape drive resides.
+The \f3\-u\f1 option specifies a userid other than ``guest'' to be
+used when doing remote TCP commands to the host specified in
+the \f3\-t\f1 option.  The userid executing 
+.I mkboot
+must be able to ``rsh host \-l username'' in order for
+.IB mkboot \-t
+to work.
+.PP
+The remaining options are the path names of directories to be included on
+the tape; no user file systems are included by default.
+Executing
+.I mkboot
+with no options makes a bootable tape of the root file system,
+and includes the special boot partition for IRIS 2400s and 2500s only.
+.PP
+To use the tape to restore a system, boot the standalone program 
+.IR mdfex ,
+.IR ipfex ,
+or 
+.I sifex
+from the
+first file on the tape.
+For an IRIS 2400 or 2500, copy tape file 2 (file system 
+.BR g ,
+the special boot partition)
+and then tape file 3 (file system
+.BR a ,
+the root file system)
+onto the disk (see example below).
+For an IRIS 2400T, 2500T, 3020, or 3030, 
+copy tape file 2 (file system
+.BR a ,
+the root file system).
+.PP
+When the system is restored from tape,
+all previous contents on the root file
+system of the disk are lost.  Bring up the system in 
+single-user mode.  To restore user file systems, run
+.IR mkfs (1M)
+to
+create the required file systems on disk.
+Use 
+.IR mt (1)
+to rewind the tape to be copied from, and to skip forward to the third
+file (fourth file for IRIS 2400 or 2500 users).
+Read in the user file systems with
+.IR cpio (1).
+.PP
+Reboot the system from the default boot file on the disk.
+.ne 7
+.SH EXAMPLE
+.PP
+This command creates a standard ``mkboot'' tape.
+.IP
+/etc/mkboot /usr
+.PP
+The next example restores
+the special boot partition and 
+the root file system on an IRIS 2400.
+For an IRIS 2500, substitute \f3ipfex\fP for \f3mdfex\fP.
+User responses are written in \f3bold\fP.
+.IP
+.nf
+iris> \f3b mt0:mdfex <return>\fP
+mdfex 2.4> \f3t\fP
+Tape to Disk Copy
+Tape file (2)? \f3<return>\fP	
+Unit (0) = \f3<return>\fP
+File system (a)? \f3g<return>\fP	
+Type 'go<return>' to begin \f3go<return>\fP
+Started
+Copy started ...
+Tape to Disk Copy Complete
+.sp
+mdfex 2.4> \f3t\fP
+Tape to Disk Copy
+Tape file (2)? \f33<return>\fP	
+Unit (0) = \f3<return>\fP
+File system (a)? \f3<return>\fP
+Type 'go<return>' to begin \f3go<return>\fP
+Started
+Copy started ...
+Tape to Disk Copy Complete
+.sp
+mdfex 2.4> \f3q\fP
+--confirm quit with `y': \f3y\fP
+iris> \f3b\fP
+.fi
+.PP
+The next example restores the root file system on 
+an IRIS 2400T or 3020.  For an IRIS 2500T, substitute
+\f3ipfex\fP for \f3mdfex\fP.  For an IRIS 3030, substitute
+\f3sifex\fP for \f3mdfex\fP.
+.IP
+.nf
+iris> \f3b mt0:mdfex <return>\fP	
+mdfex 2.4> \f3t\fP
+Tape to Disk Copy
+Tape file (2)? \f3<return>\fP	
+Unit (0) = \f3<return>\fP
+File system (a)? \f3<return>\fP	
+Type 'go<return>' to begin \f3go<return>\fP
+Started
+Copy started ...
+Tape to Disk Copy Complete
+.sp
+mdfex 2.4> \f3q\fP
+--confirm quit with `y': \f3y\fP
+iris> \f3b\fP
+.SH SEE ALSO
+cpio(1), dd(1), mkfs(1M), mt(1).

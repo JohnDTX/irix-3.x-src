@@ -1,0 +1,125 @@
+'\"macro stdmacro
+.TH FPSIGSET 3C 
+.SH NAME
+fpsigset \- C floating point exception handling system
+.SH SYNOPSIS 
+.B #include <fperr.h>
+.PP
+.B fpsigset (handler,flag)
+.br
+.B int (\(**handler ( ));
+.br
+.B int flag;
+.SH DESCRIPTION
+.I fpsigset\^
+is used to control reporting and handling of floating point exceptions 
+from C.
+Unless the appropriate routine of 
+.I fpsigset\^
+is called at program initiation, floating point exceptions will not be
+detected, and may produce indeterminate results.  A call to 
+.I fpsigset\^
+initiates floating-point error detection and determines which types of
+errors are to be raised as exceptions and the actions to occur.
+.PP
+Once a floating-point exception is raised, the default action is 
+to print a message and abort with a core dump.  
+The call to 
+.I fpsigset\^
+allows the user to specify which combination of the message, the core dump,
+and the program abort should occur.  
+The call to 
+.I fpsigset\^
+also allows specification of a user handler function
+which is called when floating-point exception processing is initiated.
+If floating-point is being emulated by software, the result of
+the operation raising the exception may be altered by this handler
+function.
+.PP
+User-control is provided by the second parameter
+.I flag.\^
+This parameter is a combination (logical \f2or\fP) of any of the
+following values (defined in \f2fpsignal.h\fP):
+.PP
+.RS .3i
+.ta \w'IGN_ILLEGALOP\ \ \ 'u
+.nf
+NOFPE_ABORT	Continue after the exception.
+NOFPE_DUMP	Suppress the core dump when aborting.
+NOFPE_MSG	Suppress the printing of an error message.
+IGN_DIVZERO	Ignore divide-by-zero errors.
+IGN_OVERFLOW	Ignore overflow errors.
+IGN_ZEROVALS	Ignore underflow and denormalized operand errors.
+IGN_NANOP	Ignore not-a-number operand errors.
+IGN_ILLEGALOP	Ignore illegal operation errors.
+.fi
+.RE
+.PP
+Any errors which are not ignored will cause the initiation of exception 
+processing.
+.PP
+If the second argument to 
+.I fpsigset\^
+is not NULL, it will be used as the address of a handler function to 
+be called when exception processing is begun.  Information about the
+exception is communicated to the handler function through a global
+data structure
+.I _fperror.\^
+This structure \f2always\fP contains one of the exception codes listed in
+.I fperr.h\^
+(field \f2code\fP).
+If floating-point operations are being performed in software,
+this data structure also contains a floating-point 
+value (field \f2union val\fP), the precision of the
+operation (field \f2precision\fP), and a code indicating the 
+operation in progress (field \f2operation\fP).
+The \f2precision\fP field must be used to select the proper value from
+the \f2union val\fP field.
+This value will 
+be used as the result of the operation if the
+NOFPE_ABORT option has been selected. (In the case of floating-point
+compare, the value found in _fperror replaces the erroneous operand
+and the comparison is re-tried.)  The result of an operation which has
+been performed in hardware is indeterminate, and cannot be altered by
+the handler function.
+.PP
+If no user handler function is being used, the smaller include file
+.I fpsignal.h\^
+may be used in place of 
+.I fperr.h.\^
+It contains only the definitions for the bits in the \f2flag\fP parameter to 
+.I fpsigset.\^
+.br
+.ne 8v
+.SH EXAMPLES
+If it is desired to simply print a message concerning the floating-point
+error and continue, the call
+.PP
+.RS .3i
+.nf
+     fpsigset(0,NOFPE_ABORT);
+.fi
+.RE
+.PP
+would suffice.  The example
+.PP
+.RS .3i
+.nf
+     fpsigset(fpe_handle,(IGN_ZEROVALS|NOFPE_MSG));
+.fi
+.RE
+.PP
+will not flag denormalized operands or underflows as exceptions, and will
+call the function fpe_handle at the beginning of exception processing.  
+When fpe_handle finishes, the program will be aborted with a core dump without
+printing a message.
+.PP
+The error types and conditions are more completely discussed in the paper
+``IRIS Floating Point''
+in the
+\f2U\s-2NIX\s+2 Programmer's Manual, Volume IIB\fP.
+.SH SEE ALSO
+setfpe(3X)
+.br
+``IRIS Floating Point'', 
+\f2U\s-2NIX\s+2 Programmer's Manual, Volume IIB\f1.

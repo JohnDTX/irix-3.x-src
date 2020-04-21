@@ -1,0 +1,139 @@
+'\"macro stdmacro
+.TH SUPERBREAK 1D
+.SH NAME
+superbreak \-  3-D version of the game "breakout" 
+.SH SYNOPSIS
+.B /usr/people/mexdemos/superbreak [\f3h\f1] [\f3\-r\f2 bricks\f1]
+[\f3\-l \f2layers\f1] [\f3\-c \f2chances\f1] [\f3\-p \f2paddlesize\f1]
+[\f3\-b \f2ballsize\f1] [\f3\-f \f2friction\f1]
+.SH DESCRIPTION
+.PP
+Try to destroy as many bricks as possible 
+while keeping the ball 
+from reaching the bottom of the playing area.
+.SH Playing the Game
+.PP
+Control the paddle by moving the mouse.
+To release a ball, press the left mouse button.
+Once the ball is in play, keep it from reaching
+the bottom of the playing area by hitting it with the paddle.
+Use the ball and paddle to hit as many bricks as possible.
+.PP
+To display the menu of player
+options, press the right
+mouse button.  Freeze ball motion by holding
+down the middle mouse button.
+.PP
+After five balls have been lost, the game is reset and all 
+options except the number of viewing windows are returned to their
+initial values.
+.SH "COMMAND LINE OPTIONS"
+.PP
+.TP 8
+\f3h\f1
+prints a usage help statement
+.TP 8
+\f3\-r\f1
+sets the number of bricks per side.  \f2bricks\f1 is an integer value
+between 1 and 7.  The default value of \f2bricks\f1 is 5.
+.TP 8
+\f3\-l\f1
+sets the number of brick layers.  \f2layers\f1 is an integer value
+between 1 and 4.  The default value of \f2layers\f1 is 4. 
+.TP 8
+\f3\-c\f1
+sets the number of balls a player gets.  \f2chances\f1 is an integer
+value between 1 and 10.  The default value of \f2chances\f1 is 5.
+.TP 8
+\f3\-p\f1
+sets the size of the paddle.  \f2paddlesize\f1 is an integer value between 1
+and 100.  The default value for \f2paddlesize\f1 is 20.
+.TP 8
+\f3\-b\f1 
+sets the ball size.  \f2ballsize\f1 is an integer value between 1 and
+100.  The default value for \f2ballsize\f1 is 10.
+.TP 8
+\f3\-f\f1
+sets the friction of the paddle.  \f2friction\f1 can be any postive
+integer.  The default value of \f2friction\f1 is 20.
+.SH "MENU OPTIONS"
+.PP
+Press the right mouse button for the pop-up menu containing player options.
+.PP
+.I stay still
+- maintains the current viewing position, regardless of viewing
+option. 
+With this option
+the player is free to move the paddle without altering the
+current viewing position. 
+This is most helpful when using the 
+.I follow mouse
+option. 
+The
+.I stay still
+option can also be used with other viewing options to create interesting
+effects.
+.PP
+.I follow mouse
+- allows the player to circle around the playing area using
+the mouse. Moving the mouse left or right rotates the viewing angle
+to the left or right.
+Similarly, moving the mouse up or down rotates the viewing angle up or down.
+.PP
+.I follow paddle
+- displays the playing area from the paddle's
+perspective. 
+Whenever the playing field is viewed from behind the paddle, the
+paddle appears transparent. 
+.PP
+.I follow ball
+- displays the playing area from the ball's
+perspective. 
+Use this option
+in conjunction with the
+.I auto on
+option described below.
+.PP
+.I three views/one view
+- toggles between one view in one window (the
+default), and three views in three separate windows. When in
+.I three views
+mode the main window will show the
+.I follow mouse
+view, the second window will show the
+.I follow paddle
+view, and the third window will show the
+.I follow ball
+view. The player may freely switch between these three views.
+Because of the added computation involved, using the \f2three views\f1 option
+will 
+slow down the game on the screen.
+.PP
+.I auto off/auto on
+- toggles between computer controlled mode (the default),
+and player controlled mode.  In automatic mode the computer automatically
+keeps the paddle directly under the ball, 
+freeing the user to demostrate the
+various display modes, features, and views while keeping the ball in play.
+Automatic mode is almost indispensible when using the
+.I follow ball
+option.
+.PP
+.I clear bricks/opaque bricks
+- toggles between opaque bricks (the default), and transparent
+bricks. Transparent bricks allow the player to see the ball while
+it is moving behind them. 
+.PP
+.I reset
+- this option resets the game.
+.PP
+.I exit
+- this option exits the game. The player must confirm the intention
+to exit before the game is over. The game may also be left at
+any time, without confirmation, by hitting the escape key.
+.SH NOTE
+.PP
+This game will run only in the window manager.
+.SH AUTHOR
+.PP
+Eric Brechner - 07/29/86

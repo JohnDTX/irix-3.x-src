@@ -1,0 +1,158 @@
+'\"macro stdmacro
+.TH MKNOD 2 
+.SH NAME
+mknod \- make a directory, or a special or ordinary file
+.SH SYNOPSIS
+.B int mknod (path, mode, dev)
+.br
+.B char \(**path;
+.br
+.B int mode, dev;
+.SH DESCRIPTION
+.I Mknod\^
+creates a new file named by the path name pointed to by
+.IR path .
+The mode of the new file is initialized from
+.IR mode .
+Where the value of
+.I mode\^
+is interpreted as follows:
+.RS .3i
+0170000 file type; one of the following:
+.RS .3i
+0010000 fifo special
+.br
+0020000 character special
+.br
+0040000 directory
+.br
+0060000 block special
+.br
+0100000 or 0000000 ordinary file
+.RE
+0004000 set user
+.SM ID
+on execution
+.br
+0002000 set group
+.SM ID
+on execution
+.br
+0001000 save text image after execution
+.br
+0000777 access permissions; constructed from the following
+.RS .3i
+0000400 read by owner
+.br
+0000200 write by owner
+.br
+0000100 execute (search on directory) by owner
+.br
+0000070 read, write, execute (search) by group
+.br
+0000007 read, write, execute (search) by others
+.RE
+.RE
+.PP
+The file's owner
+.SM ID
+is set to the process's effective
+user
+.SM ID\*S.
+The file's group
+.SM ID
+is set to the process's effective group
+.SM ID\*S.
+.PP
+Values of
+.I mode
+other than those above are undefined
+and should not be used.
+The low-order 9 bits of
+.I mode
+are modified by
+the process's file mode creation mask:
+all bits set in the process's file mode creation mask are cleared.
+See
+.IR umask (2).
+If
+.I mode\^
+indicates a block or character special file,
+.I dev\^
+is a configuration dependent
+specification of a character or block I/O device.
+If
+.I mode\^
+does not indicate a block special or character special device,
+.I dev\^
+is ignored.
+.PP
+.I Mknod\^
+may be invoked only by the super-user for file types other than
+.SM FIFO
+special.
+.PP
+.I Mknod\^
+will fail and the new file will not be created
+if one or more of the following are true:
+.TP 15
+.SM
+\%[EPERM]
+The process's effective user
+ID
+is not super-user.
+.TP
+.SM
+\%[ENOTDIR]
+A component of the
+path prefix
+is not a directory.
+.TP
+.SM
+\%[ENOENT]
+A component of the
+path prefix
+does not exist.
+.TP
+.SM
+\%[EROFS]
+The directory in which the file is to be created
+is located on a read-only file system.
+.TP
+.SM
+\%[EEXIST]
+The named file exists.
+.TP
+.SM
+\%[EFAULT]
+.I Path\^
+points outside the process's allocated address space.
+.TP
+.SM
+\%[EINVAL]
+If you create files of the type
+fifo special,
+character special,
+or
+block special
+on an NFS-mounted file system.
+.SH "RETURN VALUE"
+Upon successful completion a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+mkdir(1), chmod(2), exec(2), umask(2), fs(4).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#14,D0
+.B movl	path,A0
+.B movl	mode,D1
+.B movl	dev,A1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)mknod.2	5.1 of 10/19/83

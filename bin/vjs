@@ -1,0 +1,1208 @@
+static	char	*Sccsid = "@(#)$Header: /d2/3.7/src/bin/RCS/vjs,v 1.1 89/03/27 14:51:29 root Exp $";
+/*
+ * $Log:	vjs,v $
+# Revision 1.1  89/03/27  14:51:29  root
+# Initial check-in for 3.7
+# 
+ * Revision 1.19  87/03/25  11:19:34  brendan
+ * got rid of -nfs nonsense ...
+ * 
+ * Revision 1.18  87/03/16  13:03:01  vjs
+ * make -local work with dangling symbolic links
+ * 
+ * Revision 1.15  86/11/20  20:47:32  paulm
+ * A more complete fix to the problem with "{}" substitutions
+ * in -exec and -ok that was partially fixed in 1.12.
+ *
+ * Revision 1.14  86/08/26  22:08:51  paulm
+ * Back out the clstat change from rev 1.13
+ *
+ * Revision 1.13  86/08/26  21:56:42  root
+ * Replace clstat with lstat.
+ * Change name of ctime() to avoid conflict with libc.
+ *
+ * Revision 1.12  86/07/23  18:16:39  paulm
+ * 1) Use opendir/readdir instead of reading directories as files.
+ * 2) Fix bug in handling -exec "{}" substitution and enable
+ *    garbage collection (the "{}" bug was the one causing the
+ *    core dump).
+ *
+ * Revision 1.1  86/06/17  12:41:42  paulm
+ * Initial revision
+ *
+ * Revision 1.1  86/06/17  12:40:53  paulm
+ * Initial revision
+ *
+ * Revision 1.11  86/02/05  11:15:38  lindy
+ * fixes so that "find . -name "?" -print" does not print the "." name.
+ * SCR 1244.
+ *
+ * Revision 1.10  85/06/20  17:20:11  bob
+ * Donovan fixed so that ``chdir("..")'' works with symbolic links.
+ *
+ * Revision 1.8  85/06/04  17:43:58  bob
+ * Installed Donovan's symlink code.
+ *
+ * Revision 1.6  85/04/30  13:25:19  bob
+ * Added symbolic links:
+ *   1. Uses clstat() for checking target files (but not for -newer).
+ *   2. "-type l" works.
+ *
+ * Revision 1.5  85/01/30  02:40:00  bob
+ * Fixed so that "-size"'s arg doesn't need a [kc] suffix.
+ *
+ * Revision 1.4  85/01/29  17:36:23  bob
+ * Fixed bug that prevented -newer (and -cnewer and -anewer) from working at
+ * all.
+ *
+ */
+/*	find	COMPILE:	cc -O find.c -s -i -o find clstat.o	*/
+
+#include	<stdio.h>
+#include	<pwd.h>
+#include	<grp.h>
+
+#define	UID	1
+#define	GID	2
+
+#ifdef RT
+#include "rt/types.h"
+#include "rt/dir.h"
+#include "rt/stat.h"
+#else
+#include "sys/types.h"
+#include "dirent.h"
+#include "sys/stat.h"
+#include "ctype.h"
+#endif
+#include <errno.h>
+#define PATHLEN	1024
+#define A_DAY	86400L /* a day full of seconds */
+#define EQ(x, y)	(strcmp(x, y)==0)
+#define BUFSIZE	512	/* In u370 I can't use BUFSIZ nor BSIZE */
+#define CPIOBSZ	4096
+#define Bufsize	5120
+#define	Enull	((struct elefant *)0)
+
+int c_undescend();
+# ifdef S_IFLNK
+extern int clstat();
+int	followf = 0;
+# define c_stat(f,p)	(!followf?lstat(f,p):stat(f,p))
+# define c_open(f,m)	(A_link?sl_open(f,m):open(f,m))
+# define c_close(i)	(A_link?sl_close(i):close(i))
+# define c_read(i,t,n)	(A_link?sl_read(i,t,n):read(i,t,n))
+# define undescend(x)	(!followf?chdir(".."):-1)
+# else  S_IFLNK
+# define c_stat(f,p)	stat(f,p)
+# define c_open(f,m)	open(f,m)
+# define c_close(f)	close(f)
+# define c_read(f,t,n)	read(f,t,n)
+# define undescend(x)	chdir("..")
+# endif S_IFLNK
+
+
+int	Randlast;
+char	Pathname[PATHLEN];
+
+struct anode {
+	int (*F)();
+	struct anode *L, *R;
+} Node[100];
+int Nn;  /* number of nodes */
+char	*Fname;
+long	Now;
+int	Argc,
+	Ai,
+	Pi;
+char	**Argv;
+/* cpio stuff */
+int	Cpio;
+short	*SBuf, *Dbuf, *Wp;
+char	*Buf, *Cbuf, *Cp;
+char	Strhdr[500],
+	*Chdr = Strhdr;
+int	Wct = Bufsize / 2, Cct = Bufsize;
+int	Cflag;
+int	depthf = 0;
+
+long	Newer = -1;
+long	cNewer = -1;
+long	aNewer = -1;
+
+struct stat Statb;
+
+struct	anode	*exp(),
+		*e1(),
+		*e2(),
+		*e3(),
+		*mk();
+char	*nxtarg();
+char	Home[128];
+/* Distributed UNIX options:  mount and local				   */
+/*									   */
+/* mount--When mount is specified the search is restricted to the file	   */
+/* system containing the directory specified or, in the case no		   */
+/* directory is specified, the current directory.  This is intended	   */
+/* for use by the administrator when backing up file systems.		   */
+/*									   */
+/* local--returns true if the file physically resides on the local machine.*/
+/*									   */
+/* When find is not used with distributed UNIX				   */
+/* mount--works no different.						   */
+/*									   */
+/* local--always return true.						   */
+#include <sys/fsid.h>
+#include <sys/fstyp.h>
+#include <sys/statfs.h>
+char	local;
+struct statfs Statfsb;
+char	mount_flag;
+int	cur_dev;
+
+long	Blocks;
+char *strrchr();
+char *malloc();
+char *getenv();
+void free();
+	struct header {
+		short	h_magic,
+			h_dev;
+		ushort	h_ino,
+			h_mode,
+			h_uid,
+			h_gid;
+		short	h_nlink,
+			h_rdev,
+			h_mtime[2],
+			h_namesize,
+			h_filesize[2];
+		char	h_name[256];
+	} hdr;
+#ifdef RT
+short	Extend;
+#endif
+
+struct elefant {
+	char	*data;
+	struct	elefant	*next;
+};
+struct	elefant	*head	= Enull;
+
+char	*Shell;
+extern	int	errno;
+
+main(argc, argv)
+char *argv[];
+{
+	struct anode *exlist;
+	int paths;
+	register char *cp, *sp = 0;
+	FILE *pwd, *popen();
+
+	time(&Now);
+	pwd = popen("pwd", "r");
+	fgets(Home, 128, pwd);
+	if(pclose(pwd) & 0377) {
+		fprintf(stderr,"Cannot execute `pwd'\n");
+		exit(2);
+	}
+
+	Home[strlen(Home) - 1] = '\0';
+	Shell = getenv("SHELL");
+	if (!Shell || !*Shell)
+		Shell = "/bin/sh";
+	Argc = argc; Argv = argv;
+	if(argc<3) {
+usage:		fprintf(stderr,"Usage: find path-list predicate-list\n");
+		exit(1);
+	}
+	for(Ai = paths = 1; Ai < (argc-1); ++Ai, ++paths)
+		if(*Argv[Ai] == '-' || EQ(Argv[Ai], "(") || EQ(Argv[Ai], "!"))
+			break;
+	if(paths == 1) /* no path-list */
+		goto usage;
+	if(!(exlist = exp())) { /* parse and compile the arguments */
+		fprintf(stderr,"find: parsing error\n");
+		exit(1);
+	}
+	if(Ai<argc) {
+		fprintf(stderr,"find: missing conjunction\n");
+		exit(1);
+	}
+	for(Pi = 1; Pi < paths; ++Pi) {
+		sp = "\0";
+		strcpy(Pathname, Argv[Pi]);
+# ifndef S_IFLNK
+		if(*Pathname != '/')
+# endif  S_IFLNK
+			chdir(Home);
+		if(cp = strrchr(Pathname, '/')) {
+			sp = cp + 1;
+			*cp = '\0';
+			if(chdir(*Pathname? Pathname: "/") == -1) {
+				fprintf(stderr,"find: bad starting directory\n");
+				exit(2);
+			}
+			*cp = '/';
+		}
+		Fname = *sp? sp: Pathname;
+		if(mount_flag)
+			if (stat(Pathname, &Statb) <0) {
+				fprintf(stderr,"find: cannot stat %s\n", Pathname);
+				exit(2);
+			} else
+				cur_dev = Statb.st_dev;
+		descend(Pathname, Fname, exlist); /* to find files that match  */
+	}
+	if(Cpio) {
+		strcpy(Pathname, "TRAILER!!!");
+		Statb.st_size = 0;
+		cpio();
+	}
+	exit(0);
+}
+
+/* compile time functions:  priority is  exp()<e1()<e2()<e3()  */
+
+struct anode *exp() { /* parse ALTERNATION (-o)  */
+	int or();
+	register struct anode * p1;
+
+	p1 = e1() /* get left operand */ ;
+	if(EQ(nxtarg(), "-o")) {
+		Randlast--;
+		return(mk(or, p1, exp()));
+	}
+	else if(Ai <= Argc) --Ai;
+	return(p1);
+}
+struct anode *e1() { /* parse CONCATENATION (formerly -a) */
+	int and();
+	register struct anode * p1;
+	register char *a;
+
+	p1 = e2();
+	a = nxtarg();
+	if(EQ(a, "-a")) {
+And:
+		Randlast--;
+		return(mk(and, p1, e1()));
+	} else if(EQ(a, "(") || EQ(a, "!") || (*a=='-' && !EQ(a, "-o"))) {
+		--Ai;
+		goto And;
+	} else if(Ai <= Argc) --Ai;
+	return(p1);
+}
+struct anode *e2() { /* parse NOT (!) */
+	int not();
+
+	if(Randlast) {
+		fprintf(stderr,"find: operand follows operand\n");
+		exit(1);
+	}
+	Randlast++;
+	if(EQ(nxtarg(), "!"))
+		return(mk(not, e3(), (struct anode *)0));
+	else if(Ai <= Argc) --Ai;
+	return(e3());
+}
+struct anode *e3() { /* parse parens and predicates */
+	int exeq(), ok(), glob(),  mtime(), atime(), _ctime(), user(),
+		group(), size(), csize(), ksize(), perm(), links(), print(),
+		type(), ino(), depth(), cpio(), newer(), cnewer(), anewer(),
+		localf(), mountf();
+# ifdef S_IFLNK
+	int follow();
+# endif S_IFLNK
+	struct anode *p1;
+	struct anode *mkret;
+	int i;
+	register char *a, *b, s;
+
+	a = nxtarg();
+	if(EQ(a, "(")) {
+		Randlast--;
+		p1 = exp();
+		a = nxtarg();
+		if(!EQ(a, ")")) goto err;
+		return(p1);
+	}
+	else if(EQ(a, "-print")) {
+		return(mk(print, (struct anode *)0, (struct anode *)0));
+	}
+	else if(EQ(a, "-depth")) {
+		depthf = 1;
+		return(mk(depth, (struct anode *)0, (struct anode *)0));
+	}
+# ifdef S_IFLNK
+	else if(EQ(a, "-follow")) {
+		followf = 1;
+		return(mk(follow, (struct anode *)0, (struct anode *)0));
+	}
+# endif S_IFLNK
+	else if(EQ(a, "-local")) {
+		local = 1;
+		return(mk(localf, (struct anode *)0, (struct anode *)0));
+	}
+	else if(EQ(a, "-mount")) {
+		mount_flag = 1;
+		return(mk(mountf, (struct anode *)0, (struct anode *)0));
+	}
+	b = nxtarg();
+	s = *b;
+	if(s=='+') b++;
+	if(EQ(a, "-name"))
+		return(mk(glob, (struct anode *)b, (struct anode *)0));
+	else if(EQ(a, "-mtime"))
+		return(mk(mtime, (struct anode *)atoi(b), (struct anode *)s));
+	else if(EQ(a, "-atime"))
+		return(mk(atime, (struct anode *)atoi(b), (struct anode *)s));
+	else if(EQ(a, "-ctime"))
+		return(mk(_ctime, (struct anode *)atoi(b), (struct anode *)s));
+	else if(EQ(a, "-user")) {
+		if((i=getunum(UID, b)) == -1) {
+			if(gmatch(b, "[0-9][0-9][0-9]*")
+			|| gmatch(b, "[0-9][0-9]")
+			|| gmatch(b, "[0-9]"))
+				return mk(user, (struct anode *)atoi(b), (struct anode *)s);
+			fprintf(stderr,"find: cannot find -user name\n");
+			exit(1);
+		}
+		return(mk(user, (struct anode *)i, (struct anode *)s));
+	}
+	else if(EQ(a, "-inum"))
+		return(mk(ino, (struct anode *)atoi(b), (struct anode *)s));
+	else if(EQ(a, "-group")) {
+		if((i=getunum(GID, b)) == -1) {
+			if(gmatch(b, "[0-9][0-9][0-9]*")
+			|| gmatch(b, "[0-9][0-9]")
+			|| gmatch(b, "[0-9]"))
+				return mk(group, (struct anode *)atoi(b), (struct anode *)s);
+			fprintf(stderr,"find: cannot find -group name\n");
+			exit(1);
+		}
+		return(mk(group, (struct anode *)i, (struct anode *)s));
+	} else if(EQ(a, "-size")) {
+		mkret = mk(size, (struct anode *)atoi(b), (struct anode *)s);
+		if(*b == '+' || *b == '-')b++;
+		while(isdigit(*b))b++;
+		if(*b == 'c') Node[Nn-1].F = csize;
+		else if(*b == 'k') Node[Nn-1].F = ksize;
+		else if(*b == '\0') Node[Nn-1].F = size;
+		else {
+			fprintf(stderr,"find: illegal size specification\n");
+			exit(1);
+		}
+		return(mkret);
+	} else if(EQ(a, "-links"))
+		return(mk(links, (struct anode *)atoi(b), (struct anode *)s));
+	else if(EQ(a, "-perm")) {
+		for(i=0; *b ; ++b) {
+			if(*b=='-') continue;
+			i <<= 3;
+			i = i + (*b - '0');
+		}
+		return(mk(perm, (struct anode *)i, (struct anode *)s));
+	}
+	else if(EQ(a, "-type")) {
+		i = s=='d' ? S_IFDIR :
+		    s=='b' ? S_IFBLK :
+		    s=='c' ? S_IFCHR :
+		    s=='p' ? S_IFIFO :
+		    s=='f' ? S_IFREG :
+#ifdef	S_IFLNK
+		    s=='l' ? S_IFLNK :
+#endif	S_IFLNK
+#ifdef RT
+		    s=='r' ? S_IFREC :
+		    s=='m' ? S_IFEXT :
+		    s=='1' ? S_IF1EXT:
+#endif
+		    0;
+		return(mk(type, (struct anode *)i, (struct anode *)0));
+	}
+	else if (EQ(a, "-exec")) {
+		i = Ai - 1;
+		while(!EQ(nxtarg(), ";"));
+		return(mk(exeq, (struct anode *)i, (struct anode *)0));
+	}
+	else if (EQ(a, "-ok")) {
+		i = Ai - 1;
+		while(!EQ(nxtarg(), ";"));
+		return(mk(ok, (struct anode *)i, (struct anode *)0));
+	}
+	else if(EQ(a, "-cpio")) {
+		if((Cpio = creat(b, 0666)) < 0) {
+			fprintf(stderr,"find: cannot create %s\n", b);
+			exit(1);
+		}
+		SBuf = (short *)malloc(CPIOBSZ);
+		Wp = Dbuf = (short *)malloc(Bufsize);
+#ifdef RT
+		setio(-1,1);	/* turn on physio */
+#endif
+		depthf = 1;
+		return(mk(cpio, (struct anode *)0, (struct anode *)0));
+	}
+	else if(EQ(a, "-ncpio")) {
+		if((Cpio = creat(b, 0666)) < 0) {
+			fprintf(stderr,"find: cannot create %s\n", b);
+			exit(1);
+		}
+		Buf = (char*)malloc(CPIOBSZ);
+		Cp = Cbuf = (char *)malloc(Bufsize);
+#ifdef RT
+		setio(-1,1);	/* turn on physio */
+#endif
+		Cflag++;
+		depthf = 1;
+		return(mk(cpio, (struct anode *)0, (struct anode *)0));
+	}
+	else if(EQ(a, "-newer")) {
+		if(stat(b, &Statb) < 0) {
+			fprintf(stderr,"find: cannot access %s\n", b);
+			exit(1);
+		}
+		if (Newer != -1) {
+			fprintf(stderr,"find: -newer used more than once\n");
+			exit(1);
+		}
+		Newer = Statb.st_mtime;
+		return mk(newer, (struct anode *)0, (struct anode *)0);
+	}
+	else if(EQ(a, "-cnewer")) {
+		if(stat(b, &Statb) < 0) {
+			fprintf(stderr,"find: cannot access %s\n", b);
+			exit(1);
+		}
+		if (cNewer != -1) {
+			fprintf(stderr,"find: -cnewer used more than once\n");
+			exit(1);
+		}
+		cNewer = Statb.st_ctime;
+		return mk(cnewer, (struct anode *)0, (struct anode *)0);
+	}
+	else if(EQ(a, "-anewer")) {
+		if(stat(b, &Statb) < 0) {
+			fprintf(stderr,"find: cannot access %s\n", b);
+			exit(1);
+		}
+		if (aNewer != -1) {
+			fprintf(stderr,"find: -anewer used more than once\n");
+			exit(1);
+		}
+		aNewer = Statb.st_atime;
+		return mk(anewer, (struct anode *)0, (struct anode *)0);
+	}
+err:	fprintf(stderr,"find: bad option %s\n", a);
+	exit(1);
+}
+struct anode *mk(f, l, r)
+int (*f)();
+struct anode *l, *r;
+{
+	Node[Nn].F = f;
+	Node[Nn].L = l;
+	Node[Nn].R = r;
+	return(&(Node[Nn++]));
+}
+
+char *nxtarg() { /* get next arg from command line */
+	static strikes = 0;
+
+	if(strikes==3) {
+		fprintf(stderr,"find: incomplete statement\n");
+		exit(1);
+	}
+	if(Ai>=Argc) {
+		strikes++;
+		Ai = Argc + 1;
+		return("");
+	}
+	return(Argv[Ai++]);
+}
+
+/* execution time functions */
+and(p)
+register struct anode *p;
+{
+	return(((*p->L->F)(p->L)) && ((*p->R->F)(p->R))?1:0);
+}
+or(p)
+register struct anode *p;
+{
+	 return(((*p->L->F)(p->L)) || ((*p->R->F)(p->R))?1:0);
+}
+not(p)
+register struct anode *p;
+{
+	return( !((*p->L->F)(p->L)));
+}
+glob(p)
+register struct { int f; char *pat; } *p;
+{
+	/*
+	** additional code so that the following command will not print a '.':
+	**	find . -name "?" -print
+	*/
+	if ( Fname[ 0 ] == '.' && p->pat[ 0 ] != '.' )
+		return ( 0 );
+	return(gmatch(Fname, p->pat));
+}
+print()
+{
+	puts(Pathname);
+	return(1);
+}
+
+localf()
+{
+	static short nfs_fstyp = 0;
+
+	if (Statb.st_dev == cur_dev || (Statb.st_mode&S_IFMT) != S_IFDIR)
+		return 1;
+	if (nfs_fstyp <= 0)
+		nfs_fstyp = sysfs(GETFSIND, NFS);
+	return (Statfsb.f_fstyp != nfs_fstyp);
+}
+
+mountf()
+{
+	return (Statb.st_dev == cur_dev);
+}
+mtime(p)
+register struct { int f, t, s; } *p;
+{
+	return(scomp((int)((Now - Statb.st_mtime) / A_DAY), p->t, p->s));
+}
+atime(p)
+register struct { int f, t, s; } *p;
+{
+	return(scomp((int)((Now - Statb.st_atime) / A_DAY), p->t, p->s));
+}
+_ctime(p)	/* ctime conflicts with ctime(3) in libc */
+register struct { int f, t, s; } *p;
+{
+	return(scomp((int)((Now - Statb.st_ctime) / A_DAY), p->t, p->s));
+}
+user(p)
+register struct { int f, u, s; } *p;
+{
+	return(scomp(Statb.st_uid, p->u, p->s));
+}
+ino(p)
+register struct { int f, u, s; } *p;
+{
+	return(scomp((int)Statb.st_ino, p->u, p->s));
+}
+group(p)
+register struct { int f, u; } *p;
+{
+	return(p->u == Statb.st_gid);
+}
+links(p)
+register struct { int f, link, s; } *p;
+{
+	return(scomp(Statb.st_nlink, p->link, p->s));
+}
+size(p)
+register struct { int f, sz, s; } *p;
+{
+	return(scomp((int)((Statb.st_size+(512 - 1))/512), p->sz, p->s));
+}
+csize(p)
+register struct { int f, sz, s; } *p;
+{
+	return(scomp((int)Statb.st_size, p->sz, p->s));
+}
+ksize(p)
+register struct { int f, sz, s; } *p;
+{
+	return(scomp((int)((Statb.st_size+(1024 - 1))/1024), p->sz, p->s));
+}
+perm(p)
+register struct { int f, per, s; } *p;
+{
+	register i;
+	i = (p->s=='-') ? p->per : 07777; /* '-' means only arg bits */
+	return((Statb.st_mode & i & 07777) == p->per);
+}
+type(p)
+register struct { int f, per, s; } *p;
+{
+	return((Statb.st_mode&S_IFMT)==p->per);
+}
+exeq(p)
+register struct { int f, com; } *p;
+{
+	fflush(stdout); /* to flush possible `-print' */
+	return(doex(p->com));
+}
+ok(p)
+struct { int f, com; } *p;
+{
+	int c, yes=0;
+
+	fflush(stdout); /* to flush possible `-print' */
+	fprintf(stderr,"< %s ... %s >?   ", Argv[p->com], Pathname);
+	fflush(stderr);
+	if((c=getchar())=='y') yes = 1;
+	while(c!='\n')
+		if(c==EOF)
+			exit(2);
+		else
+			c = getchar();
+	return(yes? doex(p->com): 0);
+}
+
+#define MKSHORT(v, lv) {U.l=1L;if(U.c[0]) U.l=lv, v[0]=U.s[1], v[1]=U.s[0]; else U.l=lv, v[0]=U.s[0], v[1]=U.s[1];}
+union { long l; short s[2]; char c[4]; } U;
+long mklong(v)
+short v[];
+{
+	U.l = 1;
+	if(U.c[0] /* VAX */)
+		U.s[0] = v[1], U.s[1] = v[0];
+	else
+		U.s[0] = v[0], U.s[1] = v[1];
+	return U.l;
+}
+
+depth()
+{
+	return(1);
+}
+
+# ifdef S_IFLNK
+follow()
+{
+	return(1);
+}
+# endif S_IFLNK
+
+cpio()
+{
+#define MAGIC 070707
+#define HDRSIZE	(sizeof hdr - 256)
+#define CHARS	76
+	register ifile, ct;
+	static long fsz;
+	register i;
+	char A_link;
+
+	strcpy(hdr.h_name, !strncmp(Pathname, "./", 2)? Pathname+2: Pathname);
+	hdr.h_magic = MAGIC;
+	hdr.h_namesize = strlen(hdr.h_name) + 1;
+	hdr.h_uid = Statb.st_uid;
+	hdr.h_gid = Statb.st_gid;
+	hdr.h_dev = Statb.st_dev;
+	hdr.h_ino = Statb.st_ino;
+	hdr.h_mode = Statb.st_mode;
+	hdr.h_nlink = Statb.st_nlink;
+	hdr.h_rdev = Statb.st_rdev;
+	MKSHORT(hdr.h_mtime, Statb.st_mtime);
+	fsz = (hdr.h_mode & S_IFMT) == S_IFREG? Statb.st_size: 0L;
+#ifdef RT
+	if ((hdr.h_mode & S_IFMT) == S_IFEXT
+		|| (hdr.h_mode & S_IFMT) == S_IF1EXT) {
+		Extend = 1;
+		fsz = Statb.st_size;
+	} else Extend = 0;
+#endif
+# ifdef S_IFLNK
+	if (A_link = (hdr.h_mode & S_IFMT) == S_IFLNK)
+		fsz = Statb.st_size;
+# endif S_IFLNK
+	MKSHORT(hdr.h_filesize, fsz);
+
+	if (Cflag)
+		bintochar(fsz);
+
+	if(EQ(hdr.h_name, "TRAILER!!!")) {
+		Cflag? writehdr(Chdr, CHARS + hdr.h_namesize):
+			bwrite((short *)&hdr, HDRSIZE + hdr.h_namesize);
+		for (i = 0; i < 10; ++i)
+			Cflag? writehdr(Buf, BUFSIZE): bwrite(SBuf, BUFSIZE);
+		return;
+	}
+	if(!mklong(hdr.h_filesize)) {
+		Cflag? writehdr(Chdr, CHARS + hdr.h_namesize):
+			bwrite((short *)&hdr, HDRSIZE + hdr.h_namesize);
+#ifdef RT
+		if (Extend)
+			Cflag? writehdr(Chdr, CHARS + hdr.h_namesize):
+				bwrite((short *)&hdr, HDRSIZE + hdr.h_namesize);
+#endif
+		return;
+	}
+	if((ifile = c_open(Fname, 0)) < 0) {
+cerror:
+		fprintf(stderr,"find: cannot copy %s\n", hdr.h_name);
+		return;
+	}
+	Cflag? writehdr(Chdr, CHARS + hdr.h_namesize):
+		bwrite((short *)&hdr, HDRSIZE+hdr.h_namesize);
+#ifdef RT
+	if (Extend)
+		Cflag? writehdr(Chdr, CHARS + hdr.h_namesize):
+			bwrite((short *)&hdr, HDRSIZE + hdr.h_namesize);
+#endif
+	for(fsz = mklong(hdr.h_filesize); fsz > 0; fsz -= CPIOBSZ) {
+		ct = fsz>CPIOBSZ? CPIOBSZ: fsz;
+		if(c_read(ifile, Cflag? Buf: (char *)SBuf, ct) < 0)  {
+			fprintf(stderr,"Cannot read %s\n", hdr.h_name);
+			continue;
+		}
+		Cflag? writehdr(Buf, ct): bwrite(SBuf, ct);
+	}
+	c_close(ifile);
+	return 1;
+}
+
+bintochar(t)
+long t;
+{
+#ifdef u370
+	sprintf(Chdr,"%06ho%06ho%06ho%06ho%06ho%06ho%06ho%06ho%011lo%06ho%011lo%s",
+#else
+	sprintf(Chdr, "%.6ho%.6ho%.6ho%.6ho%.6ho%.6ho%.6ho%.6ho%.11lo%.6ho%.11lo%s",
+#endif
+		MAGIC,Statb.st_dev,Statb.st_ino,Statb.st_mode,Statb.st_uid,
+		Statb.st_gid,Statb.st_nlink,Statb.st_rdev & 00000177777,
+		Statb.st_mtime,(short)strlen(hdr.h_name)+1,t,hdr.h_name);
+}
+
+newer()
+{
+	return Statb.st_mtime > Newer;
+}
+
+cnewer()
+{
+	return Statb.st_ctime > cNewer;
+}
+
+anewer()
+{
+	return Statb.st_atime > aNewer;
+}
+
+/* support functions */
+scomp(a, b, s) /* funny signed compare */
+register a, b;
+register char s;
+{
+	if(s == '+')
+		return(a > b);
+	if(s == '-')
+		return(a < -(b));
+	return(a == b);
+}
+
+char *
+myalloc(bytes)
+int	size;
+{
+	struct	elefant	*air;
+
+	air = (struct elefant *)malloc(sizeof (struct elefant));
+	if (air == Enull)
+		return NULL;
+	air->data = malloc(bytes);
+	if (air->data == NULL) {
+		free(air);
+		return NULL;
+	}
+	air->next = head;
+	head = air;
+	return air->data;
+}
+
+garbage_collect()
+{
+	struct	elefant	*air;
+
+	while (head != Enull) {
+		air = head;
+		head = air->next;
+		free(air->data);
+		free(air);
+	}
+}
+
+doex(com)
+{
+	register np;
+	register char *na;
+	char *p;
+	char *q;
+	char **d;
+	static char *nargv[50];
+	static ccode;
+	static pid;
+	int	brains;
+
+	ccode = np = 0;
+	while (na=Argv[com++]) {
+		if(strcmp(na, ";")==0) break;
+		if(strcmp(na, "\\;")==0) nargv[np++] = ";";
+		else if(strcmp(na, "{}")==0) nargv[np++] = Pathname;
+		else {
+			p = na;
+			while (*p)
+				if (*p == '{' && p[1] == '}') {
+					q = myalloc(strlen(na)
+					  + strlen(Pathname) + 1);
+					if (q == NULL) {
+						garbage_collect();
+						return(9);
+					}
+					strncpy(q, na, p-na);
+					strcpy(q + (p-na), Pathname);
+					strcat(q, p+2);
+						/*
+						 * Adjust p to point into newly
+						 * alloced & copied string.
+						 */
+					p = q + (p - na);
+					p += strlen(Pathname);
+					na = q;
+				} else
+					p++;
+			nargv[np++] = na;
+		}
+	}
+	nargv[np] = 0;
+	brains = 0;
+	for (d=nargv; *d; d++)
+		brains += strlen(*d) + 1;
+	p = myalloc(brains);
+	if (p == NULL || np == 0) {
+		garbage_collect();
+		return(9);
+	}
+	p[0] = '\0';
+	for (d=nargv; *d; d++) {
+		strcat(p," ");
+		strcat(p,*d);
+	}
+	if(pid = fork())
+		while((brains=wait(&ccode)) != pid
+		  && (brains != -1 || errno == EINTR));
+	else { /*child*/
+		chdir(Home);
+		execlp(Shell, Shell, "-c", p+1, 0);
+		exit(1);
+	}
+	garbage_collect();
+	return(ccode ? 0:1);
+}
+
+getunum(t, s)
+int	t;
+char	*s;
+{
+	register i;
+	struct	passwd	*getpwnam(), *pw;
+	struct	group	*getgrnam(), *gr;
+
+	i = -1;
+	if( t == UID ){
+		if( ((pw = getpwnam( s )) != (struct passwd *)NULL) && pw != (struct passwd *)EOF )
+			i = pw->pw_uid;
+	} else {
+		if( ((gr = getgrnam( s )) != (struct group *)NULL) && gr != (struct group *)EOF )
+			i = gr->gr_gid;
+	}
+	return(i);
+}
+
+descend(name, fname, exlist)
+struct anode *exlist;
+char *name, *fname;
+{
+	register DIR *dirp;		/* currently open directory */
+	register struct dirent *dp;	/* current entry */
+	register char *c1, *c2;
+	register long offset;
+	register i;
+	int namelen;
+	int cdval = 0;
+	char *endofname;
+
+	if(c_stat(fname, &Statb)<0) {
+		fprintf(stderr,"find: bad status-- %s\n", name);
+		return(0);
+	}
+	if(mount_flag && (Statb.st_dev != cur_dev))
+		return(0);
+	if(local && (Statb.st_mode&S_IFMT)==S_IFDIR
+	   && Statb.st_dev != cur_dev) {
+		if(statfs(fname, &Statfsb, sizeof Statfsb, 0) < 0) {
+			fprintf(stderr,"find: bad statfs-- %s", name);
+			perror(" ");
+			return(0);
+		}
+		if(!localf())
+			return(0);
+	}
+	if(!depthf) {
+		(*exlist->F)(exlist);
+	}
+	if((Statb.st_mode&S_IFMT)!=S_IFDIR) {
+		if(depthf) {
+			(*exlist->F)(exlist);
+		}
+		return(1);
+	}
+
+	for (c1 = name; *c1; ++c1) ;
+	namelen = c1 - name;
+	while(*(c1-1) == '/')
+		--c1;
+	endofname = c1;
+	if(Statb.st_size > 32000)
+		fprintf(stderr,"Huge directory %s --call administrator\n", name);
+	dirp = NULL;
+	offset = 0;
+
+	if((cdval=chdir(fname)) == -1) {
+		fprintf(stderr,"find: cannot chdir to %s\n", name);
+	} else {
+		while (1) {	/* until entire directory processed */
+			if(dirp == NULL) {
+				/*
+				|| Directory was closed before recursive
+				|| call to 'descend'.  Reopen it.
+				*/
+				if((dirp = opendir(".")) == NULL) {
+					fprintf(stderr,"find: cannot open %s\n", name);
+					break;
+				}
+				/*
+				|| Seek to the offset of the previous
+				|| entry and read it again in order to
+				|| skip it this time (this is a difference
+				|| between the System V.3 directory primitives
+				|| and the BSD4.2 version).
+				*/
+				if(offset) {
+					seekdir(dirp, (long)offset);
+					dp = readdir(dirp);
+				}
+			}
+			if((dp = readdir(dirp)) == NULL) {
+				break;
+			}
+			if(dp->d_ino==0
+			|| (dp->d_name[0]=='.' && dp->d_name[1]=='\0')
+			|| (dp->d_name[0]=='.' && dp->d_name[1]=='.' && dp->d_name[2]=='\0'))
+				continue;
+
+			c1 = endofname;
+			*c1++ = '/';
+			if (namelen + strlen(dp->d_name) + 2 >= PATHLEN) {
+				fprintf(stderr, "Pathname too long\n");
+				exit(2);
+			}
+			strcpy(c1, dp->d_name);
+			Fname = endofname+1;
+			/*
+			|| Check if we are getting short of file
+			|| descriptors ... if so close the directory
+			|| and reopen it when we return from the recursion
+			*/
+			if(dirp->dd_fd > 10) {
+				offset = telldir(dirp);
+				closedir(dirp);
+				dirp = NULL;
+			}
+			descend(name, Fname, exlist);
+		}
+	}
+	if(dirp)
+		closedir(dirp);
+	c1 = endofname;
+	*c1 = '\0';
+	if(cdval == -1 || undescend(0) == -1) {
+		if((endofname=strrchr(Pathname,'/')) == Pathname)
+			chdir("/");
+		else {
+			if(endofname != NULL)
+				*endofname = '\0';
+			chdir(Home);
+			if(chdir(Pathname) == -1) {
+				fprintf(stderr,"find: bad directory tree\n");
+				exit(1);
+			}
+			if(endofname != NULL)
+				*endofname = '/';
+		}
+	}
+	if(depthf) {
+		if(c_stat(fname, &Statb) < 0) {
+			fprintf(stderr,"cannot stat %s\n", fname);
+		}
+		(*exlist->F)(exlist);
+	}
+/*	*c1 = '/';	*/
+	return;
+}
+
+gmatch(s, p)
+register char	*s, *p;
+{
+	register int	scc;
+	char		c;
+
+	if(scc = *s++) {
+		if((scc &= 0177) == 0) {
+			scc = 0200;
+		}
+	}
+	switch(c = *p++) {
+
+	case '[':
+		{
+			int ok;
+			int lc;
+			int notflag = 0;
+
+			ok = 0;
+			lc = 077777;
+			if( *p == '!' ) {
+				notflag = 1;
+				p++;
+			}
+			while( c = *p++ ) {
+				if(c == ']') {
+					return(ok?gmatch(s,p):0);
+				} else if (c == '-') {
+					if(notflag) {
+						if(lc > scc || scc > *(p++)) {
+							ok++;
+						} else {
+							return(0);
+						}
+					} else {
+						if( lc <= scc && scc <= (*p++)) {
+							ok++;
+						}
+					}
+				} else {
+					if(notflag) {
+						if(scc != (lc = (c&0177))) {
+							ok++;
+						} else {
+							return(0);
+						}
+					} else {
+						if(scc == (lc = (c&0177))) {
+							ok++;
+						}
+					}
+				}
+			}
+			return(0);
+		}
+	case '?':
+		return(scc?gmatch(s,p):0);
+
+	case '*':
+		if(*p == 0) {
+			return(1);
+		}
+		--s;
+		while(*s) {
+			if(gmatch(s++,p)) {
+				return(1);
+			}
+		}
+		return(0);
+
+	case 0:
+		return(scc == 0);
+
+	default:
+		if((c&0177) != scc) {
+			return(0);
+		}
+
+	}
+	return(gmatch(s,p)?1:0);
+}
+
+bwrite(rp, c)
+register short *rp;
+register c;
+{
+	register short *wp = Wp;
+
+	c = (c+1) >> 1;
+	while(c--) {
+		if(!Wct) {
+again:
+			if(write(Cpio, (char *)Dbuf, Bufsize)<0) {
+				Cpio = chgreel(1, Cpio);
+				goto again;
+			}
+			Wct = Bufsize >> 1;
+			wp = Dbuf;
+			++Blocks;
+		}
+		*wp++ = *rp++;
+		--Wct;
+	}
+	Wp = wp;
+}
+
+writehdr(rp, c)
+register char *rp;
+register c;
+{
+	register char *cp = Cp;
+
+	while (c--)  {
+		if (!Cct)  {
+again:
+			if(write(Cpio, Cbuf, Bufsize) < 0)  {
+				Cpio = chgreel(1, Cpio);
+				goto again;
+			}
+			Cct = Bufsize;
+			cp = Cbuf;
+			++Blocks;
+		}
+		*cp++ = *rp++;
+		--Cct;
+	}
+	Cp = cp;
+}
+
+chgreel(x, fl)
+{
+	register f;
+	char str[22];
+	FILE *devtty;
+	struct stat statb;
+
+	fprintf(stderr,"find: can't %s\n", (x? "write output": "read input"));
+	fstat(fl, &statb);
+	if((statb.st_mode&S_IFMT) != S_IFCHR)
+		exit(1);
+again:
+	fprintf(stderr,"If you want to go on, type device/file name when ready\n");
+	devtty = fopen("/dev/tty", "r");
+	fgets(str, 20, devtty);
+	str[strlen(str) - 1] = '\0';
+	if(!*str)
+		exit(1);
+	close(fl);
+	if((f = open(str, x? 1: 0)) < 0) {
+		fprintf(stderr,"That didn't work");
+		fclose(devtty);
+		goto again;
+	}
+	return f;
+}

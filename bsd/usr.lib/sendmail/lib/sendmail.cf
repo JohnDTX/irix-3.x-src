@@ -1,0 +1,464 @@
+#  Sendmail
+#
+#  Copyright (c) 1983 Regents of the University of California.
+#  All rights reserved.  The Berkeley software License Agreement
+#  specifies the terms and conditions for redistribution.
+#
+############################################################
+############################################################
+#####
+#####		SENDMAIL CONFIGURATION FILE
+#####
+############################################################
+############################################################
+
+# To use this file, you need to add some machine names to some 'classes.'
+#
+#   This file, as delivered, is for a small network:
+#	'olympus' is a machine that
+#		has modems,
+#		communicates both with XNS machines using UUCP 
+#		    and TCP machines using SMTP
+#	'sgi' is a machine that
+#		has modems and so can send mail over the telephone system 
+#		    with UUCP,
+#		communicates over XNS with other local machines using UUCP
+#	'notxns' is a machine that speaks only TCP and SMTP.
+#
+#   First decide with which machines you want to exchange mail.  
+#
+#   Collect the names of all machines that run 'STMP' mail.  This includes
+#   all IRIS's running TCP, as well as any VAX with the usual 4.2/4.3
+#   TCP, and many other workstations, such as those from Sun Microsystems.
+#   Add the names of these machines to the class 'S.'  You do that by
+#   replacing the lines 'CSolympus' and 'CSnotxns' with lines that looks 
+#   like 'CSmachname'.  
+#
+#   Collect the names of all machines that have modems, or are gateways to
+#   other kinds of networks, such as the ARPA net.  Replace the lines
+#   'CLsgi' and 'CLolympus' with lines that look like 'CLgatemach'.
+#
+#   Collect the names of all machines that can be reached by UUCP mail.
+#   This should consist of all 'local' machines that exchange mail using
+#   UUCP over XNS as well as those machines using UUCP over 'direct'
+#   rs-232 lines.
+#   Replace the lines 'CUolympus' 'CUsgi' and 'CUnotxns' with lines that
+#   look like 'CUuucpmach'.
+#
+
+
+
+
+
+############################################################
+###	local info
+############################################################
+
+# domain
+DDSGI
+CDSGI
+
+# official hostname
+Dj$w.$D
+
+# UUCP name
+DU$w
+
+# 4.2 and 4.3 hosts - used to select which local mailer to use...By
+# definition, we call Mlocal the name of the system V local mailer
+# and Mvaxlocal the name of the 4.2/4.3/vax mailer.
+CVolympus
+
+# Special hosts...These hosts are known to speak both SMTP and XNS
+CXolympus
+
+# forwarding host.  It must speak both SMTP & XNS, and so <<MUST>> be a member
+# of the class 'X'.  The class definition here simplifies rule 0.
+DFolympus
+CFolympus
+
+
+# Machines with local modems - **WARNING** these machines WON'T forward
+# unknown mail.
+CLolympus
+CLsgi
+
+
+# direct UUCP connections
+#	copied from the common part of L.sys
+# start of well known machines--do not remove this line
+CUolympus
+CUsgi
+# end of well known machines--do not remove this line
+#
+
+# Direct connect smtp hosts
+CSolympus
+CSnotxns
+
+# top level domains
+CTLOCAL UUCP SGI
+
+############################################################
+#
+#	General configuration information
+#
+#	This information is basically just "boiler-plate"; it must be
+#	there, but is essentially constant.
+#
+#	Information in this file should be independent of location --
+#	i.e., although there are some policy decisions made, they are
+#	not specific to Berkeley per se.
+#
+############################################################
+
+
+######################
+#   Version Number   #
+######################
+
+DZ5.6
+
+
+##########################
+###   Special macros   ###
+##########################
+
+# my name
+DnMAILER-DAEMON
+# UNIX header format
+DlFrom $g  $d
+# delimiter (operator) characters
+Do.:@!^=/[]
+# format of a total name
+Dq$g$?x ($x)$.
+# SMTP login message
+De$j Sendmail $v/$Z ready at $b
+
+
+###################
+###   Options   ###
+###################
+
+# location of alias file
+OA/usr/lib/aliases
+# wait up to x (originally ten) minutes for alias file rebuild
+Oa3
+# substitution for space (blank) characters
+OB.
+# (don't) connect to "expensive" mailers
+#Oc
+# default delivery mode (deliver in background)
+Odbackground
+#Odqueue
+# temporary file mode
+OF0600
+# default GID
+Og1
+# location of help file
+OH/usr/lib/sendmail.hf
+# log level
+OL9
+# default network name
+ONSGI
+# default messages to old style
+Oo
+# queue directory
+OQ/usr/spool/mqueue
+# read timeout -- violates protocols
+Or2h
+# status file
+OS/usr/lib/sendmail.st
+# queue up everything before starting transmission
+Os
+# default timeout interval
+OT3d
+# time zone names (V6 only)
+OtPST,PDT
+# default UID
+Ou1
+# wizard's password
+OW*
+# load average at which we just queue messages
+Ox12
+# load average at which we refuse connections
+OX19
+
+# rebuild alias file
+OD
+
+###############################
+###   Message precedences   ###
+###############################
+
+Pfirst-class=0
+Pspecial-delivery=100
+Pbulk=-60
+Pjunk=-100
+
+#########################
+###   Trusted users   ###
+#########################
+
+Troot
+Tdaemon
+Tuucp
+
+#############################
+###   Format of headers   ###
+#############################
+
+HReceived: $?sfrom $s $.by $j ($v/$Z)
+	id $i; $b
+H?P?Return-Path: <$g>
+H?D?Resent-Date: $a
+H?D?Date: $a
+H?F?Resent-From: $q
+H?F?From: $q
+H?x?Full-Name: $x
+HSubject:
+# HPosted-Date: $a
+# H?l?Received-Date: $b
+H?M?Resent-Message-Id: <$t.$i@$j>
+H?M?Message-Id: <$t.$i@$j>
+#H?R?Return-Receipt-To: $g
+
+
+###########################
+###   Rewriting rules   ###
+###########################
+
+
+################################
+#  Sender Field Pre-rewriting  #
+################################
+S1
+
+###################################
+#  Recipient Field Pre-rewriting  #
+###################################
+S2
+
+#################################
+#  Final Output Post-rewriting  #
+#################################
+S4
+
+R@			$@				handle <> error addr
+
+# externalize local domain info
+R$*<$*LOCAL>$*		$1<$2$D>$3			change local info
+R$*<$+>$*		$1$2$3				defocus
+R@$+:@$+:$+		@$1,@$2:$3			<route-addr> canonical
+
+# UUCP must always be presented in old form
+R$+@$-.$=T		$2!$1				u@h.UUCP => h!u
+
+
+
+###########################
+#  Name Canonicalization  #
+###########################
+S3
+
+# handle "from:<>" special case
+R<>			$@@				turn into magic token
+
+# basic textual canonicalization -- note RFC733 heuristic here
+R$*<$*<$*<$+>$*>$*>$*	$4				3-level <> nesting
+R$*<$*<$+>$*>$*		$3				2-level <> nesting
+R$*<$+>$*		$2				basic RFC821/822 parsing
+R$+ at $+		$1@$2				"at" -> "@" for RFC 822
+
+# make sure <@a,@b,@c:user@d> syntax is easy to parse -- undone later
+R@$+,$+			@$1:$2				change all "," to ":"
+
+# localize and dispose of route-based addresses
+R@$+:$+			$@$>6<@$1>:$2			handle <route-addr>
+
+# more miscellaneous cleanup
+R$+:$*;@$+		$@$1:$2;@$3			list syntax
+R$+:$*;			$@$1:$2;			list syntax
+R$+@$+			$:$1<@$2>			focus on domain
+R$+<$+@$+>		$1$2<@$3>			move gaze right
+R$+<@$+>		$@$>6$1<@$2>			already canonical
+
+# convert old-style addresses to a domain-based address
+R$-:$+			$@$>6$2<@$1>			host:user
+R$-.$+			$@$>6$2<@$1>			host.user
+R$+^$+			$1!$2				convert ^ to !
+R$-!$+			$@$>6$2<@$1.UUCP>		resolve uucp names
+
+
+
+############################################################
+############################################################
+#####
+#####		RULESET ZERO PREAMBLE
+#####
+#####	The beginning of ruleset zero is constant through all
+#####	configurations.
+#####
+############################################################
+############################################################
+
+S0
+
+# first make canonical
+R$*<$*>$*		$1$2$3				defocus
+R$+			$:$>3$1				make canonical
+
+# handle special cases.....
+R$+			$:$w:$1				Prepend $w:
+R$=V:@			$#vaxlocal$:$n			handle <> form (vax)
+R$=w:@			$#local$:$n			handle <> form (ws)
+R$w:$*			$:$1				strip $w: off
+
+# XXX don't support this?  Probably make somebody at NIC unhappy...
+# handle special cases.....
+#R$*<@[$+]>$*		$#tcp$@[$2]$:$1@[$2]$3		numeric internet spec
+
+# arrange for local names to be fully qualified
+R$*<$*$=S>$*		$1<$2$3.LOCAL>$4		user@etherhost
+
+# now delete the local info
+R$*<$*$=w.$=T>$*	$1<$2>$5			thishost.LOCAL
+R$*<$*$=w>$*		$1<$2>$4			thishost
+R$*<$*.>$*		$1<$2>$3			drop trailing dot
+R<@>:$*			$@$>0$1				retry after route strip
+R$*<@>			$@$>0$1				strip null trash & retry
+
+##################################
+#  End of ruleset zero preamble  #
+##################################
+
+
+###############################################
+###  Machine dependent part of rulset zero  ###
+###############################################
+
+# Try find which network this host is on
+# Insert our name in front...
+R$+			$:$w!$1				Prepend $w!
+
+# Check for connection between SMTP hosts
+R$=S!$*<@$=S.$=T>$*	$#ether$@$3$:$2<@$3.$D>$5	user@smtphost.$D
+R$=S!$*<@$=S>$*		$#ether$@$3$:$2<@$3.$D>$4	user@smtphost.$D
+
+# From SMTP host to unknown host or UUCP host--if we are not a forwarder
+# but are a SMTP host, and do not have modems, send it to the SMTP forwarder
+R$+			$:$w!$w!$1			prepend $w some more
+R$=S!$~L!$~F!$*<@$+>$*	$#ether$@$F$:$4<@$5>$6
+
+# Strip off monkey business from above...
+R$w!$w!$w!$+		$:$1				strip $w! off
+
+# If we get here, then it is because we have not resolved to a mailer.
+# We will try to send the msg off to uucp.  Rules below may try to forward
+# to $F (which is okay).  If this host is $F, then a following rule will
+# strip it off, causing uucp to try to handle the message.  If uucp doesn't
+# know about the host, then it will vomit the message back, and the user
+# will (eventually) get an error (hopefully).
+
+# Bangify the name
+R$+			$:$>5$1				convert to uucp format
+
+# See if we have local modem(s); if so, don't forward.  Just hand unknown
+# addresses to uucp to handle.  If uucp doesn't like it, it will vomit
+# it back.
+R$+			$:$w!$1				Prepend $w!
+R$w!$=S!$+		$:$w!$F!$1!$2			forward to SMTP host
+R$~L!$~U!$+		$:$w!$F!$2!$3			forward if no modems
+R$w!$F!$=X!$+		$w!$1!$2			direct to specials
+
+# Do local UUCP.  Use faster mailer, if possible.
+R$w!$=U!$+		$#near$@$1$:$2			host!user
+R$w!$-!$+		$#uucp$@$1$:$2			host!user
+
+# everything else must be a local name
+# Figure out which mailer to use; same trick as above...
+R$=V!$+			$#vaxlocal$:$2			vax local names
+R$-!$+			$#local$:$2			assume ws local names
+
+
+#####################################################
+#  General code to convert back to old style names  #
+#####################################################
+S5
+
+R$+<@$-.$=T>		$2!$1				to old format
+R$+<@$+>		$2!$1				u@h => h!u
+
+
+############################################################
+############################################################
+#####
+#####		Local and Program Mailer specification
+#####
+############################################################
+############################################################
+
+# Workstation mailer...
+Mlocal, P=/bin/mail, F=EDFMlsmhu, S=10, R=20, A=mail -s -d $u
+
+Mvaxlocal, P=/bin/mail, F=EDFMlsmrn, S=10, R=20, A=mail -d -r $g $u
+
+Mprog,	P=/bin/sh,   F=lsDFMe, S=10, R=20, A=sh -c $u
+
+S10
+R$+			$:$>7$1				strip local stuff
+
+S20
+R$+			$:$>7$1				strip local stuff
+
+# strip known stuff for the local mailers
+S7
+R@			$n				errors to daemon
+R$+<@$=w>		$1
+R$+<@$=T>		$1
+R$=w!$-			$2				strip our host name
+
+
+############################################################
+############################################################
+#####
+#####		UUCP Mailer specification
+#####
+############################################################
+############################################################
+
+
+#normal UUCP
+Muucp,	P=/usr/bin/uux, F=sDFMhuU, S=13, R=23, A=uux - $h!rmail ($u)
+
+#'nearby' UUCP, which can take >1 destination per transaction
+Mnear,	P=/usr/bin/uux, F=sDFMhuUm, S=13, R=23, A=uux - $h!rmail ($u)
+
+S13
+R$+			$:$>5$1				convert to old style
+R$=w!$+			$2				strip local name
+R$+<@$+>		$2!$1				uucpize (no @'s)
+R$+			$:$U!$1				stick on our host name
+
+S23
+R$+			$:$>5$1				convert to old style
+
+############################################################
+############################################################
+#####
+#####		Ethernet Mailer specification
+#####
+#####		@(#)etherm.m4	4.2		8/5/84
+#####
+############################################################
+############################################################
+
+Mether,	P=[IPC], F=mDFMueCX, S=11, R=21, A=IPC $h
+
+S11
+R$*<@$+>$*		$@$1<@$2>$3			already ok
+R$+			$@$1<@$w>			tack on our hostname
+R@			$n				errors to daemon
+
+S21
+R@			$n				errors to daemon

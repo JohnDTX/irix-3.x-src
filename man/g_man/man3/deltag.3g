@@ -1,0 +1,38 @@
+.TH deltag 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B deltag
+\- deletes tags from objects
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "deltag(t)"
+.B "Tag t;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine deltag(t)"
+.B "integer*4 t"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure deltag(t: Tag);"
+.SH DESCRIPTION
+.B deltag
+removes the tag 
+.I t 
+from the object currently open
+for editing.
+You cannot delete
+the special tags STARTTAG and ENDTAG.
+.SH "SEE ALSO"
+editobj,
+maketag
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

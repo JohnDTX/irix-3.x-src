@@ -1,0 +1,43 @@
+'\"macro stdmacro
+.\" Copyright (c) 1983 Regents of the University of California.
+.\" All rights reserved.  The Berkeley software License Agreement
+.\" specifies the terms and conditions for redistribution.
+.\"
+.\"	@(#)gethostid.2	6.3 (Berkeley) 11/28/85
+.\"
+.TH GETHOSTID 2
+.UC 5
+.SH NAME
+gethostid, sethostid \- get/set unique identifier of current host
+.SH SYNOPSIS
+.nf
+.ft B
+hostid = gethostid()
+long hostid;
+.PP
+.ft B
+sethostid(hostid)
+long hostid;
+.fi
+.SH DESCRIPTION
+.I Sethostid
+establishes a 32-bit identifier for the
+current processor that is intended to be unique among all
+UNIX systems in existence.  This is normally a DARPA Internet
+address for the local machine.  This call is allowed only to the
+super-user and is normally performed at boot time.
+.PP
+.I Gethostid
+returns the 32-bit identifier for the current processor.
+.SH NOTE
+The primitives documented on this manual page
+are system calls, but unlike most system calls
+they are not resolved by libc.
+To compile and link a program that makes these calls,
+follow the procedures for section (3B) routines as
+described in
+.IR intro (3).
+.SH SEE ALSO
+hostid(1), gethostname(2)
+.SH BUGS
+32 bits for the identifier is too small.

@@ -1,0 +1,43 @@
+.TH shaderange 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B shaderange
+\- sets range of color indices used in depth-cueing
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "shaderange(lowindex, highindex, z1, z2)"
+.B "Colorindex lowindex, highindex;"
+.B "Screencoord z1, z2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine shader(lowindex, highindex, z1, z2)"
+.B "integer*2 lowindex, highindex, z1, z2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure shaderange(lowindex, highindex: longint;"
+.br
+.B	z1, z2: longint);
+.SH DESCRIPTION
+.B shaderange
+sets the range of color indices used in drawing depth-cued lines and
+points.  
+The range [z1, z2] is mapped linearly into the color index range.
+z values less than
+.I z1
+map to 
+\f2highindex\fP;
+\f2z\fP values greater than
+.I z2
+map to 
+.I lowindex.
+.SH "SEE ALSO"
+depthcue
+.sp
+.I Programming Guide,
+Section 13.1, Shading

@@ -1,0 +1,35 @@
+# compiler switches
+CC	=	cc
+INCLUDE	=	-I. -I/usr/include -I$$TUTOR/src/include
+CFLAGS	=	-O -c -D$(LANGUAGE) $(ZF)
+LIBS    = 	$$TUTOR/src/lib/libtutor.a $(ZF) -Zg
+ALL	=	buffer depthcue gamma projection queue scrmask shape \
+		swap transform viewport writemask zbuffer
+DIRS	=	backface curve gouraud patch
+
+install:
+	make all
+	-ln $(ALL) $$TUTOR/online
+	for D in $(DIRS) ; do ( cd $$D ; $(MAKE) install ) done
+	@echo "make install tutors completed"
+
+all:	$(ALL)
+	for D in $(DIRS) ; do ( cd $$D ; $(MAKE) all ) done
+	@echo "make all tutors completed"
+
+$(ALL):	$$@.c 
+	$(CC) -O -D$(LANGUAGE) $(INCLUDE) $? -o $@ $(LIBS) 
+
+clean:
+	rm -f .[BC]* .em* *.o $(ALL) core
+	for D in $(DIRS) ; do ( cd $$D ; $(MAKE) clean ) done
+	@echo "make clean tutors completed"
+
+neat:
+	rm -f .[BC]* .em* *.o core
+	for D in $(DIRS) ; do ( cd $$D ; $(MAKE) neat ) done
+	@echo "make neat tutors completed"
+
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDE) $<
+

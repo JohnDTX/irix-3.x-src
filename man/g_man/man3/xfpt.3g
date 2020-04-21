@@ -1,0 +1,102 @@
+.TH xfpt 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B xfpt
+\- transforms points
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "xfpt(x, y, z)"
+.B "Coord x, y, z;"
+.IP 
+.B "xfpti(x, y, z)"
+.B "Icoord x, y, z;"
+.IP 
+.B "xfpts(x, y, z)"
+.B "Scoord x, y, z;"
+.ne 14
+.IP 
+.B "xfpt2(x, y)"
+.B "Coord x, y;"
+.IP 
+.B "xfpt2i(x, y)"
+.B "Icoord x, y;"
+.IP 
+.B "xfpt2s(x, y)"
+.B "Scoord x, y;"
+.IP
+.B "xfpt4(x, y, z, w)"
+.B "Coord x, y, z, w;"
+.IP
+.B "xfpt4i(x, y, z, w)"
+.B "Icoord x, y, z, w;"
+.IP
+.B "xfpt4s(x, y, z, w)"
+.B "Scoord x, y, z, w;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine xfpt(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine xfpti(x, y, z)"
+.B "integer*4 x, y, z"
+.IP 
+.B "subroutine xfpts(x, y, z)"
+.B "integer*2 x, y, z"
+.IP 
+.B "subroutine xfpt2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine xfpt2i(x, y)"
+.B "integer*4 x, y"
+.IP 
+.B "subroutine xfpt2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.B "subroutine xfpt4(x, y, z, w)"
+.B "real x, y, z, w"
+.IP
+.B "subroutine xfpt4i(x, y, z, w)"
+.B "integer*4 x, y, z, w"
+.IP
+.B "subroutine xfpt4s(x, y, z, w)"
+.B "integer*2 x, y, z, w"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure xfpt(x, y, z: Coord);"
+.IP 
+.B "procedure xfpti(x, y, z: Icoord);"
+.IP 
+.B "procedure xfpts(x, y, z: Scoord);"
+.IP 
+.B "procedure xfpt2(x, y: Coord);"
+.IP 
+.B "procedure xfpt2i(x, y: Icoord);"
+.IP 
+.B "procedure xfpt2s(x, y: Scoord);"
+.IP
+.B "procedure xfpt4(x, y, z, w: Coord);"
+.IP 
+.B "procedure xfpt4i(x, y, z, w: Icoord);"
+.IP
+.B "procedure xfpt4s(x, y, z, w: Scoord);"
+.SH DESCRIPTION
+.B xfpt
+multiplies the specified point (\f2x, y, z\f1)
+by the top matrix on the matrix stack
+and turns off the clippers and scalers in the Geometry Pipeline.
+In feedback mode, 
+the feedback buffer saves 
+the 4-D result of the multiplication.
+In nonfeedback mode, the routine is ignored.
+.SH SEE ALSO
+.I Programming Guide,
+Section 10.2, Feedback Mode
+.SH NOTE
+This routine
+is available only in immediate mode.

@@ -1,0 +1,20 @@
+#
+MAKEPATH=../../kgl
+
+OBJS=	bitmask.o bitpad.o change.o channel.o cursor.o devices.o \
+	dials.o dividetab.o errorhand.o fbc.o font.o ge.o gr.o \
+	grioctl.o init.o keyboard.o kfontram.o kgl.o lpen.o mouse.o \
+	printf.o queue.o retrace.o swizzletab.o textport.o
+
+TARGETS= ../libkgl${PREF}.a
+
+COPTS= -OkKS
+CINCL= -I../../include
+CDEFS= -DPM2 -DUNIX -DKERNEL
+include ${DEST}/usr/lib/make.h
+
+../libkgl${PREF}.a: ${OBJS}
+	rm -f $@
+	ar cu $@ ${OBJS}
+	strip $@
+	ranlib $@

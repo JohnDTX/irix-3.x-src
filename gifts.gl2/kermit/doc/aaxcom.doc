@@ -1,0 +1,120 @@
+              POLICY ON COMMERCIAL USE AND DISTRIBUTION OF KERMIT
+
+                                 Frank da Cruz
+
+              Columbia University Center for Computing Activities
+
+                                September, 1985
+
+
+The KERMIT file transfer protocol has always been open, available, and free to
+all.  The protocol was developed at the Columbia University Center for
+Computing Activities, as were the first several KERMIT programs.  Columbia has
+shared these programs freely with the worldwide computing community since 1981,
+and as a result many individuals and institutions have contributed their own
+improvements or new implementations in the same spirit.  In this manner, the
+number of different systems supporting KERMIT implementations has grown from
+three to over 100 in less than four years.  If Columbia had elected to keep
+the protocol secret, to restrict access to source code, or to license the
+software, the protocol would never have spread to cover so many systems, nor
+would the programs be in use at so many sites, nor would the quality of many of
+the implemementations be so high.
+
+Although KERMIT is free and available to anyone who requests it, it is not in
+the "public domain".  The protocol, the manuals, the Columbia implementations,
+and many of the contributed implementations bear copyright notices dated 1981
+or later, and include a legend like
+
+  Copyright (C) 1985, Trustees of Columbia University in the City of New York.
+  Permission is granted to any individual or institution to use, copy, or
+  redistribute this software so long as it is not sold for profit, provided
+  this copyright notice is retained.
+
+The copyright notice is to protect KERMIT, Columbia University, and the
+various contributors from having their work usurped by others and sold as a
+product.  In addition, the covering letter which we include with a KERMIT tape
+states that KERMIT can be passed along to others; "we ask only that profit not
+be your goal, credit be given where it is due, and that new material be sent
+back to us so that we can maintain a definitive and comprehensive set of KERMIT
+implementations".  
+
+Within this framework, it is acceptable to charge a reproduction fee when
+supplying KERMIT to others.  The reproduction fee may be designed to recover
+costs of media, packaging, printing, shipping, order processing, or any
+computer use required for reproduction.  The fee should not reflect any program
+or documentation development effort, and it should be be independent of how
+many implementations of KERMIT appear on the medium or where they came from.
+It should not be viewed as a license fee.  For instance, when Columbia ships a
+KERMIT tape, there is a $100.00 reproduction fee which includes a 2400' reel of
+magnetic tape, two printed manuals, various flyers, a box, and postage; there
+is an additional $100.00 order processing charge if an invoice must be sent.
+The tape includes all known versions of KERMIT, including sources and
+documentation.
+
+Commercial institutions may make unlimited internal use of KERMIT, and
+KERMIT may be installed on timesharing systems where customers are charged for
+system use, so long as they are not charged more for using KERMIT than for
+using any other program.
+
+A question raised with increasing frequency is whether a company may
+incorporate KERMIT into its products.  A hardware vendor may wish to include
+KERMIT with its standard software.  A software house may wish to incorporate
+KERMIT protocol into its communications package, or to distribute it along
+with some other product.  A timesharing vendor or dialup database may wish to
+provide KERMIT for downloading.  All these uses of KERMIT are permissible,
+with the following provisos:
+
+. A KERMIT program may not be sold as a product in and of itself.  In addition
+  to violating the prevailing spirit of sharing and cooperation, commercial
+  sale of a product called "KERMIT" could violate the trade mark which is held
+  on that name by Henson Associates, Inc., creators of THE MUPPET SHOW.
+
+. Existing KERMIT programs and documentation may be included with hardware or
+  other software as part of a standard package, provided the price of the
+  hardware or software product is not raised significantly beyond costs of
+  reproduction of the KERMIT component.
+
+. KERMIT protocol may be included in a multi-protocol communication package as
+  one of the communication options, or as a communication feature of some
+  other kind of software package, in order to enhance the attractiveness of the
+  package.  KERMIT protocol file transfer and management should not be the
+  primary purpose of the package.  The price of the package should not be
+  raised significantly because KERMIT was included, and the vendor's literature
+  should make a statement to this effect.
+
+. Credit for development of the KERMIT protocol should be given to the Columbia
+  University Center for Computing Activities, and customers should be advised
+  that KERMIT is available for many systems for only a nominal fee from
+  Columbia and from various user group organizations, such as DECUS and SHARE.
+
+Columbia University may grant permission to any person or institution to
+develop a KERMIT program for any particular system.  A commercial institution
+that intends to distribute KERMIT under the conditions listed above should be
+aware that other implementations of KERMIT for the same system may appear in
+the standard KERMIT distribution at any time.  Columbia University encourages
+all developers of KERMIT software and documentation to contribute their work
+back to Columbia for further distribution.
+
+Finally, Columbia University does not warrant in any way the KERMIT software
+nor the accuracy of any related documentation, and neither the authors of any
+KERMIT programs or documentation nor Columbia University nor any other
+contributing institutions acknowledge any liability resulting from program or
+documentation errors.
+
+These are general guidelines; this is not a legal document to be searched for
+loopholes.  To date, KERMIT has been freely shared by all who have taken the
+time to do work on it, and no formal legalities have proven necessary.  The
+guidelines are designed to allow commercial enterprises to participate in the
+promulgation of KERMIT without seriously violating the KERMIT user community's
+trust that KERMIT will continue to spread and improve at no significant cost to
+themeselves.  The guidelines are subject to change at any time, should more
+formal detail prove necessary.
+
+Commercial organizations wishing to provide KERMIT to their customers should
+write a letter stating their plans and their agreement to comply with the
+guidelines listed above.  The letter should be addressed to:
+
+	KERMIT Distribution
+	Columbia University Center for Computing Activities
+	612 West 115th Street
+	New York, NY  10025

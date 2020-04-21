@@ -1,0 +1,110 @@
+'\"macro stdmacro
+.TH FREAD 3S 
+.SH NAME
+fread, fwrite \- binary input/output
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B "int fread (ptr, size, nitems, stream)"
+.br
+.B char \(**ptr;
+.br
+.B int size, nitems;
+.br
+.SM
+.B FILE
+.B \(**stream;
+.PP
+.B "int fwrite (ptr, size, nitems, stream)"
+.br
+.B char \(**ptr;
+.br
+.B int size, nitems;
+.br
+.SM
+.B FILE
+.B \(**stream;
+.SH DESCRIPTION
+.I Fread\^
+copies, into an array beginning at
+.IR ptr ,
+.I nitems\^
+items of data
+from the named input
+.IR stream ,
+where
+an item of data is a sequence of bytes (not
+necessarily terminated by a
+null
+byte) of length
+.IR size .
+.I Fread\^
+stops appending bytes
+if an
+end-of-file
+or error condition is encountered while reading
+.IR stream ,
+or if
+.I nitems\^
+items have been read.
+.I Fread\^
+leaves the file pointer in
+.IR stream ,
+if defined, pointing to the byte following the last byte read if
+there is one.
+.I Fread\^
+does not change the contents of
+.IR stream .
+.PP
+.I Fwrite\^
+appends at most
+.I nitems\^
+items of data
+from the the array pointed to by
+.I ptr\^
+to the named output
+.IR stream .
+.I Fwrite\^
+stops appending when it has appended
+.I nitems\^
+items of data or if an
+error condition is encountered on
+.IR stream .
+.I Fwrite\^
+does not change the contents of the array pointed to by
+.IR ptr .
+.PP
+The variable
+.I size\^
+is typically
+.I sizeof(\(**ptr)\^
+where the pseudo-function
+.I sizeof\^
+specifies the length of an item pointed to by
+.IR ptr .
+If
+.I ptr\^
+points to a data type other than
+.I char\^
+it should be cast into a pointer to
+.IR char .
+.SH "SEE ALSO"
+read(2), write(2),
+fopen(3S),
+getc(3S), gets(3S),
+printf(3S),
+putc(3S), puts(3S),
+scanf(3S).
+.SH DIAGNOSTICS
+.I Fread\^
+and
+.I fwrite\^
+return the number of items read or written.
+If
+.I nitems\^
+is non-positive,
+no characters are read or written and 0 is returned by both
+.I fread\^
+and
+.IR fwrite .
+.\"	@(#)fread.3s	5.1 of 10/25/83

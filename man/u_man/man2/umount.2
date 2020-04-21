@@ -1,0 +1,76 @@
+'\"macro stdmacro
+.TH UMOUNT 2
+.SH NAME
+umount \- unmount a file system
+.SH SYNOPSIS
+.B int umount (spec)
+.br
+.B char \(**spec;
+.SH DESCRIPTION
+.I Umount\^
+requests that a previously mounted file system either contained on the
+block special device identified by
+.I spec\^
+or mounted on the directory named by spec
+be unmounted.
+.I Spec\^
+is a pointer to a path name.
+After unmounting the file system,
+the directory upon which the file system was mounted reverts to its ordinary
+interpretation.
+.PP
+.I Umount\^
+may be invoked only by the super-user.
+.PP
+.I Umount\^
+will fail if one or more of the following are true:
+.IP "" .3i
+The process's effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.IP
+.I Spec\^
+does not exist.
+.SM
+\%[ENXIO]
+.IP
+.I Spec\^
+is not a block special device.
+.SM
+\%[ENOTBLK]
+.IP
+.I Spec\^
+is not mounted.
+.SM
+\%[EINVAL]
+.IP
+A file on
+.I spec\^
+is busy.
+.SM
+\%[EBUSY]
+.IP
+.I Spec\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+mount(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#22,D0	| sys umount
+.B movl	spec,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)umount.2	5.1 of 10/19/83

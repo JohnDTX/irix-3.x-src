@@ -1,0 +1,11 @@
+#ident "$Header: /d2/3.7/src/include/make/RCS/2000defs,v 1.1 89/03/27 16:12:30 root Exp $"
+#
+# Fundamental constants of the build tree (distinct from source tree).
+# They are different for each product.
+
+SYSTEM	= SVR0
+GRAPHICS= GL2
+RELEASE	= GL2-W2.6a
+CPUBOARD= PM2
+GFXBOARD= GF2
+CC_CPUTYPE= I

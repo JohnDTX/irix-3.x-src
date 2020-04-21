@@ -1,0 +1,38 @@
+'\"macro stdmacro
+.TH MERGE 1
+.SH NAME
+merge \- three-way file merge
+.SH SYNOPSIS
+\f3merge\f1 [ \f3-p\f1 ] file1 file2 file3
+.SH DESCRIPTION
+.I Merge
+incorporates all changes that lead from \f2file2\f1 to \f2file3\f1 into 
+\f2file1\f1. The result goes to std. output if \f3-p\f1 is present, into 
+\f2file1\f1 otherwise. \f2Merge\f1 is useful for combining separate changes 
+to an original. Suppose \f2file2\f1 is the original, and both \f2file1\f1 
+and \f2file3\f1 are modifications of \f2file2\f1. Then \f2merge\f1 
+combines both changes. 
+.PP
+An overlap occurs if both \f2file1\f1 and \f2file3\f1
+have changes in a common segment of lines.
+\f2Merge\f1 prints how many overlaps occurred, and includes both alternatives
+in the result. The alternatives are delimited as follows:
+.sp
+.nf
+        <<<<<<< file1
+        lines in file1
+        =======
+        lines in file3
+        >>>>>>> file3
+.fi
+.sp
+If there are overlaps, the user should edit the result and delete one of the
+alternatives.
+.SH IDENTIFICATION
+Author: Walter F. Tichy,
+.br
+Purdue University, West Lafayette, IN, 47907.
+.br
+Copyright \(co 1982 by Walter F. Tichy.
+.SH SEE ALSO
+diff3 (1), diff (1), rcsmerge (1), co (1).

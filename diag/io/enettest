@@ -1,0 +1,8 @@
+date >>time
+rsh sys0 -l root -n date >>time1
+echo 'ethernet passed at remote host time' >>testresults
+cat time1 >>testresults
+echo "Difference in Host dates is shown below."
+diff time time1
+rm time time1
+

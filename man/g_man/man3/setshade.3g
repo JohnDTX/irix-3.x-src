@@ -1,0 +1,45 @@
+.TH setshade 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B setshade
+\- sets the current polygon shade
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setshade(shade)"
+.B "Colorindex shade;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setsha(shade)"
+.B "integer*4 shade"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setshade(shade: longint);"
+.SH DESCRIPTION
+.B setshade
+sets the current shade value.
+\f2shade\fP
+is a color index that is
+associated with the specified vertices that immediately follow
+\f3setshade\f1.
+.PP
+.B setshade
+values shade polygons closed with
+.B spclos.
+If you use
+.B setshade
+in the definition of a polygon that is closed with
+\f3pclos\f1,
+the results are undefined.
+Shading works only when the solid pattern is set.
+.SH "SEE ALSO"
+spclos,
+splf
+.sp
+.I Programming Guide,
+Section 13.1, Shading

@@ -1,0 +1,60 @@
+.TH objreplace 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B objreplace
+\- overwrites existing display list routines with new ones
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "objreplace(t) "
+.B "Tag t; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine objrep(t)"
+.B "integer*4 t"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure objreplace(t: Tag);"
+.SH DESCRIPTION
+.B objreplace
+combines the functions of
+.B objinsert
+and
+.B objdelete.
+It takes a single argument,
+tag
+.I t.
+Graphics routines that follow
+.B objreplace
+overwrite existing ones until 
+.B closeobj, 
+.B objinsert,
+.B objdelete,
+or
+.B objreplace
+terminates the replacement.
+.PP
+.B objreplace
+requires the new routine be the same length as the one it replaces;
+this makes replacement operations fast.
+Use
+.B objdelete
+and
+.B objinsert
+for more general replacement.
+.PP
+Use
+.B objreplace
+as a quick method to create a new version of a routine.
+.SH "SEE ALSO"
+closeobj, editobj, objdelete, objinsert
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

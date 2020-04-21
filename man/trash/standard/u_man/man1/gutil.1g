@@ -1,0 +1,203 @@
+.bd S B 3
+.TH GUTIL 1G
+.SH NAME
+gutil \- graphical utilities
+.SH SYNOPSIS
+command-name [options] [files]
+.SH DESCRIPTION
+Below is a list of miscellaneous device
+independent utility commands found in
+.BR /usr/bin/graf .
+If no
+.I files\^
+are given, input is from the standard input.
+All output is to the standard output.
+Graphical data is stored in \s-1GPS\s+1 format; see 
+.IR gps (4).
+.sp
+.if t .ds ' \h@.05m@\s+4\v@.333m@\'\v@-.333m@\s-4\h@.05m@
+.if n .ds ' '
+.if t .ds ` \h@.05m@\s+4\v@.333m@\`\v@-.333m@\s-4\h@.05m@
+.if n .ds ` `
+.PP
+.TP 10
+.B bel \c
+ \- send bel character to terminal
+.PP
+.TP 10
+.B cvrtopt
+[\|=\c
+.BI s "string\^"
+.BI f "string\^"
+.BI i "string " t string\c\^
+\|\|]  [\|\c
+.I args\c\^
+\|\|] \c
+ \- options converter
+.br
+.I Cvrtopt\^
+reformats \f3args\f1 (usually
+the command line arguments of a
+calling shell procedure)
+to facilitate processing by shell procedures.
+An \f3arg\f1 is either a file name
+(a string not beginning with
+a \f3\-\f1, or a \f3\-\f1 by itself)
+or an option string
+(a string of options beginning with a \f3\-\f1).
+Output is of the form:
+.br
+		\f3\-\f3option \f3\-\f3option . . . file name(s)
+.br
+\f1All options appear singularly and preceding
+any file names.
+Options that take values (e.g.,
+\f3\-\f1r1.1) or are two letters long must
+be described through options to \f3cvrtopt\f1.
+.sp
+\f3Cvrtopt\f1 is usually used with \f3set\f1 in the following manner
+as the first line of a shell procedure:
+.br
+.BI "		set \- \*`cvrtopt =[" options "] $@\*`\^"
+.br
+.I Options\^
+to
+.I cvrtopt\^
+are:
+.RS 10n
+.TP 10
+.BI s string\^
+\f3String\fP accepts string values.
+.TP 10
+.BI f string\^
+\f3String\fP accepts floating point numbers as values.
+.TP 10
+.BI i string\^
+\f3String\fP accepts integers as values.
+.TP 10
+.BI t string\^
+\f3String\fP is a two letter option name that takes no value.
+.TP 10
+\f3String\fP is a one or two letter option name.
+.RE
+.PP
+.TP 10
+.B gd
+[\|\s-1GPS\s+1
+.I files\^
+\|\|] \c
+ \- \s-1GPS\s+1 dump
+.br
+.I Gd\^
+prints a human readable listing of \s-1GPS\s+1.
+.PP
+.TP 10
+.B gtop
+[\|\f3\-\c
+.BI r n\| u\^
+\|\|]  [\|\s-1GPS\s+1
+.I files\^
+\|\|] \c
+ \- \s-1GPS\s+1 to \f3plot\^\f1(4) filter
+.br
+.I Gtop\^
+transforms a \s-1GPS\s+1 into \f3plot\^\f1(4) commands displayable by \f3plot\f1 filters.
+\s-1GPS\s+1 objects are translated if they fall within the window
+that circumscribes the first \f3file\f1 unless an
+\f3option\f1 is given.
+.br
+Options:
+.RS 10n
+.TP 10
+.BI r n\^
+translate objects in \s-1GPS\s+1 
+\f3r\f1egion \f3n\f1.
+.TP 10
+.B u
+translate all objects in the \s-1GPS\s+1 \f3u\f1niverse.
+.RE
+.PP
+.TP 10
+.B pd
+[
+.I plot\c\^
+\^(5)
+.I files\^
+\|\|] \c
+ \- \f3plot\^\f1(4) dump
+.br
+.I Pd\^
+prints a human readable listing of \f3plot\^\f1(4) format graphical commands.
+.RE
+.PP
+.TP 10
+.B ptog
+[
+.I plot\c\^
+\^(5)
+.I files\^
+\|\|] \c
+ \- \f3plot\^\f1(4) to \s-1GPS\s+1 filter
+.br
+.I Ptog\^
+transforms \f3plot\^\f1(4) commands into a \s-1GPS\s+1.
+.PP
+.TP 10
+.B quit \c
+ \- terminate session
+.PP
+.TP 10
+.B remcom
+[
+.I files\^
+\|\|] \c
+ \- remove comments
+.br
+.I Remcom\^
+copies its input to its output with comments removed.
+Comments are as defined in C (i.e., /\(** comment \(**/).
+.PP
+.TP 10
+.B whatis
+[\|\f3\-\c
+.B o
+\|\|]  [\|
+.I names\^
+\|\|] \c
+ \- brief online documentation
+.br
+.I Whatis\^
+prints a brief description of each \f3name\f1 given.
+If no \f3name\f1 is given, then the current list of description \f3names\f1 is printed.
+.B whatis \e\(**
+prints out every description.
+.br
+Option:
+.RS 10n
+.TP 10
+.B o
+just print command
+.BR o ptions
+.RE
+.PP
+.TP 10
+.B yoo
+.I file\^\c
+ \- pipe fitting
+.br
+.I Yoo\^
+is a piping primitive that deposits the output of a pipeline
+into a \f3file\f1 used in the pipeline.
+Note that, without \f3yoo\f1, this is not usually successful as it causes a read and write
+on the same file simultaneously.
+.SH "SEE ALSO"
+graphics(1G), gps(4).
+.\"	@(#)gutil.1g	5.2 of 5/18/82
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/gutil.1g,v 1.1 89/03/27 16:41:17 root Exp $
+.\" $Log:	gutil.1g,v $
+Revision 1.1  89/03/27  16:41:17  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  85/01/08  11:03:56  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

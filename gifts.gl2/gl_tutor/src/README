@@ -1,0 +1,9 @@
+This directory contains a Makefile and one or two subdirectories.
+
+The online subdirectory will definitely be here.  Online contains
+the source for On Line Tutor demonstration programs.
+
+The workshop subdirectory will be here for everyone except Silicon
+Graphics salespeople.  The workshop subdirectory contains the source
+for sample code discussed in the tutorial.  Currently, it contains
+the baseball example.

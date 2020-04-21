@@ -1,0 +1,64 @@
+.TH clipline 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I clipline
+- clip a set of lines
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long clipline(mask, n, preline, postline, index)"
+.B "String mask; "
+.B "long n;"
+.B "Coord preline[][3], postline[][4];"
+.B "Boolean index[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer function clipli(mask, n, preln, postln, index)"
+.B "character*(*) mask"
+.B "integer n"
+.B "real preln(3,n), postln(4,n*2)"
+.B "logical index(n*2)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function clipline( mask: String; n: integer; "
+.B "	var preline: Coord3array; var postline: Coord4array;"
+.B "	var Index: Boolarray ): integer;"
+.sp
+.SH DESCRIPTION
+.I Clipline
+selectively enables a subset of the six
+clipping planes.  
+\f3Mask\f1 is a string of characters specifying which clipping
+planes are enabled.
+This string is chosen from `l', `r', `b', `t', `n', and `f'
+(capital letters may also be used), which
+represent the left, right, bottom, top, near, and far
+clipping planes.  \f3Mask\f1 can 
+name from one to six planes, in
+any order.
+.PP
+\f2Clipline\f1 assumes that
+\f3preline\f1 describes a set of connected line segments. 
+It returns the number of vertices in the set of clipped lines.
+The clipped vertices themselves are returned in \f3postline\f1, which should
+have room for up to \f3\&2\(mu\&n\f1 vertices; the process of clipping can
+add up to \f3n\f1 new vertices.
+.PP
+\f3Index\f1 is a boolean array that
+shows which line segments were clipped.  If
+.B index[i]
+=
+.I TRUE,
+some of the
+vertices have been clipped out and 
+.B postline[i]
+should be reached
+with a 
+.I move command rather than 
+.I draw.
+.SH "SEE ALSO"
+.I clippoly, clippnt, screenpnt, transform
+.SH NOTE
+This command can only be used in immediate mode.

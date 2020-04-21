@@ -1,0 +1,39 @@
+.TH setbutton  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setbutton
+- initialize a button 
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setbutton(b, value) "
+.B "Device b; "
+.B "Boolean value;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setbut(b, value)"
+.B "integer*2 b"
+.B "logical value"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setbutton(b: Device; value: Boolean);"
+.sp
+.SH DESCRIPTION
+.I Setbutton
+is used to initialize an input device that has exactly two states
+and an indicator, such as an LED, which records changes of state.
+If these two states are not clearly marked as on/off,
+this command initializes the device's indicator to 
+either on or off.  After that, the indicator records 
+any change in the button's position.
+.I Setbutton
+specifies a button device \f3b\f1 and an initial
+boolean value \f3value\f1.  If the button has clearly defined on and
+off states, the command is ignored.  Otherwise, the LED or some
+other indicator is set to \f3value\f1.
+.SH "SEE ALSO"
+.I setvaluator
+.SH NOTE
+This command can only be used in immediate mode.

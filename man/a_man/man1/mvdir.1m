@@ -1,0 +1,30 @@
+'\"macro stdmacro
+.TH MVDIR 1M
+.SH NAME
+mvdir \- move a directory
+.SH SYNOPSIS
+.B /etc/mvdir
+dirname  name
+.SH DESCRIPTION
+.I Mvdir\^
+renames directories within a file system.
+.I Dirname\^
+must be a directory;
+.I name\^
+must not exist.
+Neither name may be a sub-set of the other
+.RB ( /x/y
+cannot be moved to
+.BR /x/y/z ,
+nor vice versa).
+.PP
+Only super-user can use
+.IR mvdir .
+.SH EXAMPLE
+.IP
+mvdir dir1 dir2
+.PP
+renames existing directory "dir1" to be a new directory "dir2".
+.SH "SEE ALSO"
+mkdir(1).
+.\"	@(#)mvdir.1m	5.1 of 10/17/83

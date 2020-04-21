@@ -1,0 +1,12 @@
+'\"macro stdmacro
+.TH GCLEAR 1G
+.SH NAME
+gclear \- clear IRIS graphics screen
+.SH SYNOPSIS
+.B gclear
+.SH DESCRIPTION
+.I Gclear
+clears the entire IRIS graphics screen.
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/gclear.1g,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:45:54 $

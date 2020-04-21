@@ -1,0 +1,56 @@
+'\"macro stdmacro
+.TH CLOSE 2 
+.SH NAME
+close \- close a file descriptor
+.SH SYNOPSIS
+.B int close (fildes)
+.br
+.B int fildes;
+.SH DESCRIPTION
+.PP
+.I Fildes\^
+is a
+file descriptor
+obtained from a
+.IR creat ,
+.IR open ,
+.IR dup ,
+.IR fcntl ,
+or
+.I pipe\^
+system call.
+.I Close\^
+closes the file descriptor indicated by
+.IR fildes .
+A close of all files is automatic on
+.IR exit ,
+but since there is a limit of 40 on the number of open
+files per process, 
+.I close
+is necessary for programs which deal with many files.
+.PP
+.I Close\^
+will fail if
+.I fildes\^
+is not a valid open
+file descriptor.
+.SM
+\%[EBADF]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+creat(2), dup(2), exec(2), fcntl(2), open(2), pipe(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#6,D0
+.B movl	fildes,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)close.2	5.1 of 10/19/83

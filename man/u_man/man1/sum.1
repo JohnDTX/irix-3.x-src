@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH SUM 1 
+.SH NAME
+sum \- print checksum and block count of a file
+.SH SYNOPSIS
+.B sum
+[
+.B \-r
+] [ files ]
+.SH DESCRIPTION
+.I sum\^
+calculates and prints a 16-bit checksum for the named files,
+and also prints the number of blocks in the file.
+It is typically used to look for bad spots, or
+to validate a file communicated over
+some transmission line.  If no files are specified in the command
+line, the checksum will be computed on the input from stdin.
+The option
+.B \-r
+causes an alternate algorithm to be used
+in computing the checksum.
+.SH EXAMPLE
+.IP
+sum filea
+.PP
+produces the checksum and the block count of "filea".
+.SH "SEE ALSO"
+wc(1).
+.SH DIAGNOSTICS
+"Read error"
+is indistinguishable from end of file on
+most devices; check the block count.
+.\"	@(#)sum.1	5.1 of 11/10/83

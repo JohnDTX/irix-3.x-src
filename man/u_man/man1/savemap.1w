@@ -1,0 +1,28 @@
+'\"macro stdmacro
+.TH SAVEMAP 1W
+.SH NAME
+savemap \- save a range of the color map
+.SH SYNOPSIS
+.B savemap 
+filename 
+.B -r 
+p1 p2
+.SH DESCRIPTION
+.I
+savemap
+saves the color map range from 
+.I p1 
+to 
+.I p2 
+in the named file. 
+.I p1 
+and 
+.I p2 
+are indexes
+into the color map.  The colors are saved in a file that
+.I
+loadmap
+can later load.
+.SH SEE ALSO
+loadmap(1W),
+makemap(1W)

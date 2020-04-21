@@ -1,0 +1,44 @@
+'\"macro stdmacro
+.TH PIC 1 
+.SH NAME
+pic \- troff preprocessor for drawing simple pictures
+.SH SYNOPSIS
+.B pic
+[
+.BR \-T tty_type
+]
+.\"[ \-\^\- ]
+[ files ]
+.SH DESCRIPTION
+.I pic
+is a
+.IR troff (1)
+preprocessor for drawing simple figures on a typesetter.
+The basic objects are
+.BR box ,
+.BR circle ,
+.BR ellipse ,
+.BR line ,
+.BR spline ,
+.BR arrow ,
+.BR arc
+and
+.IR text .
+.PP
+The optional argument
+.BI \-T tty_type
+specifies device
+.IR tty_type ;
+currently supported devices are
+.B aps
+(Autologic APS-5),
+and
+\f3i10\fP (Imagen Imprint-10).
+Default is
+.BR \-Taps .
+.SH "SEE ALSO"
+grap(1),
+troff(1).
+.PP
+The section entitled ``pic'' in the \f2Documenter's Workbench User's Guide\f1.
+.\"	%W% of %G%

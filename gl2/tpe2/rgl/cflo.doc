@@ -1,0 +1,73 @@
+term main
+	InitExceptionServer - kernel
+	setserialmode (MOD_IRISTERM) - hostio
+		Send Modify serial - kernel
+	InitInternet - kernel
+	Create(readhost - term)
+	Receive ??
+
+readhost
+	irisinit - context
+		ginit - kernel
+		color - kernel
+		clear - kernel
+		tpon - kernel ??
+	ttyinit - textctl
+		text_open("console",2) - textio
+			Send CREATE "sdemux" - kernel
+		textport(0,767,0,1023) - kernel
+	Ready(Create(repainter )) - term
+		Delay( 0, 10) - kernel
+		grioctl(GR_SAFE) - kernel
+
+	ringbell - kernel
+	initi488 ??
+	initcom(SERIAL_COM) - hostio
+	initserial - hostio
+		fopen("/dev/tty2/ "w+")
+	Ready(Create(writehost)) - term
+  process *rp data in readhost forever
+	flushscreen - textctl
+	switchtotext - context  
+		grioctl(GR_SAFE);
+		lampoff(LAMP_KBDLOCKED);
+		gl_textrefresh();
+	text_write - textio
+		Send(textfile,write_instance)
+	doprimitive - callfunc
+		receivef - irisio
+		switchtographics - context
+			grioctl(GR_SAFE);
+			lampon(LAMP_KBDLOCKED);
+	senddata - irisio
+		turndelay - irisio
+			Delay - kernel
+		sendB - irisio
+			puthostchar - hostio
+				flushhostbuffer - hostio
+					lockoutput - hostio
+					write(serialout)
+					unlockoutput - hostio
+		sendS
+			puthostchar
+		sendL
+			puthostchar
+		freearrays
+			free - kernel
+	putschreenchar - term.h
+		flushscreen - textctl
+			fillhostbuffer - hostio
+				read(serialin,1024) - kernel
+
+writehost
+	sendkbdchar("/r") - hostio
+		lockoutput - hostio
+		write(serialout) - kernel
+		unlockoutput -  hostio  
+    process keys forever
+	getc(stdin) - kernel
+	setlocalecho - hostio
+		setserialmode - hostio
+	sendbreakchar - hostio
+		setserialmode - hostio
+	sendkbdchar - hostio

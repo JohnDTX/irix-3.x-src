@@ -1,0 +1,114 @@
+'\"macro stdmacro
+.TH HYP 1M
+.SH NAME
+hyp \- hyperchannel table translation
+.SH SYNOPSIS
+.PP
+.B
+hyp
+[-f input file] [-h hostname]
+.SH DESCRIPTION
+.PP
+.I
+Hyp
+takes an input file describing a hyperchannel network layout, and
+produces a routing map for a specific host.  It is intended to
+be used as a filter in front of \f2hyroute\fP.  It is only useful if
+there is some non-linear topology associated with the network.
+It allows maintenance of one table, where multiple hyroute tables
+are needed in a given network.
+.PP
+The 
+.B \-f
+option allows you to read from a specific file.
+If no input file is specified, \f2hyp\fP looks for \f2Hy.net\fP then 
+\f2hy.net\fP.  Specifying a dash (\-) for the input file
+directs \f2hyp\fP to read from the standard
+input.
+.PP
+By default, \f2hyp\fP will generate the routing map for the local host.
+The 
+.B \-h
+option allows you to produce a routing table for a host other than
+the local host.
+.I
+Hyp
+produces a map suitable for input to \f2hyroute\fP on the standard output,
+and a list of errors it found on the standard error.
+.SH FILE FORMAT
+.PP
+The input file is composed of two parts \- a list of hosts and their addresses
+and a description of the network topology.
+.PP
+The list of hosts is a arranged as follows:
+.IP
+.B
+hosts
+.br
+\f2hostname\fP	\f30x\f2address\fP
+.PP
+where \f2hostname\fP is the name of a host attached to the network,
+and \f2address\fP is a four hexadecimal digit address that the IP layer is 
+listening on.  The token hosts can be followed by up to 256 
+destinations, which is the current limit on how many the kernel
+can address.
+.PP
+The network topology is described as follows:
+.IP
+\f3net\fP
+.br
+\f3trunk\fP   \f2#\fP[\f3,\f2#\fP[\f3,\f2#\fP[\f3,\f2#\fP]]]   [\f2hostname\fP  ...]
+.PP
+There can be any number of \f2net\fP constructs, each of which specifies
+a group of hosts connected to a particular trunk.  In each \f2net\fP, there
+can be from one to four \f2trunk(s)\fP, listing the physical trunks
+to which these hosts are attached.  Each \f2trunk\fP is numbered either
+0, 1, 2, or 3.
+.PP
+The input file may also contain shell style comments.
+.PP
+The following is an example \f2Hy.net\fP file.
+.IP
+.nf
+# A bunch of remote workstations and some VAXen.
+net
+	trunk 3,2 navier3-hy amelia-hy wilbur-hy rhodan-hy
+
+# A bunch of local workstations
+net
+	trunk 3,2 navier2-hy godzilla-hy
+
+# Some VAXen (short trunks)
+net
+	trunk 3,2 navier0-hy navier1-hy fred-hy orville-hy 
+
+# Everybody is on these two trunks
+net
+	trunk 1,0 navier3-hy amelia-hy wilbur-hy rhodan-hy
+		  navier2-hy godzilla-hy
+		  navier0-hy navier1-hy fred-hy orville-hy 
+
+hosts
+# The Cray 2
+navier-hy	0xc415
+navier1-hy	0xc200
+navier2-hy	0x1100
+navier3-hy	0x2100
+# IRIS Workstations
+godzilla-hy	0x2203
+rhodan-hy	0x2602
+# VAXen
+fred-hy		0x1200
+orville-hy	0x1201
+amelia-hy	0x2400
+wilbur-hy	0x2401
+.fi
+.RS 5
+.I
+.br
+.SH FILES
+.PP
+[Hh]y.net	network topology description
+.SH SEE ALSO
+.PP
+hyroute(1M)

@@ -1,0 +1,29 @@
+adventure(6) adventure: an exploration game.
+aliens(6) aliens, alienslog: the alien invaders attack the earth.
+arithmetic(6) arithmetic: provide drill in number facts.
+autorobots(6) autorobots: escape from the automatic robots.
+back(6) back: the game of backgammon.
+bcd(6) bcd: convert to antique media.
+bj(6) bj: the game of black jack.
+chase(6) chase: try to escape the killer robots.
+craps(6) craps: the game of craps.
+cribbage(6) cribbage: the card game cribbage.
+fish(6) fish: play ``Go Fish''.
+fortune(6) fortune: print a random, hopefully interesting, adage.
+hangman(6) hangman: guess the word.
+intro(6) intro: introduction to games.
+life(6) life: play the game of life.
+mastermind(6) mastermind: game of "mastermind".
+maze(6) maze: generate a maze.
+moo(6) moo: guessing game.
+number(6) number: convert Arabic numerals to English.
+quiz(6) quiz: test your knowledge.
+rain(6) rain: animated raindrops display.
+robots(6) robots: escape from the robots.
+rogue(6) rogue: exploring the Dungeons of Doom.
+trek(6) trek: trekkie game.
+ttt(6) ttt, cubic: tic-tac-toe.
+twinkle(6) twinkle: twinkle stars on the screen.
+worm(6) worm: play the growing worm game.
+worms(6) worms: animate worms on a display terminal.
+wump(6) wump: the game of hunt-the-wumpus.

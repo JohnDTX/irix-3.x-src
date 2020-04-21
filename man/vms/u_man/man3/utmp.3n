@@ -1,0 +1,34 @@
+'\macro stdmacro
+.TH UTMP 3N
+.SH NAME
+mkutmp, rmutmp \- make and delete \f2/etc/utmp\f1 entry 
+.SH SYNOPSIS
+.nf
+.B "mkutmp(name, line, host)"
+.B "char *name, *line, *host;"
+.PP
+.B "rmutmp(slot)"
+.B "int slot;"
+.fi
+.SH DESCRIPTION
+.I mkutmp
+makes an entry in
+.I /etc/utmp
+for the login
+.I name
+on special file
+.I line
+from host
+.I host.
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xnsd(1M),
+xx(1C),
+xcmd(3N),
+xconnect(3N),
+xnsfile(3N),
+xnsioctl(3N),
+xnslib(3N),
+xnswrite(3N)

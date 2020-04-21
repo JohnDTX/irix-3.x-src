@@ -1,0 +1,46 @@
+'\"macro stdmacro
+.TH GAMMA 1W
+.SH NAME
+gamma \- set the gamma correction value for mapping colors
+.SH SYNOPSIS
+.B gamma 
+newgamma
+.SH DESCRIPTION
+The luminous intensity displayed by the monitor is a power function
+of the input drive voltage.  When a color index is mapped
+using 
+.I mapcolor(index,r,g,b), 
+the red, green, and blue drive
+voltages are specified within the range 0 to 255.  However, 
+a color with 
+.I r,
+.I g, 
+and 
+.I b 
+components
+of 128 is not 50 percent gray.  On the monitor, this gray
+appears considerably darker because the luminous intensity
+is not linearly related to drive voltage.  
+.PP
+.I /usr/people/gifts/mextools/portlib
+provides 
+the function 
+.I gammapcolor(i,r,g,b)
+to correct for the non-linearity
+of the display.  The gamma correction value used by
+.I gammapcolor 
+is stored in
+.I ~/.gamma . 
+.PP
+.I gamma
+followed by a floating point argument sets the gamma
+correction value.
+.I gamma
+with no arguments prints the current gamma correction
+value.  
+For a discussion of gamma correction,
+see \f2Fundamentals of Interactive
+Computer Graphics\f1 by James D. Foley and Andries Van Dam 
+(Addison-Wesley Publishing Company, 1982), pp. 594-597.
+.SH FILES
+~/.gamma

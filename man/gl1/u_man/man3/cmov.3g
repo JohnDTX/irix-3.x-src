@@ -1,0 +1,57 @@
+.TH cmov 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I cmov
+- change the current character position
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "cmov(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "cmovi(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "cmov2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "cmov2i(x, y) "
+.B "Icoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine cmov(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine cmovi(x, y, z)"
+.B "integer x, y, z"
+.IP 
+.B "subroutine cmov2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine cmov2i(x, y)"
+.B "integer x, y"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure cmov(x, y, z: Coord);"
+.IP 
+.B "procedure cmovi(x, y, z: Icoord);"
+.IP 
+.B "procedure cmov2(x, y: Coord);"
+.IP 
+.B "procedure cmov2i(x, y: Icoord);"
+.sp
+.SH DESCRIPTION
+\f2Cmov\f1 is analogous to \f2move\f1 except that
+it updates the current character 
+position.  Its arguments specify a world space point, and can be integers or
+real numbers in 2D or 3D space.  This world space point is transformed;
+the resulting screen space point becomes the new character position.
+The character position is undefined if the transformed point is outside
+the viewport.
+.PP
+.I Cmov
+alters the current graphics position.
+.SH "SEE ALSO"
+.I charstr, move, readpixels, readRGB, writepixels, writeRGB

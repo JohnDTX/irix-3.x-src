@@ -1,0 +1,287 @@
+
+(**************************************************************************
+ *                                                                        *
+ *          Copyright (C) 1984, Silicon Graphics, Inc.                    *
+ *                                                                        *
+ *  These coded instructions, statements, and computer programs  contain  *
+ *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
+ *  are protected by Federal copyright law.  They  may  not be disclosed  *
+ *  to  third  parties  or copied or duplicated in any form, in whole or  *
+ *  in part, without the prior written consent of Silicon Graphics, Inc.  *
+ *                                                                        *
+ **************************************************************************)
+
+(*  
+            pdevice.h - Pascal const section analagous to 
+                        device.h
+*)
+
+     NULLDEV     = 0;
+     BUTOFFSET   = 1;
+     VALOFFSET   = 256;
+     KEYOFFSET   = 512;
+
+(* buttons *)
+
+     BUT0        = 1    (* 0+BUTOFFSET *);
+     BUT1        = 2    (* 1+BUTOFFSET *);
+     BUT2        = 3    (* 2+BUTOFFSET *);
+     BUT3        = 4    (* 3+BUTOFFSET *);
+     BUT4        = 5    (* 4+BUTOFFSET *);
+     BUT5        = 6    (* 5+BUTOFFSET *);
+     BUT6        = 7    (* 6+BUTOFFSET *);
+     BUT7        = 8    (* 7+BUTOFFSET *);
+     BUT8        = 9    (* 8+BUTOFFSET *);
+     BUT9        = 10   (* 9+BUTOFFSET *);
+     BUT10       = 11   (* 10+BUTOFFSET, A *);
+     BUT11       = 12   (* 11+BUTOFFSET, B *);
+     BUT12       = 13   (* 12+BUTOFFSET, C *);
+     BUT13       = 14   (* 13+BUTOFFSET, D *);
+     BUT14       = 15   (* 14+BUTOFFSET, E *);
+     BUT15       = 16   (* 15+BUTOFFSET, F *);
+     BUT16       = 17   (* 16+BUTOFFSET, 10 *);
+     BUT17       = 18   (* 17+BUTOFFSET, 11 *);
+     BUT18       = 19   (* 18+BUTOFFSET, 12 *);
+     BUT19       = 20   (* 19+BUTOFFSET, 13 *);
+     BUT20       = 21   (* 20+BUTOFFSET, 14 *);
+     BUT21       = 22   (* 21+BUTOFFSET, 15 *);
+     BUT22       = 23   (* 22+BUTOFFSET, 16 *);
+     BUT23       = 24   (* 23+BUTOFFSET, 17 *);
+     BUT24       = 25   (* 24+BUTOFFSET, 18 *);
+     BUT25       = 26   (* 25+BUTOFFSET, 19 *);
+     BUT26       = 27   (* 26+BUTOFFSET, 1A *);
+     BUT27       = 28   (* 27+BUTOFFSET, 1B *);
+     BUT28       = 29   (* 28+BUTOFFSET, 1C *);
+     BUT29       = 30   (* 29+BUTOFFSET, 1D *);
+     BUT30       = 31   (* 30+BUTOFFSET, 1E *);
+     BUT31       = 32   (* 31+BUTOFFSET, 1F *);
+     BUT32       = 33   (* 32+BUTOFFSET, 20 *);
+     BUT33       = 34   (* 33+BUTOFFSET, 21 *);
+     BUT34       = 35   (* 34+BUTOFFSET, 22 *);
+     BUT35       = 36   (* 35+BUTOFFSET, 23 *);
+     BUT36       = 37   (* 36+BUTOFFSET, 24 *);
+     BUT37       = 38   (* 37+BUTOFFSET, 25 *);
+     BUT38       = 39   (* 38+BUTOFFSET, 26 *);
+     BUT39       = 40   (* 39+BUTOFFSET, 27 *);
+     BUT40       = 41   (* 40+BUTOFFSET, 28 *);
+     BUT41       = 42   (* 41+BUTOFFSET, 29 *);
+     BUT42       = 43   (* 42+BUTOFFSET, 2A *);
+     BUT43       = 44   (* 43+BUTOFFSET, 2B *);
+     BUT44       = 45   (* 44+BUTOFFSET, 2C *);
+     BUT45       = 46   (* 45+BUTOFFSET, 2D *);
+     BUT46       = 47   (* 46+BUTOFFSET, 2E *);
+     BUT47       = 48   (* 47+BUTOFFSET, 2F *);
+     BUT48       = 49   (* 48+BUTOFFSET, 30 *);
+     BUT49       = 50   (* 49+BUTOFFSET, 31 *);
+     BUT50       = 51   (* 50+BUTOFFSET, 32 *);
+     BUT51       = 52   (* 51+BUTOFFSET, 33 *);
+     BUT52       = 53   (* 52+BUTOFFSET, 34 *);
+     BUT53       = 54   (* 53+BUTOFFSET, 35 *);
+     BUT54       = 55   (* 54+BUTOFFSET, 36 *);
+     BUT55       = 56   (* 55+BUTOFFSET, 37 *);
+     BUT56       = 57   (* 56+BUTOFFSET, 38 *);
+     BUT57       = 58   (* 57+BUTOFFSET, 39 *);
+     BUT58       = 59   (* 58+BUTOFFSET, 3A *);
+     BUT59       = 60   (* 59+BUTOFFSET, 3B *);
+     BUT60       = 61   (* 60+BUTOFFSET, 3C *);
+     BUT61       = 62   (* 61+BUTOFFSET, 3D *);
+     BUT62       = 63   (* 62+BUTOFFSET, 3E *);
+     BUT63       = 64   (* 63+BUTOFFSET, 3F *);
+     BUT64       = 65   (* 64+BUTOFFSET, 40 *);
+     BUT65       = 66   (* 65+BUTOFFSET, 41 *);
+     BUT66       = 67   (* 66+BUTOFFSET, 42 *);
+     BUT67       = 68   (* 67+BUTOFFSET, 43 *);
+     BUT68       = 69   (* 68+BUTOFFSET, 44 *);
+     BUT69       = 70   (* 69+BUTOFFSET, 45 *);
+     BUT70       = 71   (* 70+BUTOFFSET, 46 *);
+     BUT71       = 72   (* 71+BUTOFFSET, 47 *);
+     BUT72       = 73   (* 72+BUTOFFSET, 48 *);
+     BUT73       = 74   (* 73+BUTOFFSET, 49 *);
+     BUT74       = 75   (* 74+BUTOFFSET, 4A *);
+     BUT75       = 76   (* 75+BUTOFFSET, 4B *);
+     BUT76       = 77   (* 76+BUTOFFSET, 4C *);
+     BUT77       = 78   (* 77+BUTOFFSET, 4D *);
+     BUT78       = 79   (* 78+BUTOFFSET, 4E *);
+     BUT79       = 80   (* 79+BUTOFFSET, 4F *);
+     BUT80       = 81   (* 80+BUTOFFSET, 50 *);
+     BUT81       = 82   (* 81+BUTOFFSET, 51 *);
+     BUT82       = 83   (* 82+BUTOFFSET, 52 *);
+     MAXKBDBUT   = 83   (* BUT82 *);
+     BUT100      = 101  (* 100+BUTOFFSET, Mouse button 1 *);
+     BUT101      = 102  (* 101+BUTOFFSET, Mouse button 2 *);
+     BUT102      = 103  (* 102+BUTOFFSET, Mouse button 3 *);
+     BUT110      = 111  (* 110+BUTOFFSET *);
+     BUT111      = 112  (* 111+BUTOFFSET *);
+     BUT112      = 113  (* 112+BUTOFFSET *);
+     BUT113      = 114  (* 113+BUTOFFSET *);
+     BUT114      = 115  (* 114+BUTOFFSET *);
+     BUT115      = 116  (* 115+BUTOFFSET *);
+     BUT116      = 117  (* 116+BUTOFFSET *);
+     BUT117      = 118  (* 117+BUTOFFSET *);
+     BUT118      = 119  (* 118+BUTOFFSET *);
+     BUT119      = 120  (* 119+BUTOFFSET *);
+     BUT120      = 121  (* 120+BUTOFFSET *);
+     BUT121      = 122  (* 121+BUTOFFSET *);
+     BUT122      = 123  (* 122+BUTOFFSET *);
+     BUT123      = 124  (* 123+BUTOFFSET *);
+     BUT124      = 125  (* 124+BUTOFFSET *);
+     BUT125      = 126  (* 125+BUTOFFSET *);
+     BUT126      = 127  (* 126+BUTOFFSET *);
+     BUT127      = 128  (* 127+BUTOFFSET *);
+     BUT128      = 129  (* 128+BUTOFFSET *);
+     BUT129      = 130  (* 129+BUTOFFSET *);
+     BUT130      = 131  (* 130+BUTOFFSET *);
+     BUT131      = 132  (* 131+BUTOFFSET *);
+     BUT132      = 133  (* 132+BUTOFFSET *);
+     BUT133      = 134  (* 133+BUTOFFSET *);
+     BUT134      = 135  (* 134+BUTOFFSET *);
+     BUT135      = 136  (* 135+BUTOFFSET *);
+     BUT136      = 137  (* 136+BUTOFFSET *);
+     BUT137      = 138  (* 137+BUTOFFSET *);
+     BUT138      = 139  (* 138+BUTOFFSET *);
+     BUT139      = 140  (* 139+BUTOFFSET *);
+     BUT140      = 141  (* 140+BUTOFFSET *);
+     BUT141      = 142  (* 141+BUTOFFSET *);
+     MOUSE1      = 101  (* BUT100 *);
+     MOUSE2      = 102  (* BUT101 *);
+     MOUSE3      = 103  (* BUT102 *);
+     LEFTMOUSE   = 103  (* BUT102 *);
+     MIDDLEMOUSE     = 102  (* BUT101 *);
+     RIGHTMOUSE  = 101  (* BUT100 *);
+     SWBASE      = 111  (* BUT110 *);
+     SW0         = 111  (* SWBASE *);
+     SW1         = 112  (* SWBASE+1 *);
+     SW2         = 113  (* SWBASE+2 *);
+     SW3         = 114  (* SWBASE+3 *);
+     SW4         = 115  (* SWBASE+4 *);
+     SW5         = 116  (* SWBASE+5 *);
+     SW6         = 117  (* SWBASE+6 *);
+     SW7         = 118  (* SWBASE+7 *);
+     SW8         = 119  (* SWBASE+8 *);
+     SW9         = 120  (* SWBASE+9 *);
+     SW10        = 121  (* SWBASE+10 *);
+     SW11        = 122  (* SWBASE+11 *);
+     SW12        = 123  (* SWBASE+12 *);
+     SW13        = 124  (* SWBASE+13 *);
+     SW14        = 125  (* SWBASE+14 *);
+     SW15        = 126  (* SWBASE+15 *);
+     SW16        = 127  (* SWBASE+16 *);
+     SW17        = 128  (* SWBASE+17 *);
+     SW18        = 129  (* SWBASE+18 *);
+     SW19        = 130  (* SWBASE+19 *);
+     SW20        = 131  (* SWBASE+20 *);
+     SW21        = 132  (* SWBASE+21 *);
+     SW22        = 133  (* SWBASE+22 *);
+     SW23        = 134  (* SWBASE+23 *);
+     SW24        = 135  (* SWBASE+24 *);
+     SW25        = 136  (* SWBASE+25 *);
+     SW26        = 137  (* SWBASE+26 *);
+     SW27        = 138  (* SWBASE+27 *);
+     SW28        = 139  (* SWBASE+28 *);
+     SW29        = 140  (* SWBASE+29 *);
+     SW30        = 141  (* SWBASE+30 *);
+     SW31        = 142  (* SWBASE+31 *);
+     BUTCOUNT    = 142;
+     AKEY        = 11   (* BUT10 *);
+     BKEY        = 36   (* BUT35 *);
+     CKEY        = 28   (* BUT27 *);
+     DKEY        = 18   (* BUT17 *);
+     EKEY        = 17   (* BUT16 *);
+     FKEY        = 19   (* BUT18 *);
+     GKEY        = 26   (* BUT25 *);
+     HKEY        = 27   (* BUT26 *);
+     IKEY        = 40   (* BUT39 *);
+     JKEY        = 34   (* BUT33 *);
+     KKEY        = 35   (* BUT34 *);
+     LKEY        = 42   (* BUT41 *);
+     MKEY        = 44   (* BUT43 *);
+     NKEY        = 37   (* BUT36 *);
+     OKEY        = 41   (* BUT40 *);
+     PKEY        = 48   (* BUT47 *);
+     QKEY        = 10   (* BUT9 *);
+     RKEY        = 24   (* BUT23 *);
+     SKEY        = 12   (* BUT11 *);
+     TKEY        = 25   (* BUT24 *);
+     UKEY        = 33   (* BUT32 *);
+     VKEY        = 29   (* BUT28 *);
+     WKEY        = 16   (* BUT15 *);
+     XKEY        = 21   (* BUT20 *);
+     YKEY        = 32   (* BUT31 *);
+     ZKEY        = 20   (* BUT19 *);
+     ZEROKEY     = 46   (* BUT45 *);
+     ONEKEY      = 8    (* BUT7 *);
+     TWOKEY      = 14   (* BUT13 *);
+     THREEKEY    = 15   (* BUT14 *);
+     FOURKEY     = 22   (* BUT21 *);
+     FIVEKEY     = 23   (* BUT22 *);
+     SIXKEY      = 30   (* BUT29 *);
+     SEVENKEY    = 31   (* BUT30 *);
+     EIGHTKEY    = 38   (* BUT37 *);
+     NINEKEY     = 39   (* BUT38 *);
+     BREAKKEY    = 1    (* BUT0 *);
+     SETUPKEY    = 2    (* BUT1 *);
+     CTRLKEY     = 3    (* BUT2 *);
+     CAPSLOCKKEY     = 4    (* BUT3 *);
+     RIGHTSHIFTKEY   = 5    (* BUT4 *);
+     LEFTSHIFTKEY    = 6    (* BUT5 *);
+     NOSCRLKEY   = 13   (* BUT12 *);
+     ESCKEY      = 7    (* BUT6 *);
+     TABKEY      = 9    (* BUT8 *);
+     RETKEY      = 51   (* BUT50 *);
+     SPACEKEY    = 83   (* BUT82 *);
+     LINEFEEDKEY = 60   (* BUT59 *);
+     BACKSPACEKEY= 61   (* BUT60 *);
+     DELKEY      = 62   (* BUT61 *);
+     SEMICOLONKEY= 43   (* BUT42 *);
+     PERIODKEY   = 52   (* BUT51 *);
+     COMMAKEY    = 45   (* BUT44 *);
+     QUOTEKEY    = 50   (* BUT49 *);
+     ACCENTGRAVEKEY  = 55   (* BUT54 *);
+     MINUSKEY    = 47   (* BUT46 *);
+     VIRGULEKEY  = 53   (* BUT52 *);
+     BACKSLASHKEY    = 57   (* BUT56 *);
+     EQUALKEY    = 54   (* BUT53 *);
+     LEFTBRACKETKEY  = 49   (* BUT48 *);
+     RIGHTBRACKETKEY     = 56   (* BUT55 *);
+     LEFTARROWKEY    = 73   (* BUT72 *);
+     DOWNARROWKEY    = 74   (* BUT73 *);
+     RIGHTARROWKEY   = 80   (* BUT79 *);
+     UPARROWKEY  = 81   (* BUT80 *);
+     PAD0        = 59   (* BUT58 *);
+     PAD1        = 58   (* BUT57 *);
+     PAD2        = 64   (* BUT63 *);
+     PAD3        = 65   (* BUT64 *);
+     PAD4        = 63   (* BUT62 *);
+     PAD5        = 69   (* BUT68 *);
+     PAD6        = 70   (* BUT69 *);
+     PAD7        = 67   (* BUT66 *);
+     PAD8        = 68   (* BUT67 *);
+     PAD9        = 75   (* BUT74 *);
+     PADPF1      = 72   (* BUT71 *);
+     PADPF2      = 71   (* BUT70 *);
+     PADPF3      = 79   (* BUT78 *);
+     PADPF4      = 78   (* BUT77 *);
+     PADPERIOD   = 66   (* BUT65 *);
+     PADMINUS    = 76   (* BUT75 *);
+     PADCOMMA    = 77   (* BUT76 *);
+     PADENTER    = 82   (* BUT81 *);
+
+(* valuators *)
+
+     SGIRESERVED = 256  (* 0+VALOFFSET *);
+     DIAL0       = 257  (* 1+VALOFFSET *);
+     DIAL1       = 258  (* 2+VALOFFSET *);
+     DIAL2       = 259  (* 3+VALOFFSET *);
+     DIAL3       = 260  (* 4+VALOFFSET *);
+     DIAL4       = 261  (* 5+VALOFFSET *);
+     DIAL5       = 262  (* 6+VALOFFSET *);
+     DIAL6       = 263  (* 7+VALOFFSET *);
+     DIAL7       = 264  (* 8+VALOFFSET *);
+     DIAL8       = 265  (* 9+VALOFFSET *);
+     MOUSEX      = 266  (* 10+VALOFFSET *);
+     MOUSEY      = 267  (* 11+VALOFFSET *);
+     VALCOUNT    = 12;
+
+(* keyboard *)
+
+     KEYBD       = 513  (* 1+KEYOFFSET *);

@@ -1,0 +1,28 @@
+'\"macro stdmacro
+.TH HEAD 1
+.SH NAME
+head \- give first few lines
+.SH SYNOPSIS
+.B head
+[
+.BR \- count
+] [
+file ...]
+.SH DESCRIPTION
+This filter gives the first
+.I count\^
+lines of each of the specified files, or of the standard input.
+If
+.I count\^
+is omitted it defaults to
+10.
+.SH EXAMPLE
+.IP
+head -6 filea fileb filec
+.PP
+will print out the first six lines of the three specified files.
+The filename will appear before each new set of head lines listed,
+if more than one file has been specified.
+.SH SEE\ ALSO
+tail(1).
+.\"	@(#)head.1	5.1 of 11/16/83

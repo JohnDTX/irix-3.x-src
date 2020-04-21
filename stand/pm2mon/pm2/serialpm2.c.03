@@ -1,0 +1,427 @@
+/*
+**		Quirk serial device driver functions
+**		  Paul Haeberli and David J. Brown
+**			  June 20, 1983
+**
+**
+**		Redone for the PM2 processor, new duarts, etc.
+**		  	Greg Boyd (Dec, 1983)
+*/
+
+#include "duart.h"		/* PM2 Uart definitions */
+#include "pmII.h"
+
+#include "Qdevices.h"		/* Quirk includes */
+#include "Qglobals.h"
+#include "ringbufs.h"
+
+#include "common.h"
+#include "setjmp.h"
+
+# define XON	021	/* ^Q */
+# define XOFF	023	/* ^S */
+
+
+struct ring HostRing, KeybRing;
+char HostChars[128];
+char KeybChars[80];
+short HostBufCount;
+char flowctl;
+
+#define HIWATER		100		/* 16 chars below full */
+#define LOWATER		30
+
+/*
+ * interrupt service routine for the serial line devices
+ */
+
+serialHandler()
+{
+    /*
+     * find out who caused the interrupt. The choices are:
+     *    Uart1 ("LOCAL") rxint
+     *    Uart2 ("HOST") rxint
+     *    clock on Chip 1 (Uart2, Uart3 chip).
+     * 	  <BREAK> or S/W <BREAK> (trap #F)
+     */
+
+    /* did the console UART get a character */
+    if (dad[LOCALCHIP]->d_isr & (ISASCII ? ISRRB|ISCBB : ISRR))	
+    {
+        SCHED(KeybdCharIn);
+    }
+    
+    /* did the Host Uart get a char? */
+    if (dad[HOSTCHIP]->d_isr & ISRR)
+    {
+        SCHED(HostCharIn);
+    }
+    
+    /* did the clock fire? */
+    if (dad[TIMERCHIP]->d_isr & ISCR)
+    {
+        SCHED(lbolt);
+    }
+}
+
+
+HostCharIn()
+{
+    register unsigned char t;
+
+    t = dad[HOST]->d_rhr;	/* read a character from the host uart */
+    if( BREAKON && TERMULATING )
+	return;
+    if (Ring_Put(&HostRing,(Datum)t) == 0)
+	HostBufCount++;
+
+    /* 
+     * update the buffer count.  If this exceeds the Hi water mark
+     * send XOFF to the host
+     */
+    if (HostBufCount > HIWATER) 
+    { 				/* added a char to the buffer */
+	wait(TOHOST);
+	PutToHost(XOFF);
+	flowctl = 1;	/* record that flow control is now ON */
+    }
+    MAKEREADY(FROMHOST);
+}
+
+KeybdCharIn()
+{
+    register int t;
+    auto unsigned char tcell;
+
+    if( ISASCII )
+    {
+	/* did the console UART get a change in BREAK */
+	if( dad[LOCALCHIP]->d_isr & ISCBB )
+	{
+	    dad[LOCAL]->d_cr = RESET_BRK_CHANGE_INT;
+	    t = BREAKCHAR;
+	}
+	else
+	/* or a framing error */
+	if( dad[LOCAL]->d_sr & (SRFE|SRPE|SROE|SRRB) )
+	{
+	    dad[LOCAL]->d_cr = CRRES;
+	    return;
+	}
+	else
+	/* or was it just a char */
+	{
+	    t = (unsigned char)dad[LOCAL]->d_rhr;
+	}
+    }
+    else
+    {
+        t = (unsigned char)dad[LOCALCHIP]->d_rhr; 	
+
+	t = dutranslate(t);
+    }
+
+    if( t == NOCHAR )
+    {
+	if( BREAKON )
+	    /*
+	     kluge - micsw keyboard only interrupts once
+	     for break.  so hold break until key is released.
+	     */
+	    BreakIn();
+	return;
+    }
+
+    if( t == BREAKCHAR )
+    {
+	BreakIn();
+	return;
+    }
+
+    /* xon-xoff stuff */
+    if( !TERMULATING )
+    {
+	if( t == XOFF )
+	{
+	    MAKENOTREADY(NOTSTOPPED);
+	    return;
+	}
+	MAKEREADY(NOTSTOPPED);
+	if( t == XON )
+	    return;
+    }
+
+    /* put on queue */
+    Ring_Put(&KeybRing,(Datum)t);
+    MAKEREADY(KEYIN);
+}
+
+/*
+ * Check transmitter ready status on all Uarts and set status bits
+ * in the qreadyvector accordingly!!!
+ */
+CheckTxRdy()
+{
+    if (dad[HOST]->d_sr & SRTR)	/* host uart ready to take a char? */
+        MAKEREADY(TOHOST);
+
+    /* is the console uart ready to take a char? */
+    if ISASCII {
+        if (dad[LOCAL]->d_sr & SRTR)
+            MAKEREADY(KEYPANEL);
+    } 
+    else MAKEREADY(TOSCREEN);
+}
+
+
+/*
+ * HostCharOut is presently NOT interrupt driven, it therefore takes
+ * the character given to it, and puts it out (busy wait)
+ */
+HostCharOut(c)
+    char c;
+{
+    while ((dad[HOST]->d_sr & SRTR) == 0);	/* wait for ready */
+    dad[HOST]->d_thr = c;
+    if ((dad[HOST]->d_sr & SRTR) == 0)		/* still ready? */
+	MAKENOTREADY(TOHOST);
+}
+
+KeybdCharOut(c)
+    char c;
+{
+
+    while ((dad[LOCAL]->d_sr & SRTR) == 0);	/* wait for ready */
+    dad[LOCAL]->d_thr = c;
+    if ((dad[LOCAL]->d_sr & SRTR) == 0)		/* still ready? */
+	MAKENOTREADY(KEYPANEL);
+}
+
+
+
+/*
+ * Initialize the serial line devices 
+ */
+SerialDevInit()
+{
+# include "m68vectors.h"
+    extern int level6int();
+
+    RingInit(&HostRing,HostChars,sizeof HostChars);
+    RingInit(&KeybRing,KeybChars,sizeof KeybChars);
+    HostBufCount = 0;		/* Buffer start out empty */
+
+    /* stuff the interrupt vector */
+    /* level six */
+    *EVEC_LEVEL6 = (long)level6int;
+
+    /* interrupts are already set up for per char received 
+     * rather than Uart FIFO full.  Just enable interrupts!
+     */
+     /* enable rx ints and change in break int on console */
+    _commdat->imr = (ISASCII ? IMRRIB|IMRCBIB : IMRRI); 
+    dad[LOCALCHIP]->d_imr = _commdat->imr;
+
+    /* enable rx ints and timer on Host Uart */
+    dad[HOSTCHIP]->d_imr = IMRRI|IMRCI;
+
+#ifdef NEWSTUF
+    dad[HOSTCHIP]->d_opcr &= ~OP5BIT;	/* enable output op5 (dtr) */
+#endif
+	
+    spl1();		/* and allow interrupts */
+}
+
+ResetDuarts()
+{
+	dad[LOCALCHIP]->d_imr = 0;
+	dad[HOSTCHIP]->d_imr = 0;
+	_commdat->imr = 0;
+}
+
+BreakIn()
+{
+    FlushKeyIn();	/* flush stray keybd input */
+
+    if( TERMULATING )
+    {
+	/*
+	 in termulate mode,
+	 mirror the change on the host Uart
+	 change the break status being sent to the host
+	 */
+	dad[HOST]->d_cr = BREAKON?STOP_BREAK:START_BREAK;
+    }
+    else
+    if( RUNNING_USER_PROGRAM )
+    {
+	/*
+	 a break from a running program has been received.
+	 Enter the same code as for a S/W/break
+	 and return
+	 */
+	if( !BREAKON && !DOINGBREAK )
+	{
+	    asm("	trap	#15	");
+	    return;
+	}
+    }
+
+    /* and toggle our marker */
+    TOGGLEBREAK;
+    /* if( BREAKON ) RESETBREAK; else SETBREAK; */
+}
+
+
+/*
+ * (UGH) moved here from debug.c .
+ * this is a candidate for renewal.
+ */
+gomonitor(frameptr)
+    unsigned long frameptr;
+{
+    /*
+     a BREAK (h/w or s/w) has been received from a running program.
+     frameptr points to a stackframe as outlined in dbg.h .
+     trapF() has taken care of switching to our stack.
+     */
+
+    if( ISMICROSW ) InScreen();
+
+    /* make sure we can get characters (sigh) */
+    dad[LOCALCHIP]->d_imr = (ISASCII? IMRRIB|IMRCBIB : IMRRI);
+
+    /* let the user muck with the world */
+    _commdat->flags |= BREAKPENDING;
+
+    spl5();
+    monitor(frameptr);
+    spl7();
+
+    _commdat->flags &= ~BREAKPENDING;
+
+    /* if the common area is ok, restore the default imr */
+    if( ISCOMMONOK ) dad[LOCALCHIP]->d_imr = _commdat->imr;
+
+    if( ISMICROSW ) ScreenComm();
+}
+
+/*
+**	GetFromHost - get a character from the host port
+**
+*/
+GetFromHost()
+{
+    register int a;
+    register int oldpri;
+
+    oldpri = spl7();
+    a = -1;
+    if (ready(FROMHOST)) 
+    {
+	a = Ring_Get(&HostRing);	/* returns -1 if empty */
+	if (a < 0 || RingEmpty(&HostRing))
+	    MAKENOTREADY(FROMHOST);
+	if (a >= 0)
+        {
+	    if((--HostBufCount < LOWATER) && flowctl ) 
+	    {
+	        wait(TOHOST);
+		PutToHost(XON);
+		flowctl = 0;	/* Flow control is now off */
+	    }
+	}
+    }
+    splx(oldpri);
+    return a;
+}
+
+/*
+**	PutToHost - put a character to the host port
+**
+*/
+PutToHost( onechar )
+char onechar;
+{
+    register int oldpri;
+    register int rv;
+
+    rv = -1;
+    oldpri = spl7();
+    if(ready(TOHOST)) 
+    {
+	HostCharOut(onechar);		/* send the character */
+	MAKENOTREADY(TOHOST);		/* mark device busy */
+	rv = 1;
+    }
+    splx(oldpri);
+    return rv;
+}
+
+/*
+**	GetKeyIn - get a char from the user's keyboard
+**
+*/
+GetKeyIn()
+{
+    register int a;
+    register int oldpri;
+
+    a = -1;
+    oldpri = spl7();
+    if (ready(KEYIN)) 
+    {
+        a = Ring_Get(&KeybRing);	/* returns -1 if empty */
+	if (a < 0 || RingEmpty(&KeybRing))
+	    MAKENOTREADY(KEYIN);
+    }
+    splx(oldpri);
+    return a;
+}
+
+/*
+**	PutKeyPanel - put a char to the panel of the keyboard
+**
+*/
+PutKeyPanel( onechar )
+char onechar;
+{
+    register int oldpri;
+    register int rv;
+
+    rv = -1;
+    oldpri = spl7();
+    if(ready(KEYPANEL)) 
+    {
+	KeybdCharOut(onechar);		/* send the character */
+	MAKENOTREADY(KEYPANEL);		/* mark device busy */
+	rv = 1;
+    }
+    splx(oldpri);
+    return rv;
+}
+
+FlushKeyIn()
+{
+    while(ready(KEYIN))			
+	GetKeyIn();
+}
+
+FlushFromHost()
+{
+    while(ready(FROMHOST))		
+	GetFromHost();
+}
+
+UnGetKeyIn(c)
+    unsigned char c;
+{
+    register int oldpri;
+
+    oldpri = spl7();
+
+    Ring_Put(&KeybRing,(Datum)c);
+    MAKEREADY(KEYIN);
+
+    splx(oldpri);
+}

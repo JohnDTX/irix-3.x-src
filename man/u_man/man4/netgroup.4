@@ -1,0 +1,85 @@
+'\"macro stdmacro
+.TH NETGROUP 4
+.SH NAME
+netgroup \- list of network groups
+.SH SYNOPSIS
+.B /etc/netgroup
+.SH DESCRIPTION
+.I Netgroup
+defines network wide groups,
+used for permission checking when doing
+remote mounts, remote logins, and remote shells.
+For remote mounts, the information in 
+.I netgroup
+is used to classify machines;
+for remote logins and remote shells,
+it is used to classify users.
+Each line of the
+.I netgroup
+file defines a group and has the format
+.IP
+ groupname member1 member2 ....
+.PP
+where member\f2i\fP\| is either another group name, or a triple:
+.IP
+ (hostname, username, domainname)
+.PP
+Any of three fields can be empty,
+in which case it signifies a wild card.
+Thus
+.IP
+ universal (,,)
+.PP
+defines a group to which everyone belongs.
+Field names that begin with something other than a letter, digit or underscore
+(such as ``-'') work in precisely the opposite fashion. 
+For example, consider the following entries:
+.IP
+ justmachines	(analytica,-,sun)
+ justpeople	(-,babbage,sun)
+.PP
+The machine
+.I analytica
+belongs to the group
+.I justmachines
+in the domain
+.IR sun ,
+but no users belong to it.
+Similarly, the user
+.I babbage
+belongs to the group 
+.I justpeople
+in the domain
+.IR sun ,
+but no machines belong to it. 
+.PP
+Network groups are contained in the yellow pages,
+and are accessed through these files:
+.IP
+ /etc/yp/\f2domainname\fP/netgroup.dir
+ /etc/yp/\f2domainname\fP/netgroup.pag
+ /etc/yp/\f2domainname\fP/netgroup.byuser.dir
+ /etc/yp/\f2domainname\fP/netgroup.byuser.pag
+ /etc/yp/\f2domainname\fP/netgroup.byhost.dir
+ /etc/yp/\f2domainname\fP/netgroup.byhost.pag
+.PP
+These files can be created from
+.I /etc/netgroup
+using
+.IR makedbm (1M).
+.SH FILES
+/etc/netgroup
+.br
+/etc/yp/\f2domainname\fP/netgroup.dir
+.br
+/etc/yp/\f2domainname\fP/netgroup.pag
+.br
+/etc/yp/\f2domainname\fP/netgroup.byuser.dir
+.br
+/etc/yp/\f2domainname\fP/netgroup.byuser.pag
+.br
+/etc/yp/\f2domainname\fP/netgroup.byhost.dir
+.br
+/etc/yp/\f2domainname\fP/netgroup.byhost.pag
+.SH "SEE ALSO"
+getnetgrent(3R), makedbm(1M), ypserv(1M).

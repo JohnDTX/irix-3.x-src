@@ -1,0 +1,148 @@
+#
+MAKEPATH=../../tf:../../tv:../../font:../../term:../../win:../../dbg
+
+OBJS=	tf.o \
+	\
+	tvagetchar.o tvapospix.o tvclone.o tvdraw.o tvfree.o tvgetbg.o \
+	tvgetchar.o tvgetstops.o tvheight.o tvhigh.o tvleftpix.o tvmapfont.o \
+	tvmapindex.o tvmaprgb.o tvnew.o tvpixpos.o tvpospix.o tvrowh.o \
+	tvsetbg.o tvsetstops.o tvtoprow.o tvview.o tvwidth.o \
+	\
+	teclear.o teclearl.o tecolor.o tecursor.o tedelete.o tedraw.o \
+	teframe.o teinsert.o teiris.o temoveto.o tenew.o teputcs.o teredraw.o \
+	\
+	fntload.o \
+	\
+	shell.o lw.o kb.o butdata.o dispatch.o pane.o window.o \
+	${A3}
+
+SRCS=	../common/tf.c \
+	../common/tvagetchar.c ../common/tvapospix.c ../common/tvclone.c \
+	../common/tvdraw.c ../common/tvfree.c ../common/tvgetbg.c \
+	../common/tvgetchar.c ../common/tvgetstops.c ../common/tvheight.c \
+	../common/tvhigh.c tvleftpix.c ../common/tvmapfont.c \
+	../common/tvmapindex.c ../common/tvmaprgb.c ../common/tvnew.c \
+	../common/tvpixpos.c ../common/tvpospix.c ../common/tvrowh.c \
+	../common/tvsetbg.c ../common/tvsetstops.c ../common/tvtoprow.c \
+	../common/tvview.c ../common/tvwidth.c \
+	../common/teclear.c ../common/teclearl.c ../common/tecolor.c \
+	../common/tecursor.c ../common/tedelete.c ../common/tedraw.c \
+	../common/teframe.c ../common/teinsert.c ../common/teiris.c \
+	../common/temoveto.c ../common/tenew.c ../common/teputcs.c \
+	../common/teredraw.c \
+	../common/fntload.c \
+	../common/shell.c ../common/lw.c ../common/kb.c ../common/butdata.c \
+	../common/dispatch.c ../common/pane.c ../common/window.c
+
+TARGETS= ${A0}
+LCDEFS= -DINLIB
+
+# If using "-g", define strip to be "true"
+LCOPTS= ${A1} -c
+STRIP= ${A2}
+LCINCS = -I../../../h -I$(ROOT)/usr/include/gl
+
+include ${ROOT}/usr/include/make/commondefs
+
+${A0}: ${OBJS}	
+	rm -f $@
+	$(AR) rv $@ ${OBJS}
+
+install: all
+	cp ${TARGETS} ${DEST}/usr/lib
+	cd ${DEST}/usr/lib; ranlib ${TARGETS}
+	-if test ! -d ${DEST}/usr/include/sgi; then \
+		mkdir ${DEST}/usr/include/sgi; \
+	fi
+	cp ../h/* ${DEST}/usr/include/sgi
+
+tf.o:	../../common/tf.c
+	$(CC) $(CFLAGS) ../../common/tf.c
+tvagetchar.o:	../../common/tvagetchar.c
+	$(CC) $(CFLAGS) ../../common/tvagetchar.c
+tvapospix.o:	../../common/tvapospix.c
+	$(CC) $(CFLAGS) ../../common/tvapospix.c
+tvclone.o:	../../common/tvclone.c
+	$(CC) $(CFLAGS) ../../common/tvclone.c
+tvdraw.o:	../../common/tvdraw.c
+	$(CC) $(CFLAGS) ../../common/tvdraw.c
+tvfree.o:	../../common/tvfree.c
+	$(CC) $(CFLAGS) ../../common/tvfree.c
+tvgetbg.o:	../../common/tvgetbg.c
+	$(CC) $(CFLAGS) ../../common/tvgetbg.c
+tvgetchar.o:	../../common/tvgetchar.c
+	$(CC) $(CFLAGS) ../../common/tvgetchar.c
+tvgetstops.o:	../../common/tvgetstops.c
+	$(CC) $(CFLAGS) ../../common/tvgetstops.c
+tvheight.o:	../../common/tvheight.c
+	$(CC) $(CFLAGS) ../../common/tvheight.c
+tvhigh.o:	../../common/tvhigh.c
+	$(CC) $(CFLAGS) ../../common/tvhigh.c
+tvleftpix.o:	../../common/tvleftpix.c
+	$(CC) $(CFLAGS) ../../common/tvleftpix.c
+tvmapfont.o:	../../common/tvmapfont.c
+	$(CC) $(CFLAGS) ../../common/tvmapfont.c
+tvmapindex.o:	../../common/tvmapindex.c
+	$(CC) $(CFLAGS) ../../common/tvmapindex.c
+tvmaprgb.o:	../../common/tvmaprgb.c
+	$(CC) $(CFLAGS) ../../common/tvmaprgb.c
+tvnew.o:	../../common/tvnew.c
+	$(CC) $(CFLAGS) ../../common/tvnew.c
+tvpixpos.o:	../../common/tvpixpos.c
+	$(CC) $(CFLAGS) ../../common/tvpixpos.c
+tvpospix.o:	../../common/tvpospix.c
+	$(CC) $(CFLAGS) ../../common/tvpospix.c
+tvrowh.o:	../../common/tvrowh.c
+	$(CC) $(CFLAGS) ../../common/tvrowh.c
+tvsetbg.o:	../../common/tvsetbg.c
+	$(CC) $(CFLAGS) ../../common/tvsetbg.c
+tvsetstops.o:	../../common/tvsetstops.c
+	$(CC) $(CFLAGS) ../../common/tvsetstops.c
+tvtoprow.o:	../../common/tvtoprow.c
+	$(CC) $(CFLAGS) ../../common/tvtoprow.c
+tvview.o:	../../common/tvview.c
+	$(CC) $(CFLAGS) ../../common/tvview.c
+tvwidth.o:	../../common/tvwidth.c
+	$(CC) $(CFLAGS) ../../common/tvwidth.c
+teclear.o:	../../common/teclear.c
+	$(CC) $(CFLAGS) ../../common/teclear.c
+teclearl.o:	../../common/teclearl.c
+	$(CC) $(CFLAGS) ../../common/teclearl.c
+tecolor.o:	../../common/tecolor.c
+	$(CC) $(CFLAGS) ../../common/tecolor.c
+tecursor.o:	../../common/tecursor.c
+	$(CC) $(CFLAGS) ../../common/tecursor.c
+tedelete.o:	../../common/tedelete.c
+	$(CC) $(CFLAGS) ../../common/tedelete.c
+tedraw.o:	../../common/tedraw.c
+	$(CC) $(CFLAGS) ../../common/tedraw.c
+teframe.o:	../../common/teframe.c
+	$(CC) $(CFLAGS) ../../common/teframe.c
+teinsert.o:	../../common/teinsert.c
+	$(CC) $(CFLAGS) ../../common/teinsert.c
+teiris.o:	../../common/teiris.c
+	$(CC) $(CFLAGS) ../../common/teiris.c
+temoveto.o:	../../common/temoveto.c
+	$(CC) $(CFLAGS) ../../common/temoveto.c
+tenew.o:	../../common/tenew.c
+	$(CC) $(CFLAGS) ../../common/tenew.c
+teputcs.o:	../../common/teputcs.c
+	$(CC) $(CFLAGS) ../../common/teputcs.c
+teredraw.o:	../../common/teredraw.c
+	$(CC) $(CFLAGS) ../../common/teredraw.c
+fntload.o:	../../common/fntload.c
+	$(CC) $(CFLAGS) ../../common/fntload.c
+shell.o:	../../common/shell.c
+	$(CC) $(CFLAGS) ../../common/shell.c
+lw.o:	../../common/lw.c
+	$(CC) $(CFLAGS) ../../common/lw.c
+kb.o:	../../common/kb.c
+	$(CC) $(CFLAGS) ../../common/kb.c
+butdata.o:	../../common/butdata.c
+	$(CC) $(CFLAGS) ../../common/butdata.c
+dispatch.o:	../../common/dispatch.c
+	$(CC) $(CFLAGS) ../../common/dispatch.c
+pane.o:	../../common/pane.c
+	$(CC) $(CFLAGS) ../../common/pane.c
+window.o:	../../common/window.c
+	$(CC) $(CFLAGS) ../../common/window.c

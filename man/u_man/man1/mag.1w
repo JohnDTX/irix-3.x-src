@@ -1,0 +1,19 @@
+'\"macro stdmacro
+.TH MAG 1W
+.SH NAME
+mag \- magnify pixels on the screen
+.SH SYNOPSIS
+.B mag 
+factor
+.SH DESCRIPTION
+.I mag 
+magnifies the pixels of anything on the screen.
+The region to be magnified is selected by pointing to the
+region and pressing the left mouse button.
+Pressing the middle mouse button inside the port changes
+the amount of magnification using the \f2x\f1 position of the mouse.  
+Pressing the middle mouse button outside the port turns the grid on and off.
+.I factor
+is an integer that specifies the initial magnification.
+The minimum magnification is by a factor of two.
+

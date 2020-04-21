@@ -1,0 +1,72 @@
+'\"macro stdmacro
+.TH DIRCMP 1
+.SH NAME
+dircmp \- directory comparison
+.SH SYNOPSIS
+.B dircmp
+[
+.B \-d
+]
+[
+.BR \-l pagelength
+]
+[
+.B \-s
+] [
+.B \-t
+]
+dir1 dir2
+.SH DESCRIPTION
+.I Dircmp\^
+examines
+.I dir1\^
+and
+.I dir2\^
+and generates various tabulated information
+about the contents of the directories. Listings
+of files which are unique to each directory are generated
+for all the options.
+If no option is entered,
+a list is output indicating whether the
+filenames common to both directories
+have the same contents. The output is passed through 
+.IR pr (1) 
+for pagination.
+.TP \w'\f3\-d\f1\ \ 'u
+.B \-d
+Compare the contents of files with the same name in
+both directories and output a list telling what must
+be changed in the two files to bring them into agreement.
+The list format is described in
+.IR diff\^ (1).
+.TP
+.BR \-l pagelength
+This option is pased to
+.I pr. 
+There must be
+.I no
+whitespace between the 
+.B \-l
+flag and the
+.I pagelength
+value.
+It sets the page length, and the
+default page length is 66 lines.
+.TP
+.B \-s
+Suppress messages about identical files.
+.TP
+.B \-t
+Compare text files only, as determined by
+.IR file\^ (1).
+.SH EXAMPLE
+.IP
+dircmp d1 d2
+.PP
+will show the differences between the directories 
+.B d1
+and 
+.BR d2 .
+.SH SEE ALSO
+cmp(1), diff(1), file(1), pr(1)
+.\"	@(#)dircmp.1	5.1 of 10/27/83

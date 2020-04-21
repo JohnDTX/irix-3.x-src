@@ -1,0 +1,51 @@
+'\"macro stdmacro
+.TH XNSWRITE 3N
+.SH NAME
+xnswrite \- write to XNS connection
+.SH SYNOPSIS
+.nf
+.B "xnswrite (chan, buf, count, dtype, control)"
+.B "int chan, count;"
+.B "char *buf, dtype, control;"
+.PP
+.B "xnsread (chan, s, cc, dtype, control)"
+.B "int chan, cc;"
+.B "char *s, *dtype, *control;"
+.PP
+.B "xnslisten (x)"
+.B "int x;"
+.fi
+.SH DESCRIPTION
+.I Xnswrite
+allows you to write to an XNS channel while
+specifying a particular data type and control bits.  This data type
+can be recognized by the server, and can be used to
+pass out-of-band information, for example.
+A count of the number of bytes written is returned.
+The data type is reset to the default after each write.
+.PP
+.I Xnsread
+reads an XNS channel.
+If dtype and control are non-zero, the data type and control fields are
+copied to the addresses specified.
+A count of the number of bytes written is returned.
+If 0 is returned, this means end-of-file condition.
+In all cases, if an error occurs, the VMS error return value is found in the 
+external
+.B vmserrorno.
+.PP
+.I Xnslisten
+waits for a connection on socket
+.B x.
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xnsd(1M),
+xx(1C),
+utmp(3N),
+xcmd(3N),
+xconnect(3N),
+xnsfile(3N),
+xnsioctl(3N),
+xnslib(3N)

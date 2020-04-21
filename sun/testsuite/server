@@ -1,0 +1,43 @@
+#!/bin/sh
+# server <server-name>
+#
+# Actions:
+#	mounts 'SERVER:/server/MYNAME' on '/client/SERVER'
+#	runs tests in /client/SERVER/nfstestdir
+#	unmounts /client/SERVER
+#
+case $# in
+    1)
+	SERVER=$1
+	;;
+
+    *)
+	echo "usage: $0 <server-name>"
+	exit 1
+	;;
+esac
+
+NFSTESTDIR=/client/$SERVER/nfstestdir
+export NFSTESTDIR
+
+(umount /client/$SERVER > /dev/null)
+mount -v $SERVER\:/server/`hostname` /client/$SERVER
+echo
+
+echo "BASIC TESTS (server $SERVER)"
+(cd basic; runtests -t)
+
+echo
+echo "GENERAL TESTS (server $SERVER)"
+(cd general; make copy DESTDIR=$NFSTESTDIR; cd $NFSTESTDIR; runtests)
+
+# echo
+# echo "SPECIAL TESTS (server $SERVER)"
+# (cd special; make copy DESTDIR=$NFSTESTDIR; cd $NFSTESTDIR; runtests)
+
+echo
+rm -rf $NFSTESTDIR
+
+umount /client/$SERVER
+
+echo "All tests completed"

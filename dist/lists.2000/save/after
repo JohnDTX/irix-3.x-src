@@ -1,0 +1,10 @@
+bin/chgrp
+bin/chown
+bin/cp
+bin/ln
+bin/ls
+bin/mkdir
+bin/mv
+bin/rm
+bin/rmdir
+etc/reboot

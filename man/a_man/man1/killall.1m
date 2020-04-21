@@ -1,0 +1,37 @@
+'\"macro stdmacro
+.TH KILLALL 1M
+.SH NAME
+killall \- kill all active processes
+.SH SYNOPSIS
+.B /etc/killall
+[ signal ]
+.SH DESCRIPTION
+.PP
+.I Killall
+is is a procedure used by
+.IR  shutdown (1M)
+to kill all active processes not directly related to the
+shut down procedure.
+.PP
+.PP
+.I Killall
+is chiefly used to terminate all processes with open files
+so that the mounted file systems will be unbusied and can be unmounted.
+.PP
+.I Killall
+sends
+.I signal
+(see
+.IR kill (1))
+to all remaining processes not belonging to the above group of exclusions.
+If no
+.I signal
+is specified, a default of
+.B 9
+is used.
+.SH SEE ALSO
+kill(1),
+ps(1),
+shutdown(1M),
+signal(2).
+.\"	@(#)killall.1m	5.1 of 10/17/83

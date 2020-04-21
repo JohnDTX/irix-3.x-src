@@ -1,0 +1,121 @@
+'\"macro stdmacro
+.TH RM 1 
+.SH NAME
+rm, rmdir  \- remove files or directories
+.SH SYNOPSIS
+.B rm
+[
+.B \-fri
+] ... [
+.B \-
+] file ...
+.PP
+.B rmdir
+dir ...
+.SH DESCRIPTION
+.I Rm\^
+removes the entries for one or more
+files
+from a directory.
+If an entry was the last link to the file, the file
+is destroyed.
+Removal of a file requires write permission in its directory,
+but neither read nor write permission on the file itself.
+.PP
+If a file has no write permission
+and the standard input is a terminal,
+its permissions are printed and a line is read from
+the standard input.
+If that line begins with \f3y\fP the file is deleted,
+otherwise the file remains.
+No questions are asked
+when the
+.B \-f
+option is given
+or if the standard input is not a terminal.
+.PP
+If a designated file is a directory,
+an error comment is printed unless the optional
+argument
+.B \-r
+has been used.
+In that case,
+.I rm\^
+recursively deletes the
+entire contents of the specified directory,
+and the directory itself.
+Symbolic links are not followed.
+.PP
+If the
+.B \-i
+(interactive) option is in effect,
+.I rm\^
+asks whether to delete each file,
+and, under
+.BR \-r ,
+whether to examine each directory.
+.PP
+.I Rm\^
+accepts flags as separate or combined arguments.
+An argument consisting solely of
+.B \-
+will cause
+.I rm\^
+to treat any occurrence of a \- in a following argument as part of a file name.
+.PP
+.I Rmdir\^
+removes entries for the named directories,
+which must be empty.
+.SH EXAMPLES
+.IP
+rm \-r dirname
+.PP
+will remove the entire contents of the named directory and
+all subdirectories, and
+finally the directory itself, with no questions asked.
+.IP
+rm \-ri dirname
+.br
+rm \-r \-i dirname
+.PP
+will recursively and interactively remove the tree rooted at
+.IR dirname .
+.IP
+rm \-i \- \-f
+.PP
+will interactively remove the tree rooted at
+.IR \-f .
+.SH SEE ALSO
+link(1M), unlink(2).
+.SH DIAGNOSTICS
+Generally self-explanatory.
+Exit status is non-zero if an attempt to remove a file fails and the
+.B \-f
+flag is not supplied.
+It is forbidden to remove the file \f3..\fP merely to avoid the
+antisocial consequences of inadvertently doing something like:
+.IP
+"rm \-r .\(**"
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/rm.1,v 1.1 89/03/27 16:49:24 root Exp $
+.\" $Log:	rm.1,v $
+Revision 1.1  89/03/27  16:49:24  root
+Initial check-in for 3.7
+
+.\" Revision 1.7  86/04/16  09:05:25  celia
+.\" cosmetic
+.\" 
+.\" Revision 1.6  85/08/06  16:08:26  robinf
+.\" Cosmetic changes
+.\" 
+.\" Revision 1.5  85/06/17  15:48:13  robinf
+.\" Cosmetic changes for GL2-2.3 and GL1-2.3
+.\" 
+.\" Revision 1.4  85/06/17  15:47:29  robinf
+.\" Cosmetic changes for GL2-2.3 and GL1-2.3
+.\" 
+.\" Revision 1.3  85/05/15  15:10:06  robinf
+.\" Updates for GL2-W2.3 and GL1-W2.2
+.\" 
+.\" Revision 1.2  84/11/13  12:06:23  bob
+.\" Documented new allowable syntax, also exit codes.
+.\" 

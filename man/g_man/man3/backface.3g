@@ -1,0 +1,50 @@
+.TH backface 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B backface
+\- turns backfacing polygon removal on and off 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "backface(b)"
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine backfa(b)"
+.B "logical b"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure backface(b: Boolean);"
+.SH DESCRIPTION
+.B backface
+initiates or terminates backfacing filled polygon removal.
+A backfacing polygon is a polygon whose vertices
+appear in clockwise order in screen coordinates.
+When backfacing polygon removal is on, the system displays only polygons
+whose vertices appear in counterclockwise order.
+.PP
+The backface utility improves the performance of
+programs that represent solid objects as collections of polygons.
+Backfacing polygon removal does not always remove all hidden surfaces
+because some frontfacing polygons can still be obscured.
+When a polygon shrinks to the point where its vertices are coincident,
+its orientation is indeterminate and it is displayed.
+Backface removal is useful for simple convex objects.  For more 
+general images, you can achieve hidden surface removal using another
+technique, perhaps in conjunction with backface removal.
+.PP
+Matrices that negate coordinates, such as scale (-1.0, 1.0, 1.0) reverse
+the directional order of a polygon's points and can cause 
+.T backface
+to do the opposite of what was intended.
+.SH "SEE ALSO"
+zbuffer
+.sp .5v
+.I Programming Guide,
+Section 12.2, Backfacing Polygon Removal
+

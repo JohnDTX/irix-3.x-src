@@ -1,0 +1,27 @@
+'\"#ident	"@(#)shells:troff.sizes	1.4"
+.rs
+.sp 4
+\s36The Size \s10of characters is useful for emphasis
+or for meeting special reading needs such as making posters or aiding those with poor eyesight.
+The range of \fIpoint sizes\fR at a \fItroff\fR user's disposal is potentially quite broad.
+The actual limits in each case, though, are imposed by the individual printer
+supporting a UNIX system.
+Like control of typeface, or font, you can control size both before and in the middle of a line.
+The modification of character size also requires that we keep an eye on the size of
+vertical space between lines of text.
+\fItroff\fR, characteristically, puts the control in your hands:
+.sp 1
+.ps 12
+.vs 14
+This request is for a point size of 12 and should be followed by a vertical space of 14.
+.ps 14
+.vs 16
+A jump to 14, though, is quite a bit larger.  That means our text will look best with a vertical space of 16.
+\&\fI.vs\fR enables you to space these lines of large type without fear of overlapping characters.
+.ps 22
+.vs 24
+We can also change size on a word-by-word basis like this:
+Whether you want \s10ten \s12twelve \s14fourteen \s16sixteen or \s20twenty,
+an in-line command will do anything a before-the-line command will do.
+\s10Don't forget to return to ten point unless you want all the rest of your text in
+twenty point.

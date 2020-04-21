@@ -1,0 +1,30 @@
+.TH getvaluator  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getvaluator
+- return the current value of a valuator
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getvaluator(v) "
+.B "Device v;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getval(v)"
+.B "integer*2 v"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getvaluator(v: Device): Short;"
+.sp
+.SH DESCRIPTION
+A valuator is a single-valued input device.  Examples are 
+the horizontal and vertical motions of a mouse and dials on a control
+panel.  \f2Getvaluator\f1 returns the current value of  
+the specified device.  Its argument is the valuator device number.
+Bounds on the returned value can be set with \f2setvaluator\f1.
+.SH "SEE ALSO"
+.I button, keyboard, noise, qvaluator, setvaluator, unqvaluator
+.SH NOTE
+This command can only be used in immediate mode.

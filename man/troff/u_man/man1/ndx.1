@@ -1,0 +1,119 @@
+'\"macro stdmacro
+.TH NDX 1
+.SH NAME
+ndx \- create a subject-page index for a document
+.SH SYNOPSIS
+\f3ndx\f1 [ subfile ] "formatter command line"
+.SH DESCRIPTION
+.IR ndx ,
+given a list of subjects
+.RI ( subfile ),
+searches a specified document and writes a subject-page index
+to the standard output.
+.PP
+.I subfile
+is the list of subjects to be included in the index.  Each subject
+must begin on a new line and have the following format:
+.RS
+word1 [word2 ...] [, word2 ...] [, wordk ...]
+.RE
+.PP
+For example:
+.RS
+.nf
+printed circuit boards
+arrays
+arrays, dynamic change
+Smith, W.P.
+printed circuit boards, channel-oriented multi-layer
+Aranoff
+University of Illinois
+PL/1
+.RE
+.fi
+.PP
+The subject must start in column 1.
+.PP
+The syntax for the 
+.I formatter command line 
+is
+.RS
+.IR "formatter " "[ " "options " "] " "\^file ..."
+.RE
+.PP
+It is the command that will be used to create the final form of
+the document.  
+The
+.I formatter must be one of
+.IR troff , \0nroff , \0mm ,
+or
+.I mmt
+The
+.I options
+are those that will be given to the formatter
+in printing the final form of the document, and are
+necessary to determine the correct page numbers for subjects
+as they located in the document.
+.I ndx
+does not actually cause the final version of the document to be
+printed.  The author must create the document separately.  The
+indexer, of course, should not be used until the document is complete
+and no further changes are expected.
+The following are examples of valid formatter command
+lines:
+.RS
+.nf
+mm \-Tlp\f2  file ...\f1
+nroff \-mm \-Tlp \-rW60\f2  file ...\f1
+troff \-rB2 \-Taps \-r01.5i\f2  file ...\f1
+.fi
+.RE
+.PP
+For more information on the formatter command line, see
+.IR mm (1),
+.IR mmt (1),
+.IR nroff (1),
+and
+.IR troff (1).
+.SH EXAMPLES
+The command
+.RS
+ndx subfile "nroff \-mm \-rW70 file" > indexfile
+.RE
+would produce a subject-page index for the document 
+.I file  
+and take its subject for the list,
+.IR subfile .
+The page numbers would correspond to the document produced by 
+.RS
+nroff \-mm \-rW70 file
+.RE
+.PP
+The command
+.RS
+ndx subfile "mm \-rW60 \-rN2 \-rO0 ch1 ch2 ch3" > indexfile
+.RE
+would produce a subject-page index for the documents 
+.IR ch1 , 
+.IR ch2 , 
+.IR ch3 .
+The page number would correspond to the documents produced by
+.RS
+mm \-rW60 \-rN2 \-rO0 ch1 ch2 ch3
+.RE
+The command
+.RS
+ndx subfile "troff \-rB2 \-rW5i \-rO1.5i \-mm file" > indexfile
+.RE
+would produce a subject-page index for the document
+.I file
+and the page numbers would correspond to the document produced by
+.RS
+troff \-rB2 \-rW5i \-rO1.5i \-mm file
+.RE
+.SH SEE ALSO
+mm(1),
+mmt(1),
+nroff(1),
+subj(1),
+troff(1).

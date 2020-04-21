@@ -1,0 +1,58 @@
+'\" t
+.TH pushattributes 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pushattributes
+\- saves the global state attributes 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushattributes()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushat"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushattributes;"
+.SH DESCRIPTION
+.B pushattributes
+saves the global state attributes.
+The system maintains a stack of attributes,
+and
+.B pushattributes
+puts copies of 
+them on the stack.
+The global state attributes that are saved include:  
+.sp
+.TS
+center, box;
+cB s
+l l.
+Attributes
+_
+backbuffer	pattern	
+color	raster font		
+frontbuffer	resetlinestyle	
+linestyle	RGB color
+linestyle backup	RGB writemask 
+linewidth	writemask pattern 
+lsrepeat
+.TE
+.sp
+.PP
+The attribute stack is 10 levels deep.
+.B pushattributes
+is ignored if the stack is full.
+.SH "SEE ALSO"
+backbuffer, color, frontbuffer, 
+linewidth, lsbackup, lsrepeat,
+popattributes, resetls, RGBcolor, RGBmode,
+RGBwritemask, setlinestyle, setpattern, writemask
+.sp
+.I Programming Guide,
+Section 2.2, Saving Global State Attributes

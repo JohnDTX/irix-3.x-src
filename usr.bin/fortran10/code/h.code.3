@@ -1,0 +1,1050 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.3.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               04-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure store(from_cattr,to_cattr: cattr; fsize: integer);
+  var op,instsize,destmode,destreg,i,commonlev,fdatalev,flo,fhi: integer;
+      ClearFlag,FDataFlag,DoIt,CCValid,Small,ValInDReg,CCtoDreg: Boolean;
+      d,a,a2,base: pregrec; inst: array[1..4] of integer;
+      ftndlev,ftndrefloc,valregno: integer; valregstuff: regvalrec;
+begin
+DoIt := TRUE;
+case fsize of
+  BYTE: op := 4096;  { MOVE.B }
+  WORD: op := 12288; { MOVE.W }
+  LONG: op := 8192;  { MOVE.L }
+  QUAD: begin
+        DoIt := FALSE;
+        if LastPushQ and (from_cattr.ckind = STCK)
+        then begin
+             ungen(4); d := getreg(D0,D0); a := getreg(D1,D1);
+             { MOVEM.L D0/D1,xxx }
+             geneffaddr(18624,to_cattr,WORD,TRUE,3);
+             freereg(d); freereg(a);
+             end
+        else begin
+             a := loadaddress(to_cattr); isolate(a);
+             case from_cattr.ckind of
+                  ADDR,
+                  VARB,
+                  FDAT,
+                  INDX: begin
+                        a2 := loadaddress(from_cattr); isolate(a2);
+                        lock(a2); load(a);
+                        { MOVE.L (A2)+,(A)+ } genrr(8408,a,a2);
+                        { MOVE.L (A2)+,(A)+ } genrr(8408,a,a2);
+                        unlock(a2); freereg(a2); incrv(a2^.regno,8);
+                        end;
+                  CNST: begin
+                        if gcattr.cvalu.lvalu = 0
+                        then { CLR.L (A)+ } genr(17048,a)
+                        else begin
+                             { MOVE.L #xxx,(A)+ } genr0(8444,a);
+                                                  gen2(gcattr.cvalu.lvalu);
+                             end;
+                        if gcattr.cvalu.lvalu2 = 0
+                        then { CLR.L (A)+ } genr(17048,a)
+                        else begin
+                             { MOVE.L #xxx,(A)+ } genr0(8444,a);
+                                                  gen2(gcattr.cvalu.lvalu2);
+                             end;
+                        end;
+                  STCK: begin
+                        { MOVE.L (SP)+,(A)+ } genr0(8415,a);
+                        { MOVE.L (SP)+,(A)+ } genr0(8415,a);
+                        end;
+             end; {case}
+             freereg(a); incrv(a^.regno,8);
+             end;
+        end;
+end; {case}
+instsize := 0; ClearFlag := FALSE; FDataFlag := FALSE; CCtoDreg := FALSE;
+CCValid := FALSE; ftndrefloc := 0; ValInDReg := FALSE;
+
+if DoIt
+then begin
+     makevalid(to_cattr); lockcattr(to_cattr); makevalid(from_cattr);
+     with from_cattr do begin
+          if (ckind = VARB) or (ckind = FDAT) then findvarb(from_cattr,fsize);
+          case ckind of
+               EXPR: begin
+                     ValInDReg := TRUE; valregstuff.rvkind := UNKNRV;
+                     valregno := exreg^.regno;
+                     op := op + valregno;
+                     end;
+               ADDR: if aoffset = 0
+                     then op := op + 8 + adreg^.regno
+                     else begin
+                          op := op + 32 + adreg^.regno; instsize := 1;
+                          inst[1] := aoffset;
+                          end;
+               CNST: if cvalu.lvalu = 0
+                     then begin
+                          ClearFlag := TRUE;
+                          if IsAReg(to_cattr)
+                          then { SUBA.L A,A }
+                               op := -32320 + to_cattr.exreg^.regno*512
+                          else begin
+                               case fsize of
+                                 BYTE: op := 16896; { CLR.B }
+                                 WORD: op := 16960; { CLR.W }
+                                 LONG: op := 17024; { CLR.L }
+                                 QUAD: { Error };
+                               end; {case}
+                               end
+                          end
+                     else begin
+                          Small := (cvalu.lvalu <= 127) and
+                                        (cvalu.lvalu >= -128);
+                          if Small and IsDReg(to_cattr)
+                          then begin
+                               op := 28672 + cvalu.lvalu; { MOVEQ }
+                               if cvalu.lvalu < 0 then op := op + 256;
+                               with reg[to_cattr.exreg^.regno].v do begin
+                                    rvkind := CNSTRV; rvsize := LONG;
+                                    ival := cvalu.lvalu;
+                                    end;
+                               end
+                          else if FindCnst(d,cvalu.lvalu,fsize)
+                               then begin
+                                    ckind := EXPR; exreg := d;
+                                    op := op + d^.regno;
+                                    end
+                               else if Small and ((fsize = LONG) or
+                                                  FreeRegs(D0,D2))
+                                    then begin
+                                         d := loadint(cvalu.lvalu,LONG);
+                                         ckind := EXPR; exreg := d;
+                                         op := op + d^.regno;
+                                         end
+                                    else begin
+                                         op := op + 60;
+                                         if fsize <= 2
+                                         then begin
+                                              inst[1] := cvalu.ivalu[1];
+                                              instsize := 1;
+                                              end
+                                         else begin
+                                              inst[1] := cvalu.ivalu[0];
+                                              inst[2] := cvalu.ivalu[1];
+                                              instsize := 2;
+                                              end;
+                                         end;
+                          end;
+               INDX: begin
+                     fixindxoffset(from_cattr);
+                     op := op + 40 + inxareg^.regno;
+                     instsize := 1;
+                     inst[1] := inxrreg^.regno*4096 + inoffset;
+                     if LongIndex then inst[1] := inst[1] + 2048;
+                     end;
+               VARB: begin
+                     base := getbase(vlev); op := op + 32 + base^.regno;
+                     if voffset = 0
+                     then op := op - 24
+                     else begin instsize := 1; inst[1] := voffset; end;
+                     ckind := ADDR; adreg := base; { So will free base }
+                     end;
+               FDAT: begin
+                     op := op + 57; gethilo(doffset,fhi,flo);
+                     inst[1] := fhi; inst[2] := flo; instsize := 2;
+                     FDataFlag := TRUE; fdatalev := flev;
+                     end;
+               BOOL,
+               COND,
+               BITZ: begin
+                     if (to_cattr.ckind = EXPR) and (ckind = COND) and
+                        (to_cattr.exreg^.regno <= D7)
+                     then CCtoDreg := TRUE
+                     else begin
+                          d := loadd(from_cattr,fsize); op := op + d^.regno;
+                          ckind := EXPR; exreg := d; { So will free d }
+                          end;
+                     end;
+               STCK: op := op + 31;
+          end; {case}
+          end;
+     unlockcattr(to_cattr); lockcattr(from_cattr);
+     with to_cattr do
+          case ckind of
+               EXPR: begin
+                     destreg := exreg^.regno; erase(exreg);
+                     if destreg <= 7
+                     then begin destmode := 0; CCValid := TRUE; end
+                     else begin destreg := destreg - 8; destmode := 1; end;
+                     end;
+               ADDR: begin
+                     if aoffset = 0
+                     then destmode := 2
+                     else begin
+                          destmode := 5; instsize := instsize + 1;
+                          inst[instsize] := aoffset;
+                          end;
+                     destreg := adreg^.regno - 8; freereg(adreg);
+                     end;
+               INDX: begin
+                     fixindxoffset(to_cattr); destmode := 6;
+                     destreg := inxareg^.regno - 8; instsize := instsize + 1;
+                     inst[instsize] := inoffset + inxrreg^.regno*4096;
+                     if LongIndex then inst[instsize] := inst[instsize] + 2048;
+                     freereg(inxrreg); freereg(inxareg);
+                     end;
+               VARB: begin
+                     with valregstuff do begin
+                          rvsize := fsize; rvkind := VALURV;
+                          rvlev := vlev; rvoffset := voffset;
+                          rvReadOnly := FALSE;
+                          end;
+                     base := getbase(vlev); freereg(base);
+                     destreg := base^.regno - 8;
+                     if voffset = 0
+                     then destmode := 2
+                     else begin
+                          destmode := 5; instsize := instsize + 1;
+                          inst[instsize] := voffset;
+                          end;
+                     end;
+               FDAT: begin
+                     with valregstuff do begin
+                          rvsize := fsize; rvkind := VALURV;
+                          rvlev := -flev; rvoffset := doffset;
+                          rvReadOnly := FALSE;
+                          end;
+                     ftndlev := flev; ftndrefloc := instsize + 1;
+                     gethilo(doffset,fhi,flo); destmode := 7;
+                     destreg := 1; instsize := instsize + 2;
+                     inst[instsize - 1] := fhi; inst[instsize] := flo;
+                     end;
+               STCK: begin destmode := 4; destreg := 7; end;
+          end; {case}
+     unlockcattr(from_cattr);
+     if CCtoDreg
+     then begin
+          { SCC xx,D } genr(20672 + ord(from_cattr.cc)*256,to_cattr.exreg);
+          { NEG.B D  } genr(17408,to_cattr.exreg);
+          end
+     else if ClearFlag
+          then gen(op + destmode*8 + destreg)
+          else gen(op + destmode*64 + destreg*512);
+     if FDataFlag then ftndref(fdatalev);
+     for i := 1 to instsize do begin
+         if ftndrefloc = i then ftndref(ftndlev);
+         gen(inst[i]);
+         end;
+     with from_cattr do
+          case ckind of
+               EXPR: freereg(exreg);
+               ADDR: freereg(adreg);
+               INDX: begin freereg(inxareg); freereg(inxrreg); end;
+          end; {case}
+     if CCValid then ccodereg := destreg;
+     forgetcattr(to_cattr,fsize);
+     if ValInDReg and (valregstuff.rvkind <> UNKNRV) and
+        (reg[valregno].v.rvkind = UNKNRV)
+     then reg[valregno].v := valregstuff;
+     end; {if DoIt}
+end; {store}
+
+function GenCompare(acattr,bcattr: cattr; fsize: integer): Boolean;
+  var ImmFlag,FreeFlag,DoIt: Boolean; lcattr: cattr;
+      d: pregrec; immvalue: longint; lop: integer;
+begin
+GenCompare := FALSE; ImmFlag := FALSE; FreeFlag := FALSE; DoIt := TRUE;
+makevalid(acattr);
+if acattr.ckind = COND then d := loadd(acattr,fsize);
+lockcattr(acattr); makevalid(bcattr);
+if bcattr.ckind = COND then d := loadd(bcattr,fsize);
+if (bcattr.ckind = BOOL) or (bcattr.ckind = BITZ)
+then d := loadd(bcattr,fsize);
+unlockcattr(acattr); lockcattr(bcattr);
+if (acattr.ckind = BOOL) or (acattr.ckind = BITZ)
+then d := loadd(acattr,fsize);
+unlockcattr(bcattr);
+if acattr.ckind = CNST
+then begin
+     lcattr := bcattr; GenCompare := TRUE;
+     if lcattr.ckind = CNST then d := loadd(lcattr,fsize);
+     if acattr.cvalu.lvalu = 0
+     then if IsAReg(lcattr)
+          then begin
+               d := getreg(D0,D7); lock(d); FreeFlag := TRUE;
+               { MOVE.L } lop := 8064 + d^.regno*512;
+               end
+          else begin
+               lop := 18944; { TST }
+               if IsDReg(lcattr)
+               then if lcattr.exreg^.InReg
+                    then if ccodereg = lcattr.exreg^.regno
+                         then DoIt := FALSE;
+               end
+     else if (fsize = LONG) and (acattr.cvalu.lvalu >= -128) and
+             (acattr.cvalu.lvalu <= 127)
+          then begin
+               d := loadint(acattr.cvalu.lvalu,LONG);
+               acattr.ckind := EXPR; acattr.exreg := d;
+               lop := -20480 + d^.regno*512; lock(d); FreeFlag := TRUE;
+               GenCompare := FALSE;
+               end
+          else if IsAReg(lcattr)
+               then begin
+                    { CMPA } lop := -24256 + lcattr.exreg^.regno*512;
+                    freereg(lcattr.exreg);
+                    lcattr := acattr; GenCompare := TRUE;
+                    end
+               else begin
+                    ImmFlag := TRUE; lop := 3072; { CMPI }
+                    immvalue := acattr.cvalu.lvalu;
+                    end
+     end
+else if bcattr.ckind = CNST
+     then begin
+          lcattr := acattr;
+          if bcattr.cvalu.lvalu = 0
+          then if IsAReg(lcattr)
+               then begin
+                    d := getreg(D0,D7); lock(d); FreeFlag := TRUE;
+                    { MOVE.L } lop := 8064 + d^.regno*512;
+                    end
+               else begin
+                    lop := 18944; { TST }
+                    if IsDReg(lcattr)
+                    then if lcattr.exreg^.InReg
+                         then if ccodereg = lcattr.exreg^.regno
+                              then DoIt := FALSE;
+                    end
+          else if (fsize = LONG) and (bcattr.cvalu.lvalu >= -128) and
+                  (bcattr.cvalu.lvalu <= 127)
+               then begin
+                    d := loadint(bcattr.cvalu.lvalu,LONG);
+                    bcattr.ckind := EXPR; bcattr.exreg := d;
+                    lop := -20480 + d^.regno*512; lock(d); FreeFlag := TRUE;
+                    GenCompare := TRUE;
+                    end
+               else if IsAReg(lcattr)
+                    then begin
+                         { CMPA } lop := -24256 + lcattr.exreg^.regno*512;
+                         freereg(lcattr.exreg);
+                         lcattr := bcattr; GenCompare := FALSE;
+                         end
+                    else begin
+                         ImmFlag := TRUE; lop := 3072; { CMPI }
+                         immvalue := bcattr.cvalu.lvalu;
+                         end
+          end
+     else begin
+          if (bcattr.ckind = STCK) and (acattr.ckind = STCK)
+          then d := loadd(bcattr,fsize);
+          if bcattr.ckind = EXPR
+          then begin
+               lcattr := acattr; GenCompare := TRUE;
+               d := loadd(bcattr,fsize);
+               end
+          else begin d := loadd(acattr,fsize); lcattr := bcattr; end;
+          lop := -20480 + d^.regno*512; lock(d); FreeFlag := TRUE;
+          end;
+if fsize = WORD
+then lop := lop + 64
+else if fsize = LONG
+     then lop := lop + 128;
+if DoIt
+then geneffaddr(lop,lcattr,fsize,ImmFlag,immvalue)
+else freereg(lcattr.exreg);
+if FreeFlag then begin unlock(d); freereg(d); end;
+end; {GenCompare}
+
+procedure gencall; forward;
+
+procedure expression(fop: integer); forward;
+
+procedure exppushaddr(fop: integer);
+begin
+if fop = 12 {UPARROW}
+then begin expression(nextbyte); pushvalue(gcattr,LONG); end
+else begin expression(fop); pushaddress(gcattr); end;
+end; {exppushaddr}
+
+procedure pushset(fcattr: cattr; fbytes: integer; LenFlag: Boolean);
+  var a,d: pregrec; lop,lbytes,lsize,i: integer; lpint: pintlist;
+      arr: array[1..9] of integer;
+begin
+if (fcattr.ckind = CNST) and (fbytes <= 16)
+then begin
+     if odd(fbytes) then fbytes := fbytes + 1;
+     lbytes := fbytes; i := lbytes div 2; arr[i + 1] := fbytes;
+     lpint := fcattr.cvalu.setvalu;
+     while lbytes > 0 do begin
+           if lpint = nil
+           then arr[i] := 0
+           else begin arr[i] := lpint^.int; lpint := lpint^.next; end;
+           i := i - 1; lbytes := lbytes - 2;
+           end;
+     if LenFlag then fbytes := fbytes + 2;
+     i := 1;
+     while fbytes >= 4 do begin
+           pushint(arr[i + 1]*65536 + (ord4(arr[i]) and $ffff),LONG);
+           i := i + 2; fbytes := fbytes - 4;
+           end;
+     if fbytes > 0 then pushint(arr[i],WORD);
+     end
+else begin
+     if fbytes <= 4
+     then begin
+          if fbytes = 1
+          then begin
+               d := getreg(D0,D7); lock(d);
+               { CLR.W D } genr(16960,d);
+               { MOVE.B ,D } geneffaddr(4096+d^.regno*512,fcattr,BYTE,FALSE,0);
+               fcattr.ckind := EXPR; fcattr.exreg := d; unlock(d);
+               end;
+          if fbytes <= 2
+          then begin { MOVE.W ?,-(SP) } lop := 16128; lsize := WORD; end
+          else begin { MOVE.L ?,-(SP) } lop := 12032; lsize := LONG; end;
+          geneffaddr(lop,fcattr,lsize,FALSE,0);
+          end
+     else begin
+          if fcattr.ckind <> CNST
+          then incoffset(fcattr,fbytes);
+          a := loadaddress(fcattr); isolate(a);
+          if fbytes <= 16
+          then begin
+               lbytes := fbytes;
+               while lbytes >= 4 do begin
+                     { MOVE.L -(A),-(SP) } genr(12064,a);
+                     lbytes := lbytes - 4;
+                     end;
+               if lbytes > 0
+               then { MOVE.W -(A),-(SP) } genr(16160,a);
+               end
+          else begin
+               d := loadint(fbytes div 4 - 1,WORD); isolate(d);
+               { MOVE.L -(A),-(SP) } genr(12064,a);
+               { DBRA D,$-4 } genr(20936,d); gen(-4);
+               if odd(fbytes div 2)
+               then { MOVE.W -(A),-(SP) } genr(16160,a);
+               freereg(d); erase(d);
+               end;
+          freereg(a); erase(a);
+          end;
+     if odd(fbytes) then fbytes := fbytes + 1;
+     if LenFlag then pushint(fbytes,WORD);
+     end;
+end; {pushset}
+
+procedure setexpression(fop: integer; var FOnStack: Boolean);
+  var setsize,i,lop,lsize,lopsize,finalsize,initsize: integer; d: pregrec;
+      lint,newint: pintlist; lcattr: cattr; LeftStack,RightStack: Boolean;
+      initwords,finalwords: integer;
+begin
+FOnStack := FALSE;
+case fop of
+      1, { GLOBAL }
+      2, { LOCAL }
+      3, { INTER }
+      4, { COMMON }
+      5, { FCOMMON }
+     12, { UPARROW }
+     13, { FILE^ }
+     15, { FIELD }
+     16, { INDX1 }
+     17, { INDX2 }
+     18, { INDX4 }
+     19, { INDX8 }
+     20, { INDXBIG }
+     21, { INDXPCK }
+     22, { ADDRESS }
+     43: { WITHREC }
+         expression(fop);
+     30: { SETCNST }
+         begin
+         setsize := nextbyte; lint := nil;
+         for i := 1 to setsize do begin
+             if odd(i)
+             then begin
+                  new(newint); newint^.int := nextbyte;
+                  newint^.next := lint; lint := newint;
+                  end
+             else lint^.int := lint^.int + nextbyte*256;
+             end;
+         with gcattr do begin
+              ckind := CNST; cvalu.cstkind := SETCNST;
+              cvalu.setbytes := setsize; cvalu.setvalu := lint;
+              cvalu.FrontAddress := FALSE;
+              end;
+         end;
+     31: { NULLSET }
+         with gcattr do begin
+              ckind := CNST; cvalu.cstkind := SETCNST;
+              new(lint); lint^.next := nil; lint^.int := 0;
+              cvalu.setbytes := 1; cvalu.setvalu := lint;
+              cvalu.FrontAddress := FALSE;
+              end;
+    160, { UNION }
+    161, { DIFF }
+    162: { INTER }
+         begin
+         setsize := nextbyte; setexpression(nextbyte,LeftStack);
+         lcattr := gcattr; setexpression(nextbyte,RightStack);
+         FOnStack := LeftStack or RightStack or (setsize > 4);
+         if FOnStack
+         then begin
+              if not LeftStack then pushset(lcattr,setsize,TRUE);
+              if not RightStack then pushset(gcattr,setsize,TRUE);
+              case fop of
+                   160: genjsra('%_UNION ');
+                   161: if RightStack and not LeftStack
+                        then genjsra('%_RDIFF ')
+                        else genjsra('%_DIFF  ');
+                   162: genjsra('%_INTER ');
+              end; {case}
+              end
+         else begin
+              make2valid(gcattr,lcattr);
+              if fop = 160
+              then lop := -32767 - 1 { OR }
+              else lop := -16384; { AND }
+              if setsize = 1
+              then begin lopsize := 0; lsize := BYTE; end
+              else if setsize = 2
+                   then begin lopsize := 64; lsize := WORD; end
+                   else begin lopsize := 128; lsize := LONG; end;
+              lop := lop + lopsize;
+              if fop = 161
+              then begin
+                   lockcattr(lcattr); d := loadd(gcattr,lsize);
+                   isolate(d); { NOT d } genr(17920 + lopsize,d);
+                   erase(d);
+                   unlockcattr(lcattr);
+                   end;
+              if lcattr.ckind = EXPR
+              then begin d := lcattr.exreg; lcattr := gcattr; end
+              else begin
+                   lockcattr(lcattr); d := loadd(gcattr,lsize);
+                   unlockcattr(lcattr);
+                   end;
+              if lcattr.ckind = CNST
+              then begin
+                   lint := lcattr.cvalu.setvalu;
+                   lcattr.cvalu.cstkind := SCALCNST;
+                   if lint <> nil
+                   then begin
+                        lcattr.cvalu.ivalu[1] := lint^.int;
+                        lcattr.cvalu.ivalu[0] := lcattr.cvalu.ivalu[1];
+                        lint := lint^.next;
+                        end
+                   else lcattr.cvalu.ivalu[1] := 0;
+                   if lint <> nil
+                   then lcattr.cvalu.ivalu[1] := lint^.int
+                   else lcattr.cvalu.ivalu[0] := 0;
+                   end;
+              lock(d); geneffaddr(lop + d^.regno*512,lcattr,lsize,FALSE,0);
+              unlock(d); gcattr.ckind := EXPR; gcattr.exreg := d;
+              erase(d);
+              end;
+         end;
+    168: { SINGSET }
+         begin
+         setsize := nextbyte; expression(nextbyte); pushvalue(gcattr,WORD);
+         genjsra('%_SING  '); FOnStack := TRUE;
+         end;
+    169: { SETRANGE }
+         begin
+         setsize := nextbyte; expression(nextbyte); pushvalue(gcattr,WORD);
+         expression(nextbyte); pushvalue(gcattr,WORD);
+         genjsra('%_RANGE '); FOnStack := TRUE;
+         end;
+    170: { ADJSET }
+         begin
+         { n --> 0    Push set }
+         { 0 --> n    Adjust set that is already on the stack }
+         { n --> m    Adjust set that may be on the stack }
+         finalsize := nextbyte; initsize := nextbyte;
+         if finalsize = 1 then finalsize := 2;
+         setexpression(nextbyte,FOnStack);
+         if (gcattr.ckind = CNST) and not FOnStack and (finalsize <> 0)
+         then begin
+              initwords := (initsize + 1) div 2;
+              finalwords := (finalsize + 1) div 2;
+              if initwords > finalwords
+              then for i := finalwords + 1 to initwords do
+                       gcattr.cvalu.setvalu := gcattr.cvalu.setvalu^.next
+              else for i := initwords + 1 to finalwords do
+                       begin
+                       new(lint); lint^.int := 0;
+                       lint^.next := gcattr.cvalu.setvalu;
+                       gcattr.cvalu.setvalu := lint;
+                       end;
+              gcattr.cvalu.setbytes := finalsize;
+              end
+         else begin
+              if not FOnStack then pushset(gcattr,initsize,TRUE);
+              (*** The old way: if finalsize <> 0 ***)
+              (*** The new way: ***)
+              if (initsize <> finalsize) and (finalsize <> 0)
+              then begin
+                   pushint(finalsize,WORD); genjsra('%_ADJSZ ');
+                   end;
+              FOnStack := TRUE;
+              end;
+        end;
+end; {case}
+end; {setexpression}
+
+procedure fchexpression(fop,routine: integer); forward;
+
+procedure pushfchaddr(fop: integer);
+  var SubStrFlag,LCFlag,UpArrowFlag: Boolean; a: pregrec; lsize,lop: integer;
+      lcattr: cattr;
+begin
+if fop = 217 {FCHTEMP}
+then begin
+     lsize := nextword;
+     gettemp(lcattr,lsize);
+     pushaddress(lcattr);
+     { CLR.L -(SP) } gen(17063);
+     fchexpression(nextbyte,0);
+     end
+else if fop = 213 {CHFRSLT}
+     then begin
+          lsize := nextword; { Cannot be size 0 }
+          gettemp(lcattr,lsize);
+          pushaddress(lcattr);
+          pushint(lsize,LONG);
+          fop := nextbyte;
+          (****) if fop <> 190 {PARMLST}
+          (****) then writeln('CHFRSLT w/o PARMLST');
+          gencall;
+          end
+     else if fop = 190 {PARMLST}
+          then gencall
+          else begin
+               SubStrFlag := fop = 222 {FSUBSTR};
+               if SubStrFlag then fop := nextbyte;
+               LCFlag := FALSE; UpArrowFlag := FALSE;
+               if fop = 223 {MKFCH}
+               then begin
+                    lsize := nextword;
+                    if lsize = 0
+                    then begin { Must be a reference parameter }
+                         lop := nextbyte;
+                         (****) if lop <> 12 {UPARROW}
+                         (****) then writeln('*** Not a ref param!!! ***');
+                         end
+                    else if lsize < 0
+                         then begin
+                              expression(nextbyte); lcattr := gcattr;
+                              LCFlag := TRUE;
+                              end;
+                    lop := nextbyte;
+                    if lop = 12 {UPARR}
+                    then begin UpArrowFlag := TRUE; lop := nextbyte; end;
+                    expression(lop);
+                    end
+               else begin { PAOC Constant }
+                    (****) if fop <> 29 {PAOCNST}
+                    (****) then writeln('pushfchaddr w/o PAOCNST');
+                    expression(fop);
+                    lsize := gcattr.cvalu.len;
+                    end;
+               if LCFlag then make2valid(gcattr,lcattr) else makevalid(gcattr);
+               if lsize = 0
+               then begin
+                    if UpArrowFlag then uparrow(gcattr);
+                    a := loadaddress(gcattr);
+                    { MOVE.L (A),-(SP) }  genr(12048,a);
+                    { MOVE.L -(A),-(SP) } genr(12064,a);
+                    freereg(a); incrv(a^.regno,-4);
+                    end
+               else begin
+                    if LCFlag then lockcattr(lcattr);
+                    if UpArrowFlag
+                    then pushvalue(gcattr,LONG)
+                    else pushaddress(gcattr);
+                    if LCFlag then unlockcattr(lcattr);
+                    if lsize > 0
+                    then pushint(lsize,LONG)
+                    else pushvalue(lcattr,LONG);
+                    end;
+               if SubStrFlag
+               then begin
+                    expression(nextbyte); pushvalue(gcattr,WORD);
+                    lop := nextbyte;
+                    if lop = 23 {NIL}
+                    then genjsra('%FC_SUB1')
+                    else begin
+                         expression(lop);
+                         pushvalue(gcattr,WORD);
+                         genjsra('%FC_SUB ');
+                         end;
+                    end;
+               end;
+end; {pushfchaddr}
+
+procedure fchexpression{*fop,routine: integer*};
+  var lroutine: integer;
+begin
+while fop = 221 {FCONCAT} do begin
+      if routine = 2 {FIN}
+      then lroutine := 1 {ASS}
+      else lroutine := routine;
+      fchexpression(nextbyte,lroutine);
+      fop := nextbyte;
+      end;
+pushfchaddr(fop);
+saveallregs;
+if routine = 0
+then genjsra('%FC_TMP ')
+else if routine = 1
+     then genjsra('%FC_ASS ')
+     else genjsra('%FC_FIN ');
+clearscr;
+end; {fchexpression}
+
+procedure ignorexp(fsize: integer);
+begin
+with gcattr do
+     case ckind of
+          BOOL,
+          BITZ,
+          EXPR: freereg(exreg);
+          ADDR: freereg(adreg);
+          INDX: begin freereg(inxareg); freereg(inxrreg); end;
+          STCK: { ADDQ.W #fsize,SP } gen(20559 + (fsize mod 8)*512);
+     end; {case}
+end; {ignorexp}
+           
+procedure transop(fop: integer);
+  var lsize,n: integer; lcattr: cattr; TempFlag: Boolean;
+begin
+TempFlag := FALSE; expression(nextbyte);
+if odd(fop)
+then begin lsize := QUAD; n := 8; end
+else begin lsize := LONG; n := 4; end;
+if TArgKind[fop]
+then if (gcattr.ckind = ADDR) or (gcattr.ckind = VARB) or
+        (gcattr.ckind = FDAT) or (gcattr.ckind = INDX)
+     then pushaddress(gcattr)
+     else begin
+          gettemp(lcattr,n); TempFlag := TRUE;
+          store(gcattr,lcattr,lsize);
+          pushaddress(lcattr);
+          end
+else pushvalue(gcattr,lsize);
+saveallregs; genjsra(tname[fop]); clearscr;
+if TempFlag then freetemp(lcattr,n);
+if lsize = LONG
+then begin
+     gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D0);
+     end
+else begin
+     { MOVEM.L D0/D1,-(SP) } gen(18663); gen(-16384);
+     gcattr.ckind := STCK; LastPushQ := TRUE;
+     end;
+end; {transop}
+
+procedure skycmd(fop: integer);
+begin
+if SKY_FLAG
+then if SKY_LONG
+     then begin
+          { MOVE.W #fop,SKYC.L } gen(13308); gen(fop+$1000); gen2(SKYADDRESS);
+          end
+     else begin
+          { MOVE.W #fop,SKYC.W } gen(12796); gen(fop+$1000); gen(SKYADDRESS);
+          end;
+end; {skycmd}
+
+procedure putsky(fcattr: cattr; fsize: integer);
+  var a: pregrec;
+begin
+if SKY_FLAG
+then begin
+     if fcattr.ckind = STCK
+     then begin
+          if SKY_LONG
+          then begin
+               { MOVE.L (SP)+,SKYD.L } gen(9183); gen2(SKYADDRESS+4);
+               end
+          else begin
+               { MOVE.L (SP)+,SKYD.W } gen(8671); gen(SKYADDRESS+4);
+               end;
+          if fsize = QUAD
+          then begin
+               if SKY_LONG
+               then begin
+                    { MOVE.L (SP)+,SKYD.L } gen(9183); gen2(SKYADDRESS+4);
+                    end
+               else begin
+                    { MOVE.L (SP)+,SKYD.W } gen(8671); gen(SKYADDRESS+4);
+                    end;
+               end;
+          end
+     else if fsize = LONG
+          then if SKY_LONG
+               then begin
+                    { MOVE.L ea,SKYD.L } geneffaddr(9152,fcattr,LONG,FALSE,0);
+                                         gen2(SKYADDRESS+4);
+                    end
+               else begin
+                    { MOVE.L ea,SKYD.W } geneffaddr(8640,fcattr,LONG,FALSE,0);
+                                         gen(SKYADDRESS+4);
+                    end
+          else if fcattr.ckind = CNST
+               then if SKY_LONG
+                    then begin
+                         { MOVE.L #xxx,SKYD.L } gen(9212);
+                                                gen2(fcattr.cvalu.lvalu);
+                                                gen2(SKYADDRESS+4);
+                         { MOVE.L #xxx,SKYD.L } gen(9212);
+                                                gen2(fcattr.cvalu.lvalu2);
+                                                gen2(SKYADDRESS+4);
+                         end
+                    else begin
+                         { MOVE.L #xxx,SKYD.W } gen(8700);
+                                                gen2(fcattr.cvalu.lvalu);
+                                                gen(SKYADDRESS+4);
+                         { MOVE.L #xxx,SKYD.W } gen(8700);
+                                                gen2(fcattr.cvalu.lvalu2);
+                                                gen(SKYADDRESS+4);
+                         end
+               else begin
+                    a := loadaddress(fcattr); isolate(a);
+                    if SKY_LONG
+                    then begin
+                         { MOVE.L (A)+,SKYD.L } genr(9176,a);
+                                                gen2(SKYADDRESS+4);
+                         { MOVE.L (A)+,SKYD.L } genr(9176,a);
+                                                gen2(SKYADDRESS+4);
+                         end
+                    else begin
+                         { MOVE.L (A)+,SKYD.W } genr(8664,a);
+                                                gen(SKYADDRESS+4);
+                         { MOVE.L (A)+,SKYD.W } genr(8664,a);
+                                                gen(SKYADDRESS+4);
+                         end;
+                    incrv(a^.regno,8); freereg(a);
+                    end;
+     end;
+end; {putsky}
+
+procedure getsky(fsize: integer);
+  var d: pregrec;
+begin
+if SKY_FLAG
+then begin
+     d := getreg(D0,D7);
+     if SKY_LONG
+     then begin
+          { MOVE.L SKYD.L,D } genr0(8249,d); gen2(SKYADDRESS+4);
+          end
+     else begin
+          { MOVE.L SKYD.W,D } genr0(8248,d); gen(SKYADDRESS+4);
+          end;
+     if fsize = LONG
+     then begin
+          gcattr.ckind := EXPR; gcattr.exreg := D;
+          end
+     else begin
+          if SKY_LONG
+          then begin
+               { MOVE.L SKYD.L,-(SP) } gen(12089); gen2(SKYADDRESS+4);
+               end
+          else begin
+               { MOVE.L SKYD.W,-(SP) } gen(12088); gen(SKYADDRESS+4);
+               end;
+          { MOVE.L D,-(SP) } genr(12032,d);
+          freereg(d);
+          gcattr.ckind := STCK;
+          end;
+     end;
+end; {getsky}
+
+procedure skyarg(fop,fsize,tsize: integer);
+begin
+if SKY_FLAG
+then begin
+     expression(nextbyte);
+     skycmd(fop); putsky(gcattr,fsize); getsky(tsize);
+     end;
+end; {skyarg}
+
+procedure sky44(fop: integer);
+  var lcattr: cattr; d: pregrec;
+begin
+if SKY_FLAG
+then begin
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     skycmd(fop);
+     if (lcattr.ckind = STCK) and (gcattr.ckind = STCK)
+     then d := loadd(gcattr,LONG);
+     putsky(lcattr,LONG); putsky(gcattr,LONG); getsky(LONG);
+     end;
+end; {sky44}
+
+procedure hitcmd(fop: integer);
+begin
+if HIT_FLAG
+then begin
+     { MOVE.W #fop,HITC.W } gen(12796); gen(fop+$1000); gen(HITADDRESS);
+     end;
+end; {hitcmd}
+
+procedure puthit(fcattr: cattr);
+begin
+if HIT_FLAG
+then begin
+     { MOVE.L ea,HITD.W } geneffaddr(8640,fcattr,LONG,FALSE,0);
+                          gen(HITADDRESS+4);
+     end;
+end; {puthit}
+
+procedure waithit(n: integer);
+  var d: pregrec;
+begin
+if HIT_FLAG
+then begin
+     d := loadint(n,WORD); isolate(d); erase(d);
+     { DBRA D,$ } genr($51C8,d); gen(-2);
+     { NOP } gen($4E71);
+     { TST.W HITS.w } gen($4A78); gen(HITADDRESS+2);
+     { BGE.S $-4 } gen($6CFA);
+     freereg(d);
+     end;
+end; {waithit}
+
+procedure gethit;
+  var d: pregrec;
+begin
+if HIT_FLAG
+then begin
+     d := getreg(D0,D7);
+     { MOVE.L HITD.W,D } genr0(8248,d); gen(HITADDRESS+4);
+     gcattr.ckind := EXPR; gcattr.exreg := d;
+     end;
+end; {gethit}
+
+procedure hit1expr(fop: integer);
+begin
+if HIT_FLAG
+then begin
+     expression(nextbyte);
+     case fop of
+       56: { FLOAT4 }
+           begin
+           hitcmd(H_I2F); puthit(gcattr); waithit(9); gethit;
+           end;
+       58: { TRUNC4 }
+           begin
+           hitcmd(H_FTRUNC); puthit(gcattr); waithit(8); gethit;
+           end;
+     otherwise: error(22000+fop);
+     end; {case}
+     end;
+end; {hit1expr}
+
+procedure hit2expr(fop: integer);
+  var lcattr: cattr;
+begin
+if HIT_FLAG
+then begin
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     case fop of
+      112: { FADD4 }
+           begin
+           hitcmd(H_FADD); puthit(lcattr); puthit(gcattr); waithit(4); gethit;
+           end;
+      114: { FSUB4 }
+           begin
+           hitcmd(H_FSUB); puthit(gcattr); puthit(lcattr); waithit(4); gethit;
+           end;
+      116: { FMUL4 }
+           begin
+           hitcmd(H_FMUL); puthit(lcattr); puthit(gcattr); waithit(4); gethit;
+           end;
+      122, { FLT4 }
+      124, { FGT4 }
+      126, { FLE4 }
+      128, { FGE4 }
+      130, { FEQ4 }
+      132: { FNE4 }
+           begin
+           hitcmd(H_FCMP); puthit(lcattr); puthit(gcattr); waithit(3);
+           { TST.W HITD.w } gen($4A78); gen(HITADDRESS+4);
+           gcattr.ckind := COND;
+           case fop of
+             122: { FLT4 } gcattr.cc := LT;
+             124: { FGT4 } gcattr.cc := EQ;
+             126: { FLE4 } gcattr.cc := NE;
+             128: { FGE4 } gcattr.cc := GE;
+             130: { FEQ4 } gcattr.cc := GT;
+             132: { FNE4 } gcattr.cc := LE;
+           end; {case}
+           end;
+     otherwise: error(23000+fop);
+     end; {case}
+     end;
+end; {hit2expr}
+
+procedure docall(var fname: alfa8; StackFlag: Boolean; fsize: integer);
+  var d,d2: pregrec;
+begin
+if not StackFlag
+then if fsize > 0
+     then begin
+          d := getreg(D0,D0);
+          if fsize = 8 then d2 := getreg(D1,D1);
+          end;
+genjsra(fname);
+if StackFlag
+then gcattr.ckind := STCK
+else if fsize > 0
+     then if fsize = 8
+          then begin
+               { MOVEM.L D0/D1,-(SP) } gen(18663); gen(-16384);
+               gcattr.ckind := STCK; freereg(d); freereg(d2);
+               end
+          else begin
+               gcattr.ckind := EXPR; gcattr.exreg := d;
+               end;
+end; {docall}
+
+procedure push4call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,LONG);
+docall(fname,StackFlag,n);
+end; {push4call}
+
+procedure push44call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,LONG);
+expression(nextbyte); pushvalue(gcattr,LONG);
+docall(fname,StackFlag,n);
+end; {push44call}
+
+procedure push8call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,QUAD);
+docall(fname,StackFlag,n);
+end; {push8call}
+
+procedure push88call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,QUAD);
+expression(nextbyte); pushvalue(gcattr,QUAD);
+docall(fname,StackFlag,n);
+end; {push88call}
+
+procedure pushaacall(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+exppushaddr(nextbyte); exppushaddr(nextbyte);
+docall(fname,StackFlag,n);
+end; {pushaacall}
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

@@ -1,0 +1,81 @@
+'\"macro stdmacro
+.\" @(#)rpc.3n	1.3 87/11/09 3.2/4.3NFSSRC
+.\" @(#)rpc.3n 1.1 86/09/25 SMI; new on release 3.0
+.TH RPC 3R
+.SH NAME
+rpc \- library routines for remote procedure calls
+.SH SYNOPSIS
+.B #include <rpc/rpc.h>
+.SH DESCRIPTION
+.IX rpc "" "RPC routines"
+.IX "remote procedure calls"
+These routines allow C programs to make procedure calls
+on other machines across the network.
+First, the client calls a procedure to send a data packet to the server.
+Upon receipt of the packet, the server calls a dispatch routine
+to perform the requested service, and then sends back a reply.
+Finally, the procedure call returns to the client.
+.SH FUNCTIONS
+.ta \w'authunix_create_default()\0\0'u
+.nf
+\s-1auth_destroy()	destroy authentication information handle
+authnone_create()	return RPC authentication handle with no checking
+authunix_create()	return RPC authentication handle with UNIX permissions 
+authunix_create_default()	return default UNIX authentication handle
+callrpc()	call remote procedure, given [prognum,versnum,procnum]
+clnt_broadcast()	broadcast remote procedure call everywhere	
+clnt_call()	call remote procedure associated with client handle
+clnt_destroy()	destroy client's RPC handle
+clnt_freeres()	free data allocated by RPC/XDR system when decoding results
+clnt_geterr()	copy error information from client handle to error structure
+clnt_pcreateerror()	print message to stderr about why client handle creation failed
+clnt_perrno()	print message to stderr corresponing to condition given
+clnt_perror()	print message to stderr about why RPC call failed
+.\"clnt_sperrno()	print message to a string corresponding to condition given
+.\"clnt_sperror()	print message to a string
+clntraw_create()	create toy RPC client for simulation
+clnttcp_create()	create RPC client using TCP transport
+clntudp_create()	create RPC client using UDP transport
+get_myaddress() 	get the machine's IP address
+pmap_getmaps()	return list of RPC program-to-port mappings
+pmap_getport()	return port number on which waits supporting service
+pmap_rmtcall()	instructs portmapper to make an RPC call
+pmap_set()	establish mapping between [prognum,versnum,procnum] and port
+pmap_unset()	destroy mapping between [prognum,versnum,procnum] and port
+registerrpc()	register procedure with RPC service package
+rpc_createerr	global variable indicating reason why client creation failed
+svc_destroy()	destroy RPC service transport handle
+svc_fds 	global variable with RPC service file descriptor mask
+svc_freeargs()	free data allocated by RPC/XDR system when decoding arguments
+svc_getargs()	decodes the arguments of an RPC request
+svc_getcaller()	get the network address of the caller of a procedure
+svc_getreq()	returns when all associated sockets have been serviced
+svc_register()	associates prognum and versnum with service dispatch procedure
+svc_run()	wait for RPC requests to arrive and call appropriate service
+svc_sendreply()	send back results of a remote procedure call
+svc_unregister()	remove mapping of [prognum,versnum] to dispatch routines
+svcerr_auth()	called when refusing service because of authentication error
+svcerr_decode()	called when service cannot decode its parameters
+svcerr_noproc()	called when service hasn't implemented the desired procedure
+svcerr_noprog()	called when program is not registered with RPC package
+svcerr_progvers()	called when version is not registered with RPC package
+svcerr_systemerr()	called when service detects system error
+svcerr_weakauth()	called when refusing service because of insufficient authentication
+svcraw_create()	creates a toy RPC service transport for testing
+svctcp_create()	creates an RPC service based on TCP transport
+svcudp_create()	creates an RPC service based on UDP transport
+xdr_accepted_reply()	generates RPC-style replies without using RPC package
+xdr_authunix_parms()	generates UNIX credentials without using RPC package
+xdr_callhdr()	generates RPC-style headers without using RPC package
+xdr_callmsg()	generates RPC-style messages without using RPC package
+xdr_opaque_auth()	describes RPC messages, externally
+xdr_pmap()	describes parameters for portmap procedures, externally
+xdr_pmaplist()	describes a list of port mappings, externally
+xdr_rejected_reply()	generates RPC-style rejections without using RPC package
+xdr_replymsg()	generates RPC-style replies without using RPC package
+xprt_register()	registers RPC service transport with RPC package 
+xprt_unregister()	unregisters RPC service transport from RPC package \s+1
+.SH SEE ALSO
+.IR "Remote Procedure Call Programming Guide" ,
+in Appendix C of the
+.IR "IRIS Communications Guide" .

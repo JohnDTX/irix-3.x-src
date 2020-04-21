@@ -1,0 +1,159 @@
+.TH defpup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B defpup 
+\- defines a menu
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "int defpup(str [, args ] ... )"
+.B "char *str;"
+.B "long args;"
+.IP 
+.TP
+FORTRAN
+.B "available only in C"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "available only in C"
+.SH DESCRIPTION
+.B defpup
+defines a pop-up menu in the window manager; it returns a positive
+menu identifier.
+.I str
+is a string that describes each menu
+item. Menu items include
+.I title, 
+.I submenu, 
+or
+.I "selectable item." 
+.I title
+is the string displayed at the top of the menu.
+.I submenu
+is an item that invokes a
+submenu with further choices if rolled off to either side.
+A
+.I "selectable item,"
+selected with the right mouse button,
+can be a numeric value, function, or
+an implied numeric value associated with it. 
+.PP
+The optional arguments [\f2, args\f1]
+provide submenu identifiers returned by
+.B defpup
+and
+\f3newpup\f1,
+and/or handling function addresses dictated by 
+.I str. 
+.I str
+is made up of label/type pairs separated by 
+vertical bars. Each label/type pair includes a menu label and an
+optional typing character that is preceded by a percent sign (%). The
+item types are:
+.sp
+.nf
+\f3%t	\f1 title string.
+\f3%F	\f1 menu function invoked by any item selection.
+\f3%f	\f1 item function invoked by selecting the associated item
+	 with the mouse button.	
+\f3%m	\f1 submenu brought up by rolling off the associated item
+\f3%n	\f1 takes no arguments.
+\f3%x#	\f1 numeric item selected by selecting the associated item
+	 with the mouse button.
+.fi
+.sp
+An example best illustrates the use of the item types.
+.nf
+.sp
+\f3menu=defpup("foo %t |item 1|item 2 |item 3 |item 4");\f1
+.sp
+.fi
+defines a pop-up menu with title 
+.I foo
+and four items. You can use a menu of this type as follows:
+.nf
+.sp
+    \f3switch (dopup(menu)) {
+        case 1 : /* item 1 */
+	    \f2 handling code \f3
+	    break;
+        case 2 : /* item 2 */
+	    \f2 handling code \f3
+	    break;
+        case 3 : /* item 3 */
+	    \f2 handling code \f3
+	    break;
+        case 4 : /* item 4 */
+	    \f2 handling code \f3
+	    break;
+    }\f1
+.fi
+.sp
+A more complex example is:
+.sp
+.nf
+\f3menu=defpup("
+   foobar %t %F|item 1%n|item 2%m|item 3%f|item 4%x234",
+      menufunc, submenu, func);\f1
+.fi
+.sp
+defines a menu with title
+.I foobar
+and four items.  Invoked by: 
+.sp
+.nf
+\f3menuval = dopup(menu);\f1
+.fi
+.sp
+Selecting menu item 1 causes 
+.B dopup
+to return \f3menufunc(1)\fP.
+.sp
+Rolling off menu item 2 displays
+\f2submenu\f1,
+which provides additional selections. 
+.B dopup 
+returns \f3menufunc(dopup(submenu))\f1 when another selection is made;
+otherwise 
+.I submenu 
+disappears and selections are made from
+.I menu.
+.sp
+Buttoning item 3 executes
+\f2func\f1
+with 3 as its argument. 
+.B dopup 
+returns \f3menufunc(func(3))\f1.
+.sp
+Buttoning item 4 causes
+.B dopup
+to return \f3menufunc(234)\f1.
+.sp
+If no item is selected, then
+.B dopup
+returns \-1.
+.sp
+\f2pupmode\f1 or \f2full-screen mode\f1 executes
+any function that is invoked from a pop-up menu.
+If a menu handling function uses the pop-up planes and/or
+regions of the screen beyond the process's graphics window, it must make
+calls to 
+.B pupmode
+and/or
+.B fullscrn .
+.SH "SEE ALSO"
+addtopup, dopup, freepup, newpup
+.sp
+\f2Using mex\fP, Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode. 
+.sp
+FORTRAN and Pascal do not support this routine;
+use
+.B newpup
+and
+\f3addtopup\fP. 

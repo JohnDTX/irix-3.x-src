@@ -1,0 +1,122 @@
+'\"macro stdmacro
+.TH MAKEDBM 1M
+.SH NAME
+makedbm \- make a yellow pages dbm file
+.SH SYNOPSIS
+.B makedbm
+[
+.B \-i
+yp_input_file 
+] 
+[
+.B \-o
+yp_output_name 
+] 
+.br
+[
+.B \-d
+yp_domain_name 
+] 
+[
+.B \-m
+yp_master_name 
+] 
+infile outfile
+.br
+.B makedbm
+[
+.B \-u
+dbmfilename 
+]
+.SH DESCRIPTION
+.IX  "makedbm command"  ""  "\fLmakedbm\fP \(em make yellow pages dbm file"
+.IX  "make yellow pages dbm file"  ""  "make yellow pages dbm file \(em \fLmakedbm\fP"
+.IX  "create yellow pages dbm file"  ""  "create yellow pages dbm file \(em \fLmakedbm\fP"
+.IX  "yellow pages"  "make dbm file"  ""  "make dbm file \(em \fLmakedbm\fP"
+.I makedbm
+takes
+.I infile
+and converts it to a pair of files in
+.IR dbm (3X)
+format, namely
+.IR outfile .pag
+and
+.IR outfile .dir.
+Each line of the input file is converted to a single
+.I dbm
+record.
+All characters up to the first tab or space form the key,
+and the rest of the line is the data.
+If a line ends with \e,
+then the data for that record is continued on to the next line.
+It is left for the clients of the yellow pages to interpret #;
+.I makedbm
+does not itself treat it as a comment character.
+.I infile
+can be \-, in which case standard input is read.
+.LP
+.I makedbm
+is meant to be used in generating
+.I dbm
+files for the yellow pages,
+and it generates a special entry with the key 
+.IR yp_last_modified ,
+which is the date of
+.I infile
+(or the current time, if
+.I infile
+is \-).
+.SH OPTIONS
+.TP
+.B \-i
+Create a special entry with the key 
+.IR yp_input_file .
+.TP
+.B \-o
+Create a special entry with the key 
+.IR yp_output_name .
+.TP
+.B \-d
+Create a special entry with the key 
+.IR yp_domain_name .
+.TP
+.B \-m
+Create a special entry with the key 
+.IR yp_master_name .  
+If no master host name is specified, 
+.IR yp_master_name 
+will be set to the local host name.
+.TP
+.B \-u
+Undo a
+.I dbm
+file.
+That is, print out a
+.I dbm
+file one entry per line,
+with a single space separating keys from values.
+.SH EXAMPLE
+.LP
+It is easy to write shell scripts
+to convert standard files such as
+.I /etc/passwd
+to the key value form used by
+.IR makedbm .
+For example,
+.IP
+ #!/bin/awk -f
+ BEGIN { FS = ":"; OFS = "\et"; }
+ { print $1, $0 }
+.LP
+takes the
+.I /etc/passwd
+file and converts it to a form that can be read by
+.I makedbm
+to make the yellow pages file
+.IR passwd.byname .
+That is, the key is a username,
+and the value is the remaining line in the
+.I /etc/passwd
+file.
+.SH "SEE ALSO"
+yppasswd(1)

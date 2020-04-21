@@ -1,0 +1,34 @@
+.TH keyboard  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I keyboard
+- return an ASCII character
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "char keyboard()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "character function keyboa()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function keyboard: char;"
+.sp
+.SH DESCRIPTION
+.I Keyboard
+returns
+an ASCII character.  It blocks the calling process until a character
+has been typed.
+If more than one
+character has been typed, the most recently typed character is returned.
+If a keyboard key has been queued as a button, it is not considered part
+of the keyboard.  That is, if the \f3P\f1 key has been queued as a
+button, the \f2keyboard\f1 command will not return the character `P'.
+If the keyboard is queued when \f2keyboard\f1 is executed, the character
+returned will not be entered into the queue.
+.SH "SEE ALSO"
+.I qkeyboard
+.SH NOTE
+This command can only be used in immediate mode.

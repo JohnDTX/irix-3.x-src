@@ -1,0 +1,140 @@
+'\"macro stdmacro
+.TH HSEARCH 3C 
+.SH NAME
+hsearch, hcreate, hdestroy \- manage hash search tables 
+.SH SYNOPSIS
+.B #include <search.h>
+.PP
+.B \s-1ENTRY\s+1 \(**hsearch (item, action)
+.br
+.B \s-1ENTRY\s+1 item;
+.br
+.B \s-1ACTION\s+1 action;
+.PP
+.B int hcreate (nel)
+.br
+.B unsigned nel;
+.PP
+.B void hdestroy ( )
+.SH DESCRIPTION
+.I Hsearch\^
+is a hash-table search routine generalized from Knuth (6.4) Algorithm D.
+It returns a pointer into a hash table indicating the location at which
+an entry can be found.
+.I Item\^
+is a structure of type
+.SM ENTRY
+(defined in the <search.h> header file)
+containing two pointers:
+.I item.key\^
+points to the comparison key, and
+.I item.data\^
+points to any other data to be associated with that key.
+(Pointers to types other than character
+should be cast to pointer-to-character.)
+.I Action\^
+is a member of an enumeration type
+.SM ACTION
+indicating the disposition of the entry if it cannot be found in the table.
+.SM
+.B ENTER
+indicates that the item should be inserted in the table at an
+appropriate point.
+.SM
+.B FIND
+indicates that no entry should be made.
+Unsuccessful resolution is 
+indicated by the return of a 
+.SM NULL
+pointer.
+.PP
+.I Hcreate\^
+allocates sufficient space for the table, and must be called before
+.I hsearch\^
+is used.
+.I nel\^
+is an estimate of the maximum number of entries that
+the table will contain.
+This number may be adjusted upward by the
+algorithm in order to obtain certain mathematically favorable
+circumstances.
+.PP
+.I Hdestroy\^
+destroys the search table,
+and may be followed by another call to
+.IR hcreate .
+.SH NOTES
+.I Hsearch\^
+uses
+.I open addressing\^
+with a
+.I multiplicative\^
+hash function.
+However, its source code has many other options
+available which the user may select by compiling the
+.I hsearch\^
+source with the following symbols defined to the preprocessor:
+.RS .3i
+.TP \w'\s-1CHAINED\s+1\ \ 'u
+.B \s-1DIV\s+1
+Use the
+.I remainder modulo table size\^
+as the hash function instead of the multiplicative algorithm.
+.TP
+.B \s-1USCR\s+1
+Use a User Supplied Comparison Routine for ascertaining
+table membership.
+The routine should be named
+.I hcompar\^
+and should behave in a manner similar to
+.I strcmp\^
+(see
+.IR string\^ (3C)).
+.TP
+.B \s-1CHAINED\s+1
+Use a linked list to resolve collisions.
+If this option is selected,
+the following other options become available.
+.RS
+.TP \w'\s-1SORTDOWN\s+1\ \ 'u
+.B \s-1START\s+1
+Place new entries at the beginning of the linked list (default is at
+the end).
+.TP
+.B \s-1SORTUP\s+1
+Keep the linked list sorted by key in ascending order.
+.TP
+.B \s-1SORTDOWN\s+1
+Keep the linked list sorted by key in descending order.
+.RE
+.RE
+.PP
+Additionally, there are preprocessor flags for obtaining debugging
+printout
+.RB ( \-\s-1DDEBUG\s+1 )
+and for including a test driver in the calling routine
+.RB ( \-\s-1DDRIVER\s+1 ).
+The source code should be consulted for further details.
+.SH "SEE ALSO"
+bsearch(3C),
+lsearch(3C),
+string(3C),
+tsearch(3C).
+.SH DIAGNOSTICS
+.I Hsearch\^
+returns a
+.SM NULL
+pointer if either the action is
+.SM
+.B FIND
+and the item could not be found or the action is
+.SM
+.B ENTER
+and the table is full.
+.PP
+.I Hcreate\^
+returns zero if it cannot allocate sufficient space for the
+table.
+.SH BUGS
+Only one hash search table may be active at any given time.
+.\"	@(#)hsearch.3c	5.1 of 10/25/83

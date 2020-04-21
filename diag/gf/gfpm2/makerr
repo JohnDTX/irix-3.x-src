@@ -1,0 +1,10 @@
+cc68 -I. -I../include -I$HDWR/include -DPM2 -c -DGFBETA -D_GF1 -DDC3 -DUC3 ../src/fifotest.c
+"../src/fifotest.c", line 123: warning: illegal pointer combination, op =
+cc68 -I. -I../include -I$HDWR/include -DPM2 -c -DGFBETA -D_GF1 -DDC3 -DUC3 ../src/fbinitmac.c
+cc68 -I. -I../include -I$HDWR/include -DPM2 -c -DGFBETA -D_GF1 -DDC3 -DUC3 -I/oh4/hdwr/include ../src/initall.c
+../include/uctest.h: 80: GFBETA redefined
+cc68 -I. -I../include -I$HDWR/include -DPM2 -c -DGFBETA -D_GF1 -DDC3 -DUC3 ../src/ge2cmd.c
+cd ../test2;make
+tests made.
+cc68 -s -r -o gfpm2 -i/ws/pmII/stand/crtstand.b char.b devload.b devcmd.b devcmdsb.b expectint.b devmacro.b ../beta/betacode.b betarams.b testall.b  fifotest.b testpass.b fbcscreen.b quiettest.b  font.b  fbinit.b fbinitmac.b fbtext.b header.b  drawtests.b bustests.b bpctest.b initall.b testvec.b  ge2cmd.b gedraw.b realdraw.b reset.b ../test2/testmm1.b ../test2/testmm2.b ../test2/testmm3.b  ../test2/testmm4.b ../test2/testcl1.b ../test2/testcl2.b  ../test2/testcl3.b ../test2/testcl4.b ../test2/testcl5.b  ../test2/testcl6.b ../test2/testsc1.b ../test2/testgsi.b  ../test2/testgso.b ../test2/test10sc1.b  ../test2/test10gso.b /ws/pmII/stand/libstand.a
+cp gfpm2 $BOOT/test

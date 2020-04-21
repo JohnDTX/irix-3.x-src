@@ -1,0 +1,121 @@
+/*
+**	GetFromHost - get a character from the host port
+**
+*/
+GetFromHost()
+{
+    register unsigned char *c;
+    register int i;
+    i = spl7();
+    if(ready(FROMHOST)) 
+    {
+        c = (unsigned char *)RingGet(&HostRing);	/* returns 0 if empty */
+	if(c) 
+        {
+	    if(RingEmpty(&HostRing))
+	        MAKENOTREADY(FROMHOST);
+	    if((--HostBufCount < LOWATER) && flowctl ) 
+	    {
+	        wait(TOHOST);
+		PutToHost(XON);
+		flowctl = 0;	/* Flow control is now off */
+	    }
+	    splx(i);
+	    return *c;
+	}
+	else 
+	{
+	    MAKENOTREADY(FROMHOST);
+	}
+    }
+    splx(i);
+    return(-1);
+}
+
+/*
+**	PutToHost - put a character to the host port
+**
+*/
+PutToHost( onechar )
+char onechar;
+{
+    register int i;
+    i = spl7();
+    if(ready(TOHOST)) 
+    {
+	HostCharOut(onechar);		/* send the character */
+	MAKENOTREADY(TOHOST);		/* mark device busy */
+	splx(i);
+	return(1);
+    }
+    splx(i);
+    return(-1);
+}
+
+/*
+**	GetKeyIn - get a char from the user's keyboard
+**
+*/
+GetKeyIn()
+{
+    register unsigned char *c;
+    register int i;
+
+    i = spl7();
+    if(ready(KEYIN)) 
+    {
+        c = (unsigned char *)RingGet(&KeybRing);	/* returns 0 if empty */
+	if(c) 
+	{
+	    if(RingEmpty(&KeybRing))
+	        MAKENOTREADY(KEYIN);
+	    splx(i);
+	/* changed to simple return */
+	    return *c;
+	}
+	else 
+	{
+	    MAKENOTREADY(KEYIN);
+	}
+    }
+    splx(i);
+    return(-1);
+}
+
+/*
+**	PutKeyPanel - put a char to the panel of the keyboard
+**
+*/
+PutKeyPanel( onechar )
+char onechar;
+{
+    register int i;
+    i = spl7();
+    if(ready(KEYPANEL)) 
+    {
+	KeybdCharOut(onechar);		/* send the character */
+	MAKENOTREADY(KEYPANEL);		/* mark device busy */
+	splx(i);
+	return(1);
+    }
+    splx(i);
+    return(-1);
+}
+
+FlushKeyIn()
+{
+    while(ready(KEYIN))			
+	GetKeyIn();
+}
+
+FlushFromHost()
+{
+    while(ready(FROMHOST))		
+	GetFromHost();
+}
+
+UnGetKeyIn(c)
+    int c;
+{
+    RingPut(&KeybRing,&c);
+}

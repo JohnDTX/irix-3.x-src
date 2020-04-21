@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH ABORT 3C 
+.SH NAME
+abort \- generate an \s-1IOT\s0 fault
+.SH SYNOPSIS
+.B int abort ( )
+.SH DESCRIPTION
+.I Abort\^
+causes an \s-1IOT\s0 signal to be sent to the process.
+This usually results in termination with a core dump.
+.PP
+It is possible for
+.I abort\^
+to return control if
+.SM
+.B SIGIOT
+is caught or ignored,
+in which case the value returned is that of the
+.IR kill (2)
+system call.
+.SH "SEE ALSO"
+adb(1),
+exit(2),
+kill(2),
+signal(2).
+.SH DIAGNOSTICS
+If
+.SM
+.B SIGIOT
+is neither caught nor ignored
+and the current directory is writable,
+a core dump is produced and the message
+``abort \- core dumped'' is
+written
+by the shell.
+.\"	@(#)abort.3c	5.1 of 11/16/83

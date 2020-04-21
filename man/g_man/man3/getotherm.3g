@@ -1,0 +1,36 @@
+.TH getothermonitor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getothermonitor
+\- returns the nondisplayed monitor type
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getothermonitor()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getoth()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getothermonitor: longint;"
+.SH DESCRIPTION
+.B getothermonitor
+returns the nondisplayed monitor type.
+Possible display monitors
+include 50Hz noninterlaced, 60Hz noninterlaced, 30Hz interlaced, 
+NTSC, and PAL.  The file
+\f2get.h\f1
+defines
+values for HZ30, HZ50, HZ60, NTSC, and PAL.
+It complements \f3getmonitor\f1.
+.SH SEE ALSO
+getmonitor, setmonitor
+.sp
+\f2Programming Guide\fP, Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.

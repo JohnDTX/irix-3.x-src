@@ -1,0 +1,43 @@
+.TH delete  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I delete
+- delete commands from an object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "delete(t, offst, count) "
+.B "Tag t; "
+.B "Offset offst; "
+.B "short count;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine delete(t, offst, count)"
+.B "integer t, offst"
+.B "integer*2 count"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure delete(t: Tag; offst: Offset; count: Short);"
+.sp
+.SH DESCRIPTION
+.I Delete
+removes commands from an object and takes 
+three arguments: a tag \f3t\f1, an offset \f3offst\f1, and an 
+argument specifying the
+number of commands to remove from the object.  
+Commands are deleted sequentially, beginning with the one
+addressed by the \f3tag\f1 and \f3offst\f1 arguments.  
+Tags attached to deleted
+commands are deleted as well.  After a \f2delete\f1 command, the command
+pointer is repositioned at the end of the object; subsequent graphics
+commands will be appended.
+.PP
+If no object is open for editing when 
+.I delete 
+is called, the command is ignored.
+.SH "SEE ALSO"
+.I editobj, insert, replace
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,131 @@
+'\"macro stdmacro
+.TH NX 7
+.SH NAME
+nx \- XNS Ethernet driver
+.SH SYNOPSIS
+.B "device nx0 at mb0 csr 0x7ffc priority 2 vector nxintr"
+.SH DESCRIPTION
+This is the driver for Excelan NX 101 (or 201) ethernet controller.
+Access is via some number (currently 32) pseudo-device files.
+By convention,
+the zeroth (0th) of these is used only for control purposes.
+The rest are available for use as i/o conduits.
+They may be allocated in an orderly fashion by calls to
+.IR ioctl (2).
+Writes to the pseudo-device files cause data to be sent over the interface,
+possibly after some protocol processing.
+Reads on the pseudo-device files return data from packets received
+over the interface,
+possibly after some protocol processing.
+The kind of processing which occurs is controlled by calls to
+.IR ioctl (2).
+One type of processing is XNS Sequenced Packet Protocol
+(see
+.IR xns (7)).
+.PP
+In the following descriptions,
+.B cfd
+is a file descriptor referring to pseudo-device zero (0),
+and
+.B fd
+is a 
+file descriptor referring to some other pseudo-device.
+.PP
+.IP "ioctl(cfd, NXAVAIL, short_ptr)"
+.br
+Passes back the minor device number of a currently available (unused)
+pseudo-device, or -1 if none is available;
+in the short integer pointed at by
+.B short_ptr.
+This number is only a hint:
+the pseudo-device is not opened or allocated,
+and it is not guaranteed to remain available for any length of time.
+.IP "ioctl(fd, NXIOTEST, short_ptr)"
+.br
+Passes back the number of active references to the pseudo-device;
+in the short integer pointed at by
+.B short_ptr.
+This provides a means of checking the hint provided by
+.IR NXAVAIL .
+For exclusive access,
+the number passed back must be no greater than one (1).
+.IP "fd = ioctl(cfd, NXAVOPEN, char_ptr)"
+.br
+Finds and allocates an available pseudo-device,
+copies back its path name to the area pointed at by
+.B char_ptr
+(should be at least 20 bytes),
+opens it,
+and returns the resulting file descriptor.
+Returns -1 if none is available.
+.PP
+This call controls the type of i/o processing
+which is performed on a pseudo-device:
+.IP "ioctl(fd, NXIORAW, 0)"
+.br
+Enables transmission of raw ethernet packets on subsequent writes.
+This includes the ethernet header but not the CRC.
+.PP
+These several calls are used by system daemons and utilities:
+.IP "ioctl(fd, NXIOBOUNCE, 0)"
+.br
+Enables reception of raw SG Bounce packets on subsequent reads
+(only one pseudo-device at a time may be enabled to receive
+these packets).
+.IP "ioctl(fd, NXUPROTO, short_ptr)"
+.br
+Enables reception of raw packets whose ethertype is equal to
+the short integer pointed at by
+.B short_ptr.
+.IP "ioctl(fd, NXPHYSADDR, physnet_ptr)"
+.br
+Passes back the physical ethernet address
+of the local ethernet controller,
+in the
+.IR "struct physnet"
+pointed at by
+.B physnet_ptr.
+.IP "ioctl(fd, NXSETPGRP, 0)"
+Makes the calling process the head of a process group
+controlled (in the tty sense) by the pseudo-device.
+.PP
+These several calls are used for multicasting:
+.IP "ioctl(fd, NXPUTSLOT, physnet_ptr)"
+.br
+Sets the multicast address of the pseudo-device to the
+.IR "struct physnet"
+pointed at by
+.B physnet_ptr.
+.IP "ioctl(fd, NXGETSLOT, physnet_ptr)"
+.br
+Passes back the multicast address of the pseudo-device,
+in the
+.IR "struct physnet"
+pointed at by
+.B physnet_ptr.
+.IP "ioctl(fd, NXSETRCV, arg)"
+Governs reception of raw multicast packets.
+The multicast address
+should have been specified by a previous
+.I NXPUTSLOT
+call.
+The mode of reception is governed by the value of
+.B arg:
+if
+.B arg
+==0,
+reception is disabled;
+if
+.B arg
+== 1, reception is enabled, including self-transmissions;
+if
+.B arg
+==2, reception is enabled, not including self-transmissions.
+.SH FILES
+/dev/ttyn*			- pseudo-device files
+.br
+xns/Xns.h, xns/Xnsioctl.h	- include files
+.SH "SEE ALSO"
+.na
+ioctl(2),
+xns(7).

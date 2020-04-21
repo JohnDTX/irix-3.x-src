@@ -1,0 +1,13 @@
+f77.1:f77 \- FORTRAN compiler for the 68000
+factor.1:on a 68000.
+machid.1:m68000, m68k, pdp11, u3b, vax \- provide truth value about your processor type
+machid.1:.B m68000
+machid.1:.TP "\w'\f3m68000\f1\ \ \ 'u"
+machid.1:.B m68000
+machid.1:True if you are on a 68000.
+machid.1:True if you are on a 68000.
+pc.1: pc \- Pascal compiler for the 68000
+ptrace.2:These requests are read/write processor registers.  For the 68000 the
+uname.2:machine one of:	M68000
+getc.3s:returns the next word (32-bit integer on a 68000) 
+putc.3s:writes the word (32-bit integer on the 68000)

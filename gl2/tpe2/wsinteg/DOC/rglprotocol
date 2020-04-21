@@ -1,0 +1,300 @@
+/**************************************************************************
+ *									  *
+ * 		 Copyright (C) 1985, Silicon Graphics, Inc.		  *
+ *									  *
+ *  These coded instructions, statements, and computer programs  contain  *
+ *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
+ *  are protected by Federal copyright law.  They  may  not be disclosed  *
+ *  to  third  parties  or copied or duplicated in any form, in whole or  *
+ *  in part, without the prior written consent of Silicon Graphics, Inc.  *
+ *									  *
+ **************************************************************************/
+ 
+	This document describes the transport and function layers
+	of the GeometryLink protocols
+	Peter Ecclesine 30 April 85 Revised 20 November
+
+	Transport Layer
+
+	Outbound messages, text,  and protocol writes
+
+	Messages refer to binary messages, and text refers to EBCDIC
+	messages.
+	All outbound messages are written with a cent sign (c) as the 
+	leading character. Device drivers will also unlock the keyboard
+	on every write, and initially clear the '3278 screen' so
+	subsequent i/o is to an unformatted 'screen'.
+
+	The messages are accompanied by protocol writes and reads. Protocol
+	writes also begin with the cent sign (c). The protocol writes are :
+
+	(c)c	cent c	Begin a message segment of up to 6141 bytes.
+			This is used for messages longer than 6141 bytes.
+
+	(c)k	cent k	Kill or finish a download message. This may be used
+			to accurately finish a variable record length file
+			whose length is not known at the start of transfer.
+
+	(c)m	cent m	Begin a text segment of up to 8184 bytes. This is
+			used for text longer than 8184 bytes.
+
+	(c)q	cent q	Request an acknowledgement of this protocol write,
+			REQ_ACK (awaiting acknowledgement now).
+
+	(c)r	cent r	Inbound message was read properly by comms,
+
+	(c)s	cent s	Inbound message was read improperly by comms, resend  
+
+	(c)t	cent t	Outbound start of text
+	The text transfer format is:
+	(c)t	cent t	Begin a text transfer
+	LENGTH		6 character hex text length (including these 6 chars)
+	body		text segment body
+
+	(c)$	cent buck Outbound start of message
+	The message format is :
+	(c)$	cent buck Begin a message
+	LENGTH		3 byte message length (including these 3 bytes)
+	body		message body.
+
+	The message coding uses 8192 byte blocks per message or segment
+	of a message, although only the part used is written.
+
+	Binary coding substitutes 4 bytes for 3 of the length or message. The
+	coding uses 6 bit parts of each 3 bytes. The coding uses the
+	EBCDIC letters, numbers, "." and ","
+	A-Z,a-z,0-9,".","," are the 64 coding symbols. A = 0, a = 26, 0 = 52,
+	"." = 62, and "," = 63.
+
+	The EBCDIC message "HELLO WORLD" 
+	(c8,c5,d3,d3,d6,40,e6,d6,d9,d3,c4) 14 bytes including LENGTH
+	is represented
+	00,00,0e	AAAO	(LENGTH field)
+				A + 000000 = A
+				A + 000000 = A
+				A + 000000 = A
+				A + 001110 = O
+	c8,c5,d3	yMXT	(HEL)
+				A + 110010 = y
+				A + 001100 = M
+				A + 010111 = X
+				A + 010011 = T
+	d3,d6,40	09ZA	(LO )
+				A + 110100 = 0
+				A + 111101 = 9
+				A + 011001 = Z
+				A + 000000 = A
+	e6,d6,d9	5tbZ	(WOR)
+				A + 111001 = 5
+				A + 101101 = t
+				A + 011011 = b
+				A + 011001 = Z
+	d3,c4,00	08QA	(LD )
+				A + 110100 = 0
+				A + 111100 = 8
+				A + 010000 = Q
+				A + 000000 = A (trailing NULL pads)
+
+	(c)$AAAOyMXT09ZAyMXT09ZA5tbZ08QA
+
+	The purpose of the REQ_ACK is to allow the receiver time to process
+	the message and acknowledge when the processing is complete. The
+	IRIS receive buffer is 16384 bytes, however the mainframe terminal
+	access method and the 3274 controller both add overhead data to 
+	the messages. The 3274 adds about 220 bytes per write, in the
+	form of status updates, keyboard locks and unlocks, and cursor
+	positioning. Many consecutive short messages will generate additional
+	3274 overhead. For these reasons, the mainframe program cannot know
+	exactly how much data is in the IRIS receive buffer, and must
+	coordinate writing with the IRIS. REQ_ACK means the mainframe will
+	not write until an acknowledgement (defined below) is read. The
+	mainframe program maintains a write_byte counter of the message bytes
+	written.
+	A request acknowledgement is sent before any message that would cause
+	the write_byte counter to exceed 6141. This allows ample margin in the
+	IRIS receive buffer.
+
+	Binary output greater than 6141 bytes is segmented into 6141 byte parts
+	so that each coded message segment requires 8192 or fewer bytes.
+	A 16384 byte message would be segmented :
+	(c)$AEAA........	(length is 16384, first segment 6138 + LENGTH)
+	..............(c)q	(end of initial segment, REQ_ACK)
+
+				(read acknowledgement)
+	(c)c..............
+	..............(c)q	(end of second segment 6141, REQ_ACK)
+
+				(read acknowledgement)
+
+	(c)c..............	(final 4105 byte segment)
+	..............		(end of final segment, write_byte is 4102)
+
+
+	Inbound messages and protocol reads
+
+	The mainframe program uses writes and reads that block execution
+	until satisfied.
+
+	An acknowledgement is any read that does not begin with $(buck).
+	The IRIS will reply to REQ_ACK with ENTER. This causes the 
+	mainframe terminal access method to read the IRIS 'screen'. The
+	IRIS begins inbound messages and protocol reads with $, so the
+	mainframe program only processes read data that begins with $, and
+	discards as an acknowledgement read data that does not begin with $.
+
+	The protocol reads are :
+
+	$c	buck c	Begin a message segment of up to 1437 bytes.
+			This is used for messages longer than 1437 bytes.
+
+	$m	buck m	Begin a text segment of up to 1914 characters..
+			Used for text input greater than 1914 characters.
+
+	$q	buck q	No ack, used to pad inbound message segments
+
+	$t	buck t	Inbound start of text
+	The text transfer format is:
+	$t	buck t	Begin a text transfer
+	LENGTH		6 character hex text length (including these 6 chars)
+	body		text segment body
+
+	$(c)	buck,cent Used to delimit plain text inbounded messages. This
+			allows multiple plain text messages in a single read.
+			(e.g.) $(c)text1$(c)text2$(c)text3
+			contains three text messages. The total length of the
+			plain text messages and delimiters
+			should not exceed 1900 bytes. The IRIS routine that
+			creates this message imposes the 1900 byte limit.
+	
+	Inbound binary messages are symetric to the outbound messages, and
+	are coded 4 for 3 for transmission through the 3274.
+
+	The message format is :
+	$f	buck,f	Begin a message
+	LENGTH		3 byte message length (including these 3 bytes)
+	body		message body.
+
+	The message coding uses 1920 byte blocks per message or continuation
+	segment of a message, although only the part used is written.
+
+	The EBCDIC message "HELLO WORLD" 
+	(c8,c5,d3,d3,d6,40,e6,d6,d9,d3,c4) 14 bytes including LENGTH
+	is represented
+
+	$fAAAOyMXT09ZAyMXT09ZA5tbZ08QA
+	
+	Messages longer than 1437 bytes are segmented into 1437 byte parts
+	so that each coded message segment requires 1920 or fewer bytes.
+	A 16384 byte message would be segmented :
+	$fAEAA........		(length is 16384, first segment 1434 + LENGTH)
+	..............$q	(end of initial segment, no ack)
+				(receive (c)r)
+	$c..............
+	..............$q	(end of second segment 1437, no ack)
+				(receive (c)r)
+	---
+	$c..............
+	..............$q	(end of eleventh segment 1437, no ack)
+				(receive (c)r)
+	$c..............	(final 580 byte segment)
+	..............		(end of final segment)
+				(receive (c)r)
+				
+	No inbound counters or pacing mechanisms are used, because the
+	mainframe program can easily process the one or two segments per
+	second of IRIS messages.
+
+	Function Layer
+
+	Description of the Upload/Download file transfer
+
+	The file transfer protocol is eight messages that use the 
+	GeometryLink protocol to convey the file.
+
+	The mainframe file transfer program UDT is called with the
+	following arguments:
+
+	UDT VERB FN FT FM (LRECL XXXX
+
+	VERB	BCMS2SGI	Binary from mainframe to IRIS
+		TCMS2SGI	Text from mainframe to IRIS
+		BSGI2CMS	Binary from IRIS to mainframe
+		TSGI2CMS	Text from IRIS to mainframe
+	FN			mainframe file name
+	FT			mainframe file type
+	FM			optional mainframe file mode
+	(LRECL XXXX		CMS logical record length for inbound transfer
+				* note FN, FT, are capitol letters on iris.
+
+	e.g. UDT TCMS2SGI MAINTEST FORTRAN A to send the text program
+				MAINTEST FORTRAN to the IRIS
+
+1.	Transfer Request from mainframe
+		The Transfer Request message has three fields:
+		Dir	1 char	bin 0 - download (mainframe to IRIS)
+				bin 1 - upload (IRIS to mainframe)
+	*	Length	3 bytes	binary length of file (msb first) or 1 (upload)
+		IRIS name null terminated EBCDIC name of IRIS file
+
+	*(This length may be 2**23 - 1 if file length is unknown at start)
+
+		The Transfer Request text has three fields:
+		Dir	1 char	d - download (mainframe to IRIS)
+				u - upload (IRIS to mainframe)
+		Length	6 chars	hex length of file (e.g. 4096 = 001000)
+		IRIS name null terminated EBCDIC name of IRIS file
+		
+2.	Transfer Reply from IRIS
+		The Transfer Reply message has three fields:
+		Dir	1 char	bin 0 - download (mainframe to IRIS)
+				bin 1 - upload (IRIS to mainframe)
+		Length	3 bytes	binary length of file (msb first)
+		IRIS name null terminated EBCDIC name of IRIS file
+
+		or to Nak the request, fields 2 and 3 are:
+		Length	3 bytes	binary zero
+		IRIS error text null terminated EBCDIC error text
+
+		The Transfer Reply text has three fields:
+		Dir	1 char	d - download (mainframe to IRIS)
+				u - upload (IRIS to mainframe)
+		Length	6 chars	hex length of file (e.g. 4096 = 001000)
+		IRIS name null terminated EBCDIC name of IRIS file
+		
+		or to Nak the request, fields 2 and 3 are:
+		Length	6 chars 000000
+		IRIS error text null terminated EBCDIC error text
+
+
+3.	File Transfer from sender
+		The message segments end with valid data if not the last or
+		only segment. The last segment is sent with no trailing
+		pads (if text).
+
+4.	File Transfer Complete from sender
+		The cent k for download and buck k for upload are used to tell
+		the receiver that transfer is complete.
+
+5.	Transfer Abort from either 
+		The Transfer Abort message has two fields:
+		Dir	1 char	bin 0 - download (mainframe to IRIS)
+				bin 1 - upload (IRIS to mainframe)
+		Length	3 bytes	binary zero
+
+		The Transfer Abort text has two fields:
+		Dir	1 char	d - download (mainframe to IRIS)
+				u - upload (IRIS to mainframe)
+		Length	6 chars 000000
+		
+
+
+
+	The mainframe to IRIS rgl protocol is one packed message that uses the
+GeometryLink protocol to convey the message, which can contain
+many rgl commands. The IRIS receive buffer is 6144 bytes, and the IRIS
+send buffer is 1437 bytes, so the mainframe program will operate
+more efficiently by changing the criteria for flushing to the IRIS, and
+recognizing that the IRIS can only be read twice a second through the
+GeometryLink. New rgl commands that return more data (read mouse) are
+probably required to efficiently use the link. Thew current mouse "tie"
+command can let a blkqread return the mouse x,y for any mouse switch change.

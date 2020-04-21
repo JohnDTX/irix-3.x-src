@@ -1,0 +1,30 @@
+.TH translate  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I translate
+- translate graphical primitives
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "translate(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine transl(x, y, z)"
+.B "real x, y, z"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure translate(x, y, z: Coord);"
+.sp
+.SH DESCRIPTION
+.I Translate
+places the object space origin at a given world coordinate point.
+\f2Translate\fP is a modeling command,
+and changes the current transformation
+matrix.  All objects drawn after the \f2translate\f1 command is 
+executed will be translated.  Use \f2pushmatrix\f1 and \f2popmatrix\f1
+to limit the scope of the translation.
+.SH "SEE ALSO"
+.I popmatrix, pushmatrix, rotate, scale

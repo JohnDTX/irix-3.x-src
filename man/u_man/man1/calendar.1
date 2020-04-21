@@ -1,0 +1,111 @@
+'\"macro stdmacro
+.TH CALENDAR 1 
+.SH NAME
+calendar \- reminder service
+.SH SYNOPSIS
+.B calendar
+[ \f3\-\fP ]
+.SH DESCRIPTION
+.I calendar\^
+consults the file \f3calendar\fP in the current directory
+and prints out lines that contain today's or
+tomorrow's date anywhere in the line.
+Most reasonable month-day dates such as ``Dec. 7,''
+``december 7,'' ``12/7,'' etc., are recognized, but not
+``7 December' or ``7/12''.
+On weekends and holidays ``tomorrow'' extends through the next
+business day.
+Entries preceded with an equals sign ( \f3=\f1 ) will only match
+on the exact day, without advance ``tomorrow'', weekend, or holiday notice.
+.PP
+A \(** may be used in the place of a month to mean every month.
+The \f3calendar\fP file is first filtered through the ``C'' pre-processor
+so that \f3#define\fPs and \f3#include\fPs may be used.
+.PP
+.I calendar\^
+will match days of the week if they are preceded with an at-sign ( \f3@\f1 ).
+The day should not be immediately followed with a slash except as discussed
+below.
+The at-sign is necessary to avoid unintentionally matching a weekday given on
+a line where a month-day match is desired merely as an reminder of the
+day of the week that the event occurs on.
+.PP
+One may specify every second, every third, or every fourth week for selecting
+a day of the week.
+To do this, specify an at-sign, the name of the weekday, a slash ( \f3/\f1 ),
+the modulus of the day of the year (January first being one) of any
+date which applies, and a second slash followed by the repetition factor.
+For example, we get paid every second Friday with this Friday being a payday.
+Today is Thursday and \f2date \s-2+%\s0j\f1 says today is the 236\u\s-4th\s0\d
+day of the year.
+Thus this Friday (tomorrow) is day 237.
+Since 237 modulus 2 is 1 an appropriate entry would be
+.sp
+.ti +1i
+@Friday/1/2 Payday
+.sp
+.PP
+When 
+an argument is present,
+.I calendar\^
+does its job for every user
+who has a file \f3calendar\fP in their login directory
+and sends them any positive results by
+.IR mail\^ (1),
+using the first matching line to form a \f2Subject\f1 line.
+Normally this is done daily by facilities in the 
+.SM U\s-2NIX\s+2
+operating system under control of 
+.IR cron\^ (1M).
+.SH EXAMPLES
+.PP
+If the user has the following lines, among other lines containing
+date information, in the file ``calendar'' in the login directory:
+.IP
+.ta +2.5i
+.nf
+Monday, September 6	Labor Day Holiday
+Tuesday, Sep 7	Back to work
+.fi
+.PP
+typing in 
+.IP
+calendar
+.PP
+either on the Friday before or on the specified Monday will cause these lines
+to be printed on the screen.
+.PP
+The following might be typical of a \f3calendar\fP file:
+.IP
+.nf
+#include private/birthdays
+Monday, September 6 Labor Day Holiday
+Tuesday, Sep 7 Back to work
+January 1 New Year's day
+9/6 Labor Day Holiday
+9-6 Take the day off
+*/1 Mortgage payment due
+07/04 Fourth of July
+#define ECR in Engineering Conference Room
+#define MCR in Main Conference Room
+@Thursday SCR meeting 10:30 ECR
+@Wed Meeting on reducing meetings 2pm MCR
+@Monday and @Wednesday: Scuba Class at 7pm
+.fi
+.SH FILES
+.ta +1.8i
+calendar	your calendar of events
+.br
+/usr/lib/calprog	to figure out today's and tomorrow's dates
+.br
+/etc/passwd	login directories
+.br
+/usr/lib/acct/holidays	table of holidays
+.br
+/tmp/cal\(**	temporary files
+.SH "SEE ALSO"
+at(1), date(1), mail(1).
+.\"	@(#)calendar.1	5.1 of 10/26/83
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/calendar.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:44:17 $

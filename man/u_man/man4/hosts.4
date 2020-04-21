@@ -1,0 +1,66 @@
+'\"macro stdmacro
+.hw hex-a-dec-i-mal
+.TH HOSTS 4
+.SH NAME
+hosts \- host name data base
+.SH SYNOPSIS
+.B /etc/hosts
+.SH DESCRIPTION
+The
+.I hosts
+file contains information on       
+the known hosts on the DARPA Internet.
+This file contains:
+.TP
+\(bu
+lines of text with one or more fields separated by
+spaces or tabs
+.TP
+\(bu
+optional comments that begin with a pound sign (#)
+and continue to the end of the line
+.PP
+The first field contains the 4 byte Internet address.
+This address is a logical address which identifies
+a host 
+on the network.  You must specify all four bytes of
+the address even if any byte is 0.  Each byte may
+be specified in decimal or hexadecimal notation separated 
+by a period.  (Precede
+hexadecimal digits by 0x.)  For example, 89.0.0.1.
+(See 
+.IR inet (7P)
+for a complete explanation of the ``.'' notation.)
+.PP
+The second field contains the
+official host name
+corresponding to the Internet address.
+This name is an arbitrary string, preferably long enough
+to keep hosts unique on the network.
+Typically, a name class is chosen, such as alabama, alaska,
+arkansas ... or washington, adams, jefferson ...
+.PP
+The subsequent fields contain aliases or nicknames
+for a particular host.
+These aliases
+are other names for a particular system.
+Typically this is a shorter name
+(al, ak, ar ... or george, john, tom),
+and may not be unique across the network.
+For example, the host alaska could have the following address and alias:
+.sp
+.ce
+129.0.9.5 alaska ak
+.PP
+Users should put the serial number of each Silicon Graphics, Inc.
+workstation as a comment in their 
+.I /etc/hosts
+file.  This makes it easier for you to find the serial number of 
+your machines if you need to call the Geometry Hotline.
+.SH CAUTION
+Avoid using host names that have more than eight letters or digits,
+or host names with upper case letters.
+.SH FILES
+/etc/hosts
+.SH SEE ALSO
+hosts.equiv(4)

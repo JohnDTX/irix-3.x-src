@@ -1,0 +1,71 @@
+.TH FREC 1M
+.SH NAME
+frec \- recover files from a backup tape
+.SH SYNOPSIS
+.B /etc/frec
+.RB [\| \-p " path\|]
+.RB [\| \-f " reqfile\|]
+raw-tape
+.RB i-number : name
+.B .\|.\|.
+.SH DESCRIPTION
+.I Frec\^
+recovers files 
+from the specified
+.I raw-tape
+backup tape written by \f2volcopy\fP(1M) or \f2finc\fP(1M), given their
+.IR i-numbers .
+The data for each recovery request will be written into the
+file given by
+.I name .
+.PP
+The
+.B \-p
+option allows you to specify a default prefixing
+.I path 
+different from your current working directory.
+This will be prefixed to any
+.I names
+that are not fully qualified, i.e.
+that do not begin with
+.B /
+or
+.BR \&./ .
+If any directories are missing in the paths of recovery
+.I names\^
+they will be created.
+.TP "\w'\f3-f\f2 reqfile\f1\ \ \ 'u"
+.BI \-p " path"
+Specifies a prefixing
+.I path\^
+to be used to fully qualify any names
+that do not start with "/" or "./".
+.TP "\w'\f3-f\f2 reqfile\f1\ \ \ 'u"
+.BI \-f " reqfile"
+Specifies a file which contains recovery requests. The format is
+i-number:newname, one per line.
+.SH EXAMPLE
+.IP
+frec \|/dev/rmt0 \|1216:junk
+.PP
+recovers a file, i-number 1216 when backed-up, into a file
+named
+.B junk
+in your current working directory.
+.IP
+frec \|\-p \|/usr/src/cmd \|/dev/rmt0 \|14156:a \|1232:b \|3141:/usr/joe/a.c
+.PP
+recovers files with i-numbers 14156, 1232, and 3141 into files 
+.BR /usr/src/cmd/a ,
+.B /usr/src/cmd/b
+and
+.BR /usr/joe/a.c .
+.SH "SEE ALSO"
+cpio(1), ff(1M), finc(1M), volcopy(1M).
+.SH BUGS
+While paving a path (i.e. creating the intermediate directories
+contained in a pathname) 
+.I frec
+can only recover inode fields for those directories contained
+on the tape and requested for recovery.
+.\"	@(#)frec.1m	5.1 of 10/17/83

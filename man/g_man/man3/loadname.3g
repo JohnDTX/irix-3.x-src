@@ -1,0 +1,38 @@
+.TH loadname 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B loadname
+\- loads the name on the top of the name stack
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "loadname(name)"
+.B "short name;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine loadna(name)"
+.B "integer*4 name"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure loadname(name: longint);"
+.SH DESCRIPTION
+.B loadname
+replaces the top name in the 
+name stack with a new 16-bit integer name.
+Each time
+a routine causes a hit in picking or selecting mode,
+the system stores the contents of the name stack in a buffer.
+.PP
+.B loadname
+is ignored outside of picking and selecting modes.
+.SH "SEE ALSO"
+gselect,
+pick
+.sp
+.I Programming Guide,
+Section 9.2, Picking  

@@ -1,0 +1,135 @@
+#! /bin/sh
+# NAME
+#	efs2300
+# SYNOPSIS
+#	efs2300 [-r root] [-d dist]
+# DESCRIPTION
+#	Ad hoc dist/tools script to make a bootable 2.4 floppy and another
+#	floppy containing the EFS upgrade junk.  2300 analogue of newboot.
+#
+#	Need the following:
+#		upgrade, mdpatch
+#		/bin/{expr,grep,sed,sgilabel}
+#		/etc/mkfs (for efs)
+#		/etc/{umount,labelit}
+#		/stand/{hiqprom.r,rhqprom.r}
+root=/
+dist=.
+
+while test $# -gt 0
+do
+	case $1 in
+	-r)	shift ; root=$1 ;;
+	-d)	shift ; dist=$1 ;;
+	*)	break ;;
+	esac
+done
+
+echo "Insert a new floppy for the bootable system, then press RETURN."
+read x
+cp $dist/2300.profile $root/root.profile
+cp $dist/isbell $root
+
+# BEGIN IN-LINE /etc/mkbootflp
+set `uname -t`
+FLPKERNEL=/kernels/$1.flp
+case $1 in
+3*|2*T)
+	KBASE=20000000 KLIMIT=2fffffff
+	;;
+*)
+	KBASE=c00400 KLIMIT=cfffff
+	;;
+esac
+MNT=/mnt
+DISK=/dev/mf0a
+ROOTDEV=0x200
+SWAPDEV=0x101
+NSWAP=0d12240
+MKFS=etc/mkfs.bell MKFSARGS="$DISK 1280 16 4"
+if ( test ! -x /$MKFS ) then
+	MKFS=etc/mkfs MKFSARGS="-C 1280:64 -G 1 1 $DISK 1280"
+fi
+
+cd $root
+trap "cd /; umount $DISK 2>/dev/null; exit" 0 2 3
+
+find dev \( -type b -o -type c \) -print > /tmp/devlist
+ex - << ! /tmp/devlist
+g:dev/EXOS:d
+g:dev/ttyn:d
+g:dev/ttyp:d
+g:dev/pty:d
+g:dev/ib:d
+g:dev/ttyw[1-9]:d
+g:dev/tek:d
+g:dev/pxd:d
+g:dev/ip.[a-h]:d
+g:dev/rip.[a-h]:d
+g:dev/md.[bd-g]:d
+g:dev/rmd.[bd-g]:d
+g:dev/si.[a-h]:d
+g:dev/rsi.[a-h]:d
+g:dev/mt[34]:d
+g:dev/rmt[34]:d
+g:dev/ttyd[23]:d
+w
+q
+!
+devlist="`cat /tmp/devlist`"
+rm -f /tmp/devlist
+
+/$MKFS $MKFSARGS
+mount $DISK $MNT
+tar cfb - 80 - << ! | (cd $MNT; tar xvfpb - 80)
+root.profile
+isbell
+$devlist
+etc/init
+etc/mkfs
+etc/mkfs.bell
+etc/mount
+etc/reboot
+etc/flppatch
+etc/flpuxfer
+bin/cp
+bin/echo
+bin/ln
+bin/mkdir
+bin/mv
+bin/pwd
+bin/sgilabel
+bin/sh
+bin/sync
+bin/tar
+!
+mkdir $MNT/tmp $MNT/mnt
+cp $FLPKERNEL $MNT/vmunix
+
+adb -w $MNT/vmunix << !
+?m $KBASE $KLIMIT
+rootdev?w $ROOTDEV
+swapdev?w $SWAPDEV
+nswap?W $NSWAP
+!
+ln $MNT/vmunix $MNT/defaultboot
+# END IN-LINE /etc/mkbootflp
+
+rm $root/root.profile $root/isbell
+
+list="
+	$dist/upgrade
+	$dist/mdpatch
+	$root/bin/expr
+	$root/bin/grep
+	$root/bin/sed
+	$root/bin/sgilabel
+	$root/etc/mkfs
+	$root/etc/umount
+	$root/etc/labelit
+	$root/stand/hiqprom.r
+	$root/stand/rhqprom.r
+"
+echo "Insert a new floppy for EFS upgrade miscellany, then press RETURN."
+read x
+tar cvf /dev/rmf0a $list

@@ -1,0 +1,32 @@
+.TH objstr 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I objstr
+- draw a string of object font characters on the screen
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "objstr(str)"
+.B "String str;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine objstr(str)"
+.B "character*(*) str"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure objstr(str: String);"
+.sp
+.SH DESCRIPTION
+.I Objstr
+draws a string of text using the currently selected object font.  The 
+origin of the first character
+in the string will be placed at the current graphics position.
+After each character is drawn, the current graphics position is 
+updated by the character itself, or not at all.
+.PP
+Any characters in the text string that are undefined in the current
+object font are ignored.
+.SH "SEE ALSO"
+.I defobjfont, objfont

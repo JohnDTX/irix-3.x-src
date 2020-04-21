@@ -1,0 +1,35 @@
+.TH winset 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winset
+\- sets the current graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winset(gid)"
+.B "long gid;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winset(gid)"
+.B "integer*4 gid"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function winset(gid: longint): longint;"
+.SH DESCRIPTION
+.B winset
+makes the graphics window associated with identifier
+.I gid
+the current window. 
+The system directs all graphics output routines to the
+current graphics window.
+.SH "SEE ALSO"
+winget
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

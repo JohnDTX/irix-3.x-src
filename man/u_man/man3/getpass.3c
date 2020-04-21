@@ -1,0 +1,43 @@
+'\"macro stdmacro
+.TH GETPASS 3C 
+.SH NAME
+getpass \- read a password
+.SH SYNOPSIS
+.B char \(**getpass (prompt)
+.br
+.B char \(**prompt;
+.SH DESCRIPTION
+.I Getpass\^
+reads up to a
+newline
+or
+.SM
+.B EOF\^
+from the file
+.BR /dev/tty ,
+after prompting on
+the standard error output
+with the null-terminated string
+.I prompt\^
+and disabling echoing.
+A pointer is returned to a null-terminated string
+of at most 8 characters.
+If
+.B /dev/tty
+cannot be opened, a
+.SM
+.B NULL
+pointer is returned.
+An interrupt will terminate input and send
+an interrupt signal to the calling program before returning.
+.SH FILES
+/dev/tty
+.SH WARNING
+The above routine uses \f3<stdio.h>\fP, which causes 
+it to increase the size of programs,
+not otherwise using standard I/O, more
+than might be expected.
+.SH BUGS
+The return value points to static data
+whose content is overwritten by each call.
+.\"	@(#)getpass.3c	5.1 of 10/19/83

@@ -1,0 +1,78 @@
+#! /bin/sh
+#
+# Initialize the nfs software.
+#
+# The portmapper is the sine qua non, since RPC doesn't work without
+# him.  Now that inetd supports RPC, /etc/rc.tcp must start portmap.
+# Therefore /etc/rc.tcp must be invoked before this script.
+#
+PATH=$PATH:/usr/etc/yp:.
+domainname=/usr/bin/domainname
+nfs=/usr/etc
+
+#
+# Fire up YP daemons if both domainname and the daemons are present
+# and executable.
+#
+if test -x $domainname; then
+	$domainname default
+	echo "Yellow Pages daemons:\c"
+
+	# Remove the comment marks from the following
+	# if ... fi statement on machines that are 
+	# Yellow Pages servers.
+
+	# Yellow Pages server
+#	if test -x $nfs/ypserv; then
+#		$nfs/ypserv;				echo " ypserv\c"
+#	fi
+
+	# Remove the comment marks from the following
+	# if ... fi statement on the machine that is the 
+	# master server for the Yellow Pages passwd file.
+
+	# Yellow Pages passwd update daemon
+#	if test -x $nfs/rpc.passwd; then
+#		$nfs/rpc.passwd /etc/passwd -m passwd &	echo " rpc.passwd\c"
+#	fi
+
+	# Remove the comment marks from the following
+	# if ... fi statement on machines that are
+	# Yellow Pages clients.
+
+	# Yellow Pages binder
+#	if test -x $nfs/ypbind; then
+#		$nfs/ypbind;				echo " ypbind\c"
+#	fi
+
+	echo "."
+fi
+
+#
+# Fire up NFS daemons if the running kernel supports NFS and the daemons
+# are present and executable.  Also mount the default NFS filesystems.
+#
+if test -x /etc/havenfs && /etc/havenfs; then
+	#
+	# Clear this host from the client list (/etc/rmtab) of all servers
+	# on the wire.  Then do a showmount to initialize filesystem export
+	# state in the kernel.
+	#
+	2>&1 umount -at nfs > /dev/null
+	2>&1 showmount -e > /dev/null
+
+	echo "NFS daemons:\c"
+
+	# NFS server daemons
+	if test -x $nfs/nfsd; then
+		$nfs/nfsd 4;				echo " nfsd\c"
+	fi
+
+	# NFS client bio daemons
+	if test -x $nfs/biod; then
+		$nfs/biod 4;				echo " biod\c"
+	fi
+
+	echo "."
+	/etc/mount -avt nfs
+fi

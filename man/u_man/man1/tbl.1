@@ -1,0 +1,236 @@
+'\" t
+'\"macro stdmacro
+.ds T \(->
+.TH TBL 1
+.SH NAME
+tbl \- format tables for nroff or troff
+.SH SYNOPSIS
+.B tbl
+[
+.B \-\s-1TX\s+1
+] [ files ]
+.SH DESCRIPTION
+.I Tbl\^
+is a preprocessor that formats tables for
+.I nroff\^
+or
+.IR troff .
+The input files are copied to the standard output,
+except for lines between
+.SM
+.B \&.TS
+and
+.SM
+.B \&.TE
+command lines, which are assumed to describe tables
+and are re-formatted by
+.IR tbl .
+(The
+.SM
+.B \&.TS
+and
+.SM
+.B \&.TE
+command lines are not altered by
+.IR tbl ).
+.PP
+.SM
+.B \&.TS
+is followed by global options.
+The available global options are:
+.RS .3i
+.PP
+.PD 0
+.TP "\w'\f3doublebox\f1\ \ 'u"
+.B center
+center the table (default is left-adjust);
+.TP
+.B expand
+make the table as wide as the current line length;
+.TP
+.B box
+enclose the table in a box;
+.TP
+.B doublebox
+enclose the table in a double box;
+.TP
+.B allbox
+enclose each item of the table in a box;
+.TP
+.BI "tab (" x )
+use the character
+.I x\^
+instead of a tab to separate items in a line of input data.
+.RE
+.PD
+.PP
+The global options, if any, are terminated with a semi-colon
+.RB ( \|;\| ).
+.PP
+Next come lines describing the format of each line of the table.
+Each such format line describes one line of the actual table, except that the
+last format line
+(which must end with a period)
+describes
+.I all\^
+remaining lines of the table.
+Each column of each line of the table is described by a single key-letter,
+optionally followed by specifiers that determine the font and point size
+of the corresponding item,
+that indicate where vertical bars are to appear between columns,
+that determine
+column width, inter-column spacing, etc.
+The available key-letters are:
+.RS .3i
+.PP
+.PD 0
+.TP "\w'\f3=\f1\ \ \ 'u"
+.B c
+center item within the column;
+.TP
+.B r
+right-adjust item within the column;
+.TP
+.B l
+left-adjust item within the column;
+.TP
+.B n
+numerically adjust item in the column:
+units positions of numbers are aligned vertically;
+.TP
+.B s
+span previous item on the left into this column;
+.TP
+.B a
+center longest line in this column and then
+left-adjust all other lines in
+this column with respect to that centered line;
+.TP
+.B ^
+span down previous entry in this column;
+.TP
+.B \|_
+replace this entry with a horizontal line;
+.TP
+.B =
+replace this entry with a double horizontal line.
+.RE
+.PD
+.PP
+The characters
+.B B
+and
+.B I
+stand for the bold and italic fonts, respectively;
+the character \||\| indicates a vertical line between columns.
+.PP
+The format lines are followed by lines containing the actual data for the
+table, followed finally by
+.SM
+.BR \&.TE .
+Within such data lines, data items are normally separated by tab characters.
+.PP
+If a data line consists of only
+.B _
+or
+.BR = ,
+a single or double line, respectively, is drawn
+across the table at that point;
+if a
+.I "single item\^"
+in a data line consists of only
+.B _
+or
+.BR = ,
+then that item is replaced by a single or double line.
+.PP
+Full details of all these and other features of
+.I tbl\^
+are given in the reference manual cited below.
+.PP
+The
+.SM
+.B \-TX
+option forces
+.I tbl\^
+to use only full vertical line motions, making the output
+more
+suitable for devices that cannot generate partial vertical
+line
+motions (e.g., line printers).
+.PP
+If no file names are given as arguments
+(or if
+.B \-
+is specified as the last
+argument),
+.I tbl\^
+reads the standard input,
+so it may be used as a filter.
+When it is used with
+.IR eqn\^ (1)
+or
+.IR neqn ,
+.I tbl\^
+should come first to minimize the volume
+of data passed through
+pipes.
+.SH EXAMPLE
+.PP
+In the following input, ^I represents a tab
+(which should be typed as a genuine tab):
+.IP
+.nf
+\&\f3.\fPTS
+center \|box \|;
+cB \|s \|s
+cI \||\| \|cI \|s
+\f3^\f1 \||\| \|c \|c
+l \||\| \|n \|n \|.
+Household \|Population
+\&_
+Town\|^I\|Households
+\|^I\|Number\|^I\|Size
+\&=
+Bedminster\|^I\|789\|^I\|3.26
+Bernards Twp.\|^I\|3087\|^I\|3.74
+Bernardsville\|^I\|2018\|^I\|3.30
+Bound Brook\|^I\|3425\|^I\|3.04
+Bridgewater\|^I\|7897\|^I\|3.81
+Far Hills\|^I\|240\|^I\|3.19
+\&.TE
+.fi
+.PP
+yields:
+.PP
+.TS
+center box ;
+cB s s
+cI | cI s
+^ | c c
+l | n n .
+Household Population
+_
+Town	Households
+	Number	Size
+=
+Bedminster	789	3.26
+Bernards Twp.	3087	3.74
+Bernardsville	2018	3.30
+Bound Brook	3425	3.04
+Bridgewater	7897	3.81
+Far Hills	240	3.19
+.TE
+.SH SEE ALSO
+cw(1), eqn(1), mm(1), mmt(1), nroff(1), troff(1), mm(5), mv(5)
+.br
+.SM
+.I TBL\*S\-A Program to Format Tables\c 
+\&.
+.SH BUGS
+See
+.SM
+.I BUGS\^
+under
+.IR nroff\^ (1).
+.\"	@(#)tbl.1	5.1 of 11/15/83

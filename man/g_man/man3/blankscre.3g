@@ -1,0 +1,43 @@
+.TH blankscreen 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B blankscreen
+\- turns screen refresh on and off
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "blankscreen(b)"
+.B "Boolean bool;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine blanks(b)
+.B "logical bool
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure blankscreen(bool: Boolean);"
+.SH DESCRIPTION
+.B blankscreen
+turns screen refresh on and off.
+\f2b\fP = TRUE(1)
+stops display;
+\f2b\fP = FALSE(0)
+restarts display.
+.PP
+When bitplanes are simultaneously viewed and updated
+(as in single buffer mode,
+RGB mode, or when the front buffer is displayed
+in double buffer mode),
+there is competition for memory which reduces performance.
+This is most true
+for noninterlaced monitors.
+To speed up drawing in these cases,
+turn off the display while drawing. 
+.SH SEE ALSO
+\f2Programming Guide\fP, Section 2.1, Initialization 
+.SH NOTE
+This routine is available only in immediate mode.

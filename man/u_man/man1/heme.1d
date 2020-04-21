@@ -1,0 +1,152 @@
+'\"macro stdmacro
+.TH HEME 1D
+.SH NAME
+heme \- depthcued display of the Cytochrome P450 protein molecule
+.SH SYNOPSIS
+.nf
+.B /usr/people/mexdemos/heme
+.fi
+.SH DESCRIPTION
+.PP
+Dr. Tom Poulos and Prof. Joseph Kraut of the University of California at 
+San Diego have constructed a computer model of
+the Cytochrome P450 molecule to aid in their research into the structure
+of this enzyme. Computer graphics help in
+comparing electron density maps to the proposed protein structure by
+moving the hypothetical structure into regions of high electron density.
+Proximity of atoms provides information regarding chemical
+interaction.
+.PP
+.I heme
+displays the Cytochrome protein with control of viewing transformations
+via pop-up menu selections. Also, display of various parts of the protein 
+molecule can be toggled on and off.  When all portions are displayed,
+the molecular model is comprised of 1022 points and 549 vectors.
+.PP
+Pop up the menu by holding down the CENTER mouse button. Menu selections are
+are toggled by placing the cursor atop the menu selection and pressing the
+LEFT mouse button. The menu disappears when the CENTER mouse button is 
+released.
+.sp
+.nf
+.na
+	Left 	Function
+.br
+	Menu
+.sp
+	5	Amino acids that interact with the heme group.
+.br
+	4 	Backbone of P450, connecting alpha-carbons
+		of amino acid subunits.
+.br 
+	3	Electron density contour around the iron atom.         	
+.br
+	2 	Van der Waals surface of the heme group.
+.br
+	1 	The heme group, the subunit which accepts
+		and donates electrons.
+.fi
+.ad
+.sp
+.PP
+The right menu is a series of glyphs which specify the transformations
+affecting the molecule.  From top to bottom, the first button turns 
+depth-cueing on and off.  The next six menu 
+buttons rotate the molecule around the x, y and z axes.  The next six menu
+buttons translate the molecule in the x, y and z directions.  The
+next two menu buttons scale the molecule (larger or smaller).  The
+next to last button is the bungalow (house) icon, which resets the initial
+position of the molecule.  The house represents returning to home.  
+The stop sign is, of course, the exit.
+.PP
+The depth-cueing uses either 32 or 16 intensities per color, depending
+upon the number of available planes of image memory.
+The initial display is designed to emphasize the central structure of the
+model.
+If the model is translated far enough away to be completely visible, the depth-
+cueing will render it virtually invisible.
+To see the whole model, scale it down and translate it forward
+until the perspective, Z-clipping,
+and depth-cueing give an attractive image.
+.SH "DIAL AND BUTTON BOX OPERATION"
+.PP
+If a dial and button box is connected to the IRIS, it can be used to control
+the molecule.  Typing \f3k\f1 (which stands for knobs) activates the 
+dial and button box as the input device.  
+Refer to the dials and buttons by the names in this chart:
+.sp
+.nf
+.ce 100
+32 Buttons
+SW0	SW1	SW2	SW3
+SW4	SW5	SW6	SW7	SW8	SW9
+SW10	SW11	SW12	SW13	SW14	SW15
+SW16	SW17	SW18	SW19	SW20	SW21
+SW22	SW23	SW24	SW25	SW26	SW27
+SW28	SW29	SW30	SW31
+
+8 DIALS
+DIAL6		DIAL7
+DIAL4		DIAL5
+DIAL2		DIAL3
+DIAL0		DIAL1
+.ce 0
+.fi
+.sp
+When the dial and button box is selected as the new input device,
+all current transformations (rotations, translations,
+and scaling) stop.  The dials and buttons take over the
+functions originally found on the pop-up menu:
+.nf
+.na
+.sp
+	Button 	Function
+.sp
+	SW0	Depth-cueing, on and off
+.br
+	SW1	Return to home position (bungalow icon equivalent)
+.br
+	SW2	Unused
+.br
+	SW3	Exit the program
+.br
+	SW4 	The heme group, the subunit which accepts
+		and donates electrons.
+.br
+	SW5 	Van der Waals surface of the heme group.
+.br
+	SW6	Electron density contour around the iron atom.
+.br
+	SW7 	Backbone of P450, connecting alpha-carbons
+		of amino acid subunits.
+.br 
+	SW8	Amino acids that interact with the heme group.
+.br
+	SW9-SW31 are unused
+.bp
+	Dials 		Functions
+.sp
+	DIAL0		enlarge and shrink (scale) molecule
+.br
+	DIAL1		unused
+.br
+	DIAL2,4,6	rotate molecule around z, y and x axes (respectively)
+.br
+	DIAL3,5,7	translate molecule in z, y and x
+			directions (respectively)
+.sp
+.fi
+.ad
+Type the \f3k\f1 key again to restore the mouse, with its pop-up menu,
+as the input device.
+.SH "WINDOW MANAGER"
+.PP
+The heme executable can only run under the window manager.
+A special option with the window manager version of heme
+continues the motion of the molecule, even when the window is detached.
+This motion option is turned on and off by typing \f3m\f1.
+.SH "HARDWARE CONFIGURATION"
+A minimum configuration of 20 bitplanes of image memory 
+is required to run
+.I heme.
+

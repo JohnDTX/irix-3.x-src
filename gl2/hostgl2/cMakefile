@@ -1,0 +1,88 @@
+##########################################################################
+#									 #
+# 		 Copyright (C) 1985, Silicon Graphics, Inc.		 #
+#									 #
+#  These coded instructions, statements, and computer programs  contain  #
+#  unpublished  proprietary  information of Silicon Graphics, Inc., and  #
+#  are protected by Federal copyright law.  They  may  not be disclosed  #
+#  to  third  parties  or copied or duplicated in any form, in whole or  #
+#  in part, without the prior written consent of Silicon Graphics, Inc.  #
+#									 #
+##########################################################################
+
+#
+# Makefile for Remote Graphics Library, utilities, and demos for 
+# VAX/UNIX 4.2 BSD 
+#
+
+DEFINES = -DVAX -DUNIX4_2 -I.
+CFLAGS = -O $(DEFINES)
+DBGFLAGS = -DIO_DEBUG
+
+LIB = librgl2.a
+DBGLIB = librgl2dbg.a
+UTILS = dliris iftp irsh
+DEMOS = sqiral drawing popup textinit 
+ALL = $(LIB) $(UTILS) $(DEMOS)
+
+CONFIGFILES =  wsirisrc mexrc sys_id TZ rc.getdate
+
+all: $(ALL)
+
+$(LIB): io.o lib.o
+	rm -f $(LIB)
+	ar cr $(LIB) io.o lib.o
+	ranlib $(LIB)
+
+# 'debug' librgl2.a -- prints out a listing of all graphics i/o into the file
+#   "protsave" (or into $PROTSAVE if $PROTSAVE is defined in the environment)
+$(DBGLIB): lib.o iodbg.o
+	ar crv $(DBGLIB) lib.o iodbg.o
+	ranlib $(DBGLIB)
+
+io.o: io.c rpc.h
+	-if [ ! -f /usr/include/xns/Xnsioctl.h ] ; \
+		then y=-DTCP_ONLY ; fi ; \
+	    $(CC) $(CFLAGS) -c $$y io.c 
+
+iodbg.o: io.c rpc.h
+	rm -f iodbg.c ; ln io.c iodbg.c
+	-if [ ! -f /usr/include/xns/Xnsioctl.h ] ; \
+		then y=-DTCP_ONLY ; fi ; \
+	$(CC) $(CFLAGS) -c $(DBGFLAGS) $$y iodbg.c 
+	rm -f iodbg.c
+
+lib.o: decl.h 
+
+sqiral: sqiral.o $(LIB)
+	$(CC) $(CFLAGS) -o sqiral sqiral.o $(LIB) 
+
+drawing: drawing.o $(LIB)
+	$(CC) $(CFLAGS) -o drawing drawing.o $(LIB) 
+
+popup: popup.o $(LIB)
+	$(CC) $(CFLAGS) -o popup popup.o $(LIB) 
+
+textinit: textinit.o $(LIB)
+	$(CC) $(CFLAGS) -o textinit textinit.o $(LIB) 
+
+dliris: dliris.c boot.h remprom.h irisboot.h
+	$(CC) $(CFLAGS) -o dliris dliris.c
+
+iftp: iftp.c $(LIB)
+	$(CC) $(CFLAGS) -o $@ -DVAX -DUNIX4_2 iftp.c $(LIB)
+
+irsh: irsh.c $(LIB)
+	$(CC) $(CFLAGS) -o $@ -DVAX -DUNIX4_2 irsh.c $(LIB)
+
+clean:
+	rm -f *.o *.a $(ALL) iodbg.c
+
+install-config-files: iftp irsh $(CONFIGFILES)
+	iftp w wsirisrc /.wsirisrc
+	iftp w mexrc /mexrc
+	iftp w sys_id /etc/sys_id
+	iftp w TZ /etc/TZ
+# uncomment if will be using rc.getdate
+#	iftp w rc.getdate /etc/rc.getdate
+#	irsh chmod a+x /etc/rc.getdate

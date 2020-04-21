@@ -1,0 +1,119 @@
+'\"macro stdmacro
+.TH LIGHT 1D
+.SH NAME
+light \- demonstrates real-time lighting and shadows
+.SH SYNOPSIS
+.nh
+.na
+.B  /usr/people/mexdemos/light
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+.I light
+displays a cube floating above a grid.  The cube is lit up and casts a shadow
+on the grid.  The mouse valuators and buttons control the display.
+.PP
+To change the display, press the right mouse button to display a popup menu.
+Move the cursor until the menu option you select is highlighted and release
+the button.  To get rid of the menu without changing the display, 
+move the cursor clear of the menu and release the button.
+.SS Automatic operation
+.PP
+Select the window for input.  Press and hold the right mouse button.  A menu
+appears.  Move the cursor to the menu entry for the desired mode and release
+the right mouse button.  The
+.I cube spin
+option makes the cube rotate by itself.  The
+.I scene spin
+option makes the scene rotate by itself.
+.PP
+Any automatic motion will continue with the system unattended.
+.PP
+The label on the menu is the operation that will be executed if that item is selected.  It is \f3not\f1 showing what state the demo is in.  This means that if the menu says
+.I cube spin on
+, selecting this will turn the automatic cube spin on.  It \f3does not\f1 mean that the spin is currently on.
+.SS Manual operation
+.PP
+In this demo, the controls are a little different than are found in 
+most of the others.  The controls were designed to make smooth motions.
+.PP
+With the automatic scene spin off, holding the left mouse button down will
+make the scene spin according to the position of the mouse.  Moving the
+mouse left makes the scene spin clockwise; to the right, counterclockwise.
+Moving the mouse up makes the scene spin toward you; downwards, away from you.
+The farther you move the mouse pointer away from the center of the screen
+the faster it spins in the coresponding direction.
+.PP
+With the automatic cube spin off, holding the middle mouse button down will
+control the cube in a similar manner.
+.PP
+Holding the left and middle mouse buttons down at the same time will make
+the scene move closer or farther away depending on the position of the
+mouse.  Moving the mouse up will make the scene move away, down will make it
+move closer.
+.SS MTV mode
+.PP
+This is named after ``Music Television'' because it is similar to a video
+effect commonly used in that sort of thing.  In
+.I MTV mode
+the picture on the
+screen itself becomes an object.  It can be moved around in the same way as
+the scene.  First get good at moving the scene around.  Then select
+.I MTV mode
+on the popup menu.  Press the left and middle mouse buttons and move
+the mouse pointer above the middle of the screen to back away from the
+picture a little.  Spin the picture by holding the left mouse button down
+and positioning the mouse in the direction you want the picture to rotate.
+.PP
+The automatic cube and scene spin still work while in
+\f2MTV mode.\f1  Getting
+out of MTV mode reverts the mouse control back to what's `inside'
+the picture.  The \f3S\f1, \f3C\f1 and \f3M\f1
+keys do the same thing as selecting
+.I scene spin, cube spin
+and
+.I MTV mode
+on the popup menu.  One last trick:  when you are in
+.I MTV mode
+and you hold the left mouse button down to spin the
+picture, you can press the
+.I M
+key to get out of \f2MTV mode.\f1  The picture will
+still spin at the rate you left it.
+.PP
+Pressing
+.I ESC
+or selecting
+.I kill
+exits the program.
+.sp
+.fi
+.SH "WINDOW MANAGER"
+.PP
+.I light
+only runs under the window manager.  Notice that the window can be
+made any shape.  The scene inside automatically corrects for the aspect 
+ratio.  In
+.I MTV mode
+reshaping the window also reshapes the picture.  Even if you detach
+from the window, objects in automatic motion do not stop.
+.sp
+.SH "COLOR MAP USAGE"
+.PP
+In a fully equipped demonstration unit with at least 24 bit planes, there is enough room in the
+color map for the colors used in the \f2light\f1 program and
+the other programs in our demo package.
+When running on a unit with only 20 bit planes, the colors used by \f2light\f1 are
+shared with other programs.  Therefore, on a 20 bit plane machine,
+use \f2light\f1 with no other graphics windows running.
+After exiting \f2light\f1, run \f2demomakemap\f1 before displaying other
+demos.  The program will not work correctly on a system with less than 20 bit planes.
+.sp
+.SH AUTHOR
+.PP
+Thant Tessman
+.SH "HARDWARE REQUIREMENTS"
+Twenty bitplanes and 1.5 Megabytes of memory are necessary.
+

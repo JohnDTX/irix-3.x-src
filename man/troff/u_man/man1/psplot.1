@@ -1,0 +1,48 @@
+'\"macro stdmacro
+.TH PSPLOT 1
+.SH NAME
+psplot \- convert plot files to P\s-2OST\s+2S\s-2CRIPT\s+2 format
+.SH SYNOPSIS
+.B psplot
+[
+.BR \-g prologue
+] [ files ]
+.SH DESCRIPTION
+.I psplot
+reads
+.I files
+in
+.IR plot 
+format and converts them to P\s-2OST\s+2S\s-2CRIPT\s+2 format on the 
+standard output.  If no
+.I files
+are specified, the standard input is used.
+The conversion is almost one-for-one, with one P\s-2OST\s+2\S\s-2CRIPT\s+2 function call for each
+.I plot 
+primitive.  The behavior of the generated file can be modified by 
+changing the definitions of the P\s-2OST\s+2\S\s-2CRIPT\s+2 functions in the prologue.
+If no 
+.B \-g 
+option is specified, the default prologue is used.
+.SH ENVIRONMENT
+.TP \w'/usr/lib/ps/psplot.pro\ \ \ 'u
+PSLIBDIR
+path name of a directory to use instead of 
+.B /usr/lib/ps
+for psplot prologue file.
+.SH FILES
+.TP \w'/usr/lib/ps/psplot.pro\ \ \ 'u
+/usr/lib/ps/psplot.pro
+default prologue file.
+.SH "SEE ALSO"
+lp(1), ps4014(1).
+.SH AUTHOR
+Adobe Systems Incorporated
+.SH BUGS
+.I plot 
+format has been removed from some newer UNIX systems (e.g.,
+Systems V), but 
+.I psplot
+lives on.
+.SH NOTES
+P\s-2OST\s+2S\s-2CRIPT\s+2 is a trademark of Adobe Systems Incorporated.

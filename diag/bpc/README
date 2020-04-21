@@ -1,0 +1,425 @@
+User guide to the console program
+Kurt Akeley
+30 March 1983
+
+Introduction
+
+Console is a C program that supports interractive use of the IRIS raster
+subsystem.  It is compiled for specific versions of the display and
+update boards of these raster subsystems.  It is used primarily for
+test and debug purposes, although it includes some interesting
+demonstration routines.  Currently it requires a special (one of a kind)
+interface board to drive the update board (UC).
+Later versions will run with the standard geometry engine-fbc (GF)
+board.  (Update - consolegf.r now works with the GF1 board.)
+
+
+Compiling
+
+All of the console source code is maintained in /olb/iris/bpc/test and
+its subdirectories.  Device descriptions for the UC and DC boards are
+currently referenced in /olb/iris/betasrc/include, but this may
+change as the PicMan code is finalized.  Console is compiled by simply
+typing "make" while in the test directory.  This compiles for the
+current board revisions, UC3 and DC3 at the time of this writing.
+If a different version is desired, "make" can be qualified by
+DC=-DDC2 or UC=-DUC2 to force older versions.  It is necessary to "touch"
+all of the .c files once before a different version is compiled.
+
+
+Loading and Running
+
+The latest working copy of each version of console is stored in
+/olb/iris/boot.  For example, the version for UC2 and DC3 is in
+/olb/iris/boot/console23.r.  
+
+Console runs on a raw processor board (i.e. without any kernal).
+The current rom monitor includes the "n" command which loads
+precompiled programs over the ethernet.  Console33.r is loaded by
+typing
+	n/olb/iris/boot/console33.r
+to this monitor.  Console can also be loaded over the serial line,
+but this takes over 5 minutes at 9600 baud.  The command is
+	load console33.d
+You must be logged in and currently in directory /olb/iris/boot for
+this command to work.  Login is accomplished by running the processor
+in transparent (type t) mode.  Escape is by typing ^c.
+Note that console must be compiled with the -d (rather than -r) flag
+if it is to be serially loaded.
+
+
+Machine configuration
+
+An IRIS which is to run console must have its GE/FBC board(s) removed
+and replaced by the console test board (so marked).  A flat cable
+(50-conductor for UC2, 34-conductor for UC3) connects the console
+test board to the UC.  A processor board and an ethernet interface
+board should be installed (if not already present) in the usual fashion.
+
+The IRIS keyboard must be replaced by an ASCII terminal while console
+is run.  Alpha units are configured for terminal operation by setting
+only switch 10.  Beta units are not yet defined.
+
+
+User Interface
+
+Console prompts for each command by typing
+	[console] ->
+at the left edge of the screen.  It expects you to type a single command,
+followed by the (possibly variable) number of arguments expected by that
+command, i.e.
+	[console] -> command arg1 arg2 ... argn
+The command string and its arguments must all be separated by at least one
+space (or tab).  All must be typed on a single line.  If an incorrect number
+of arguments is provided, or if the command is preceded by a question mark,
+	[console] -> ? command
+a description of the syntax and actions of "command" is printed, and the
+command is not executed.  The command "cmndlist"
+	[console] -> cmndlist
+prints a list of all currently implemented commands.
+
+If console refuses to prompt (infinite loop, perhaps) it can be halted by
+pressing the break key on the keyboard.  This will get you back to the
+monitor prompt
+	>
+If the console code has not been damaged, it can be restarted without
+reloading by typing
+	> g1000
+Otherwise you will have to reload console using either the ethernet or the
+serial line.  It is a good idea "soft reset" the processor after each break
+by typing
+	> k
+This will not affect the console code, but will insure that the monitor
+stack is not overflowed by repeated abort (break) commands.  Thus the
+normal sequence for stopping and restarting console is:
+	break key
+	> k
+	> g1000
+	[console] ->
+
+
+Theory of Operation
+
+Console maintains a set of global variables that hold current color,
+write enable, buffer mode, machine configuration, and other information.
+Some console commands change these global variables, and the hardware
+registers to which they correspond.  Other console commands execute
+simple-to-complex drawing operations which use these global values.
+The init command returns all global variables to user-specified values.
+Its actions are further described below.
+
+Console allows complete access to all UC and DC registers.  For example,
+you can fill a rectangular region by typing:
+	[console] -> ldxs 100
+	[console] -> ldxe 200
+	[console] -> ldys 100
+	[console] -> ldye 200
+	[console] -> ldfmaddr 20
+	[console] -> request 8 0
+It is easier, however, to simply type
+	[console] -> drawrect 100 100 101 101 ff ffff
+which will accomplish the same thing.  The first command sequence has a
+one-to-one correspondence to the actual hardware actions.  The second
+is simply a shorthand version; it does the same thing, but requires much
+less typing.
+
+Numeric arguments are almost always expected to be hex values.  Boolean
+responses require zero (0) for no and one (1) for yes.  Exceptions are
+noted in the command descriptions that are printed by console itself.
+
+
+Init
+
+Init maintains a private set of static variables that match the globals
+used by all of console.  The first time that init is called, it asks you
+to either accept its default values for these variables, or the specify
+alternate values.  Subsequent init commands simply reset the global
+variables to the values of the static variables.  Some console commands
+destroy machine state that is critical to the execution of other
+commands.  Simply typing "init" insures that the machine state is set
+to a known standard.
+
+Init sets some machine state that is not maintained by global variables.
+This includes:
+    1.	Color indexes 0, 1, 2, and 3 are mapped to red, green, blue, and
+	white.
+    2.	Several stipple patterns are written into low font memory locations.
+    3.	The screen is cleared to the current color index.
+    4.	The special 256 byte font used to support "writeword" and several
+	internal operations is written into the font memory.
+    5.	Maybe some other stuff, I can't remember.
+
+Init operates in four modes, specified by an optional argument.
+Mode zero (the default) simply resets the global values to the static
+values stored by init itself.  The static values can be modified prior to
+assignment to the globals by typing
+	[console] -> init 1
+The command
+	[console] -> init 2
+updates the default values of the static variables, as well as allowing you
+to change these static values.  For example, the default significant planes
+are determined by experiment (read and write the planes). If you have switched
+the locations of some bitplane boards (fiddled with the switches, that is),
+you can re-initialize without any hassle by using init 2, which will detect
+the new arrangement and set its defaults accordingly.  The first call to
+init is always mode 2 (regardless of your argument).  All other calls are
+mode 0 unless otherwise specified.  The command:
+	[console] -> init 3
+initializes the GF interface (if used) without changing any other state.
+This can be used to diagnose failure of other programs (gl, for example)
+without affecting the corpse.
+
+In summary:
+
+	Mode	Action
+	------------------------------------------------------------------
+	  0	Set all globals to the static values
+	  1	Allow the static values to be changed, then set globals
+		to these new statics
+	  2	Recompute the default static values and assign these to the
+		statics, then allow the statics to be changed, then set all
+		globals to the new static values.
+	  3	Just initialize the GF board interface
+
+
+Indexing
+
+Bit patterns stored as pixels in the bitplane are refered to as colorcodes.
+The current color and write-enable information stored in the hardware are
+therefore the current colorcode and wecode.  Rather than requiring you to
+remember which planes are installed (or are to be consider significant),
+console allows you to specify once (using init) which planes are significant,
+and then to refer to colors by index rather than by code.  It converts
+indexes in the range 0 to (2**n)-1 (n is the number of visible, significant
+planes) into either colorcodes or wecodes, as specified.  Console commands
+which return bitplane data often return index as well as code information.
+
+For example, suppose that two bitplane boards are installed, but that you
+wish to use only the one which is currently set to zero, and thus holds
+bitplane bits A0, A1, B0, and B1.  You should set the significant planes
+to 303 by typing
+	[console] -> sigplanes 303
+or by calling
+	[console] -> init 1
+and responding to the sigplanes prompt.
+
+Then the following index-to-code table will apply.
+
+      Index	  Display A code  Display B code  Display AB code
+	0		  0		  0		  0
+	1		  1		100		  1
+	2		  2		200		100
+	3		  3		300		101
+	4		---		---		  2
+	5		---		---		  3
+	6		---		---		102
+	7		---		---		103
+	8		---		---		200
+	9		---		---		201
+	a		---		---		300
+	b		---		---		301
+	c		---		---		202
+	d		---		---		203
+	e		---		---		302
+	f		---		---		303
+
+
+Bptest
+
+Fills all significant bitplanes with one of four patterns, then reads all
+data back and compares to desired pattern.  The four patterns are:
+    0.	All zero
+    1.	All one
+    2.	Each word takes its address
+    3.	Each word takes the complement of its address
+	(accomplished by loaded the addresses, then rotating 16-bits
+	 in the local registers, then rewriting.)
+The tests_to_run argument on the command line specifies which of the four
+tests are to be executed.  Each bit in this argument corresponds to a
+single test.  For example, setting tests_to_run equal to 1 runs only the
+zero-test (test 0).  Tests_to_run equal c runs both address tests
+(tests 2 and 3).
+
+
+Fmtest
+
+Fills the font memory with one of four patterns, then reads all
+data back and compares to desired pattern.  The four patterns are:
+    0.	All zero
+    1.	All one
+    2.	Each byte takes the 8 low-order bits of its address
+    3.	Each byte takes the 8 high-order bits of its address
+The tests_to_run argument on the command line specifies which of the four
+tests are to be executed.  Each bit in this argument corresponds to a
+single test.  For example, setting tests_to_run equal to 1 runs only the
+zero-test (test 0).  Tests_to_run equal c runs both address tests
+(tests 2 and 3).
+
+
+Maptest
+
+Fills the colormap with one of four patterns, then reads the
+data back and compares to desired pattern.  The four patterns are:
+    0.	All zero
+    1.	All one
+    2.	Each byte takes the 8 low-order bits of its address
+    3.	Each byte takes the 2 or 4 high-order bits of its address
+	(DC2 and DC3 respectively).
+The tests_to_run argument on the command line specifies which of the four
+tests are to be executed.  Each bit in this argument corresponds to a
+single test.  For example, setting tests_to_run equal to 1 runs only the
+zero-test (test 0).  Tests_to_run equal c runs both address tests
+(tests 2 and 3).
+
+
+Stripetest
+
+Fills all significant planes with a vertical stripe pattern, 3 on, 3 off,
+etc.  For each significant plane the colormap is loaded so as to ignore
+output from all other planes, and to switch red 0 and red 1 as a function
+of that plane.  The vfsm traces the colormap output and totals errors
+for each plane.
+
+
+BP Board testing
+
+A system with tested UC and DC cards is used for this testing.
+The following sequence is suggested for testing a new bp board:
+
+    1.	bplamptest
+	Check that all we and color LEDs light in sequence.  Failure
+	may indicate bad LEDs or bad circuitry.  Use colorcode and
+	wecode commands to create test patterns, then probe the board
+	to determine the fault location.
+    2.	colorwetest
+	Again tests the color and write enable circuitry, but here the
+	read and write of a single bitplane location is also involved.
+	Failure here probably indicates memory problems, but check the
+	color and write enable stuff again anyway.  Memory problems
+	are best dealt with in step 3.
+    3.	bptest (tests 0 and 1 only)
+	The zero and one tests ignore bitplane addressing and concentrate
+	on the update data paths.  Failure here should be investigated 
+	with "loopclearword", which allows a single bitplane word to be
+	read/written repeatedly.  Use colorcode, wecode, and the mask
+	argument of loopclearword to create various data and we levels
+	at the DRAM inputs and outputs.  An oscilloscope synced to CAS
+	is often best.
+	Note that cfr can be set to disable display cycles on the
+	bitplanes.  This will greatly simplify the interpretation of
+	the oscilloscope screen.  Syncing on CAS avoids memory refresh
+	cycles, but gets a late start on update cycles.  Syncing on RAS
+	will include refresh cycles.
+    4.	bptest (tests 2 and 3)
+	These tests check bitplane addressing.  Each bitplane word
+	(in all significant planes) is written with its address,
+	x and y bits stuffed in a regular manner.  Error reporting
+	includes x, y, ras, and cas information to allow stuck and/or
+	shorted address lines to be identified.
+	Test 3 first loads each word with its address, then uses the
+	local 16-bit registers to rotate, and thus invert, each word.
+	Test 3 failures should be related to the registers, not to
+	additional address line problems.
+    5.	stripetest (double buffer)
+	Tests the display data paths.  In case of failure, use sigplanes,
+	stripe, and mapcolor to display stripes on the screen.  Set
+	sigplanes to the single plane of interest.
+    6.	Repeat colorwetest, bptest, and stripetest with the board in
+	each of its 4 configurations (board 0, 1, 2, and 3).  A bp board
+	which has passed these tests in all configurations is completely
+	tested.
+
+
+DC Board testing
+
+The dc board performs 2 distinguishable functions:
+    1.	Memory and monitor timing signal generation, and
+    2.	Display generation (color maps, rgb data paths, DACs).
+It would be nice if these functions were independent, but of course they
+are not.
+
+    1.	dclamptest
+	Dc is mapped into the multibus address space.  The lamp test
+	checks for address acknowledge and gives visual feedback of
+	correct dcr operation.  If bus errors result, use a logic
+	probe and the dcr command to trace the acknowledge path.
+    2.	dcrtest
+	Checks for stuck and shorted bits in dcr.  Performs a rudamentary
+	test on the video fsm PAL.
+    3.	maptest (all 4 tests)
+	Looks for both data and address errors in the colormaps.
+	Readmap and writemap can be used to interogate and alter the
+	colormap contents if problems are encountered.
+	Note: be sure that the signal jumpers are correctly installed.
+    4.	monitor
+	Connect a color monitor and check for a correct raster (indicates
+	that horizontal and vertical sync are present and correct, and
+	therefore that the display fsm is operating).  Problems can
+	often be traced with a logic probe, particularly if the dfsm
+	is not cycling.  In this case, check the "config" signals at
+	both the page and line levels to determine what state the dfsm
+	is in.
+    5.	fmtest (all 4 tests)
+	Tests the dfsm generation of memory signals, including refresh.
+    6.	bptest (config: update ab, display ab)
+	Test the update ability with the display on.
+    7.	bptest (config: update ab)
+	Test the update ability with the display off.
+    8.	stripetest (double buffer)
+	Check the double buffer data paths.
+    9.	stripetest (single buffer)
+	Check the single buffer data paths.
+   10.	ramptest (mapped mode)
+	Use an oscilloscope to individually check each DAC output.  All
+	256 levels should blend into a smooth ramp.  The ramp amplitude
+	(with only the on-board 75 ohm resistor as termination) should
+	be 1.5 volts peak-to-peak.
+   11.	ramptest (rgb mode)
+	Tests the rgb data paths.
+
+It is important that the stripetest and rgb ramptests be performed in
+24-bitplane systems to insure that all paths are correct.  
+
+
+UC Board Testing
+
+The recommended test procedure is:
+
+    1.	uclamptest
+	Tests buffer loading and simple command execution (to transfer
+	cfb contents into cfr).
+    2.	fmtest
+	The font memory is crucial to almost all uc operations (uclamptest
+	above is a notable exception).  Its must operate correctly before
+	any conclusions are drawn about other tests.
+    3.	colorwetest
+	Simple uc test which does not count on correct operation of
+	x,y addressing, er computation, or viewport operation.  The
+	fsm is tested.
+    4.	bptest
+    5.	linetest
+    6.	viewporttest
+    7.	recttest
+    8.	chartest
+
+Very little experience has been had trouble-shooting uc boards.
+All but 2 (to date) have been wirewraped and have had few if any
+problems.  Thus the list above is not well commented.
+
+
+Bpctest
+
+Bpctest is  a collection of all of the test procedures available in
+console.  It tests the entire BPC with the exception of the color
+intensity paths after the colormaps.  This means that it must be
+supplemented with ramptest/steptest in both mapped and rgb modes.
+
+Bits in the tests_to_run argument specify which boards are to be tested.
+If a new board has been installed in a previously tested system,
+only those tests which are specific to that board need be run.  In
+general, however, it is best to run all tests.  The bit significances are:
+    0 	Display controller
+    1   Update controller
+    2	Bitplane memory
+    3	Bptest (this should always be specified for final tests of any
+	board).

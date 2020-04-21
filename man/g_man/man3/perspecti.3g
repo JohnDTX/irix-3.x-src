@@ -1,0 +1,84 @@
+.TH perspective 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B perspective
+\- defines a perspective projection transformation
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "perspective(fovy, aspect, near, far) "
+.B "Angle fovy;"
+.B "float aspect; "
+.B "Coord near, far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine perspe(fovy, aspect, near, far)"
+.B "integer*4 fovy"
+.B "real aspect, near, far"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure perspective(foyv: longint; aspect: 
+.br
+.B	real; near, far: Coord);
+.SH DESCRIPTION
+.B perspective
+defines a projection transformation
+by indicating the field-of-view angle
+(\f2fovy\f1)
+in the
+.I y
+direction of the eye coordinate system;
+the
+.I aspect
+ratio that determines the field of view in the
+.I x 
+direction;
+and the distance to the 
+.I near
+and 
+.I far 
+clipping planes in the
+.I z
+direction.  
+The aspect ratio is a ratio of
+.I x
+to
+.I y.  
+In general,
+the aspect ratio in
+.B perspective
+should match the
+aspect ratio of the associated viewport.
+For example,
+\f2aspect\fP=2.0
+means the viewer's angle of view is twice as wide
+in \f2x\fP as it is in \f2y\fP.
+If the viewport is 
+twice as wide as it is tall,
+it displays the image without distortion.
+.I near
+and
+.I far
+are the distances from the viewer to the near and far clipping planes,
+and are always positive.
+.PP
+.B perspective
+loads a matrix onto the transformation stack, overwriting what was
+there.
+.PP
+.I fovy
+is in tenths of degrees, as are all angles.
+.I fovy
+must be \(>= 2 or an error results.
+
+.ne 15 
+.SH "SEE ALSO"
+ortho, window
+.sp
+.I Programming Guide,
+Section 4.3, Projection Transformations

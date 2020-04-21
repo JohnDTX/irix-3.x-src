@@ -1,0 +1,64 @@
+.TH ortho 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I ortho
+- define an orthographic projection transformation
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "ortho(left, right, bottom, top, near, far) "
+.B "Coord left, right, bottom, top, near, far;"
+.IP 
+.B "ortho2(left, right, bottom, top) "
+.B "Coord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine ortho(left, right, bottom, top, near, far)"
+.B "real left, right, bottom, top, near, far"
+.IP 
+.B "subroutine ortho2(left, right, bottom, top)"
+.B "real left, right, bottom, top"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure ortho(left, right, bottom, top, near, far: Coord);"
+.IP 
+.B "procedure ortho2(left, right, bottom, top: Coord)"
+.sp
+.SH DESCRIPTION
+.I Ortho
+specifies
+a box-shaped enclosure in the eye coordinate system that will
+be mapped to the viewport.  
+.B Left, right, bottom,
+and
+.B top
+are the 
+.B x
+and
+.B y
+clipping planes.  
+.B near
+and
+.B far
+are distances along the line of sight from the eye space origin, and
+can be negative.  The 
+.B z
+clipping planes are at
+.B -near
+and 
+.B -far.
+.PP
+\f2Ortho2\f1 defines a
+2D clipping rectangle.  When \f2ortho2\f1 is used with 3D world 
+coordinates, the z values are left
+unchanged.
+.PP
+Both
+.I ortho
+and
+.I ortho2
+load a matrix onto the transformation stack, overwriting whatever was there.
+.SH "SEE ALSO"
+.I perspective, window

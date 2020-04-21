@@ -1,0 +1,38 @@
+.TH endfeedback 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B endfeedback
+\- turns off feedback mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long endfeedback(buffer)"
+.B "short buffer[];"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function endfee(buffer)"
+.B "integer*2 buffer(*)
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function endfeedback(var buffer: Short): longint; "
+.SH DESCRIPTION
+.B endfeedback
+turns off feedback mode.
+.I buffer 
+contains the values 
+output by the Geometry Pipeline during the feedback session.
+.B endfeedback
+returns the number of shorts in 
+.I buffer.
+.SH "SEE ALSO"
+feedback
+.sp
+.I Programming Guide,
+Section 10.2, Feedback Mode
+.SH NOTE
+This routine is available only in immediate mode.

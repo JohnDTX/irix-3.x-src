@@ -1,0 +1,62 @@
+'\"macro stdmacro
+.TH RHOSTS 4  
+.SH NAME
+rhosts \- list of trusted hosts and users
+.SH DESCRIPTION
+Each user may have a \f2.rhosts\f1 file in his home directory.
+This file contains a list of users on other hosts in
+the network that are trusted in the following sense:  when
+making requests to access the user's system with
+.IR rcp (1C),
+.IR rlogin (1C),
+or
+.IR rsh (1C),
+they are allowed to assume the user's identity
+without specifying a password.
+In other words, the remote user has exactly the
+same access privileges on the local system that
+the owner of the
+.I .rhosts
+file does and this access is
+granted without any attempt to verify
+the remote user's identity by requiring him to
+enter a password.
+The incoming request includes the user name that should
+be used on the local system.
+The
+.I .rhosts
+file owned by that local user acts as a logical extension to the
+.IR hosts.equiv (4)
+file when deciding whether to grant permission for the incoming
+.IR rcp ,
+.IR rlogin ,
+or
+.I rsh
+request.
+.PP
+The
+.I .rhosts
+file has the same format as the
+.IR hosts.equiv (4)
+file.
+.SH NOTES
+The owner of the
+.I .rhosts
+file must be the user in whose home directory
+it resides.
+The contents of the file will be disregarded if it is owned
+by another user.
+.PP
+Special care should be taken in deciding the contents
+of the file
+.I /.rhosts.
+Any host or user added to this file has the ability
+to become the superuser on the local system without
+entering the password.
+Note that 
+.I /.rhosts
+are not required. 
+.SH FILES
+~/.rhosts
+.SH SEE ALSO
+rcp(1C), rlogin(1C), rsh(1C), hosts.equiv(4)

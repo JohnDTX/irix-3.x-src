@@ -1,0 +1,32 @@
+.TH closeobj  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I closeobj
+- close an object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "closeobj()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine closeo"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure closeobj;"
+.sp
+.SH DESCRIPTION
+\f2Closeobj\f1 closes an open object.  A new object is created with the 
+\f2makeobj\f1 command.  All display list commands between \f2makeobj\f1
+and \f2closeobj\f1 become part of the object definition.  An existing
+object is opened for editing with \f2editobj\f1; the editing session is
+terminated when the object is closed.
+.PP
+If no object is open, 
+.I closeobj
+is ignore.
+.SH "SEE ALSO"
+.I editobj, makeobj
+.SH NOTE
+This command can only be used in immediate mode.

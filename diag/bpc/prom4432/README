@@ -1,0 +1,69 @@
+Kurt Akeley
+7 June 1985
+bpcd proms for an IP1 system
+
+I assume that you want to make a prom board that can be "prom booted"
+by an IP1 system.  Here's the procedure:
+
+    1.	The PROM board should set to respond to address 200000
+	(set S1 to 2, J1 to 0, and S2 to 0).
+
+    2.	Use the latest copy of bpcd4432.r.  The bpcd4432.r file in
+	this directory is linked to the file of the same name in
+	the diag/bpc directory.  No need to copy!
+
+    3.	Split the .r file into 64K chunks by typing
+
+		~kurt/bin/psplit 0 10000 bpcd4432
+
+	This will produce three output files: bpcd4432.0, bpcd4432.1,
+	and bpcd4432.2.
+
+    4.	Use the GangPak in the data i/o programmer.  Initialize
+	the programmer by keying in
+
+		SELECT
+		F
+		9
+		START
+
+		SELECT
+		F
+		1
+		START
+		START
+
+    5.	Install 4 128K EPROMs in the 4 upper locations of the
+	GangPak.  Label these PROMs 1 0 3 2 from left to right.
+
+    6.	Burn the first 4 EPROMs by typing
+
+		nprom -S2 -v -cxxxx < bpcd4432.0
+
+	This has been tested only with tony's personal version of
+	nprom:	/og3/roaque/iris/gl2/proms/nprom.  The -cxxxx refers
+	to the family pinout code for the data io.  See the wall chart
+	for the correct code for the EPROMs that you are using
+	(example hitachi -c7951).
+
+    7.	Burn the second 4 EPROMs by typing
+
+		nprom -S2 -v -cxxxx < bpcd4432.1
+
+	label these EPROMs 5 4 7 6 from left to right.
+
+    8.	Same procedure for EPROMs 8 through 11.
+
+    9.	Install the EPROMs in the board like this:
+
+		0   2   4   6   8   10  x   x
+		1   3   5   7   9   11  x   x
+
+   10.	Install the PROM board in a system and type
+
+		b pb.200000:
+
+	to the monitor to get things rolling.  Be sure that the
+	processor and the PROM board share the P2 extended address
+	lines (P2 lines 55, 56, 57, and 58).
+

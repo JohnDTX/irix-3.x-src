@@ -1,0 +1,33 @@
+'\"#ident	"@(#)shells:mm.letter	1.4"
+.LO AT "Research Staff"
+.WA "James Lorrin, Ph.D." "Director of Research"
+Business Computer Systems, Inc.
+190 River Boulevard
+Durham, N.C. 27707
+.WE
+.LO SA "Dear Dr. Smith:"
+.LO CN
+.IA "Fred Smith, Ph.D."
+Columbia University
+116th Street
+New York, NY 10019
+.IE
+.LO SJ "Summit Research Project"
+.LT BL
+.P
+The experiements are almost complete.
+We hope to finish up work in this area soon.
+The first publication has been cleared by Steve.
+I have already sent it to several journals.
+I expect to hear from them soon if the paper needs
+revisions.
+.P
+We appreciate all the help you have given us.
+We look forward to collaborating with you again.
+.FC "Sincerely,"
+.SG JL-der
+.NS 5
+.NE
+.NS
+J. Brown
+.NE

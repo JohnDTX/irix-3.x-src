@@ -1,0 +1,31 @@
+.TH getbuffer  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getbuffer
+- indicate which buffers are enabled for writing
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getbuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getbuf()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getbuffer: Short;"
+.sp
+.SH DESCRIPTION
+.I Getbuffer
+indicates which buffers are enabled for writing.  \f31\f1, the
+default, means that the back buffer is enabled, \f32\f1 means that
+the front buffer is enabled, and \f33\f1 means that both are
+enabled.  \f2Getbuffer\f1 returns 
+.B 0
+if neither buffer is enabled
+or the IRIS is not in double buffer mode.
+.SH "SEE ALSO"
+.I backbuffer, doublebuffer, frontbuffer
+.SH NOTE
+This command can only be used in immediate mode.

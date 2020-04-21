@@ -1,0 +1,91 @@
+.TH GRAPHICS 1G
+.SH NAME
+graphics \- access graphical and numerical commands
+.SH SYNOPSIS
+.B graphics
+[ \f3\-r\fP ]
+.SH DESCRIPTION
+.I Graphics\^
+appends the path name
+.B /usr/bin/graf
+to the current
+.B $\s-1PATH\s+1
+value,
+changes the primary shell prompt to \f3^\f1,
+and executes a new shell.
+The directory
+.B /usr/bin/graf
+contains all of the Graphics subsystem commands.
+If the \f3\-r\f1 option is given,
+access to the graphical commands is created
+in a restricted environment;
+that is,
+.B $\s-1PATH\s+1
+is set to
+\f3/:rbin:\%/usr/rbin:\%/bin:\%/usr/bin:\%/usr/bin/graf\f1
+and the restricted shell,
+.IR rsh ,
+is invoked.
+To restore the environment that existed prior to
+issuing the
+.I graphics\^
+command, type
+.B \s-1EOT\s+1
+(control-d on most terminals).
+To logoff from the graphics environment,
+type
+.BR quit .
+.PP
+The command line format for a command in
+.I graphics\^
+is \f3command name\f1 followed by \f3argument\f1(s).
+An \f3argument\f1 may be a \f3file name\f1 or an \f3option string\f1.
+A \f3file name\f1 is the name of any \s-1UNIX\s+1 System file except those
+beginning with \f3\-\f1.
+The \f3file name\f1 \f3\-\f1 is the name for the standard input.
+An \f3option string\f1 consists of \f3\-\f1 followed by one or more \f3option\f1(s).
+An \f3option\f1 consists of a keyletter possibly followed by a value.
+\f3Options\f1 may be separated by commas.
+.PP
+The graphical commands have been partitioned into four groups.
+.IP
+Commands that manipulate and plot numerical data; see
+.IR stat (1G).
+.IP
+Commands that generate tables of contents; see
+.IR toc (1G).
+.IP
+Commands that interact with graphical devices; see
+.IR gdev (1G)
+and
+.IR ged (1G).
+.IP
+A collection of graphical utility commands; see
+.IR gutil (1G).
+.PP
+A list of the
+.I graphics\^
+commands can be generated
+by typing
+.B whatis
+in the 
+.I graphics\^
+environment.
+.SH SEE ALSO
+gdev(1G),
+ged(1G),
+gutil(1G),
+stat(1G),
+toc(1G),
+gps(4).
+.br
+.IR "\s-1UNIX\s+1 System Graphics Guide" .
+.\"	@(#)graphics.1g	5.2 of 5/18/82
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/graphics.1g,v 1.1 89/03/27 16:41:16 root Exp $
+.\" $Log:	graphics.1g,v $
+Revision 1.1  89/03/27  16:41:16  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  85/01/08  11:03:52  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

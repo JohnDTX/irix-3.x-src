@@ -1,0 +1,604 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: ASM68K.P1.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               27-Mar-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure pass1;
+    var ExitFlag,LoopFlag,IncludeFlag,FirstTime: Boolean;
+        isize,op,ldreg,llsize,hi,lo,i,m,savecol: integer; incfname: string30;
+        oldscanclass,lmode,lreg: integer; lpsy: psy;
+        lequ: pequvalrec;
+    
+    procedure p1op10;
+    begin
+    case oldscanclass of
+     10: { NOP RESET RTE RTR RTS TRAPV }
+         begin
+         isize := 2;
+         end;
+     11: { MOVE }
+         begin
+         isize := 2;
+         if token <> USPREGSY
+         then if token = SREGSY
+              then begin
+                   scan; comma;
+                   effaddr(WORD,lmode,lreg,isize,ALTDAT);
+                   end
+              else begin
+                   effaddr(instsize,lmode,lreg,isize,ALL);
+                   comma;
+                   if (token <> USPREGSY) and
+                      (token <> CCREGSY) and
+                      (token <> SREGSY)
+                   then begin
+                        effaddr(instsize,lmode,lreg,isize,ALT);
+                        end;
+                   end;
+         end;
+     12: { ADD SUB AND OR }
+         begin
+         isize := 2;
+         if token = DREGSY
+            then begin
+                 ldreg := getdreg;
+                 comma;
+                 effaddr(instsize,lmode,lreg,isize,ALTMEM);
+                 end
+            else begin
+                 effaddr(instsize,lmode,lreg,isize,ALL{!!! OR AND !!!});
+                 comma;
+                 ldreg := getdreg;
+                 end;
+         end;
+     13: { JMP JSR PEA }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,CTR);
+         end;
+     14: { Bcc BRA BSR }
+         begin
+         if instsize = BYTE
+         then isize := 2
+         else isize := 4;
+         end;
+     15: { MOVEQ }
+         begin
+         isize := 2;
+         end;
+     16: { ADDA CMPA SUBA }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         end;
+     17: { ADDI ANDI CMPI EORI ORI SUBI }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,IMMDATA);
+         comma;
+         if (token <> CCREGSY) and (token <> SREGSY)
+         then begin
+              effaddr(instsize,lmode,lreg,isize,ALTDAT);
+              end;
+         end;
+     18: { ADDQ SUBQ }
+         begin
+         isize := 2;
+         if token = HASHSY then scan;
+         expression;
+         comma;
+         effaddr(instsize,lmode,lreg,isize,ALT);
+         end;
+     19: { CLR NEG NEGX NOT TST }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,ALTDAT);
+         end;
+     20: { ASL ASR LSL LSR ROL ROR ROXL ROXR }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,ALL{!!!});
+         if token = COMMASY
+            then isize := 2;
+         end;
+     21: { EOR }
+         begin
+         isize := 2;
+         ldreg := getdreg;
+         comma;
+         effaddr(instsize,lmode,lreg,isize,ALTDAT);
+         end;
+     22: { CMP }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         comma;
+         ldreg := getdreg;
+         end;
+     23: { CHK DIVS DIVU MULS MULU }
+         begin
+         isize := 2;
+         effaddr(WORD,lmode,lreg,isize,DAT);
+         comma;
+         ldreg := getdreg;
+         end;
+     24: { BCHG BCLR BSET BTST }
+         begin
+         isize := 2;
+         if token = DREGSY
+            then scan
+            else if token = HASHSY
+                    then begin
+                         scan;
+                         expression;
+                         isize := 4;
+                         end;
+         comma;
+         effaddr(WORD,lmode,lreg,isize,ALTDAT);
+         end;
+    end;
+    end; {p1op10}
+    
+    procedure p1op25;
+        var lreg,lmode: integer; ExitFlag: Boolean;
+    begin
+    case oldscanclass of
+     25: { EXT }
+         begin
+         isize := 2;
+         end;
+     26: { SWAP }
+         begin
+         isize := 2;
+         end;
+     27: { LINK }
+         begin
+         isize := 4;
+         end;
+     28: { UNLK }
+         begin
+         isize := 2;
+         end;
+     29: { MOVEM }
+         begin
+         isize := 4;
+         if (token = AREGSY) or (token = DREGSY)
+            then begin
+                 ExitFlag := FALSE;
+                 repeat
+                        if (token = AREGSY) or (token = DREGSY) then scan;
+                        if token = MINUSSY
+                           then begin
+                                scan;
+                                if (token = AREGSY) or (token = DREGSY)
+                                   then scan;
+                                end;
+                        if token = SLASHSY
+                           then scan
+                           else ExitFlag := TRUE;
+                 until ExitFlag;
+                 comma;
+                 effaddr(instsize,lmode,lreg,isize,CTRPRE);
+                 end
+            else effaddr(instsize,lmode,lreg,isize,CTRPOST);
+         end;
+     30: { CMPM }
+         begin
+         isize := 2;
+         end;
+     31: { LEA }
+         begin
+         isize := 2;
+         effaddr(LONG,lmode,lreg,isize,CTR);
+         end;
+     32: { TRAP }
+         begin
+         isize := 2;
+         end;
+     33: { ABCD ADDX SBCD SUBX }
+         begin
+         isize := 2;
+         end;
+     34: { STOP }
+         begin
+         isize := 4;
+         end;
+     35: { DBcc }
+         begin
+         isize := 4;
+         end;
+     36: { EXG }
+         begin
+         isize := 2;
+         end;
+     37: { MOVEA }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         end;
+     38: { MOVEP }
+         begin
+         isize := 4;
+         end;
+     39: { Scc }
+         begin
+         isize := 2;
+         effaddr(BYTE,lmode,lreg,isize,ALTDAT);
+         end;
+     40: { JSYS }
+         begin
+         isize := 4;
+         end;
+    end;
+    end; {p1op25}
+    
+    procedure p1op50;
+      var lreg,lmode: integer;
+    begin
+    case oldscanclass of
+      50, { Fxxx <EA>,Fx }
+      52: { FTEST }
+          begin
+          isize := 4;
+          if token = FREGSY
+          then scan
+          else begin
+               effaddr(instsize,lmode,lreg,isize,ALL);
+               end;
+          end;
+      51: { FMOVE }
+          begin
+          isize := 4;
+          if token = FREGSY
+          then begin
+               scan; comma;
+               effaddr(instsize,lmode,lreg,isize,ALL);
+               end
+          else begin
+               effaddr(instsize,lmode,lreg,isize,ALL);
+               end;
+          end;
+      53: { FBcc }
+          begin
+          if instsize = LONG
+          then isize := 6
+          else isize := 4;
+          end;
+    end; {case}
+    end; {p1op50}
+    
+begin {pass1}
+initp1;
+filestack[0] := filestack[1];
+filestack[0].nextchtoread := inbufp;
+filestack[0].flineno := curlineno;
+OldMakeUpper := MakeUpper; OldMakeLower := MakeLower;
+pass := 1;
+FirstTime := TRUE; ExitFlag := FALSE;
+repeat
+       newline;
+       if EOFFlag
+       then if FirstTime
+            then begin NoMore := TRUE; exit(pass1); end;
+       isize := 0;
+       StringOK := FALSE;
+       IncludeFlag := FALSE;
+       if CommentFlag
+       then ExitFlag := EOFFlag
+       else begin
+            FirstTime := FALSE;
+            if token = OPSY
+            then begin
+                 if odd(pc)
+                    then if scanclass >= 9
+                         then pc := pc + 1;
+                 oldscanclass := scanclass;
+                 op := scanop;
+                 if scanclass < 50
+                 then begin { Not FP }
+                      instsize := getsize(extension,FALSE);
+                      if scansize = B
+                      then instsize := BYTE
+                      else if scansize = L
+                           then instsize := LONG;
+                      end
+                 else begin
+                      if extension <> ' '
+                      then instsize := getsize(extension,TRUE)
+                      else case scanclass of
+                             50,
+                             51,
+                             52: instsize := XTND;
+                             53: instsize := WORD;
+                           end; {case}
+                      end;
+                 savecol := column;
+                 scan;
+                 case oldscanclass of
+                   1: { END }
+                      begin
+                      ExitFlag := TRUE;
+                      if (token <> EOLNSY) and (token <> EOFSY)
+                      then begin
+                           expression;
+                           StartFlag := TRUE;
+                           startloc := gattr.avalue;
+                           end;
+                      end;
+                   2: { ORG }
+                      begin
+                      expression;
+                      pc := gattr.avalue;
+                      end;
+                   3: { EQU }
+                      begin
+                      UndefExpr := FALSE;
+                      expression;
+                      if (gattr.akind <> ABSOLUTE) and
+                         (gattr.akind <> RELOCATABLE)
+                      then gattr.akind := ABSOLUTE;
+                      if LabelFlag
+                      then begin
+                           lpsy := lookupname(symboltree,labelname);
+                           if lpsy = nil
+                           then begin
+                                new(lpsy,IDENTSY);
+                                with lpsy^ do begin
+                                     name := labelname;
+                                     llink := nil; rlink := nil;
+                                     sykind :=  IDENTSY;
+                                     Defined := TRUE;
+                                     Double := FALSE;
+                                     Global := FALSE;
+                                     idclass := gattr.akind;
+                                     value := gattr.avalue;
+                                     end;
+                                if UndefExpr
+                                then begin
+                                     lpsy^.EquNoVal := TRUE;
+                                     new(lequ);
+                                     with lequ^ do begin
+                                          next := undefequlist;
+                                          esym := lpsy;
+                                          for i := 1 to 64 do
+                                              equexpr[i] := ' ';
+                                          m := 0;
+                                          for i := savecol to column do
+                                              if m < 64
+                                              then begin
+                                                   m := m + 1;
+                                                   equexpr[m] := line[i];
+                                                   end
+                                              else equexpr[64] := '!';
+                                          end;
+                                     undefequlist := lequ;
+                                     end
+                                else lpsy^.EquNoVal := FALSE;
+                                entername(lpsy);
+                                end
+                           else lpsy^.Double := TRUE;
+                           end;
+                      LabelFlag := FALSE;
+                      end;
+                   4: { EXT }
+                      begin
+                      while token = IDENTSY do begin
+                            lpsy := lookupname(symboltree,scanname);
+                            if lpsy = nil
+                            then begin
+                                 new(lpsy,IDENTSY);
+                                 with lpsy^ do begin
+                                      name := scanname;
+                                      llink := nil; rlink := nil;
+                                      sykind := IDENTSY;
+                                      Defined := TRUE;
+                                      Double := FALSE;
+                                      Global := FALSE;
+                                      idclass := EXTERN;
+                                      sreflist := nil;
+                                      lreflist := nil;
+                                      EquNoVal := FALSE;
+                                      end;
+                                 entername(lpsy);
+                                 end
+                            else if lpsy^.Defined
+                                 then lpsy^.Double := TRUE
+                                 else with lpsy^ do begin
+                                           Defined := TRUE;
+                                           Double := FALSE;
+                                           Global := FALSE;
+                                           idclass := EXTERN;
+                                           sreflist := nil;
+                                           lreflist := nil;
+                                           end;
+                            scan;
+                            if token = COMMASY then scan;
+                            end;
+                      end;
+                   5: { GLOBAL }
+                      begin
+                      while token = IDENTSY do begin
+                            lpsy := lookupname(symboltree,scanname);
+                            if lpsy = nil
+                            then begin
+                                 new(lpsy,IDENTSY);
+                                 with lpsy^ do begin
+                                      name := scanname;
+                                      llink := nil; rlink := nil;
+                                      sykind := IDENTSY;
+                                      Defined := FALSE;
+                                      Global := TRUE;
+                                      EquNoVal := FALSE;
+                                      end;
+                                 entername(lpsy);
+                                 end
+                            else lpsy^.Global := TRUE;
+                            scan;
+                            if token = COMMASY then scan;
+                            end;
+                      end;
+                   6: { RES }
+                      begin
+                      expression;
+                      gethilo(gattr.avalue,hi,lo);
+                      isize := lo;
+                      end;
+                   7: { DATA }
+                      begin
+                      StringOK := TRUE;
+                      LoopFlag := FALSE;
+                      if extension = 'B'
+                         then llsize := 1
+                         else if extension = 'L'
+                                 then llsize := 4
+                                 else llsize := 2;
+                      repeat
+                             expression;
+                             case gattr.akind of
+                               ABSOLUTE:
+                                 isize := isize + llsize;
+                               RELOCATABLE,
+                               EXTERN:
+                                 isize := isize + llsize;
+                               STRINGVAL,
+                               PAOCVAL:
+                                 begin
+                                 if gattr.akind <> PAOCVAL
+                                 then isize := isize + 1;
+                                 isize := isize + length(gattr.svalue);
+                                 end;
+                             end;
+                             if token = COMMASY
+                                then scan
+                                else LoopFlag := TRUE;
+                      until LoopFlag;
+                      isize := ((isize + llsize - 1) div llsize)*llsize;
+                      end;
+                   8: { PAGE IDENT }
+                      case op of
+                        1: { PAGE }
+                           begin
+                           end;
+                        2: { IDENT }
+                           if token = IDENTSY
+                              then if modulename = '        '
+                                      then modulename := scanname;
+                        3: { LIST }
+                           begin
+                           end;
+                        4: { INCLUDE }
+                           begin
+                           if token = PAOCSY
+                           then begin
+                                IncludeFlag := TRUE;
+                                incfname := scanstring;
+                                scan;
+                                end
+                           else error(35);
+                           end;
+                        5: { SEG }
+                           begin
+                           if token = IDENTSY
+                           then segmentname := scanname;
+                           end;
+                        6: { UPPER }
+                           begin
+                           MakeUpper := TRUE;
+                           MakeLower := FALSE;
+                           end;
+                        7: { LOWER }
+                           begin
+                           MakeLower := TRUE;
+                           MakeUpper := FALSE;
+                           end;
+                        8: { LITERAL }
+                           begin
+                           MakeLower := FALSE;
+                           MakeUpper := FALSE;
+                           end;
+                      end; {end}
+                   9: { Unimplemented instruction }
+                      begin
+                      isize := 4;
+                      end;
+                  10, { NOP RESET RTE RTR RTS TRAPV }
+                  11, { MOVE }
+                  12, { ADD SUB AND OR }
+                  13, { JMP JSR PEA }
+                  14, { Bcc BRA BSR }
+                  15, { MOVEQ }
+                  16, { ADDA CMPA SUBA }
+                  17, { ADDI ANDI CMPI EORI ORI SUBI }
+                  18, { ADDQ SUBQ }
+                  19, { CLR NEG NEGX NOT TST }
+                  20, { ASL ASR LSL LSR ROL ROR ROXL ROXR }
+                  21, { EOR }
+                  22, { CMP }
+                  23, { CHK DIVS DIVU MULS MULU }
+                  24: { BCHG BCLR BSET BTST }
+                      p1op10;
+                  25, { EXT }
+                  26, { SWAP }
+                  27, { LINK }
+                  28, { UNLK }
+                  29, { MOVEM }
+                  30, { CMPM }
+                  31, { LEA }
+                  32, { TRAP }
+                  33, { ABCD ADDX SBCD SUBX }
+                  34, { STOP }
+                  35, { DBcc }
+                  36, { EXG }
+                  37, { MOVEA }
+                  38, { MOVEP }
+                  39, { Scc }
+                  40: { JSYS }
+                      p1op25;
+                  50, { Fxxx <EA>,Fx }
+                  51, { FMOVE }
+                  52, { FTEST }
+                  53: { FBcc }
+                      p1op50;
+                 end; {case}
+                 end
+            else if token = EOFSY
+                 then ExitFlag := TRUE;
+            if LabelFlag
+            then begin
+                 lpsy := lookupname(symboltree,labelname);
+                 if lpsy = nil
+                 then begin
+                      new(lpsy,IDENTSY);
+                      with lpsy^ do begin
+                           name := labelname;
+                           llink := nil; rlink := nil;
+                           sykind := IDENTSY;
+                           Defined := TRUE; Double := FALSE;
+                           Global := FALSE; idclass := RELOCATABLE;
+                           value := pc; EquNoVal := FALSE;
+                           end;
+                      entername(lpsy);
+                      end
+                 else if lpsy^.Defined
+                      then lpsy^.Double := TRUE
+                      else with lpsy^ do begin
+                                Defined := TRUE;
+                                Double := FALSE;
+                                value := pc;
+                                idclass := RELOCATABLE;
+                                end;
+                 end;
+            end;
+       pc := pc + isize;
+       if IncludeFlag then doinclude(incfname);
+until ExitFlag;
+end; {pass1}
+
+
+                                                                                                                                                                                                                                                                                                                                        

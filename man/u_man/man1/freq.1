@@ -1,0 +1,18 @@
+'\"macro stdmacro
+.TH FREQ 1
+.SH NAME
+freq \- report on character frequencies in a file
+.SH SYNOPSIS
+.B freq
+[ file ... ]
+.SH DESCRIPTION
+.I Freq\^
+counts occurrences of characters in the list of files specified on the
+command line.
+If no files are specified, the standard input is read.
+.SH EXAMPLE
+.IP
+freq filea
+.PP
+will list a count of each character that appears in "filea".
+.\"	@(#)freq.1	5.1 of 11/16/83

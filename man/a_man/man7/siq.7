@@ -1,0 +1,88 @@
+'\"macro stdmacro
+.TH SIQ 7
+.SH NAME
+siq \- Interphase Storager 2 qic-02 tape controller
+.SH SYNOPSIS
+.B "controller siq0 at mb0 csr 0x73fc priority 5 vector siqintr
+.br
+.B "tape sq0 at siq0 drive 0
+.SH DESCRIPTION
+This is a MULTIBUS esdi/st-506 disk and tape controller.
+The driver software supports 2 winchester hard disk drives,
+one qic-02 tape drive, and one floppy.
+This documents the tape support.
+.PP
+There is a `raw' interface
+which provides for direct transmission between the tape
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.' Also, the \f3mtio\f1(7)
+interface to the drive is provided.
+.PP
+In raw I/O, counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.SH FILES
+/dev/nrsq0	non rewinding drive
+.br
+/dev/rsq0	rewinding drive
+.SH SEE ALSO
+autoconf(7),
+sii(7),
+sif(7)
+.SH DIAGNOSTICS
+\f3(qic02 cartridge tape)\f1.  This is printed when the system configures
+the tape drive.
+.br
+\f3%s: tape is in use\f1.  This message is printed if two processes
+attempt to use the same tape drive.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: drive is busted\f1.  If for some reason a hard error occurs,
+and the hard error cannot be reset, this message is printed.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: no tape cartridge in drive\f1.  A cartridge must be present
+in the drive before i/o can be performed.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: tape is write protected\f1.  If the tape device is opened with
+writing enabled, then the tape must be writable.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: drive is not on line\f1.  This normally can't happen.  If it does,
+call field service.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: must be multiple of 512 bytes\f1.  All raw transfers must be
+done in multiples of 512 bytes.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: can't start command\f1.  For some reason, the system cannot
+send the controller a command.  Retry the operation and if that
+fails, call field service.
+Note that this message is printed
+both to the console and to the terminal requesting the tape.
+.br
+\f3%s: hard error, cmd="%s" error="%s"\f1.  A hard error has
+occured.  The first string printed is the name of the device where
+the error occured.  This is followed by the command that failed and
+the actual error message.  Note that this message is printed to
+the console only.
+.br
+\f3%s: bad controller status (%x), csr=%x cmd=%x err=%x\f1
+.br
+\f3%s: can't read status\f1
+.br
+\f3%s: command start timeout, status=%x\f1.  These errors normally
+mean a failing controller/drive.  Call field service.  Note that these
+errors are printed only on the console.

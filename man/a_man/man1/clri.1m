@@ -1,0 +1,72 @@
+'\"macro stdmacro
+.TH CLRI 1M
+.SH NAME
+clri \- clear inode
+.SH SYNOPSIS
+.B /etc/clri
+file-system i-number ...
+.SH DESCRIPTION
+.I clri\^
+writes zeros on the area of the volume
+.I file-system
+occupied by the
+.I inode
+numbered
+.IR i-number .
+.I file-system\^
+must be a device file
+which contains a file system.
+Bell file systems and Extent file systems are both supported.
+.PP
+After
+.I clri\^
+is executed, the i-node
+can be allocated.
+Any blocks formerly claimed by
+the affected file
+may show up as ``missing'' in an
+.IR fsck (1M)
+of the
+.IR file-system .
+.PP
+This command should only be used in emergencies,
+and only on quiescent file systems.
+Extreme care should be exercised.
+You must be superuser or logged in as "root" to use
+.IR clri (1M).
+.PP
+The primary purpose of this command
+is to remove a file which
+for some reason does not appear
+in any directory.
+If it is used to
+.I zap\^
+an inode
+which does appear in a directory,
+be careful to track down
+the entry and remove it beforehand.
+Otherwise, when the inode is reallocated to some new file,
+the old entry will still point to that file.
+At that point removing the old entry will destroy the new file.
+The new entry will again point to an unallocated inode,
+so the whole cycle is likely to be repeated again and again.
+.SH EXAMPLE
+.IP
+clri /dev/md0c 100
+.PP
+zaps inode 100 on device /dev/md0c.
+.SH SEE ALSO
+fsck(1M),
+fsdb(1M),
+ncheck(1M),
+fs(4),
+inode(4).
+.SH BUGS
+If the file is open,
+.I clri\^
+is likely to be ineffective.
+.br
+Inodes are written a block at a time,
+so if the file system is not quiescent,
+inodes physically nearby the target inode may be damaged.
+.\"	@(#)clri.1m	5.1 of 10/17/83

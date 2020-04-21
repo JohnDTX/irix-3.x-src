@@ -1,0 +1,23 @@
+'\"macro stdmacro
+.TH TTY 7
+.SH NAME
+tty \- controlling terminal interface
+.SH DESCRIPTION
+.PP
+The file
+.B /dev/tty
+is, in each process, a synonym
+for the control terminal associated with the process group of that process,
+if any.
+It is useful for programs or shell sequences that wish to
+be sure of writing messages on the terminal
+no matter how output has been redirected.
+It can also be used for programs that demand the name of a file
+for output, when typed output is desired
+and it is tiresome to find out what terminal
+is currently in use.
+.SH FILES
+/dev/tty
+.br
+/dev/tty\(**
+.\"	@(#)tty.7	5.1 of 10/15/83

@@ -1,0 +1,786 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.5.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               17-Jun-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  procedure expr2(fop: integer);
+    var lcattr,tcattr: cattr; lop,mop,lsize,msize,bits: integer;
+        lsiz,rsiz: sizes; lcc: condition; d1,d2,a,a1,a2,f,f2: pregrec;
+        QuickFlag,DoIt,Reversed: Boolean;
+  begin
+  case fop of
+   64, { IADD2 }
+   65, { IADD4 }
+   66, { ISUB2 }
+   67: { ISUB4 }
+       begin
+       if odd(fop)
+       then lsiz := L
+       else lsiz := W;
+       numexpr(nextbyte,lsiz); lcattr := gcattr; numexpr(nextbyte,lsiz);
+       make2valid(gcattr,lcattr);
+       if fop <= 65
+       then begin
+            lop := -12224; { ADD.W }
+            if lcattr.ckind = CNST
+            then begin
+                 tcattr := lcattr; lcattr := gcattr; gcattr := tcattr;
+                 end;
+            end
+       else begin
+            lop := -28608; { SUB.W }
+            if (gcattr.ckind = STCK) and (lcattr.ckind = STCK)
+            then d1 := loadd(gcattr,lsiz);
+            lockcattr(gcattr); d1 := loadd(lcattr,lsiz); unlockcattr(gcattr);
+            end;
+       if odd(fop) then lop := lop + 64; { .W --> .L }
+       QuickFlag := FALSE;
+       if gcattr.ckind = CNST
+       then if abs(gcattr.cvalu.lvalu) <= 8
+            then begin
+                 QuickFlag := TRUE;
+                 if gcattr.cvalu.lvalu <> 0
+                 then begin
+                      d1 := loadd(lcattr,lsiz); isolate(d1);
+                      if fop >= 66
+                      then gcattr.cvalu.lvalu := -gcattr.cvalu.lvalu;
+                      addidreg(d1,gcattr.cvalu.lvalu,lsiz);
+                      gcattr.ckind := EXPR; gcattr.exreg := d1;
+                      end
+                 else gcattr := lcattr;
+                 end;
+       if not QuickFlag
+       then begin
+            if lcattr.ckind = EXPR
+            then begin
+                 lockcattr(gcattr); d1 := loadd(lcattr,lsiz); isolate(d1);
+                 unlockcattr(gcattr); lcattr := gcattr;
+                 end
+            else begin
+                 lockcattr(lcattr); d1 := loadd(gcattr,lsiz); isolate(d1);
+                 unlockcattr(lcattr);
+                 end;
+            lock(d1);
+            genrea(lop,d1,lcattr,lsiz);
+            unlock(d1); ccodereg := d1^.regno; erase(d1);
+            gcattr.ckind := EXPR; gcattr.exreg := d1;
+            end;
+       end;
+   68, { IMULT2 }
+   69: { IMULT4 }
+       begin
+       if fop = 68
+       then begin lop := _MULS_W; mop := _LSL_W; lsiz := W; end
+       else begin lop := _MULS_L; mop := _LSL_L; lsiz := L; end;
+       numexpr(nextbyte,lsiz); lcattr := gcattr; numexpr(nextbyte,lsiz);
+       if gcattr.ckind = CNST
+       then begin tcattr := lcattr; lcattr := gcattr; gcattr := tcattr; end;
+       make2valid(gcattr,lcattr);
+       DoIt := TRUE;
+       if lcattr.ckind = CNST
+       then if ShiftMult(lcattr.cvalu.lvalu,bits)
+            then begin
+                 DoIt := FALSE;
+                 if bits > 0
+                 then begin
+                      d1 := loadd(gcattr,lsiz); isolate(d1); erase(d1);
+                      if bits > 8 then { LSL #8,D } genr(mop,d1);
+                      { LSL #bits,D } gennr(mop,bits,d1);
+                      gcattr.exreg := d1; ccodereg := d1^.regno;
+                      end;
+                 end;
+       if DoIt
+       then begin
+            if lcattr.ckind = EXPR
+            then if not reg[lcattr.exreg^.regno].Perm
+                 then begin
+                      tcattr := lcattr; lcattr := gcattr; gcattr := tcattr;
+                      end;
+            lockcattr(lcattr); d1 := loadd(gcattr,lsiz); isolate(d1);
+            unlockcattr(lcattr); lock(d1); erase(d1);
+            if lsiz = W
+            then genrea(lop,d1,lcattr,W)
+            else geneaxrr(lop,$0800,lcattr,L,d1,nil);
+            unlock(d1);
+            gcattr.ckind := EXPR; gcattr.exreg := d1; ccodereg := d1^.regno;
+            end;
+       end;
+   70, { IDIV2 }
+   72: { IMOD2 }
+       begin
+       numexpr(nextbyte,W); lcattr := gcattr; numexpr(nextbyte,W);
+       make2valid(gcattr,lcattr);
+       if (gcattr.ckind = STCK) and (lcattr.ckind = STCK)
+       then begin
+            lockcattr(lcattr); d1 := loadd(gcattr,W);
+            unlockcattr(lcattr);
+            end;
+       lockcattr(gcattr); d1 := loadd(lcattr,W); isolate(d1);
+       genr(_EXT_L,d1); unlockcattr(gcattr); lock(d1);
+       genrea(-32320,d1,gcattr,W);
+       unlock(d1); ccodereg := d1^.regno; erase(d1);
+       if fop = 72 then genr(_SWAP,d1);
+       gcattr.ckind := EXPR; gcattr.exreg := d1;
+       end;
+   71, { IDIV4 }
+   73: { IMOD4 }
+       begin
+       numexpr(nextbyte,L); lcattr := gcattr; numexpr(nextbyte,L);
+       make2valid(gcattr,lcattr);
+       if (gcattr.ckind = STCK) and (lcattr.ckind = STCK)
+       then begin
+            lockcattr(lcattr); d1 := loadd(gcattr,L);
+            unlockcattr(lcattr);
+            end;
+       lockcattr(gcattr); d1 := loadd(lcattr,L); isolate(d1);
+       erase(d1); unlockcattr(gcattr); lock(d1);
+       if fop = 73
+       then begin d2 := getreg(D0,D7); lock(d2); end
+       else d2 := d1;
+       geneaxrr(_DIVS_L,$0800,gcattr,L,d1,d2); unlock(d1);
+       if fop = 73 then begin unlock(d2); freereg(d1); end;
+       gcattr.ckind := EXPR; gcattr.exreg := d2;
+       if fop = 71 then ccodereg := d2^.regno;
+       end;
+   74, { INEG2 }
+   75, { INEG4 }
+   76, { IABS2 }
+   77: { IABS4 }
+       begin
+       if odd(fop)
+       then begin lop := 17536; { NEG.L } lsiz := L; end
+       else begin lop := 17472; { NEG.W } lsiz := W; end;
+       expression(nextbyte); d1 := loadd(gcattr,lsiz); isol(d1,lsiz,TRUE);
+       if fop > 75
+       then begin
+            if ccodereg <> d1^.regno then testd(d1,lsiz);
+            { BPL $+4 } gen(27138);
+            end;
+       genr(lop,d1); gcattr.exreg := d1; ccodereg := d1^.regno; erase(d1);
+       end;
+   78: { I2**I2 }
+       begin
+       expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+       if (gcattr.ckind = CNST) and (gcattr.cvalu.lvalu = 2)
+       then begin
+            d1 := loadd(lcattr,W); isolate(d1); erase(d1);
+            genrr(-15936,d1,d1);
+            gcattr.ckind := EXPR; gcattr.exreg := d1; ccodereg := d1^.regno;
+            end
+       else begin
+            d1 := loadd(lcattr,W); isolate(d1);
+            { EXT.L D } genr(18624,d1);
+            { MOVE.L D,-(SP) } genr(12032,d1);
+            freereg(d1);
+            d1 := loadd(gcattr,W); isolate(d1);
+            { EXT.L D } genr(18624,d1);
+            { MOVE.L D,-(SP) } genr(12032,d1);
+            freereg(d1);
+            saveallregs; genjsra('%I_UP_I '); clearscr;
+            gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D0);
+            end;
+       end;
+   79: { I4**I4 }
+       begin
+       numexpr(nextbyte,L); lcattr := gcattr; numexpr(nextbyte,L);
+       if (gcattr.ckind = CNST) and (gcattr.cvalu.lvalu = 2)
+       then begin
+{dar edit- add forgotten erase d1}
+            d1 := loadd(lcattr,L); isolate(d1); erase(d1);
+            genr(_MULS_L,d1); gen($0800+d1^.regno*4096);
+            gcattr.ckind := EXPR; gcattr.exreg := d1;
+            end
+       else begin
+            if (gcattr.ckind = STCK) and (lcattr.ckind <> STCK)
+            then d1 := loadd(gcattr,L);
+            pushvalue(lcattr,L); pushvalue(gcattr,L);
+            saveallregs; genjsra('%I_UP_I '); clearscr;
+            gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D0);
+            end;
+       end;
+   80, { AND1 }
+   81, { AND2 }
+   82, { AND4 }
+   83, { IOR1 }
+   84, { IOR2 }
+   85: { IOR4 }
+       begin
+       if fop > 82
+       then lop := -32767 - 1 { OR }
+       else lop := -16384; { AND }
+       mop := (fop - 80) mod 3;
+       if mop = 0
+       then lsiz := B
+       else if mop = 1
+            then begin lop := lop + 64; lsiz := W; end
+            else begin lop := lop + 128; lsiz := L; end;
+       expression(nextbyte);
+       if gcattr.ckind = COND then loadcc(gcattr);
+       if gcattr.ckind = FCND then loadfcc(gcattr);
+       lcattr := gcattr; expression(nextbyte);
+       if gcattr.ckind = COND then loadcc(gcattr);
+       if gcattr.ckind = FCND then loadfcc(gcattr);
+       if IsAReg(lcattr) then d1 := loadd(lcattr,lsiz);
+       if IsAReg(gcattr) then d1 := loadd(gcattr,lsiz);
+       make2valid(gcattr,lcattr);
+       if (lcattr.ckind = EXPR) or
+          (lcattr.ckind = BOOL) or
+          (lcattr.ckind = BITZ)
+       then begin
+            d1 := lcattr.exreg; tcattr := gcattr;
+            end
+       else begin
+            if (gcattr.ckind = BOOL) or (gcattr.ckind = BITZ)
+            then d1 := gcattr.exreg
+            else begin
+                 lockcattr(lcattr); d1 := loadd(gcattr,lsiz);
+                 unlockcattr(lcattr);
+                 end;
+            tcattr := lcattr;
+            end;
+       if (tcattr.ckind = BOOL) or (tcattr.ckind = BITZ)
+       then tcattr.ckind := EXPR;
+       isolate(d1); erase(d1); lock(d1);
+       genrea(lop,d1,tcattr,lsiz);
+       unlock(d1);
+       if fop <= 82
+       then {--> AND | BOOL  BITZ  else }
+              { -----+----------------- }
+              { BOOL | BOOL  BITZ  EXPR }
+              { BITZ | BITZ  BITZ  EXPR }
+              { else | EXPR  EXPR  EXPR }
+            
+            begin
+            if ((gcattr.ckind = BOOL) or (gcattr.ckind = BITZ)) and
+               ((lcattr.ckind = BOOL) or (lcattr.ckind = BITZ))
+            then if gcattr.ckind = BOOL
+                 then gcattr.ckind := lcattr.ckind
+                 else gcattr.ckind := BITZ
+            else gcattr.ckind := EXPR;
+            end
+       else {--> OR  | BOOL  BITZ  else }
+              { -----+----------------- }
+              { BOOL | BOOL  BITZ  BITZ }
+              { BITZ | BITZ  BITZ  BITZ }
+              { else | BITZ  BITZ  EXPR }
+            
+            if (gcattr.ckind = BOOL) and (lcattr.ckind = BOOL)
+            then gcattr.ckind := BOOL
+            else if ((gcattr.ckind <> BOOL) and (gcattr.ckind <> BITZ)) and
+                    ((lcattr.ckind <> BOOL) and (lcattr.ckind <> BITZ))
+                 then gcattr.ckind := EXPR
+                 else gcattr.ckind := BITZ;
+       if gcattr.ckind = EXPR then ccodereg := d1^.regno;
+       gcattr.exreg := d1;
+       end;
+   86, { XOR1 }
+   87, { XOR2 }
+   88: { XOR4 }
+       begin
+       lop := fop - 86;
+       if lop = 0
+       then begin lsiz := B; lop := -20224; { EOR.B } end
+       else if lop = 1
+            then begin lsiz := W; lop := -20160; { EOR.W } end
+            else begin lsiz := L; lop := -20096; { EOR.L } end;
+       expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+       makevalid(gcattr); d1 := loadd(gcattr,lsiz); isolate(d1); lock(d1);
+       makevalid(lcattr); d2 := loadd(lcattr,lsiz); unlock(d1); erase(d1);
+       genrr(lop,d2,d1); freereg(d2); gcattr.exreg := d1; ccodereg := d1^.regno;
+       end;
+   89, { NOT1 }
+   90, { NOT2 }
+   91: { NOT4 }
+       begin
+       lop := 17920; { NOT }
+       fop := fop - 89;
+       if fop = 0
+       then lsiz := B
+       else if fop = 1
+            then begin lsiz := W; lop := lop + 64; end
+            else begin lsiz := L; lop := lop + 128; end;
+       expression(nextbyte);
+       d1 := loadd(gcattr,lsiz); isolate(d1); erase(d1); genr(lop,d1);
+       gcattr.ckind := EXPR; gcattr.exreg := d1; ccodereg := d1^.regno;
+       end;
+   92, { LT1 }
+   93, { LT2 }
+   94, { LT4 }
+   95, { GT1 }
+   96, { GT2 }
+   97, { GT4 }
+   98, { LE1 }
+   99, { LE2 }
+  100, { LE4 }
+  101, { GE1 }
+  102, { GE2 }
+  103, { GE4 }
+  104, { EQ1 }
+  105, { EQ2 }
+  106, { EQ4 }
+  107, { NE1 }
+  108, { NE2 }
+  109: { NE4 }
+       begin
+       fop := fop - 92;
+       case fop mod 3 of
+         0: lsiz := B;
+         1: lsiz := W;
+         2: lsiz := L;
+       end; {case}
+       case fop div 3 of
+         0: lcc := LT;
+         1: lcc := GT;
+         2: lcc := LE;
+         3: lcc := GE;
+         4: lcc := EQ;
+         5: lcc := NE;
+       end; {case}
+       numexpr(nextbyte,lsiz); lcattr := gcattr; numexpr(nextbyte,lsiz);
+       if GenCompare(lcattr,gcattr,lsiz)
+       then case lcc of
+             LT: lcc := GT;
+             LE: lcc := GE;
+             GT: lcc := LT;
+             GE: lcc := LE;
+            end; {case}
+       gcattr.ckind := COND; gcattr.cc := lcc;
+       end;
+  110: { BNOT }
+       begin
+       expression(nextbyte);
+       with gcattr do
+            if ckind = COND
+            then if odd(ord(cc))
+                 then cc := pred(cc)
+                 else cc := succ(cc)
+            else if (ckind = BOOL) or (ckind = BITZ)
+                 then begin
+                      makevalid(gcattr); isolate(exreg); erase(exreg);
+                      { ADDQ.B #1,D } genr(20992,exreg);
+                      if ckind = BOOL then ckind := EXPR;
+                      end
+                 else begin
+                      d1 := loadd(gcattr,B); isolate(d1); erase(d1);
+                      { EORI.B #1,d1 } genr(2560,d1); gen(1);
+                      gcattr.exreg := d1; ccodereg := d1^.regno;
+                      end;
+       end;
+  111: { ODD }
+       begin
+       expression(nextbyte); d1 := loadd(gcattr,B); isolate(d1); erase(d1);
+       { ANDI.W #1,D } genr(576,d1); gen(1);
+       gcattr.exreg := d1; ccodereg := d1^.regno;
+       end;
+  112: { FADD4 } if FPHardware
+                 then if SKY_FLAG
+                      then sky44(S_FADD)
+                      else if MAX_FLAG
+                           then max2expr(112)
+                           else if JUN_FLAG
+                                then jun44(J_FADD,TRUE)
+                                else fbinop(_FADD,S,S,TRUE)
+                 else push44call('%F_ADD  ',TRUE,4);
+  113: { FADD8 } if FPHardWare and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                 then if MAX_FLAG
+                      then max2expr(113)
+                      else if JUN_FLAG
+                           then jun88(J_DADD,TRUE)
+                           else fbinop(_FADD,D,D,TRUE)
+                 else push88call('%D_ADD  ',TRUE,8);
+  114: { FSUB4 } if FPHardWare
+                 then if SKY_FLAG
+                      then sky44(S_FSUB)
+                      else if MAX_FLAG
+                           then max2expr(114)
+                           else if JUN_FLAG
+                                then jun44(J_FSUB,FALSE)
+                                else fbinop(_FSUB,S,S,FALSE)
+                 else push44call('%F_SUB  ',TRUE,4);
+  115: { FSUB8 } if FPHardWare and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                 then if MAX_FLAG
+                      then max2expr(115)
+                      else if JUN_FLAG
+                           then jun88(J_DSUB,FALSE)
+                           else fbinop(_FSUB,D,D,FALSE)
+                 else push88call('%D_SUB  ',TRUE,8);
+  116: { FMUL4 } if FPHardWare
+                 then if SKY_FLAG
+                      then sky44(S_FMUL)
+                      else if MAX_FLAG
+                           then max2expr(116)
+                           else if JUN_FLAG
+                                then jun44(J_FMUL,TRUE)
+                                else fbinop(_FSMUL,S,S,TRUE)
+                 else push44call('%F_MUL  ',TRUE,4);
+  117: { FMUL8 } if FPHardWare and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                 then if MAX_FLAG
+                      then max2expr(117)
+                      else if JUN_FLAG
+                           then jun88(J_DMUL,TRUE)
+                           else fbinop(_FMUL,D,D,TRUE)
+                 else push88call('%D_MUL  ',TRUE,8);
+  118: { FDIV4 } if FPHardWare and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                 then if MAX_FLAG
+                      then max2expr(118)
+                      else if JUN_FLAG
+                           then jun44(J_FDIV,FALSE)
+                           else fbinop(_FSDIV,S,S,FALSE)
+                 else 
+						push44call('%F_DIV  ',TRUE,4);
+  119: { FDIV8 }(* if FPHardWare and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                 then if MAX_FLAG
+                      then max2expr(119)
+                      else if JUN_FLAG
+                           then jun88(J_DDIV,FALSE)
+                           else fbinop(_FDIV,D,D,FALSE)
+                 else push88call('%D_DIV  ',TRUE,8);
+		*)
+		begin
+			if  (FPHardWare) and (SWDivinHW) then
+			begin
+				push88call('_divide ',TRUE,8);
+			end else if FPHardWare then
+                                jun88(J_DDIV,FALSE)
+			else
+				push88call('%D_DIV  ',TRUE,8);
+		end;
+  122, { FLT4 }
+  123, { FLT8 }
+  124, { FGT4 }
+  125, { FGT8 }
+  126, { FLE4 }
+  127, { FLE8 }
+  128, { FGE4 }
+  129, { FGE8 }
+  130, { FEQ4 }
+  131, { FEQ8 }
+  132, { FNE4 }
+  133: { FNE8 }
+       begin
+       if FPHardware and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+       then if MAX_FLAG
+            then max2expr(fop)
+            else if JUN_FLAG
+            then juncmp(fop)
+            else begin
+                 if odd(fop) then lsiz := D else lsiz := S;
+                 rsiz := lsiz; fexpr(lsiz); lcattr := gcattr; fexpr(rsiz);
+                 Reversed := FALSE; DoIt := TRUE;
+                 if lcattr.ckind = CNST
+                 then begin
+                      if (lcattr.cvalu.lvalu = 0) and
+                         ((lcattr.cvalu.lvalu2 = 0) or (lsiz = S))
+                      then begin
+                           genfear(_FTEST,gcattr,nil,rsiz);
+                           DoIt := FALSE;
+                           end;
+                      end
+                 else if gcattr.ckind = CNST
+                      then begin
+                           if (gcattr.cvalu.lvalu = 0) and
+                              ((gcattr.cvalu.lvalu2 = 0) or (rsiz = S))
+                           then begin
+                                genfear(_FTEST,lcattr,nil,lsiz);
+                                DoIt := FALSE; Reversed := TRUE;
+                                end;
+                           end;
+                 if DoIt
+                 then if gcattr.ckind = FEXP
+                      then begin
+                           f := loadf(gcattr,rsiz);
+                           genfear(_FCMP,lcattr,f,lsiz);
+                           freereg(f);
+                           end
+                      else begin
+                           f := loadf(lcattr,lsiz);
+                           genfear(_FCMP,gcattr,f,rsiz);
+                           freereg(f); Reversed := TRUE;
+                           end;
+                 with gcattr do begin
+                      ckind := FCND;
+                      case fop of
+                           122,123: { FLT4/8 } if Reversed
+                                               then fcc := FCC_LT
+                                               else fcc := FCC_GT;
+                           124,125: { FGT4/8 } if Reversed
+                                               then fcc := FCC_GT
+                                               else fcc := FCC_LT;
+                           126,127: { FLE4/8 } if Reversed
+                                               then fcc := FCC_LE
+                                               else fcc := FCC_GE;
+                           128,129: { FGE4/8 } if Reversed
+                                               then fcc := FCC_GE
+                                               else fcc := FCC_LE;
+                           130,131: { FEQ4/8 } fcc := FCC_SEQ;
+                           132,133: { FNE4/8 } fcc := FCC_SNEQ;
+                      end; {case}
+                      end;
+                 end
+       else begin
+            if odd(fop)
+                 then push88call('%D_CMP  ',FALSE,0)
+                 else push44call('%F_CMP  ',FALSE,0);
+            with gcattr do begin
+                 ckind := COND;
+                 case fop of
+                      122,123: { FLT4/8 } cc := LT;
+                      124,125: { FGT4/8 } cc := GT;
+                      126,127: { FLE4/8 } cc := LE;
+                      128,129: { FGE4/8 } cc := GE;
+                      130,131: { FEQ4/8 } cc := EQ;
+                      132,133: { FNE4/8 } cc := NE;
+                 end; {case}
+                 end;
+            end;
+       end;
+  134, { FNEG4 }
+  135, { FNEG8 }
+  136, { FABS4 }
+  137: { FABS8 }
+       begin
+       if FPHardware and (M81_FLAG or JUN_FLAG)
+       then begin
+            if odd(fop) then lsiz := D else lsiz := S;
+            if JUN_FLAG
+            then begin
+                 if fop <= 135 then jneg(lsiz) else jabs(lsiz);
+                 end
+            else begin
+                 if fop <= 135 then funop(_FNEG,lsiz) else funop(_FABS,lsiz);
+                 end;
+            end
+       else begin
+            expression(nextbyte);
+            if odd(fop)
+            then pushvalue(gcattr,D)
+            else pushvalue(gcattr,S);
+            if fop <= 135
+            then { BCHG #7,(SP) } gen(2135)
+            else { BCLR #7,(SP) } gen(2199);
+            gen(7);
+            gcattr.ckind := STCK;
+            end;
+       end;
+  138: { F4**I4 }
+       begin
+       if FPHardWare and (M81_FLAG or JUN_FLAG)
+       then if JUN_FLAG
+            then junfupi(S)
+       else begin
+            lsiz := S; fexpr(lsiz); lcattr := gcattr; expression(nextbyte);
+            if (gcattr.ckind = CNST) and
+               (gcattr.cvalu.lvalu >= 1) and (gcattr.cvalu.lvalu <= 4)
+            then begin
+                 f := loadf(lcattr,lsiz);
+                 case gcattr.cvalu.lvalu of
+                   1: ;
+                   2: begin
+                      isolate(f); erase(f); lcattr.exreg := f;
+                      dupref(lcattr,S); genfear(_FMUL,lcattr,f,S);
+                      end;
+                   3: begin
+                      lock(f); f2 := getreg(F0,F7);
+                      dupref(lcattr,S); dupref(lcattr,S);
+                      genfear(_FLOAD,lcattr,f2,X);
+                      genfear(_FMUL,lcattr,f2,S);
+                      genfear(_FMUL,lcattr,f2,S);
+                      unlock(f); lcattr.exreg := f2;
+                      end;
+                   4: begin
+                      isolate(f); erase(f); lcattr.exreg := f;
+                      dupref(lcattr,S); genfear(_FMUL,lcattr,f,S);
+                      dupref(lcattr,S); genfear(_FMUL,lcattr,f,S);
+                      end;
+                 end; {case}
+                 gcattr := lcattr;
+                 end
+            else begin
+                 if lsiz <> S then f := loadf(lcattr,lsiz);
+                 pushvalue(lcattr,S); pushvalue(gcattr,L);
+                 saveallregs; genjsra('%_UP_I  '); clearscr;
+                 gcattr.ckind := FEXP; gcattr.exreg := getreg(F0,F0);
+                 end;
+            end
+       else begin
+            expression(nextbyte); pushvalue(gcattr,S); expression(nextbyte);
+            if (gcattr.ckind = CNST) and
+               (gcattr.cvalu.lvalu >= 1) and (gcattr.cvalu.lvalu <= 4)
+            then begin
+                 case gcattr.cvalu.lvalu of
+                   1: ;
+                   2: begin
+                      if FPHardware and MAX_FLAG
+                      then maxcmd(M_FSQR,0)
+                      else begin
+                           { MOVE.L (SP),-(SP) } gen(12055);
+                           genjsra('%F_MUL  ');
+                           end;
+                      end;
+                   3: begin
+                      gen(12055);
+                      if FPHardware and MAX_FLAG
+                      then begin maxcmd(M_FSQR,0); maxcmd(M_FMUL,4); end
+                      else begin
+                           gen(12055);
+                           genjsra('%F_MUL  '); genjsra('%F_MUL  ');
+                           end;
+                      end;
+                   4: begin
+                      if FPHardware and MAX_FLAG
+                      then begin maxcmd(M_FSQR,0); maxcmd(M_FSQR,0); end
+                      else begin
+                           gen(12055); genjsra('%F_MUL  ');
+                           gen(12055); genjsra('%F_MUL  ');
+                           end;
+                      end;
+                 end; {case}
+                 gcattr.ckind := STCK;
+                 end
+            else begin
+                 pushvalue(gcattr,L);
+                 saveallregs; genjsra('%_UP_I  '); clearscr;
+                 gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D0);
+                 end;
+            end;
+       end;
+  139: { F8**I4 }
+       begin
+       if FPHardWare and (M81_FLAG or JUN_FLAG)
+       then if JUN_FLAG
+            then junfupi(D)
+       else begin
+            lsiz := D; fexpr(lsiz); lcattr := gcattr; expression(nextbyte);
+            if (gcattr.ckind = CNST) and
+               (gcattr.cvalu.lvalu >= 1) and (gcattr.cvalu.lvalu <= 4)
+            then begin
+                 f := loadf(lcattr,lsiz);
+                 case gcattr.cvalu.lvalu of
+                   1: ;
+                   2: begin
+                      isolate(f); erase(f); lcattr.exreg := f;
+                      dupref(lcattr,D); genfear(_FMUL,lcattr,f,D);
+                      end;
+                   3: begin
+                      lock(f); f2 := getreg(F0,F7);
+                      dupref(lcattr,D); dupref(lcattr,D);
+                      genfear(_FLOAD,lcattr,f2,X);
+                      genfear(_FMUL,lcattr,f2,D);
+                      genfear(_FMUL,lcattr,f2,D);
+                      unlock(f); lcattr.exreg := f2;
+                      end;
+                   4: begin
+                      isolate(f); erase(f); lcattr.exreg := f;
+                      dupref(lcattr,D); genfear(_FMUL,lcattr,f,D);
+                      dupref(lcattr,D); genfear(_FMUL,lcattr,f,D);
+                      end;
+                 end; {case}
+                 gcattr := lcattr;
+                 end
+            else begin
+                 if lsiz <> D then f := loadf(lcattr,lsiz);
+                 pushvalue(lcattr,D); pushvalue(gcattr,L);
+                 saveallregs; genjsra('%_DUPIV '); clearscr;
+                 gcattr.ckind := FEXP; gcattr.exreg := getreg(F0,F0);
+                 end;
+            end
+       else begin
+            expression(nextbyte); pushvalue(gcattr,D); expression(nextbyte);
+            if (gcattr.ckind = CNST) and
+               (gcattr.cvalu.lvalu >= 1) and (gcattr.cvalu.lvalu <= 4)
+            then begin
+                 case gcattr.cvalu.lvalu of
+                   1: ;
+                   2: begin
+                      if FPHardware and MAX_FLAG
+                      then maxcmd(M_DSQR,0)
+                      else begin
+                           { MOVE.L 4(SP),-(SP) } gen(12079); gen(4);
+                           gen(12079); gen(4); genjsra('%D_MUL  ');
+                           end;
+                      end;
+                   3: begin
+                      gen(12079); gen(4); gen(12079); gen(4);
+                      if FPHardware and MAX_FLAG
+                      then begin maxcmd(M_DSQR,0); maxcmd(M_DMUL,8); end
+                      else begin
+                           gen(12079); gen(4); gen(12079); gen(4);
+                           genjsra('%D_MUL  '); genjsra('%D_MUL  ');
+                           end;
+                      end;
+                   4: begin
+                      if FPHardware and MAX_FLAG
+                      then begin maxcmd(M_DSQR,0); maxcmd(M_DSQR,0); end
+                      else begin
+                           gen(12079); gen(4); gen(12079); gen(4);
+                           genjsra('%D_MUL  ');
+                           gen(12079); gen(4); gen(12079); gen(4);
+                           genjsra('%D_MUL  ');
+                           end;
+                      end;
+                 end; {case}
+                 end
+            else begin
+                 pushvalue(gcattr,L);
+                 saveallregs; genjsra('%_DUPIV '); clearscr;
+                 { MOVEM.L D0/D1,-(SP) } gen(18663); gen(-16384);
+                 end;
+            gcattr.ckind := STCK;
+            end;
+       end;
+  143: { Transcendentals:}
+       begin
+       fop := nextbyte;
+       if FPHardware and (MAX_FLAG or M81_FLAG)
+       then if MAX_FLAG
+            then maxtransop(fop)
+            else m81transop(fop)
+       else transop(fop);
+       end;
+  144: { STRLT } pushaacall('%S_LT   ',FALSE,1);
+  145: { STRGT } pushaacall('%S_GT   ',FALSE,1);
+  146: { STRLE } pushaacall('%S_LE   ',FALSE,1);
+  147: { STRGE } pushaacall('%S_GE   ',FALSE,1);
+  148: { STREQ } pushaacall('%S_EQ   ',FALSE,1);
+  149: { STRNE } pushaacall('%S_NE   ',FALSE,1);
+  150, { PAOCLT }
+  151, { PAOCGT }
+  152, { PAOCLE }
+  153, { PAOCGE }
+  154, { PAOCEQ }
+  155: { PAOCNE }
+       begin
+       lsize := nextbyte; msize := nextbyte;
+       if lsize <> msize then error(2009);
+       { !!! Special case for length=2/4 !!! }
+       { !!! Special case for length=6/8 !!! but no quite as good !!! }
+       expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+       a2 := loadaddress(gcattr); a1 := loadaddress(lcattr);
+       isolate(a1); lock(a1); load(a2); isolate(a2); unlock(a1);
+       erase(a1); erase(a2); d1 := loadint(lsize-1,W);
+       isolate(d1); erase(d1);
+       { CMPM.B (A1)+,(A2)+ } genrr(-20216,a1,a2);
+       { DBNE } genr(22216,d1); gen(-4);
+       freereg(a1); freereg(a2); freereg(d1);
+       with gcattr do begin
+            ckind := COND;
+            case fop of
+                 150: { PAOCLT } cc := LO;
+                 151: { PAOCGT } cc := HI;
+                 152: { PAOCLE } cc := LS;
+                 153: { PAOCGE } cc := HS;
+                 154: { PAOCEQ } cc := EQ;
+                 155: { PAOCNE } cc := NE;
+            end; {case}
+            end;
+       end;
+  end; {case}
+  end; {expr2}
+  
+

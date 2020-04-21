@@ -1,0 +1,23 @@
+'\"macro stdmacro
+.TH RWALLD 1M
+.SH NAME
+rwalld \- network rwall server
+.SH SYNOPSIS
+.B /usr/etc/rpc.rwalld
+.SH DESCRIPTION
+.LP
+.I Rwalld
+is a server that handles
+.IR rwall (1M)
+and
+.IR shutdown (1M)
+requests.
+It is implemented by calling
+.IR wall (1M)
+to all the appropriate network machines.
+The
+.I rwalld
+daemon is normally invoked by
+.IR inetd (1M).
+.SH "SEE ALSO"
+rwall(1M), wall(1M), inetd(1M).

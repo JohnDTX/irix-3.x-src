@@ -1,0 +1,40 @@
+#! /bin/sh
+#
+# Creates a list of differences in file names between two releases.  Expects
+# to be given the names of two directories full of lists as arguments.
+
+if test ! -d "$1" -o ! -d "$2"
+then
+	echo "usage: differences <dir1> <dir2>"
+fi
+
+PATH=$PATH:.
+
+tmp=/tmp/diff
+
+mklist -f -r $1 | sed -n '/list\./s/.*list\.//p' > $tmp.1
+mklist -f -r $2 | sed -n '/list\./s/.*list\.//p' > $tmp.2
+
+echo differences between $1 and $2
+
+comm -23 $tmp.1 $tmp.2 |
+while read image ; do echo obsolete image: $image ; done
+
+comm -13 $tmp.1 $tmp.2 |
+while read image ; do echo new image: $image ; done
+
+echo
+echo "Only in $1"
+echo "	Only in $2"
+echo
+
+comm -12 $tmp.1 $tmp.2 |
+while read image
+do
+	echo 
+	echo "---- $image:"
+	echo
+	comm -3 $1/list.$image $2/list.$image
+done
+
+rm -f /tmp/diff.1 /tmp/diff.2

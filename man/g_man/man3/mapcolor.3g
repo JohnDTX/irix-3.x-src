@@ -1,0 +1,44 @@
+.TH "mapcolor" 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B mapcolor 
+\- changes a color map entry 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "mapcolor(i, red, green, blue)"
+.B "Colorindex i;"
+.B "short red, green, blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine mapcol(i, red, green, blue"
+.B "integer*4 i, red, green, blue"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure mapcolor(i: Colorindex; red, green, 
+.br
+.B	blue: Short);
+.SH DESCRIPTION
+.B mapcolor
+changes a single color map entry to the specified RGB value.
+Its arguments include a color map index (\f2i\f1) and eight bits each
+of red, green, and blue intensities.
+Pixels written with
+.I i 
+display
+the specified RGB (\f2red, green, blue\f1) intensities.
+.PP
+In multimap mode, only the current color map can be updated with
+\f3mapcolor\fP.
+The system ignores invalid indices.
+.SH "SEE ALSO"
+multimap, onemap, setmap
+.sp
+\f2Programming Guide\fP, Section 6.2, Color Maps
+.SH NOTE
+This routine is available only in immediate mode.

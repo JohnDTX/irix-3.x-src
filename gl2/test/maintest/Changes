@@ -1,0 +1,7 @@
+- Added isrem.f which contains function ISREM() which returns .TRUE. if
+  running remote test.
+- Changed DO loops iteration size to call LOOPSZ which returns an
+  appropriate value based on ISREM().
+-changed subtest1 after 1000
+	GO TO 1040
+	I = 0   ***** unreachable

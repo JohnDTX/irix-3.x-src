@@ -1,0 +1,46 @@
+#! /bin/sh
+
+case $machine in
+iris)
+	case $GLHDWR in
+	gl1)	k=1000 ;;
+	gl2)	k=2400 ;;
+	*)	echo "Can't figure out proper kernel from GLHDWR=$GLHDWR."
+		exit 1
+	esac
+	;;
+juniper)
+	k=3000
+	;;
+*)	echo "Can't figure out proper kernel from machine=$machine."
+	exit 1
+esac
+
+dest=${1?"usage: Makevmunix <desttree>"}
+
+kernel=$dest/kernels/$k.std
+vmunix=$dest/vmunix
+default=$dest/defaultboot
+vmunix1=${vmunix}1
+cp $kernel $vmunix
+rm -f $default
+ln $vmunix $default
+cp $vmunix $vmunix1
+case $machine in 
+iris)
+
+	adb -w $vmunix1 << 'EOF'
+		?m c00400 cfffff
+		rootdev?w 8
+		swapdev?w 9
+		$q
+	EOF
+juniper)
+	
+	adb -w $vmunix1 << 'EOF'
+		?m 0x20000000 0x2fffffff
+		rootdev?w 8
+		swapdev?w 9
+		$q
+	EOF
+esac

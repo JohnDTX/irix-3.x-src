@@ -1,0 +1,132 @@
+'\"macro stdmacro
+.TH PSCAT 1
+.SH NAME
+pscat \- convert C/A/T files to P\s-2OST\s+2S\s-2CRIPT\s+2 format
+.SH SYNOPSIS
+.B pscat
+[
+.BR \-F fonttable
+] [
+.BR \-i prologuefile
+] [
+.BR \-l paperlength
+] [
+.BR \-x xoffset
+] [
+.BR \-y yoffset
+] [ files ]
+.SH DESCRIPTION
+.I pscat
+converts C/A/T format
+.IR file 
+(i.e., as produced by the original
+.IR troff ),
+to P\s-2OST\s+2S\s-2CRIPT\s+2 format on the standard output.  If no
+.I file
+argument is given, the standard input is used.
+Page offset distances and the page length 
+are specified by giving a fixed-point real number optionally 
+followed by a units measure.  For example, 1in means one inch, 15mm means 
+fifteen millimeters.  If no units are indicated, points (72 to the inch) 
+are used.
+The options are:
+.TP
+.BI \-F " fonttable"
+specifies a font correspondence table for use by the converter.
+(The default is usually
+.I Times.ct
+where the mounted fonts are:
+.BR R =Times-Roman, 
+.BR I =Times-Italic, 
+.BR B =Times-Bold, 
+and
+.BR S =Symbol.
+Note that 
+.I troff
+should be invoked with an appropriate 
+.B \-F 
+switch and explicit ``.fp''
+commands.)
+.TP
+.BI \-i " prologuefile"
+specifies a file to be incorporated as the P\s-2OST\s+2S\s-2CRIPT\s+2 prologue, otherwise
+the default prologue will be used (see below).
+.TP
+.BI \-l " pagelength"
+specifies the page length to use when splitting the
+C/A/T file into P\s-2OST\s+2S\s-2CRIPT\s+2 pages.  The default is 11in.
+.TP
+.BI \-x " xoffset"
+moves the output 
+.I xoffset
+to the right on the paper.  The default is 0.
+.TP
+.BI \-y " yoffset"
+moves the output
+.I yoffset
+downward on the paper.  The default is 0.  Different versions of 
+.I troff
+seem to have different notions of where 
+the top edge of the paper really is, so careful setting of the 
+.B \-y 
+switch may be necessary.
+.SH ENVIRONMENT
+.TP
+PSLIBDIR
+path name of a directory to use instead of
+.B /usr/lib/ps 
+for 
+.I pscat 
+prologue and font metric files.
+.SH FILES
+.TP 2.2i
+/usr/lib/ps/troff.font/*.ct
+character correspondence tables
+mapping C/A/T codes to P\s-2OST\s+2S\s-2CRIPT\s+2 fonts and characters or other actions.
+.TP
+/usr/lib/ps/pscat.pro
+default P\s-2OST\s+2S\s-2CRIPT\s+2 prologue.
+.SH "SEE ALSO"
+troff(1)
+.br
+\f2Documenter's Workbench\fP.
+.SH AUTHOR
+Adobe Systems Incorporated
+.SH BUGS
+Because of the character mapping tables used, arbitrary
+use of the ``.fp'' troff directive in will usually produce the
+wrong results.  The 
+.I family.head
+files which 
+.I ptroff
+feeds to 
+.I troff
+contain ``.fp'' commands appropriate for a given font family.
+
+Distance computations are not checked for overflow.
+
+The mapping from the default troff fonts to 
+Adobe's Times-Roman will not look good.  P\s-2OST\s+2S\s-2CRIPT\s+2 font width 
+tables (and ``.fp'' commands) should be used explicitly in troff.
+
+.I pscat
+determines where page breaks occur by assuming that each page is exactly
+the specified length.  There is no indication of page boundaries
+in the C/A/T file, so improper use of the 
+.B \-l 
+option will lead to undesirable results.  Some 
+.IR troff 
+macro packages 
+generate cut-marks at logical edges of the page which may or
+may not get imaged on a P\s-2OST\s+2S\s-2CRIPT\s+2 device.
+Careful use of the 
+.B \-x 
+and 
+.B \-y 
+options may help.
+.SH NOTES
+P\s-2OST\s+2S\s-2CRIPT\s+2 is a trademark of Adobe Systems Incorporated.
+.br
+Times is a registered trademark of Allied Corporation.
+.br
+Documenter's Workbench is a trademark of AT&T Technologies.

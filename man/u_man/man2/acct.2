@@ -1,0 +1,103 @@
+'\"macro stdmacro
+.TH ACCT 2
+.SH NAME
+acct \- enable or disable process accounting
+.SH SYNOPSIS
+.B int acct (path)
+.br
+.B char \(**path;
+.SH DESCRIPTION
+.I Acct\^
+is used to enable or disable the system's process accounting routine.
+If the routine is enabled, an accounting record will be written on an
+accounting file for each process that terminates.
+Termination can be caused by one of two things: an
+.I exit\^
+call or a signal; see
+.IR exit\^ (2)
+and 
+.IR signal\^ (2).
+The effective user
+.SM ID
+of the calling process must be super-user to use this call.
+.PP
+.I Path\^
+points to a path name naming the accounting file.
+The accounting file format is given in
+.IR acct\^ (4).
+.PP
+The accounting routine is enabled if
+.I path\^
+is non-zero and no errors occur during the system call.
+It is disabled if
+.I path\^
+is zero and no errors occur during the system call.
+.PP
+.I Acct\^
+will fail if one or more of the following are true:
+.IP "" .3i
+The effective user
+.SM ID
+of the calling process is not super-user.
+.SM
+\%[EPERM]
+.IP
+An attempt is being made to enable accounting when it is already enabled.
+.SM
+\%[EBUSY]
+.IP
+A component of the path prefix is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+One or more components of the accounting file's path name do not exist.
+.SM
+\%[ENOENT]
+.IP
+A component of the
+path prefix
+denies search permission.
+.SM
+\%[EACCES]
+.IP
+The file named by
+.I path\^
+is not an ordinary file.
+.SM
+\%[EACCES]
+.IP
+.I Mode\^
+permission is denied for the named accounting file.
+.SM
+\%[EACCES]
+.IP
+The named file is a directory.
+.SM
+\%[EISDIR]
+.IP
+The named file resides on a read-only file system.
+.SM
+\%[EROFS]
+.IP
+.I Path\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned. Otherwise, a
+value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+acct(4).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#51,D0
+.B movl	path,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)acct.2	5.1 of 11/1/83

@@ -1,0 +1,55 @@
+.TH tie 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B tie
+\- ties two valuators to a button 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "tie(b, v1, v2) "
+.B "Device b, v1, v2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine tie(b, v1, v2)"
+.B "integer*4 b, v1, v2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure tie(b, v1, v2: Device);"
+.SH DESCRIPTION
+.B tie                                       
+requires a button 
+.I b 
+and two valuators 
+.I v1
+and
+.I v2.
+When a queued
+button changes state, three entries are made
+in the queue:  one records the current state of the button and two
+record the current positions of each valuator.
+You can tie one valuator to a button by making
+\f2v2\fP = 0.
+You can untie a button by making both
+.I v1
+and
+\f2v2\fP= 0.
+.I v1
+appears before
+.I v2
+in the event queue;
+.I b
+precedes both
+.I v1
+and 
+.I v2.
+.SH "SEE ALSO"
+getbutton
+.sp
+\f2Programming Guide\fP, Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,9 @@
+a_man/man1/ypinit.1m: ypinit - build and install yellow pages database 
+a_man/man1/yppoll.1m: yppoll - what version of a YP map is at a YP server host 
+a_man/man1/yppush.1m: yppush - force propagation of a changed YP map 
+a_man/man1/ypset.1m: ypset - point ypbind at a particular server 
+u_man/man1/ypmatch.1: ypmatch - print the value of one or more keys from a yp map 
+u_man/man1/ypcat.1: ypcat - print values in a YP data base 
+u_man/man2/sginap.2: sginap - timed sleep and processor yield function 
+u_man/man2/ip2mapio.2: ip2mapio, ip2mapmem, ip2unmap - multibus mapping operations 
+u_man/man1/diction.1: diction,explain \- print wordy sentences; thesaurus for diction 

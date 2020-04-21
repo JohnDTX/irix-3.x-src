@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH STRTOL 3C 
+.SH NAME
+strtol, atol, atoi \- convert string to integer
+.SH SYNOPSIS
+.nf
+.B long strtol (str, ptr, base)
+.B char \(**str;
+.B char \(**\(**ptr;
+.B int base;
+.PP
+.B long atol (str)
+.B char \(**str;
+.PP
+.B int atoi (str)
+.B char \(**str;
+.fi
+.SH DESCRIPTION
+.I Strtol\^
+returns as a long integer the value represented by the character string
+.IR str .
+The string is scanned up to the first
+character inconsistent with the base.
+Leading ``white-space'' characters are ignored.
+.PP
+If the value of
+.I ptr\^
+is not (char \(**\(**)\s-1NULL\s+1,
+a pointer to the character terminating the scan is returned in
+.IR \(**ptr .
+If no integer can be formed,
+.I \(**ptr\^
+is set to
+.IR str ,
+and zero is returned.
+.PP
+If
+.I base\^
+is positive (and not greater than 36), it is used as
+the base for conversion.
+After an optional leading sign, leading zeros are ignored,
+and ``0x'' or ``0X'' is ignored if
+.I base\^
+is 16.
+.PP
+If
+.I base\^
+is zero, the string itself determines the base thus: After an
+optional leading sign, a leading zero indicates octal conversion,
+and a leading ``0x'' or ``0X'' hexadecimal conversion.  Otherwise,
+decimal conversion is used.
+.PP
+Truncation from long to int can, of course, take place upon
+assignment, or by an explicit cast.
+.PP
+.I Atol(str)\^
+is equivalent to
+.I strtol(str, (char \(**\(**)\s-1NULL\s+1, 10).
+.PP
+.I Atoi(str)\^
+is equivalent to
+.I (int) strtol(str, (char \(**\(**)\s-1NULL\s+1, 10).
+.SH SEE ALSO
+atof(3C),
+scanf(3S).
+.SH BUGS
+Overflow conditions are ignored.
+.\"	@(#)strtol.3c	5.1 of 10/25/83

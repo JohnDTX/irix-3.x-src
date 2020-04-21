@@ -1,0 +1,107 @@
+#! /bin/sh
+# uigptx - make permuted index for IRIS User's Guide reference manual.
+#	   Modelled after /usr/man/tocrc.  It also makes a table of
+#	   contents.
+#
+# Usage: uigptx all	- create ptx and toc files
+#	 uigptx tr	- create troff output (using xroff)
+#
+# The script getNAME extracts the information from which the permuted index
+# is made.  It expects the man pages to have the following format:
+#
+#	.TH <pagename> <anything>
+#	...
+#	.B <routine_name>
+#	- <a single line of description>
+#	.SH 
+#
+# It will complain if any are found which don't.  getNAME ignores
+# intro.3g.  <routine_name> can be a quoted comma-separated list of routines.
+#
+# Mon Aug 19 23:28:03 1985  Charles (Herb) Kuta at SGI  (olympus!kuta)
+#
+tmp=/tmp/toc$$
+tmp2=/tmp/cattoc$$
+troff=xroff
+trap "rm -f $tmp $tmp2 ; exit" 0 2 3 15
+if [ $# -eq 2 ]
+then
+	: create toc input file for one section only
+
+	( cd ../$1 ; ../ptx/getNAME *.* |
+		sed \
+			-e 's/.s-2//g' \
+			-e 's/.s-1//g' \
+			-e 's/.s0//g' \
+			-e 's/.s+1//g' \
+			-e 's/  *.-  */: /' \
+			-e 's/ *$/./' \
+			-e 's/.TH.*	//' \
+		> ../ptx/tocx$1
+	)
+else case $1 in
+	all )
+		:   tocx files for all sections and everything else
+
+		for x in 2.4man
+			do
+			./$0 $x $x
+			done
+		./$0 t
+		;;
+	t )
+		:   permuted index and toc files
+
+		if [ ! -f ./tocxmanpgs ]
+		then
+			echo "tocx* files missing; must run uigptx all first"
+			exit
+		fi
+		sed \
+			-e 's/(1c)/(1C)/' \
+			-e 's/(1g)/(1G)/' \
+			-e 's/(3c)/(3C)/' \
+			-e 's/(3m)/(3M)/' \
+			-e 's/(3s)/(3S)/' \
+			-e 's/(3x)/(3X)/' \
+			-e 's/(3f)/(3F)/' \
+			-e 's/(4f)/(4F)/' \
+			-e 's/(4n)/(4N)/' \
+			-e 's/(4p)/(4P)/' \
+			-e 's/(8c)/(8C)/' \
+			-e 's/(8v)/(8V)/' \
+			-e '/"\."/d' \
+			./tocx* \
+		> $tmp2
+
+		ptx -r -t -b break -f -w 96 -i ignore \
+		    $tmp2 $tmp
+
+		sed 's/(3G)$//' $tmp > ptxx
+
+		for x in 2.4man
+		do
+			< ./tocx$x grep '^intro' >$tmp
+				sed \
+				-e '2,${' \
+				-e '/^intro/d' \
+				-e '}' \
+				-e 's/ .*://' \
+				-e 's/.$//' \
+				-e 's/([^)]*) /" "/' \
+				-e 's/.*/.xx "&"/' \
+				-e '/""/d' \
+				$tmp ./tocx$x \
+			>./toc$x
+		done
+		;;
+	tr )
+		$troff ptx.in
+	        $troff toc.in
+		;;
+	* )
+		./$0 $1 $1
+		;;
+	esac
+fi
+exit

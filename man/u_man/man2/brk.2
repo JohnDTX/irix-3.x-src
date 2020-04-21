@@ -1,0 +1,81 @@
+'\"macro stdmacro
+.TH BRK 2
+.SH NAME
+brk, sbrk \- change data segment space allocation
+.SH SYNOPSIS
+.B int brk (endds)
+.br
+.B char *endds;
+.PP
+.B  char *sbrk (incr)
+.br
+.B int incr;
+.SH DESCRIPTION
+.I Brk\^
+and
+.I sbrk\^
+are used to change dynamically the amount of space allocated
+for the calling process's data segment; see
+.IR exec (2).
+The change is made by resetting the process's break value and allocating
+the appropriate amount of space.
+The break value
+is the address of the first location beyond the end of the data segment.
+The amount of allocated space increases as the break value increases.
+The newly allocated space is set to zero.
+.PP
+.I Brk\^
+sets the break value to
+.I endds\^
+and changes the allocated space accordingly.
+.PP
+.I Sbrk\^
+adds 
+.I incr\^
+bytes to the break value and changes the allocated space accordingly.
+.I Incr\^
+can be negative, in which case the amount of allocated space is decreased.
+.PP
+.I Brk\^
+and
+.I sbrk\^
+will fail without making any change in the allocated space if one or more of
+the following are true:
+.IP "" .3i
+Such a change would result in more space being allocated
+than is allowed by a system-imposed maximum (see
+.IR ulimit (2)).
+.SM
+\%[ENOMEM]
+.IP
+Such a change would result in the break value being greater than or equal
+to the start address of any attached shared memory segment (see
+.IR shmop (2)).
+.SH RETURN VALUE
+Upon successful completion,
+.I brk\^
+returns a value of 0 and
+.I sbrk\^
+returns the old break value.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+exec(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#17,D0
+.B movl	endds,A0
+.B trap	#0
+.fi
+.PP
+Carry bit cleared if the
+.I brk
+could be set; 
+.I brk
+fails if the program requests more memory than the system limit or, on 
+memory management CPUs, if too many segmentation registers would be
+required to implement the break.
+.DT
+.\"	@(#)brk.2	5.1 of 10/19/83

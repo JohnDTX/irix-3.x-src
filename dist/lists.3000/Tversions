@@ -1,0 +1,6 @@
+488	004-0341-051	IEEE-488 Option		23T/3010
+ibm	004-0351-041	IBM Option		23T/3010
+stand	004-0111-031	Standalone Tools	23T/3010
+tcp	004-0331-042	TCP/IP Option		23T/3010
+test	004-0611-061	Test Software		23T/3010
+unix	004-0131-101	Standard System		23T/3010

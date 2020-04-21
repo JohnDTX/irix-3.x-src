@@ -1,0 +1,11 @@
+#! /bin/sh
+
+list="
+usr/sys/kernels/3000tcp.a
+usr/sys/kernels/3000xns.a
+"
+
+for f in $list
+do
+	ranlib /$f
+done

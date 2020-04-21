@@ -1,0 +1,50 @@
+
+		UNIX Programmer's Manual: Volume 1
+
+This directory contains source files for the "UNIX Programmer's
+Manual: Volume 1".  The different subdirectories correspond to
+sections in the manual.  In the directory u_man (user's manual pages)
+the divisions are:
+	man1	Section 1
+	man2	Section 2	System Calls
+	man3	Section 3	Subroutines
+	man4	Section 4	File Formats
+	man5	Section 5	Miscellaneous
+	man6	Section 6 	Games
+
+In the directory a_man (adminstrator's manual pages) the divisions are:
+	man1	Section 1	(suffix 1m)
+	man7	Section 7	Special Files
+	man8	Section 8	Administration
+
+
+To print a page, find the source file
+for it and use the following incantation:
+
+	mmdoc -Tpsc manpagefilename
+
+note: you MUST have the following in your path to print a man page:
+
+	/pubs/5.3/bin /pubs/tools
+
+The directory "man0" contains various Shell scripts for producing
+the manual.  There is a README which explains how to use the
+scripts.  "unsoft/tools" also has some scripts that may be useful.
+
+Due to differences between the software on the IRIS 2000 Series
+workstations and the IRIS Turbo Option (68020 Upgrade)/IRIS 3300, 
+new manual pages for certain programs have been
+generated.  The following manual pages were affected:  cc(1), df(1), as20(1),
+fs(4), newfs(1m), efs(4), bellfs(4), inode(4), bellinode(4), efsinode(4),
+cpp(1), ld(1).
+
+Manual pages that apply to IRIS Turbo Option/IRIS 3300 and which also 
+have a companion manual page for the 2000 series
+workstation have been given the suffix j as part of the file name.
+
+The following manual pages do not apply to the IRIS Turbo Option/IRIS 3300:
+fload.1m and library.1.
+
+NOTE: After the 2.4 release, the manual pages for ld(1) and cpp(1)
+will be updated to reflect both the IRIS 2000 series and the IRIS
+3000 series workstations.

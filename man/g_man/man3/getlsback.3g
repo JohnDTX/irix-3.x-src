@@ -1,0 +1,40 @@
+.TH getlsbackup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B getlsbackup 
+\- returns the current value of the linestyle backup flag 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getlsbackup()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getlsb()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlsbackup: Boolean;"
+.SH DESCRIPTION
+.B getlsbackup
+returns the current value of the linestyle backup flag.  
+TRUE(1)
+indicates
+.B lsbackup
+is on, and the last three pixels of a line are colored regardless of
+the linestyle pattern.
+FALSE(0)
+indicates
+.B lsbackup
+is off and the pattern
+determines the state of all the pixels in the line.
+.SH "SEE ALSO"
+lsbackup
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,41 @@
+.TH curveprecision 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B curveprecision
+\- sets the number of line segments that draw a curve segment
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curveprecision(nsegments)"
+.B "short nsegments;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curvep(nsegments)"
+.B "integer*4 nsegments"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curveprecision(nsegments: short);"
+.SH DESCRIPTION
+.B curveprecision
+sets the number of line segments used to draw a curve.
+Whenever 
+.B crv,
+.B crvn,
+.B rcrv,
+or
+.B rcrvn
+executes, a number of straight line segments (\f2nsegments\f1) approximates
+each curve segment.
+The greater the value of 
+.I nsegments,
+the smoother the curve, but the longer the drawing. 
+.SH "SEE ALSO"
+crv, curvebasis, crvn, rcrv, rcrvn
+.sp
+.I Programming Guide,
+Section 11.2, Drawing Curves

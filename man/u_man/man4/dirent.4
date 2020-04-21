@@ -1,0 +1,67 @@
+'\"macro stdmacro
+.TH DIRENT 4
+.SH NAME
+dirent \- file system independent directory entry
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/dirent.h>
+.SH DESCRIPTION
+Different file system types may have different
+directory entries.
+The
+.I dirent\^
+structure defines a file system independent
+directory entry, which contains information common to
+directory entries in different file system types.
+A set of these structures is returned
+by the
+.IR getdents (2)
+system call.
+.PP
+The 
+.I dirent\^
+structure is defined below.
+.nf
+		struct	dirent {
+			long			d_ino;
+			off_t			d_off;
+			unsigned short		d_reclen;
+			char			d_name[1];
+		};
+.PP
+.fi
+The 
+.I d_ino\^
+is a number which is 
+unique for each file
+in the file system.
+The field
+.I d_off\^
+is an opaque offset (i.e., not necessarily in bytes) of the next 
+directory entry in the
+actual file system directory.
+The field
+.I d_name\^
+is the beginning of the
+character array giving the name of the
+directory entry.
+This name is null terminated 
+and may have at most \%MAXNAMLEN
+characters.
+This results in file system independent
+directory entries being variable length
+entities.
+The value of 
+.I d_reclen\^
+is the record length
+of
+this entry.
+This length is defined to be the
+number of bytes between the
+current entry and the next one,
+so that it will always result
+in the next entry being on a 
+long boundary.
+.SH SEE ALSO
+getdents(2).

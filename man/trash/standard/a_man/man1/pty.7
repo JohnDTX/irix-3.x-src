@@ -1,0 +1,34 @@
+.TH PTY 7
+.SH NAME
+pty \- pseudo terminal driver
+.SH SYNOPSIS
+pseudo-device pty
+.SH DESCRIPTION
+The 
+.I pty
+driver supports a device-pair called 
+.IR pseudo\0 terminal.
+A pseudo terminal is a pair of character devices,
+a
+.I master
+device and a 
+.I slave
+device.  The 
+.I slave
+device provides interface processes identical to those
+described in 
+.IR tty (7).  
+Unlike the other devices of 
+.IR tty , 
+the
+.I slave
+device is manipulated by the pseudo terminal's 
+master half.  As a result, anything written
+on the master device is passed as input to the 
+slave device and vice versa.
+.SH FILES
+.ta 20n
+/dev/pty[0-3]   master pseudo terminals
+.br
+/dev/ttyp[0-3]  slave pseudo terminals
+

@@ -1,0 +1,37 @@
+.TH rectcopy 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B rectcopy
+\- copies a rectangle of pixels on the screen
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rectcopy(x1, y1, x2, y2, newx, newy)"
+.B "Screencoord x1, y1, x2, y2, newx, newy;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rectco(x1, y1, x2, y2, newx, newy)"
+.B "integer*4 x1, y1, x2, y2, newx, newy"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rectcopy(x1, y1, x2, y2, newx, newy:"
+.br
+.B 	Screencord);
+.SH DESCRIPTION
+.B rectcopy
+copies a rectangular array of pixels
+(\f2x1, y1, x2, y2\f1) to
+another position on the screen.
+The point (\f2newx, newy\f1) defines the lower-left corner
+of the new window position.
+The current viewport and screenmask mask the drawing of the copied region.
+.SH SEE ALSO
+.I Programming Guide,
+Section 3.5, Rectangles
+.SH NOTE
+This routine is available only in immediate mode.

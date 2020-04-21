@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH MTAB 4
+.SH NAME
+/etc/mtab \- mounted file system table
+.SH SYNOPSIS
+.B #include <mntent.h>
+.SH DESCRIPTION
+.I Mtab
+resides in the
+.I /etc
+directory, and contains a table of filesystems currently mounted by the
+.I mount
+command.
+.I Umount
+removes entries from this file.
+.PP
+The file contains a line of information for each mounted filesystem,
+structurally identical to the contents of
+.IR /etc/fstab ,
+described in
+.IR mntent (4).
+There are a number of lines of the form:
+.RS
+.PP
+\f2fsname  dir  type  opts  freq  passno\f1
+.RE
+.PP
+For example:
+.PP
+.RS
+/dev/si0a  /  efs  rw,raw=/dev/rsi0a  0  0
+.RE
+.PP
+The file is accessed by programs using
+.IR getmntent (3C),
+and by the system administrator using a text editor.
+.SH FILES
+/etc/mtab
+.SH "SEE ALSO"
+mount(1M), getmntent(3C), mntent(4).

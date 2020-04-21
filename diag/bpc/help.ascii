@@ -1,0 +1,514 @@
+C_MAPCOLOR
+All colormap entries that correspond to index are changed to the
+new red, green, and blue values.  An index corresponds to multiple
+map entries if not all of the planes connected to the colormap are
+'significant' (see sigplanes).
+
+Index is in the range 0..(2**n)-1, where n is the number of
+significant planes that are currently connected to the colormap.
+Red, green, and blue are 8-bit intensities, ranging from 0 (off)
+to FF (brightest).  All arguments are given in hex.
+
+For example, if only bitplane A0 is significant (sigplanes = 1) then the
+command 'mapcolor 0 ff ff ff' will set every other colormap entry
+(0, 2, 4, etc) to 'ff ff ff'.  Calling mapcolor with no significant
+planes sets the entire colormap.
+C_REQUEST
+Execute a single UC command.  First argument is the command code.  Second
+argument is the (optional) data/value/stipple/etc.  Codes listed in ()
+below are read codes (they return a value).  They do not require a data
+argument.  The other codes are write codes.  An x after one of these codes
+indicates that the argument is not significant.
+
+  0 (readfont)             10 setscrmaskx x
+  1 writefont value        11 setscrmasky x
+  2 (readrepeat)           12 -
+  3 setaddrs x             13 -
+  4 saveword x             14 setcolorcd color
+  5 drawword mask          15 setcolorab color
+  6 (readlstip)            16 setwecd we
+  7 noop x                 17 setweab we
+  8 -                      18 (readpixelcd)
+  9 drawchar x             19 (readpixelab)
+  a fillrect x             1a drawpixelcd color
+  b filltrap x             1b drawpixelab color
+  c drawline1 stipple      1c drawline11 stipple
+  d drawline2 stipple      1d drawline10 stipple
+  e drawline4 stipple      1e drawline8 stipple
+  f drawline5 stipple      1f drawline7 stipple
+C_LOOP
+Continuous requests until interrupted.  Read-requests do read, but they
+do not print a value.  See 'request' for a list of command assignments.
+C_ROTATELOOP
+Continuous requests until interrupted.  The data are rotated left before
+each request.  Only write-requests are accepted.
+C_HELP
+BACKSPACE   Delete character
+DELETE         ''     ''
+CTRL-W      Delete argument
+TAB         Use default argument
+CTRL-L      Redraw command line
+CTRL-U      Erase command line
+?           Print help text - type at any time
+SPACE       Interrupt command execution
+
+A command-line consists of a command string followed by zero or more
+arguments.  Partially typed command strings are expanded, if possible,
+when a <space> is typed.  Arguments are signed hex numbers separated
+by a single <space>.  Additional spaces typed between arguments prompt
+for additional arguments, until none are left.  Typing any character
+other than a space causes all prompts to disappear.  Arguments that are
+not typed are given (compiled-in) default values, which are displayed
+after the carriage return is typed.
+
+BPCD supports nested (not recursive) user-defined macros, and includes
+both history and argument substitution mechanisms.
+
+BPCD was written by Kurt Akeley, who is happy to hear positive comments
+and suggestions.  Complaints (on the other hand) should be directed to
+Dave Koontz, who is now responsible for the code.
+
+Take drugs and prosper ...
+C_MACRO
+Execute a user-defined macro a specified number of times.
+C_SEEMACRO
+View the contents of the specified user-defined macro.
+C_DCR
+Set the display control register to a new value.  The contents are not
+changed if no argument is given.  The current (or new) value is printed.
+
+  bit  DC3       DC4
+  ---  ---       ---
+   0   bus       reg0
+   1   reg       reg1
+   2   rgb       reg2
+   3   maint     reg3
+   4   reg0      bus
+   5   reg1      reg
+   6   reg2      rgb
+   7   reg3      highmap
+   8   pal0      pal0
+   9   pal1      pal1
+   a   pal2      pal2
+   b             optclk
+   c             pipe4
+   d             prom
+   e             1k
+   f             mbit
+C_UCR
+Set the update control register to a new value.
+
+   8   board enable
+   9   multibus enable
+   a   interrupt enable
+   b   dma enable
+C_COLORCODE
+Set the (up to) 32-bit colorcode.  Current color index becomes invalid.
+
+Code bits are always ordered D7-0, C7-0, B7-0, A7-0, regardless of the
+current swizzle or double values.  Cfr and mdr are restored after the
+code has been written.
+C_WECODE
+Set the (up to) 32-bit writeenable code.  Current we index becomes invalid.
+
+Code bits are always ordered D7-0, C7-0, B7-0, A7-0, regardless of the
+current swizzle or double values.  Cfr and mdr are restored after the
+code has been written.
+C_LDCONFIG
+Set the uc configuration register to a new value.  The current value is
+not changed if no argument is given.  The current (or new) value is
+printed.
+
+  bit   uc3            uc4
+  ---   ---            ---
+   0    display a      display a
+   1    display b      display b
+   2    update a       update a
+   3    update b       update b
+   4    screenmask     screenmask
+   5    enable cd      invert
+   6    finish line    finish line
+   7    ldlinestip     ldlinestip
+   8                   pfi cd
+   9                   pfi read
+   a                   pfi column
+   b                   pfi x down
+   c                   pfi y down
+   d                   all pattern
+   e                   pattern 32
+   f                   pattern 64
+C_LDED
+Set the uc bresenham error delta to a new value.  Only EDB is changed.
+EDR follows when the next command is executed.
+C_LDEC
+Set the uc bresenham error correction to a new value.  Only ECB is changed.
+ECR follows when the next command is executed.
+C_LDXS
+Set the uc X start address to a new value.  Only XSB is changed.  XSR
+follows when the next command is executed.  You must load XR explicitly
+with a SETADDRS command (request) in some cases.
+C_LDXE
+Set the uc X end address to a new value.  Only XEB is changed.  XER
+follows when the next command is executed.
+C_LDYS
+Set the uc Y start address to a new value.  Only YSB is changed.  YSR
+follows when the next command is executed.  You must load YR explicitly
+with a SETADDRS command (request) in some cases.
+C_LDYE
+Set the uc Y end address to a new value.  Only YEB is changed.  YER
+follows when the next command is executed.
+C_LDFMADDR
+Set the uc font memory address to a new value.  Only FMAB is changed.
+You must load FMAR explicitly with a SETADDRS command (request) in some
+cases.
+C_LDMODE
+Set the UC mode register to a new value.  The current value is not changed
+if no argument is given.  The current (or new) value is printed.
+
+  bit   uc4
+  ---   ---
+   0    swizzle
+   1    double
+   2    depthcue
+C_LDREPEAT
+Set the uc4 line-stipple repeat buffer to a new value.  Only RPB is changed.
+RPR follows when the next command is executed if the LDLINESTIP bit of
+CFR is true.
+
+Only the 8 least-significant bits of the argument are valid.
+C_WRITE
+Write to any multibus i/o space address.  The i/o space is a 16-bit space.
+Address bits 0 and 16..31 are ignored.  Word access only (no byte writes).
+C_WRITELOOP
+Write continuously to any multibus i/o space address.  Interrupt to stop.
+The i/o space is a 16-bit space.  Address bits 0 and 16..31 are ignored.
+Word access only (no byte writes).
+C_READ
+Read any multibus i/o space location, and print the 16-bit result.   The
+i/o space is a 16-bit space.  Address bits 0 and 16..31 are ignored.
+Word access only (no byte reads).
+C_READLOOP
+Read continuously any multibus i/o space location, and do NOT print the
+16-bit results.  The i/o space is a 16-bit space.  Address bits 0 and
+16..31 are ignored.  Word access only (no byte reads).
+C_READWORD
+Executes a UC SAVEWORD command, then prints the 16 32-bit pixel values.
+Index, code, and plane information are printed.
+C_WRITEWORD
+All planes of the specified bitplane word are loaded with value.
+This is accomplished by first setting all 16 pixels to all 0's, then
+setting the appropriate pixels to 1's.  After the write is completed,
+a UC SAVEWORD command is executed so that the bitplane registers are
+also set to the specified value (for probe/scope purposes).
+C_DISPLAY
+The color indexes of a word-aligned 64x20 screen area are printed.
+Each index is masked by 0xf so that it can be printed as a single character.
+The special character '.' is printed if and only if ALL bits of that
+pixel are 0.
+C_INIT
+Initialize the raster subsystem, or return it to its initialized state.
+Must be called before any UC command is executed.  Arguments are
+
+  none  return all values to defaults.
+  1     change the default init values
+  2     size the bitplanes to determine the default values
+  3     interface init only, minimum state change to the raster system
+  4     like 'none', but bitplanes are not altered
+C_COLOR
+The given color index is converted into a code, taking into account the
+current cfr, dcr, and sigplane values.  This code becomes the current
+colorcode, and is written into the bitplanes.
+
+Nothing is changed if no argument is given.  The current (new) value is
+always printed.
+C_WE
+The given we index is converted into a code, taking into account the
+current cfr, dcr, and sigplane values.  This code becomes the current
+wecode, and is written into the bitplanes.
+
+Nothing is changed if no argument is given.  The current (new) value is
+always printed.
+C_RGBCOLOR
+Sets the colorcode to the given red, green, and blue values (range 0..ff).
+Color index becomes invalid.
+C_SIGPLANES
+Specify which bitplanes are significant, in terms of index-to-code
+conversion and colormap changes.  Sigplanes is not changed if no argument
+is given.  The current (new) value is always printed.
+C_DRAWCHAR
+Draws a predefined character t x,y.
+C_FILLRECT
+Fills the specified rectangle with the current color.  A 16x16 (8x16 for
+uc3) pattern is specified as the bitwise OR of the given horizontal and
+vertical patterns.
+C_LOOPCLEARWORD
+Executes continuous CLEAR commands at the specified word until interrupted.
+Set stipple to 0 for a read loop, FFFF for a write loop.  UC4 implements
+CLEAR as FILLRECT.
+C_CLEAR
+Clear the 1024x1024 bitplane memory to the current colorcode.  A 16x16
+(8x16 for uc3) pattern that is the bitwise OR of the horizontal and
+vertical patterns is used.  Wecode is not changed.
+C_DRAWLINE
+Draws a line from x1,y1 to x2,y2 with the specified stipple.
+C_DEPTHCUE
+Draws a depthcued line from x1,y1 to x2,y2 with the specified stipple.
+Swizzle is asserted during drawing.  Mdr is restored when drawing is
+complete.
+C_DCPAL
+Set the VFSM (video finite state machine) to the specified value (range
+0-7) (no change if no argument is given).  Then sample the VFSM outputs
+during the following vertical retrace periods and print the results.
+C_STRIPE
+Fill the screen with screen-height rectangles of the specified width,
+on the specified horizontal pitch.  For example, 'stripe 3 6' draws
+rectangles that are 3 pixels wide, with 3-pixel spaces (pitch of 6=3+3).
+C_STRIPETEST
+Fills each significant plane with a 3-off/3-on pattern, then uses the
+VFSM to determine whether this pattern is being correctly received at
+the output of the colormap.  The colormap is adjusted to output only
+a function of the bitplane being tested.
+
+Errors are reported as characters in parentheses after the plane name.
+DC3 characters are 'e' and 'o', indicating errors in even and/or odd
+planes.  DC4 errors are '0', '1', '2', and '3' to allow pipe4 error
+reporting.
+C_SCREENMASK
+Define and enable the screenmask.  Pixels outside the rectangular mask
+area will be unaffected by all subsequent draw commands.
+C_BALL
+The 'ball' (implemented as a single uc character) moves around the
+screen as directed by the 6 parameters and its infinitely elastic
+collisions with the screen boundries.  Each time the ball moves, it is
+first drawn in the current color, then 'erased' to color index 0.
+Thus, if the screen is not cleared to color index 0, the ball leaves
+a trail (try striping the screen with colors 1 and 2, then setting the
+color to 3).
+C_SWAP
+Display A and display B are swapped at a rate proportional to the argument.
+C_RANDRECT
+Continuous random fill of the screen with rectangles.  Color indexes 0, 1,
+2, and 3 are used with 4 different patterns.  Rectangle dimensions range
+from 1 through 2 raised to the power of the passed argument.  For example,
+'randrect 8' draws rectangles with dimensions in the range 1..255.
+C_RANDLINES
+Draws the specified number of lines with the specified stipple pattern in
+the current color.  'Seed' initializes the random number generator
+determines the line endpoints.  Any value will do.
+
+Be sure to clear the screen to a color that is different from the current
+color, or you won't see anything.
+C_SCROLL
+See if you can figure it out.
+C_READDDA
+Prints the current values of the 4 dda address registers.  These values
+are read from the UC4 hardware.
+C_DDATEST
+Test the dda hardware.  Errors are reported as they are encountered it
+verbose is true (not 0).  Otherwise only the total is printed.  Individual
+tests are specified with bits of the 'tests' argument.  UC4 only.
+
+  bit   test
+  ---   ----
+   0    Address 0
+   1    Address FFF
+   2    Address rotating 1's.
+   3    Address and delta 0, add.
+   4    Address 0, delta FFF, add.
+   5    Address 0, delta rotating 1's, add.
+   6    Address 1, delta FFF, add.  Test carry overflow.
+C_PIXELTEST
+Test UC4 pixel draw and readback, expecially autoincrement modes.
+Errors are reported as they occur if verbose is true (not 0).  Otherwise
+only the error total is reported.  Individual tests are selected with
+bits of the 'tests' argument.
+
+  bit   test
+  ---   ----
+   0    Autoincrement test.  Alternate row/column read/write a 4x4 area.
+   1    Invert test.  Draw 4x4 area, then invert and test.
+   2    Allpattern test.  Check 16x16, 32x32, and 64x64.
+   3    AB/CD read/write test.  Test independent operation of AB and CD.
+C_READFM
+Print consecutive font memory values.
+C_READMAP
+Print consecutive colormap values.  The 'address' argument is an absolute
+colormap address in the range 0..FFF.  It is NOT a color index.
+C_WRITEMAP
+Change a single colormap location.  The 'address' argument is an absolute
+colormap address in the range 0..FFF.  It is NOT a color index.
+C_QUIT
+Return to the prom monitor.
+C_BPTEST
+Test the operation of the bitplane memory.  Errors are reported as they
+occur if verbose is true (not 0).  Otherwise only an error total is
+reported.  Individual tests are selected with bits of the 'tests'
+argument.
+
+  bit   test
+  ---   ----
+   0    All 0 test.
+   1    All 1 test.
+   2    Word = address.
+   3    Word = complement of address.  UC4 only.
+   4    Word takes random value.
+   5    Exercise saveword/drawword hardware.
+   
+C_FMTEST
+Test the operation of the font memory.  Errors are reported as they occur
+if verbose is true (not 0).  Otherwise only an error total is printed.
+Individual tests are selected with bits of the 'tests' argument.
+
+  bit   test
+  ---   ----
+   0    Data = 0.
+   1    Data = FF (UC3) or FFFF (UC4).
+   2    Data = address & FF (UC3) or data = address (UC4).
+   3    Data = address & FF00 (UC3) or data = address (UC4).
+   4    Data = random value
+C_MAPTEST
+Test the operation of the colormap.  Errors are reported as they occur
+if verbose is true (not 0).  Otherwise only an error total is printed.
+Individual tests are selected with bits in the 'tests' argument.
+
+  bit   test
+  ---   ----
+   0    Red, green, blue = 0.
+   1    Red, green, blue = FF.
+   2    Red, green, blue = address & FF.
+   3    Red, green, blue = address & F00.
+   4    Red, green, and blue = different random values.
+C_LINETEST
+Test all aspects of line drawing.  Errors are reported as they occur if
+verbose is true (not 0).  Otherwise only an error total is printed.
+Individual tests are selected with bits of the 'tests' argument.
+
+  bit  test
+  ---  ----
+   0   Draw and read lines with different delta and correction values.
+   1   Verify line stipple operation (rotate, backup, continue).
+   2   Draw and read 1 line in each of the 8 octants.
+   3   Draw and invert lines (UC4 only).
+   4   Draw and read a depthcued line (UC4 only).
+   5   Read stipple register (UC4 only).
+   6   Test stipple repeat (UC4 only).
+C_BPCTEST
+Run an assortment of tests on the entire raster system.  All tests are
+run non-verbose.  Each test reports its error total if verbose is true
+(not 0).  Otherwise only the error total of all of the tests is printed.
+Unlike other test commands, bits in the 'tests' argument specify the
+boards to be tested (rather than specific tests to run).
+
+  bit  meaning
+  ---  -------
+   0   Run tests that are applicable to the display controller.
+   1   Run tests that are applicable to the update controller.
+   2   Run tests that are applicable to the bitplane boards.
+   3   Run bptest (display on and off).  This test is very long with UC3.
+   4   Run the processor memory test (PM2 and IP2 only).
+   5   Run the gf2 test (GL2 systems only - others will crash)
+   6   Run the floating point test.  IP2 with FP1 only.
+C_COLORWETEST
+Test the color and write enable registers on the bitplanes boards.
+Various color and we combinations are specified, used to draw into the
+bitplanes, then tested by reading a single pixel back.  Errors are
+reported as they occur if verbose is true (not 0).  Otherwise only the
+error total is printed.
+C_DCRTEST
+Test the display controller multibus register.
+C_SCRMSKTEST
+Test the operation of the UC screenmask (called viewport in UC3 days).
+Errors are reported as they occur if verbose is true (not 0).  Otherwise
+only the error total is printed.
+C_RECTTEST
+Test rectangle draw and readback.  UC4 also tests invert and multiple
+pattern sizes.  Errors are reported as they occur if verbose is true
+(not 0).  Otherwise only the error total is printed.
+C_TRAPTEST
+Test trapezoid fill (UC4 only).  Errors are reported as they occur if
+verbose is true (not 0).  Otherwise only the error total is printed.
+Individual tests are selected with bits in the 'tests' argument.
+This is NOT a complete dda test - use 'ddatest' for that purpose.
+
+  bit   test
+  ---   ----
+   0    Fill and read back various width parallelograms.
+   1    Fill and invert various width parallelograms.
+   2    Fill with a 64x64 pattern and read back.
+C_CHARTEST
+Test character drawing.
+C_TIME
+Support timing of various UC4 operations.  Try it and see.
+C_DCLAMPTEST
+Individually turn on each of the display control LEDs.  DC4 'optclk'
+stays on longer for obscure reasons.
+C_UCLAMPTEST
+Individually turn on most of the update control LEDs.  'Req' and 'ack'
+(UC3 only) do not turn on.  'Mbus' (UC4 only) is turned off instead.
+C_BPLAMPTEST
+Turn on the 8 LEDs on each bitplane board in series.
+C_RAMPTEST
+Fill the screen with a ramp of intensity increasing from left to right.
+Each of red, green, and blue is either ramped or not depending on whether
+the corresponding argument is false (0) or true (not 0).  RGBmode
+disables the colormap; it requires 24 bitplanes for correct operation.
+C_STEPTEST
+Like ramptest, but draws 10 vertical stipes of increasing intensity,
+instead of 256.
+C_JOESCALE
+Draws a pattern useful for monitor adjustment.  Named in honor of
+Jok'in Eddie.
+C_MEMTEST
+Tests all processor memory.  PM2 and IP2 only.
+C_CMNDLIST
+List all bpcd commands is (roughly) alphabetic order.  Type 'cmndlist'
+or '?'.
+C_SAVE
+Saves a bunch of bpc state in a register, to be restored later with the
+'restore' command.  This state is taken from global variables in the
+bpcd program, not from the hardware itself (which generally cannot be
+read anyway).  Normally these values will be correct, but they might
+not be, especially if you have changed anything with the 'write' or
+'writeloop' commands (naughty, naughty).
+C_RESTORE
+If a register number is given, lots of bpc state is restored from that
+register.  (See 'save' for disclaimers.)  Then the current state is
+printed.
+C_WRITEFM
+Change a single font memory location.  The font memory address (FMAR) is
+left at the given address, so this command can be followed by repeated
+WRITEFONT requests (UC4 3) to change adjacent font memory values.
+C_REVISION
+Print the compilation date and the board configuration of this version
+of bpcd.
+C_DEFMACRO
+Begin defining a macro.  Subsequent commands execute normally and are also
+saved in the specified macro script.  Type 'endmacro' or '.' to complete
+the macro definition.  See 'macro' and 'endmacro'.
+
+Macros can be nested, but not recursively.  It is OK to reference an
+undefined macro during the definition of another.
+C_HISTORY
+A history of previous commands is maintained.  Typing 'history' with no
+argument causes the list of recently typed commands to be printed.
+Each command in this list is preceded by its number.  A remembered command
+can be re-executed by typing 'history <number>'.  Alternately, the n'th
+previous command can be re-executed by typing 'history -n'.
+C_GFTEST
+Tests all FBC functions plus GE pipe data paths and all handshaking.
+Works with either GE/GA's or passers installed.  Does not run GE/GA test
+vectors.  To operate with passers, remember to jump U15A pin 12 to ground.
+Individual tests are selected by the 'tests' argument:
+	bit |     meaning
+      ------+---------------------
+	 0  |   basic Multibus I/F test
+	 1  |   microcode ram test
+	 2  |   microcode execution / scratch ram test
+	 3  |   FBC-UC4 interface test
+	 4  |   drawing tests (fed via Multibus)
+	 5  |   GE pipeline test
+C_PRINT
+Reproduce the recent screen history one screen at a time.
+C_FPTEST
+Run a random test of the FP1 board (IP2 systems only).  Don't fuss with
+the option register value unless you have gold balls.

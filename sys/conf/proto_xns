@@ -1,0 +1,4 @@
+# Xns support
+device		nx0 	at mb0 csr 0x7ffc	priority 2 vector nxintr
+pseudo-device	xns
+

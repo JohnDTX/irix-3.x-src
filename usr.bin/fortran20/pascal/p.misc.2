@@ -1,0 +1,463 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.MISC.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               08-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+procedure error{errnum: integer};
+  var ch: char;
+  
+  procedure pline(line: alfa81; len,lnum: integer;
+                  ErrorFlag: Boolean; var targfile: text);
+    var i: integer; errmess: text; s: string[80];
+  begin
+  write(targfile,lnum:6,'.');
+  if ListFlag and ListOpen then write(targfile,' ':8);
+  write(targfile,line:len);
+  if ErrorFlag
+  then begin
+    writeln(targfile,'<<<<<');
+    writeln(targfile,'***** Error number ',errnum:0,' in line ',
+            curlineinfile:0,' of file ',curfile,' *****');
+    reset(errmess,EMESSFILE);
+    if HOSTOS <> ELITE
+    then if ioresult <> 0
+         then reset(errmess,EMESS2FILE);
+    if ioresult = 0
+    then begin
+      repeat
+        read(errmess,i);
+        if i = errnum
+        then begin
+          readln(errmess,s); writeln(targfile,'*****',s,' *****');
+          end
+        else readln(errmess);
+      until i > errnum;
+      close(errmess);
+      end;
+    end
+  else writeln(targfile);
+  end; {pline}
+  
+begin {error}
+errors := errors + 1;
+if pcurline = 1
+then begin
+  curlineinfile := curlineinfile - 1;
+  if ListFlag and ListOpen
+  then pline(prevline,pprevline,linenumber - 1,TRUE,listfile)
+  else pline(prevline,pprevline,linenumber - 1,TRUE,output);
+  if ErrFileOpen
+  then pline(prevline,pprevline,linenumber - 1,TRUE,errfile);
+  curlineinfile := curlineinfile + 1;
+  end
+else begin
+  if ListFlag and ListOpen
+  then pline(curline,pcurline,linenumber,TRUE,listfile)
+  else begin
+    if linenumber > 1
+    then pline(prevline,pprevline,linenumber - 1,FALSE,output);
+    pline(curline,pcurline,linenumber,TRUE,output);
+    end;
+  if ErrFileOpen
+  then begin
+    if linenumber > 1
+    then pline(prevline,pprevline,linenumber - 1,FALSE,errfile);
+    pline(curline,pcurline,linenumber,TRUE,errfile);
+    end;
+  end;
+if (not ListFlag) and (not ErrFileOpen) and PromptFlag
+then
+  repeat
+    write(ERRPROMPT);
+    if (HOSTOS = MERLIN) or (HOSTOS = ELITE)
+    then read(ch)
+    else readln(ch);
+    writeln;
+    if (ch = chr(27)) or eof then goto 999;
+  until ch = ' ';
+end; {error}
+
+procedure constant{fsys: setofsys; var fvalu: valu; var fpt: pt};
+  var Signed,Negative: Boolean; lpn: pn;
+begin
+if not (token in constbegsys)
+then skip(24,fsys + constbegsys);
+if token in constbegsys
+then begin
+  if token = SCONSTSY
+  then begin
+    new(fpt,SCONST);
+    with fpt^ do begin
+      typeno := 0; Marked := FALSE;
+      Ftype := FALSE; form := SCONST; stringlen := intval;
+      bits := 0; bytes := stringlen + 1;
+      if (bytes <> 1) and odd(bytes) then bytes := bytes + 1;
+      end;
+    fvalu.svalu := strval; fvalu.svalulen := intval;
+    scan;
+    end
+  else
+    if token = CCONSTSY
+    then begin
+      fpt := charptr; fvalu.ivalu := intval;
+      scan;
+      end
+    else begin
+      Negative := token = MINUSSY;
+      Signed := (token = PLUSSY) or Negative;
+      if Signed then scan;
+      if token = ICONSTSY
+      then begin
+        if Negative then intval := -intval;
+        fpt := intptr; fvalu.ivalu := intval;
+        scan;
+        end
+      else if (token = RCONSTSY) or (token = DCONSTSY)
+        then begin
+          if Negative then doubleval := -doubleval;
+          fvalu.dvalu := doubleval;
+          if token = DCONSTSY then fpt := doubleptr else fpt := realptr;
+          scan;
+          end
+        else if token = IDENTSY
+          then begin
+            lpn := searchall([CONSTS]);
+            fvalu := lpn^.valueof; fpt := lpn^.idtype;
+            if Signed
+            then
+              if CompTypes(fpt,intptr)
+              then begin
+                if Negative then fvalu.ivalu := -fvalu.ivalu;
+                end
+              else
+                if (fpt = realptr) or (fpt = doubleptr)
+                then begin
+                  if Negative then fvalu.dvalu := -fvalu.dvalu;
+                  end
+                else error(103);
+            scan;
+            end
+          else skip(104,fsys);
+      end;
+  if not (token in fsys)
+  then skip(20,fsys);
+  end
+else begin fvalu.ivalu := 0; fpt := intptr; end;
+end; {constant}
+
+procedure pflist(fsys: setofsys; fsy: symbol);
+  var ExitFlag: Boolean; ltoken: symbol; heapmark: pboolean; i: integer;
+    oldtop: disprange; oldlevel: levrange; procpn,parentproc: pn;
+begin
+ExitFlag := FALSE; oldlevel := level; oldtop := top; parentproc := currentproc;
+repeat
+  if (token = PROCSY) or (token = FUNCTSY)
+  then begin
+    ltoken := token; scan;
+    declarations(fsys + [IDENTSY],ltoken,procpn,heapmark);
+    currentproc := procpn;
+    if token = IDENTSY
+    then
+      with procpn^ do begin
+        if ident.a8 = 'FORWARD '
+        then begin pfdecl := FORWDECL; lcbits := -ord(CCall); end
+        else
+          if ident.a8 = 'EXTERNAL'
+          then begin pfdecl := EXTDECL; rtnno := -1; lcbits := -ord(CCall); end
+          else
+            if ident.s = 'CEXTERNAL'
+            then begin pfdecl := EXTDECL; rtnno := -1; CCall := TRUE; end
+            else error(162);
+      scan;
+      end
+    else begin
+      procpn^.pfdecl := DECL; procpn^.lcbits := -ord(procpn^.CCall);
+      pflist(fsys,BEGINSY);
+      if token = BEGINSY then scan else error(43);
+      repeat
+        body(fsys + [CASESY],procpn^.name,procstmt);
+        if token <> SEMISY
+        then skip(20,fsys);
+        if (errors = 0) and CodeFlag
+        then begin
+          for i := 1 to ADDRREGS do a[i].count := 0;
+          for i := 1 to DATAREGS do d[i].count := 0;
+          for i := 1 to FLOTREGS do f[i].count := 0;
+          for i := 1 to GENPREGS do r[i].count := 0;
+          { Must call optimize for function results! }
+          optimize(procstmt,procpn);
+          dump(procstmt,procpn,parentproc,display[level].bigvars);
+          end;
+      until (token = SEMISY) or (token in blockbegsys);
+      end;
+    if token = SEMISY then scan else error(36);
+    release(heapmark); level := oldlevel;
+    top := oldtop; currentproc := parentproc;
+    end
+  else ExitFlag := TRUE;
+until ExitFlag;
+if token <> fsy
+then skip(22,fsys);
+end; {pflist}
+
+procedure unittext(firstibyte: integer);
+  var lblock,fblock,numblocks,i: integer;
+begin
+
+{ Copy interface source }
+
+if errors = 0
+then begin
+  if byteno > 0
+  then begin
+    if blockwrite(icodefile,buff,1,blockno) <> 1 then error(407);
+    blockno := blockno + 1; byteno := 0;
+    end;
+  fblock := blockno;
+  
+  { Copy initial text block }
+  
+  close(sourcefile); reset(sourcefile,intfname); lblock := firstublock;
+  if blockread(sourcefile,inbuf,2,lblock) <= 0 then error(406);
+  for i := 0 to 1023 - firstubyte do inbuf[i] := inbuf[i + firstubyte];
+  for i := 1024 - firstubyte to 1023 do inbuf[i] := 0;
+  if blockwrite(icodefile,inbuf,2,blockno) <> 2 then error(407);
+  blockno := blockno + 2; lblock := lblock + 2;
+  
+  { Copy remaining text blocks }
+  
+  while lblock <= lastublock do begin
+    if blockread(sourcefile,inbuf,2,lblock) <= 0 then error(406);
+    if lblock = lastublock
+    then for i := lastubyte + 1 to 1023 do inbuf[i] := 0;
+    if blockwrite(icodefile,inbuf,2,blockno) <> 2 then error(407);
+    blockno := blockno + 2; lblock := lblock + 2;
+    end;
+  
+  { Put address and size of text into first record in object file }
+  
+  if blockread(icodefile,buff,1,0) <> 1 then error(401);
+  numblocks := lblock - firstublock;
+  buff[firstibyte+2] := fblock div 128;
+  buff[firstibyte+3] := (fblock*2) mod 256;
+  buff[firstibyte+6] := numblocks div 128;
+  buff[firstibyte+7] := (numblocks*2) mod 256;
+  buff[firstibyte+10] := 1; {Flags: Bit 0: Unit Module Present}
+  if blockwrite(icodefile,buff,1,0) <> 1 then error(407);
+  byteno := 0;
+  
+  end;
+end; {unittext}
+
+procedure prog;
+  var lpn: pn; i,firstibyte: integer;
+begin
+if (token <> PROGRAMSY) and (token <> UNITSY) and (token <> MODULESY)
+then skip(41,[PROGRAMSY,UNITSY,MODULESY]);
+if token = PROGRAMSY
+then begin
+  scan;
+  new(lpn,IDENTNODE,PROC,DECLARED);
+  with lpn^ do begin
+    node := IDENTNODE; class := PROC; pfdeclkind := DECLARED; rtnno := -1;
+    pflev := 0; pfdecl := DECL; lc := 0; parmbytes := 0; next := nil;
+    pfarglist := nil; llink := nil; rlink := nil; idtype := nil;
+    CCall := FALSE; lcbits := 0;
+    end;
+  if token = IDENTSY
+  then begin
+    copyident(lpn); scan; 
+    if (token <> LPARENSY) and (token <> SEMISY)
+    then skip(23,blockbegsys + statbegsys - [CASESY] + [SEMISY,LPARENSY]);
+    if token = LPARENSY
+    then begin
+      repeat
+        scan;
+        if token = IDENTSY then scan else error(29);
+        if (token <> RPARENSY) and (token <> COMMASY)
+        then skip(20,blockbegsys + statbegsys - [CASESY] +
+                                   [COMMASY,RPARENSY,USESSY]);
+      until token <> COMMASY;
+      if token = RPARENSY then scan else error(32);
+      end;
+    if token = SEMISY then scan else error(36);
+    end
+  else
+    begin makname(lpn,'No Name!');
+    skip(29,blockbegsys + statbegsys - [CASESY] + [USESSY]);
+    end;
+  repeat
+    declarations(blockbegsys + statbegsys - [CASESY] + [USESSY],
+                 PROGRAMSY,lpn,heapmark);
+    currentproc := lpn;
+    pflist(blockbegsys + statbegsys - [CASESY],BEGINSY);
+    if token = BEGINSY then scan else error(43);
+    repeat
+      body(blockbegsys + statbegsys,lpn^.name,procstmt);
+      if token <> PERIODSY
+      then skip(51,blockbegsys + statbegsys - [CASESY]);
+      segname := '        ';
+      if (errors = 0) and CodeFlag
+      then begin
+        for i := 1 to ADDRREGS do a[i].count := 0;
+        for i := 1 to DATAREGS do d[i].count := 0;
+        for i := 1 to FLOTREGS do f[i].count := 0;
+        for i := 1 to GENPREGS do r[i].count := 0;
+        if OptFlag then optimize(procstmt,lpn);
+        dump(procstmt,lpn,nil,display[1].bigvars);
+        end;
+    until (token = PERIODSY) or (token in blockbegsys);
+  until token = PERIODSY;
+  scan; out(255{ENDCODE});
+  end
+else
+  if token = UNITSY
+  then begin
+    scan;
+    InUnit := TRUE; numunits := numunits + 1; level := -numunits;
+    new(lpn,IDENTNODE,UNITS);
+    with lpn^ do begin
+      node := IDENTNODE; class := UNITS; ulev := level; ulc := 0;
+      llink := nil; rlink := nil; next := unitlist; idtype := nil;
+      end;
+    unitlist := lpn;
+    if token = IDENTSY
+    then begin copyident(lpn); scan; end
+    else begin
+      makname(lpn,'No Name!');
+      skip(29,blockbegsys + statbegsys - [CASESY] +
+                            [SEMISY,USESSY,INTERSY,IMPLESY]);
+      end;
+    intfname := filestack[topoffilestack].fname;
+    firstublock := filestack[topoffilestack].lastrelblkread;
+    firstubyte := inbufp;
+    if token = SEMISY then scan else error(36);
+    if token = INTERSY then scan else error(53);
+    declarations(blockbegsys + statbegsys - [CASESY],UNITSY,lpn,heapmark);
+    firstibyte := byteno;
+    if errors = 0 then dumpuhead(lpn);
+    currentproc := lpn;
+    pflist(blockbegsys + statbegsys - [CASESY],ENDSY);
+    if token = ENDSY then scan else error(44);
+    if token = PERIODSY then scan else error(51);
+    dumpudefs(lpn); out(255{ENDCODE});
+    unittext(firstibyte);
+    end
+  else begin {MODULE}
+    scan;
+    numunits := numunits + 1; level := -numunits;
+    new(lpn,IDENTNODE,UNITS);
+    with lpn^ do begin
+      node := IDENTNODE; class := UNITS; ulev := level; ulc := 0;
+      llink := nil; rlink := nil; next := unitlist; idtype := nil;
+      end;
+    unitlist := lpn;
+    if token = IDENTSY
+    then begin copyident(lpn); scan; end
+    else begin
+      makname(lpn,'No Name!');
+      skip(29,blockbegsys + statbegsys - [CASESY] + [SEMISY]);
+      end;
+    if token = SEMISY then scan else error(36);
+    declarations(blockbegsys + statbegsys - [CASESY],MODULESY,lpn,heapmark);
+    currentproc := lpn;
+    pflist(blockbegsys + statbegsys - [CASESY],ENDSY);
+    if token = ENDSY then scan else error(44);
+    if token = PERIODSY then scan else error(51);
+    dumpudefs(lpn); out(255{ENDCODE});
+    end;
+end; {prog}
+
+{$S OPT }
+procedure loadopt;
+begin
+prog;
+end; {loadopt}
+
+{$S DUMP }
+procedure loaddump;
+begin
+loadopt;
+end; {loaddump}
+
+{$S DECL }
+procedure loaddecl;
+begin
+loaddump;
+end; {loaddecl}
+
+{$S BODY }
+procedure loadbody;
+begin
+loaddecl;
+end; {loadbody}
+
+{$S }
+procedure finalize;
+  var largv: array[1..2] of ^string31; i: integer;
+  
+  procedure printers(var ffile: text);
+  begin
+  writeln(ffile,errors,' errors.  ',linenumber - 1,' lines.  File ',sfname);
+  end; {printers}
+  
+begin {finalize}
+if CodeOpened
+then begin
+     if (byteno > 0) and (errors = 0)
+     then if blockwrite(icodefile,buff,1,blockno) <> 1 then error(407);
+     if errors = 0
+     then begin
+          close(icodefile,LOCK);
+          if HOSTOS = MERLIN
+          then begin
+            release(initheap);
+            largv[1] := @ifname; largv[2] := @cfname;
+            if call(CODEGEN,input,output,largv,2) <> 0
+            then begin
+                 writeln('*** Can''t call ',CODEGEN,' ***');
+                 if ListOpen
+                 then writeln(listfile,'*** Can''t call ',CODEGEN,' ***');
+                 if ErrFileOpen
+                 then writeln(errfile,'*** Can''t call ',CODEGEN,' ***');
+                 errors := errors + 1;
+                 end;
+            end;
+          end
+     else close(icodefile,PURGE);
+     end;
+if ListOpen
+then begin
+     writeln(listfile);
+     printers(listfile);
+     if HOSTOS = CROMIX then page(listfile);
+     close(listfile,LOCK);
+     end;
+if ErrFileOpen
+then begin
+     writeln(errfile);
+     printers(errfile);
+     close(errfile,LOCK);
+     end;
+if not QuietFlag then writeln(output);
+printers(output);
+if errors > 0 then halt(ERRHALT);
+if HOSTOS = ELITE
+then if SourceOpen then close(sourcefile);
+end; {finalize}
+
+begin {Pascal}
+initialize;
+scan;
+if SwapFlag then prog else loadbody;
+if token <> EOFSY then error(17);
+999: finalize;
+end. {Pascal}
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         

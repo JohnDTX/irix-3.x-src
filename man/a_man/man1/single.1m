@@ -1,0 +1,34 @@
+'\"macro stdmacro
+.TH SINGLE 1M
+.SH NAME
+single \- switch the system to single-user mode
+.SH SYNOPSIS
+.B /etc/single
+.SH DESCRIPTION
+.I Single
+switches the system to single-user mode and turns the
+.IR getty s
+off.
+.I Single
+does not kill background processes such as
+.IR cron ,
+.IR update ,
+or
+.IR xnsd .
+These must be killed with
+.I kill
+or
+.IR killall .
+.I Single
+is a shell script that invokes
+.BR /etc/telinit .
+.SH "SEE ALSO"
+multi(1M),
+init(1M),
+getty(1M),
+kill(1),
+killall(1M),
+inittab(4).
+.\" $Source: /d2/3.7/src/man/a_man/man1/RCS/single.1m,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:21:51 $

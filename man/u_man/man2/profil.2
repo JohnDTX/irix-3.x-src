@@ -1,0 +1,75 @@
+'\"macro stdmacro
+.TH PROFIL 2 
+.SH NAME
+profil \- execution time profile
+.SH SYNOPSIS
+.B profil (buff, bufsiz, offset, scale)
+.br
+.B char \(**buff;
+.br
+.B int bufsiz, offset, scale;
+.SH DESCRIPTION
+.I Buff\^
+points to an area of core whose length (in bytes) is given by
+.IR bufsiz .
+After this call, the user's program counter (pc)
+is examined each clock tick; 
+.I offset\^
+is subtracted from it, and the result multiplied by
+.IR scale .
+If the resulting number corresponds to a word
+inside
+.IR buff\| ,
+that word is incremented.
+.PP
+The scale is interpreted as an unsigned (16 bit),
+fixed-point fraction with binary point at the
+left: FFFF (hex) gives a 1-1 mapping of pc's to words
+in
+.IR buff\| ;
+FFFF (hex) maps each pair of instruction words
+together.
+2(hex) maps all instructions onto the beginning of
+.I buff\^
+(producing a non-interrupting core clock).
+.PP
+Profiling is turned off by giving a
+.I scale\^
+of 0 or 1.
+It is rendered
+ineffective by giving a
+.I bufsiz\^
+of 0.
+Profiling is turned off when an
+.I exec\^
+is executed, but remains on in child and parent both
+after a
+.IR fork .
+Profiling will be turned off if an update in
+.I buff\^
+would cause a memory fault.
+.SH RETURN VALUE
+Not defined.
+.SH "SEE ALSO"
+prof(1), monitor(3C).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#44,D0
+.B movl	buff,A0
+.B movl	bufsiz,D1
+.B movl	offset,A1
+.B movl	D2,save
+.B movl	scale,D2
+.B trap	#0
+.B movl	save,D2
+.fi
+.PP
+The 
+.B D2 
+register must be saved when calling 
+.IR profil\^ (2)
+since that register might be in use by the "C" program
+that calls this routine.
+.DT
+.\"	@(#)profil.2	5.1 of 11/1/83

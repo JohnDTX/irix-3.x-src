@@ -1,0 +1,104 @@
+.TH greset  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I greset
+- reset all global attributes to their initial values
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "greset()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine greset"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure greset;"
+.sp
+.SH DESCRIPTION
+The \f2greset\f1 command returns
+the following global state variables to their initial values, and 
+can be called at any time.
+.TS
+center box;
+lb | lb
+l | l.
+state variable	initial value
+_
+available bitplanes	all bitplanes\(dg
+color	undefined
+color map mode	one map
+cursor	0 (arrow)\(dd
+display mode	single buffer
+font	0 \(dg\(dg
+linestyle	0 (solid)
+linestyle backup	off
+linewidth	1 pixel
+picking size	10\&\(mu\&10 pixels
+reset linestyle	on
+RGB color	undefined
+RGB writemask	undefined
+texture	0 (solid)
+viewport	entire screen
+writemask	all planes enabled\(dg
+zmax	1023
+zmin	0
+.TE
+.RS
+\(dg  If there are more than three bitplane boards installed, 
+available planes is set to twelve.
+.br
+\(dd  The color and writemask of the cursor are set to 1.
+.br
+\(dg\(dg Rasterfont 0 is a Helvetica-like font.
+.RE
+.PP
+In addition, \f2greset\f1
+puts a two-dimensional orthographic projection transformation on 
+the matrix stack with left, right, bottom, and top set to the
+boundaries of the screen.  It also
+turns the cursor on, ties it to 
+.I MOUSEX
+and
+.I MOUSEY,
+and unqueues
+all buttons, valuators, and the keyboard.
+Each button is set to 
+.I FALSE
+and untied from valuators.
+Each valuator is set to 
+.I XMAXSCREEN/2;
+the range is 
+.I 0..XMAXSCREEN.
+.I MOUSEY
+is an exception.  It is set to 
+.I YMAXSCREEN/2
+and has range
+.I 0..YMAXSCREEN.
+.PP
+\f2Greset\f1 also defines every entry in the color map, as follows:
+.TS 
+center allbox;
+cb | cb | cb s s
+cb | cb | cb s s
+cb | lb | c|c|c
+c | l | c | c | c .
+index	name	RGB value
+\^	\^	_
+\^	\^	red	green	blue
+=
+0	BLACK	0	0	0
+1	RED	255	0	0
+2	GREEN	0	255	0
+3	YELLOW	255	255	0
+4	BLUE	0	0	255
+5	MAGENTA	255	0	255
+6	CYAN	0	255	255
+7	WHITE	255	255	255
+all others	unnamed	0	0	0
+.TE
+.SH "SEE ALSO"
+.I ginit
+.SH NOTE
+This command can only be used in immediate mode.

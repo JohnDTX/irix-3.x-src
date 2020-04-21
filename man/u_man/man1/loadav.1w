@@ -1,0 +1,12 @@
+'\"macro stdmacro
+.TH LOADAV 1W
+.SH NAME
+loadav \- graphically display the system load average
+.SH SYNOPSIS
+.B loadav
+.SH DESCRIPTION
+.I loadav 
+displays the system load average using bars of color.
+The three bars represent the load average over the last
+ten, three, and one minutes.
+

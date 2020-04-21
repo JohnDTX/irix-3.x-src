@@ -1,0 +1,91 @@
+'\" t
+'\"macro stdmacro
+.TH UTMP 4
+.SH NAME
+utmp, wtmp \- utmp and wtmp entry formats
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <utmp.h>
+.br
+.B #include <wtmp.h>
+.SH DESCRIPTION
+These files, which hold user and accounting information
+for such commands as
+.IR who (1),
+.IR write (1),
+and
+.IR login (1),
+have the following structure as defined by
+.BR <utmp.h> :
+.nf
+.PP
+.TS
+l lp-1 l.
+#define	UTMP_FILE	"/etc/utmp"
+#define	WTMP_FILE	"/etc/wtmp"
+.T&
+l l l.
+#define	ut_name	ut_user
+.TE
+.sp .5
+.TS
+l1 l1 l1 l.
+.tr ~ 
+struct	utmp {
+	char	ut_user[8];	/\(** User login name \(**/
+	char	ut_id[4];	/\(** /etc/inittab id (usually line #) \(**/
+	char	ut_line[12];	/\(** device name (console, lnxx) \(**/
+	short	ut_pid;	/\(** process id \(**/
+	short	ut_type;	/\(** type of entry \(**/
+	struct	exit_status {
+	~~~~short	~~~~e_termination;	/\(** Process termination status \(**/
+	~~~~short	~~~~e_exit;	/\(** Process exit status \(**/
+	} ut_exit;		/\(** The exit status of a process
+			 \(** marked as \s-1DEAD_PROCESS\s+1. \(**/
+	time_t	ut_time;	/\(** time entry was made \(**/
+};
+.tr ~~
+.TE
+.sp 1v
+.br
+.ne 15v
+/\(**  Definitions for ut_type  \(**/
+.TS
+l1 l1p-1 l1 l.
+#define	EMPTY	0
+#define	RUN_LVL	1
+#define	BOOT_TIME	2
+#define	OLD_TIME	3
+#define	NEW_TIME	4
+#define	INIT_PROCESS	5	/\(** Process spawned by "init" \(**/
+#define	LOGIN_PROCESS	6	/\(** A "getty" process waiting for login \(**/
+#define	USER_PROCESS	7	/\(** A user process \(**/
+#define	DEAD_PROCESS	8
+#define	ACCOUNTING	9
+#define	UTMAXTYPE	\s-2ACCOUNTING\s+2	/\(** Largest legal value of ut_type \(**/
+.TE
+.sp 1v
+.br
+.ne 9v
+/\(**  Special strings or formats used in the "ut_line" field when  \(**/
+/\(**  accounting for something other than a process.  \(**/
+/\(**  No string for the ut_line field can be more than 11 chars +  \(**/
+/\(**  a \s-1NULL\s+1 in length.  \(**/
+.sp .5
+.TS
+l1 l1p-1 l.
+#define	RUNLVL_MSG	"run\-level %c"
+#define	BOOT_MSG	"system boot"
+#define	OTIME_MSG	"old time"
+#define	NTIME_MSG	"new time"
+.TE
+.fi
+.PP
+.SH FILES
+/etc/utmp
+.br
+/etc/wtmp
+.SH SEE ALSO
+login(1), who(1), write(1), getut(3C).
+.\"	@(#)utmp.4	5.1 of 10/15/83

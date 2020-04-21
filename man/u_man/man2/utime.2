@@ -1,0 +1,144 @@
+'\"macro stdmacro
+.TH UTIME 2
+.SH NAME
+utime \- set file access and modification times
+.SH SYNOPSIS
+.ta \w'struct\ \ 'u +\w'utimbuf {\ 'u +\w'modtime;\ \ \ 'u
+.nf
+.ft 3
+#include <sys/types.h>
+struct	utimbuf {
+	time_t	actime;	/\(** access time \(**/
+	time_t	modtime;	/\(** modification time \(**/
+};
+int utime (path, times)
+char \(**path;
+struct utimbuf \(**times;
+.ft
+.fi
+.SH DESCRIPTION
+.I Path\^
+points to a
+path name
+naming a file.
+.I Utime\^
+sets the access and modification times
+of the named file.
+.PP
+If
+.I times\^
+is
+.SM
+.BR NULL ,
+the access and modification times of the file are set to the current time.
+A process must be the owner of the file or have write permission to use
+.I utime\^
+in this manner.
+.PP
+If
+.I times\^
+is not
+.SM
+.BR NULL ,
+.I times\^
+is interpreted as a pointer to a
+.I utimbuf\^
+structure and
+the access and modification times are set to the values contained in
+the designated structure.
+Only the owner of the file or the super-user may
+use
+.I utime\^
+this way.
+.PP
+The times in the
+.I utimbuf
+structure are measured in 
+seconds since 00:00:00 \s-1GMT\s+1, Jan. 1, 1970.
+.PP
+.I Utime\^
+will fail if one or more of the following are true:
+.IP "" .3i
+The named file does not exist.
+.SM
+\%[ENOENT]
+.IP
+A component of the
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+Search permission is denied by a component of the
+path prefix.
+.SM
+\%[EACCES]
+.IP
+The effective user
+.SM ID
+is not super-user and not the owner of the file
+and
+.I times\^
+is not
+.SM
+.BR NULL .
+.SM
+\%[EPERM]
+.IP
+The effective user
+.SM ID
+is not super-user and not the owner of the file
+and 
+.I times\^
+is
+.SM
+.B NULL
+and write access is denied.
+.SM
+\%[EACCES]
+.IP
+The file system containing the file is mounted read-only.
+.SM
+\%[EROFS]
+.IP
+.I Times\^
+is not
+.SM
+.B NULL
+and points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+stat(2)
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#30,D0
+.B movl	path,A0
+.B movl	times,D1
+.B trap	#0
+.fi
+.DT
+.\"	@(#)utime.2	5.1 of 11/1/83
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man2/RCS/utime.2,v 1.1 89/03/27 16:55:01 root Exp $
+.\" $Log:	utime.2,v $
+Revision 1.1  89/03/27  16:55:01  root
+Initial check-in for 3.7
+
+Revision 1.1  89/03/27  16:57:04  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  85/03/01  14:34:51  bob
+.\" Corrected to indicate that user must declare utimbuf structure to fix
+.\" SCR 596.
+.\" 

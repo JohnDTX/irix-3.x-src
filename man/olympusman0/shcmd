@@ -1,0 +1,28 @@
+sh(1) .: read commands from file.
+sh(1) :: null command.
+sh(1) break: exit while/for loop.
+sh(1) case: multi-way command branch.
+sh(1) cd: change directory.
+sh(1) continue: cycle in loop.
+sh(1) do, for: loop over list of words.
+sh(1) done: terminate loop.
+sh(1) elif, else: alternative commands.
+sh(1) esac: terminate case.
+sh(1) eval: re-evaluate shell data.
+sh(1) exec: overlay shell with specified command.
+sh(1) exit: leave shell.
+sh(1) export: add shell variables to the environment.
+sh(1) fi: terminate conditional.
+sh(1) if, then: conditional statement.
+sh(1) newgrp: log in to a new group.
+sh(1) read: accept input from the standard input.
+sh(1) readonly: make shell variables read-only.
+sh(1) set: set shell flags or positional parameters.
+sh(1) shift: manipulate argument list.
+sh(1) test: condition evaluation command.
+sh(1) times: print accumulated times.
+sh(1) trap: process interrupts in command scripts.
+sh(1) ulimit: change or display size limits.
+sh(1) umask: change or display file creation mask.
+sh(1) until, while: repeat commands conditionally.
+sh(1) wait: wait for background processes to complete.

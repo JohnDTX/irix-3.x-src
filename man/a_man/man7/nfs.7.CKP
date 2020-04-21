@@ -1,0 +1,62 @@
+'\"macro stdmacro
+.TH NFS 7 "9 July 1986"
+.SH NAME
+nfs \- network file system
+.SH SYNOPSIS
+.B options NFS
+.SH DESCRIPTION
+.IX  "NFS, network file system protocol"
+The Network File System, or NFS, is a \f2Sun Microsystems\f1
+trademark.  It allows a client workstation to perform 
+transparent file access over the network.  Using it, a client 
+workstation can operate on files that reside on a variety of servers,
+server architectures and across a variety of operating systems.  Client
+file access calls are converted to NFS protocol requests, and are sent 
+to the server system over the network.  The server receives the request,
+performs the actual file system operation, and sends a response back to
+the client.
+.LP
+The Nework File System operates in a stateless fashion using
+remote procedure (RPC) calls built on top of external data
+representation (XDR) protocol.
+The RPC protocol provides for version and authentication parameters
+to be exchanged for security over the network.
+.LP
+A server can grant access to a specific filesystem to certain
+clients by adding an entry for that filesystem to the server's
+.I /etc/exports
+file.
+.LP
+A client gains access to that filesystem with the
+.IR mount (2)
+system call, which requests a file handle for the filesystem itself.
+Once the filesystem is mounted by the client, the server issues a file 
+handle to the client for each file (or directory) the client accesses.
+If the file is somehow removed on the server side, the file handle 
+becomes stale (dissociated with a known file).
+.LP
+A server may also be a client with respect to filesystems it
+has mounted over the network, but its clients cannot gain access
+to those filesystems.  Instead, the client
+must mount a filesystem directly from the server on which it resides.
+.LP
+The user ID and group ID mappings must be the same between client and 
+server.  However, the server maps uid 0 (the super-user) to uid \-2 
+before performing access checks for a client.  This inhibits
+super-user privileges on remote filesystems.
+.SH ERRORS
+Generally physical disk I/O errors detected at the server are returned
+to the client for action.  If the server is down or inaccessable,
+the client will see the console message:
+.RS
+NFS:  file server not responding: still trying.
+.RE
+The client continues (forever) to resend the request until it
+receives an acknowledgement from the server.
+This means the server can crash or power down, and come back up,
+without any special action required by the client.
+It also means the client process requesting the I/O will block and
+remain insensitive to signals, sleeping inside the kernel at 
+.SM PRIBIO.
+.SH "SEE ALSO"
+exports(4), mntent(4), mount(2), nfsd(1M)

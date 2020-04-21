@@ -1,0 +1,125 @@
+		"Installing Remote Graphics Library on the Geometry Link"
+
+Some Fortran Remote Graphics Library (RGL) demonstration programs, and execs
+are included on an unsupported basis.  All files are text or FORTRAN, except
+the I/O drivers, and the executible modules.
+
+		"MVS Module Creation"
+
+    Run	the LOADLIB job	to create a checkout load library.   (Note:   The
+ TSO  command  can  be	linkedited  to reside in this library for its own
+ checkout, but should be moved to a LNKLIST library for	production.)  Now
+ run the jobs LINKPP, LINKSTAR,	LINKSQRL and LINKMAIN.	These jobs create
+ the installation checkout programs MAINTEST, STAR, SQIRAL and PP in  the
+ 'SGI.TEST.LOAD' dataset.
+
+    At	this  point, the installation checkout programs	are ready, but we
+ do not	(may not) have the correct environment for them.  To prepare  the
+ mainframe environment,	enter the following:
+
+      ALLOC FI(FT06F001) DS(*)
+
+ This  provides	 a definition of an output file	that FORTRAN doesn't need
+ except	that he	insists	that it	be defined.  On	the IRIS side, make  sure
+ that  you  are	in the INTERACTIVE GRAPHICS mode.  Now enter the commands
+ which were link edited	into your test library in the form:
+
+      CALL 'SGI.TEST.LOAD(XXX)'
+
+ Where xxx is, in turn,	PP, STAR, SQIRAL, and  MAINTEST.    The	 expected
+ results of each test is listed	below.	(Note:	Depending on the level of
+ MVS  and  TCAM	/ VTAM with which you are working, it may be necessary to
+ use the PA1 key to reset the full screen mode between each test.)
+
+    PP should produce a	blue backgound	and  the  words	 HELLO	WORLD  in
+ black.
+
+    SQIRAL  generates  several	repetitions  of	a blue SQuare spIRAL on	a
+ black backgound.
+
+    STAR results in a small, dim five pointed star which  starts  in  the
+ upper	right portion of the screen and	which becomes brighter and larger
+ as it moves to	the lower center screen	area.
+
+    MAINTEST is	a self documenting, interactive	graphics test.
+
+                                                                             
+
+		"VM/CMS demonstartion"
+
+The system should respond with the mainframe's front-end logo panel.
+
+To test remote graphics:
+
+Log into the account that has been set up to hold the RGL software, and copy
+the mainframe software to that account.
+
+Prepare IRIS MACLIB by typing:
+
+MAC GEN IRIS FDEVICE FGET FGL FIO FRPC
+
+
+Find out the established procedure for ``dialing'' your account. (Talk to the
+mainframe person who is assisting you.)
+
+Type SQIRAL to start the sqiral remote graphics program.
+The system displays four lines, reports that ``GRAF 200'' is defined to
+receive the dial-in, and disconnects you.
+
+Press RETN and dial back into your account.  The status line shows the receipt
+of graphics messages, and then clears the screen and shows ``DROP''.
+
+Press CTRL-d to return to the t3279 menu, and type 3 to select the RGL mode.
+
+Log back into the account and type B to reconnect.
+
+Run the sqiral program again.
+To run sqiral, first enter this sequence:
+
+SQIRAL
+#CP DISC
+ENTER
+
+Then dial back into your account.
+
+The IRIS clears the screen and displays square spirals from the host.
+
+The STAR and MAINTEST programs work similarly.
+
+		"Building RGL Modules"
+
+You can build a graphics module manually or with the MAKE exec file.
+The following procedure makes the FORTRAN program PP into a module:
+
+TXTFORT
+FORTMAC
+FORTVS PP
+LOAD PP IO LIB IRISCOM
+G PP
+
+or simply:
+
+MAKE PP FORTRAN 
+
+
+Be sure the PROFILE EXEC file contains the proper reference to your FORTRAN
+libraries. 
+
+
+		"Debugging RGL Modules"
+
+The RGL programs that queue the keyboard keys introduce the possibility of
+failure to return to UNIX. The IRIS passes keystrokes to UNIX if the SETUP
+key is pressed while the other keystrokes are entered. In general, the 
+mainframe programs should provide for exiting if qtest returns no activity
+after much polling. This allows another recovery path if the RGL has hung the
+IRIS graphics. The t3279 program provides several options to assist debugging.
+	The 'g' option creates a LOGFILE describing the RGL commands.
+	The 'i' option recreates graphics from an RDDATA type file.
+	The 'o' option creates an RDDATA file of the actual commands.
+Menu item 7 is a specialized version of 'od' useful for examining RDDATA files.
+Menu item 33 strobes keyboard indicators L1 (input from mainframe) and L2 (
+output to mainframe) while executing RGL.
+It is entirely likely that the IRIS program 'mex' will conflict with the 
+intended operation of your RGL, and it may be desireable to 'kill mex' before
+debugging RGL.

@@ -1,0 +1,105 @@
+'\"macro stdmacro
+.TH PHYS 2 
+.SH NAME
+phys \- allow a process to access physical addresses
+.SH SYNOPSIS
+.nf
+.B phys(physnum, virtaddr, size, physaddr)
+.B int physnum
+.B char *virtaddr;
+.B long size;
+.B char *physaddr;
+.fi
+.SH DESCRIPTION
+.PP
+The 
+.IR phys\^ (2) 
+call maps arbitrary physical memory into a
+process's virtual address space.  
+The virtual address used by 
+.I phys\^
+must not otherwise be used.
+.I physnum\^
+is a number (0-3)
+that specifies which of 4 physical spaces
+to set up.
+Up to 4 
+.IR phys\^ (2) 
+calls can be active at any one time.
+.I Virtaddr\^
+is the process's virtual address.
+.I Size\^
+is the number of bytes to map in.
+.I physaddr\^
+is the physical address to map in.
+.PP
+Valid 
+.I virtaddr\^ 
+and 
+.I physaddr\^ 
+values are constrained
+by hardware and must be at an address multiple of the
+resolution of the \s-1CPU\s+1's memory management scheme.
+If 
+.I size\^ 
+is non-zero,
+size is rounded up to the next 
+.SM MMU 
+resolution boundary.
+If
+.I size\^
+is zero, any previous 
+.IR phys\^ (2)
+mapping for that
+.I physnum\^
+segment is nullified.
+.PP
+For example, the call:
+.IP
+.B phys(2, 0x100000, 32768, 0)
+.PP
+will allow a process to access physical locations 0 through
+32767 by referencing virtual address 0x100000 through
+0x100000+32767.
+.PP
+In actuality, the 
+.SM CPU 
+.SM MMU 
+register is loaded with 
+.I physaddr\^ 
+shifted to account for page resolution.
+.PP
+.IR phys\^ (2)
+may only be executed by the super-user.
+.SH DIAGNOSTICS
+The value zero is returned if the 
+.I phys\^
+call was successful.
+The value \-1 is returned if not super-user, if
+.I virtaddr\^
+or
+.I physaddr\^
+is not in the proper range,
+or if the specified
+.I virtaddr\^
+segment register is already in use.
+.SH BUGS
+This system call is very machine dependent.
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#55,D0
+.B movl	physnum,A0
+.B movl	virtaddr,D1
+.B movl	size,A1
+.B movl	D2,save
+.B movl	physaddr,D2
+.B trap	#0
+.B movl	save,D2
+.fi
+.PP
+Carry bit cleared on success.
+.SH NOTE
+This system call is not supported.
+.DT
+.\"	@(#)phys.2	5.2 of 3/26/84

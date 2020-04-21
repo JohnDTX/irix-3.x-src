@@ -1,0 +1,44 @@
+.TH lsrepeat 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B lsrepeat
+\- sets a repeat factor for the current linestyle
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lsrepeat(factor)"
+.B "long factor;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lsrepe(factor)"
+.B "integer*4 factor"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lsrepeat(factor: longint);"
+.SH DESCRIPTION
+.B lsrepeat
+sets a repeat factor for the current linestyle. When a line is
+drawn, pixels are turned on if there is a 1 in the corresponding
+position of the linestyle mask. For example, the mask 0x5555 specifies
+that alternate pixels are turned on (assuming the 
+linestyle repeat factor is 1). If
+the repeat factor is
+.I n,
+then the 0x5555 pattern above would draw a line
+with
+.I n
+bits on and
+.I n
+bits off, alternately.
+The valid range of the repeat factor is 1 through 256. 
+.SH "SEE ALSO"
+getlsrepeat, setlinestyle
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles
+

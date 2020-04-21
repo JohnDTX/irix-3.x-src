@@ -1,0 +1,443 @@
+'\"macro stdmacro
+.tr ~"
+.if t .ds i ''
+.if n .ds i ""
+.TH MAN 5
+.SH NAME
+man \- macros for formatting entries in this manual
+.SH SYNOPSIS
+.B
+nroff \-man
+files
+.PP
+.B
+troff \-man
+[
+.B \-rs1
+] \[ 
+.B \-rv2
+\] files
+.SH DESCRIPTION
+These
+.IR troff (1)
+macros are used to lay out the format of the entries of this manual.
+These macros are used by the
+.IR man (1)
+command.
+.PP
+The default page size is 8.5\*i\(mu11\*i, with a 6.5\*i\(mu10\*i text area;
+the
+.B \-rs1
+option reduces these dimensions to 6\*i\(mu9\*i and 4.75\*i\(mu8.375\*i, respectively;
+this option (which is
+.I not\^
+effective in
+.IR nroff )
+also reduces the default type size from 10-point to 9-point, and the
+vertical line spacing from 12-point to 10-point.
+The
+.B \-rV2
+option may be used to set certain parameters to values
+appropriate
+for certain Versatec printers:
+it sets the line length to 82 characters, the page length to
+84 lines, and it inhibits underlining.
+.\"This option should not be confused with the
+.\".B \-Tvp
+.\"option of the
+.\".IR man (1)
+.\"command,
+.\"which is available at some
+.\".SM UNIX
+.\"System sites.
+.PP
+Any
+.I text\^
+argument below may be one to six ``words''.
+Double quotes
+.RB ( ~~ )
+may be used to include blanks in a ``word''.
+If
+.I text\^
+is empty,
+the special treatment is applied to
+the next line that contains text to be printed.
+For example,
+.SM
+.B \&.I
+may be used to italicize a whole line, or
+.SM
+.B \&.SM
+followed by
+.SM
+.B \&.B
+to make small bold text.
+By default, hyphenation is turned off for
+.IR nroff ,
+but remains on for
+.IR troff .
+.PP
+Type font and size are reset to default values
+before each paragraph and after processing
+font- and size-setting macros,
+e.g.,
+.SM
+.BR \&.I\*S ,
+.SM
+.BR \&.RB\*S ,
+.SM
+.BR \&.SM\*S .
+Tab stops are neither used nor set by any macro
+except
+.SM
+.B \&.DT
+and
+.SM
+.BR \&.TH\*S .
+.PP
+Default units for indents
+.I in\^
+are ens.
+When
+.I in\^
+is omitted, the previous indent is used.
+This remembered indent is set to its default value
+(7.2 ens in
+.IR troff ,
+5 ens in
+.IR nroff \-this
+corresponds to 0.5\*i in the default page size)
+by
+.SM
+.BR \&.TH\*S ,
+.SM
+.BR \&.P\*S ,
+and
+.SM
+.BR \&.RS\*S ,
+and restored by
+.SM
+.BR \&.RE\*S .
+.PP
+.PD 0
+.TP "\w'.TH t s c n  'u"
+.SM
+.BI \&.TH " \*St s c n\^"
+Set the title and entry heading;
+.I t\^
+is the title,
+.I s\^
+is the section number,
+.I c\^
+is extra commentary, e.g., ``local'',
+.I n\^
+is new manual name.
+Invokes
+.SM
+.B \&.DT
+(see below).
+.TP
+.SM
+.BI \&.SH " \*Stext\^"
+Place subhead
+.IR text ,
+e.g.,
+.SM
+.BR SYNOPSIS\*S ,
+here.
+.TP
+.SM
+.BI \&.SS " \*Stext\^"
+Place sub-subhead
+.IR text ,
+e.g.,
+.BR Options ,
+here.
+.TP
+.SM
+.BI \&.B " \*Stext\^"
+Make
+.I text\^
+bold.
+.TP
+.SM
+.BI \&.I " \*Stext\^"
+Make
+.I text\^
+italic.
+.TP
+.SM
+.BI \&.SM " \*Stext\^"
+Make
+.I text\^
+1 point smaller than default point size.
+.TP
+.SM
+.BI \&.RI " \*Sa b\^"
+Concatenate roman
+.I a\^
+with italic
+.IR b ,
+and alternate these two fonts for up to six arguments.
+Similar macros alternate between any two of roman,
+italic, and bold:
+.RS
+.RS
+.SM
+.B "\&.IR   .RB   .BR   .IB   .BI"
+.RE
+.RE
+.TP
+.SM
+.B \&.P
+Begin a paragraph with normal font, point size, and indent.
+.SM
+.B \&.PP
+is a synonym for
+.SM
+.BR \&.P \*S.
+.TP
+.SM
+.BI \&.HP " \*Sin\^"
+Begin paragraph with hanging indent.
+.TP
+.SM
+.BI \&.TP " \*Sin\^"
+Begin indented paragraph with hanging tag.
+The next line that contains text to be printed is taken as the
+tag.
+If the tag does not fit, it is printed on a separate line.
+.TP
+.SM
+.BI \&.IP " \*St in\^"
+Same as
+.SM
+.BI \&.TP " \*Sin\^"
+with tag
+.IR t ;
+often used to get an indented paragraph without a tag.
+.TP
+.SM
+.BI \&.RS " \*Sin\^"
+Increase relative indent (initially zero).
+Indent all output an extra
+.I in\^
+units
+from the current left margin.
+.TP
+.SM
+.BI \&.RE " \*Sk\^"
+Return to the
+.IR k th
+relative indent level
+(initially,
+.IR k =1;
+.IR k =0
+is equivalent to
+.IR k =1);
+if
+.I k\^
+is omitted, return to the most recent lower indent level.
+.TP
+.SM
+.BI \&.PM " \*Sm\^"
+Produces proprietary markings;
+where
+.I m\^
+may be
+.B P
+for
+.SM
+.BR PRIVATE\*S ,
+.B N
+for
+.SM
+.BR NOTICE\*S ,
+.B BP
+for
+.SM
+.BR "BELL LABORATORIES PROPRIETARY\*S" ,
+or
+.B BR
+for
+.SM
+.BR "BELL LABORATORIES RESTRICTED\*S" .
+.TP
+.SM
+.B \&.DT
+Restore default tab settings (every
+7.2 ens in
+.IR troff ,
+5 ens in
+.IR nroff ).
+.TP
+.SM
+.BI \&.PD " \*Sv\^"
+Set the interparagraph distance to
+.I v\^
+vertical spaces.
+If
+.I v\^
+is omitted, set the interparagraph distance to the default value
+(0.4v in
+.IR troff ,
+1v in
+.IR nroff ).
+.PD
+.PP
+The following
+.I strings\^
+are defined:
+.PP
+.PD 0
+.TP "\w'.TH t s c n  'u"
+.SM
+.B \e\(**R
+.if t \{\(rg
+in
+.IR troff ,
+.B (Reg.)
+in
+.IR nroff . \}
+.if n \{``(Reg.)''
+in
+.IR nroff ,
+``Registered'' symbol in
+.IR troff (1). \}
+.TP
+.SM
+.B \e\(**S
+Change to default type size.
+.TP
+.SM
+.B \e\(**(Tm
+Trademark indicator.
+.PD
+.PP
+The following
+.I "number registers\^"
+are
+given default values by
+.SM
+.BR \&.TH\*S :
+.PP
+.PD 0
+.TP "\w'.TH t s c n  'u"
+.SM
+.B IN
+Left margin indent relative to subheads
+(default is
+7.2 ens in
+.IR troff ,
+5 ens in
+.IR nroff ).
+.TP
+.SM
+.B LL
+Line length including
+.SM
+.BR IN \*S.
+.TP
+.SM
+.B PD
+Current interparagraph distance.
+.PD
+.SH CAVEATS
+In addition to the macros, strings, and number registers mentioned
+above, there are defined a number of
+.I internal\^
+macros, strings, and number registers.
+Except for names predefined by
+.I troff
+and number registers
+.BR d ,
+.BR m ,
+and
+.BR y ,
+all such internal names are of the
+form
+.IR XA ,
+where
+.I X\^
+is
+one of
+.BR ) ,
+.BR ] ,
+and
+.BR } ,
+and
+.I A\^
+stands for any alphanumeric character.
+.PP
+If a manual entry needs to be preprocessed by
+.IR cw (1),
+.IR eqn (1)
+(or
+.IR neqn ),
+and/or
+.IR tbl (1),
+it must begin with a special line
+(described in
+.IR man (1)),
+causing the
+.I man\^
+command to invoke the appropriate preprocessor(s).
+.PP
+The programs that prepare the Table of Contents and the Permuted
+Index for this Manual assume the
+.SM
+.I NAME\*S\^
+section of each entry consists of a single line of input that has the following
+format:
+.IP
+name[, \|name, \|name \|.\|.\|.] \|\e\^\- \|explanatory \|text
+.PP
+The macro package increases the inter-word spaces (to eliminate ambiguity)
+in the
+.SM
+.I SYNOPSIS\*S\^
+section of each entry.
+.PP
+The macro package itself uses only the roman font
+(so that one can replace, for example, the bold font by the constant-width
+font\-see
+.IR cw (1)).
+Of course, if the input text
+of an entry
+contains
+requests for other fonts (e.g.,
+.SM
+.BR \&.I\*S ,
+.SM
+.BR \&.RB\*S ),
+the corresponding fonts must be mounted.
+.SH EXAMPLE
+.IP
+nroff \-man man.5
+.PP
+to 
+.I nroff
+this manual section.
+.SH FILES
+/usr/lib/tmac/tmac.an
+.br
+/usr/lib/macros/cmp.[nt].[dt].an
+.br
+/usr/lib/macros/ucmp.[nt].an
+.br
+.SH SEE ALSO
+man(1), nroff(1), troff(1).
+.\".SH BUGS
+.\"If the argument to
+.\".B
+.\".SM \&.TH
+.\"contains
+.\".I any\^
+.\"blanks and is
+.\".I not\^
+.\"enclosed by double quotes
+.\".RB ( ~~ ),
+.\"there will be bird-dropping-like things on the output.
+.\".br
+.tr ~~
+.\"	@(#)man.5	5.1 of 10/15/83

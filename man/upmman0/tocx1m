@@ -1,0 +1,104 @@
+accept(1m) accept, reject: allow/prevent LP requests.
+acct(1m) acctdisk, acctdusg, accton, acctwtmp: overview of accounting and miscellaneous accounting commands.
+acctcms(1m) acctcms: command summary from per-process accounting records.
+acctcon(1m) acctcon1, acctcon2: connect-time accounting.
+acctmerg(1m) acctmerg: merge or add total accounting files.
+acctprc(1m) acctprc1, acctprc2: process accounting.
+acctsh(1m) chargefee, ckpacct, dodisk, lastlogin, monacct, nulladm, prctmp, prdaily, prtacct, runacct, shutacct, startup, turnacct: shell procedures for accounting.
+addclient(1m) addclient: allow remote printing clients to connect.
+arp(1m) arp: address resolution display and control.
+backup(1m) backup: interactive backup program for SGI IRIS workstation.
+bcopy(1m) bcopy: interactive block copy.
+bootp(1m) bootp: server for DARPA Bootstrap Protocol (BOOTP).
+brc(1m) brc, bcheckrc, rc, powerfail: system initialization shell scripts.
+chroot(1m) chroot: change root directory for a command.
+clri(1m) clri: clear inode.
+cron(1m) cron: clock daemon.
+devnm(1m) devnm: device name.
+flpuxfer(1m) flpuxfer: transfer the bootable floppy.
+fsck(1m) fsck, dfsck: file system consistency check and interactive repair.
+fsdb(1m) fsdb: Bell file system debugger.
+ftpd(1m) ftpd: DARPA Internet File Transfer Protocol server.
+fwtmp(1m) fwtmp, wtmpfix: manipulate connect accounting records.
+gethostident(1m) gethostident: print hostident value.
+getty(1m) getty: set terminal type, modes, speed, and line discipline.
+hyp(1m) hyp: hyperchannel table translation.
+hyroute(1m) hyroute: set the hyperchannel routing tables.
+ifconfig(1m) ifconfig: configure network interface parameters.
+iib(1m) iib: initialize ib driver.
+inetd(1m) inetd: internet ``super-server''.
+init(1m) init, telinit: process control initialization.
+install(1m) install: install commands.
+install.4d(1m) Install: install commands.
+intro(1m) intro: introduction to system maintenance commands and application programs.
+kernel(1m) kernel: install a default kernel.
+killall(1m) killall: kill all active processes.
+labelit(1m) labelit: label a file system.
+link(1m) link, unlink: exercise link and unlink system calls.
+lpadmin(1m) lpadmin: configure the LP spooling system.
+lpsched(1m) lpsched, lpshut, lpmove: start/stop the LP request scheduler and move requests.
+makedbm(1m) makedbm: make a yellow pages dbm file.
+mkboot(1m) mkboot: make a bootable tape for system restoration.
+mkbootflp(1m) mkbootflp: create a bootable unix floppy disk.
+mkcentpr(1m) mkcentpr: register a Centronics-interface printer with LP.
+mkfs(1m) mkfs: construct a file system.
+mklost+found(1m) /etc/mklost+found: make a lost+found directory for fsck.
+mknetpr(1m) mknetpr: provide access to a remote printer.
+mknod(1m) mknod: build special file.
+mkps(1m) mkps: register a LaserWriter printer with LP.
+mount(1m) mount, umount: mount and dismount filesystems.
+mountd(1m) mountd: NFS mount request server.
+multi(1m) multi: switch the system to multi-user mode.
+mvdir(1m) mvdir: move a directory.
+ncheck(1m) ncheck: generate names from i-numbers.
+nfsd(1m) nfsd, biod: NFS daemons.
+nfsstat(1m) nfsstat: Network File System statistics.
+ping(1m) ping: send ICMP ECHO_REQUEST packets to network hosts.
+portmap(1m) portmap: DARPA port to RPC program number mapper.
+preset(1m) preset: reset the lp queue system to a pristine state by deleting printers.
+pwck(1m) pwck, grpck: password/group file checkers.
+rc.getdate(1m) rc.getdate: user-configurable system date initialization.
+rc.tcp(1m) rc.tcp, rc.nfs, rc.mail, rc.488, rc.xns: communication option initialization.
+reboot(1m) reboot: reboot the system.
+rexecd(1m) rexecd: remote execution server.
+rlogind(1m) rlogind: remote login server.
+rmprinter(1m) rmprinter: remove a printer from the LP spooling system.
+rootcopy(1m) rootcopy: IRIS terminal root partition copy.
+route(1m) route: manually manipulate the routing tables.
+routed(1m) routed: network routing daemon.
+rpc.passwd(1m) rpc.passwd: server for modifying yellow pages password file.
+rpcinfo(1m) rpcinfo: report RPC information.
+rshd(1m) rshd: remote shell server.
+runacct(1m) runacct: run daily accounting.
+rwall(1m) rwall: write to all users over a network.
+rwalld(1m) rwalld: network rwall server.
+rwhod(1m) rwhod: system status server.
+sendmail(1m) sendmail, newaliases, mailq: send mail over the Internet.
+setmnt(1m) setmnt: establish mount table.
+sgboot(1m) sgboot: provide network boot service.
+sgbounce(1m) sgbounce: provide network name service.
+sgilabel(1m) sgilabel: print or update the SGI disk drive label.
+showmount(1m) showmount: show all remote mounts.
+shutdown(1m) shutdown: terminate all processing.
+single(1m) single: switch the system to single-user mode.
+spray(1m) spray: spray packets.
+sprayd(1m) sprayd: spray server.
+syslogd(1m) syslogd: log systems messages.
+telnetd(1m) telnetd: DARPA TELNET protocol server.
+tftpd(1m) tftpd: DARPA Trivial File Transfer Protocol server.
+timed(1m) timed: time server daemon.
+timedc(1m) timedc: timed control program.
+update(1m) update: periodically update the super block.
+uuclean(1m) uuclean: uucp spool directory clean-up.
+uusub(1m) uusub: monitor uucp network.
+vmstat(1m) vmstat: report virtual memory statistics.
+wall(1m) wall: write to all users.
+whodo(1m) whodo: who is doing what.
+xnsd(1m) xnsd: network utility daemon.
+ypinit(1m) ypinit: build and install yellow pages database.
+ypmake(1m) ypmake: rebuild yellow pages database.
+yppoll(1m) yppoll: what version of a YP map is at a YP server host.
+yppush(1m) yppush: force propagation of a changed YP map.
+ypserv(1m) ypserv, ypbind: yellow pages server and binder processes.
+ypset(1m) ypset: point ypbind at a particular server.
+ypxfr(1m) ypxfr: transfer a YP map from some YP server to here.

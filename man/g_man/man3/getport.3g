@@ -1,0 +1,77 @@
+.TH getport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getport
+\- creates a graphics window under the window manager 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getport(arg)"
+.B "char arg[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getpor(arg, length)"
+.B "character*(*) arg"
+.B "integer*4 length
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getport(arg: pstring128);"
+.SH DESCRIPTION
+.B getport
+does a graphics initialization and creates a graphics window according to
+the constraints specified in 
+.B "minsize, maxsize, keepaspect, prefsize, prefposition, stepunit,"
+.B "fudge, noport,
+and
+.B foreground. 
+After
+they are bound to the graphics window,
+these constraints are reset to zero.
+.PP
+If no constraints are specified 
+or if the description is incomplete, the window manager
+prompts for the missing information.
+If you use the cursor to show the size and location of the
+graphics window,
+.B getport
+puts the graphics program in the background, unless
+\f3foreground\f1 is called before
+\f3getport\f1.
+.PP
+When you call
+\f3getport\fP,
+the pseudo devices INPUTCHANGE and REDRAW are
+automatically queued.
+.PP
+When you call \f3getport\f1 outside the 
+window manager,
+it creates a standard-size graphics window:
+(xmin 0, xmax 1023, ymin 0, ymax 767).
+.PP
+\f2arg\fP has no function at this time.
+.PP
+In FORTRAN, there is an extra argument,
+.I length,
+which is the number of characters in the name string.
+.SH "SEE ALSO"
+foreground, fudge, keepaspect, maxsize, minsize, noport, prefposition, prefsize,
+stepunit,
+winconstraints, winopen
+.sp
+.I Using mex , 
+Chapter 2, Programming with mex
+.SH NOTE
+.B winopen
+is preferred over 
+.B getport
+for manipulating graphics windows.
+.sp 
+This routine
+is available only in immediate mode.
+
+

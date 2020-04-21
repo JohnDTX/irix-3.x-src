@@ -1,0 +1,26 @@
+.TH getlstyle 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getlstyle
+- return the current linestyle  
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getlstyle()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getlst()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlstyle: Short;"
+.sp
+.SH DESCRIPTION
+.I Getlstyle
+returns the currently selected linestyle.  The returned value is 
+an index into the linestyle table.
+.SH "SEE ALSO"
+.I deflinestyle, setlinestyle
+.SH NOTE
+This command can only be used in immediate mode.

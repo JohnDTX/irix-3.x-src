@@ -1,0 +1,51 @@
+'\"macro stdmacro
+.TH SPRAY 1M
+.UC 6
+.SH NAME
+spray \- spray packets 
+.SH SYNOPSIS
+.B /usr/etc/spray 
+host
+[
+.B \-l
+]
+[
+.B \-nth
+]
+[
+.B \-c
+.B \-cnt
+]
+.SH DESCRIPTION
+.I Spray
+send a one-way stream of packets to
+.I host
+using rpc, and then reports how many were received by 
+.I host
+and what the transfer rate was.
+The default value of
+.I lnth 
+is 86 bytes (the size of the rpc and udp headers),
+and the value of 
+.I cnt
+is the number of packets required to make the total stream size
+10000 bytes.  The host name can be either a name
+or an internet address.
+.PP
+The
+.I lnth 
+parameter is the numbers of bytes in the ethernet packet that 
+holds the rpc call message.  Since the data is encoded using
+xdr, and xdr only
+deals with 32 bit quantities, not all values of
+.I lnth
+are possible.
+.I Spray
+will round up to the nearest possible value.
+When
+.I lnth
+is greater than 1514, then the rpc call can no longer
+be encapsulated in one ethernet packet, so the 
+.I lnth
+field no longer has a simple correspondence to ethernet packet size.
+

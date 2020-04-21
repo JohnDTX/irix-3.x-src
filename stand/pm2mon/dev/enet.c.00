@@ -1,0 +1,98 @@
+/*
+**		        Ethernet read and write primitives
+**
+**			    Paul Haeberli - July 1983 
+**
+*/
+#include "net.h"
+#include "Qdevices.h"
+#include "Qglobals.h"
+
+Xhost MyHostAddress;
+int ethertimeout;
+char *readdatabuf;
+
+# undef DEBUG do_debug
+# include "dprintf.h"
+
+/*
+**	WriteEnet - write a packet on a specific ethertype.  If the packet is
+**		    smaller than the minimum packet size, it is extended. The
+**		    src address is set to MyHostAddress, and the ethertype is
+**		    set to etype.
+**
+*/
+WriteEnet( etype, buffer, nbytes )
+register int etype;
+register char buffer[];
+register int nbytes;
+{
+    register etheader *etherheader; 
+    register int writecount;
+
+    if(nbytes<MIN_ENET_PACKET) nbytes = MIN_ENET_PACKET;
+    etherheader = (etheader *)buffer;
+    etherheader->src = MyHostAddress;
+    etherheader->etype = etype; 
+    wait(TOENET);
+    if( (writecount = WriteToEnet(buffer,nbytes)) < 0 )
+	printf("WriteEnet: error\n");
+    return nbytes;
+}
+
+
+/*
+**	EnetReadTimeout - set the ethernet read timeout in milliseconds
+**		          A timeout value of 0 will make EnetRead block
+**		          indefinitely on a read. 
+**
+*/
+EnetReadTimeout( clicks )
+register int clicks;
+{
+    ethertimeout = clicks;
+}
+
+
+/*
+**	ReadEnet - read a packet from the ethernet of the given ethertype.
+**		   This returns READTIMEOUT if no packet of the given 
+**		   ethertype arrives within the current timeout period. 
+**		   Packets of other ethertypes are ignored!  The value
+**		   ERROR is returned on error.
+**
+*/
+short urgkeyin;
+int
+ReadEnet( etype )
+register int etype;
+{
+extern short urgkeyin;
+    register int r, bytecount;
+    register etheader *etherheader;
+    register int cond;
+
+    cond = FROMENET|ALARM;
+if(urgkeyin)cond|=KEYIN;
+    if( ethertimeout != 0 )
+	alarm(ethertimeout);
+    while(1) {
+	readenable();
+	r = wait(cond);
+/*if(urgkeyin)*/if(r&KEYIN){MAKEREADY(r);return READTIMEOUT;}
+        if(r & ALARM) {
+	    MAKEREADY(r&~ALARM);
+            return READTIMEOUT;
+	}
+        if(r & FROMENET) {
+            if( (bytecount = ReadFromEnet()) <= 0) {
+	        printf("ReadEnet: error\n");
+	        return 0;
+	    } else {
+	        etherheader = (etheader *)readdatabuf;
+	        if(etherheader->etype == etype)
+	            return bytecount;
+            }
+        }
+    }
+}

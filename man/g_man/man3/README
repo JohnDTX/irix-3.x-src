@@ -1,0 +1,33 @@
+I am not deleting the text below as this is some conjecture on my part.  
+Looks like this in the source for Version 3.0 iug gl man pages.  The file
+mn has version 3.0 in it, a very good sign.
+diane 10/7/87
+
+
+##############################################
+The files in this directory
+are the man pages for version 2.1 of the IRIS User's Guide.
+
+The man pages for Version 2.0 of the IUG are 
+in the directory /doc/ref/gl2/arch3.
+
+The files in the directory called "manmac"
+are files used for formatting
+the man pages in Version 2.0 of the
+IRIS User's Guide.
+
+To run off a man page type:
+	
+	xroff mn filename
+
+if any preprocessors are used type:
+
+	tbl mn filename | eqn | xroff
+
+To find out if any preprocessors (that is, tbl or eqn) are used,
+type:
+	fgrep .TS filename
+	fgrep .EQ filename
+
+or you can go ahead and pipe the files through tbl and eqn, even if they
+aren't used.

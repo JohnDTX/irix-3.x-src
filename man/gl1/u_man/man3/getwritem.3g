@@ -1,0 +1,27 @@
+.TH getwritemask 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getwritemask
+- return the current writemask
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Colorindex getwritemask()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getwri()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getwritemask: Colorindex;"
+.sp
+.SH DESCRIPTION
+.I Getwritemask
+returns the current writemask.
+It is an integer with up to twelve significant bits, one for each available
+bitplane.  This command is undefined in RGB mode.
+.SH "SEE ALSO"
+.I RGBwritemask, writemask
+.SH NOTE
+This command can only be used in immediate mode.

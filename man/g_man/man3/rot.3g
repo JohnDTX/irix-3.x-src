@@ -1,0 +1,49 @@
+.TH rot 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rot
+\- rotates graphical primitives (floating point version)
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rot(a, axis) "
+.B "float a; "
+.B "char axis;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rot(a, axis)"
+.B "real a"
+.B "character axis"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rot(a: real; axis: longint);"
+.SH DESCRIPTION
+.B rot
+specifies an angle (\f2a\f1) and an axis of rotation (\f2axis\f1).
+The floating point angle is given in 
+degrees according to the right-hand rule.
+The axis of 
+rotation is defined by a character, 
+either \'x\', \'y\', or \'z\'
+(the character can be upper- or lowercase).
+.PP
+.B rot
+is a modeling routine;
+it changes the current transformation matrix.
+All objects drawn after
+.B rot
+executes are rotated.
+Use
+.B pushmatrix
+and
+.B popmatrix
+to preserve and restore an unrotated world space.
+.SH "SEE ALSO"
+popmatrix, pushmatrix, rotate, scale, translate
+.sp
+\f2Programming Guide\fP, Section 4.1 Modeling Transformations

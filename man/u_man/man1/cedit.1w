@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH CEDIT 1W
+.SH NAME
+cedit \- edit colors on the screen
+.SH SYNOPSIS
+.B cedit
+number
+.SH DESCRIPTION
+The frame buffer of the IRIS contains values which are translated into
+RGB values by a color map. 
+.I cedit
+changes the mapping of a color index.
+Three sliders are displayed, along with a sample patch of the color 
+being edited.  A click of the left button outside the screen area of 
+.I cedit
+picks up a color index to be edited.  
+This color becomes the current color, and appears in the sample patch.
+The sliders indicate
+components of the current color.  The color
+can be changed by clicking down on a slider, and adjusting its position
+by moving the mouse.
+.PP
+The right mouse button brings up a menu that allows you to choose
+from among four color systems:  rgb (red-green-blue), 
+cmy (cyan-magenta-yellow), hsv (hue-saturation-value), and 
+hls (hue-lightness-saturation).  If you know
+which color system you want, you can specify
+.I number ,
+an integer from 1 to 4 that
+corresponds to the position of the color
+system in the menu.  The 
+.I cedit
+window then appears with the color system already set.
+.SH SEE ALSO
+showmap(1W)
+.SH BUGS
+If another process changes the color entry being edited, the sliders
+of 
+.I cedit 
+do not indicate the correct positions for that color index.

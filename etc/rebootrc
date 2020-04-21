@@ -1,0 +1,14 @@
+#! /bin/sh
+# Put any reboot actions except killall in this script
+# $Log:	rebootrc,v $
+# Revision 1.1  89/03/27  15:38:38  root
+# Initial check-in for 3.7
+# 
+# Revision 1.2  87/05/16  17:53:38  vjs
+# unmount NFS file systems
+# 
+# Revision 1.1  85/08/26  18:28:08  brendan
+# Initial revision
+# 
+#
+/etc/umount -avt nfs

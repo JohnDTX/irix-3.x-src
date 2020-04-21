@@ -1,0 +1,420 @@
+'\"macro stdmacro
+.\" Copyright (c) 1983 Regents of the University of California.
+.\" All rights reserved.  The Berkeley software License Agreement
+.\" specifies the terms and conditions for redistribution.
+.\"
+.\"	@(#)indent.1	6.4 (Berkeley) 9/10/85
+.\"
+.TH INDENT 1 "September 10, 1985"
+.UC 5
+.SH NAME
+indent \- indent and format C program source
+.SH SYNOPSIS
+.in +\w'\f3indent \f1'u
+.ti -\w'\f3indent \f1'u
+\f3indent \f1 [ \f2input-file\f1 [ \f2output-file\f1 ] ]
+[\ \f3\-bad\f1\ |\ \f3\-nbad\f1\ ]
+[\ \f3\-bap\f1\ |\ \f3\-nbap\f1\ ]
+[\ \f3\-bbb\f1\ |\ \f3\-nbbb\f1\ ]
+[\ \f3\-bc\f1\ |\ \f3\-nbc\f1\ ]
+[\ \f3\-bl\f1\ |\ \f3\-br\f1\ ]
+[\ \f3\-c\f2n\f1\ ]
+[\ \f3\-cd\f2n\f1\ ]
+[\ \f3\-cdb\f1\ |\ \f3\-ncdb\f1\ ]
+[\ \f3\-ce\f1\ |\ \f3\-nce\f1\ ]
+[\ \f3\-ci\f2n\f1\ ]
+[\ \f3\-cli\f2n\f1\ ]
+[\ \f3\-d\f2n\f1\ ]
+[\ \f3\-di\f2n\f1\ ]
+[\ \f3\-dj\f1\ |\ \f3\-ndj\f1\ ]
+[\ \f3\-ei\f1\ |\ \f3\-nei\f1\ ]
+[\ \f3\-fc1\f1\ |\ \f3\-nfc1\f1\ ]
+[\ \f3\-i\f2n\f1\ ]
+[\ \f3\-ip\f1\ |\ \f3\-nip\f1\ ]
+[\ \f3\-l\f2n\f1\ ]
+[\ \f3\-lc\f2n\f1\ ]
+[\ \f3\-lp\f1\ |\ \f3\-nlp\f1\ ]
+[\ \f3\-npro\f1\ ]
+[\ \f3\-pcs\f1\ |\ \f3\-npcs\f1\ ]
+[\ \f3\-ps\f1\ |\ \f3\-nps\f1\ ]
+[\ \f3\-psl\f1\ |\ \f3\-npsl\f1\ ]
+[\ \f3\-sc\f1\ |\ \f3\-nsc\f1\ ]
+[\ \f3\-sob\f1\ |\ \f3\-nsob\f1\ ]
+[\ \f3\-st\f1\ ]
+[\ \f3\-troff\f1\ ]
+[\ \f3\-v\f1\ |\ \f3\-nv\f1\ ]
+.SH DESCRIPTION
+.IX  indent  ""  "\fLindent\fP \(em format C source"
+.IX  "programming tools"  "indent"  ""  "\fLindent\fP \(em format C source"
+.IX  "languages"  "indent"  ""  "\fLindent\fP \(em format C source"
+.IX  "C programming language"  "indent"  ""  "\fLindent\fP \(em format C source"
+.IX  "pretty printer"  "indent"  ""  "\fLindent\fP \(em format C source"
+.IX  "format C programs" "" "format C programs \(em \fLindent\fP"
+.IX  "code formatter"  "indent"  ""  "\fLindent\fP \(em format C source"
+.IX  "cb"  "indent"  "\fLcb\fP"  "try \fLindent\fP \(em format C source"
+.I Indent
+is a \f3C\f1 program formatter.  It reformats the \f3C\f1 program in the
+\f2input-file\f1 according to the switches.  The switches which can be
+specified are described below. They may appear before or after the file
+names.
+.LP
+\f3NOTE\fP: If you only specify an \f2input-file\f1, the formatting is
+done `in-place', that is, the formatted file is written back into
+.I input-file
+and a backup copy of
+.I input-file
+is written in the current directory.  If
+.I input-file
+is named `/blah/blah/file', the backup file is named
+.RI file .BAK.
+.LP
+If
+.I output-file
+is specified,
+.I indent
+checks to make sure it is different from
+.IR input-file .
+.SH OPTIONS
+.LP
+The options listed below control the formatting style imposed by
+.IR indent .
+.TP 15
+.BR \-bad , \-nbad
+If
+.B \-bad
+is specified, a blank line is forced after every block of
+declarations.  Default:  
+.BR \-nbad .
+.TP 15
+.BR \-bap , \-nbap
+If
+.B \-bap
+is specified, a blank line is forced after every procedure body.  Default:
+.B \-nbap.
+.TP 15
+.BR \-bbb , \-nbbb
+If
+.B \-bbb
+is specified, a blank line is forced before every block comment.  Default:
+.B \-nbbb.
+.TP 15
+.BR \-bc , \-nbc
+If
+.B \-bc
+is specified, then a newline is forced after each comma in a declaration. 
+.B \-nbc
+turns off this option.  The default is
+.BR \-nbc .
+.TP 15
+.BR \-br , \-bl
+Specifying
+.B \-bl
+lines up compound statements like this:
+.ne 4
+.nf
+.ft L
+    if (...)
+    {
+        code
+    }
+.ft R
+.fi
+Specifying
+.B \-br
+(the default) makes them look like this:
+.ne 3
+.nf
+.ft L
+    if (...) {
+        code
+    }
+.ft R
+.fi
+.LP
+.TP 15
+.BI \-c n
+The column in which comments on code start.  The default is 33.  
+.TP 15
+.BI \-cd n
+The column in which comments on declarations start.  The default
+is for these comments to start in the same column as those on code.
+.TP 15
+.BI \-cdb , \-ncdb
+Enables (disables) the placement of comment delimiters on blank lines.  With
+this option enabled, comments look like this:
+.nf
+.ft L
+.ne 3
+	/*
+	 * this is a comment
+	 */
+.ft R
+.fi
+Rather than like this:
+.nf
+.ft L
+	/* this is a comment */
+.ft R
+.fi
+This only affects block comments, not comments to the right of
+code. The default is
+.BR \-cdb .
+.TP 15
+.BI \-ce , \-nce
+Enables (disables) forcing `else's to cuddle up to the immediately preceding
+`}'.  The default is
+.BR \-ce .
+.TP 15
+.BI \-ci n
+Sets the continuation indent to be \f2n\f1.  Continuation
+lines will be indented that far from the beginning of the first line of the
+statement.  Parenthesized expressions have extra indentation added to
+indicate the nesting, unless \f3\-lp\f1 is in effect.
+\f3\-ci\f1 defaults to the same value as \f3\-i\f1.
+.TP 15
+.BI \-cli n
+Causes case labels to be indented
+.I n
+tab stops to the right of the containing \f3switch\f1 statement.
+\f3\-cli0.5\f1 causes case labels to be indented half a tab stop.  The
+default is
+.BR \-cli0 .
+(This is the only option that takes a fractional argument.)
+.TP 15
+.BI \-d n
+Controls the placement of comments which are not to the
+right of code.  Specifying
+.B \-d1
+means that such comments are placed one indentation level to the
+left of code.  The default
+.B \-d0
+lines up these comments with the code.  See the section on comment
+indentation below.
+.TP 15
+.BI \-di n
+Specifies the indentation, in character positions, from a declaration keyword
+to the following identifier.  The default is
+.BR \-di16 .
+.TP 15
+.BR \-dj , \-ndj
+.B \-dj
+left justifies declarations.
+.B \-ndj
+indents declarations the same as code.  The default is
+.BR \-ndj .
+.TP 15
+.BI \-ei , \-nei
+Enables (disables) special
+.B else-if
+processing.  If enabled,
+.BR if "s"
+following
+.BR else "s"
+will have the same indentation as the preceding
+.B if
+statement.  The default is
+.BR \-ei .
+.TP 15
+.BI \-fc1 , \-nfc1
+Enables (disables) the formatting of comments that start in column 1.
+Often, comments whose leading `/' is in column 1 have been carefully
+hand formatted by the programmer.  In such cases, \f3\-nfc1\f1 should be
+used.  The default is \f3\-fc1\f1.
+.TP 15
+.BI \-i n
+The number of spaces for one indentation level.  The default is 8.
+.TP 15
+.BI \-ip , \-nip
+Enables (disables) the indentation of parameter declarations from the left
+margin.  The default is
+.BR \-ip .
+.TP 15
+.BI \-l n
+Maximum length of an output line.  The default is 78.
+.TP 15
+.BI \-lp , \-nlp
+Lines up code surrounded by parenthesis in continuation lines.  If a line
+has a left paren which is not closed on that line, then continuation lines
+will be lined up to start at the character position just after the left
+paren.  For example, here is how a piece of continued code looks with
+\f3\-nlp\f1 in effect:
+.ne 2
+.nf
+.ft L
+    p1 = first_procedure(second_procedure(p2, p3),
+        third_procedure(p4, p5));
+.ft R
+.fi
+.ne 5
+With \f3\-lp\f1 in effect (the default) the code looks somewhat clearer:
+.nf
+.ft L
+.ta \w'    p1 = first_procedure('u
+    p1 = first_procedure(second_procedure(p2, p3),
+	third_procedure(p4, p5));
+.ft R
+.fi
+.ne 5
+Inserting two more newlines we get:
+.nf
+.ft L
+.ta \w'    p1 = first_procedure('u +\w'second_procedure('u
+    p1 = first_procedure(second_procedure(p2,
+		p3),
+.ta \w'    p1 = first_procedure('u +\w'third_procedure('u
+	third_procedure(p4,
+		p5));
+.ft R
+.fi
+.TP 15
+.B \-npro
+Causes the profile files, `./.indent.pro' and `~/.indent.pro', to be ignored.
+.TP 15
+.BR \-pcs , \-npcs
+If true (\f3\-pcs\f1) all procedure calls will have a space inserted between
+the name and the `('.  The default is 
+.BR \-npcs .
+.TP 15
+.BR \-ps , \-nps
+If true (\f3\-ps\f1) the pointer following operator `\->' will be
+surrounded by spaces on either side.  The default is
+.BR \-nps .
+.TP 15
+.BR \-psl , \-npsl
+If true (\f3\-psl\f1) the names of procedures being defined are placed in
+column 1 \- their types, if any, will be left on the previous lines.  The
+default is 
+.BR \-psl .
+.TP 15
+.BR \-sc , \-nsc
+Enables (disables) the placement of asterisks (`*'s) at the left edge of all
+comments.  The default is
+.BR \-sc .
+.TP 15
+.BR \-sob , \-nsob
+If
+.B \-sob
+is specified, indent will swallow optional blank lines.  You can use this to
+get rid of blank lines after declarations.  Default:
+.BR \-nsob .
+.TP 15
+.B \-st
+Causes
+.B indent
+to take its input from stdin, and put its output to stdout.
+.TP 15
+.BI \-T typename
+Adds
+.I typename
+to the list of type keywords.  Names accumulate:
+.B \-T
+can be specified more than once.  You need to specify all the typenames that
+appear in your program that are defined by \f3typedef\f1s \- nothing will be
+harmed if you miss a few, but the program won't be formatted as nicely as
+it should.  This sounds like a painful thing to have to do, but it's really
+a symptom of a problem in C: \f3typedef\f1 causes a syntactic change in the
+language and \f2indent\f1 can't find all \f3typedef\f1s.
+.TP 15
+.B \-troff
+Causes
+.B indent
+to format the program for processing by troff.  It will produce a fancy
+listing in much the same spirit as
+.BR vgrind .
+If the output file is not specified, the default is standard output,
+rather than formatting in place.
+.TP 15
+.BR \-v , \-nv
+.B \-v
+turns on `verbose' mode;
+.B \-nv
+turns it off.  When in verbose mode,
+.I indent
+reports when it splits one line of input into two or more lines of output,
+and gives some size statistics at completion. The default is
+.BR \-nv .
+.SH "FURTHER DESCRIPTION"
+.LP
+You may set up your own `profile' of defaults to
+.I indent
+by creating a file called
+.BI . indent . pro
+in either your login directory and/or the current directory and including
+whatever switches you like.  Switches in `.indent.pro' in the current
+directory override those in your login directory (with the exception of
+.B -T
+type definitions, which just accumulate).  If
+.I indent
+is run and a profile file exists, then it is read to set up the program's
+defaults.  The switches should be separated by spaces, tabs or newlines.
+Switches on the command line, however, override profile switches.
+.LP
+.B Comments
+.LP
+.IR "`Box' comments" .
+.I Indent
+assumes that any comment with a dash or star immediately after the start of
+comment (that is, `/*\-' or `/**') is a comment surrounded by a box of stars.
+Each line of such a comment is left unchanged, except that its indentation
+may be adjusted to account for the change in indentation of the first line
+of the comment.
+.LP
+.IR "Straight text" .
+All other comments are treated as straight text.
+.I Indent
+fits as many words (separated by blanks, tabs, or newlines) on a
+line as possible.  Blank lines break paragraphs.
+.LP
+.B Comment indentation
+.LP
+If a comment is on a line with code it is started in the `comment column',
+which is set by the
+.BI \-c n
+command line parameter.  Otherwise, the comment is started at
+.I n
+indentation levels less than where code is currently being placed, where
+.I n
+is specified by the
+.BI \-d n
+command line parameter.  If the code on a line extends past the comment
+column, the comment starts further to the right, and the right margin may be
+automatically extended in extreme cases.
+.LP
+.B Preprocessor lines
+.LP
+In general, \f2indent\f1 leaves preprocessor lines alone.  The only
+reformatting that it will do is to straighten up trailing comments.  It
+leaves embedded comments alone.  Conditional compilation
+(\f3#ifdef...#endif\f1) is recognized and \f2indent\f1 attempts to correctly
+compensate for the syntactic peculiarities introduced.
+.LP
+.B C syntax
+.LP
+\f2Indent\f1 understands a substantial amount about the syntax of C, but it
+has a `forgiving' parser.  It attempts to cope with the usual sorts of
+incomplete and misformed syntax.  In particular, the use of macros like:
+.nf
+.ft L
+        #define forever for(;;)
+.ft R
+.fi
+is handled properly.
+.SH FILES
+.DT
+.br
+\&./.indent.pro	profile file
+.br
+~/.indent.pro	profile file
+.SH BUGS
+.I Indent
+has even more switches than \f2ls\f1.
+.sp
+.ne 5
+A common mistake that often causes grief is typing:
+.nf
+.ft L
+    indent *.c
+.ft R
+.fi
+to the shell in an attempt to indent all the \f3C\f1 programs in a directory.
+This is probably a bug, not a feature.

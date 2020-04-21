@@ -1,0 +1,279 @@
+'\"macro stdmacro
+.TH LS 1
+.SH NAME
+ls \- list contents of directory (enhanced Berkeley version)
+.SH SYNOPSIS
+.B ls
+[
+.B \-1ACFHLRTabcdfgilmnoqrstux
+] name ...
+.SH DESCRIPTION
+For each directory argument,
+.I ls\^
+lists the contents of the directory;
+for each file argument,
+.I ls\^
+repeats the file name(s) and any other information
+requested with the
+.I ls\^
+options.
+The output is sorted alphabetically by default.
+When no argument is given, the current directory is listed.
+When several arguments are given,
+the arguments are first sorted appropriately,
+but file arguments appear
+before directories and their contents.
+.PP
+There are three major listing formats.
+The format chosen depends on whether the output is going
+to a terminal, and may also be controlled by option flags.
+The default format for a terminal is to list the contents of directories
+in multi-column format, with the entries sorted down the columns.
+(Files which are not the contents of a directory being interpreted
+are always sorted across the page rather than down the page in columns.
+This is because the individual file names may be arbitrarily long.)
+Files are listed first, and each directory being listed is labeled
+with its pathname, when two or more directory listings are
+requested.
+If the standard output is not a terminal, the default format is to
+list one entry per line.
+Finally, there is a stream output format in which files are listed
+across the page, separated by commas.
+The
+.B \-m
+flag enables this format.
+.PP
+There are numerous options:
+.TP "\w'\f3\-F\f1\|\ \ 'u"
+.B  \-l
+List in long format, giving mode, number of links, owner, group,
+size in bytes, and time of last modification
+for each file.
+(See below.)
+If the file is a special file, the size field will contain
+the major and minor device numbers.
+.TP
+.B  \-t
+Sort by time modified (latest first) instead of
+by name.
+.TP
+.B  \-a
+List all entries, including
+entries preceded by a dot (.).
+.TP
+.B  \-A
+Same as 
+.B  \-a
+, but not including the directory files (.)
+or (..).
+.TP
+.B  \-s
+Give size in kbytes (one kbytes equals 1024 bytes),
+not including indirect blocks, for each entry.
+.TP
+.B  \-d
+If argument is a directory, list only its name, not
+its contents (usually used with
+.B \-l
+to get status
+on directory).
+.TP
+.B  \-L
+If the file is a symbolic link, list the file that the
+link references.
+.TP
+.B  \-H
+If the file is a symbolic link, list the link itself.
+.TP
+.B  \-r
+Reverse the order of sort to get reverse alphabetic
+or oldest first as appropriate.
+.TP
+.B  \-u
+Use time of last access (use) instead of last
+modification for sorting
+.RB ( \-t )
+or printing
+.RB ( \-l ).
+.TP
+.B  \-c
+Use time of last status change for sorting
+.RB ( \-t )
+or printing
+.RB ( \-l )
+(see 
+.IR stat\^ (2)).
+.TP
+.B  \-i
+Print i-number in first column
+of the report for each file listed.
+.TP
+.B  \-f
+Force each argument to be interpreted as a directory
+and list the name found in each slot.
+This option turns off
+.BR \-l ,\  \-t ,\  \-s ,
+and
+.BR \-r ,
+and
+turns on
+.BR \-a ;
+the entries are printed in the order that they 
+appear in the directory.
+.TP
+.B  \-g
+Do not give owner 
+.SM ID
+in long listing.
+.TP
+.B  \-o
+Do not give group 
+.SM ID
+in long listing
+.TP
+.B  \-m
+Force stream output format.
+.TP
+.B  \-1
+Force one entry per line output format, e.g., to a terminal.
+.TP
+.B  \-C
+Force multi-column output, e.g., to a file or a pipe.
+.TP
+.B  \-q
+Force printing of non-graphic characters in file names as
+the character `?'; this normally happens only if the output device is
+a terminal.
+.TP
+.B  \-b
+Force printing of non-graphic characters to be in the `\eddd'
+notation, in octal.
+.TP
+.B  \-x
+Force columnar printing to be sorted across rather than
+down the page.
+If the last character of the name the program is invoked
+with is an `x' (for example, by linking 
+.I /bin/ls 
+to 
+.IR /bin/lx ), 
+this option 
+is the default.
+.TP
+.B  \-F
+Cause directories to be marked with a trailing ``/'', executable
+files to be marked with a trailing ``\(**'', symbolic links to be
+marked with a trailing ``@'', and network symbolic links to be
+marked with a trailing ``!'';
+If the last character of the name the program is invoked
+with is a `f' (for example, by linking 
+.I /bin/ls
+to
+.IR /bin/lf ), 
+this option is the default.
+.TP
+.B  \-p
+Cause directories to be marked with a trailing `/'.
+.TP
+.B  \-R
+Recursively list subdirectories encountered.
+.TP
+.B  \-T
+Causes long listings to include seconds in the time.
+.PP
+The mode printed under the
+.B \-l
+(long) option contains eleven characters
+which are interpreted
+as follows:
+.PP
+.ti 4em
+The first character is:
+.RS .3i
+.TP "\w'\f3m\f1\|\ \ 'u"
+.B d
+if the entry is a directory;
+.PD 0
+.TP
+.B b
+if the entry is a block-type special file;
+.TP
+.B c
+if the entry is a character-type special file;
+.TP
+.B p
+if the entry is a named pipe;
+.TP
+.B l
+if the entry is a symbolic link;
+.TP
+.B \-
+if the entry is a plain file.
+.PD
+.PP
+The next nine characters are interpreted
+as three sets of three bits each.
+The first set refers to owner permissions;
+the next to permissions to others in the same user-group;
+and the last to all others.
+Within each set the three characters indicate
+permission respectively to read, to write, or to
+execute the file as a program.
+For a directory, ``execute'' permission is interpreted
+to mean permission to search the directory
+for a specified file.
+The permissions are indicated as follows:
+.TP "\w'\f3m\f1\|\ \ 'u"
+.B  r
+if the file is readable;
+.PD 0
+.TP
+.B w
+if the file is writable;
+.TP
+.B x
+if the file is executable;
+.TP
+.B \-
+if the indicated permission is not granted.
+.PD
+.PP
+The group-execute permission character is given
+as
+.B s
+if the file has set-group-\s-1ID\s+1 mode;
+likewise the user-execute permission character is given
+as
+.B s
+if the file has set-user-\s-1ID\s+1 mode.
+.PP
+The last character of the mode (normally `x' or `\-') is 
+.B t
+if the 1000 bit of the mode is on.
+See
+.IR chmod\^ (1)
+for further information on file permissions and modes.
+.RE
+.PP
+When the sizes of the files in a directory
+are listed, a total count of kbytes,
+not including indirect blocks is printed.
+.PP
+The name of the file that a symbolic link points to is
+also listed (unless the 
+.B \-L 
+flag is also given).
+.SH EXAMPLE
+.TP \w'ls\ \ \ 'u
+ls
+lists the contents of the current directory in multi-column format.
+.SH FILES
+.ta \w'/etc/passwd\ \ \ \ \ 'u
+/etc/passwd	to get user \s-1ID\s+1s for 
+ls \-l.
+.br
+/etc/group	to get group \s-1ID\s+1s for
+ls \-l.
+.SH BUGS
+Eight character user names merge with the group name, so you
+cannot use utilities that count fields separated by whitespace.

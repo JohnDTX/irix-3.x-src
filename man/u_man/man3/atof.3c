@@ -1,0 +1,41 @@
+'\"macro stdmacro
+.TH ATOF 3C 
+.SH NAME
+atof (_latof) \- convert \s-1ASCII\s0 string to floating-point number
+.SH SYNOPSIS
+.B #include <math.h>
+.PP
+.B float atof (nptr)
+.br
+.B char \(**nptr;
+.PP
+.B long float _latof (nptr)
+.br
+.B char \(**nptr;
+.SH DESCRIPTION
+.I (_l)atof\^
+converts a character string pointed to by
+.I nptr\^
+to a floating-point number of the indicated precision.
+The first unrecognized character ends the conversion.
+.I (_l)atof\^
+recognizes an optional string of white-space characters
+(tabs and spaces), then an optional sign, 
+then a string of digits optionally containing a decimal
+point, then an optional
+.B e
+or
+.B E
+followed
+by an optionally signed integer.
+If the string begins with an unrecognized character,
+.I (_l)atof\^
+returns the value zero.
+.SH DIAGNOSTICS
+The low-level floating point routines will raise a floating point
+exception if the conversion done by
+.I (_l)atof\^
+overflows or underflows.
+.SH SEE ALSO
+fpsigset(3C), scanf(3S), strtol(3C).
+.\"	@(#)atof.3c	5.1 of 10/19/83

@@ -1,0 +1,64 @@
+.TH XMEM 7 
+.SH NAME
+xmem \- EXOS ethernet front-end processor board memory
+.SH SYNOPSIS
+\f3#include <ex_ioctl.h>
+.br
+#include <sys/init.h>
+
+ioctl(xmem, EXIOCRESET, 0);
+.br
+ioctl(xmem, EXIOCSTART, &startaddr);
+.br
+ioctl(xmem, EXIOCGCONF, &confmsg);\f1
+.SH DESCRIPTION
+.lg
+\f2xmem\f1
+is a special file that is an image of the EXOS board's memory.
+\f2lseek\f1(2) can be used to set the on-board address.
+Any user can \f2read\f1(2), but only the super user can \f2write\f1(2).
+\f2xmem\f1 also provides privileged \f2ioctl\f1(2) operations that 
+configure the board and startup on-board code.
+\f2netload\f1(1M) uses this device to download TCP/IP code to the 
+board and start it up.
+Subsequent to startup, \f2xmem\f1
+provides access to on-board data memory for utilities like \f2adb\f1(1).
+.PP
+EXIOCRESET resets the board and puts it through self-diagnostics,
+then configures it for downloading and front-end mode operation.
+.PP
+EXIOCSTART starts up downloaded code at the given segmented address.
+.PP
+EXIOCGCONF returns the configuration message (see \f2init.h\f1).
+Typically, it is used to obtain information that the
+EXOS returns in the configuration reply message.
+This includes NX firmware release and available on-board RAM locations.
+EXIOCGCONF should not be used before EXIOCRESET is called.
+.PP
+Before startup, byte addresses in \f2xmem\f1
+are interpreted as 8086-style segmented physical memory addresses.
+After startup, byte addresses are interpreted as 8086-style offsets
+relative to the current data segment value (0x1000 for TCP/IP)
+of the on-board code.
+.SH DIAGNOSTICS
+.TP 5
+\f3EXIOCRESET \f1
+Returns EIO if the self-test or configuration failed
+.TP 5
+\f3EXIOCSTART \f1
+Returns EIO if the starting address is invalid;
+reading or writing a nonexistent memory address on the EXOS board
+returns EIO or ENXIO
+.SH SEE ALSO
+netload(1M)
+.SH FILES
+/dev/EXOS/xmem
+.SH BUGS
+Before startup, read is not implemented.
+.PP
+Before startup, a write that advances the offset part
+of the segmented file pointer past 64K cause it to spill over into
+the segment part of the file pointer, with unexpected results.
+.PP
+After startup, reads and writes past 64K ``wrap around'' to 0.
+EOF never occurs.

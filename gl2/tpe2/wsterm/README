@@ -1,0 +1,3 @@
+When making changes here, make sure they are propagated to ../term.
+Note that the ret.c in this directory is compiled from ../term/ret.c.
+

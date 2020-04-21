@@ -1,0 +1,49 @@
+.TH readpixels 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I readpixels
+- return values of specific pixels
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short readpixels(n, colors) "
+.B "short n; "
+.B "Colorindex colors[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function readpi(n, colors)"
+.B "integer*2 n, colors(n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function readpixels(n: Short; var colors: Colorarray): Short;"
+.sp
+.SH DESCRIPTION
+.I Readpixels
+reads pixel values to be read from the bitplanes.  It
+returns an array of \f3n\f1 colors, 
+starting from the current 
+character position.  (In double buffer mode only the back buffer is read.)
+It also returns the number of pixels read, which may be less than
+.B n
+if you attempt to read pixels with x >
+.I XMAXSCREEN.
+.PP
+Pixel reading is not restricted to the current
+viewport, as is the current character position.  
+As long as the current
+character position is inside the viewport when the \f2readpixels\f1
+command is issued, any number of pixel values can be read, including
+those outside the viewport.
+.PP
+\f2Readpixels\f1 will not wrap to the
+next line of pixels when the cursor reaches the edge of the screen.
+The current character position is updated when the
+\f2readpixels\f1 command is executed.  The current position is set to
+one pixel to the right of the last one read, or invalidated if the
+new position is outside the viewport.
+.SH "SEE ALSO"
+.I readRGB, writepixels
+.SH NOTE
+This command can only be used in immediate mode.

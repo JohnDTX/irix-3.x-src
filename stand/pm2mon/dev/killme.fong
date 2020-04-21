@@ -1,0 +1,4 @@
+cc -c -O -DMC68000 -DPM2 -DQPROM -I../include  efs_file.c
+ar r ../libpm2prom.a i488.do  ikon.do  iprblk.do  mdrblk.do  nx.do  tapesub.do bell_file.do  bky_file.do  bootstr.do  cpio_sub.do  diskboot.do  efs_file.o  enet.do  file_sub.do  i488boot.do  ipboot.do  mdboot.do  memboot.do  mfboot.do  mmemboot.do  netboot.do  seq.do  serialio.do  tapeboot.do
+:
+:

@@ -1,0 +1,95 @@
+As contributions of Kermit programs continue to arrive, the Kermit
+distribution area grows larger and larger.  This week, the collection finally
+grew so large that it would not fit on a 1600bpi labeled tape.  The past
+several days have been spent reorganizing the entire Kermit distribution
+operation.
+
+The biggest change is that there are now two major Kermit distribution areas,
+which correspond to two Kermit distribution tapes (Tape A and Tape B).
+Area/Tape B contains all the mainframe and minicomputer ("host")
+implementations; Area/Tape A contains everything else -- the microcomputer
+(PC, workstation) implementations, the manuals, and miscellany.  Splitting up
+the files this way allows room for a good amount of growth, and also lets
+several versions (notably the U of Toronto Pascal Kermits for RT-11 and
+VAX/VMS) be resurrected from the "Kermit-Extra" area.
+
+Even though the files have been split into two directories, they still all
+have (and must have) UNIQUE PREFIXES.  No files with the same prefix will
+appear in more than one directory (except the new AA files, about which see
+below).
+
+Many files have been renamed in a more sensible way.  Previously, all the
+"bureaucratic" files like VERSIONS.DOC, 00README.TXT, etc, were mixed in with
+all the other files.  Now (in addition to being rewritten), they have new
+names, all starting with AA.  In fact, all filenames now start with a letter,
+since it turns out that some systems require that.
+
+Old             New          What
+
+(none)          AAAREAD.ME   Explains what all the AA files are.
+00README.TXT    AATAPE.HLP   Talks about tapes (replaces ANSITAPE, OSSLTAPE)
+(none)          AANETW.HLP   Instructions for getting Kermit via network
+00README.TXT    AAFILES.HLP  Explains what the Kermit files are
+CURRENT.DOC     AAVNEW.HLP   List of current versions, chronological
+VERSIONS.DOC    AAVSYS.HLP   List of current versions, alphabetical by system
+(none)          AAWAIT.HLP   List of versions we're waiting for
+FLYER.DOC       AAXFLY.DOC   Flyer (now also includes order form)
+COMMER.DOC      AAXCOM.DOC   Commercial policy, only the name has been changed
+KLTR.TEX        AAKLTR.TEX   Cover letter, rewritten
+
+The files that used to be VERSIONS.DOC and CURRENT.DOC been combined into
+AAVERS.HLP.  This is a list of versions, one on each line, showing the
+following information:
+
+Prefix,                 Operating  Program   Program  Released
+ Tape  Machine          System     Language  Version  yy/mm/dd  Contributor
+
+for example:
+
+CMS B  IBM 370 Series   VM/CMS     Assembler    2.01  85/05/20  Columbia U
+
+Whenever a new version is installed, this file is updated and then sorted
+several different ways to produce the following files:
+
+AAVNEW.HLP -- Listed in reverse chronological order of release date
+AAVOPS.HLP -- Listed alphabetically by operating system only
+AAVPFX.HLP -- Listed alphabetically by prefix, regardless of tape
+AAVSYS.HLP -- Listed alphabetically by machine and operating system
+AAVTAP.HLP -- Listed by tape (A or B), then alphabetically by file prefix
+
+The AA*.* files will appear in both Kermit distribution areas/tapes.  A glance
+at the appropriate file will make it easy to answer questions like "Is there a
+Kermit for xxx?", or "Has there been a new release of Kermit for xxx since
+yyy?", or "What is the prefix for zzz Kermit?", or "What tape is such-and-such
+a Kermit on?"
+
+Some Kermit program files were renamed:
+
+    Old             New
+
+  20KERMIT        K20MIT (needed to start with a letter)
+  170KERMIT       CDCKER    "
+  800KER          LUXKER    "
+  86KERMIT        C86KER    "
+  CMSKERMIT       CMSKER (so Scribe could deal with the .MSS better)
+
+Those who use the Internet, CCnet, or BITnet to get Kermit files from Columbia
+should read KER:AANETW.HLP for details about network access.  The BITnet area
+(KERMSRV@CUVMA) is not yet reorganized -- that will take another week or two.
+Those who use FTP or NFT to get files from CU20B should notice no difference
+in the procedure, since the "logical name" KER: has been redefined to include
+the new area in its search path; the fact that no prefix (except AA) appears
+in more than one area should allow network file transfer to work as before,
+except when you try to get ALL the Kermit files (would anybody really do
+that?) -- if you tried to "MULTIPLE GET KER:*.*", you would wind up with only
+the files from area A.  If you need to refer to the B area explicitly, its
+logical name is K2:, as in "MULTIPLE GET K2:*.*".
+
+And a minor complication -- Macintosh Kermit is part of the CK*.* files, which
+are on Tape B.  But since the Mac is a micro, people will be upset if they
+order the "micros" tape (A) and there's no Mac Kermit on it.  So just the .HQX
+files for CKMKER and CKMKEY have copies KER:, along with the CKMKER.DOC file.
+However...  since these files were also in K2:, their names have to be
+something that doesn't start with CK; otherwise, people who tried to FTP CK*.*
+would only get those three files and nothing else (because DEC-20 logical names
+don't step).  So they are called KER:MCKER and MCKEY...

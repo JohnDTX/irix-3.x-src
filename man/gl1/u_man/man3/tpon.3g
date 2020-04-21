@@ -1,0 +1,21 @@
+.TH tpon 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2tpon\fP - turn on textport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "tpon()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine tpon"
+.sp
+.SH DESCRIPTION
+\f2Tpon\fP turns on the textport
+allocated by \f2textport\fP.
+.SH "SEE ALSO"
+.I color, pagecolor, pagewritemask, textcolor,
+.I textport, textwritemask, tpoff
+.SH NOTE
+This command can only be used in immediate mode.

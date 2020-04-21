@@ -1,0 +1,215 @@
+.TH XNSLIB 3X
+.SH NAME
+xnslib \- XNS network support subroutines
+.SH SYNOPSIS
+.nf
+.B "bcmp (buf1, buf2, count)"
+.B "char *buf1, *buf2;"
+.B "int count;"
+.PP
+.B "bcopy (from, to, count)"
+.B "char *from, *to;"
+.B "int count;"
+.PP
+.B "bzero (buf, size)"
+.B "char *buf;"
+.B "int size;"
+.PP
+.B "conserr (format, arg)"
+.B "char *format, *arg;"
+.PP
+.B "makeproc ()"
+.PP
+.B "isolate ()"
+.PP
+.B "prw (shp, count)"
+.B "short *shp;"
+.B "int count;"
+.PP
+.B "mprw (string, shp, count)"
+.B "char *string;"
+.B "short *shp;"
+.B "int count;"
+.PP
+.B "prc (cp, count)"
+.B "char *cp;"
+.B "int count;"
+.PP
+.B "mprc (string, cp, count)"
+.B "char *string, *cp;"
+.B "int count;"
+.PP
+.B "setvec ()"
+.PP
+.B "tread (fd, buf, count, secs)"
+.B "int fd, count, secs;"
+.B "char *buf;"
+.PP
+.B "twrite (fd, buf, count, secs)"
+.B "int fd, count, secs;"
+.B "char *buf;"
+.PP
+.B "tsend (fd, buf, count, secs, dtype)"
+.B "int fd, count, secs, dtype;"
+.B "char *buf;"
+.PP
+.B "rawmode (fd)"
+.B "int fd;"
+.PP
+.B "normalmode (fd)"
+.B "int fd;"
+.PP
+.B "restoremode (fd)"
+.B "int fd;"
+.SH DESCRIPTION
+.I Bcmp
+compares
+.B count
+bytes of
+.B buf1
+with
+.B buf2
+and returns 0 if they are equal, \-1 if not.
+.I bcmp
+has been copied for compatability with 4.2BSD.
+.PP
+.I Bcopy
+copies
+.B count
+bytes from
+.B from
+to
+.B to.
+.I Bcopy
+has been copied for compatability with 4.2BSD.
+.PP
+.I Bzero
+fills
+.B size
+bytes of
+.B buf
+with zeros.
+.I Bzero
+has been copied for compatability with 4.2BSD.
+.PP
+.I Conserr
+uses
+.I fprintf
+to write the arguments to
+.I /dev/console .
+.PP
+.I Makeproc
+makes a child by forking twice, so that a
+.I wait
+need not be done.  A \-1 is returned by the
+parent after the resultant child has been started.
+.I Makeproc
+has been copied for compatability with 4.2BSD.
+.PP
+.I Isolate
+starts a child process
+.I (makeproc)
+and opens a network
+special file
+.I (xnsfile).
+An
+.I NXSETPGRP ioctl
+is then
+done on the resultant file descriptor.
+.I Isolate
+has been copied for compatability with 4.2BSD.
+.PP
+.I Isolate
+starts a child process
+.I (makeproc)
+and opens a network
+special file
+.I (xnsfile).
+An
+.I NXSETPGRP ioctl
+is then
+.PP
+.I Prw
+prints
+.B count
+shorts from array
+.B shp
+in hex,
+to the standard output.
+.PP
+.I Mprw
+is like
+.I prw,
+except that it first prints
+.B string.
+.PP
+.I Prc
+and
+.I mprc
+are like
+.I prw
+and
+.I mprw,
+except that they work on an array of chars,
+rather than shorts.
+.I Prc
+and
+.I mprc
+have been copied for compatability with 4.2BSD.
+.PP
+.I Setvec
+initializes signal handling.
+Alarms and hangups are caught,
+while interrupts,
+broken pipes and termination signals are
+ignored.
+.PP
+.I Tread
+and
+.I twrite
+read and write from/to network file descriptors,
+using a timeout.
+If the read or write doesn't complete within
+.B secs
+seconds,
+the operation is aborted,
+and a \-1 is returned.
+A remote hangup on the connection
+will also cause the
+operation to return with a \-1.
+.PP
+.I Tsend
+is like
+.I twrite,
+except that a data type can be specified,
+like
+.I xnswrite.
+.PP
+.I Rawmode
+sets the terminal specified by
+.B fd
+into raw mode.
+.I Normalmode
+does the inverse.
+.I normalmode
+has been copied for compatability with 4.2BSD.
+.PP
+.I Restoremode
+sets
+.B fd
+back to what it was before
+.I rawmode
+was called.
+.SH "SEE ALSO"
+sgboot(1M),
+sgbounce(1M),
+xcp(1),
+xlogin(1),
+xnsd(1M),
+xx(1),
+utmp(3X),
+xcmd(3X),
+xconnect(3X),
+xnsfile(3X),
+xnsioctl(3X),
+xnswrite(3X)

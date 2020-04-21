@@ -1,0 +1,81 @@
+'\"macro stdmacro
+.TH LINENUM 4
+.SH NAME
+linenum \- line number entries in a common object file
+.SH SYNOPSIS
+.B
+#include  <linenum.h>
+.SH DESCRIPTION
+Compilers based on
+.IR pcc
+generate an entry in the object file for
+each C source line on which a breakpoint is possible (when
+invoked with the \f2\-g\f1 option; see 
+.IR cc (1)).
+Users can then reference line numbers when using
+the appropriate software test system.
+The structure of these line number entries appears below.
+.PP
+.if t .RS
+.ta \w'struct\ \ 'u +\w'unsigne'u +\w'd\ short\ \ 'u
+.nf
+.lg 0
+struct	lineno
+{
+	union
+	{
+		long	l_symndx ;
+		long	l_paddr ;
+	}		l_addr ;
+	unsigned short	l_lnno ;
+} ;
+.fi
+.lg
+.if t .RE
+.PP
+Numbering starts with one for each function.
+The initial line number entry for a function has
+.I l_lnno
+equal to zero, and the symbol table index of the function's
+entry is in
+.IR l_symndx .
+Otherwise,
+.I l_lnno
+is non-zero, and
+.I l_paddr
+is the physical address of the code for the referenced line.
+Thus the overall structure is the following:
+.sp
+.RS 10
+.ta \w'function\ symtab\ index\ \ \ \ 'u
+.nf
+.I
+l_addr	l_lnno
+.sp
+function symtab index	0
+physical address	line
+physical address	line
+\&...
+
+function symtab index	0
+physical address	line
+physical address	line
+\&...
+.fi
+.sp
+.RE
+.DT
+.SH "SEE ALSO"
+cc(1), a.out(4).
+.\"	@(#)linenum.4	5.2 of 5/18/82
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man4/RCS/linenum.4,v 1.1 89/03/27 17:04:39 root Exp $
+.\" $Log:	linenum.4,v $
+Revision 1.1  89/03/27  17:04:39  root
+Initial check-in for 3.7
+
+.\" Revision 1.3  86/04/14  16:35:24  celia
+.\" removed bad ref.
+.\" 
+.\" Revision 1.2  85/01/08  11:28:16  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

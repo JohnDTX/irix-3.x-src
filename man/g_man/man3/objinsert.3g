@@ -1,0 +1,46 @@
+.TH objinsert 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B objinsert
+\- inserts routines in an object at a specified location
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "objinsert(t) "
+.B "Tag t; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine objins(t)"
+.B "integer*4 t"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure objinset(t: Tag);"
+.SH DESCRIPTION
+.B objinsert
+takes tag
+.I t
+as an argument,
+and positions an editing
+pointer on the specified routine.
+Add the desired graphics routines after the tag.
+.PP
+Use
+.B closeobj
+or another positioning routine 
+.B (objdelete,
+.B objinsert,
+or
+.B objreplace)
+to terminate the insertion.
+.SH "SEE ALSO"
+editobj, closeobj, objdelete, objreplace, maketag
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

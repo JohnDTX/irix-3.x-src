@@ -1,0 +1,25 @@
+.TH getcmmode 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getcmmode
+- return the current color map mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getcmmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getcmm()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getcmmode: Short;"
+.SH DESCRIPTION
+.I Getcmmode
+returns the current color map mode.  The returned value
+is either 0 for multimap mode or 1 for onemap mode.
+.SH "SEE ALSO"
+.I multimap, onemap
+.SH NOTE
+This command can only be used in immediate mode.

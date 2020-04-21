@@ -1,0 +1,4 @@
+fbcscreen.c has been preprocessed on the Vax and the result taken
+over.  This was because of macro expansion problems with our preprocessor.
+
+enet/commands.c changed to NOT use reentrant or IRQ2Vect.

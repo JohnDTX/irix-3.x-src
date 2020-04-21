@@ -1,0 +1,36 @@
+.TH getdisplaymode 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getdisplaymode
+- return the current display mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getdisplaymode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getdis()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getdisplaymode: Short;"
+.sp
+.SH DESCRIPTION
+.I Getdisplaymode
+returns the current display mode, where
+.sp
+.TS
+center, box;
+ic ic 
+c l.
+value	display mode
+_
+0	RGB mode
+1	single buffer mode
+2	double buffer mode
+.TE
+.SH "SEE ALSO"
+.I doublebuffer, RGBmode, singlebuffer
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,243 @@
+'\"macro stdmacro
+.ds P UNIX
+.TH RUNACCT 1M
+.SH NAME
+runacct \- run daily accounting
+.SH SYNOPSIS
+.B /usr/lib/acct/runacct
+[\^mmdd [\^state\^]\^]
+.SH DESCRIPTION
+.I Runacct\^
+is the main daily accounting shell procedure.
+It is normally initiated via
+.IR cron (1M).
+.I Runacct\^
+processes connect, fee, disk, and process accounting files.
+It also prepares summary files for
+.I prdaily\^
+or billing purposes.
+.PP
+.I Runacct\^
+takes care not to damage active accounting files or summary
+files in the event of errors.
+It records its progress by writing descriptive diagnostic
+messages into
+.BR active .
+When an error is detected, a message is written to
+.BR /dev/console ,
+mail (see \f2mail\fP(1)) is sent to
+.BR root \ and \ adm ,
+and \f2runacct\fP terminates.
+.I Runacct\^
+uses a series of lock files to protect against re-invocation.
+The files
+.B lock
+and
+.B lock1
+are used to prevent simultaneous invocation, and
+.B lastdate
+is used to prevent more than one invocation per day.
+.PP
+.I Runacct\^
+breaks its processing into separate, restartable
+.I states\^
+using
+.B statefile
+to remember the last
+.I state\^
+completed.
+It accomplishes this by writing the
+.I state\^
+name into
+.BR statefile .
+.I Runacct\^
+then looks in
+.B statefile
+to see what it has done and to determine what to process next.
+.I States\^
+are executed in the following order:
+.RS .3i
+.TP "\w'\s-1MERGETACCT\s0\ \ 'u"
+.SM
+.B SETUP
+Move active accounting files into working files.
+.TP
+.SM
+.B WTMPFIX
+Verify integrity of
+.B wtmp
+file, correcting date changes if necessary.
+.TP
+.SM
+.B CONNECT1
+Produce connect session records in
+.B ctmp.h
+format.
+.TP
+.SM
+.B CONNECT2
+Convert
+.B ctmp.h
+records into
+.B tacct.h
+format.
+.TP
+.SM
+.B PROCESS
+Convert process accounting records into
+.B tacct.h
+format.
+.TP
+.SM
+.B MERGE
+Merge the connect and process accounting records.
+.TP
+.SM
+.B FEES
+Convert output of
+.I chargefee\^
+into
+.B tacct.h
+format and merge with connect and process accounting records.
+.TP
+.SM
+.B DISK
+Merge disk accounting records with connect, process, and fee accounting
+records.
+.TP
+.SM
+.B MERGETACCT
+Merge the daily total accounting records in
+.B daytacct
+with the summary total accounting records in
+.BR /usr/adm/acct/sum/tacct .
+.TP
+.SM
+.B CMS
+Produce command summaries.
+.TP
+.SM
+.B USEREXIT
+Any installation-dependent accounting programs can be
+included here.
+.TP
+.SM
+.B CLEANUP
+Cleanup temporary files and exit.
+.RE
+.PP
+To restart
+.I runacct\^
+after a failure, first check the
+.B active
+file for diagnostics, then fix up any corrupted data files
+such as
+.BR pacct \ or \ wtmp .
+The
+.B lock
+files and
+.B lastdate
+file must be removed before
+.I runacct\^
+can be restarted.
+The argument
+.I mmdd\^
+is necessary if \f2runacct\fP is being restarted,
+and
+specifies the month and day for which
+.I runacct\^
+will rerun the accounting.
+Entry point for processing is based on the contents of
+.BR statefile ;
+to override this,
+include the desired
+.I state\^
+on the command line to designate where processing
+should begin.
+.SH EXAMPLE
+.IP
+nohup runacct 2> /usr/adm/acct/nite/fd2log &
+.PP
+starts \f2runacct\fP.
+.IP
+nohup runacct 0601 2>> /usr/adm/acct/nite/fd2log &
+.PP
+restarts \f2runacct\fP.
+.IP
+nohup runacct 0601 \s-1MERGE\s0 2>> /usr/adm/acct/nite/fd2log &
+.PP
+restarts \f2runacct\fP at a specific \f2state\fP.
+.SH FILES
+/etc/wtmp
+.br
+/usr/adm/pacct\f2\(**\fP
+.br
+/usr/src/cmd/acct/tacct.h
+.br
+/usr/src/cmd/acct/ctmp.h
+.br
+/usr/adm/acct/nite/active
+.br
+/usr/adm/acct/nite/daytacct
+.br
+/usr/adm/acct/nite/lock
+.br
+/usr/adm/acct/nite/lock1
+.br
+/usr/adm/acct/nite/lastdate
+.br
+/usr/adm/acct/nite/statefile
+.br
+/usr/adm/acct/nite/ptacct\f2\(**\fP.\f2mmdd\fP
+.SH SEE ALSO
+acct(1M),
+acctcms(1M),
+acctcom(1),
+acctcon(1M),
+acctmerg(1M),
+acctprc(1M),
+acctsh(1M),
+cron(1M),
+fwtmp(1M),
+acct(2),
+acct(4),
+utmp(4).
+.SH DIAGNOSTICS
+The accounting system will start complaining with
+.B \(**\(**\(**\s-1RECOMPILE\s+1 pnpsplit
+.SM
+.B WITH NEW HOLIDAYS\*S\(**\(**\(**
+after the last holiday of the year.
+See "The \s-1UNIX\s+1 Accounting System" 
+for more on how to correct this condition.
+Other diagnostics are placed in various error
+and log files.
+.SH BUGS
+Normally it is not a good idea to restart
+.I runacct\^
+in the
+.SM
+.B SETUP
+.IR state .
+Run
+.SM
+.B SETUP
+manually and restart via:
+.PP
+.RS 5
+.B runacct
+.I mmdd\^
+.SM
+.B WTMPFIX
+.RE
+.PP
+If
+.I runacct\^
+failed in the
+.SM
+.B PROCESS
+.IR state,
+remove the last
+.B ptacct
+file because it will not be complete.
+.\"	@(#)runacct.1m	5.1 of 10/17/83

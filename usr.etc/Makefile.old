@@ -1,0 +1,7 @@
+# makefile for making SGI usr/etc files
+# $Source: /d2/3.7/src/usr.etc/RCS/Makefile.old,v $
+# @(#)$Revision: 1.1 $
+# $Date: 89/03/27 18:32:04 $
+
+all boot install clean clobber:
+	cd bootp; make $@

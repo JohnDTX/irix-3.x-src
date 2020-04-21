@@ -1,0 +1,45 @@
+.TH SELECT 3N 
+.SH NAME
+select \- synchronous I/O multiplexing
+.SH SYNOPSIS
+.nf
+\f3#include <sys/time.h>
+.sp
+nfound = select(nfds, readfds, writefds, timeout)
+int nfound, nfds, *readfds, *writefds;	
+long timeout;\f1
+.fi
+.SH DESCRIPTION
+\f2select\f1 examines the I/O descriptors in the bits 0 through
+\f2nfds \-1\f1 in the \f2readfds\f1 and \f2writefds\f1 masks.  
+It checks if the descriptors are ready for reading or writing.
+Mask bit "1<<f" represents the file descriptor \f2f\f1.
+.PP
+\f2select\f1 returns a mask and count (\f2nfound\f1)
+of the ready descriptors.
+.PP
+\f2timeout\f1 specifies the maximum interval to wait for the
+selection to complete, in milliseconds.
+.PP
+\f2readfds \f1 and/or \f2writefds \f1
+may be specified as 0 if no descriptors are of interest.
+.SH "RETURN VALUE
+\f2select\f1 returns the number of descriptors that are contained in
+the bit masks, or \-1 if an error occurred.
+If the time limit expires, \f2select\f1 returns 0.
+.SH "ERRORS
+.TP 15
+[EBADF]
+An invalid descriptor was specified.
+.TP 15
+[EINTR]
+A signal was delivered before any selected
+events occurred, or the time limit expired.
+.SH SEE ALSO
+accept(3N), connect(3N), read(2), write(2), receive(3N), send(3N)
+.SH BUGS
+The descriptor masks are always modified on return, even
+if the call returns as the result of the timeout.
+.PP
+\f2select\f1 works only on socket-file descriptors.
+All other files always select as being writable or readable.

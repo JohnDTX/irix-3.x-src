@@ -1,0 +1,297 @@
+'\"macro stdmacro
+.TH MAIL 1
+.SH NAME
+mail, rmail \- send mail to users or read mail
+.SH SYNOPSIS
+.B mail
+[
+.B \-epqr
+] [
+.B \-f
+file
+]
+.PP
+.B mail
+[
+.B \-t
+]
+persons
+.PP
+.B rmail
+[
+.B \-t
+]
+persons
+.SH DESCRIPTION
+.I Mail\^
+without arguments
+prints
+a user's mail,
+message-by-message,
+in last-in, first-out order.
+For each message,
+the user is prompted with a ?,
+and
+a line is read from the standard input
+to determine the disposition of the message:
+.RS .3i
+.PP
+.PD 0
+.TP "\w'\f3\s-1EOT\s+1\f1\ (control-d)\ \ 'u"
+<new-line>
+Go on to next message.
+.TP
+.B +
+Same as <new-line>.
+.TP
+.B d
+Delete message and go on to next message.
+.TP
+.B p
+Print message again.
+.TP
+.B \-
+Go back to previous message.
+.TP
+\f3s\f1 [\^\f2files\^\f1]
+Save message in the named
+.I files\^
+.RB ( mbox
+is default).
+.TP
+\f3w\f1 [\^\f2files\^\f1]
+Save message, without its header, in the named
+.I files\^
+.RB ( mbox
+is default).
+.TP
+\f3m\f1 [\^\f2persons\^\f1]
+Mail the message to the named
+.I persons\^
+(yourself is default).
+.TP
+.B q
+Put undeleted mail back in the
+.I mailfile\^
+and stop.
+.TP
+.SM
+.BR EOT\*S " (control-d)"
+Same as
+.BR q .
+.TP
+.B x
+Put all mail back in the
+.I mailfile\^
+unchanged and stop.
+.TP
+.BI !\^ command
+Escape to the shell to do
+.IR command .
+.TP
+.B \(**
+Print a command summary.
+.PD
+.RE
+.PP
+The optional arguments alter the printing of the mail:
+.PP
+.PD 0
+.RS .3i
+.TP "\w'\f3\-f\|\f2file\f1\ \ 'u"
+.B \-e
+causes mail not to be printed.
+An exit value of 0 is returned if the user has mail;
+otherwise, an exit value of 1 is returned.
+.TP
+.B \-p
+causes all mail to be printed without prompting for disposition.
+.TP
+.B \-q
+causes
+.I mail\^
+to terminate after interrupts.
+Normally an interrupt only causes the
+termination of the message being printed.
+.TP
+.B \-r
+causes messages to be printed in first-in, first-out order.
+.TP
+.BI \-f\| file
+causes
+.I mail\^
+to use
+.I file\^
+(e.g.,
+.BR mbox )
+instead of the default
+.IR mailfile .
+.RE
+.PD
+.PP
+When
+.I persons\^
+are named,
+.I mail\^
+takes the standard input up to an end-of-file
+(or up to a line consisting of just a
+.BR \&. )
+and adds it to each
+.IR person\| 's
+.IR mailfile .
+The message is preceded by the sender's name and a postmark.
+Lines that look like postmarks
+in the message,
+(i.e., "From\ .\|.\|.")
+are preceded with a
+.BR > .
+The
+.B \-t
+option causes the message to be preceded by all
+.I persons\^
+the
+.I mail\^
+is sent to.
+A
+.I person\^
+is usually a user name recognized by
+.IR login\^ (1).
+If a
+.I person\^
+being sent mail is not recognized, or if
+.I mail\^
+is interrupted during input, the file
+.B dead.letter
+will be saved
+to allow editing and resending.
+.PP
+To denote a recipient on a remote system, prefix
+.I person\^
+by the system name and exclamation mark (see
+.IR uucp\^ (1C)).
+Everything after the first exclamation mark in
+.I persons\^
+is interpreted by the remote system.
+In particular, if
+.I persons\^
+contains additional exclamation marks, it can denote a sequence of machines
+through which the message is to be sent on the way to its ultimate
+destination.
+For example, specifying
+.B a!b!cde
+as a recipient's name causes the message to be sent to user
+.B b!cde
+on system
+.BR a .
+System
+.B a
+will interpret that destination as a request to send the message to
+user
+.B cde
+on system
+.BR b .
+This might be useful, for instance, if the sending system
+can access system
+.B a
+but not system
+.BR b ,
+and system
+.B a
+has access to system
+.BR b .
+.PP
+The
+.I mailfile\^
+may be manipulated in two ways to alter the function of
+.IR mail .
+The
+.I other\^
+permissions of the file may be read-write, read-only, or neither
+read nor write to allow different levels of privacy.
+If changed to other than the default, the file will be preserved
+even when empty to perpetuate the desired permissions.
+The file may also contain the first line:
+.PP
+.RS .3i
+Forward to
+.I person\^
+.RE
+.PP
+which will cause all mail sent to the owner of the
+.I mailfile\^
+to be forwarded to
+.IR person .
+This is especially useful to forward all of a person's mail to one
+machine in a multiple machine environment.
+.PP
+.I Rmail\^
+only permits the sending of mail;
+.IR uucp\^ (1C)
+uses
+.I rmail\^
+as a security precaution.
+.PP
+When a user logs in, the presence
+of mail, if any, is indicated. Also, notification
+is made if new mail arrives while using
+.IR mail .
+.SH EXAMPLE
+.IP
+mail carolyn
+.PP
+accepts whatever message is typed up to an 
+.SM EOF\*S.
+Carolyn will be notified that she has mail the next time
+she logs in.
+.PP
+If you want to read mail that has been sent to you, simply type
+.IP
+mail
+.SH FILES
+.PD 0
+.TP "\w'/usr/mail/\(**\f3.\f1lock\ \ \ 'u"
+/etc/passwd
+to identify sender and locate persons
+.TP
+/usr/mail/\f2user\fP
+incoming mail for \f2user\fP;
+i.e., the
+.I mailfile\^
+.TP
+.SM
+$HOME\*S/mbox
+saved mail
+.TP
+.SM
+$MAIL\*S
+variable containing path name of
+.I mailfile\^
+.TP
+/tmp/ma\(**
+temporary file
+.TP
+/usr/mail/\(**\f3.\fPlock
+lock for mail directory
+.TP
+dead\f3.\fPletter
+unmailable text
+.TP
+/bin/rmail
+remote mailer for uucp (linked to Mail for alias expansion)
+.TP
+/bin/rrmail
+invoked by rmail to do actual mail (linked to mail)
+.PD
+.SH SEE ALSO
+Mail(1), login(1), uucp(1C), write(1).
+.SH BUGS
+Race conditions sometimes result
+in a failure to remove a lock file.
+.br
+After an interrupt, the next message may not be printed;
+printing may be forced by typing a
+.BR p .
+.\"	@(#)mail.1	5.1 of 11/8/83
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/mail.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:46:50 $

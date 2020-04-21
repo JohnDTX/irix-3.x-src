@@ -1,0 +1,5 @@
+for i in f.* *.p
+do
+	echo $i----------------------
+	diff $i ../../fortran20/fortran
+done

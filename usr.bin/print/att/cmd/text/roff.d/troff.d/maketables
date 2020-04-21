@@ -1,0 +1,56 @@
+#		Copyright (c) 1984 AT&T
+#		  All Rights Reserved
+#     THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF AT&T
+#   The copyright notice above does not evidence any actual
+#   or intended publication of such source code.
+#
+# For use in one of the dev* font-table directories
+#
+#    If you're not really comfortable with the 'makedev' program, you can
+# use this shell script to make the binary font and device tables for the
+# device independent troff. You can be sure that all the necessary
+# binary files will be properly updated. The command 'maketables *'
+# will make a complete new set of binary '.out' files.
+#
+#    If the makedev program isn't located in the parent of this directory,
+# just change the initialization of the shell variable MAKEDEV.
+#
+#
+# USAGE:  maketables files
+#         files - one or more files from this directory.
+#
+#
+
+
+MAKEDEV=../makedev                        # this program does the real work
+MAKEDESC=no                            # need to remake the DESC.out file
+
+FONTS=`grep "^fonts" DESC | sed s/"fonts[ \t][0-9][0-9]*"//gp`
+
+FONTS=`echo "$FONTS" | sed "s/	/ /gp"`     # get rid of any tabs
+FONTS="$FONTS "								# and add a blank to the end
+
+for i do
+    if echo "$FONTS" | grep " $i " > /dev/null; then
+        MAKEDESC=yes
+        continue
+    fi
+
+    case $i in
+             [A-Z]) $MAKEDEV $i;;
+
+        [A-Z][0-9]) $MAKEDEV $i;;
+
+        [A-Z][A-Z]) $MAKEDEV $i;;
+
+              DESC) MAKEDESC=yes;;
+    esac
+done
+
+if [ $MAKEDESC = yes ]; then
+    $MAKEDEV DESC
+fi
+
+if [ -r LINKFILE ]; then
+	. LINKFILE
+fi

@@ -1,0 +1,83 @@
+bindfunc hogmode 78
+reservebut 78
+bindfunc hogwhiledown 13
+reservebut 13
+bindfunc popattach 103
+bindfunc movegrow 102
+bindfunc menu 101
+bindindex inborder 7
+bindindex hiinborder 7
+bindindex titletextin 4
+bindindex titletextout 4
+bindindex hititletextin 4
+bindindex hititletextout 4
+bindindex hioutborder 1
+bindindex outborder 0
+bindcolor menu 10 10 10 
+bindcolor menuback 220 220 220 
+bindcolor cursor 255 0 0
+mapcolor 0 0 0 0
+mapcolor 1 255 0 0
+mapcolor 2 0 255 0
+mapcolor 3 255 255 0
+mapcolor 4 0 0 255
+mapcolor 5 255 0 255
+mapcolor 6 0 255 255
+mapcolor 7 255 255 255
+mapcolor 8 0 0 0
+mapcolor 9 144 147 144
+mapcolor 10 151 153 153
+mapcolor 11 255 255 255
+mapcolor 12 40 40 40
+mapcolor 13 237 237 239
+mapcolor 14 0 0 0
+mapcolor 15 255 0 0
+mapcolor 16 0 0 0
+mapcolor 17 72 72 72
+mapcolor 18 99 99 99
+mapcolor 19 119 119 119
+mapcolor 20 136 136 136
+mapcolor 21 150 150 150
+mapcolor 22 163 163 163
+mapcolor 23 175 175 175
+mapcolor 24 186 186 186
+mapcolor 25 196 196 196
+mapcolor 26 206 206 206
+mapcolor 27 215 215 215
+mapcolor 28 224 224 224
+mapcolor 29 232 232 232
+mapcolor 30 240 240 240
+mapcolor 31 248 248 248
+mapcolor 32 0 0 0
+mapcolor 33 154 0 0
+mapcolor 34 212 0 0
+mapcolor 35 255 0 0
+mapcolor 36 0 154 0
+mapcolor 37 154 154 0
+mapcolor 38 212 154 0
+mapcolor 39 255 154 0
+mapcolor 40 0 212 0
+mapcolor 41 154 212 0
+mapcolor 42 212 212 0
+mapcolor 43 255 212 0
+mapcolor 44 0 255 0
+mapcolor 45 154 255 0
+mapcolor 46 212 255 0
+mapcolor 47 255 255 0
+mapcolor 48 0 0 255
+mapcolor 49 154 0 255
+mapcolor 50 212 0 255
+mapcolor 51 255 0 255
+mapcolor 52 0 154 255
+mapcolor 53 154 154 255
+mapcolor 54 212 154 255
+mapcolor 55 255 154 255
+mapcolor 56 0 212 255
+mapcolor 57 154 212 255
+mapcolor 58 212 212 255
+mapcolor 59 255 212 255
+mapcolor 60 0 255 255
+mapcolor 61 154 255 255
+mapcolor 62 212 255 255
+mapcolor 63 255 255 255
+exec /tmp/startbg

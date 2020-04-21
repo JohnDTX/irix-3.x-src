@@ -1,0 +1,56 @@
+.TH circ 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B circ
+\- outlines a circle
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "circ(x, y, radius) "
+.B "Coord x, y, radius; "
+.IP 
+.B "circi(x, y, radius) "
+.B "Icoord x, y, radius;"
+.IP 
+.B "circs(x, y, radius) 
+.B "Scoord x, y, radius;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine circ(x, y, radius)"
+.B "real x, y, radius"
+.IP 
+.B "subroutine circi(x, y, radius)"
+.B "integer*4 x, y, radius"
+.IP 
+.B "subroutine circs(x, y, radius)"
+.B "integer*2 x, y, radius"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure circ(x, y, radius: Coord);"
+.IP
+.B "procedure circi(x, y, radius: Icoord);"
+.IP
+.B "procedure circs(x, y, radius: Scoord);"
+.SH DESCRIPTION
+\f3circ\f1 outlines a circle.
+The circle has a center at point 
+(\f2x\f1,\f2y\f1) and a radius (\f2radius\f1),
+which are specified in world coordinates.
+Since a circle is a 2-D shape,
+these routines have only 2-D forms (note that
+circles rotated outside the 2-D \f2x-y\fP plane appear as ellipses). 
+The circle is in the \f2x-y\fP plane,
+with \f2z\fP=0.  
+The system draws the circle using the current color,
+linestyle, linewidth, and writemask.
+.ne 16
+.SH "SEE ALSO"
+arc, arcf, circf, crv
+.sp .5v
+.I Programming Guide,
+Section 3.7, Circles and Arcs

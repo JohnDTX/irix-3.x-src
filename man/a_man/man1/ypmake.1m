@@ -1,0 +1,66 @@
+'\"macro stdmacro
+.TH YPMAKE 1M
+.SH NAME
+ypmake \- rebuild yellow pages database
+.SH SYNOPSIS
+.B "cd /usr/etc/yp ; make"
+[
+.I map
+]
+.SH DESCRIPTION
+.IX  "ypmake command"  ""  "\fLypmake\fP \(em rebuild yellow pages database"
+.IX  "rebuild yellow pages database"  ""  "rebuild yellow pages database \(em \fLypmake\fP"
+.IX  "yellow pages"  "rebuild database"  ""  "rebuild database \(em \fLypmake\fP"
+The file called
+.I Makefile
+in
+.IR /usr/etc/yp
+is used by 
+.I make
+to build the yellow pages database.
+With no arguments,
+.I make
+creates
+.I dbm
+databases for any YP maps that are out-of-date,
+and then executes
+.I yppush 
+to notify slave servers that there has been a change.
+.LP
+If you supply a
+.I map
+on the command line,
+.I make
+will update that map only.
+Typing
+.I "make passwd"
+will create and
+.I yppush
+the password database (assuming it is out of date).
+Likewise,
+.I "make hosts"
+and
+.I "make networks"
+will create and
+.I yppush
+the host and network files,
+.I /etc/hosts
+and
+.IR /etc/networks .
+.LP
+There are three special variables used by 
+.IR make :
+DIR, which gives the directory of the source files;
+NOPUSH, which when non-null inhibits doing a
+.I yppush
+of the new database files;
+and DOM, used to construct a domain
+other than the master's default domain.
+The default for DIR is
+.IR /etc ,
+and the default for NOPUSH is
+the null string.
+.LP
+Refer to \f2ypfiles\f1(4) and \f2ypserv\f1(1M) for an overview of the yellow pages.
+.SH "SEE ALSO"
+make(1), makedbm(1M), ypserv(1M).

@@ -1,0 +1,96 @@
+.TH poly 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B poly
+\- outlines a polygon
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "poly(n, parray) "
+.B "long n; "
+.B "Coord parray[][3];"
+.IP 
+.B "polyi(n, parray) "
+.B "long n; "
+.B "Icoord parray[][3];"
+.IP 
+.B "polys(n, parray) "
+.B "long n; "
+.B "Scoord parray[][3];"
+.IP 
+.B "poly2(n, parray) "
+.B "long n; "
+.B "Coord parray[][2];"
+.IP 
+.B "poly2i(n, parray) "
+.B "long n; "
+.B "Icoord parray[][2];"
+.IP 
+.B "poly2s(n, parray) "
+.B "long n; "
+.B "Scoord parray[][2];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine poly(n, parray)"
+.B "integer*4 n"
+.B "real parray(3,n)"
+.IP 
+.B "subroutine polyi(n, parray)"
+.B "integer*4 n"
+.B "integer*4 parray(3,n)"
+.IP 
+.B "subroutine polys(n, parray)"
+.B "integer*4 n"
+.B "integer*2 parray(3,n)"
+.ne 14
+.IP 
+.B "subroutine poly2(n, parray)"
+.B "integer*4 n"
+.B "real parray(2,n)"
+.IP 
+.B "subroutine poly2i(n, parray)"
+.B "integer*4 n"
+.B "integer*4 parray(2,n)"
+.IP 
+.B "subroutine poly2s(n, parray)"
+.B "integer*4 n"
+.B "integer*2 parray(2,n)"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure poly(n: longint; var parray: Coord);"
+.IP
+.B "procedure polyi(n: longint; var parray; Icoord);"
+.IP
+.B "procedure polys(n: longint; var parray: Scoord);"
+.IP
+.B "procedure poly2(n: longint; var parray: Coord);"
+.IP
+.B "procedure poly2i(n: longint; var parray: Icoord);"
+.IP
+.B "procedure poly2s(n: longint; var parray: Scoord);"
+.SH DESCRIPTION
+.B poly
+outlines a polygon. It takes two arguments:  
+an array of points (\f2parray\f1) and the number of points
+in that array (\f2n\f1).
+A polygon is represented
+as an array of points.  The first and last points connect automatically
+to close the polygon.  The points can be expressed as integers,
+shorts, or real numbers, in
+2-D or 3-D space.
+2-D polygons are drawn with 
+\f2z\fP=0.
+The polygon is outlined using the current linestyle, 
+linewidth, color, and writemask.
+The maximum number of points in a polygon is 384.
+.SH "SEE ALSO"
+pclos, pdr, pmv, polf, rect, rectf, rpdr, rpmv 
+.sp
+.I Programming Guide,
+Section 3.6, Polygons

@@ -1,0 +1,900 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: ASM68K.MSC.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               27-Mar-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure lowercase{*var fname: string30*};
+  var i: integer; ch: char;
+begin
+for i := 1 to length(fname) do begin
+    ch := fname[i];
+    if (ch >= 'A') and (ch <= 'Z')
+    then fname[i] := chr(ord(ch) + 32);
+    end;
+end; {lowercase}
+
+procedure suffix{*var fname: string30; suf: string30*};
+  var DoItFlag: Boolean;
+begin
+if (length(suf) >= length(fname)) or
+   (pos(suf,fname) < length(fname) - length(suf) + 1)
+then fname := concat(fname,suf);
+end; {suffix}
+
+procedure finishpage;
+var i: integer;
+begin
+if PageSetFlag
+then for i := lineonpage + 1 to linesperpage - 3 do
+     writeln(lfile)
+else page(lfile);
+end; {finishpage}
+
+procedure printheading;
+begin
+pageno := pageno + 1;
+writeln(lfile,'File: ',infilename,' ':30-length(infilename),
+              modulename,' ':22,'Page ',pageno:3);
+writeln(lfile); writeln(lfile);
+lineonpage := 0;
+end; {printheading}
+
+procedure room(lines: integer);
+begin
+if lineonpage + lines > linesperpage - 6
+then begin
+     if pageno > 0
+        then finishpage;
+     printheading;
+     end;
+lineonpage := lineonpage + lines;
+end; {room}
+
+function roomleft: integer;
+begin
+roomleft := linesperpage - (lineonpage + 6);
+end; {roomleft}
+
+procedure gethilo(l: longint; var fhi,flo: integer);
+  var lrec: record lhi: integer; llo: integer end;
+begin
+moveleft(l,lrec,4);
+fhi := lrec.lhi; flo := lrec.llo;
+end; {gethilo}
+
+procedure outword(fword: integer);
+begin
+objbuff[objword] := fword;
+if objword = 255
+then begin
+     if blockwrite(objfile,objbuff,1,objblock) <> 1
+        then error(27);
+     objblock := objblock + 1;
+     objword := 0;
+     end
+else objword := objword + 1;
+end; {outword}
+
+procedure outname(fname: alfa8);
+    var i,temp: integer;
+begin
+for i := 1 to 8 do
+    if odd(i)
+    then temp := ord(fname[i])*256
+    else outword(temp + ord(fname[i]));
+end; {outname}
+
+procedure flushobj;
+  var i: integer;
+begin
+for i := objword to 255 do
+    objbuff[i] := 0;
+if blockwrite(objfile,objbuff,1,objblock) <> 1
+   then error(27);
+objblock := objblock + 1;
+objword := 0;
+end; {flushobj}
+
+procedure outcode;
+    var i: integer;
+begin
+if ByteFlag
+then begin
+     codebuff[codeword] := byteval*256;
+     codeword := codeword + 1;
+     end;
+if codeword > 0
+then begin
+     outword(-31488); outword(codeword*2 + 8);
+     outword(0); outword(codebase);
+     for i := 0 to codeword - 1 do
+         outword(codebuff[i]);
+     end;
+end; {outcode}
+
+procedure genbyte(faddress,fbyte: integer);
+begin
+if (faddress = nextaddress) and (codeword <= MAXCODEW)
+then if ByteFlag
+     then begin
+          ByteFlag := FALSE;
+          codebuff[codeword] := byteval*256 + fbyte;
+          codeword := codeword + 1;
+          end
+     else begin
+          ByteFlag := TRUE;
+          byteval := fbyte;
+          end
+else begin
+     outcode;
+     codebase := faddress;
+     if odd(faddress)
+     then begin
+          ByteFlag := FALSE;
+          codebuff[0] := fbyte;
+          codeword := 1;
+          end
+     else begin
+          ByteFlag := TRUE;
+          byteval := fbyte;
+          codeword := 0;
+          end
+     end;
+nextaddress := faddress + 1;
+end; {genbyte}
+
+procedure genword(faddress,fword: integer);
+begin
+if ByteFlag
+   then begin
+        error(999);
+        genbyte(nextaddress,0);
+        end;
+if (faddress = nextaddress) and (codeword <= MAXCODEW)
+   then begin
+        codebuff[codeword] := fword;
+        codeword := codeword + 1;
+        end
+   else begin
+        outcode;
+        codebase := faddress;
+        codebuff[0] := fword;
+        codeword := 1;
+        end;
+nextaddress := faddress + 2;
+end; {genword}
+
+procedure entername(* fpsy: psy *);
+    var lpsy: psy;
+begin
+if symboltree = nil
+   then symboltree := fpsy
+   else begin
+        lpsy := symboltree;
+        repeat
+               with lpsy^ do
+                    if fpsy^.name < name
+                       then if llink = nil
+                               then begin
+                                    llink := fpsy;
+                                    lpsy := nil;
+                                    end
+                               else lpsy := llink
+                       else if rlink = nil
+                               then begin
+                                    rlink := fpsy;
+                                    lpsy := nil;
+                                    end
+                               else lpsy := rlink;
+        until lpsy = nil;
+        end;
+end; {entername}
+
+function lookupname(ftree: psy; fname: alfa8): psy;
+    var lpsy: psy; ExitFlag: Boolean;
+begin
+lpsy := ftree; ExitFlag := FALSE;
+while (lpsy <> nil) and not ExitFlag do
+      with lpsy^ do
+           if name = fname
+              then ExitFlag := TRUE
+              else if fname < name
+                      then lpsy := llink
+                      else lpsy := rlink;
+lookupname := lpsy;
+end; {lookupname}
+
+procedure error(* n: integer *);
+    var s: string[50]; i,j: integer; ch: char;
+begin
+if (pass = 2) and (lasterrcol <> lasttokcol)
+   then begin
+        case n of
+          1: s := 'Illegal character in label';
+          2: s := 'Illegal character';
+          3: s := 'Opcode expected';
+          4: s := 'Absolute value(s) expected';
+          5: s := ''')'' expected';
+          6: s := 'Illegal symbol in expression';
+          7: s := 'Undefined symbol';
+          8,
+          9: s := 'Absolute or Relocatable value expected';
+         10: s := 'Illegal opcode extension or length';
+         11: s := ''','' expected';
+         12: s := 'Data Register expected';
+         13: s := 'Label required';
+         14: s := 'Multiple defined symbol';
+         15: s := '.W or .L expected';
+         16: s := 'Address register expected';
+         17: s := ''')'' expected';
+         18: s := '''('' expected';
+         19: s := 'Register expected';
+         20: s := 'Value must be in range -128 .. 127';
+         21: s := 'Relocatable value expected';
+         22: s := 'Strings not allowed';
+         23: s := '''#'' expected';
+         24: s := 'Value must be in range 1 .. 8';
+         25: s := 'Illegal address mode';
+         26: s := 'Unterminated string';
+         27: s := 'Object file full';
+         28: s := 'Cannot EQU to an external';
+         29: s := 'Identifier expected';
+         30: s := 'Value must be in range 0..15';
+         31: s := 'Extra junk at end of line';
+         32: s := 'Missing END statement';
+         33: s := 'Cannot have zero offset';
+         34: s := 'Hex constants begin with $';
+         35: s := 'String expected';
+         36: s := 'Too many include files';
+         37: s := 'Can''t open include file';
+         38: s := 'Relocatable values require .L, not .W';
+         39: s := 'EQU expression unresolvable';
+         40: s := 'Absolute addresses require .L or .W suffix';
+         41: s := 'Multiple starting addresses';
+         50: s := 'Floating point register expected';
+         51: s := 'Only .X allowed';
+         52: s := 'Only .W or .L allowed';
+         53: s := 'Value must be in range -32768 .. 32767';
+         99: s := 'Literals for .D .P and .X not implemented';
+        otherwise: s := '???';
+        end; {case}
+        errors := errors + 1;
+        if ListOpen
+           then begin
+                room(2);
+                writeln(lfile,'***** Line ',curlineno:0,' of file ',
+                        filestack[topoffilestack].fname,' *****');
+                writeln(lfile,'***** Error ',n:2,' - ','v':lasttokcol + 13,
+                        ' ',s);
+                end
+           else begin
+                writeln('***** Error ',n:0,' in line ',curlineno:0,' of file ',
+                        filestack[topoffilestack].fname,' *****');
+                writeln('*****','v':lasttokcol + 3,' - ',s);
+                write(lineno:6,'* ');
+                j := 0;
+                for i := 1 to maxcolumn do
+                    if line[i] = TAB
+                       then repeat
+                                   write(' '); j := j + 1;
+                            until (j mod 8) = 0
+                       else begin write(line[i]); j := j + 1; end;
+                writeln;
+                write('***** Type <CR> to continue, <ESC> to abort - ');
+                read(ch); writeln;
+                if ch = ESC then goto 999;
+                end;
+        lasterrcol := lasttokcol;
+        end;
+end; {error}
+
+function getdatacls(fvalcls: valueclass): dataclass;
+begin
+case fvalcls of
+     ABSOLUTE:    getdatacls := ABS2;
+     RELOCATABLE: getdatacls := REL2;
+     EXTERN:      getdatacls := EXT2;
+     PAOCVAL,
+     STRINGVAL:   getdatacls := ABS2;
+end; {case}
+end; {getdatacls}
+
+function getsize(fch: char; FpFlag: Boolean): sizes;
+begin
+if FpFlag
+then if fch = 'L'
+     then getsize := LONG
+     else if fch = 'B'
+          then getsize := BYTE
+          else if fch = 'S'
+               then getsize := SNGL
+               else if fch = 'W'
+                    then getsize := WORD
+                    else if fch = 'D'
+                         then getsize := DBLE
+                         else if fch = 'P'
+                              then getsize := PBCD
+                              else getsize := XTND
+else if fch = 'L'
+     then getsize := LONG
+     else if (fch = 'B') or (fch = 'S')
+          then getsize := BYTE
+          else getsize := WORD;
+end; {getsize}
+
+procedure printtag(ftag: identclass);
+    var ch: char;
+begin
+if ftag in [ABSOLUTE..EXTERN]
+   then case ftag of
+             ABSOLUTE:    ch := ' ';
+             RELOCATABLE: ch := '+';
+             EXTERN:      ch := ' ';
+        end
+   else ch := '?';
+write(lfile,ch);
+end; {printtag}
+
+procedure printhex(fval: integer; flen: integer);
+    var i,k,nblanks: integer; Negative: Boolean; a: array[1..4] of char;
+begin
+if fval < 0
+   then begin
+        fval := (fval + 32767) + 1;
+        Negative := TRUE;
+        end
+   else Negative := FALSE;
+for i := 4 downto 1 do
+    begin
+    k := fval mod 16;
+    fval := fval div 16;
+    if Negative and (i = 1)
+       then k := k + 8;
+    if k > 9
+       then k := k + (ord('A') - ord('9') - 1);
+    a[i] := chr(ord('0') + k);
+    end;
+nblanks := flen - 4;
+if flen > 4 then flen := 4;
+for i := 5 - flen to 4 do
+    write(lfile,a[i]);
+for i := 1 to nblanks do write(lfile,' ');
+end; {printhex}
+
+procedure printline(PCFlag: Boolean; fields: integer);
+    const MAXPOS = 24;
+    var dhi,dlo,hi,lo,field,width,size,pos,delta: integer; FirstLine: Boolean;
+    
+    procedure beginline;
+    begin
+    room(1);
+    if PCFlag
+       then begin
+            printhex(lo + delta,4);
+            write(lfile,' ':2);
+            end
+       else write(lfile,' ':6);
+    pos := 6;
+    end; {beginline}
+    
+    procedure endline;
+        var i,j: integer;
+    begin
+    if FirstLine
+       then begin
+            write(lfile,lineno:28-pos,'* ');
+            j := 0;
+            for i := 1 to maxcolumn do
+                if line[i] = TAB
+                   then repeat
+                               write(lfile,' '); j := j + 1;
+                        until (j mod 8) = 0
+                   else begin write(lfile,line[i]); j := j + 1; end;
+            end;
+    writeln(lfile);
+    FirstLine := FALSE;
+    end; {endline}
+    
+begin {printline}
+FirstLine := TRUE; field := 0; delta := 0;
+gethilo(pc,hi,lo); beginline;
+for field := 1 to fields do
+    begin
+    gethilo(data[field].val,dhi,dlo);
+    case data[field].cls of
+         ABS1:           begin size := 1; width := 3; end;
+         ABS2,REL2,EXT2: begin size := 2; width := 6; end;
+         ABS4,REL4,EXT4: begin size := 4; width := 10; end;
+         CHR1,FILL:      begin size := 1; width := 3; end;
+    end; {case}
+    if pos + width > MAXPOS
+    then begin endline; beginline; end;
+    gethilo(data[field].val,dhi,dlo);
+    case data[field].cls of
+         ABS1: begin
+               printhex(dlo,2);
+               write(lfile,' ');
+               end;
+         ABS2: begin
+               printhex(dlo,4);
+               write(lfile,'  ');
+               end;
+         REL2: begin
+               printhex(dlo,4);
+               write(lfile,'+ ');
+               end;
+         EXT2: begin
+               write(lfile,'****  ');
+               end;
+         ABS4: begin
+               printhex(dhi,4);
+               printhex(dlo,4);
+               write(lfile,'  ');
+               end;
+         REL4: begin
+               printhex(dhi,4);
+               printhex(dlo,4);
+               write(lfile,'+ ');
+               end;
+         EXT4: begin
+               write(lfile,'********  ');
+               end;
+         CHR1: begin
+               printhex(dlo,2);
+               width := 2;
+               end;
+         FILL: begin
+               write(lfile,'--');
+               width := 2;
+               end;
+    end; {case}
+    pos := pos + width; delta := delta + size;
+    end;
+endline;
+end; {printline}
+
+procedure printtree(fpsy: psy);
+    var buffsize,maxbuffsize,delta: integer;
+        buffer: array[1..300] of psy;
+    
+    procedure dumpbuffer;
+        var i,k,limit,hi,lo: integer;
+    begin
+    k := 1; delta := (buffsize + 4) div 5; limit := delta*5;
+    for i := 1 to limit do
+        begin
+        if i mod 5 = 1
+           then begin
+                if i > 1
+                   then writeln(lfile);
+                room(1);
+                end
+           else write(lfile,' ');
+        if k <= buffsize
+           then with buffer[k]^ do
+                     begin
+                     if sykind = IDENTSY
+                        then if Global
+                                then write(lfile,'*')
+                                else write(lfile,' ')
+                        else write(lfile,' ');
+                     write(lfile,name,' ');
+                     case sykind of
+                          AREGSY:  write(lfile,'A',regno:1,' ':16);
+                          DREGSY:  write(lfile,'D',regno:1,' ':16);
+                          OPSY:    write(lfile,'Op ',opclass:1,
+                                         ',',opvalue:1);
+                          IDENTSY: if Defined
+                                   then if Double
+                                        then write(lfile,' **Double')
+                                        else begin
+                                             gethilo(value,hi,lo);
+                                             case idclass of
+                                               RELOCATABLE:
+                                                 begin
+                                                 write(lfile,'  ');
+                                                 printhex(hi,2);
+                                                 printhex(lo,4);
+                                                 end;
+                                               ABSOLUTE:
+                                                 begin
+                                                 printhex(hi,4);
+                                                 printhex(lo,4);
+                                                 end;
+                                               EXTERN:
+                                                 write(lfile,'  ******');
+                                             end; {case}
+                                             printtag(idclass);
+                                             end
+                                   else write(lfile,' ***Undef');
+                     end; {case}
+                     end;
+        k := k + delta;
+        if k > limit
+           then k := (k - limit) + 1;
+        end;
+    writeln(lfile);
+    buffsize := 0; maxbuffsize := (linesperpage - 6)*5;
+    end; {dumpbuffer}
+    
+    procedure ptree(fpsy: psy);
+    begin
+    if fpsy <> nil
+       then with fpsy^ do
+                 begin
+                 ptree(llink);
+                 if buffsize >= maxbuffsize
+                    then dumpbuffer;
+                 buffsize := buffsize + 1;
+                 buffer[buffsize] := fpsy;
+                 ptree(rlink);
+                 end;
+    end; {ptree}
+
+begin {printtree}
+room(1); writeln(lfile);
+buffsize := 0; maxbuffsize := roomleft*5;
+ptree(fpsy);
+if buffsize > 0 then dumpbuffer;
+end; {printtree}
+
+procedure fillinbuf;
+    label 1;
+begin
+1: filestack[topoffilestack].lastrelblkread :=
+         filestack[topoffilestack].lastrelblkread + 2;
+inbuf[512] := 0;
+if blockread(infile,inbuf,2,
+      filestack[topoffilestack].lastrelblkread) = 0
+   then begin
+        
+        { Top of stack read failed. }
+        
+        if topoffilestack = 1
+           then if EOFFlag
+                   then begin
+                        writeln;
+                        writeln('\07Source file read error.');
+                        halt;
+                        end
+                   else EOFFlag := TRUE
+           else begin
+                topoffilestack := topoffilestack - 1;
+                with filestack[topoffilestack] do
+                     begin
+                     close(infile);
+                     reset(infile,fname);
+                     inbufp := nextchtoread;
+                     curlineno := flineno;
+                     end;
+                if blockread(infile,inbuf,2,
+                      filestack[topoffilestack].lastrelblkread) = 0
+                   then begin
+                        writeln;
+                        writeln('\07Source file read error.');
+                        halt;
+                        end;
+                
+                { Block just reread might have just hit last <CR> }
+                { before it was pushed onto the stack.            }
+                
+                if ENVIRONMENT = CPM 
+                then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+                if inbufp >= 1024 then goto 1;
+                if inbuf[inbufp] = 0 then goto 1;
+                end
+        end
+   else begin
+        
+        { Top of stack read succeeded. }
+        
+        inbufp := 0;
+        if ENVIRONMENT = CPM then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+        if (ENVIRONMENT = ADVENTURE) or (ENVIRONMENT = CPM)
+        then
+          if inbuf[0] = 0 then fillinbuf;
+        end;
+end; {fillinbuf}
+
+procedure doinclude(ffname: string30);
+begin
+if (ENVIRONMENT = MERLIN) or
+   (ENVIRONMENT = CROMIX) or
+   (ENVIRONMENT = ADVENTURE) or
+   (ENVIRONMENT = CPM)
+then lowercase(ffname); 
+if (ENVIRONMENT = MERLIN) or
+   (ENVIRONMENT = CROMIX)
+then suffix(ffname,SRCSUFFIX)
+else
+  if ENVIRONMENT = ADVENTURE
+  then suffix(ffname,'.src');
+filestack[topoffilestack].nextchtoread := inbufp;
+if topoffilestack >= MAXFILES
+then error(36)
+else begin
+     close(infile); reset(infile,ffname);
+     if ioresult <> 0
+     then begin
+          error(37);
+          reset(infile,filestack[topoffilestack].fname);
+          end
+     else begin
+          topoffilestack := topoffilestack + 1;
+          with filestack[topoffilestack] do begin
+               lastrelblkread := -2;
+               nextchtoread := 0; fname := ffname;
+               flineno := curlineno; curlineno := 0;
+               fillinbuf;
+               if inbuf[0] <= 1 then fillinbuf;
+               end;
+          end;
+     end;
+end; {doinclude}
+
+procedure readnextline;
+    label 9;
+    var i: integer; ch: char; EndOfLine: Boolean;
+  
+  procedure rdnxtch;
+  begin
+  if inbuf[inbufp] = 0
+  then begin
+       fillinbuf;
+       if EOFFlag then goto 9;
+       end;
+  ch := chr(inbuf[inbufp]);
+  inbufp := inbufp + 1;
+  end; {rdnxtch}
+  
+begin {readnextline}
+curlineno := curlineno + 1;
+maxcolumn := 0;
+rdnxtch;
+if ch = chr(16)
+then begin
+     rdnxtch;
+     maxcolumn := ord(ch) - 32;
+     for i := 1 to maxcolumn do
+         line[i] := ' ';
+     rdnxtch;
+     end;
+EndOfLine := FALSE;
+repeat
+       if ch = '\0d'
+       then begin
+            rdnxtch;
+            if ch <> '\0a' then inbufp := inbufp - 1;
+            EndOfLine := TRUE;
+            end
+       else if ch = '\0a'
+            then begin
+                 rdnxtch;
+                 if ch <> '\0d' then inbufp := inbufp - 1;
+                 EndOfLine := TRUE;
+                 end
+            else begin
+                 maxcolumn := maxcolumn + 1;
+                 line[maxcolumn] := ch;
+                 rdnxtch;
+                 end;
+until EndOfLine;
+9:
+end; {readnextline}
+
+procedure scan;
+    label 1;
+    var ch,ch2,quote: char; i,lval,base: integer; lpsy: psy;
+begin
+1:
+if column <= maxcolumn
+then begin
+     ch := line[column];
+     if ch = TAB then ch := ' ';
+     if (ch <> ' ') and (ch <> ';') then lasttokcol := column;
+     if ch in
+      [' ','_','A'..'Z','a'..'z','0'..'9','(',')','''','$','-','+',
+       '#',',','.',';','/','*','%','"','~','|','&']
+     then case ch of
+            ' ': begin column := column + 1; goto 1; end;
+            'A','B','C','D','E','F','G','H','I','J','K','L','M',
+            'N','O','P','Q','R','S','T','U','V','W','X','Y','Z','%',
+            'a','b','c','d','e','f','g','h','i','j','k','l','m',
+            'n','o','p','q','r','s','t','u','v','w','x','y','z','_':
+                 begin
+                 i := 0;
+                 scanname := '        ';
+                 repeat
+                        lasttokcol := column;
+                        i := i + 1;
+                        if i <= 8
+                           then scanname[i] := ch;
+                        column := column + 1;
+                        ch := line[column];
+                 until not (ch in ['A'..'Z','a'..'z','0'..'9','_','%'])
+                        or (column > maxcolumn);
+                 ucscanname := scanname;
+                 for i := 1 to 8 do
+                     begin
+                     ch2 := ucscanname[i];
+                     if (ch2 >= 'a') and (ch2 <= 'z')
+                        then ch2 := chr(ord(ch2) - 32);
+                     ucscanname[i] := ch2;
+                     end;
+                 if MakeUpper 
+                 then scanname := ucscanname
+                 else
+                   if MakeLower
+                   then
+                     for i := 1 to 8 do
+                         begin
+                         ch2 := scanname[i];
+                         if (ch2 >= 'A') and (ch2 <= 'Z')
+                            then ch2 := chr(ord(ch2) + 32);
+                         scanname[i] := ch2;
+                         end;
+                 lpsy := lookupname(optree,ucscanname);
+                 if lpsy = nil
+                 then token := IDENTSY
+                 else begin
+                      token := lpsy^.sykind;
+                      case token of
+                        CCREGSY,SREGSY,USPREGSY,PCSY: ;
+                        AREGSY,DREGSY,FREGSY: scanreg := lpsy^.regno;
+                        OPSY: with lpsy^ do
+                                   begin
+                                   scanop := opvalue;
+                                   scanclass := opclass;
+                                   scansize := opsize;
+                                   extension := ' ';
+                                   if (ch = '.') and (column < maxcolumn)
+                                   then begin
+                                        column := column + 1;
+                                        lasttokcol := column;
+                                        ch := line[column];
+                                        if ch >= 'a'
+                                        then ch := chr(ord(ch) - 32);
+                                        if ch in ['S','W','B','L','D','X','P']
+                                        then begin
+                                             extension := ch;
+                                             column := column + 1;
+                                             end
+                                        else error(10);
+                                        end;
+                                   end;
+                      end;
+                      end;
+                 end;
+            '0','1','2','3','4','5','6','7','8','9','$':
+                 begin
+                 if ch = '$'
+                    then begin base := 16; ch := '0'; end
+                    else base := 10;
+                 scanint := 0;
+                 repeat
+                        if ch <= '9'
+                        then lval := ord(ch) - ord('0')
+                        else if base = 16
+                             then if ch <= 'F'
+                                  then lval := ord(ch) - ord('A') + 10
+                                  else lval := ord(ch) - ord('a') + 10
+                             else error(34);
+                        scanint := scanint*base + lval;
+                        lasttokcol := column;
+                        column := column + 1;
+                        ch := line[column];
+                 until not (ch in ['0'..'9','A'..'F','a'..'f']);
+                 token := INTSY;
+                 end;
+            '''',
+            '"': begin
+                 quote := ch;
+                 scanstring := '';
+                 column := column + 1;
+                 ch := line[column];
+                 repeat
+                        while (ch <> quote) and (column <= maxcolumn) do
+                              begin
+                              scanstring := concat(scanstring,' ');
+                              scanstring[length(scanstring)] := ch;
+                              column := column + 1;
+                              ch := line[column];
+                              end;
+                        if ch = quote
+                           then if line[column + 1] = quote
+                                   then begin
+                                        if quote = ''''
+                                        then scanstring :=
+                                              concat(scanstring,'''')
+                                        else scanstring :=
+                                              concat(scanstring,'"');
+                                        column := column + 2;
+                                        ch := line[column];
+                                        end;
+                 until (ch = quote) or (column > maxcolumn);
+                 lasttokcol := column;
+                 if column > maxcolumn
+                    then error(26)
+                    else column := column + 1;
+                 if quote = ''''
+                 then token := PAOCSY
+                 else token := STRINGSY;
+                 end;
+            '(': begin token := LPARENSY; column := column + 1; end;
+            ')': begin token := RPARENSY; column := column + 1; end;
+            ',': begin token := COMMASY; column := column + 1; end;
+            '+': begin token := PLUSSY; column := column + 1; end;
+            '-': begin token := MINUSSY; column := column + 1; end;
+            '#': begin token := HASHSY; column := column + 1; end;
+            '.': begin token := DOTSY; column := column + 1; end;
+            '/': begin token := SLASHSY; column := column + 1; end;
+            '*': begin token := STARSY; column := column + 1; end;
+            '&': begin token := ANDSY; column := column + 1; end;
+            '|': begin token := ORSY; column := column + 1; end;
+            '~': begin token := NOTSY; column := column + 1; end;
+            ';': token := eolnsy;
+          end
+     else begin
+          error(2);
+          token := ERRORSY;
+          end
+     end
+else if EOFFlag
+     then token := EOFSY
+     else token := EOLNSY;
+end; {scan}
+
+function getdreg: integer;
+begin
+if token = DREGSY
+   then begin getdreg := scanreg; scan; end
+   else begin
+        getdreg := 0;
+        error(12);
+        end;
+end; {getdreg}
+
+procedure newline;
+    var ch: char;
+begin
+lineno := lineno + 1;
+readnextline;
+column := 1;
+lasttokcol := 1;
+if maxcolumn <= 0
+   then CommentFlag := TRUE
+   else if line[1] = ';'
+           then CommentFlag := TRUE
+           else begin
+                CommentFlag := FALSE;
+                LabelFlag := FALSE;
+                ch := line[1];
+                if (ch <> ' ') and (ch <> TAB)
+                   then if ch in ['A'..'Z','a'..'z','%','_']
+                           then begin
+                                LabelFlag := TRUE;
+                                scan;
+                                if token <> IDENTSY then error(29);
+                                labelname := scanname;
+                                end
+                           else error(1);
+                scan;
+                end;
+line[maxcolumn + 1] := ' ';
+end; {newline}
+
+procedure comma;
+begin
+if token = COMMASY
+   then scan
+   else error(11);
+end; {comma}
+
+
+                                                                     

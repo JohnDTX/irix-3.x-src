@@ -1,0 +1,38 @@
+.TH pushname 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pushname
+\- pushes a new name on the name stack
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushname(name)"
+.B "short name;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushna(name)
+.B "integer*4 name"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushname(name: longint);"
+.SH DESCRIPTION
+.B pushname
+pushes the name stack down one level, and puts a new 16-bit name on
+top.  The system stores the contents of the name stack in a buffer
+for each hit in picking and selecting modes.
+.PP
+.B pushname
+is ignored outside of picking and selecting mode.
+.SH "SEE ALSO"
+gselect,
+loadname,
+pick,
+popname
+.sp
+.I Programming Guide,
+Section 9.2, Picking

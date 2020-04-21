@@ -1,0 +1,16 @@
+etc/nfs
+etc/nfsstat
+etc/rc.nfs
+etc/rpcinfo
+etc/rwall
+etc/showmount
+etc/spray
+etc/yp
+kernels/2000.nfs
+usr/bin/ypcat
+usr/bin/ypmatch
+usr/bin/yppasswd
+usr/bin/ypwhich
+usr/include/nfs
+usr/include/rpcsvc
+usr/lib/libyp.a

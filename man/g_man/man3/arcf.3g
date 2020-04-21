@@ -1,0 +1,75 @@
+.TH arcf 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B arcf
+\- draws a filled circular arc
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "arcf(x, y, radius, startang, endang)"
+.B "Coord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.B "arcfi(x, y, radius, startang, endang)"
+.B "Icoord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.B "arcfs(x, y, radius, startang, endang)"
+.B "Scoord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine arcf(x, y, radius, stang, endang)"
+.B "real x, y, radius"
+.B "integer*4 stang, endang"
+.IP 
+.B "subroutine arcfi(x, y, radius, stang, endang)"
+.B "integer*4 x, y, radius, stang, endang"
+.IP 
+.B "subroutine arcfs(x, y, radius, stang, endang)"
+.B "integer*2 x, y, radius"
+.B "integer*4 stang, endang"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure arcf(x, y, radius: Coord; startang," 
+.br
+.B	endang: Angle);
+.IP
+.B "procedure arcfi(x, y, radius: Icoord; startang," 
+.br
+.B	endang: Angle);
+.IP
+.B "procedure arcfs(x, y, radius: Scoord; startang," 
+.br
+.B	endang: Angle);
+.SH DESCRIPTION
+.B arcf
+draws a filled circular arc (pie section).  The arc is specified as a
+center point (\f2x,y\f1), a radius (\f2radius\f1), a starting angle
+(\f2startang\f1), and an ending angle (\f2endang\f1).
+The
+angle of the arc
+is measured from the \f2x\fP axis and specified in integral tenths of
+degrees.
+Positive angles
+describe counterclockwise rotations.  The arc is drawn using the current 
+color and writemask, and is filled with the current texture.  Since
+an arc is a 2-D shape, these routines have only 
+2-D forms.
+The arc is in the
+\f2x-y\fP plane with \f2z\fP=0.  Arcs are drawn counterclockwise from
+.I startang 
+to 
+.I endang,
+so the arc from 10 degrees to 5 degrees is
+a nearly complete circle.
+.SH "SEE ALSO"
+arc, circ, circf, crv
+.sp
+.I Programming Guide,
+Section 3.7, Circles and Arcs

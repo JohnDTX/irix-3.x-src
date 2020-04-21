@@ -1,0 +1,30 @@
+.TH qreset 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B qreset
+\- empties the event queue
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qreset()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qreset"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qreset;"
+.SH DESCRIPTION
+.B qreset
+removes all entries from the event queue and discards them.
+.SH "SEE ALSO"
+qenter, qread, qtest
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

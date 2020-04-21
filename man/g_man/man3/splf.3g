@@ -1,0 +1,129 @@
+.TH splf 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B splf
+\- draws a shaded filled polygon
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "splf(n, parray, iarray)"
+.B "long n;"
+.B "Coord parray[][3];"
+.B "Colorindex iarray[];"
+.IP
+.B "splfi(n, parray, iarray)"
+.B "long n;"
+.B "Icoord parray[][3];"
+.B "Colorindex iarray[];"
+.IP
+.B "splfs(n, parray, iarray)"
+.B "long n;"
+.B "Scoord parray[][3];"
+.B "Colorindex iarray[];"
+.IP
+.B "splf2(n, parray, iarray)"
+.B "long n;"
+.B "Coord parray[][2];"
+.B "Colorindex iarray[];"
+.IP
+.B "splf2i(n, parray, iarray)"
+.B "long n;"
+.B "Icoord parray[][2];"
+.B "Colorindex iarray[];"
+.IP
+.B "splf2s(n, parray, iarray)"
+.B "long n;"
+.B "Scoord parray[][2];"
+.B "Colorindex iarray[];"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine splf(n, parray, iarray)"
+.B "integer*4 n"
+.B "real parray(3,n)"
+.B "integer*2 iarray(n)"
+
+.ne 22
+.IP 
+.B "subroutine splfi(n, parray, iarray)"
+.B "integer*4 n"
+.B "integer*4 parray(3,n)"
+.B "integer*2 iarray(n)"
+.IP 
+.B "subroutine splfs(n, parray, iarray)"
+.B "integer*4 n"
+.B "integer*2 parray(3,n)"
+.B "integer*2 iarray(n)"
+.IP 
+.B "subroutine splf2(n, parray, iarray)"
+.B "integer*4 n"
+.B "real parray(2,n)"
+.B "integer*2 iarray(n)"
+.IP 
+.B "subroutine splf2i(n, parray, iarray)"
+.B "integer*4 n"
+.B "integer*4 parray(2,n)"
+.B "integer*2 iarray(n)"
+.IP 
+.B "subroutine splf2s(n, parray, iarray)"
+.B "integer*4 n"
+.B "integer*2 parray(2,n)"
+.B "integer*2 iarray(n)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure splf(n: longint; var parray; Coord;"
+.br
+.B 	var iarray: Colorindex);
+.IP
+.B "procedure splfi(n: longint; var parray; Icoord;"
+.br
+.B 	var iarray: Colorindex);
+.IP
+.B "procedure splfs(n: longint; var parray: Scoord;"
+.br
+.B 	var iarray: Colorindex);
+.IP
+.B "procedure splf2(n: longint; var parray: Coord;"
+.br
+.B 	var iarray: Colorindex);
+.IP
+.B "procedure splf2i(n: longint; var parray: Icoord;"
+.br
+.B 	var iarray: Colorindex;
+.IP
+.B "procedure splf2s(n: longint; var parray: Scoord;"
+.br
+.B 	var iarray: Colorindex);
+.ne 23
+.SH DESCRIPTION
+.B splf
+draws Gouraud-shaded polygons using the current
+pattern and writemask.
+It takes three arguments:
+.I parray, 
+an array of points; 
+.I array, 
+an array of the intensities at these points;
+.I n, 
+the number of points
+in each array.  
+Polygons are represented
+as arrays of points.
+The first and last points automatically connect
+to close a polygon.  The points can be expressed as integers, shorts, or 
+real numbers, in 2-D or 3-D space.
+2-D polygons are drawn with
+.I z 
+= 0.  After the polygon is drawn, the current graphics
+position is set to the first point in the array.
+.PP
+All polygons must be convex.
+.SH "SEE ALSO"
+pdr, pmv, poly, rect, rectf, rpdr, rpmv
+.sp
+.I Programming Guide,
+Section 13.1, Shading

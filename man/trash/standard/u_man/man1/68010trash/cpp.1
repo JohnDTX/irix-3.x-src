@@ -1,0 +1,335 @@
+.TH CPP 1
+.SH NAME
+cpp \- the C language preprocessor
+.SH SYNOPSIS
+.B /lib/cpp 
+[ option ...  ] [ ifile [ ofile ] ]
+.SH DESCRIPTION
+.PP
+.I Cpp\^
+is the C language preprocessor which is invoked as the
+first pass of any C compilation using the
+.IR cc\^ (1)
+command.  Thus the output of
+.I cpp\^
+is designed to be in a form acceptable as input
+to the next pass of the C compiler.
+As the C language evolves,
+.I cpp\^
+and the rest of the C compilation package will be
+modified to follow these changes.
+Therefore, the use of
+.I cpp\^
+other than in this framework is not suggested.
+The preferred way to invoke
+.I cpp\^
+is through the
+.IR cc\^ (1)
+command since the functionality of
+.I cpp\^
+may someday be moved elsewhere.  See
+.IR m4\^ (1)
+for a general macro processor.
+.PP
+.I Cpp\^
+optionally accepts two file names as arguments.
+.I Ifile\^
+and
+.I ofile\^
+are respectively the input and output
+for the preprocessor.  They default to standard input
+and standard output if not supplied.
+.PP
+The following \f2options\fP to
+.I cpp\^
+are recognized:
+.TP "\w'\f3\-I\f2dir\f1\ \ 'u"
+.B \-P
+Preprocess the input without producing the line control
+information used by the next pass of the C compiler.
+.TP
+.B \-C
+By default,
+.I cpp\^
+strips C-style comments.  If the
+.B \-C
+option is specified, all comments (except those found on
+.I cpp\^
+directive lines)
+are passed along.
+.TP
+.BI \-U name\^
+Remove any initial definition of
+.IR name ,
+where
+.I name\^
+is a reserved symbol
+that is predefined by the particular preprocessor.
+The current list of these possibly reserved symbols includes:
+.PD 0
+.RS 8
+.TP "\w'\s-1UNIX\s+1 System variant:\ \ 'u"
+operating system:
+ibm, gcos, os, tss, unix
+.TP
+hardware:
+interdata, m68000, pdp11, u370, u3b, vax
+.TP
+\s-1UNIX\s+1 System variant:
+.SM RES\*S,
+.SM RT
+.RE
+.PD
+.TP "\w'\f3\-I\f2dir\f1\ \ 'u"
+.BI \-D name\^
+.PD 0
+.TP
+.BI \-D name=def\^
+Define
+.I name\^
+as if by a
+.B #define
+directive.  If no
+.I =def\^
+is given,
+.I name\^
+is defined as 1.
+.PD
+.TP
+.BI \-I dir\^
+Change the algorithm for searching for
+.B #include
+files
+whose names do not begin with \f3/\fP
+to look in
+.I dir\^
+before looking in the directories on the standard list.
+Thus,
+.B #include
+files whose names are enclosed in \f3"\|"\fP
+will be searched for
+first in the directory of the
+.I ifile\^
+argument,
+then in directories named in 
+.B \-I
+options,
+and last in directories on a standard list.
+For
+.B #include
+files whose names are enclosed in
+.BR <> ,
+the directory of the
+.I ifile\^
+argument is not searched.
+.TP
+.B \-p
+The input source is 
+.I pascal
+source.  cpp will strip C-style comments from the source, will
+ignore anything within Pascal-style comments, and will 
+.I not
+put out blank lines for 
+.I cpp 
+directives found in included files.
+Pascal programs may then include a file of macros and not alter
+the line numbers in the original source.  When the
+.B "\-p"
+flag is used, 
+.I cpp 
+does not output line number directives.
+.PP
+Two special names are understood by
+.IR cpp .
+The name
+.B _\^\^_\s-1LINE\s+1_\^\^_
+is defined as the current line number (as a decimal integer) as known by
+.IR cpp ,
+and
+.B _\^\^_\s-1FILE\s+1_\^\^_
+is defined as the current file name (as a C string) as known by
+.IR cpp .
+They can be used anywhere (including in macros) just as any
+other defined name.
+.PP
+All
+.I cpp\^
+directives start with lines begun by
+.BR # .
+The directives are:
+.TP "\w'\f3\-I\f2dir\f1\ 'u"
+.BI #define " name" " " token-string
+Replace subsequent instances of
+.I name\^
+with
+.IR token-string .
+.TP
+\f3#define\f2 name\f3(\f2 arg\f3, ...,\f2 arg\f3 )\f2 token-string\f1
+Notice that there can be no space between
+.I name\^
+and the
+.BR ( .
+Replace subsequent instances of
+.I name\^
+followed by a
+.BR ( ,
+a list of comma separated tokens, and a
+.B )
+by
+.I token-string\^
+where each occurrence of an
+.I arg\^
+in the
+.I token-string\^
+is replaced by the corresponding token in the comma separated list.
+.TP
+.BI #undef " name"
+Cause the definition of
+.I name\^
+(if any) to be forgotten from now on.
+.TP
+\f3#include\f2 "filename\^"
+.PD 0
+.TP
+.BI #include " " < filename >
+Include at this point the contents of
+.I filename\^
+(which will then be run through
+.IR cpp\^ ).
+When the
+.BI < filename >
+notation is used,
+.I filename\^
+is only searched for in the standard places.
+See the
+.B \-I
+option above for more detail.
+.PD
+.TP
+\f3#line\f2 integer-constant "filename\^"
+Causes
+.I cpp\^
+to generate line control information for the next pass of the
+C compiler.
+.I Integer-constant\^
+is the line number of the next line
+and
+.I filename\^
+is the file where it comes from.
+If \f2"filename\^"\f1 is not given, the current file name is unchanged.
+.TP
+.B #endif
+.br
+Ends a section of lines begun by a test directive
+.RB ( #if ,
+.BR #ifdef ,
+or
+.BR #ifndef ).
+Each test directive must have a matching
+.BR #endif .
+.TP
+.BI #ifdef " name"
+The lines following will appear in the output if and only if
+.I name\^
+has been the subject of a previous
+.B #define
+without being the subject of an intervening
+.BR #undef .
+.TP
+.BI #ifndef " name"
+The lines following will not appear in the output if and only if
+.I name\^
+has been the subject of a previous
+.B #define
+without being the subject of an intervening
+.BR #undef .
+.TP
+.BI #if " constant-expression"
+Lines following will appear in the output if and only if the
+.I constant-expression\^
+evaluates to non-zero.
+All binary non-assignment C operators, the
+.B ?:
+operator, the unary
+.BR \(mi ,
+.BR ! ,
+and
+.B ~
+operators are all legal in
+.IR constant-expression .
+The precedence of the operators is the same as defined by the C language.
+There is also a unary operator
+defined,
+which can be used in
+.I constant-expression\^
+in these two forms:
+.BI defined " " ( " name " )
+or
+.BI defined " name" .
+This allows the utility of
+.BR #ifdef " and " #ifndef
+in a
+.B #if
+directive.
+Only these operators, integer constants, and names which
+are known by
+.I cpp\^
+should be used in
+.IR constant-expression .
+In particular, the
+.B sizeof
+operator is not available.
+.bp
+.TP
+.B #else
+Reverses the notion of the test directive which
+matches this directive.  So if lines previous to
+this directive are ignored, the following lines
+will appear in the output, 
+and vice versa.
+.PP
+The test directives and the possible
+.B #else
+directives can be nested.
+.SH EXAMPLE
+.RS .3i
+/lib/cpp \-P \-D\s-1XYZ\s+1 \-D\s-1MYFILE\s+1=myfile \-I../include myprog.c myprog.i
+.RE
+.PP
+would preprocess "myprog.c"
+input output file "myprog.i",
+deleting output line numbers
+.RB ( \-P 
+),
+defining symbol
+.SM XYZ
+to be null,
+symbol
+.SM MYFILE
+to be ``myfile''
+and using include files from
+.BR ../include .
+.SH FILES
+.TP "\w'/usr/include\ \ \ \ 'u"
+/usr/include
+standard directory for
+.B #include
+files
+.SH SEE ALSO
+cc(1), m4(1).
+.SH DIAGNOSTICS
+.PP
+The error messages produced by
+.I cpp\^
+are intended to be self-explanatory.  The line number and filename
+where the error occurred are printed along with the diagnostic.
+.SH NOTES
+When newline characters were found in argument lists for macros
+to be expanded, previous versions of
+.I cpp\^
+put out the newlines as they were found and expanded.
+The current version of
+.I cpp\^
+replaces these newlines with blanks to alleviate problems that the
+previous versions had when this occurred.
+.\"	@(#)cpp.1	5.1 of 11/7/83

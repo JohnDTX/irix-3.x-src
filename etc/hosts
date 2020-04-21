@@ -1,0 +1,5 @@
+127.1		localhost
+#
+# This network number, '192.0.2' is the officially blessed 'test' network.
+#	It should be changed immediately to your own official network number.
+192.0.2.1	IRIS

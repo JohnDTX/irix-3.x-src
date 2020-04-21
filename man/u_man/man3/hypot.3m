@@ -1,0 +1,34 @@
+'\"macro stdmacro
+.TH HYPOT 3M 
+.SH NAME
+hypot \- Euclidean distance function
+.SH SYNOPSIS
+.B #include <math.h>
+.PP
+.B long float hypot (x, y)
+.br
+.B long float x, y;
+.SH DESCRIPTION
+.I Hypot\^
+returns 
+.PP
+.RS
+sqrt(x \(** x + y \(** y),
+.RE
+.PP
+taking precautions against unwarranted overflows.
+.SH DIAGNOSTICS
+.I Hypot\^
+checks its input for the illegal values NaN and INFINITY, raising the
+floating point exception 
+.I INVALID_OP_A,\^
+and 
+.I INVALID_OP_F2,\^
+respectively.  If the input would cause 
+.I hypot\^
+to overflow, a floating point exception with the type code
+.I OVERFL
+is signalled.
+.SH SEE ALSO
+fpsigset(3C).
+.\"	@(#)hypot.3m	5.1 of 10/25/83

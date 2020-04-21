@@ -1,0 +1,36 @@
+boot	004-0124-046	Bootstrap System
+demos	004-0174-035	Update Demos
+demos%	004-0174-036	Update Demos, Bug Fix (Aug. 22, 1988)
+dist	004-0024-042	Distribution Tools
+ftn	004-0314-035	FORTRAN Opt
+games	004-0164-035	Update Games
+gifts	004-0184-032	Update Gifts
+gltut	004-0204-032	Update IRIS Prog Tut
+mail	004-0194-032	Update Mail
+man	004-0154-035	Update Manual Pages
+nfs	004-0384-032	NFS Opt
+nfs%	004-0384-033	NFS Bug Fix (Jan. 27, 1988)
+nfs%	004-0384-034	NFS Bug Fix (Feb. 26, 1988)
+nfs%	004-0384-035	NFS Bug Fix (Aug. 22, 1988)
+pas	004-0324-035	Pascal Opt
+root	004-0134-164	Standard System root
+root%	004-0134-165	Standard System root, Bug Fix (Jan. 27, 1988)
+root%	004-0134-166	Standard System root, Bug Fix (Feb. 26, 1988)
+root%	004-0134-167	Standard System root, Bug Fix (Aug. 22, 1988)
+squish	004-0011-133	Special Terminal Release
+sys	004-0631-026	Reconfigurable Kernel Special
+sys%	004-0631-027	Reconfigurable Kernel, Bug Fix (April 8, 1988)
+sysnfs	004-0631-033	Reconfigurable Kernel with NFS Special
+sysnfs%	004-0631-034    Reconfigurable NFS Kernel, Bug Fix (Apr 8, 1988)
+troff	004-0304-032	Laser Printer Opt
+upd	004-0144-045	Update System
+upd%	004-0144-046	Update System Bug Fix (Jan. 27, 1988)
+upd%	004-0144-047	Update System Bug Fix (Feb. 26, 1988)
+upd%	004-0144-048	Update System Bug Fix (Aug. 22, 1988)
+usr	004-0134-174	Standard System usr
+usr%	004-0134-175	Standard System usr, Bug Fix (May 6, 1988) 
+usr%	004-0134-176	Standard System usr, Bug Fix (Aug. 22, 1988) 
+xns	004-0394-032	XNS Opt
+xns%	004-0394-033	XNS Bug Fix (Jan. 27, 1988)
+xns%	004-0394-034	XNS Bug Fix (Feb. 26, 1988)
+xns%	004-0394-035	XNS Bug Fix (Aug. 22, 1988)

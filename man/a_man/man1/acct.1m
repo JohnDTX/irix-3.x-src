@@ -1,0 +1,152 @@
+'\"macro stdmacro
+.ds P UNIX
+.\".if t .ds ' \h@.05m@\s+4\v@.333m@\'\v@-.333m@\s-4\h@.05m@
+.if t .ds ' '
+.if n .ds ' '
+.\".if t .ds ` \h@.05m@\s+4\v@.333m@\`\v@-.333m@\s-4\h@.05m@
+.if t .ds ` `
+.if n .ds ` `
+.TH ACCT 1M
+.SH NAME
+acctdisk, acctdusg, accton, acctwtmp \- overview of accounting and miscellaneous accounting commands
+.SH SYNOPSIS
+.B /usr/lib/acct/acctdisk
+.PP
+.B /usr/lib/acct/acctdusg
+.RB [\| \-u " file\|]"
+.RB [\| \-p " file\|]"
+.PP
+.B /usr/lib/acct/accton
+[\|file\|]
+.PP
+.B /usr/lib/acct/acctwtmp
+"reason"
+.SH DESCRIPTION
+Accounting software is structured as a set of tools
+(consisting of both C programs and shell procedures)
+that can be used
+to build accounting systems.
+.IR acctsh (1M)
+describes the set of shell procedures built on top of
+the C programs.
+.PP
+Connect time accounting is handled by various programs that write
+records into
+.BR /usr/adm/utmp ,
+as described in
+.IR utmp (4).
+The programs described in
+.IR acctcon (1M)
+convert this file into session and charging records,
+which are then summarized by
+.IR acctmerg (1M).
+.PP
+Process accounting is performed by the
+.SM UNIX
+System
+kernel.
+Upon termination of a process,
+one record per process is written to a file
+(normally
+.BR /usr/adm/pacct ).
+The programs in
+.IR acctprc (1M)
+summarize this data for charging purposes;
+.IR acctcms (1M)
+is used to summarize command usage.
+Current process data may be examined using
+.IR acctcom (1).
+.PP
+Process accounting and connect time accounting (or any accounting records
+in the format described in
+.IR acct (4))
+can be merged and summarized into total accounting records by
+.I acctmerg\^
+(see \f3tacct\fP format in
+.IR acct (4)).
+.I Prtacct\^
+(see
+.IR acctsh (1M))
+is used to format any or all accounting records.
+.PP
+.I Acctdisk\^
+reads lines that contain user
+.SM ID\*S,
+login name, and number of
+disk blocks and converts them to total accounting
+records that can be merged with other accounting records.
+.PP
+.I Acctdusg\^
+reads its standard input (usually from
+.BR "find / \-print" )
+and computes disk resource consumption
+(including indirect blocks) by login.
+If \f3\-u\fP is given, records consisting of those file names for which
+.I acctdusg\^
+charges no one are placed in
+.I file\^
+(a potential source for finding users trying to avoid disk charges).
+If \f3\-p\fP is given,
+.I file\^
+is the name of the password file.
+This option is not needed if the password file is
+.BR /etc/passwd .
+.PP
+.I Accton\^
+alone turns process accounting off.
+If
+.I file\^
+is given,
+it must be the name of an existing file,
+to which the kernel appends process accounting records
+(see
+.IR acct (2)
+and
+.IR acct (4)).
+.PP
+.I Acctwtmp\^
+writes a
+.IR utmp (4)
+record to its standard output.
+The record contains the current time
+and
+a string of characters that describe the
+.IR reason .
+A record type of
+.SM ACCOUNTING
+is assigned (see
+.IR utmp (4)).
+.I Reason
+must be a string of 11 or less characters, numbers,
+.BR $ ,
+or spaces.
+For example, the following are suggestions
+for use in reboot and shutdown procedures, respectively:
+.PP
+.RS
+acctwtmp \|\*`uname\*` \|>> /etc/wtmp
+.br
+acctwtmp \|"file \|save" \|>> /etc/wtmp
+.RE
+.SH FILES
+.ta \w'/usr/adm/pacct\ \ \ \ 'u +.5i
+.nf
+/etc/passwd	used for login name to user \s-1ID\s+1 conversions
+/usr/lib/acct	holds all accounting commands listed in
+	sub-class 1M of this manual
+/usr/adm/pacct	current process accounting file
+/etc/wtmp	login/logoff history file
+.fi
+.SH SEE ALSO
+acctcms(1M),
+acctcom(1),
+acctcon(1M),
+acctmerg(1M),
+acctprc(1M),
+acctsh(1M),
+fwtmp(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.\"	@(#)acct.1m	5.1 of 10/17/83

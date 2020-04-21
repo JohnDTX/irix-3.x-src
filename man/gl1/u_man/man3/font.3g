@@ -1,0 +1,32 @@
+.TH font  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I font
+- select a raster font to display text
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "font(fntnum) "
+.B "short fntnum;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine font(fntnum)"
+.B "integer*2 fntnum"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure font(fntnum: Short);"
+.sp
+.SH DESCRIPTION
+\f2Font\f1 chooses a raster font that will be used
+whenever a \f2charstr\f1 command draws a text string.  The argument is an
+index into the font table built with the \f2defrasterfont\f1 
+command.  This font remains in effect until another \f2font\f1 command is
+executed.  By default, font 0 is selected.
+.PP
+If 
+.I font
+specifies an font number that is not defined, the command is ignored.
+.SH "SEE ALSO"
+.I defrasterfont, getfont

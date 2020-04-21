@@ -1,0 +1,30 @@
+.TH getfont 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getfont
+\- returns the current raster font number
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getfont()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getfon()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getfont: longint;"
+.SH DESCRIPTION
+.B getfont
+returns the index of the current raster font.
+.SH "SEE ALSO"
+defrasterfont, font
+.sp
+.I Programming Guide,
+Section 5.3, Fonts
+.SH NOTE
+This routine is available only in immediate mode.

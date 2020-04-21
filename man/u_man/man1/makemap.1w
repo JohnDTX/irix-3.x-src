@@ -1,0 +1,45 @@
+'\"macro stdmacro
+.TH MAKEMAP 1W
+.SH NAME
+makemap \- make the default color map
+.SH SYNOPSIS
+.B makemap
+.SH DESCRIPTION
+The frame buffer of the IRIS contains values which are translated into
+RGB values by a color map. The default map is created by
+.I makemap.
+.I makemap 
+maps the lowest eight colors in the color map
+to the default eight colors
+in the Graphics Library.  It then reads color
+mapping commands from a file in your
+home directory called 
+.I ~/.desktop.  
+.PP
+Color mapping commands contain 
+the numbers of colors to be mapped and 
+red, green, and blue values.
+If 
+.I ~/.desktop
+is not found, 
+.I makemap
+uses default values.
+.I makemap 
+then maps 
+a gray scale, followed by an ordered color map for
+dithering.  If there are more than eight planes,
+.I makemap 
+makes a random color map from colors 64 to 127, and
+another ramp from 128 to 255, followed by 
+another ordered color map.
+.I makemap 
+maps
+the remaining colors to red.  
+.SH SEE ALSO
+loadmap(1W,
+randmap(1W),
+savedesktop(1W),
+showmap(1W),
+startup(1W)
+.SH FILES
+~/.desktop

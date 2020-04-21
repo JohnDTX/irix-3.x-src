@@ -1,0 +1,105 @@
+'\"macro stdmacro
+.TH SETFPE 3X 
+.SH NAME
+setfpe, fpecleanup \- FORTRAN and Pascal floating-point exception handling system
+.SH "FORTRAN SYNOPSIS"
+.B $include /usr/include/fortfpe.h
+.PP
+.B subroutine setfpe(mode,errormask)
+.br
+.B integer*4 mode,errormask
+.PP
+.B subroutine fpecleanup(errorcode)
+.br
+.B integer*4 errorcode
+.SH "PASCAL SYNOPSIS"
+.B #include <pascfpedefs.h>
+.br
+.B {$I /usr/include/pascfpe.h }
+.PP
+.B procedure setfpe(var mode,errormask: longint); external;
+.PP
+.B procedure fpecleanup(var errorcode: longint);
+.SH DESCRIPTION
+The routine 
+.I setfpe\^
+is used to control reporting and handling of floating-point exceptions.  
+Unless 
+.I setfpe\^
+is called at program initiation, floating-point errors will not be 
+raised as exceptions, 
+and may produce indeterminate results.  A call to 
+.I setfpe\^
+specifies which types of floating-point
+errors are to be raised as exceptions, and the actions to be performed
+during exception processing.
+.PP
+Once a floating-point exception is detected, the default action is 
+to call the user-handler routine
+.I fpecleanup,\^
+print a message, 
+and abort with a core dump.  The call to 
+.I setfpe\^
+may inhibit the call of the handler routine, the message, or the core dump.
+.PP
+The parameter 
+.I mode\^
+is the sum of any or all of the following values (see
+.I /usr/include/fortfpe.h\^
+or
+.I /usr/include/pascfpedefs.h\^
+):
+.PP
+.RS .3i
+.ta \w'NOFPECLEANUP\ \ \ 'u
+.nf
+NOFPECLEANUP	Don't call the subroutine \f2fpecleanup\fP.
+NOCOREDUMP	Don't dump core when aborting.
+NOMESSAGE	Don't print a message concerning the error before aborting.
+.fi
+.RE
+.PP
+The parameter 
+.I errormask\^
+indicates which errors are to be 
+.I ignored.\^
+It is the bitwise \f2or\fP of any or all of the error codes found in
+.I /usr/include/fortfpe.h\^
+or
+.IR /usr/include/pascfpedefs.h :\^
+.PP
+.RS .3i
+.ta \w'UNDERFLOW\ \ \ 'u
+.nf
+DIVZERO	Division by zero has occurred.
+OVERFLOW	The operation overflowed.
+NANOP	One of the operands was an IEEE not-a-number (\f2NaN\fP).
+ILLEGALOP	An illegal operation was requested.
+UNDERFLOW	The operation underflowed.
+DENORM	One of the operands was denormalized.
+ZEROVALS	A combination of UNDERFLOW and DENORM.
+ALL	A combination of all errors.
+.sp 1
+.fi
+.RE
+NOTE: the status of the errors UNDERFLOW and DENORM must be treated
+similarly.  Thus, if it is opted for UNDERFLOW errors to be ignored,
+DENORM errors should also be ignored.  (These errors have been combined
+in the ZEROVALS code for this purpose.)  If ZEROVALS errors are ignored, 
+they are treated as zero.
+.PP
+Unless it is suppressed, the user routine
+.I fpecleanup\^
+is called with the errorcode.  This errorcode may be any of 
+the errorcodes OVERFLOW, DIVZERO, NANOP, ILLEGALOP, UNDERFLOW, or
+DENORM listed above.  It may also be UNKNOWN, implying that the
+error cause cannot be determined.  The error code may also have
+the error INEXACT logically-ored in.  INEXACT errors arise normally 
+from operations whose results are not exact, (e.g., 1.0/3.0).
+INEXACT errors will never be indicated unless another error has occurred.
+.fi
+.RE
+.SH SEE ALSO
+fpsigset(3C)
+.br
+``IRIS Floating Point'' in \f2U\s-2NIX\s+2 Programmer's Guide, Volume IIB\f1.

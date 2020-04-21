@@ -1,0 +1,91 @@
+'\" t
+'\"macro stdmacro
+.TH BESSEL 3M 
+.SH NAME
+bessel: j0, j1, jn, y0, y1, yn \- Bessel functions
+.SH SYNOPSIS
+.nf
+.B #include <math.h>
+.PP
+.B long float j0 (x)
+.B long float x;
+.PP
+.B long float j1 (x)
+.B long float x;
+.PP
+.B long float jn (n, x)
+.B int n;
+.B long float x;
+.PP
+.B long float y0 (x)
+.B long float x;
+.PP
+.B long float y1 (x)
+.B long float x;
+.PP
+.B long float yn (n, x)
+.B int n;
+.B long float x;
+.SH DESCRIPTION
+.I J0\^
+and
+.I j1\^
+return Bessel functions of
+.I x\^
+of the first kind of orders 0 and 1
+respectively.
+.I Jn\^
+returns the Bessel function of
+.I x\^
+of the first kind of order
+.IR n .
+.PP
+.I Y0\^
+and
+.I y1\^
+return the Bessel functions of
+.I x\^
+of the second kind of orders 0 and 1 respectively.
+.I Yn\^
+returns the Bessel function of
+.I x\^
+of the second kind of order
+.IR n .
+The value of
+.I x\^
+must be positive.
+.SH DIAGNOSTICS
+The routines comprising
+.I bessel\^
+use the standard IRIS floating point exception handling system.
+Certain arguments to 
+.I y0,y1,yn,j0,j1,\^
+and
+.I jn\^
+raise a floating point exception with the operation set to 
+.I MATH\^
+and the global
+.I _mathfunc_id\^
+indicating the routine raising the exception.  The exception
+type (the
+.I type\^
+field of the global
+.I _fperror\^
+structure) is set as indicated below:
+.TS
+center, allbox;
+c c
+l l.
+input value	exception type
+NaN	INVALID_OP_A	
+\(if	INVALID_OP_F2
+< 0.0	DOMAIN_ERROR
+> ~2e102	UNDERFL
+> 2e8	PARTIAL_SLOSS
+< ~.4e-102	OVERFL
+.TE
+.SH SEE ALSO
+fpsigset(3C),\^
+\f2IRIS Floating Point\fP,
+IRIS Workstation Guide.
+.\"	@(#)bessel.3m	5.1 of 10/19/83

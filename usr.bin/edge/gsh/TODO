@@ -1,0 +1,22 @@
+o fix -I flag to work and to correctly define a rows,cols window centered
+  before iconizing, so that unshrinking works right
+
+o Change "previous" menu entry to record origins as well as sizes
+
+o Dave Ciemo wants a "-n" flag for don't attach
+
+o Fix winlogin() to print a nicer message when gsh is not setuid - like change
+  the main code to detect it, and avoid the login in that case, after printing
+  a friendly message
+
+o Fix to not run the movie if -I is used
+
+o Fix up the movie to get done about 4 times faster (take at most 1 second)
+
+o Fix the gl to have a "caps" key button that can be getbutton'd
+
+o its nice that gsh changes the input focus.  However, it does it rather
+  late.  If I clone a window, and then while it is thinking about coloring
+  it and so forth, go back and try to activate the original window, I get
+  zapped.  Csh finally gets thru my .login, and gsh then changes the
+  focus out from under the window I'm now trying to use. (from vjs)

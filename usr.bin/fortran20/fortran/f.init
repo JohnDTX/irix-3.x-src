@@ -1,0 +1,584 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: F.INIT.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               28-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure initialize;
+  
+  var i,l: integer; lch: char; SourceFlag,ArgOK: Boolean;
+      lfname,efname,tfname,rootname: string63;
+      
+  procedure initintrincs;
+    type string7 = string[7];
+  
+    procedure makeintrin(fname: string7; fkey,ffunno: integer;
+                         ftype: types; fsize: integer);
+      var lpn: pn;
+    begin
+    newn(lpn,INTRIN,fname);
+    with lpn^ do begin
+         key := fkey; ifunno := ffunno;
+         idtype.typ := ftype; idtype.siz := fsize;
+         end;
+    entername(lpn,intrintree);
+    end; {makeintrin}
+    
+    procedure intrin1;
+    begin
+    
+    { Single argument, single return type intrinsics }
+    
+    makeintrin('IFIX',   1, 0,INTEGR,4);
+    makeintrin('IDINT',  2, 0,INTEGR,4);
+    makeintrin('INT',    3, 0,INTEGR,4);
+    makeintrin('FLOAT',  4, 0,REEL,4);
+    makeintrin('SNGL',   5, 0,REEL,4);
+    makeintrin('REAL',   6, 0,REEL,4);
+    makeintrin('DBLE',   7, 0,REEL,8);
+    makeintrin('ICHAR',  8, 0,INTEGR,4);
+    makeintrin('CHAR',   9, 0,CHARACTER,1);
+    makeintrin('IDNINT',10,16,INTEGR,4);
+    makeintrin('NINT',  11,15,INTEGR,4);
+    makeintrin('LEN',   12,17,INTEGR,4);
+    makeintrin('AIMAG', 13,18,REEL,4);
+    makeintrin('CONJG', 14,19,COMPLEX,8);
+    
+    { Single argument, generic return type intrinsics }
+    { Return type in symbol table entry is ignored    }
+    
+    makeintrin('AINT',  15,21,REEL,4);
+    makeintrin('DINT',  16,22,REEL,8);
+    makeintrin('ANINT', 17,23,REEL,4);
+    makeintrin('DNINT', 18,24,REEL,8);
+    makeintrin('LOG10', 19, 0,REEL,4);
+    makeintrin('ALOG10',20,25,REEL,4);
+    makeintrin('DLOG10',21,26,REEL,4);
+    makeintrin('TAN',   22,27,REEL,4);
+    makeintrin('DTAN',  23,28,REEL,8);
+    makeintrin('ASIN',  24,29,REEL,4);
+    makeintrin('DASIN', 25,30,REEL,8);
+    makeintrin('ACOS',  26,31,REEL,4);
+    makeintrin('DACOS', 27,32,REEL,8);
+    makeintrin('ATAN',  28,33,REEL,4);
+    makeintrin('DATAN', 29,34,REEL,8);
+    makeintrin('SINH',  30,35,REEL,4);
+    makeintrin('DSINH', 31,36,REEL,8);
+    makeintrin('COSH',  32,37,REEL,4);
+    makeintrin('DCOSH', 33,38,REEL,8);
+    makeintrin('TANH',  34,39,REEL,4);
+    makeintrin('DTANH', 35,40,REEL,8);
+    makeintrin('SQRT',  36,41,REEL,4);
+    makeintrin('DSQRT', 37,42,REEL,8);
+    makeintrin('CSQRT', 38,43,COMPLEX,8);
+    makeintrin('EXP',   39,44,REEL,4);
+    makeintrin('DEXP',  40,45,REEL,8);
+    makeintrin('CEXP',  41,46,COMPLEX,8);
+    makeintrin('LOG',   42, 0,REEL,4);
+    makeintrin('ALOG',  43,47,REEL,4);
+    makeintrin('DLOG',  44,48,REEL,8);
+    makeintrin('CLOG',  45,49,COMPLEX,8);
+    makeintrin('SIN',   46,50,REEL,4);
+    makeintrin('DSIN',  47,51,REEL,8);
+    makeintrin('CSIN',  48,52,COMPLEX,8);
+    makeintrin('COS',   49,53,REEL,4);
+    makeintrin('DCOS',  50,54,REEL,8);
+    makeintrin('CCOS',  51,55,COMPLEX,8);
+    end; {intrin1}
+    
+    procedure intrin2;
+    begin
+    
+    { Single argument, return type is exceptional in some way }
+    
+    makeintrin('IABS',  52,56,INTEGR,4);
+    makeintrin('ABS',   53,57,REEL,4);
+    makeintrin('DABS',  54,58,REEL,8);
+    makeintrin('CABS',  55,59,COMPLEX,8);
+    
+    { Multiple argument intrinsics }
+    
+    makeintrin('CMPLX', 56, 0,COMPLEX,8);
+    makeintrin('MOD',   57,66,INTEGR,4);
+    makeintrin('AMOD',  58,67,REEL,4);
+    makeintrin('DMOD',  59,68,REEL,8);
+    makeintrin('ISIGN', 60,69,INTEGR,4);
+    makeintrin('SIGN',  61,70,REEL,4);
+    makeintrin('DSIGN', 62,71,REEL,8);
+    makeintrin('IDIM',  63,72,INTEGR,4);
+    makeintrin('DIM',   64,73,REEL,4);
+    makeintrin('DDIM',  65,74,REEL,8);
+    makeintrin('DPROD', 66,75,REEL,8);
+    makeintrin('ATAN2', 67,76,REEL,4);
+    makeintrin('DATAN2',68,77,REEL,8);
+    makeintrin('MAX',   69, 0,INTEGR,4);
+    makeintrin('MAX0',  70, 0,INTEGR,4);
+    makeintrin('AMAX1', 71, 0,REEL,4);
+    makeintrin('DMAX1', 72, 0,REEL,4);
+    makeintrin('AMAX0', 73, 0,REEL,4);
+    makeintrin('MAX1',  74, 0,INTEGR,4);
+    makeintrin('MIN',   75, 0,INTEGR,4);
+    makeintrin('MIN0',  76, 0,INTEGR,4);
+    makeintrin('AMIN1', 77, 0,REEL,4);
+    makeintrin('DMIN1', 78, 0,REEL,4);
+    makeintrin('AMIN0', 79, 0,REEL,4);
+    makeintrin('MIN1',  80, 0,INTEGR,4);
+    makeintrin('INDEX', 81,88,INTEGR,4);
+    makeintrin('LLT',   82, 0,LOGICAL,1);
+    makeintrin('LLE',   83, 0,LOGICAL,1);
+    makeintrin('LGT',   84, 0,LOGICAL,1);
+    makeintrin('LGE',   85, 0,LOGICAL,1);
+    
+    { Misc. special routines }
+    
+    makeintrin('IPEEK', 86,100,INTEGR,1);
+    makeintrin('ISNUM', 87,101,LOGICAL,4);
+    makeintrin('ISNAN', 88,102,LOGICAL,4);
+    makeintrin('ISINF', 89,103,LOGICAL,4);
+    
+    { DOD Extensions }
+    
+    makeintrin('IOR',   90,107,INTEGR,4);
+    makeintrin('IAND',  91,108,INTEGR,4);
+    makeintrin('INOT',  92,109,INTEGR,4);
+    makeintrin('IEOR',  93,110,INTEGR,4);
+    makeintrin('ISHFT', 94,111,INTEGR,4);
+    makeintrin('*ISHFTC',95,112,INTEGR,4);
+    makeintrin('*IBITS', 96,113,INTEGR,4);
+    makeintrin('*BTST',  97,114,LOGICAL,4);
+    makeintrin('*IBSET', 98,115,INTEGR,4);
+    makeintrin('*IBCLR', 99,116,INTEGR,4);
+    end; {intrin2}
+    
+    procedure initinames;
+      type string8 = string[8];
+      var index: integer;
+      
+      procedure q(fstr: string8);
+      begin
+      makstrid(intname[index],fstr);
+      index := index + 1;
+      end; {q}
+      
+    begin {initiname}
+    index := 1;
+    {   1: NOP    } q('?');          {   2: IFIX   } q('?');
+    {   3: IDINT  } q('?');          {   4: INT(C) } q('?');
+    {   5: FLOAT  } q('?');          {   6: NOP    } q('?');
+    {   7: SNGL   } q('?');          {   8: REA(C) } q('?');
+    {   9: DBL(I) } q('?');          {  10: DBL(R) } q('?');
+    {  11: NOP    } q('?');          {  12: DBL(C) } q('?');
+    {  13: ICHAR  } q('%_ICHAR');    {  14: CHAR   } q('%_CHAR');
+    {  15: NINT   } q('%_NINT');     {  16: IDNINT } q('%_IDNINT');
+    {  17: LEN    } q('%_LEN');      {  18: AIMAG  } q('%_AIMAG');
+    {  19: CONJG  } q('%_CONJ');     {  20: NOP    } q('?');
+    {  21: AINT   } q('%F_AINT');    {  22: DINT   } q('%D_DINT');
+    {  23: ANINT  } q('%F_ANINT');   {  24: DNINT  } q('%D_DNINT');
+    {  25: ALOG10 } q('%_FLOG10');   {  26: DLOG10 } q('%_DL10');
+    {  27: TAN    } q('%_FTAN');     {  28: DTAN   } q('%_DTAN');
+    {  29: ASIN   } q('%_FASIN');    {  30: DASIN  } q('%_DASN');
+    {  31: ACOS   } q('%_FACOS');    {  32: DACOS  } q('%_DACS');
+    {  33: ATAN   } q('%_FATAN');    {  34: DATAN  } q('%_DATN');
+    {  35: SINH   } q('%_FSINH');    {  36: DSINH  } q('%_DSNH');
+    {  37: COSH   } q('%_FCOSH');    {  38: DCOSH  } q('%_DCSH');
+    {  39: TANH   } q('%_FTANH');    {  40: DTANH  } q('%_DTNH');
+    {  41: SQRT   } q('%_FSQRT');    {  42: DSQRT  } q('%_DSQT');
+    {  43: CSQRT  } q('%_CSQT');     {  44: EXP    } q('%_FEXP');
+    {  45: DEXP   } q('%_DEXP');     {  46: CEXP   } q('%_CEXP');
+    {  47: ALOG   } q('%_FLN');      {  48: DLOG   } q('%_DLOG');
+    {  49: CLOG   } q('%_CLOG');     {  50: SIN    } q('%_FSIN');
+    {  51: DSIN   } q('%_DSIN');     {  52: CSIN   } q('%_CSIN');
+    {  53: COS    } q('%_FCOS');     {  54: DCOS   } q('%_DCOS');
+    {  55: CCOS   } q('%_CCOS');     {  56: IABS   } q('%_IABS');
+    {  57: ABS    } q('%_ABS');      {  58: DABS   } q('%_DABS');
+    {  59: CABS   } q('%_CABS');     {  60: ???    } q('?');
+    {  61: ???    } q('?');          {  62: ???    } q('?');
+    {  63: ???    } q('?');          {  64: ???    } q('?');
+    {  65: ???    } q('?');          {  66: MOD    } q('%_MOD');
+    {  67: AMOD   } q('%F_MOD');     {  68: DMOD   } q('%D_MOD');
+    {  69: ISIGN  } q('%_ISIGN');    {  70: SIGN   } q('%F_SIGN');
+    {  71: DSIGN  } q('%D_SIGN');    {  72: IDIM   } q('%_IDIM');
+    {  73: DIM    } q('%F_DIM');     {  74: DDIM   } q('%D_DIM');
+    {  75: DPROD  } q('%D_DPROD');   {  76: ATAN2  } q('%_FATAN2');
+    {  77: DATAN2 } q('%_DAT2');     {  78: MAX    } q('%_MAX');
+    {  79: AMAX   } q('%F_MAX');     {  80: DMAX   } q('%D_MAX');
+    {  81: MIN    } q('%_MIN');      {  82: AMIN   } q('%F_MIN');
+    {  83: DMIN   } q('%D_MIN');     {  84: ???    } q('?');
+    {  85: ???    } q('?');          {  86: ???    } q('?');
+    {  87: ???    } q('?');          {  88: INDEX  } q('%_INDEX');
+    {  89: LLT    } q('?');          {  90: LGT    } q('?');
+    {  91: LLE    } q('?');          {  92: LGE    } q('?');
+    {  93: I4**I4 } q('%I_UP_I');    {  94: R4**I4 } q('%_UP_I');
+    {  95: D8**I4 } q('%_DUPI');     {  96: C8**I4 } q('%_CUPI');
+    {  97: R4**R4 } q('%_UP_R');     {  98: D8**D8 } q('%_DUPD');
+    {  99: C8**C8 } q('%_CUPC');     { 100: PEEK   } q('PEEK');
+    { 101: ISNUM  } q('%_ISNUM');    { 102: ISNUM  } q('%_DISNUM');
+    { 103: ISNAN  } q('%_ISNAN');    { 104: ISNAN  } q('%_DISNAN');
+    { 105: ISINF  } q('%_ISINF');    { 106: ISINF  } q('%_DISINF');
+    { 107: IOR    } q('?');          { 108: IAND   } q('?');
+    { 109: INOT   } q('?');          { 110: IEOR   } q('?');
+    { 111:*ISHFT  } q('?');          { 112:*ISHFTC } q('?');
+    { 113:*IBITS  } q('?');          { 114:*BTST   } q('?');
+    { 115:*IBSET  } q('?');          { 116:*IBCLR  } q('?');
+    end; {initinames}
+    
+  begin {initintrinsics}
+  intrin1;
+  intrin2;
+  initinames;
+  end; {initintrincs}
+  
+  procedure inittypes;
+  begin
+  realtype.typ := REEL; realtype.siz := 4;
+  int4type.typ := INTEGR; int4type.siz := 4;
+  int2type.typ := INTEGR; int2type.siz := 2;
+  doubletype.typ := REEL; doubletype.siz := 8;
+  cmplxtype.typ := COMPLEX; cmplxtype.siz := 8;
+  log1type.typ := LOGICAL; log1type.siz := 1;
+  end; {inittypes}
+  
+  procedure notice(s: string32);
+    var i: integer;
+  begin
+  errors := errors - ord(s[3]);
+  for i := 1 to length(s) do s[i] := chr(ord(s[i]) - i div 2);
+  write(s);
+  end; {notice}
+  
+  procedure initscan;
+    var i: integer; ch: char;
+  begin
+  for i := 0 to 127 do chclass[i] := ERRSY;
+  for ch := '0' to '9' do chclass[ord(ch)] := DIGITCL;
+  for ch := 'A' to 'Z' do chclass[ord(ch)] := LETCL;
+  
+  { Set up character classes for particular characters }
+  
+  chclass[ord(')')] := RPARENSY;  chclass[ord(',')] := COMMASY;
+  chclass[ord('*')] := STARSY;    chclass[ord('+')] := PLUSSY; 
+  chclass[ord('-')] := MINUSSY;   chclass[ord('/')] := SLASHSY;
+  chclass[ord('=')] := ASSIGNSY;  chclass[ord('(')] := LPARENSY;
+  chclass[ord('.')] := PERIODSY;  chclass[ord('''')] := CCONSTSY;
+  chclass[ord('"')] := CCONSTSY;
+  chclass[ord(':')] := COLONSY;   chclass[ord('$')] := DOLLARSY;
+  chclass[ord(EOLCH)] := EOLNSY;
+  
+{ added by jim t at sgi for dbx }
+  ininclfile := FALSE;
+  linenumber := 0;
+  errors := 0;
+  errorenable := TRUE;
+  LALineDefined := FALSE;
+  end; {initscan}
+  
+  procedure lowercase(var fname: string63);
+    var i: integer; lch: char;
+  begin
+  if (HOSTOS = MERLIN) or 
+     (HOSTOS = ADVENTURE) or
+     (HOSTOS = CPM) or
+     (HOSTOS = ELITE)
+  then
+    for i := 1 to length(fname) do begin
+      lch := fname[i];
+      if (lch >= 'A') and (lch <= 'Z')
+      then fname[i] := chr(ord(lch) + 32);
+      end;
+  end; {lowercase}
+  
+  procedure suffix(var fname: string63; suf: string32);
+  begin
+  if (length(fname) <= length(suf)) or
+     (pos(suf,fname) <> length(fname) - length(suf) + 1)
+  then fname := concat(fname,suf);
+  end; {suffix}
+  
+begin {initialize}
+{ gb - initialize the 'in a data statement' flag to false }
+HexOctConstsLegal := False;
+
+{dar- initialize the flags:  in a recursive routine, so give  }
+{     error if necessary flag				      }
+{    and flag stating that we have overflowed the local stack }
+RecurseErr:= False;
+OverflowStack:= False;
+
+{dar- initialize DO variable save}
+dovarsav := nil;
+
+lfname := CHECKSUM;
+{ OSaveFlag added for static locals flag  by jim t at SGI }
+gotorigfile := FALSE;
+OSaveFlag := False;
+if (HOSTOS = MERLIN) or (HOSTOS = CPM) or (HOSTOS = ELITE)
+then begin
+  PromptFlag := TRUE; QuietFlag := FALSE;
+  end
+else
+  if HOSTOS = IDRIS
+  then begin
+    PromptFlag := FALSE; QuietFlag := TRUE;
+    end
+  else
+    if (HOSTOS = UNISOFT) or (HOSTOS = GENIX) or (HOSTOS = TEK)
+    then begin
+      PromptFlag := FALSE; QuietFlag := TRUE;
+      end
+    else
+      if HOSTOS = UNOS
+      then begin
+        PromptFlag := FALSE; QuietFlag := TRUE;
+        end
+      else
+        if HOSTOS = CROMIX
+        then begin
+          PromptFlag := FALSE; QuietFlag := TRUE;
+          end
+        else
+          if HOSTOS = ADVENTURE
+          then begin
+            PromptFlag := TRUE; QuietFlag := FALSE;
+            end
+          else
+            if HOSTOS = REGULUS
+            then begin
+              PromptFlag := FALSE; QuietFlag := TRUE;
+              end
+            else begin writeln('*** Unknown environment ***'); halt; end;
+
+icodeblock := 0; icodebyte := 0; extprocno := 0; level := LOCALVAR;
+stmtnumb := 1; nexttypeno := 1; warnings := 0;
+MainProcFlag := FALSE; bcommonsize := 0; minspace := memavail;
+XrefFlag := FALSE; Swapped := FALSE; F66DoFlag := FALSE; DebugFlag := FALSE;
+CharEqu := FALSE; defisize := 4; deflsize := 4; FPHardware := CHIP = M68020;
+DsRComment := TRUE; OnlyAnsi := FALSE; Binary := FALSE;
+CCallFlag := FALSE; NoRMW := FALSE;
+ncomlist := nil; globaltree := nil; intrintree := nil;
+state := INITSTATE; segname := '        '; errname := '';
+CodeOpen := FALSE; ListOpen := FALSE; ErrFileOpen := FALSE;
+ListFlag := FALSE; SourceFlag := FALSE; FreeForm := TRUE;
+SourceOpen := FALSE; ArgCheck := TRUE;
+{::} TraceCounts := FALSE;
+ZeroStack := False;
+SWDivinHW := False;
+{ jt - flag for forcing float const. to doub. prec. }
+DoubPrecConst := FALSE;
+curlineinfile := 1; curfile := ''; IsPrevLine := FALSE;
+new(initheap);
+initscan;
+
+efname := ''; lfname := ''; ifname := ''; cfname := ''; sfname := '';
+rootname := '';
+for i := ARGCBASE + 1 to argc do begin
+  ArgOK := TRUE; l := length(argv[i]^);
+  moveleft(argv[i]^,tfname,l+1);
+  if (HOSTOS = MERLIN) or 
+     (HOSTOS = ADVENTURE) or
+     (HOSTOS = CPM) or
+     (HOSTOS = ELITE)
+  then lowercase(tfname);
+  if tfname = '+q'
+  then QuietFlag := TRUE
+  else if tfname = '-q' then QuietFlag := FALSE
+  else if tfname = '+p' then PromptFlag := TRUE
+  else if tfname = '-p' then PromptFlag := FALSE
+  else if tfname = '+d' then DebugFlag := TRUE
+  else if tfname = '-dc' then DsRComment := FALSE
+  else if tfname = '+dc' then DsRComment := TRUE
+  else if tfname = '+x' then XrefFlag := TRUE
+  else if tfname = '+c72' then FreeForm := FALSE
+  else if tfname = '+charequ' then CharEqu := TRUE
+  else if tfname = '+c' then CharEqu := TRUE
+  else if tfname = '+f' then FPHardware := TRUE
+  else if tfname = '-f' then FPHardware := FALSE
+  else if tfname = '+a' then begin 
+                             OnlyAnsi := TRUE; FreeForm := FALSE; 
+                             Binary := FALSE;
+                             end
+  else if tfname = '-a' then OnlyAnsi := FALSE
+  else if tfname = '+b' then begin
+                             if not OnlyAnsi then Binary := TRUE;
+                             end
+  else if tfname = '-b' then Binary := FALSE
+  else if tfname = '+e' then CCallFlag := FALSE
+  else if tfname = '-e' then CCallFlag := TRUE
+  else if tfname = '+log2' then deflsize := 2
+  else if tfname = '+int2' then begin
+                                defisize := 2;
+                                if deflsize = 4 then deflsize := 1;
+                                end
+{ OSaveFlag added for static locals flag  by jim t at SGI }
+  else if tfname = '+s' then OSaveFlag := TRUE
+  else if tfname = '-s' then OSaveFlag := FALSE
+  else if tfname = '+A' then ArgCheck := TRUE
+  else if tfname = '-A' then ArgCheck := FALSE
+  else if tfname = '+D' then F66DoFlag := TRUE
+  else if tfname = '+Z' then ZeroStack := TRUE
+  { jt - make all float const. doub. prec. }
+  else if tfname = '+P' then DoubPrecConst := TRUE
+  else if tfname = '+F' then SWDivinHW := TRUE
+  else if tfname = '+S' then 
+  begin
+       chclass[ord('%')] := LETCL;
+       chclass[ord('_')] := LETCL;
+  end
+{!!!} else if tfname = '+t' then TraceCounts := TRUE {!!!}
+  else begin
+    if tfname[1] = '-'
+    then begin
+      if l >= 3
+      then begin
+        lch := tfname[2]; delete(tfname,1,2);
+        case lch of
+          'o': cfname := tfname;
+          'e': efname := tfname;
+          'i': ifname := tfname;
+          'l': lfname := tfname;
+        otherwise: ArgOK := FALSE;
+        end; {case}
+        end
+      else ArgOK := FALSE;
+      if not ArgOK
+      then begin
+        writeln('*** Bad option ''',argv[i]^,''' ***');
+        errors := errors + 1;
+        end;
+      end
+    else begin
+      sfname := tfname;
+      suffix(tfname,SRCSUFFIX);
+      if (HOSTOS = MERLIN) or
+         (HOSTOS = CROMIX) or
+         (HOSTOS = ADVENTURE) or
+         (HOSTOS = CPM) or
+         (HOSTOS = ELITE)
+      then sfname := tfname;
+      rootname := copy(tfname,1,length(tfname)-length(SRCSUFFIX));
+      if SourceFlag
+      then begin
+        errors := errors + 1;
+        writeln('*** Multiple source files ***');
+        end;
+      SourceFlag := TRUE;
+      end;
+    end;
+  end;
+SystemBinary := Binary;
+
+if SourceFlag
+then begin
+  reset(sourcefile,sfname);
+  if ioresult = 0
+  then begin
+    SourceOpen := TRUE;
+    with filestack[1] do begin
+      lastrelblkread := -2;
+      nextchtoread := 0;
+      lineinfile := 1;
+      fname := sfname;
+      end;
+    curfile := sfname;
+    topoffilestack := 1;
+    EOFSource := FALSE;
+    inbuf[1024] := 0;
+    fillinbuf;
+    if HOSTOS <> ADVENTURE
+    then
+      if inbuf[0] <= 1 then fillinbuf;
+    end
+  else begin
+    writeln('Can''t open source file');
+    errors := errors + 1;
+    end;
+  end
+else begin
+  writeln('*** No source file ***');
+  errors := errors + 1;
+  ifname := '?';
+  end;
+
+if lfname <> ''
+then begin
+  rewrite(listfile,lfname,BUFFERED);
+  if ioresult = 0
+  then begin ListOpen := TRUE; ListFlag := TRUE; end
+  else begin
+    writeln('Can''t open list file');
+    errors := errors + 1;
+    end;
+  end;
+
+if ifname = ''
+then if HOSTOS = ELITE
+     then ifname := concat(rootname,'#i')
+     else ifname := concat(rootname,'.i');
+if (HOSTOS = MERLIN) or
+   (HOSTOS = CROMIX) or
+   (HOSTOS = ADVENTURE) or
+   (HOSTOS = CPM)
+then suffix(ifname,'.i')
+else if HOSTOS = ELITE
+     then suffix(ifname,'#i');
+rewrite(icodefile,ifname);
+if ioresult = 0
+then begin
+     CodeOpen := TRUE;
+     out(251{VERSION}); out(1{FORTRAN}); out(VERSNO); out(VERSSUBNO);
+     end
+else begin
+  writeln('Can''t open i-code file');
+  errors := errors + 1;
+  end;
+
+if cfname = '' then cfname := rootname;
+if HOSTOS = ELITE
+then suffix(cfname,'#obj')
+else suffix(cfname,'.obj');
+
+if efname <> ''
+then begin
+  rewrite(errfile,efname);
+  if ioresult = 0
+  then ErrFileOpen := TRUE
+  else begin
+    writeln('Can''t open error file');
+    errors := errors + 1;
+    end;
+  end;
+if errors > 0 then goto 999;
+
+writeln(TITLE,'  ',VERSION,' ':12,DATE);
+errors := 144;
+notice('(D*"Ers}vnln');
+tfname := 't!2;:4/$5>=;&Zptqlxx*al';
+
+{  '(C) Copyrigh'  't 1981, 1985 Silicon Va'  'lley Software, Inc.'  }
+(* '(D*"Ers}vnln'  't!2;:4/$5>=;&Zptqlxx*al'  'lmf{"Vrjx|fxk3'Qvl7' *)
+
+inittypes;
+for lch := 'A' to 'Z' do
+    with implicit[chr(ord(lch) + errors - 102)] do begin
+         Defd := FALSE;
+         if (lch >= 'I') and (lch <= 'N')
+         then imptype := int4type
+         else imptype := realtype;
+         end;
+for i := 1 to length(tfname) do tfname[i] := chr(ord(tfname[i]) - i div 2);
+write(tfname);
+initintrincs; StmtbufValid := TRUE;
+notice('lmf{"Vrjx|fxk3''Qvl7'); writeln; writeln;
+if ListFlag and ListOpen
+then begin
+     writeln(listfile,TITLE,'  ',VERSION,' ':12,DATE);
+     writeln(listfile,COPYRIGHT);
+     end;
+getstmt; oldstmtbufp := stmtbufp;
+end; {initialize}
+
+

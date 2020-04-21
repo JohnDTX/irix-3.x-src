@@ -1,0 +1,51 @@
+'\"macro stdmacro
+.TH TYPES 5
+.SH NAME
+types \- primitive system data types
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.SH DESCRIPTION
+The data types defined in the include file
+are used in \s-1UNIX\s0 System code;
+some data of these types are accessible to user code:
+.PP
+.RS .3i
+.nf
+.ta \w'typedef\ \ 'u +\w'struct { int r[1]; } \(**\ \ 'u
+typedef	struct { int r[1]; } \(**	physadr;
+typedef	long	daddr_t;
+typedef	char \(**	caddr_t;
+typedef	unsigned int	uint;
+typedef	unsigned short	ushort;
+typedef	ushort	ino_t;
+typedef	short	cnt_t;
+typedef	long	time_t;
+typedef	int	label_t[13];
+typedef	short	dev_t;
+typedef	long	off_t;
+typedef	long	paddr_t;
+typedef	long	key_t;
+typedef unsigned char	u_char;
+typedef unsigned short	u_short;
+typedef unsigned int	u_int;
+typedef unsigned long	u_long;
+.fi
+.RE
+.PP
+The form
+.I daddr_t\^
+is used for disk addresses except in an
+i-node on disk, see
+.IR fs (4).
+Times are encoded in seconds since 00:00:00 \s-1GMT\s0, January 1, 1970.
+The major and minor parts of a device code
+specify kind and unit number of a device
+and are installation-dependent.
+Offsets are measured in bytes from the beginning of a file.
+The
+.I label_t\^
+variables are used to save the processor state
+while another process is running.
+.SH SEE ALSO
+fs(4).
+.\"	@(#)types.5	5.1 of 10/15/83

@@ -1,0 +1,27 @@
+.TH swapbuffers  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I swapbuffers
+- swap the front and back buffers in double buffer mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "swapbuffers()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine swapbu"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure swapbuffers;"
+.sp
+.SH DESCRIPTION
+The \f2swapbuffers\f1 command swaps the front and back buffers
+in double buffer mode during the next vertical retrace period.  After an
+image is drawn in the back buffer, a \f2swapbuffers\f1 command displays it.
+\f2Swapbuffers\f1 is ignored in single buffer or RGB mode.
+.SH "SEE ALSO"
+.I backbuffer, doublebuffer, frontbuffer, swapinterval, sync
+.SH NOTE
+This command can only be used in immediate mode.

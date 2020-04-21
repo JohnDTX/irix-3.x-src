@@ -1,0 +1,14 @@
+
+kermit:
+	cd src; make sys3nid;
+	mv src/wermit bin/kermit
+	chmod og-w bin/kermit
+all:
+	make kermit
+bin/kermit:
+	make kermit
+clean:
+	cd src; make clean
+install: bin/kermit kermit.1c
+	install -m 755 -g bin -u bin -f /usr/local/bin bin/kermit
+	install -m 644 -g bin -u bin -f /usr/local/man/u_man/man1 kermit.1c

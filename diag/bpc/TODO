@@ -1,0 +1,108 @@
+Kurt Akeley
+19 October 1984
+Upgrade bpcd with UC4 tests
+
+The plan
+--------
+
+The goals of the tests routines included in bpcd must be
+
+    1.	to detect all "hard" hardware errors,
+
+    2.	to support diagnosis of all (hard and soft) hardware errors,
+
+    3.	to support oven testing.
+
+We intend to leave the code structure intact, and simply add test routines
+as necessary to achieve the above goals for UC4 systems.  A partial list of
+required additions is:
+
+Additions
+---------
+
+    1.	Numerical test of DDA registers (read back address registers)
+	WRITTEN TESTED
+
+	a.  static test of address registers
+	b.  simple test of delta registers
+	c.  use simple trapezoid commands to increment these registers
+
+    2.	Color/we tests
+	WRITTEN TESTED
+
+	a.  test single/double modes
+	b.  test swizzle mode
+	c.  test AB and CD planes in both orders, individually
+
+    3.	Read/write pixels
+	WRITTEN TESTED
+	a.  auto increment - all directions, row/column WRITTEN TESTED
+	b.  invert mode WRITTEN BAD-MICROCODE
+	c.  allpattern mode - all sizes WRITTEN TESTED
+	d.  separate AB and CD, both orders WRITTEN TESTED
+
+    4.	Retrace interrupt
+
+    5.	Lines (read the screen back)
+	WRITTEN TESTED
+
+	a.  invert mode WRITTEN
+	b.  depthcue (read screen) WRITTEN
+	c.  finish mode (on and off) WRITTEN
+	d.  ldlinestip (stipple continue) WRITTEN
+	e.  stipple readback WRITTEN
+	f.  stipple repeat (screen and readback) WRITTEN
+
+    6.	Rectangle stipple
+
+	a.  all stipple sizes
+	b.  invert mode
+
+    7.	Trapezoid fill (read screen)
+
+	a.  don't need to check all slopes - done in dda test.
+	b.  test end>start masking
+	c.  invert
+
+    8.	All tests executed at GF port? NOT ME
+
+    9.	Test Multibus setaddrs bit operation.
+
+Other fixes
+-----------
+
+    1.	Eliminate write enable index from init routine.  Always write enable
+	all bitplanes (either sigplanes or 0xffffffff?). WRITTEN TESTED
+
+    2.	Add help mechanism to getcmnd. WRITTEN TESTED
+
+    3.	Add ability to get default values one at a time (tab). WRITTEN TESTED
+
+    4.	Add history mechanism. WRITTEN TESTED
+
+    5.  Fix ramptest for non-interlaced operation and perhaps make
+	all tests that affect the DCR more general by not impacting
+	bits that could be preset prior invoking test. WRITTEN TESTED
+	
+    6.	DCR flags OPC, PI4, D1K, PRM, and UPH need to be reported when
+	they are set using the DCR  or INIT commands. WRITTEN TESTED
+
+    7.	DCLAMPTEST needs to be fixed to operate more smoothly. WRITTEN TESTED
+
+    8.	Do NOT print default argument values if they are not used.
+	(color, dcr, ucr, etc.) WRITTEN TESTED
+   
+Concerns
+--------
+
+    1.	Might not completely test the "nexty" prom.
+
+    2.	Should fix "read", "write", "readloop", and "writeloop" so that
+	they recover from multibus timeout.  Also, have "write" and
+	"writeloop" scan for known addresses and update the appropriate
+	global variables if necessary (dc_dcr, uc_ucr, uc_xxx, etc.).
+
+    3.	Fix "read" and "write" to recover gracefully from timeout errors.
+
+    4.	DMA interface hardware is not tested.
+

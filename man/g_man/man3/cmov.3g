@@ -1,0 +1,83 @@
+.TH cmov 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B cmov
+\- updates the current character position
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "cmov(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "cmovi(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "cmovs(x, y, z)"
+.B "Scoord x, y, z;"
+.IP 
+.B "cmov2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "cmov2i(x, y) "
+.B "Icoord x, y;"
+.IP
+.B "cmov2s(x, y)"
+.B "Scoord x, y;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine cmov(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine cmovi(x, y, z)"
+.B "integer*4 x, y, z"
+.IP 
+.B "subroutine cmovs(x, y, z)"
+.B "integer*2 x, y, z"
+.IP 
+.B "subroutine cmov2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine cmov2i(x, y)"
+.B "integer*4 x, y"
+.IP
+.B "subroutine cmov2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.ne 12
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure cmove(x, y, z: Coord);"
+.IP
+.B "procedure cmovi(x, y, z: Icoord);"
+.IP
+.B "procedure cmovs(x, y, z: Scoord);"
+.IP
+.B "procedure cmov2(x, y: Coord);"
+.IP
+.B "procedure cmov2i(x, y: Icoord);"
+.IP
+.B "procedure cmov2s(x, y: Scoord);"
+.SH "DESCRIPTION"
+\f3cmov\f1 moves the current character
+position to a specified point (as \f3move\f1 sets the
+current line drawing position). 
+\f2x\fP, \f2y\fP, \f2z\fP
+are integers,
+shorts, or
+real numbers in 2-D or 3-D space that specify a point in world coordinates.
+\f3cmov\fP transforms the specified world coordinates into screen
+coordinates, which become the new character position. If the transformed
+point
+is outside the viewport, the character position is undefined.
+.PP
+.B cmov
+does not affect the current graphics position.
+.SH "SEE ALSO"
+charstr, move, readpixels, readRGB, writepixels, writeRGB
+.sp
+.I Programming Guide, 
+Section 3.8, Text

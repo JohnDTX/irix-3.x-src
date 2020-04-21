@@ -1,0 +1,55 @@
+'\"macro stdmacro
+.TH GETLOGIN 3C 
+.SH NAME
+getlogin \- get login name
+.SH SYNOPSIS
+.B char \(**getlogin ( );
+.SH DESCRIPTION
+.I Getlogin\^
+returns a pointer to
+the login name
+as found in
+.BR /etc/utmp .
+It may be used
+in conjunction
+with
+.I getpwnam\^
+to locate the correct
+password file entry
+when the same user
+.SM ID
+is shared by several
+login names.
+.PP
+If
+.I getlogin\^
+is called within a process
+that is not attached to a
+terminal, it returns a
+.SM
+.B NULL
+pointer.
+The correct procedure
+for determining the login name
+is to call
+.IR cuserid ,
+or to call
+.I getlogin\^
+and if it fails
+to call
+.IR getpwuid .
+.SH FILES
+/etc/utmp
+.SH SEE ALSO
+cuserid(3S), getgrent(3C), getpwent(3C), utmp(4).
+.SH DIAGNOSTICS
+Returns the
+.SM
+.B NULL
+pointer if
+.I name\^
+not found.
+.SH BUGS
+The return values point to static data
+whose content is overwritten by each call.
+.\"	@(#)getlogin.3c	5.1 of 10/19/83

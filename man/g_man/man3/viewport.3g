@@ -1,0 +1,51 @@
+.TH viewport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B viewport
+\- allocates an area of the window for an image
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "viewport(left, right, bottom, top)"
+.B "Screencoord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine viewpo(left, right, bottom, top)"
+.B "integer*4 left, right, bottom, top"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure viewport(left, right bottom, 
+.br
+.B	top: Screencoord);
+.SH DESCRIPTION
+.B viewport
+specifies, in pixels, the area 
+of the window that displays an
+image.  Specifying
+the viewport is the first step in mapping world coordinates to
+screen coordinates.
+The portion of world space that 
+\f3window\f1, 
+\f3ortho\f1, 
+or 
+\f3perspective\f1 
+describes is mapped into the viewport.
+\f2left\f1, 
+\f2right\f1, 
+\f2bottom\f1, 
+\f2top\f1 
+coordinates
+define a rectangular area on the screen.
+.PP
+.B viewport
+also loads the screenmask.
+.SH "SEE ALSO"
+scrmask, getviewport, popviewport, pushviewport
+.sp
+.I Programming Guide,
+Section 4.4, Viewports

@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH RNUSERS 3X
+.SH NAME
+rnusers, rusers \- return information about users on remote machines
+.SH SYNOPSIS
+.nf
+.B #include <rpcsvc/rusers.h>
+.PP
+.B rnusers(host)
+.B char *host;
+.PP
+.B rusers(host, up)
+.B char *host;
+.B struct utmpidlearr *up;
+.SH DESCRIPTION
+.I Rnusers
+returns the number of users logged on to
+.I host
+(\-1 if it cannot determine that number).
+.I Rusers
+fills the
+.I utmpidlearr
+structure with data about
+.IR host ,
+and returns 0 if successful.
+The relevant structures are:
+.PP
+.nf
+struct utmparr {			/* RUSERSVERS_ORIG */
+	struct utmp **uta_arr;
+	int uta_cnt
+};
+.sp .5
+struct utmpidle {
+	struct utmp ui_utmp;
+	unsigned ui_idle;
+};
+.sp .5
+struct utmpidlearr {		/* RUSERSVERS_IDLE */
+	struct utmpidle **uia_arr;
+	int uia_cnt
+};
+.fi
+.SH RPC INFO
+.nf
+program number:
+	RUSERSPROG
+.sp .5
+xdr routines:
+	int xdr_utmp(xdrs, up)
+		XDR *xdrs;
+		struct utmp *up;
+	int xdr_utmpidle(xdrs, ui);
+		XDR *xdrs;
+		struct utmpidle *ui;
+	int xdr_utmpptr(xdrs, up);
+		XDR *xdrs;
+		struct utmp **up;
+	int xdr_utmpidleptr(xdrs, up);
+		XDR *xdrs;
+		struct utmpidle **up;
+	int xdr_utmparr(xdrs, up);
+		XDR *xdrs;
+		struct utmparr *up;
+	int xdr_utmpidlearr(xdrs, up);
+		XDR *xdrs;
+		struct utmpidlearr *up;
+.sp .5
+procs:
+	RUSERSPROC_NUM
+		No arguments, returns number of users as an \f2unsigned long\fP.
+	RUSERSPROC_NAMES
+		No arguments, returns \f2utmparr\fP or 
+		\f2utmpidlearr\fP, depending on version number.
+	RUSERSPROC_ALLNAMES
+		No arguments, returns \f2utmparr\fP or 
+		\f2utmpidlearr\fP, depending on version number.
+		Returns listing even for \f2utmp\fP entries satisfying \f2nonuser()\fP in \f2utmp.h\fP.
+versions:
+	RUSERSVERS_ORIG
+	RUSERSVERS_IDLE
+
+.fi
+.SH FILES
+.ta \w'/usr/lib/librpcsvc.a\0\0\0'u
+/usr/lib/librpcsvc.a	RPC services library
+.br
+/usr/lib/libsun.a	RPC protocol library
+.SH NOTE
+To compile and link a program that calls any of these routines,
+use a compile command of the form:
+.RS
+\f3cc \-I/usr/include/sun \-I/usr/include/bsd \f2prog.c\f3 \-lrpcsvc \-lsun \-lbsd\f1
+.RE
+

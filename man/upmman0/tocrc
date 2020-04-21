@@ -1,0 +1,149 @@
+#! /bin/sh
+# tocrc - create permuted index and table of contents for manual
+#
+# Must be run from this subdirectory (but is independent of its name).
+# Includes gl2 demo man pages.
+#
+# $Revision: 1.1 $
+# $Date: 89/03/27 17:07:06 $
+#
+#set -v
+tmp=/tmp/toc$$
+tmp2=/tmp/cattoc$$
+tmp3=/tmp/notcap$$
+
+troff=psroff
+trap "rm -f $tmp $tmp2 $tmp3; exit" 2 3 15
+if [ $# -eq 0 ]
+then
+	echo "Usage: tocrc section | \"all\" | \"tr\""
+	exit 1
+fi
+if [ $# -eq 2 ]
+then
+	: create toc input file for one section only
+#We assume that a section is only in one tree. We consider 1 and 1m to
+# be separate sections
+        for dir in ../. ../troff ../vms 
+	do
+	   (if [ $1 = 1m ]  
+           then
+              cd $dir/a_man/man1
+           elif [ $1 = 1 ]
+           then
+              cd $dir/u_man/man1
+           else
+              cd $dir/[ua]_man/man$1
+           fi
+           find . \( -name \*.$1 -o  -name \*.$1[a-z] \) -print\
+	   | xargs nroff -Tlp /pubs/tools/upmman0/getname )
+	done  \
+	| col -bx\
+	| sed -e 's/^[^:]*: *//' \
+	      -e '/^$/d'\
+	| sed -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'\
+              -e 'N;p;d'\
+	| paste - - \
+	| sort -u | sed > tocx$1 \
+		  -e 's/ *- */: /' \
+		  -e 's/ *$/./' \
+		  -e 's/	/ /g'\
+		  -e 's/  / /g'\
+		  -e 's/ :/:/g'
+
+	# don't need these any more as we run things through nroff
+	#	  -e 's/\\s[-+][0-9]//g' \
+	#	  -e 's/\\s0//g' \
+	#	  -e 's/\\f[1234RIBP]//g' \
+		# remove font and size changes as they alphabetize
+		# wrong and tabs put in by paste.
+else 
+	case $1 in
+	all )
+		:   tocx files for all sections and everything else
+
+		for x in 1 2 3 4 5 6 7 8 1m
+		do
+			./$0 $x $x
+		done
+		./$0 t
+		;;
+	t )
+		:   permuted index and toc files
+
+		if [ ! -f tocx1 ]
+		then
+			echo "tocx* files missing; must run 'tocrc all' first"
+			exit
+		fi
+		sed \
+			-e 's/(1c)/(1C)/' \
+			-e 's/(1g)/(1G)/' \
+			-e 's/(1m)/(1M)/' \
+			-e 's/(1w)/(1W)/' \
+			-e 's/(3b)/(3B)/' \
+			-e 's/(3c)/(3C)/' \
+			-e 's/(3f)/(3F)/' \
+			-e 's/(3g)/(3G)/' \
+			-e 's/(3m)/(3M)/' \
+			-e 's/(3n)/(3N)/' \
+			-e 's/(3r)/(3R)/' \
+			-e 's/(3s)/(3S)/' \
+			-e 's/(3x)/(3X)/' \
+			-e 's/(3y)/(3Y)/' \
+			-e 's/(6d)/(6D)/' \
+			-e 's/(6t)/(6T)/' \
+			-e 's/(7p)/(7P)/' \
+			-e '/"\."/d' \
+			tocx* cshcmd shcmd \
+		> $tmp2
+
+		: check for uncapitalized subsections
+		awk '{print $1}' $tmp2 | sed -n 's/.*(\(.[a-z]\))$/\1/p' | \
+			sort -u > $tmp3
+		if [ -s $tmp3 ]
+		then
+			echo tocrc needs changing to capitalize these subsections:
+			cat $tmp3
+		fi
+		:
+		: check for bad NAME sections
+		egrep -e - $tmp2 > $tmp3
+		if [ -s $tmp3 ]
+		then
+			echo The following pages have bad NAME sections:
+			cat $tmp3
+		fi
+		rm -f $tmp3
+
+		/usr/bin/ptx -t -w 78 -r -f -b break -i ignore $tmp2  ptxx
+
+		for f in tocx*
+		do
+			< $f grep '^intro' >$tmp
+				sed \
+				-e '2,${' \
+				-e '/^intro/d' \
+				-e '}' \
+				-e 's/ .*://' \
+				-e 's/.$//' \
+				-e 's/([^)]*) /" "/' \
+				-e 's/.*/.xx "&"/' \
+				-e '/""/d' \
+				$tmp $f \
+			> `echo $f | sed 's/tocx/toc/'`
+		done
+		;;
+	tr )
+		$troff ptx.in
+		$troff -ra0 toc.in
+		$troff -ra1 toc.in
+		$troff -ra2 toc.in
+		;;
+	* )
+		./$0 $1 $1
+		;;
+	esac
+fi
+rm -f $tmp $tmp2
+exit

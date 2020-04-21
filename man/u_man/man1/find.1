@@ -1,0 +1,299 @@
+'\"macro stdmacro
+.TH FIND 1
+.SH NAME
+find \- find files
+.SH SYNOPSIS
+.B find
+path-name-list  expression
+.SH DESCRIPTION
+.I Find\^
+recursively descends
+the directory hierarchy for
+each path name in the
+.I path-name-list\^
+(i.e., one or more path names)
+seeking files that match a boolean
+.I expression\^
+written in the primaries given below.
+By default, symbolic links are not followed (see
+.B \-follow
+below).
+In the descriptions, the argument
+.I n\^
+is used as a decimal integer
+where
+.BI + n\^
+means more than
+.IR n ,
+.BI \- n\^
+means less than
+.I n\^
+and
+.I n\^
+means exactly
+.IR n .
+.TP "\w'\f3\-group \f2gname\^\fP\ \ 'u"
+.BI \-name " file\^"
+True if
+.I file\^
+matches the current file name.
+Normal shell
+argument syntax may be used if escaped (watch out for
+.BR [ ", "
+.BR ? " and "
+.BR \(** ).
+.TP
+.BI \-perm " onum\^"
+True if the file permission flags
+exactly
+match the
+octal number
+.I onum\^
+(see
+.IR chmod\^ (1)).
+If
+.I onum\^
+is prefixed by a minus sign,
+more flag bits (017777, see
+.IR stat\^ (2))
+become significant and
+the flags are compared:
+.sp \n(PDu
+.RS 10m
+(flags&onum)==onum
+.RE
+.sp \n(PDu
+.TP
+.BI \-type " c\^"
+True if the type of the file
+is
+.IR c ,
+where
+.I c\^
+is
+.BR b ,
+.BR c ,
+.BR d ,
+.BR p ,
+.BR l ,
+or
+.B f
+for
+block special file, character special file,
+directory, fifo (a.k.a named pipe), symbolic link, or plain file.
+.TP
+.BI \-links " n\^"
+True if the file has
+.I n\^
+links.
+.TP
+.BI \-user " uname\^"
+True if the file belongs to the user
+.IR uname .
+If
+.I uname\^
+is numeric and does not appear as a login name in the
+.B /etc/passwd
+file, it is taken as a user \s-1ID\s0.
+.TP
+.BI \-group " gname\^"
+True if the file belongs to the group
+.IR gname .
+If 
+.I gname\^
+is numeric and does not appear in the
+.B /etc/group
+file, it is taken as a group \s-1ID\s0.
+.TP
+.B \-size 
+\f2n\f1[\f3ck\f1]
+True if the file is
+.I n\^
+blocks long (512 bytes per block).
+If
+.I n
+is followed by a
+.BR c ,
+the size is in characters.
+If
+.I n
+is followed by a
+.BR k ,
+the size is in kilobytes.
+.TP
+.BI \-atime " n\^"
+True if the file has been accessed in
+.I n\^
+days.
+.TP
+.BI \-mtime " n\^"
+True if the file has been modified in
+.I n\^
+days.
+.TP
+.BI \-ctime " n\^"
+True if the file has been changed in
+.I n\^
+days.
+.TP
+.BI \-inum " n\^"
+True if the file has inode
+.I n\^.
+.TP
+.BI \-exec " cmd\^"
+True if the executed
+.I cmd\^
+returns
+a zero value as exit status.
+The end of
+.I cmd\^
+must be punctuated by an escaped or quoted
+semicolon.
+Occurrences of
+.B {}
+are replaced by the
+current path name, even if they are part of a longer word.
+Shell meta-characters may be used.
+The
+.B SHELL
+environment variable, if present, is used to select a shell.
+.TP
+.BI \-ok " cmd\^"
+Like
+.B \-exec
+except that the generated command line is printed
+with a question mark first,
+and is executed only if the user responds
+by typing
+.BR y .
+.TP
+.B  \-print
+Always true;
+causes the current path name to be printed.
+.TP
+.BI \-cpio " device\^"
+Write the current file on
+.I device\^
+in
+.IR cpio\^ (4)
+format (5120 byte records).
+.TP
+.BI \-newer " file\^"
+True if
+the current file has been modified more recently than the argument
+.IR file .
+The
+.B \-newer
+primary may only be used once.
+.TP
+.BI \-anewer " file\^"
+True if
+the current file has been accessed more recently than the argument
+.IR file .
+The
+.B \-anewer
+primary may only be used once.
+.TP
+.BI \-cnewer " file\^"
+True if
+the current file had its status changed more recently than 
+that of argument 
+.IR file 
+(see 
+.IR chmod (1)).
+The
+.B \-cnewer
+primary may only be used once.
+.TP
+.B \-depth
+Always true; causes descent of the directory hierarchy to be
+done so that all entries in a directory are acted on before the
+directory itself.  This can be useful when 
+.I find
+is used with 
+.IR cpio (1)
+to transfer files that are contained in directories without
+write permission.
+.TP
+.B \-mount
+Always true;
+restricts the search to the file system containing the directory specified,
+or if no directory was specified, the current directory.
+.TP
+.B \-local
+True if the file physically resides on the local system.
+.TP
+.B \-follow
+Always true; causes
+.I find
+to follow symbolic links
+(see
+.IR symlink (2)).
+.TP
+.BR (\0 expression \0)
+True if the parenthesized expression is true (parentheses are
+special to the shell and must be escaped).
+.PP
+The primaries may be combined using the following operators (in order
+of decreasing precedence):
+.TP
+1)
+The negation of a primary (
+.B ! 
+is the unary 
+.I not
+operator ).
+.TP
+2)
+Concatentation of primaries (the 
+.I and
+operation is implied by the juxtaposition of two primaries).
+.TP
+3)
+Alternation of primaries (
+.B \-o
+is the 
+.I or
+operator ).
+.SH EXAMPLES
+.IP
+find / \-perm 755 \-exec ls "{}" ";"
+.PP
+will find all files, starting with the root directory, on which
+the permission levels have been set to 755 (see
+.IR chmod\^ (1)).
+.PP
+With 
+.B \-exec
+and a command such as
+.IR ls ,
+it is often necessary to escape the "{}" that stores
+the current pathname under investigation by putting it
+in double quotes.  It is
+.B always
+necessary to escape the semicolon at the end of an
+.B \-exec
+sequence.
+.PP
+Note again that it is also necessary to escape
+parentheses
+" \\( "
+and
+" \\) "
+used for grouping primaries, by means of a backslash.
+.IP
+find  /  \\( \-name a.out \-o \-name '\(**.o' \\)
+\-atime +7 \-exec rm {} \\;
+.PP
+removes all files named "a.out" or "\(**.o" that
+have not been accessed for a week.
+.SH FILES
+/etc/passwd
+.br
+/etc/group
+.SH "SEE ALSO"
+chmod(1), cpio(1), sh(1), test(1), stat(2), symlink(2), cpio(4), fs(4).
+.\"	@(#)find.1	5.1 of 11/8/83
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/find.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:45:43 $

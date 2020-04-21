@@ -1,0 +1,46 @@
+ipII/autoconf.c		standard
+ipII/console.c		standard
+ipII/cx.c		standard
+ipII/debug.c		optional debug device-driver
+ipII/fpa.c		optional fpa device-driver
+ipII/fs_machdep.c	standard
+ipII/machdep.c		standard
+ipII/mem.c		standard
+ipII/sysx.c		standard
+ipII/tod.c		standard
+ipII/trap.c		standard
+ipII/vm_machdep.c	standard
+multibus/mbio.c		standard
+multibus/dk.c		standard
+multibus/lpen.c		standard device-driver
+multibus/sky.c		optional sky device-driver
+gpib/ib.c		optional ib
+gpib/ib_probe.c		optional ib
+gpib/ib_subr.c		optional ib
+gpib/ib_q.c		optional ib
+gpib/ib_tlc.c		optional ib device-driver
+gpib/ib_machdep.c	optional ib
+gpib/ib_rawio.c		optional ib
+gpib/ib_dbg.c		optional ib device-driver
+multibus/adaptec.c	optional ad device-driver
+multibus/cdsio.c	optional cd device-driver
+multibus/dsd.c		optional md device-driver
+multibus/ikc.c		optional ik device-driver
+multibus/iph.c		optional ip device-driver
+multibus/pxd.c		optional pxd device-driver
+multibus/sii.c		optional si device-driver
+multibus/siq.c		optional sq device-driver
+multibus/std.c		optional sd device-driver
+multibus/tmt.c		optional tm device-driver
+multibus/wait.c		standard
+xns/xns.c		optional xns
+xns/xns_tty.c		optional xns
+xns/nx.c		optional nx device-driver
+xns/nx_func.c		optional nx
+xns/nx_subr.c		optional nx
+multibusif/if_nex.c	optional nex device-driver
+multibusif/if_ex.c	optional ex device-driver
+multibusif/if_imp.c	optional imp device-driver
+multibusif/if_hy.c	optional hy device-driver
+multibusif/if_cy.c	optional cypress
+ipII/in_cksum.c		optional tcp device-driver

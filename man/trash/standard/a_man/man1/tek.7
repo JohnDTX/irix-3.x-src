@@ -1,0 +1,224 @@
+'\" t
+.TH TEK 7
+.SH NAME
+tek \- Tektronix 4692 color graphics printer device
+.SH SYNOPSIS
+.B "device ik0 at mb0 csr 0x70c0 priority 5 vector ikcintr
+.SH DESCRIPTION
+.de ne
+.sp (\\$1)
+.sp -(\\$1)
+..
+.PP
+The Tektronix 4692 is a color hardcopy device with automatic dithering.
+It is capable
+of printing an image of 1536 by 1152 pixels on 8\(12 by 11 inch paper
+or transparencies,
+each pixel being a combination of one or more of the primary colors or black or white.
+The Ikon 10085 controller is used is used to drive it.
+An image takes approximately 1\(12 minutes to print, including paper loading and
+unloading time.
+.PP
+The device file,
+.BR /dev/tek ,
+interprets the supplied data as appropriate for driving the Tek 4692.
+A high-level graphics routine,
+.IR capture (3G),
+is also provided to allow
+capturing the current IRIS console screen image and printing it. It uses a
+network spooling system,
+.IR colord (1),
+so that users on different systems can
+spool up images over XNS for printing at workstations with Tek 4692 printers.
+.PP
+Additionally, the utility program
+.IR capture (1G)
+is supplied which invokes the capture graphics routine and sends the output
+to the specified destination.
+Low-level routines,
+coloropen(), colorwrite(), and colorclose(),
+are also provided.  
+These routines, which are documented in
+.IR coloropen (3),
+allow a program to generate its own data and 
+produce a printed copy using the network spooling system.   (The data
+to be printed does not necessarily need to appear
+on the screen.)
+.PP
+To write an image to
+.BR /dev/tek ,
+a header is first written to the device, using a single write. This header
+must be at least 6 bytes long.  Any data longer than 6 bytes is ignored, 
+allowing for
+a 1024-byte write so that the data file can be blocked on 1024-byte boundaries.
+The contents of these bytes is documented in the
+.I "Tektronix 4692 Color Graphics Copier Device Driver Development Guide"
+and summarized below:
+
+.TS
+center doublebox;
+cB s s
+lI | lI
+l | l.
+Header format
+_
+Byte	Contents
+=
+0	mode
+1	repaint
+2	x size, high byte
+3	x size, low byte
+4	y size, high byte
+5	y size, low byte
+.TE
+
+.PP
+The mode byte is broken up into several bit fields. Bit 0 is the low-order
+bit.
+Set bit 0 to true to specify black and white inversion.  
+Black and white inversion means that
+white will be printed
+when the intensity of all colors for a given pixel is zero (normally black)
+and vice versa.
+This inversion
+allows for the fact that the background color on many CRTs is black and the
+background color for the printer is white (blank paper).  
+.PP
+Set bit 1 (the "quality bit") to true to fix the image resolution at 158
+pixels per inch. If bit 1 is false, 
+then the pixels will be spread as needed.   The pixels can spread up to
+128 pixels per inch. When the pixels are allowed to spread, the image takes
+up as much of the page as possible.
+.PP
+Bits 2 and 3 specify the image orientation:
+
+.TS
+box,center;
+cB s s
+lI | lI | lI
+l | l | l.
+Image orientation
+_
+Bit 3	Bit 2	Format
+=
+0	0	Landscape (normal mode)
+0	1	Portrait (bottom of page)
+1	0	Portrait (center of page)
+1	1	Portrait (top of page)
+.TE
+
+.ne 6
+.PP
+Bits 4 and 5 specify the image resolution in bits per color per pixel:
+
+.TS
+box,center;
+cB s s
+lI | lI | lI
+l | l | l.
+Image resolution
+_
+Bit 5	Bit 4	Resolution
+=
+0	0	1 bit/primary (2 pixels/byte)
+0	1	2 bit/primary (1 byte/pixel)
+1	0	4 bit/primary (2 bytes/pixel)
+1	1	not allowed
+.TE
+
+.PP
+Bit 6 is the communications mode. The driver controls this itself.
+Bit 7 must be true (so that this byte is recognized as data).
+.PP
+Byte 1 is the repaint byte. The low-order three bits specify how many images
+should be painted on the same page.  These bits should normally be 
+set to 0x01 for paper.
+The count can be increased for transparencies since they generally require
+more ink. If the count is increased,
+then the complete image data, including the header,
+should be replicated.  In this case, 
+the device file should be opened, written
+to, and closed for each repetition of the image.
+It may also be used to superimpose several different images on the same page.
+The repaint count should be
+.IR or ed
+with 0x80.
+.PP
+Byte 2 is the high-order 7 bits of the size of the x dimension, in pixels,
+.IR or ed
+with 0x80.
+Byte 3 is the low-order 7 bits of the x dimension size
+.IR or ed
+with 0x80.
+.PP
+Bytes 4 and 5 are, respectively, the high-order and low-order 7 bits of the
+y size,
+.IR or ed
+with 0x80.
+.PP
+The driver will supply the checksum and EOL bytes.
+.PP
+Each subsequent write provides the data for one raster line (which is printed
+parallel to the long edge of the paper). For producing images of 1 bit per color
+per pixel, two pixels are supplied in each byte so each write must be
+of 512 bytes to specify a full line of data.
+For 2 bits per color per pixel, each pixel takes up one byte so each write must
+be 1024 bytes to specify a full line of data.
+Likewise, for 4 bits per color per pixel each pixel takes up two bytes and each
+write must be 2048 bytes to specify a full line of data.
+.PP
+If a write contains less than an entire line worth of data, then the last
+pixel value will be replicated. This can be useful for data compression.
+At least one pixel per line (two pixels for 1 bit per color per pixel) should be
+specified.  After writing the data, the file must be closed (to cause paper
+ejection).
+If less than the full number of lines are specified, then the rest of the paper
+will be blank (white).
+.PP
+The data format for encoding each byte for 1 bit per color per pixel is as
+follows (assuming two pixels are packed into each byte).
+The high-order two bits (bit 6 and bit 7) must be true.
+The low-order three bits (bit 0, bit 1, and bit 2) are for the \f2n\fP-th
+pixel, and bit 3, bit 4, and bit 5 are for the next (\f2n\fP-th plus one) pixel.
+Of each three-bit triplet describing a pixel, the low bit specifies red, the
+middle bit specifies green, and the high bit specifies blue.
+.PP
+The data format for encoding each byte for 2 bits per color per pixel is as
+follows.
+The high-order two bits (bit 6 and bit 7) must be true.
+The low-order two bits (bit 0 and bit 1) are for the red value.  Bit 0,
+the low-order bit, and bit 1, the high-order bit, specify the intensity
+level.  Likewise, bit 2 and bit 3 specify the green value, bit 3 being the
+high bit.  Bit 4 and bit 5 specify the blue value, bit 5 being the high bit.
+.PP
+The data format for encoding each byte for 4 bits per color per pixel is as
+follows.  (Each pixel requires two bytes).
+The encoding is similar to that for 2 bits per pixel, with the first byte of
+the pair specifying the high-order two bits for each color and the second byte
+the low-order two bits. Bit 6 is true for the first byte of the pair and false
+for the second byte to distinguish them.
+.SH FILES
+/dev/tek	formatted Ikon device for Tektronix 4692
+.\" .br
+.\" /dev/ikon	raw Ikon device
+.SH SEE ALSO
+capture(1G), colord(1), capture(3G), coloropen(3),
+.I "Tektronix 4692 Color Graphics Copier Device Driver Development Guide"
+(Tektronix Part No. 070-4818-00)
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/a_man/man1/RCS/tek.7,v 1.1 89/03/27 16:40:48 root Exp $
+.\" $Log:	tek.7,v $
+Revision 1.1  89/03/27  16:40:48  root
+Initial check-in for 3.7
+
+.\"Revision 1.3  86/04/22  10:47:16  celia
+.\"cosmetic
+.\"
+.\"Revision 1.2  85/06/03  16:40:06  robinf
+.\"Changes for GL2-W2.3
+.\"
+.\" Revision 1.1  85/05/31  16:09:01  robinf
+.\" Edited for GL2-W2.3
+
+.\" Revision 1.0  85/05/31  15:18:42  robinf
+.\" Initial Revision for GL2-W2.3
+

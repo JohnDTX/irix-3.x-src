@@ -1,0 +1,104 @@
+'\"macro stdmacro
+.TH STDIPC 3C
+.SH NAME
+stdipc: ftok \- standard interprocess communication package
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/ipc.h>
+.PP
+.B key_t ftok(path, id)
+.B char \(**path;
+.B char id;
+.fi
+.SH DESCRIPTION
+All interprocess communication facilities
+require the user to supply a key
+to be used by the
+.IR msgget\^ (2),
+.IR semget\^ (2)
+and
+.IR shmget\^ (2)
+system calls to obtain interprocess communication identifiers.
+One suggested method for forming a key
+is to use the
+.I ftok
+subroutine described below.
+Another way to compose keys
+is to include the project \s-1ID\s+1 in the most significant byte
+and to use the remaining portion as a sequence number.
+There are many other ways to form keys,
+but it is necessary for each system
+to define standards for forming them.
+If some standard is not adhered to,
+it will be possible for unrelated processes
+to unintentionally interfere with
+each other's operation.
+Therefore,
+it is strongly suggested that
+the most significant byte of a key
+in some sense
+refer to a project
+so that keys do not conflict
+across a given system.
+.PP
+.I Ftok\^
+returns a key
+based on
+.I path\^
+and
+.I id\^
+that is usable in subsequent
+.IR msgget ,
+.I semget\^
+and
+.I shmget\^
+system calls.
+.I Path\^
+must be the path name
+of an existing file
+that is accessible
+to the process.
+.I Id\^
+is a character
+which uniquely identifies
+a project.
+Note that
+.I ftok\^
+will return the same key
+for linked files
+when called with the same
+.I id\^
+and that it will return
+different keys when
+called with the same file name
+but different
+.IR ids .
+.SH "SEE ALSO"
+intro(2),
+msgget(2),
+semget(2),
+shmget(2).
+.SH DIAGNOSTICS
+.I Ftok\^
+returns
+.B "(key_t) \-1"
+if \f2path\^\fP
+does not exist
+or if it is not accessible
+to the process.
+.SH WARNING
+If the file whose \f2path\^\fP is passed
+to
+.I ftok\^
+is removed when keys still refer to the file,
+future calls to
+.I ftok\^
+with the same \f2path\^\fP and \f2id\^\fP
+will return an error.
+If the same file is recreated,
+then
+.I ftok\^
+is likely to return a different key
+than it did the original time it was called.
+.\"	@(#)stdipc.3c	5.1 of 10/25/83

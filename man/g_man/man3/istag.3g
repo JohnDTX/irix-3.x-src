@@ -1,0 +1,38 @@
+.TH istag 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B istag 
+\- indicates if a given tag is used within the current open object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean istag(t)"
+.B "Tag t;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function istag(t)"
+.B "integer*4 t"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function istag(t: Tag): Boolean;"
+.SH DESCRIPTION
+.B istag
+returns 
+TRUE
+(1) if \f2t\f1 is used within the current
+open object and
+FALSE
+(0) if it is not.
+The result is undefined if there is no current open object.
+.SH "SEE ALSO"
+gentag, isobj
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

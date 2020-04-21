@@ -1,0 +1,39 @@
+.TH lsbackup  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I lsbackup
+- control whether the last three pixels of a line are colored
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lsbackup(b) "
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lsback(b)"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lsbackup(b: Boolean);"
+.sp
+.SH DESCRIPTION
+.I Lsbackup
+is one of two commands that modify the application of the linestyle
+pattern.  If enabled, it overrides
+the current linestyle to guarantee that the final 
+three pixels in a line will be colored.  
+It takes one argument, a boolean.  If 
+.B b
+=
+.I TRUE,
+backup mode is enabled.  
+\f2Resetls\f1 should also be set to 
+.I TRUE
+when backup mode is enabled.
+.I FALSE,
+the default setting, means the linestyle will be used as is, 
+and lines may have invisible endpoints. 
+.SH "SEE ALSO"
+.I deflinestyle, getlsbackup, setlinestyle, resetls 

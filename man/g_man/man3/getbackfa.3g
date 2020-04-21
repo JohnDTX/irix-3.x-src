@@ -1,0 +1,33 @@
+.TH getbackface 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B getbackface
+\- returns whether backfacing polygons will appear 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getbackface()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 getbac()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getbackface: longint;"
+.SH DESCRIPTION
+.B getbackface
+returns the state of backfacing filled polygon
+removal.  If backface removal is on, the system 
+draws only those polygons that face
+the viewer.  1 indicates backfacing polygon removal is
+enabled; otherwise \f3getbackface\fP returns zero.
+.SH SEE ALSO
+backface
+.sp
+\f2Programming Guide\fP, Section 12.2, Backfacing Polygon Removal
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,208 @@
+'\"macro stdmacro
+.TH ENSCRIPT 1 
+.SH NAME
+enscript \- convert text files to P\s-2OST\s+2S\s-2CRIPT\s+2 format for printing
+.SH SYNOPSIS
+.B enscript
+[ options ] [ spooler options ] [ files ] 
+.SH DESCRIPTION
+.I enscript
+reads in plain text files, converts them to P\s-2OST\s+2S\s-2CRIPT\s+2 format, and spools them for 
+printing on a P\s-2OST\s+2S\s-2CRIPT\s+2 printer.  Fonts, headings, limited formatting 
+options and spooling options may be specified.
+.PP
+Font specifications have two parts:
+A font name as known to P\s-2OST\s+2S\s-2CRIPT\s+2 (e.g., Times-Roman, Times-BoldItalic
+Helvetica, Courier), and a point size (1 point=1/72 inch \- 8 point 
+is a good small font).  So Courier-Bold8 is 8 point Courier Bold, 
+Helvetica12 is 12 point Helvetica.
+.PP
+The environment variable ENSCRIPT may be used to specify defaults.  The 
+value of ENSCRIPT is parsed as a string of arguments 
+.I before 
+the arguments 
+that appear on the command line.  For example:
+.PP
+.RS 
+% setenv ENSCRIPT \-fTimes-Roman8
+.RE
+.PP
+sets your default body font to 8 point Times Roman.
+.PP
+The possible 
+.I options 
+are:
+.TP
+.B \-2
+set in two columns.
+.TP
+.B \-1
+set in one column (the default).
+.TP
+.B \-r
+rotate the output 90 degrees (landscape mode).
+This is good for output that requires a wide page or for program listings
+when used in conjunction with \-2.
+"enscript \-2r files" is a nice way to get program listings.
+.TP
+.B \-R
+don't rotate, also known as portrait mode (the default).
+.TP
+.B \-G
+print in gaudy mode: causes page headings, dates, page numbers to be printed
+in a flashy style, at some slight performance expense.
+.TP
+.B \-l
+simulate a line printer: make pages 66 lines long and omit headers.
+.TP
+.B \-B
+omit page headings.
+.TP
+.BI \-b header
+sets the string to be used for page headings to
+.IR header .  
+The default header is constructed from the file name, its last
+modification date, and a page number.
+.TP
+.BI \-L lines
+set the maximum number of lines to output on a page.
+.I Enscript
+usually computes how many to put on a page based on point size,
+and may put fewer per page than requested by 
+.IR lines .
+.TP
+.BI \-f font
+sets the font to be used for the body of each page.
+Defaults to Courier10, unless two column rotated mode is used, in which case
+it defaults to Courier7.
+.TP
+.BI \-F hfont
+sets the font to be used for page headings.
+Defaults to Courier-Bold10.
+.TP
+.BI \-p out
+causes the P\s-2OST\s+2S\s-2CRIPT\s+2 file to be written to the named file rather than
+being spooled for printing.  As a special case, 
+.B \-p
+will send the P\s-2OST\s+2S\s-2CRIPT\s+2 to the standard output.
+.TP
+.B \-g
+causes the fact that a file is garbage to be ignored.  Normally, any file
+with more than a small number of non-printing characters is suspected of
+being garbage, and not printed \- this option means "print it anyway."
+.TP
+.B \-o
+If
+.I enscript
+cannot find characters in a font, the missing characters are listed.
+.TP
+.B \-q
+causes 
+.I enscript
+to be quiet about what it is doing. 
+.I Enscript 
+won't report about pages, destination, omitted characters, etc.  
+Fatal errors are still reported to the standard error output.
+.TP
+.B \-k
+enables page prefeed (if the printer supports it).  This allows
+simple documents (e.g., program listings in one font)
+to print somewhat faster by keeping the printer running between pages.  
+.TP
+.B \-K
+disable page prefeed (the default).
+.TP
+.B \-h
+suppress printing of job burst page.
+.PP
+The following 
+.I spooler options 
+are also recognized:
+.TP
+.BI \-t title
+sets job title for use on the burst page.
+.TP
+.BI \-d dest
+causes the output to be sent to the named printer or printer class.
+.TP
+.BI \-n n
+causes 
+.I n
+copies of the output to be produced. The default is one.
+.TP
+.BR \-w " or " \-m
+causes the printer daemon to write or send mail upon job completion.
+.SH EXAMPLES
+.RS
+enscript \-daleph boring.txt
+.RE
+.PP
+prints a copy of the file called boring.txt on the printer called
+"aleph".
+.PP
+.RS
+enscript \-2r boring.c
+.RE
+.PP
+prints a two-up landscape listing of the file called boring.c on 
+the default printer.
+.SH ENVIRONMENT
+.IP ENSCRIPT \w'PSTEMPDIR\0\0\0'u
+string of options to be used by
+.I enscript.
+.IP PSLIBDIR
+path name of a directory to use instead of 
+.B /usr/lib/ps
+for enscript prologue and font metric files.
+.IP PSTEMPDIR
+path name of temporary directory to use instead of 
+.B /usr/tmp
+for spooled temporary files.
+.IP "LPDEST"
+the name of a printer (as in the 
+.B \-d
+option) for 
+.I lp
+to use.  If no 
+.B \-d
+option is specified,
+.IR lp (1)
+will use this printer.  If neither 
+.B \-d 
+nor LPDEST is set,
+.I enscript
+will spool to a printer class named ``PostScript''.
+.SH FILES
+.ta \w'/usr/lib/ps/enscript.pro\ \ \ 'u
+/usr/lib/ps/\(**.afm	font metrics files.
+.br
+/usr/lib/ps/enscript.pro	prologue for enscript files.
+.SH "SEE ALSO"
+cancel(1), getopt(3C), lp(1), lpstat(1), pr(1).
+.SH DIAGNOSTICS
+Should be self explanatory.
+.SH AUTHOR
+Adobe Systems Incorporated
+.br
+Gaudy mode by Guy Riddle of AT&T Bell Laboratories
+.SH FEATURES
+Options and the ENSCRIPT environment string are parsed in
+.IR getopt (3C)
+fashion.
+.SH BUGS
+Long lines are truncated.  Line truncation may be 
+off by a little bit as printer margins vary.  There should be a 
+"wrap" option and multiple (truncated or wrapped) columns.
+.\".PP
+.\".I Enscript
+.\"generates temporary files which are spooled for printing.  The temporary file
+.\"names are used by the spooling software (e.g., 
+.\".IR lpq ),
+.\"rather than the symbolic job name passed to 
+.\".IR lpr .
+.PP
+There are too many options.
+.SH NOTES
+P\s-2OST\s+2S\s-2CRIPT\s+2 is a trademark of Adobe Systems Incorporated.
+.br
+Times and Helvetica are registered trademarks of Allied Corporation.

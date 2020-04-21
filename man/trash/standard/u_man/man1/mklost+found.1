@@ -1,0 +1,28 @@
+.TH MKLOST+FOUND 1
+.SH NAME
+/etc/mklost+found \- make a lost+found directory for fsck
+.SH SYNOPSIS
+.B mklost+found
+.SH DESCRIPTION
+A directory
+.B lost+found
+is created in the current directory and a number of empty files
+are created therein and then removed so that there will be
+empty slots for
+.IR fsck (1M).
+This command should be run immediately after first mounting 
+and changing directory to a newly created file system and upon initial
+creation of the root file system.
+.SH EXAMPLE
+.IP
+mklost+found
+.PP
+in the current directory, 
+creates a directory with empty slots named 
+.BR lost+found .
+.SH SEE ALSO
+fsck(1M), mkfs(1M)
+.SH BUGS
+Should be done automatically by
+.I mkfs.
+.\"	@(#)mklost+found.1m	5.1 of 10/18/83

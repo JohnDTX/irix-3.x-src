@@ -1,0 +1,30 @@
+#! /bin/sh
+
+if test ! -d $1
+then
+	echo "usage: genfluff <dir> <entries>" ; exit 1
+fi
+
+dir=$1 ; shift
+tmp=/tmp/$$
+
+#  Generate list of files in all lists
+for entry in $*
+do
+	sed 's/[-+@]$//' list.$entry
+done | sort -u - > all_lists
+
+#  Make each fluff list
+for entry in $*
+do (
+	set -- `./mklist -qf $dir/:* | grep "list.$entry\$"`
+	if test $# -gt 0 -a -n "$*"
+	then
+		echo generating fluff.$entry
+		sed 's:[-+@]$::' $* | sort -u |
+			comm -23 - $dir/notfluff |
+			comm -23 - all_lists > fluff.$entry
+	fi
+) done
+
+rm -f all_lists

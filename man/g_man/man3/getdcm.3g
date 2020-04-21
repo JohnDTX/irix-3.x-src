@@ -1,0 +1,33 @@
+.TH getdcm 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getdcm
+\- indicates whether depth-cue mode is on or off
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getdcm()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getdcm()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getdcm: Boolean;"
+.SH DESCRIPTION
+.B getdcm
+returns TRUE(1)
+if the system is in depth-cue mode and 
+FALSE(0)
+if it is not.
+.SH SEE ALSO
+depthcue
+.sp
+.I Programming Guide, 
+Section 13.2, Depth-Cueing
+.SH NOTE
+This routine is available only in immediate mode.

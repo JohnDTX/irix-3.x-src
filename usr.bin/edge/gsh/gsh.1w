@@ -1,0 +1,380 @@
+'\" t
+.TH GSH 1W
+.SH NAME
+gsh \- graphical shell
+.SH SYNOPSIS
+.B gsh
+[
+.B \-b
+rate
+]
+[
+.B \-f
+font
+]
+[
+.B \-h
+]
+[
+.B \-s
+rows cols
+]
+[
+.B \-t
+title
+]
+[
+.B \-C
+textcolor pagecolor reversecolor
+]
+[
+.B \-i
+icon
+]
+[
+.B \-I
+]
+[
+.B \-m
+]
+[
+.B \-c
+cmds .\|.\|.
+]
+.SH DESCRIPTION
+.I Gsh\^
+is a windowing graphics tool which will manage a shell within a window.
+When
+.I gsh
+starts up, it selects a font and a shell to use.
+If the user selects the
+.B \-f
+option, then
+.I gsh
+will use the users specific font choice.  If the user doesn't ask for a
+specific font, then
+.I gsh
+checks the environment for the
+.B FONT
+variable, which should define the name of the font to use.  If the
+.B FONT
+environment variable is not set, then
+.I gsh
+uses the default system font, font 0.  If the default font is not used,
+then
+.I gsh
+will search for the font in two places.  First, it will try to open the
+font file name directly.  If that fails, then
+.I gsh
+will prepend
+.B FONTLIB
+(another environment variable) to the name.  If
+.B FONTLIB
+is not defined, then
+.B /usr/lib/gl2/fonts
+is used.  For both the direct font name lookup, and the search of the
+font library directory,
+.I gsh
+will try appending
+.B ".fnt"
+to the name if it can't open the file name directly.
+.PP
+Using the
+.B shrink
+and
+.B unshrink
+menu entries, gsh can be made to shrink and display an icon instead of the
+text window.  By default, gsh uses
+.B gsh.icon
+as the name of its icon; however, using the
+.B \-i icon
+flag, a different icon can be used.  Normally, when gsh starts up,
+it displays the text window, and automatically attaches the keyboard
+and mouse (i.e., the input focus) to itself.  If gsh is given the
+.B \-I
+flag, gsh starts up in icon form and avoids moving the input focus.  Gsh
+looks for the icon file in a manner similar to its font file lookup.
+First, gsh tries the file name directly.  If that fails, it then tries
+appending
+.B ".icon"
+to the file name.  If that too fails, gsh then tries
+prefixing
+.B /usr/lib/gl2/icons
+to the file name.  If that fails, gsh makes one last try by prefixing
+.B /usr/lib/gl2/icons
+to the file name, and appending
+.B ".icon"
+to the filename.  If the icon file cannot be found, gsh will complain, but
+continue to run.  When no icon is found, gsh removes the
+.B shrink
+menu entry from its menu.  Via the
+.B \-m
+command option, gsh can be told to run a little movie for the transition
+from file sized window to icon and back again.
+.PP
+If a non-standard shell is desired, the
+.B \-c
+and
+.B \-h
+flags can be used.  The
+.B \-c
+flag must be the last flag on a
+.I gsh
+command line, as all the remaining arguments will be handed to the shell
+the user specifies.
+When the shell which is being run is just a simple
+program, the
+.B \-h
+flag can be used to
+.I hold
+the output after the program exits.
+For normal shell selection
+.I gsh
+will look in the users environment for the
+.B SHELL
+variable, and if set, use it for the shell.  Otherwise, the default
+of
+.B /bin/sh
+is used.
+.PP
+For convenience, the
+.B \-s
+flag can be used to set the size in terms of rows and columns, allowing
+the window to be placed during creation.
+Once the window is initially placed, it can still be moved and resized.
+Using the
+.B \-C
+flag, gsh will use a particular set of colors for the
+text color, the page color (behind the text) and the reverse text color,
+instead of the default colors (black, white and yellow, respectively).
+If the colors are set with this command line option then the escape
+sequences described below which set the various color values will no
+longer work.  The intention of this option is to
+.I force
+the colors to a particular value, not to supply different initial values.
+Finally, the
+.B \-t
+flag is used to specify a fixed title for the window, instead of the
+default, which is the name of the command being managed by gsh.
+.PP
+By setting the
+.B \-b
+flag the user can tell
+.I gsh
+to blink the cursor at a certain rate, specified in blinks per second.
+The true rate is determined by the number of vertical retraces per second,
+divided by the
+.I rate
+argument.  A rate of 3 is a nice relaxed rate.
+.SH TERMINAL EMULATION
+The
+.I gsh
+tool emulates a hardwired terminal which resembles for the most part
+a visual 50 computer terminal.  A set of escape sequences define this
+emulation.  In the following table,
+.I <escape>
+stands for the ascii escape character, octal 033.  Numeric
+values given below that are preceded by a "0" are in octal.
+.IP control-G
+will ring the keyboard bell.
+.IP control-H
+backs up the cursor one character, and will stick at the left margin.
+.IP control-I
+will more the cursor forward to the next fixed tab stop, and will wrap at
+the right margin.  Tab stops are at every eighth column.  Column 0 is
+the first tab stop.
+.IP control-J
+will move the cursor down one line, scrolling the screen up one line if
+the cursor is on the bottom line.
+.IP control-M
+moves the cursor to the left margin.
+.IP "<escape>0@"
+will restore the video attribute back to normal video.
+.IP <escape>7<attribute><color-index>
+sets the given
+.I attribute
+to the given \f2color-index\f1.
+The possible attributes are
+.B F
+for foreground color,
+.B B
+for background color,
+.B C
+for cursor color, and
+.B R
+for reverse video color.
+.I Color-index
+is an ascii digit, from "0" (ascii 060) on upward.
+.IP <escape>9P
+selects the reverse video attribute for future character display.  Any
+characters displayed after reverse video mode is entered will be in
+the reverse video color.
+.IP <escape>,<columns><rows><return>
+is an escape sequence which is normally the output of the <escape>. command,
+described below.  The terminal emulator will swallow this escape
+sequence without echoing it.
+.IP <escape>.
+will cause the terminal emulator to echo back the current screen
+dimensions in characters.  The terminal emulator will output
+.br
+.in +5
+<escape>,<columns><rows><return>
+.in -5
+.br
+where
+.I escape
+is an ascii escape character (033),
+.I columns
+and
+.I rows
+are encoded forms of the number of columns and rows the screen has,
+and
+.I return
+is the ascii return character (015).
+The
+.I rows
+and
+.I columns
+values are encoded as follows: two characters are returned for each
+item, the first is the low 6 bits of the dimension, offset by an
+ascii space (040).  The second character returned for each item is
+the high 6 bits of the dimension, offset by an ascii space (040).
+.IP <escape>;
+.IP <escape>=
+sets the keypad to be in extended keypad mode, where each key sends
+an escape sequence.  The keys send the following default sequences:
+.br
+.sp 1
+.TS
+box;
+c | c.
+Key	Escape sequence
+_
+0	<escape>0p
+1	<escape>0q
+2	<escape>0r
+3	<escape>0s
+4	<escape>0t
+5	<escape>0u
+6	<escape>0v
+7	<escape>0w
+8	<escape>0x
+9	<escape>0y
+dash	<escape>0m
+comma	<escape>0l
+period	<escape>0n
+enter	<escape>0M
+.TE
+.IP <escape>>
+restores the keypad to normal keypad mode, where each key sends the
+character on its keytop.
+.IP <escape>A
+moves the cursor up one line, sticking at the top line.
+.IP <escape>B
+moves the cursor down one line, sticking at the bottom line.
+.IP <escape>C
+moves the cursor right one column, sticking on the right margin.
+.IP <escape>D
+moves the cursor left one column, sticking on the left margin.
+.IP <escape>H
+homes the cursor to the upper left corner of the visible screen.
+.IP <escape>I
+moves the cursor up one line, scrolling the screen down if the cursor
+was at the top line.
+.IP <escape>J
+clears each line which is on or below the cursor line.
+.IP <escape>K
+clears to the end of line.
+.IP <escape>L
+inserts a line in front of the current line, scrolling all lines below and
+including the current line, down one line.  The bottom line is lost.
+.IP <escape>M
+deletes the current line, scrolling all lines below up one line.  The
+bottom line is initialized to all blanks.
+.IP <escape>T<delimiter><string><delimiter>
+will set the title for the
+.I gsh
+window.  The initial
+.I delimiter
+determines what will be used to delimit the end of the \f2string\f1, and
+must be repeated at the end of the \f2string\f1.
+The title can be a maximum of 80 characters before it is discarded.
+.IP <escape>Y<row><column>
+moves the cursor to
+.I row
+and \f2column\f1.
+Both
+.I row
+and
+.I column
+are numerically offset by ascii SPACE (040).
+.IP <escape>k<key><binding><escape>
+is used to bind a particular function key to an ascii string.
+The table below shows what
+.I key
+should be encoded as to bind a particular function key.
+.I binding
+is an ascii string, no longer than 132 characters, delimited
+by
+.I escape
+(ascii 033).
+.br
+.sp 1
+.TS
+box;
+c | c.
+Key	Binding Character
+_
+PF1	1 (ascii 061)
+PF2	2 (ascii 062)
+PF3	3 (ascii 063)
+PF4	4 (ascii 064)
+.TE
+.IP <escape>r<key>
+will report the current binding of \f2key\f1.
+.I Key
+is encoded as described above.  The binding is reported as
+.br
+.in +5
+<escape>k<key><binding><escape>
+.in -5
+.br
+allowing the sequence to be
+echoed and thus ignored by the terminal emulator.
+.IP <escape>v
+homes the cursor and then clears the entire screen.
+.SH EXAMPLES
+.IP
+gsh
+.PP
+starts a shell, using the environment for the choice of shell and font.
+.IP
+gsh -f small7.fnt
+.PP
+creates a shell, using the environment for the choice of shell, and
+small7.fnt for the font to use.
+.IP
+gsh -h -c ls -l
+.PP
+creates a window with the output of the "ls -l" command, holding the
+data in the window after the "ls -l" command exits.  This is useful
+for creating a window with just text data in it.
+.IP
+gsh -c vmstat 5
+.PP
+creates a window with the vmstat programs output in it.  No hold flag
+is needed here, because vmstat doesn't exit.
+.SH ENVIRONMENT
+.IP FONT 10
+is the name of the font file that
+.I gsh
+will use by default.  It can be an absolute path name, or a name relative
+to
+.B FONTLIB .
+.IP FONTLIB
+is the name of the font library directory that will be prepended to the
+font file name if the font file name cannot be directly opened.
+.IP SHELL
+names the default shell to use.
+.SH SEE ALSO
+bindkey(1), mex(1), ascii(5)

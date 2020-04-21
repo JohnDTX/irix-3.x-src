@@ -1,0 +1,444 @@
+'''\"	PWB Manual Entry Macros - 1.37 of 12/19/80
+'''\"	Nroff/Troff Version	@(#)1.37
+.fp 1 MR	\" load Malibu Roman
+.fp 2 MI	\" load Malibu Italic
+.fp 3 MB	\" load Malibu Bold
+.fp 4 IC	\" load ICON font
+.fp 5 HR	\" load Helvetica Roman
+.fp 6 HI	\" load Helvetica Italic
+.fp 7 HB	\" load Helvetica Bold
+.fp 8 R		\" load Helvetica Roman
+.fp 9 S		\" load Special font
+.deth
+.tmwrong version of man entry macros - use -man6
+.ab
+..
+.ifn .ds Tm \uTM\d
+.ift .ds Tm \v'-0.5m'\s-4TM\s+4\v'0.5m'
+.de }E
+.	}f
+.	in\\n()Ru+\\n(INu
+.	ll\\n(LLu
+.	lt\\n(LLu
+.	pl\\n()Lu
+..
+.
+.
+.de DT
+.	ift .ta 3.6m 7.2m 10.8m 14.4m 18m 21.6m 25.2m 28.8m 32.4m 36m 39.6m 43.2m 46.8m
+.	ifn .ta 5n 10n 15n 20n 25n 30n 35n 40n 45n 50n 55n 60n 65n
+..
+.
+.
+.de }f
+.	ift .vs \\n()Vp
+.	ps\\n()S
+.	ft1
+..
+.
+.
+.de }H
+.	ev1
+.	}C
+.	}E
+.	ie\\n()s 'sp 2v
+.	el'sp 2v	\" Dan was here.
+.	ps\\n()S-1
+.	bd1 3
+.	ie\\*(]L .tl \\*(]H\\*(]D\\*(]H
+.	el.tl \\*(]H\\*(]D \|\\*(]L\\*(]H
+.	bd1
+.	ps\\n()S
+.	ie\\n()s 'sp 1.5v
+.	el'sp 2v	\" Dan was here.
+.	ev
+.	ns
+..
+.
+.
+.de }F
+.	ev1
+.	}E
+.	ds BN \f3IRIS User's Guide\f1
+.	if\\n()s 'sp |\\n(.pu-1v-1p
+.	if\\n()t 'sp |\\n(.pu-3v
+.	ifn 'sp |\\n(.pu-4v
+.	ifn .tl ''\f3- % -\f1''
+.	if\\n()s .tl `\f1\\*(VE`\f3- % -\f1`\\*(BN\fP`
+.	if\\n()t .tl `\f1\\*(VE`\f3- % -\f1`\\*(BN\fP`
+'	bp
+.	ev
+..
+.
+.
+.	ifn .ig
+.
+.
+.de }C
+.	po0i
+.	lt7.5i
+.\"	Dan was here.
+.\"	if\\n()s .tl \l0.25i\l0.25i\h1i\l0.25i
+.\"	if\\n()t .tl \l0.25i\l0.25i
+.	lt
+.	po
+..
+.
+.
+.de }M
+.	}N
+.	wh-.5p }C
+.	ll\\n(LLu
+.	bp
+..
+.de }K
+.	}N
+.	pl1
+.	ll\\n(LLu
+..
+.
+.
+.de TH
+.	ds VE \f3Version 3.0\f1			\" 8/8/86 dmw
+.	PD
+.	nrIN \\n()Mu
+.	ift .ds ]H \\$1
+.	ifn .ds ]H \\$1
+.	if\\n()s .ds ]D
+.	ds]L
+.	if!\\$3 .ds ]L
+.	wh0 }H
+.	wh-\\n(:mu }F
+.	em}M
+.	if\\n(nl .bp 1
+.	nr)I \\n()Mu
+.	nr)R 0
+.	}E
+.	DT
+.\" .ifn \{.na
+.\" .nh\}
+.	ifn \{..ad b	\" Added 02/28/84 SGI
+.	hy 14\}
+.	ift \{.bd S 3 3
+.	hy14 \}
+..
+.
+.
+.de SH
+.	}X 0 "\\$1" smaller
+.	nr)E 2
+\&\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6
+.	rs
+.	sp\\n(PDu*1.5u		\" diane was here adding space after heading
+..
+.
+.
+.de SS
+.	}X 0 "" ""
+.	nr)E 2
+\&\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6
+..
+.
+.
+.de }X
+.	}E
+.	ti\\$1
+.	sp\\n(PDu*3u			\" diane adding space between sections
+.	ne1.1v
+.	nr)R 0
+.	fi
+.	ss12
+.	if\\$2SPECIFICATION .ss 18	\" diane changed fm synopsis
+.	it1 }N
+.	if!\\$3 .SM
+.	bd1 3
+..
+.
+.
+.de }2
+.	nr)E 0
+.	}E
+.	nr)I \\n()Mu
+.	ns
+.	bd1
+..
+.
+.
+.de SM
+.	ps\\n()S-1
+.	if!\\$1 \&\\$1
+.	if!\\$2 \&\\$2
+.	if!\\$3 \&\\$3
+.	if!\\$4 \&\\$4
+.	if!\\$5 \&\\$5
+.	if!\\$6 \&\\$6
+.	if!\\$1 .ps \\n()S
+.	if\\$1 .it 1 }N
+..
+.
+.
+.de I
+.	ft2
+.	it1 }N
+.	if!\\$1 \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6
+..
+.
+.
+.de B
+.	ft3
+.	it1 }N
+.	if!\\$1 \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6
+..
+.
+.
+.de RI
+.	}S 1 2 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.
+.
+.de IR
+.	}S 2 1 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.
+.
+.de IB
+.	ift .}S 2 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.	ifn .}S 2 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.
+.
+.de RB
+.	ift .}S 1 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.	ifn .}S 1 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.
+.
+.de BR
+.	ift .}S 3 1 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.	ifn .}S 3 1 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.
+
+.de BI
+.	ift .}S 3 2 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.	ifn .}S 3 2 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.
+.
+.de }S
+.	ds]F
+.	if\\$12 .if !\\$5 .ds ]F\^
+.	ie!\\$4 .}S \\$2 \\$1 "\\$3\f\\$1\\$4\\*(]F" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
+.	el\\$3
+.	}f
+..
+.
+.
+.de PP
+.	sp\\n(PDu
+.	ne1.1v
+.	}E
+.	nr)I \\n()Mu
+.	ns
+..
+.
+.
+.de P
+.	PP
+..
+.
+.
+.de LP
+.	PP
+..
+.
+.
+.de PD
+.	ift .nr PD .4v
+.	ifn .nr PD 1v
+.	if!\\$1 .nr PD \\$1v
+..
+.
+.
+.de HP
+.	sp\\n(PDu
+.	ne1.1v
+.	if!\\$1 .nr )I \\$1n
+.	ll\\n(LLu
+.	in\\n()Ru+\\n(INu+\\n()Iu
+.	ti\\n()Ru+\\n(INu
+.	}f
+..
+.
+.
+.de IP
+.	TP \\$2
+\&\\$1
+..
+.
+.
+.de TP
+.	if!\\$1 .nr )I \\$1n
+.	sp\\n(PDu
+.	ne1.1v
+.	in\\n()Ru
+.	lg0
+.	ns
+.	it1 }N
+.	nr)E 1
+.	di]B
+..
+.
+.
+.de }1
+.	ds]X \&\\*(]B\\
+.	rm]B
+.	nr)E 0
+.	if!\\$1 .nr )I \\$1n
+.	}f
+.	ll\\n(LLu
+.	in\\n()Ru+\\n(INu+\\n()Iu
+.	ti\\n(INu
+.	ie!\\n()Iu+\\n()Ru-\w\\*(]Xu-3p \{\\*(]X
+.	br\}
+.	el\\*(]X\h|\\n()Iu+\\n()Ru\c
+.	}f
+.	lg
+..
+.
+.
+.de }N
+.	if\\n()E .br
+.	di
+.	if\\n()E0 .}f
+.	if\\n()E1 .}1
+.	if\\n()E2 .}2
+..
+.
+.
+.de RS
+.	nr]\\n+()p \\n()I
+.	nr)\\n()p \\n()R
+.	ie!\\$1 .nr )R +\\$1n
+.	el.nr )R +\\n()I
+.	nr)I \\n()Mu
+.	}E
+..
+.
+.
+.de RE
+.	if!\\$1 \{.ie \\$10 .nr )p 1 1
+.	el.nr )p \\$1 1 \}
+.	ds]i \\*(]I\\n()p
+.	ds]r \\*(]R\\n()p
+.	nr)I \\*(]i
+.	nr)R \\*(]r
+.	if\\n()p .nr )p -1
+.	}E
+..
+.
+.
+.de PM
+.	if\\$1 .nr !K 0
+.	if\w\\$1 \{\
+.	ie\\$1P .nr !K 1
+.	el.ie \\$1BP .nr !K 3
+.	el.ie \\$1BR .nr !K 4
+.	el.nr !K 2 \}
+.	if\\n(!K .wh -(\\n(:mu+5v) )G
+..
+.
+.
+.de )G
+.	if\\n(!K 'sp 2v
+.	ie\\n(!K=1 \{\
+.	bd1 3
+.	tlPRIVATE
+.	bd1
+.	tlThis information should not be disclosed to unauthorized persons.
+.	tlIt is meant solely for use by authorized Bell System employees. \}
+.	el.ie \\n(!K=3 \{\
+.	bd1 3
+.	tlBELL LABORATORIES PROPRIETARY
+.	bd1
+.	tlNot for use or disclosure outside Bell Laboratories except by
+.	tlwritten approval of the director of the distributing organization. \}
+.	el.ie \\n(!K=4 \{\
+.	bd1 3
+.	tlBELL LABORATORIES RESTRICTED
+.	bd1
+.	tlThe information herein is meant solely for use by authorized
+.	tlBell Laboratories employees and is not to be disclosed to others. \}
+.	el.if \\n(!K=2 \{\
+.	bd1 3
+.	tlNOTICE
+.	bd1
+.	tlNot for use or disclosure outside the
+.	tlBell System except under written agreement. \}
+..
+.
+.
+.	nr)s 0
+.	ift .if \ns .nr )s 1
+.	nr)t 0
+.	ift .if !\ns .nr )t 1
+.	if\n()s \{.nr )L 9i
+.	nrLL 4.75i
+.	nr)O .75i
+.	nr)S 9
+.	nr)V 10 \}
+.\" this is the place.
+.	if\n()t \{.nr )L 11.0i		\" Dan was here.
+.	nrLL 6.19i
+.	nr)O 1.0i
+.	nr)S 12
+.	nr)V 14 \}
+.	ift \{.ds R \(rg
+.	dsS \s\n()S
+'	br\}
+.	ifn \{.nr )L 11i
+.	nrLL 6.5i
+.	nr)O .463i
+.	dsR (Reg.)
+.	dsS
+'	br\}
+.	if\nT .nr LL 80n
+.	if\nV>1 \{
+.	nrLL 82n
+.	nr)L 84v
+.	rmul \}
+.	nr)p 0 1
+.	ds]I \\\\n(]
+.	ds]R \\\\n()
+.	if\nd0 .nr m \n(mo-1
+.	if\nm0 .ds ]m January
+.	if\nm1 .ds ]m February
+.	if\nm2 .ds ]m March
+.	if\nm3 .ds ]m April
+.	if\nm4 .ds ]m May
+.	if\nm5 .ds ]m June
+.	if\nm6 .ds ]m July
+.	if\nm7 .ds ]m August
+.	if\nm8 .ds ]m September
+.	if\nm9 .ds ]m October
+.	if\nm10 .ds ]m November
+.	if\nm11 .ds ]m December
+.	ifn \{.nr m \nm+1
+.	ie\nd .ds ]W (last mod. \nm/\nd/\ny)
+.	el.ds ]W (printed \n(mo/\n(dy/\n(yr)
+'	br\}
+.	if\n()s .ds ]W
+.	if\n()t \{.ie \nd .ds ]W \*(]m \nd, 19\ny
+.	el.ds ]W \*(]m \n(dy, 19\n(yr
+'	br\}
+.	pl\n()Lu
+.	ll\n(LLu
+.	lt\n(LLu
+.	po\n()Ou
+.	}f
+.	if\n()s .nr :m 1.5v	\" Dan was here.
+.	if\n()t .nr :m 6v
+.	ifn .nr :m 7v
+.	ift .nr )M 1.6m	\" Dan was here.
+.	ifn .nr )M 5n
+.	em}K

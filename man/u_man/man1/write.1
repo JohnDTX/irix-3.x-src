@@ -1,0 +1,111 @@
+'\"macro stdmacro
+.TH WRITE 1
+.SH NAME
+write \- write to another user
+.SH SYNOPSIS
+.B write 
+user [ line ]
+.SH DESCRIPTION
+.I Write\^ 
+copies lines from your terminal to that of another user.
+When first called, it sends the message:
+.PP
+.RS
+.B Message from 
+.I yourname 
+.BR (tty ?? )
+[
+.I date
+.RB ]\^ \&.\|.\|.
+.RE
+.PP
+to the person you want to talk to.  When it has successfully
+completed the connection it also sends two bells to your own
+terminal to indicate that what you are typing is being sent.
+.PP
+The recipient of the message can write back 
+by using 
+.I write .
+Communication continues until an end of file is read from the
+terminal or an interrupt is sent.  At that point 
+.I write\^ 
+writes \f3\s-1EOT\s+1\fP on the other terminal and exits.
+.PP
+If you want to write to a user who is logged in more than once,
+the 
+.I line\^
+argument may be used to indicate which line or terminal
+to send to (e.g.,
+.BR tty00 );
+otherwise, the first instance of
+the user found in
+.B  /etc/utmp 
+is assumed and the
+following message posted:
+.PP
+.RS
+.nf
+\f2user\fP is logged on more than one place.
+You are connected to "\f2terminal\fP\^".
+Other locations are:
+\f2terminal\fP
+.fi
+.RE
+.PP
+Permission to write may be denied or granted by use of the 
+.IR mesg\^ (1) 
+command.
+Writing to others is normally allowed by default.
+Certain commands, in
+particular 
+.IR nroff\^ (1) 
+and 
+.IR pr\^ (1) 
+disallow messages in order to prevent
+interference with their output.  
+However, if the user has super-user permissions,
+messages can be forced onto a write inhibited terminal.
+.PP
+If the character \f3!\fP is found at the beginning of a line, 
+.I write\^
+calls the shell to execute the rest of the line as a command.
+.PP
+The following protocol is suggested for using 
+.IR write :
+when you first \f2write\^\fP to another user, wait for them to
+\f2write\^\fP back before starting to send.
+Each person should end a message with a distinctive
+signal
+(i.e.,
+.B (o)
+for "over") so that the other person knows when to reply.
+The signal
+.B (oo)
+(for "over and out") is suggested when conversation
+is to be terminated.
+.SH EXAMPLE
+.IP
+write diane tty7
+.PP
+writes diane on terminal 7, unless messages have been
+refused with 
+.IR mesg\^ (1).
+.SH FILES
+.ta \w'/etc/utmp\ \ \ \ 'u
+/etc/utmp	to find user
+.br
+/bin/sh	to execute \f3!\fP
+.SH SEE ALSO
+mail(1),
+mesg(1),
+nroff(1),
+pr(1),
+sh(1),
+who(1).
+.SH DIAGNOSTICS
+.TP "\w'\f2user not logged in\f1\ \ \ 'u"
+.I user not logged in
+if the person you are trying to
+.I write\^
+to is not logged in.
+.\"	@(#)write.1	5.1 of 11/14/83

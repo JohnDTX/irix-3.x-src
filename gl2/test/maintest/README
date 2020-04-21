@@ -1,0 +1,10 @@
+This is Ron G.'s RGL test suite (maintest) originally written for testing 
+the VMS FORTRAN RGL.  Only the include file syntax needs changing to have it
+compile under UNIX.  This is done with a sed script (see Makefile).
+
+Two programs are made from this source:
+    - rgltest: this can be used to test a host FORTRAN RGL or a
+      terminal program (iris or wsiris).
+    - fgltest: this can be used to test the local FORTRAN wrapper library.
+
+	CSK  3/3/86

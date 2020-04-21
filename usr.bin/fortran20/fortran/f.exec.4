@@ -1,0 +1,248 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.EXEC.4.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1984 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               16-Apr-84   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  { Dostmttermination only called if stmt was a labeled, nonformat stmt }
+  
+  procedure dostmttermination;
+  
+    function TopDoTerminating: Boolean;
+    begin {TopDoTerminating}
+    TopDoTerminating := FALSE;
+    if ctrlstk <> nil
+    then
+      if ctrlstk^.cbkind = DOBLK
+      then TopDoTerminating := ctrlstk^.finallab = labeledby;
+{dar dovarsav no longer valid}
+     dovarsav := nil;
+
+    end; {TopDoTerminating}
+    
+  begin {dostmttermination}
+  
+  { See if label terminates do loop }
+  
+  while TopDoTerminating do
+    with ctrlstk^ do begin
+      doblkstmt^.dobody := doblkstmt^.nextstmt;
+      doblkstmt^.nextstmt := nil;
+      laststmt := doblkstmt;
+      ctrlstk := nextblk;
+      end;
+  end; {dostmttermination}
+  
+  procedure compexecstmt;
+    var IsAssFlag: Boolean; olderrors: integer;
+        lctrlstk: pctrlstkrec;
+  
+    procedure processlabel;
+      var llabrec: plabelrec; lref: plocofref; curblk: integer;
+          lstmt: pstmt;
+    begin
+    if LabeledFlag
+    then begin
+          
+      { Find labelrec and patch forward gotos }
+      
+      if ctrlstk = nil then curblk := 0 else curblk := ctrlstk^.ctrlblknum;
+      llabrec := findlabel(labeledby,EXECLAB);
+      with llabrec^ do
+        if labkind = FORMATLAB
+        then error(103)
+        else begin
+          labkind := EXECLAB;
+          if Defined
+          then error(104)
+          else begin
+            lref := labreflist;
+            while lref <> nil do
+              with lref^ do begin
+                checkgotovalid(refctrlstk,curblk);
+                lref := nextref;
+                end;
+            Defined := TRUE;
+            inblk := curblk;
+            ilabno := nextilabno;
+            nextilabno := nextilabno + 1;
+            end;
+          end;
+      new(lstmt,LABEDST);
+      with lstmt^ do begin
+        nextstmt := nil; stmtop := LABEDST; stlab := llabrec;
+        end;
+      
+      { Processlabel never called from ifstmt so OK to link into stmt list }
+      
+      if firststmt = nil
+      then firststmt := lstmt
+      else laststmt^.nextstmt := lstmt;
+      laststmt := lstmt;
+      LabeledFlag := FALSE;
+      end;
+    end; {processlabel}
+    
+    procedure normalstmt;
+      var lch: char;
+    begin
+    lch := getnonblank;
+    if not (lch in ['A'..'G','I','L','O','P','R','S','W'])
+    then lch := ' ';
+    case lch of
+      ' ': error(89);
+      'A': if Match('SSIGN') then assignstmt else error(89);
+      'B': if Match('ACKSPACE') then rewendback(BACKST)
+           else
+             if Match('LOCKDATA') then error(100)
+             else error(89);
+      'C': if Match('ONTINUE') then contstmt
+           else
+             if Match('ALL') then callstmt
+             else
+               if Match('OMMON') then error(100)
+               else 
+                 if Match('HARACTER') then error(100)
+                 else 
+                   if Match('LOSE') then closestmt
+                   else
+                     if Match('OMPLEX') then error(100)
+                     else error(89);
+      'D': if Match('OUBLEPRECISION') then error(100)
+           else
+             if Match('O') then dostmt
+             else
+               if Match('ATA') then begin 
+		 DataFlag := TRUE; 
+		 { gb - added set/reset-ing the 'in a data statement'
+		   flag for the scanner }
+		 HexOctConstsLegal := TRUE;
+		 datastmt; 
+		 HexOctConstsLegal := FALSE;
+	       end
+               else
+                 if Match('IMENSION') then error(100)
+                 else error(89);
+      'E': if Match('ND')
+           then
+             if Match('FILE') then rewendback(ENDFST)
+             else begin endstmt; ExitFlag := TRUE; end
+           else
+             if Match('QUIVALENCE') then error(100)
+             else
+               if Match('XTERNAL') then error(100)
+               else 
+                 if Match('LSEIF') then elseifstmt
+                 else
+                   if Match('LSE') then elsestmt 
+                   else
+                     if Match('NTRY') then entrystmt
+                     else error(89);
+      'F': if Match('UNCTION') then error(100) else error(89);
+      'G': if Match('OTO') then gotostmt else error(89);
+      'I': if Match('F') then ifstmt
+           else
+             if Match('MPLICIT') then error(100)
+             else
+               if Match('NTRINSIC') then error(100)
+               else 
+                 if Match('NTEGER') then error(100)
+                 else
+                   if Match('NQUIRE') then inquirestmt
+                   else error(89);
+      'L': if Match('OGICAL') then error(100) else error(89);
+      'O': if Match('PEN') then openstmt else error(89);
+      'P': if Match('AUSE') then stoppause(FALSE)
+           else
+             if Match('ROGRAM') then error(100) 
+             else
+               if Match('RINT') then readwritestmt(PRINTST)
+               else
+                 if Match('ARAMETER') then error(100)
+                 else error(89);
+      'R': if Match('EAD') then readwritestmt(READST)
+           else
+             if Match('ETURN') then returnstmt
+             else
+               if Match('EAL') then error(100)
+               else 
+                 if Match('EWIND') then rewendback(REWDST) 
+                 else error(89);
+      'S': if Match('UBROUTINE') then error(100)
+           else
+             if Match('TOP') then stoppause(TRUE)
+             else
+               if Match('AVE') then error(100)
+               else error(89);
+      'W': if Match('RITE') then readwritestmt(WRITEST) else error(89);
+    end; {case}
+    end; {normalstmt}
+  
+  begin {compexecstmt}
+  newstmt := nil; ErrorEnable := FALSE; oldstmtbufp := stmtbufp;
+  IsAssFlag := IsAssign; stmtbufp := oldstmtbufp; ErrorEnable := TRUE;
+  olderrors := errors;
+  if LabeledFlag
+  then begin
+    
+    { See if label terminates do loop }
+    
+    lctrlstk := ctrlstk;
+    while lctrlstk <> nil do
+      begin
+      if lctrlstk^.cbkind = DOBLK
+      then
+        if labeledby = lctrlstk^.finallab
+        then AfterDoLab := TRUE;
+      lctrlstk := lctrlstk^.nextblk;
+      end;
+    end;
+  if IsAssFlag
+  then begin processlabel; assignment; end
+  else
+    if Match('FORMAT')
+    then begin FormatFlag := TRUE; formatstmt; end
+    else
+      if Match('ENDIF')
+      then begin endifstmt; processlabel; end
+      else begin processlabel; normalstmt; end;
+  if (token <> EOLNSY) and (olderrors = errors) then error(23);
+  end; {compexecstmt}
+
+begin {execstmts}
+stmtbufp := oldstmtbufp; ExitFlag := FALSE; FirstTime := TRUE;
+while StmtbufValid and not ExitFlag do begin
+  if FirstTime then FirstTime := FALSE else getstmt;
+  if StmtbufValid
+  then begin
+    FormatFlag := FALSE; LLabeledFlag := LabeledFlag; DataFlag := FALSE;
+    InsideLogIf := FALSE; AfterDoLab := FALSE; compexecstmt;
+    if newstmt <> nil
+    then begin
+      if firststmt = nil
+      then firststmt := newstmt
+      else laststmt^.nextstmt := newstmt;
+      laststmt := newstmt;
+      stmtnumb := stmtnumb + 1;
+      { added for dbx by jim t at SGI }
+      newstmt^.linenumber := cpplinenum;
+      newstmt^.filename := originalfile;
+      end;
+    if LLabeledFlag and not FormatFlag then dostmttermination;
+    if blockkind = BLOCKBLOCK
+    then
+      if not (ExitFlag or DataFlag) then error(255);
+    end
+  else {Not StmtbufValid} error(4);
+  end;
+proctree := firststmt;
+if ListFlag and ListOpen then printprevline;
+stmtnumb := 1;
+end; {execstmts}
+
+

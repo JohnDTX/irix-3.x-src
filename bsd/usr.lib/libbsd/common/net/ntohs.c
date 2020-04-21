@@ -1,0 +1,4 @@
+ntohs(x)
+{
+	return (x);
+}

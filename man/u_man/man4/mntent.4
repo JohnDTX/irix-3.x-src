@@ -1,0 +1,248 @@
+'\"macro stdmacro
+.TH MNTENT 4
+.SH NAME
+mntent, fstab \- static information about filesystems
+.SH SYNOPSIS
+.B #include <mntent.h>
+.\".SH NOTE    
+.\"This file is obsolete and exists only for compatability.
+.\"New programs should use
+.\".IR mntent (4)
+.\"instead.     
+.\"The routines for accessing
+.\".I /etc/fstab
+.\"are now in   
+.\".IR getmntent (3).
+.SH DESCRIPTION
+The file
+.B /etc/fstab
+describes the filesystems used by the local machine.
+The system administrator can modify it with a text editor.
+It is read by commands that mount, unmount,
+and check the consistency of filesystems.
+The file consists of a number of lines of the form:
+.nf
+.PP
+.RS
+\f2fsname  dir  type  opts  freq  passno\f1
+.RE
+.PP
+For example:
+.PP
+.RS
+/dev/si0a  /  efs  rw,raw=/dev/rsi0a  0  0
+.RE
+.PP
+.fi
+.LP
+Fields are separated by white space;
+a `#' as the first non-white character of a line indicates a comment.
+.LP
+The entries from this file are accessed using the routines in
+.IR getmntent (3C),
+which returns a structure of the following form:
+.LP
+.RS
+.ta \w'#define'u +\w'char\0\0'u +\w'\(**mnt_fsname;\0\0'u
+.nf
+struct mntent {
+	char	\(**mnt_fsname;	/\(** filesystem name \(**/
+	char	\(**mnt_dir;	/\(** filesystem path prefix \(**/
+	char	\(**mnt_type;	/\(** efs, bell, nfs, or ignore \(**/
+	char	\(**mnt_opts;	/\(** rw, ro, noquota, quota, hard, soft \(**/
+	int	mnt_freq;	/\(** dump frequency, in days \(**/
+	int	mnt_passno;	/\(** pass number on parallel fsck \(**/
+};
+.fi
+.RE
+.LP
+The 
+.I mnt_dir
+fields is the full path name of the directory to be mounted on.
+.LP
+The
+.I mnt_type
+field determines how the 
+.I mnt_fsname
+and 
+.I mnt_opts
+fields will be interpreted.
+Here is a list of the filesystem types currently supported,
+and the way each of them interprets these fields:
+.\".ta \w'mnt_fsname\0\0'u
+.RS
+.TP 10
+.B efs
+Extent File System (\f2mnt_fsname\f1 must be a block special device).
+.\".br
+.\"\f2mnt_opts\f1	valid options are:
+.\".BI ro , 
+.\".BI rw . 
+.\".BI quota , 
+.\"and
+.\".BI noquota .
+.TP 10
+.B bell
+Bell File System (\f2mnt_fsname\f1 must be a block special device).
+.TP 10
+.B nfs
+Network File System (\f2mnt_fsname\f1 must be the path on the server 
+of the directory to be served of the form
+.IR hostname : pathname ).
+.\".br
+.\"\f2mnt_opts\f1	valid options are:
+.\".BI ro , 
+.\".BI rw , 
+.\".BI quota , 
+.\".BI noquota , 
+.\".BI hard , 
+.\"and
+.\".BI soft .
+.TP 10
+.B ignore
+Ignore the entry.
+This is useful to show disk partitions not currently used.
+.RE
+.LP
+'\" This description should match that in mount(1M)
+The 
+.I mnt_opts
+field contains a list of comma-separated option words.  Some
+.I mnt_opts
+are valid for all filesystem types, while others apply to a
+specific type only.
+.I mnt_opts
+valid for all
+file system types are:
+.RS
+.IP \f3rw\f1 \w'\f3raw=\f2path\f1\ \ \ 'u
+read/write (default).
+.IP \f3ro\f1
+read-only.
+.IP \f3suid\f1
+set-uid execution allowed (default, can not be disabled).
+.\".IP \f3nosuid\f1
+.\"set-uid execution not allowed (not supported).
+.IP \f3hide\f1
+ignore this entry during a \f3mount \-a\f1 command to allow you to define
+\f2fstab\f1 entries for commonly used file systems you don't want to
+automatically mount.
+.RE
+.PP
+.I mnt_opts
+specific to 
+.B efs
+and
+.B bell
+file systems are:
+.RS
+.IP \f3fsck\f1 \w'\f3raw=\f2path\f1\ \ \ 'u
+.IR fsck (1M)
+invoked with no filesystem arguments should check this filesystem (default).
+.IP \f3nofsck\f1
+.I fsck
+should not check this filesystem by default.
+.IP \f3raw=\f2path\f1
+the filesystem's raw device interface pathname.
+.RE
+.PP
+.I mnt_opts
+specific to 
+.B nfs
+file systems are:
+.RS
+.IP \f3bg\f1 \w'\f3raw=\f2path\f1\ \ \ 'u
+if the first mount attempt fails, retry in the background.
+.IP \f3fg\f1
+retry in the foreground.
+.IP \f3retry=\f2n\f1
+set number of mount failure retries to 
+.I n.
+.IP \f3rsize=\f2n\f1
+set read buffer size to 
+.I n 
+bytes.
+.IP \f3wsize=\f2n\f1
+set write buffer size to 
+.I 
+n bytes.
+.IP \f3timeo=\f2n\f1
+set NFS timeout to 
+.I n 
+tenths of a second.
+.IP \f3retrans=\f2n\f1
+set number of NFS retransmissions to 
+.I n.
+.IP \f3port=\f2n\f1
+set server IP port number to 
+.I n.
+.IP \f3soft\f1
+return error if server doesn't respond.
+.IP \f3hard\f1
+retry request until server responds.
+.RE
+.PP
+The
+.B bg
+option causes 
+.I mount
+to run in the background if the server's
+.IR mountd (1M)
+does not respond.  
+.I mount 
+attempts each request
+.BI retry= n
+times before giving up.  
+If
+.B bg 
+is specified and 
+.B retry 
+is not specified, it
+defaults to 10000.
+Once the filesystem is mounted,
+each 
+.SM NFS 
+request made in the kernel waits
+.BI timeo= n
+tenths of a second for a response.  If no response arrives, the
+time-out is multiplied by 2 
+and the request is retransmitted.  When
+.BI retrans= n
+retransmissions have been sent with no reply a
+.B soft
+mounted filesystem returns an error on the request and a
+.B hard
+mounted filesystem retries the request.
+Filesystems that are mounted 
+.B rw
+(read/write)
+should use the 
+.B hard
+option.
+The number of bytes in a read or write request can be set with the
+.B rsize
+and
+.B wsize
+options.
+The default options are:
+.PP
+.RS
+\f3fg,hard,retry=0,timeo=7,retrans=4,port=\f2NFS_PORT\f1
+.RE
+.PP
+with defaults for 
+.I rsize 
+and 
+.I wsize 
+set by the kernel.
+.LP
+.I mnt_freq
+and 
+.I mnt_passno
+are not supported.
+.SH FILES
+/etc/fstab	static data
+.br
+/etc/mtab	dynamic data (i.e., those file systems currently mounted)
+.SH SEE ALSO
+fsck(1M), mount(1M), getmntent(3C).

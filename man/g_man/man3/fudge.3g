@@ -1,0 +1,76 @@
+.TH fudge 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B fudge
+\- specifies fudge values added to a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "fudge(xfudge, yfudge)"
+.B "long xfudge, yfudge;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine fudge(xfudge, yfudge)"
+.B "integer*4 xfudge, yfudge"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure fudge(xfudge, yfudge: longint);"
+.SH DESCRIPTION
+.B fudge
+specifies fudge values that are added to the dimensions of a graphics window 
+when it is resized.
+Typically, you use 
+.B fudge
+to create window borders.
+.B fudge
+is useful in conjunction with
+.B stepunit
+and
+.B keepaspect.
+.PP
+With
+.B stepunit 
+the window size for integers 
+.I n
+and 
+.I m 
+is:
+.sp
+.nf
+.in +0.5i
+\f3width \s9=\s0 xunit\f1\(**\f3n \s9+\s0 xfudge
+height \s9=\s0 yunit\f1\(**\f3m \s9+\s0 yfudge
+.fi
+.in -0.5i
+.sp
+.PP
+With
+.B keepaspect
+the window size is (\f2w\f1, \f2h\f1) where:
+.sp
+.nf
+.in +0.5i
+\f3(w\-xfudge)\f1\(**\f3yaspect \s9=\s0 (h\-yfudge)\f1\(**\f3xaspect
+.in -0.5i
+.fi
+.sp
+\f1Call \f3fudge\f1 at the beginning of a graphics program that runs under
+the window manager. 
+If you do not call
+\f3winopen\f1, or if the window manager is not running,
+the system ignores
+\f3fudge\f1.
+
+.ne 15 
+.SH "SEE ALSO"
+keepaspect, stepunit, winopen
+.sp
+.I Using mex ,
+Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

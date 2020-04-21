@@ -1,0 +1,20 @@
+		IN-CIRCUIT GE TESTER
+>ngfld
+
+cs	setup
+cp<n>	passthru/FIFO test, <n> repetitions
+c1<n>	MM1 test
+c2<n>	MM2 test
+c3<n>	MM3 test
+c4<n>	MM4 test
+c5<n>	CL0 test
+c6<n>	CL1 test
+c7<n>	CL2 test
+c8<n>	CL3 test
+c9<n>	CL4 test
+ca<n>	CL5 test
+cb<n>	SC0 test
+cc<n>	SC1 test
+
+cP<n>	stopping passthru test
+cg<n>	stopping SC0 test

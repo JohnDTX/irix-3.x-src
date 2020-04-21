@@ -1,0 +1,102 @@
+'\"#ident	"@(#)eqn:psceqnchar	2.5"
+'\"		Copyright (c) 1984 AT&T
+'\"		  All Rights Reserved
+'\"     THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF AT&T
+'\"   The copyright notice above does not evidence any actual
+'\"   or intended publication of such source code.
+.EQ
+tdefine ciplus % "\(a+" %
+ndefine ciplus % O+ %
+tdefine citimes % "\(ax" %
+ndefine citimes % Ox %
+tdefine =wig % "\(eq\h'-\w'\(eq'u-\w'\s-3\(ap'u/2u'\v'-.4m'\s-3\z\(ap\(ap\s+3\v'.4m'\h'\w'\(eq'u-\w'\s-3\(ap'u/2u'" %
+ndefine =wig % ="~" %
+tdefine bigstar % "\o'\(pl\(mu'" %
+ndefine bigstar % X|- %
+tdefine =dot % "\o'=\(dt'" %
+ndefine =dot % = dot %
+tdefine orsign % "\(lo" %
+ndefine orsign % \e/ %
+tdefine andsign % "\(la" %
+ndefine andsign % /\e %
+tdefine =del % "\v'.2m'\(eq\h'-\w'\(eq'u-\w'\s-1\(*D'u/2u'\v'-.5m'\s-1\(*D\s+1\v'.3m'\h'\w'\(eq'u-\w'\s-1\(*D'u/2u'" %
+ndefine =del % = to DELTA %
+tdefine oppA % "\(fa" %
+ndefine oppA % V- %
+tdefine oppE % "\(te" %
+ndefine oppE % E/ %
+tdefine incl % roman "\z\(or\h'\w'\(or'u/2u'\v'-.335m'\z\(mi\v'.625m'\z\(mi\v'.2m'\(mi\v'-.490m'" %
+ndefine incl % C_ %
+tdefine nomem % "\(!m" %
+ndefine nomem % C-/ %
+tdefine angstrom %"\f1A\fP\h'-\w'\f1A'u-\w'\(de'u/2u'\v'-.3m'\(de\v'.3m'\h'\w'\f1A'u-\w'\(de'u/2u'"%
+ndefine angstrom % A to o %
+tdefine star % "\(**" %
+ndefine star % * %
+tdefine || % roman "\(or\(or" %
+tdefine <wig % "<\h'-\w'<'u-\w'\s-2\(ap'u/2u'\v'.4m'\s-2\(ap\s+2\v'-.4m'\h'\w'<'u-\w'\s-2\(ap'u/2u'" %
+ndefine <wig %{ < from "~" }%
+tdefine >wig % ">\h'-\w'>'u-\w'\s-2\(ap'u/2u'\v'.4m'\s-2\(ap\s+2\v'-.4m'\h'\w'>'u-\w'\s-2\(ap'u/2u'" %
+ndefine >wig %{ > from "~" }%
+tdefine langle % "\(l<" %
+ndefine langle %<%
+define rangle % "\(r>" %
+ndefine rangle %>%
+tdefine hbar % "\fIh\fP\h'-\w'\fIh'u-\w'\s-2\(ru'u/2u'\v'-.55m'\s-2\(ru\s+2\v'.55m'\h'\w'\fIh'u-\w'\s-2\(ru'u/2u'" %
+ndefine hbar % h\u-\d %
+tdefine ppd % "\(bt" %
+ndefine ppd % _| %
+tdefine <-> % "\(<>" %
+ndefine <-> % "<-->" %
+tdefine <=> % "\(io" %
+ndefine <=> % "<=>" %
+tdefine |< % roman "\o'\(or<'" %
+ndefine |< % <| %
+tdefine |> % roman "\o'\(or>'" %
+ndefine |> % |> %
+tdefine ang % "\z/\v'-.2m'_\v'.2m'" %
+ndefine ang % /_ %
+tdefine rang % "\z\(br_" %
+ndefine rang % L %
+tdefine 3dot % "\v'-.7m'\z.\v'.4m'\z.\v'.4m'.\v'-.1m'" %
+ndefine 3dot % .\u.\u.\d\d %
+tdefine thf % "\(tf" %
+ndefine thf % ..\u.\d %
+tdefine quarter % roman \(14 %
+ndefine quarter % 1/4 %
+tdefine 3quarter % roman \(34 %
+ndefine 3quarter % 3/4 %
+tdefine degree % \(de %
+ndefine degree % nothing sup o %
+tdefine square % \(sq %
+ndefine square % [] %
+tdefine circle % \(ci %
+ndefine circle % O %
+tdefine blot % "\(bx" %
+ndefine blot % HIX %
+tdefine bullet % \(bu %
+ndefine bullet % oxe %
+tdefine -wig % "\(~=" %
+ndefine -wig % - to "~" %
+tdefine wig % \(ap %
+ndefine wig % "~" %
+tdefine prop % \(pt %
+ndefine prop % oc %
+tdefine empty % \(es %
+ndefine empty % O/ %
+tdefine member % \(mo %
+ndefine member % C- %
+tdefine scrL % "l" %
+ndefine scrL % (/ %
+tdefine ==> % "\o'\(>=_'" %
+ndefine ==> % >\d=\u %
+tdefine ==< % "\o'\(<=_'" %
+ndefine ==< % <\d=\u %
+define cap % \(ca %
+tdefine cup % \(cu %
+ndefine cup % U %
+define subset % \(sb %
+define supset % \(sp %
+define !subset % \(ib %
+define !supset % \(ip %
+.EN

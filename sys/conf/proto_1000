@@ -1,0 +1,25 @@
+#
+# Configuration for 1400 system
+#
+machine		"pm2"
+cpu		"PM2"
+timezone	8 dst
+maxusers	4
+
+config		vmunix	root on dsd
+
+controller	mb0	at nexus ?
+
+pseudo-device	sky
+
+# GL1 support
+options		"GL1"
+pseudo-device	glone
+
+# Filesystem support
+pseudo-device	efs
+pseudo-device	bfs
+
+# Psuedo TTY's
+pseudo-device	pty
+

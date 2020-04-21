@@ -1,0 +1,72 @@
+'\"macro stdmacro
+.TH UNGETC 3S 
+.SH NAME
+ungetc \- push character back into input stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int ungetc (c, stream)
+.br
+.B char c;
+.br
+.SM
+.B FILE
+.B \(**stream;
+.SH DESCRIPTION
+.I Ungetc\^
+inserts the character
+.I c\^
+into the buffer associated with an input
+.IR stream .
+That character,
+.IR c ,
+will be returned by the next
+.I getc\^
+call on that
+.IR stream .
+.I Ungetc\^
+returns 
+.IR c ,
+and leaves the file
+.I stream\^
+unchanged.
+.PP
+One character of pushback is guaranteed provided
+something has been read from the stream and the stream is
+actually buffered.
+.PP
+If
+.I c\^
+equals
+.SM
+.BR EOF ,
+.I ungetc\^
+does nothing to the buffer and returns
+.SM
+.BR EOF .
+.PP
+.IR fseek\^ (3S)
+erases all memory of inserted characters.
+.SH "SEE ALSO"
+fseek(3S), getc(3S), setbuf(3S).
+.SH DIAGNOSTICS
+In order that
+.I ungetc\^
+perform correctly, a read statement must have been performed prior to the
+call of the
+.I ungetc\^
+function.
+.I Ungetc\^
+returns
+.SM
+.B EOF
+if it can't insert the character.
+In the case that
+.I stream\^
+is
+.IR stdin ,
+.I ungetc\^
+will allow exactly
+one character to be pushed back onto the buffer without a previous read
+statement.
+.\"	@(#)ungetc.3s	5.1 of 10/25/83

@@ -1,0 +1,47 @@
+.TH backbuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B backbuffer
+\- enables updating in the back buffer
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "backbuffer(b)"
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine backbu(b)"
+.B "logical b"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure backbuffer(b: Boolean);"
+.SH DESCRIPTION
+.B backbuffer
+enables updating in the back bitplane buffer.  When the value of
+.I b
+is
+TRUE
+(1), the default, 
+the back buffer is enabled.
+When the value of \f2b\f1 is
+FALSE
+(0), the back buffer is not enabled.  This routine
+is useful only in
+double buffer mode, and is ignored in single buffer mode and RGB mode.
+.PP
+\f3gconfig\f1 sets
+.B backbuffer 
+to 
+TRUE 
+(1).
+.SH "SEE ALSO"
+doublebuffer, frontbuffer, getbuffer
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+

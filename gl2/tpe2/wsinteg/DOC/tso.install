@@ -1,0 +1,55 @@
+                                                                                
+                        Silicon Graphics Inc.                                   
+                                                                                
+    T S O  /   I R I S   D A T A   T R A N S F E R   C O M M A N D              
+                                                                                
+           I N S T A L L A T I O N   I N S T R U C T I O N S                    
+                                                                                
+                                                                                
+   Accompanying this install letter is a tape mini reel at either               
+1600 or 6250 BPI.  It is an OS standard label tape, volume SGITAP,              
+and it contains a single IEBCOPY unloaded dataset.  The name of                 
+tape dataset is SGI.UNLOADED.COMMAND.                                           
+                                                                                
+   Load the tape dataset to disk.  JCL to perform the disk load                 
+will look somewhat like the sample below.                                       
+                                                                                
+                                                                                
+//SGIJOB   JOB  site_data,'SGI JOB',CLASS=A,MSGCLASS=A                          
+//STEP1    EXEC PGM=IEBCOPY                                                     
+//SYSPRINT DD   SYSOUT=*                                                        
+//TAPE     DD   UNIT=TAPE,VOL=SER=SGITAP,DISP=OLD,                              
+//         DSN=SGI.UNLOADED.COMMAND                                             
+//DISK     DD   UNIT=SYSDA,SPACE=(CYL,(1,1,5)),DISP=(,CATLG),                   
+//         DSN=SGI.TSO.COMMAND                                                  
+//SYSIN    DD   *                                                               
+ COPY OUTDD=DISK,INDD=TAPE                                                      
+/*                                                                              
+//                                                                              
+                                                                                
+   The dataset has seven members:                                               
+                                                                                
+   LINK     Sample JCL to link edit the TEXT and NAME members.                  
+   TEXT     Object code for the command.                                        
+   NAME     A module name card for IEWL.                                        
+   COPY     Sample JCL to copy the HELP member to SYS1.HELP.                    
+   HELP     TSO help for the command.                                           
+   INSTALL  A copy of this letter.                                              
+   SOURCE   Either one line 'source not shipped' or command source.             
+                                                                                
+                                                                                
+   Link edit the command text into SYS1.CMDLIB.  The JCL in the LINK            
+member may be used as a guide.                                                  
+                                                                                
+   Modify the COMMANDS member of the SYS1.HELP dataset to include               
+a line of information about the IRSXFR command.                                 
+                                                                                
+   Copy the the HELP member of the SGI.TSO.COMMAND library to the               
+SYS1.HELP dataset as member IRSXFR.  Sample JCL for the copy step               
+is included in member COPY.                                                     
+                                                                                
+   Check for help accessibility and correct command action.  The                
+command is installed.                                                           
+                                                                                
+                                                                                
+                                                                                

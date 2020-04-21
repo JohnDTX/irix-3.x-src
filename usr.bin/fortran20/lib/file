@@ -1,0 +1,43 @@
+From kipp Tue Oct 22 16:37:52 1985
+Received: by olympus.UUCP (4.12/4.7)
+	id AA07613; Tue, 22 Oct 85 16:37:43 pdt
+Date: Tue, 22 Oct 85 16:37:43 pdt
+From: kipp (Kipp Hickman)
+Message-Id: <8510222337.AA07613@olympus.UUCP>
+To: yu
+Subject: nfs meeting
+Cc: bruce, greg, oshacks
+Status: R
+
+
+Just some notes and highlights.
+
+1. The meeting was pretty boring.  Nothing was said that wasn't in their
+   documentation.
+
+2. They are still finessing some of the hard issues - "open" file
+   semantics using their lingo; fully diskless workstations (no nd device);
+   etc.
+
+3. The pyramid folks took a year and 3 months to complete their nfs, including
+   beta site time.  They are just now beta-ing it, and plan on a formal release
+   in january.
+
+4. The mt. xinu people claim that it is an easy job of putting the nfs code
+   into a vanilla 4.2 (which we have on the vaxen).  In many cases, they
+   said, the sun guys had fixed bugs in 4.2 differently; in most cases they
+   chose the sun fix over their own...
+
+5. Everyone involved stressed that it would be more work to get it into a
+   System V.  Also, in all cases, they stressed that some of the semantics
+   of System V would be lost.
+
+6. On the good side, some of their design decisions merit serious review,
+   as they solve several tough problems in a quick manner.  Their usage
+   of the ``lookup'' operator makes remote non-unix filesystems appear
+   as a unix filesystem to the client.  This approach also solves the
+   ".." problem that most remote filesystems face.  Etc.
+
+Come by and chat for more stuff...
+					kipp
+

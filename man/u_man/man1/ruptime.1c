@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH RUPTIME 1C 
+.SH NAME
+ruptime \- show host status of local machines
+.SH SYNOPSIS
+.B ruptime
+[
+.B \-a
+]
+.SH DESCRIPTION
+\f2ruptime\f1 gives a status line for each machine on the local network.
+The status lines are formed from packets broadcast by each host
+on the network once a minute.
+They include a count of the number of users on a
+system and an indication of the load on each system, if available.
+.PP
+Machines for which no status report has been received for five 
+minutes are shown as being down.
+.PP
+Users idle one hour or more are not counted unless the
+\f3\-a\f1 flag is given.
+.SH FILES
+.DT
+/usr/spool/rwho/whod.*	data files
+.SH SEE ALSO
+rwho(1C), rwhod(1M)
+.SH BUGS
+Not all systems keep load statistics that are usable by \f2rwhod\f1(1M).
+.I rwho
+makes it appears as though all the machines on the local net are
+down if
+.I rwhod
+is not running. 

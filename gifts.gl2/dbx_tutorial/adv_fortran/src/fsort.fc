@@ -1,0 +1,9 @@
+
+fsort(sortarray,nelements,elsize)
+int sortarray[];
+int nelements,elsize;
+{
+
+	qsort(sortarray,nelements,elsize,cmprec);
+
+}

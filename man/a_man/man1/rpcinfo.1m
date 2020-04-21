@@ -1,0 +1,49 @@
+'\"macro stdmacro
+.TH RPCINFO 1M
+.SH NAME
+rpcinfo \- report RPC information
+.SH SYNOPSIS
+.B "rpcinfo \-p"
+[ host ]
+.br
+.B "rpcinfo \-u"
+host program-number
+[ version-number ]
+.br
+.B "rpcinfo \-t"
+host program-number
+[ version-number ]
+.SH DESCRIPTION
+.IX  "rpcinfo command"  ""  "\fLrpcinfo\fP \(em report RPC information"
+.I Rpcinfo
+makes an RPC call to an RPC server and reports what it finds.
+.SH OPTIONS
+.TP
+.B \-p
+Probe the portmapper on
+.IR host ,
+and print a list of all registered RPC programs.
+If 
+.I host
+is not specified, it defaults to the value returned by
+.IR hostname (1).
+.TP
+.B \-u
+Make an RPC call to procedure 0 of
+.I program-number
+using UDP, and report whether a response was received.
+.TP
+.B \-t
+Make an RPC call to procedure 0 of
+.I program-number
+using TCP, and report whether a response was received.
+.LP
+The
+.I program-number
+argument can be either a name or a number.  If no version is given,
+it defaults to 1.
+.SH FILES
+/etc/rpc	names for rpc program numbers
+.SH "SEE ALSO"
+.I "RPC Programming Guide,"
+rpc(4), portmap(1M)

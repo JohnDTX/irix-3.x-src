@@ -1,0 +1,49 @@
+rm -f *.o
+$SVS/asm68k -s ubuf ; $SVS/jlinker -oubuf.o ubuf.obj
+$SVS/asm68k -s ugotoxy ; $SVS/jlinker -ougotoxy.o ugotoxy.obj
+$SVS/asm68k -s uio ; $SVS/jlinker -ouio.o uio.obj
+$SVS/asm68k -s g.umem ; $SVS/jlinker -og.umem.o g.umem.obj
+$SVS/asm68k -s 20umisc ; $SVS/jlinker -o20umisc.o 20umisc.obj
+$SVS/asm68k -s utexti ; $SVS/jlinker -outexti.o utexti.obj
+$SVS/asm68k -s utexto ; $SVS/jlinker -outexto.o utexto.obj
+$SVS/asm68k -s g.20uinit ; $SVS/jlinker -og.20uinit.o g.20uinit.obj
+$SVS/asm68k -s pascheck ; $SVS/jlinker -opascheck.o pascheck.obj
+$SVS/asm68k -s pasdpwr10 ; $SVS/jlinker -opasdpwr10.o pasdpwr10.obj
+$SVS/asm68k -s pasmath ; $SVS/jlinker -opasmath.o pasmath.obj
+$SVS/asm68k -s pasmove ; $SVS/jlinker -opasmove.o pasmove.obj
+$SVS/asm68k -s paspwr10 ; $SVS/jlinker -opaspwr10.o paspwr10.obj
+$SVS/asm68k -s passcomp ; $SVS/jlinker -opasscomp.o passcomp.obj
+$SVS/asm68k -s passet ; $SVS/jlinker -opasset.o passet.obj
+$SVS/asm68k -s pastext ; $SVS/jlinker -opastext.o pastext.obj
+$SVS/asm68k -s pastring ; $SVS/jlinker -opastring.o pastring.obj
+$SVS/asm68k -s add ; $SVS/jlinker -oadd.o add.obj
+$SVS/pascal pasrio.pas; $SVS/code pasrio.i ; $SVS/jlinker -opasrio.o pasrio.obj
+$SVS/pascal d13.pas; $SVS/code d13.i; $SVS/jlinker -od13.o d13.obj
+$SVS/pascal f13.pas; $SVS/code f13.i; $SVS/jlinker -of13.o f13.obj
+$SVS/asm68k -s cmp ; $SVS/jlinker -ocmp.o cmp.obj
+$SVS/asm68k -s dadd ; $SVS/jlinker -odadd.o dadd.obj
+$SVS/asm68k -s dcmp ; $SVS/jlinker -odcmp.o dcmp.obj
+$SVS/asm68k -s div ; $SVS/jlinker -odiv.o div.obj
+$SVS/asm68k -s dmul ; $SVS/jlinker -odmul.o dmul.obj
+$SVS/asm68k -s dpk ; $SVS/jlinker -odpk.o dpk.obj
+$SVS/asm68k -s dvmd ; $SVS/jlinker -odvmd.o dvmd.obj
+$SVS/asm68k -s fpk ; $SVS/jlinker -ofpk.o fpk.obj
+$SVS/asm68k -s ipk ; $SVS/jlinker -oipk.o ipk.obj
+$SVS/asm68k -s mod ; $SVS/jlinker -omod.o mod.obj
+$SVS/asm68k -s mul ; $SVS/jlinker -omul.o mul.obj
+$SVS/asm68k -s nan ; $SVS/jlinker -onan.o nan.obj
+ar crv libp.a *.o
+echo
+echo libp.a built.
+rm -f dpk.o dvmd.o dcmp.o ipk.o f13.o d13.o pasrio.o
+$SVS/asm68k -s sky.gmath ; $SVS/jlinker -osky.gmath.o sky.gmath.obj
+$SVS/asm68k -s sky.dpk ; $SVS/jlinker -osky.dpk.o sky.dpk.obj
+$SVS/asm68k -s sky.dvmd ; $SVS/jlinker -osky.dvmd.o sky.dvmd.obj
+$SVS/asm68k -s sky.dcmp ; $SVS/jlinker -osky.dcmp.o sky.dcmp.obj
+$SVS/asm68k -s sky.ipk ; $SVS/jlinker -osky.ipk.o sky.ipk.obj
+$SVS/pascal sky.f13.pas +f; $SVS/code sky.f13.i; $SVS/jlinker -osky.f13.o sky.f13.obj
+$SVS/pascal pasrio.pas +f; $SVS/code pasrio.i; $SVS/jlinker -opasrio.o pasrio.obj
+$SVS/pascal d13.pas +f; $SVS/code d13.i; $SVS/jlinker -od13.o d13.obj
+ar crv libphwfp.a *.o
+echo
+echo libphwfp.a built.

@@ -1,0 +1,18 @@
+transcript/goodies/
+
+LaserPrep.ps
+	is the Apple Macintosh LaserPrep header file
+	exactly as uploaded from a Mac LaserPrep resource.
+	This file is not suitable as-is for creating
+	included illustrations.
+
+gbind.ps
+	Adobe's graphics binder.  
+	An exercise in PostScript code modification.
+	(see it's header comments)
+
+psops.sh
+	A shell script for PostScript operator one-liners.
+	You can use this to build an on-line reference
+	(e.g., an Emacs description database file).
+

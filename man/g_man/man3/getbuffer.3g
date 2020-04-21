@@ -1,0 +1,55 @@
+'\" t
+.TH getbuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getbuffer
+\- indicates which buffers are enabled for writing
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getbuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getbuf()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getbuffer: longint;"
+.SH DESCRIPTION
+.B getbuffer
+indicates which buffers are enabled for writing in double buffer mode.
+1,
+the default, indicates the back buffer is enabled;
+2
+indicates the front buffer is enabled;
+and
+3
+indicates that both buffers are enabled.
+.PP
+\f3getbuffer\f1 returns 
+0
+if both buffers are disabled 
+or if the system is not in double buffer mode.
+.sp
+.TS
+center, box;
+cB | cB | cB 
+n l.
+Value	Buffer Enabled	Symbolic Name
+_
+0	none	NOBUFFER
+1	back buffer	BCKBUFFER
+2	front buffer	FRNTBUFFER
+3	both buffers	BOTHBUFFERS
+.TE
+.SH "SEE ALSO"
+backbuffer, doublebuffer, frontbuffer
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes
+.SH NOTE
+This routine is available only in immediate mode.

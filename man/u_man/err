@@ -1,0 +1,2 @@
+./tocrc: ../man0/tocx1: cannot create
+tocx* files missing; must run tocrc all first

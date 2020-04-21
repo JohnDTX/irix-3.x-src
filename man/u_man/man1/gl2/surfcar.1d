@@ -1,0 +1,82 @@
+'\"macro stdmacro
+.TH SURFCAR 1D
+.SH NAME
+surfcar, surfegg \- surface editor and rendering driver
+.SH SYNOPSIS
+.B /usr/people/mexdemos/surfcar  
+.br
+.B /usr/people/mexdemos/surfegg
+.SH DESCRIPTION
+.PP
+.I surfcar and
+.I surfegg
+are interactive bicubic patch editors.
+It allows the user to manipulate the locations and numbers of basis points
+defining a bicubic B-spline surface. 
+The user can also establish planes of symmetry, manipulate the splined object
+for study from various points of view, and send the basis points to a second
+program that draws smooth-shaded, z-buffered objects.
+.PP
+The default data base specifies a surface shape more or less resembling an
+automobile or egg carton.
+.PP
+The simplest use of the program allows you to edit the displayed surface by
+manipulating its basis points.
+The program takes a while to start up.
+It displays a wait cursor until it does.
+.PP
+The program uses screen buttons and cursor glyphs.
+In the initial state,  the cursor is shaped like the mouse.
+LEFTMOUSE gives a stylized arrow in the 'X' direction, MIDDLEMOUSE
+one in 'Y', and RIGHTMOUSE one in 'Z'.
+The mouse can be used to pick a basis point, select an axis, and move the
+point along that axis.
+Any basis point can be picked either at its ``real'' location in space
+or at its projection on any of the index surfaces.
+.PP
+The rightmost five screen buttons help edit the surface.
+The leftmost two help view it.
+.PP
+The leftmost screen window shows three mutually perpendicular
+axes.
+If an axis is selected by the cursor, RIGHTMOUSE will rotate the surface about
+that axis.
+The index planes will stay still while the surface rotates ninety degrees
+around the axis selected.
+.PP
+The stylishly bloodshot eye allows rotation of the object and the index
+planes.
+LEFTMOUSE allows rotation of the surface alone.
+RIGHTMOUSE returns it to its original spot.
+RIGHTMOUSE allows rotation of the object and axes.
+Pressing  
+RIGHTMOUSE again gets out of the rotate mode and leaves the display at its new
+position.
+LEFTMOUSE, while the object is in rotate mode, transmits the current
+surface to the surface rendering demonstration program, 
+.IR zshadecar (1D).
+.PP
+Use the five screen buttons on the lower right to make more modifications
+to the surface.
+Each of the three rightmost buttons 
+(the cubes with slices down the middle) selects
+a plane of symmetry 
+across the surface.
+Only two planes of symmetry can be relevant for any orientation of the object.
+Attempts to select the impossible plane will not be accepted and will blink
+an error cursor.
+The remaining two buttons double the number of basis points in the image
+along the axes indicated.
+More points allow a more complicated surface.
+.SH "WINDOW MANAGER"
+.PP
+Versions for use with and without the window manager are supplied.
+The version with the window manager is the only one that communicates
+directly
+with
+.IR zshadecar (1D).
+.SH "SEE ALSO"
+zshadecar(1D)
+.SH AUTHOR
+Henry Moreton
+

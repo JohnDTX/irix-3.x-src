@@ -1,0 +1,54 @@
+'\"macro stdmacro
+.TH CORE 4
+.SH NAME
+core \- format of core image file
+.SH DESCRIPTION
+The
+.SM UNIX
+System writes out a core image of a terminated
+process when any of various errors occur.
+See
+.IR signal (2)
+for the list of reasons;
+the most common are memory violations, illegal
+instructions, bus errors, and user-generated
+quit signals.
+The core image is called
+.B core
+and is written in the process's
+working directory (provided it can be;
+normal access controls apply).
+A process with an effective user
+.SM ID
+different from the real user
+.SM ID
+will not produce a core image.
+.PP
+The first section of the core image
+is a copy of the system's per-user
+data for the process, including the registers
+as they were at the time of the fault.
+The size of this section depends on the parameter
+.SM USIZE ,
+which is defined in
+.BR <sys/param.h> .
+The
+remainder represents the actual contents of
+the user's core area when the core image
+was written.
+If the text segment is read-only and shared,
+or separated from data space, it is not dumped.
+.PP
+The format of the
+information in the first section
+is described by
+the
+.I user\^
+structure of the system,
+defined in
+.BR <sys/user.h> .
+The locations of the registers are outlined in
+.BR <machine/reg.h> .
+.SH "SEE ALSO"
+setuid(2), signal(2).
+.\"	@(#)core.4	5.1 of 10/15/83

@@ -1,0 +1,146 @@
+'\"macro stdmacro
+.TH AR 1
+.SH NAME
+ar \- archive and library maintainer
+.SH SYNOPSIS
+.B ar
+[mrxtdpq] [uvnbailc] [posname] archivename filename(s) ...
+.SH DESCRIPTION
+The archive command
+.I ar\^
+maintains groups of files
+combined into a single archive file.
+Its main use
+is to create and update library files as used by the loader.
+However,
+.I ar\^
+can be used for any similar archiving purpose.
+Archives often consist of unlinked program modules.
+.PP
+.I archivename\^
+is the archive file.
+The
+.I filename(s)\^
+are constituent files in or destined for the archive file.
+.TP "\w'\f3m\fP\ \ \ 'u"
+.B d
+Delete the named files from the archive file.
+.TP
+.B r
+Replace the named files in the archive file.
+If the optional character
+.B u
+is used with
+.BR r ,
+then only those files with
+modified dates later than
+the archive files are replaced.
+If an optional positioning character from the set
+.B abi
+is used, then the
+.I posname\^
+argument must be present
+and specifies that new files are to be placed
+after
+.RB ( a )
+or before
+.RB ( b
+or
+.BR i )
+.IR posname .
+Otherwise
+new files are placed at the end.
+.TP
+.B q
+Quickly append the named files to the end of the archive file.
+Optional positioning characters are invalid.
+The command does not check whether the added members
+are already in the archive.
+Useful only to avoid quadratic behavior when creating a large
+archive piece-by-piece.
+.TP
+.B t
+Print a table of contents of the archive file.
+If no names are given, all files in the archive are tabled.
+If names are given, only those files are tabled.
+.TP
+.B p
+Print the named files in the archive.
+.TP
+.B m
+Move the named files to the end of the archive.
+If a positioning character is present,
+then the
+.I posname\^
+argument must be present and,
+as in
+.BR r ,
+specifies where the files are to be moved.
+.TP
+.B x
+Extract the named files.
+If no names are given, all files in the archive are
+extracted.
+In neither case does
+.B x
+alter the archive file.
+.TP
+.B v
+Verbose.
+Under the verbose option,
+.I ar\^
+gives a file-by-file
+description of the making of a
+new archive file from the old archive and the constituent files.
+When used with
+.BR t ,
+it gives a long listing of all information about the files.
+When used with
+.BR p ,
+it precedes each file with a name.
+.TP
+.B c
+Create.
+Normally
+.I ar\^
+will create
+.I afile\^
+when it needs to.
+The create option suppresses the
+normal message that is produced when
+.I afile\^
+is created.
+.TP
+.B l
+Local.
+Normally
+.I ar\^
+places its temporary files in the directory 
+.BR /tmp .
+This option causes them to be placed in the local directory.
+.bp
+.SH EXAMPLE
+.IP
+ar rv libar.a text.o
+.PP
+places file "text.o" in archive "libar.a".  
+.IP
+ar bm file1 archivename file2
+.PP
+changes the location of a file inside an archive.  "File2" 
+is the file to be moved.  "File2" is moved to a new 
+position before "file1".     
+.DT
+.SH FILES
+/tmp  temporaries
+.SH "SEE ALSO"
+ld(1), ar(4).
+.SH BUGS
+If the same file is mentioned twice in an argument list,
+it may be put in the archive twice.
+.br
+Sufficient disk space must be present to make an entire copy of the archive 
+or the 
+.I ar\^
+command will fail.
+.\"	@(#)ar.1	5.1 of 11/15/83

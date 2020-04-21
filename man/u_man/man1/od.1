@@ -1,0 +1,80 @@
+'\"macro stdmacro
+.TH OD 1 
+.SH NAME
+od \- octal dump
+.SH SYNOPSIS
+.B od
+[
+.B \-bcdosx
+] [ file ] [ [
+.B +
+]offset[
+.BR ". " "]["
+\f3b\f1 ] ]
+.SH DESCRIPTION
+.I Od\^
+dumps
+.I file\^
+in
+one or more formats
+as
+selected by the first argument.
+If the first argument is missing,
+.B \-o
+is default.
+The meanings of the format options are:
+.TP "\w'\f3\-b\f1\ \ \ 'u"
+.B \-b
+Interpret bytes in octal.
+.TP
+.B \-c
+Interpret bytes in \s-1ASCII\s0.
+Certain non-graphic characters appear as C escapes:
+null=\f3\e0\fP,
+backspace=\f3\eb\fP,
+form-feed=\f3\ef\fP,
+new-line=\f3\en\fP,
+return=\f3\er\fP,
+tab=\f3\et\fP;
+others appear as 3-digit octal numbers.
+.TP
+.B \-d
+Interpret words in unsigned decimal.
+.TP
+.B \-o
+Interpret words in octal.
+.TP
+.B \-s
+Interpret 16-bit words in signed decimal.
+.TP
+.B \-x
+Interpret words in hex.
+.PP
+The
+.I file\^
+argument specifies which file is to be dumped.
+If no file argument is specified,
+the standard input is used.
+.PP
+The offset argument specifies the offset
+in the file where dumping is to commence.
+This argument is normally interpreted
+as octal bytes.
+If \f3.\f1 is appended, the offset is interpreted in
+decimal.
+If \f3b\f1 is appended, the offset is interpreted in
+blocks of 512 bytes.
+If the file argument is omitted,
+the offset argument must be preceded by
+.BR + .
+.PP
+Dumping continues until end-of-file.
+.SH EXAMPLE
+.IP
+od -d filea +2
+.PP
+produces an octal dump of "filea"
+divided up into 32-bit words expressed in decimal
+equivalents with the dump starting point offset by 2 octal bytes.
+
+.\"	@(#)od.1	5.1 of 11/9/83

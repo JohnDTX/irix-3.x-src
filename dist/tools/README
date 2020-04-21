@@ -1,0 +1,97 @@
+This directory contains commands used to install software updates and
+options.  The commands and data files included here are part of a
+specific distribution and should only be used with the distribution.
+Do not use these tools with a tape other than the one from which they
+were taken.  These commands and files are the "distribution tools".
+
+NOTE: The distribution tools are fully documented in the manuals and
+release notes, which should be used whenever possible.  This sketch is
+provided for situations where the documentation is not available.
+
+The file "desc" in this directory describes the software that may have
+been included on the tape.  Software is broken up into units called
+"images", where an image might be, for example, the standard system
+update files, the demo programs, the online manual pages, the FORTRAN
+option, or the TCP/IP communications option.  Each such image has a
+shorthand name by which it is known to the distribution commands.  For
+example, the FORTRAN option is known as "ftn".  See the "desc" file for
+a list of images that might be included on the tape, and their
+shorthand names.
+
+The "toc" file in this directory contains the names of the images that
+were included on the tape, and is used by the distribution commmands to
+access the images on the tape.  You can examine "toc" to see the
+shorthand names of the images on the tape.
+
+To install software from this tape:
+
+1) The machine should be running in multi-user mode, with no other
+users logged in and no other user processes running.  Log in as root.
+
+2) Read the distribution tools into the root directory.
+
+	cd /
+	rm -rf dist
+	cpio -ivhmud1
+
+3) Examine the "/dist/toc" file to determine what images are available
+to you.  Bug fix images are named with a trailing "%" (e.g. "ftn%");
+these are automatically included when you access the normal entry
+(e.g.  "ftn"), so you should not take any specific actions to load
+these images.
+
+4) To see the increase or decrease in disk usage that will result from
+reading in the images from the tape, use the "Spchk" command.  With no
+command line arguments, "Spchk" assumes you will be reading all of the
+images named in "toc".  If you are only going to read some of the
+images in "toc", you can give their names to "Spchk" as command line
+arguments.
+
+	/dist/Spchk
+
+		or
+
+	/dist/Spchk upd man demos tcp           (for example)
+
+Spchk will report an approximate projected increase or decrease in disk
+usage.  If an increase is reported, make sure you have at least that
+many disk blocks available, hopefully with two or three hundred to
+spare.  Use "df" to find out how much space is available.  If you don't
+have enough space available, delete some files you don't need, and/or
+back some user files up onto tape and delete them, then run Spchk and
+df again.  Do not proceed until any increase shown by Spchk will fit in
+the available space shown by df.
+
+5) Read in the images with the "Read" command.  By default, all
+software from the tape will be read.  If you want to read specific
+images, you can name them as command line arguments (see "Spchk"
+example above).
+
+	/dist/Read
+
+If you prefer more feedback, use the "verbose" option, which will cause
+the file names to be printed as they are read in.
+
+	/dist/Read -v
+
+6) Use the "Install" command to perform various housekeeping functions
+once the software is read in.  You should run "Install" for each image
+that was read in by the "Read" command.  Again, by default, all images
+on the tape will be processed, but you can name specific images if you
+wish.
+
+	/dist/Install
+
+7) Check the configuration files listed during the installation; you
+may want to merge changes from the old or new "saved" versions of these
+files into the working version.
+
+8) Reboot the system.  The "Install" command may have asked you to run
+"Install -cleanup"; if so, bring the system up multi-user, log in as
+root, and type "/dist/Install -cleanup".
+
+7) Remove the distribution tools:
+
+	rm -rf /dist
+
+The new software is now fully installed.

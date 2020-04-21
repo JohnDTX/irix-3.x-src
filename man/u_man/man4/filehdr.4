@@ -1,0 +1,77 @@
+'\" t
+'\"macro stdmacro
+.TH FILEHDR 4 
+.SH NAME
+filehdr \- file header for common object files
+.SH SYNOPSIS
+.B #include <filehdr.h>
+.SH DESCRIPTION
+Every common object file begins with a 20-byte header.
+The following C
+.B struct
+declaration is used:
+.PP
+.if t .RS
+.ta \w'struct\ \ 'u +\w'unsigned'u +\w'\ short\ \ 'u +\w'f_symptr\ ;\ \ 'u
+.nf
+.lg 0
+struct	filehdr
+{
+	unsigned short	f_magic ;	/\(** magic number \(**/
+	unsigned short	f_nscns ;	/\(** number of sections \(**/
+	long		f_timdat ;	/\(** time & date stamp \(**/
+	long		f_symptr ;	/\(** file ptr to symtab \(**/
+	long		f_nsyms ;	/\(** # symtab entries \(**/
+	unsigned short	f_opthdr ;	/\(** sizeof(opt hdr) \(**/
+	unsigned short	f_flags ;	/\(** flags \(**/
+} ;
+.fi
+.lg
+.if t .RE
+.PP
+.I F_symptr
+is the byte offset into the file at which the symbol table
+can be found.
+Its value can be used as the offset in
+.IR fseek (3S)
+to position an I/O stream to the symbol table.
+The \s-1UNIX\s+1 System optional header is always 36 bytes.
+The valid magic numbers are given below:
+.if t .RS
+.PP
+.TS
+l1 l1p-1 l l.
+#define	N3BMAGIC	0550	/\(** 3B20S \(**/
+#define	NTVMAGIC	0551	/\(** 3B20S \(**/
+.sp 1v
+#define	VAXWRMAGIC	0570	/\(** \s-1VAX\s+1 writable text segments \(**/
+#define	VAXROMAGIC	0575	/\(** \s-1VAX\s+1 readonly sharable text segments \(**/
+.TE
+.if t .RE
+.PP
+The value in
+.I f_timdat
+is obtained from the
+.IR time (2)
+system call.
+Flag bits currently defined are:
+.PP
+.if t .RS
+.TS
+l1 l1p-1 l l.
+#define	F_RELFLG	00001	/\(** relocation entries stripped \(**/
+#define	F_EXEC	00002	/\(** file is executable \(**/
+#define	F_LNNO	00004	/\(** line numbers stripped \(**/
+#define	F_LSYMS	00010	/\(** local symbols stripped \(**/
+#define	F_MINMAL	00020	/\(** minimal object file \(**/
+#define	F_UPDATE	00040	/\(** update file, ogen produced \(**/
+#define	F_SWABD	00100	/\(** file is "pre-swabbed" \(**/
+#define	F_AR16WR	00200	/\(** 16 bit DEC host \(**/
+#define	F_AR32WR	00400	/\(** 32 bit DEC host \(**/
+#define	F_AR32W	01000	/\(** non-DEC host \(**/
+#define	F_PATCH	02000	/\(** "patch" list in opt hdr \(**/
+.TE
+.if t .RE
+.SH "SEE ALSO"
+time(2), fseek(3S), \*pa.out(4).
+.\"	@(#)filehdr.4	5.2 of 5/18/82

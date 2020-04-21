@@ -1,0 +1,150 @@
+'\"macro stdmacro
+.TH GETOPT 3C
+.SH NAME
+getopt \- get option letter from argument vector
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int getopt (argc, argv, optstring)
+.br
+.B int argc;
+.br
+.B char \(**\(**argv;
+.br
+.B char \(**optstring;
+.PP
+.B extern char \(**optarg;
+.br
+.B extern int optind;
+.br
+.SH DESCRIPTION
+.I Getopt\^
+returns the next option letter in
+.I argv\^
+that matches
+a letter in
+.IR optstring .
+.I Optstring\^
+is a string of recognized option letters;
+if a letter is followed by a colon, the option
+is expected to have an argument that may or
+may not be separated from it by white space.
+.I Optarg\^
+is set to point to the start of the option argument
+on return from
+.IR getopt .
+.PP
+.I Getopt\^
+places in
+.I optind\^
+the
+.I argv\^
+index of the next argument to be processed.
+Because
+.I optind\^
+is external, it is normally initialized to zero
+automatically before the first call to
+.IR getopt .
+.PP
+When all options have been processed
+(i.e., up to the first non-option argument),
+.I getopt\^
+returns
+.SM
+.BR EOF .
+The special option
+.B \-\^\-
+may be used to delimit the end of the options;
+.SM
+.B EOF
+will be returned, and
+.B \-\^\-
+will be skipped.
+.SH DIAGNOSTICS
+.I Getopt\^
+prints an error message on
+.I stderr\^
+and returns a
+question mark
+.RB ( ? )
+when it encounters an option letter not included in
+.IR optstring .
+.SH WARNING
+The above routine uses \f3<stdio.h>\fP, which causes 
+it to increase the size of programs,
+not otherwise using standard I/O, more
+than might be expected.
+.SH EXAMPLE
+The following code fragment shows how one might process the arguments
+for a command that can take the mutually exclusive options
+.B a
+and
+.BR b ,
+and the options
+.B f
+and
+.BR o ,
+both of which require arguments:
+.PP
+.RS \".3i
+.DT
+.nf
+.ss 18
+#include <stdio.h>
+
+main (argc, argv)
+int argc;
+char \(**\(**argv;
+{
+	int c;
+	extern int optind;
+	extern char \(**optarg;
+.sp -.5v
+	\&\f3.\fP
+.sp -.5v
+	\&\f3.\fP
+.sp -.5v
+	\&\f3.\fP
+	while ((c = getopt (argc, argv, "abf:o:")) != \s-1EOF\s+1)
+		switch (c) {
+		case 'a':
+			if (bflg)
+				errflg++;
+			else
+				aflg++;
+			break;
+		case 'b':
+			if (aflg)
+				errflg++;
+			else
+				bproc( );
+			break;
+		case 'f':
+			ifile = optarg;
+			break;
+		case 'o':
+			ofile = optarg;
+			bufsiza = 512;
+			break;
+		case '?':
+			errflg++;
+		}
+	if (errflg) {
+		fprintf (stderr, "usage: . . . ");
+		exit (2);
+	}
+	for ( ; optind < argc; optind++) {
+		if (access (argv[optind], 4)) {
+.sp -.5v
+	\&\f3.\fP
+.sp -.5v
+	\&\f3.\fP
+.sp -.5v
+	\&\f3.\fP
+}
+.ss 12
+.fi
+.RE
+.SH SEE ALSO
+getopt(1).
+.\"	@(#)getopt.3c	5.1 of 10/25/83

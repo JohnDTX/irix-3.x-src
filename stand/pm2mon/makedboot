@@ -1,0 +1,28 @@
+#! /bin/csh
+# makedboot booster image tgt
+# old proms could only boot at 0x1000.
+
+# get args
+set booster = $1; shift
+set image = $1; shift
+set tgt = $1; shift
+
+set tmp = /tmp/rl$$
+onintr remove
+
+cp $image $tmp; strip $tmp
+set junk = (`ls -l $tmp`)
+@ size = $junk[5]
+
+# concatenate stripped booster and image
+cp $booster $tgt; strip $tgt
+cat $tmp>>$tgt
+
+# adjust booster data size
+adb -w $tgt << EOF
+?m 0 1000 0
+0x8?W 0d$size
+EOF
+
+remove:
+	rm $tmp

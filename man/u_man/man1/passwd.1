@@ -1,0 +1,43 @@
+'\"macro stdmacro
+.TH PASSWD 1
+.SH NAME
+passwd \- change login password
+.SH SYNOPSIS
+\f3passwd\f1 [name]
+.SH DESCRIPTION
+This command changes (or installs) a password
+associated with the 
+login name.  The default \f2name\f1 is that of the user executing
+the command.
+.PP
+The program prompts for the old password 
+(if any) and then for the new one (twice).
+The caller must supply these.
+New passwords should be at least four characters long if they use
+a sufficiently rich alphabet and at least six characters long
+if monocase.
+Only the first eight characters of the password are significant.
+.PP
+Only the owner of the name or the super-user may change a password;
+the owner must prove he knows the old password.
+Only the super-user can create a null password.
+.PP
+The password file is not changed if the new password
+is the same as the old password, or if the password has not
+``aged'' sufficiently; see 
+.IR passwd\^ (4).
+.SH EXAMPLE
+.IP
+passwd
+.PP
+will give the response
+.IP
+Changing password for <\f2yourname\|\f1>
+.PP
+and will then prompt for your present password
+and for the new password (twice).
+.SH FILES
+/etc/passwd
+.SH "SEE ALSO"
+login(1), passwd(4)
+.\"	@(#)passwd.1	5.1 of 11/9/83

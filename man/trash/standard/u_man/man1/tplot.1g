@@ -1,0 +1,85 @@
+.TH TPLOT 1G
+.SH NAME
+tplot \- graphics filters
+.SH SYNOPSIS
+.B tplot
+[
+.BR \-T\| terminal
+[
+.BR \-e " raster"
+] ]
+.SH DESCRIPTION
+These commands read plotting instructions (see
+.IR plot\^ (4))
+from the standard input
+and in general
+produce, on the standard output, plotting instructions suitable for
+a particular
+.IR terminal .
+If no
+.I terminal\^
+is specified, the environment parameter
+.B
+.SM $TERM
+(see
+.IR environ\^ (5))
+is used.
+Known
+.IR terminal\| s
+are:
+.PP
+.PD 0
+.TP "\w'300S\ \ \ 'u"
+300
+.SM DASI
+300.
+.TP
+300S
+.SM DASI
+300s.
+.TP
+450
+.SM DASI
+450.
+.TP
+4014
+Tektronix 4014.
+.TP
+ver
+Versatec D1200A.
+This version of
+.I plot\^
+places a scan-converted
+image in
+.BR /usr/tmp/raster $$
+and sends the
+result directly to the plotter device, rather than to
+the standard output.
+The
+.B \-e
+option causes a previously
+scan-converted file
+.I raster\^
+to be sent to the plotter.
+.PD
+.SH EXAMPLE
+.IP
+tplot -T4014 graph.out
+.PP
+will use the encoded information in "graph.out" to plot
+a graph on a Tektronix 4014-type terminal.
+.SH FILES
+/usr/lib/t300
+.br
+/usr/lib/t300s
+.br
+/usr/lib/t450
+.br
+/usr/lib/t4014
+.br
+/usr/lib/vplot
+.br
+/usr/tmp/raster$$
+.SH SEE ALSO
+plot(3X), plot(4), term(5).
+.\"	@(#)tplot.1g	5.1 of 11/10/83

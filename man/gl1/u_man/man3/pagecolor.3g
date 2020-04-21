@@ -1,0 +1,22 @@
+.TH pagecolor 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2pagecolor\fP - set the color of the textport background
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pagecolor(c) "
+.B "Colorindex c;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pageco(c)"
+.B "integer*2 c"
+.sp
+.SH DESCRIPTION
+\f2Pagecolor\fP sets the textport background color.  
+.SH "SEE ALSO"
+.I color, pagewritemask, textcolor,
+.I textport, textwritemask, tpoff, tpon
+.SH NOTE
+This command can only be used in immediate mode.

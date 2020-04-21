@@ -1,0 +1,2 @@
+ld -s -T $1 -o t /lib/crtstand.o t.o /usr/lib/libstand.a -lc
+/Sys3bin/makeboot -l $1 t t$1

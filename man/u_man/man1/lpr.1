@@ -1,0 +1,73 @@
+'\"macro stdmacro
+.TH LPR 1
+.SH NAME
+lpr \- line printer spooler
+.SH SYNOPSIS
+.B lpr
+[ option ... ] [ name ... ]
+.SH DESCRIPTION
+.I Lpr\^
+causes the named files to be queued for printing
+on a line printer.
+If no names appear, the standard input is assumed;
+thus
+.I lpr\^
+may be used as a filter.
+.PP
+The following \f2options\^\fP may be given (each as a separate argument
+and in any order)
+before any file name arguments:
+.PP
+.PD 0
+.TP "\w'\f3\-f\^\f2file\f1\ \ 'u"
+.B \-c
+Makes a copy of the file to be sent before returning to the user.
+.TP
+.B \-r
+Removes the file after sending it.
+.TP
+.B \-m
+When printing is complete, reports that fact by
+.IR mail\^ (1).
+.TP
+.B \-n
+Does not report the completion of printing by
+.IR mail\^ (1).
+This is the default option.
+.TP
+.BI \-f\^ file
+Use
+.I file\^
+as a dummy file name to report back in the mail.
+(This is useful for distinguishing multiple runs, especially when
+.I lpr\^
+is being used as a filter).
+.PD
+.PP
+Please note that the directory
+.B /usr/spool/lpd
+must be owned by daemon and have mode 0755;
+.B /bin/lpr
+must have mode 4755; and
+.B /dev/lp
+must be owned by daemon and have mode 600.
+.SH EXAMPLE
+.IP
+cat asa | lpr
+.PP
+will print the file "asa" on the line printer.
+.SH FILES
+.PD 0
+.TP "\w'/usr/spool/lpd/\(**\ \ \ 'u"
+/etc/passwd
+user's identification and accounting data.
+.TP
+/usr/lib/lpd
+line printer daemon.
+.TP
+/usr/spool/lpd/\(**
+spool area.
+.PD
+.SH SEE ALSO
+lp(1).
+.\"	@(#)lpr.1	5.1 of 11/8/83

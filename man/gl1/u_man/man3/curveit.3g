@@ -1,0 +1,27 @@
+.TH curveit 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I curveit
+- draw a curve
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curveit(iterationcount)"
+.B "short iterationcount;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curvei(count)"
+.B "integer*2 count"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curveit(iterationcount: Short);"
+.sp
+.SH DESCRIPTION
+.I Curveit
+iterates the forward differences of the matrix on top of the transformation
+matrix stack \f3iterationcount\f1 times.  Section 3.7 in the \f2IRIS
+Graphics Library\f1 describes the forward difference algorithm.
+.SH "SEE ALSO"
+.I curve, resetls

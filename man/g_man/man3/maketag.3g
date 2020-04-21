@@ -1,0 +1,41 @@
+.TH maketag 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B maketag
+\- numbers a routine in the display list
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "maketag(t) "
+.B "Tag t;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine maketa(t)"
+.B "integer*4 t"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure maketag(t: Tag);"
+.SH DESCRIPTION
+Use 
+.B maketag 
+to explicitly number routines within an object.
+To do this, specify a 31-bit number (\f2t\fP)
+with
+\f3maketag\fP.
+The system assigns this number to the next routine
+in the display list. 
+A tag 
+is specific only to the object in which you use
+it.  
+Consequently, you can use the same 31-bit number
+in different objects without confusion.
+.SH "SEE ALSO"
+gentag, istag
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing

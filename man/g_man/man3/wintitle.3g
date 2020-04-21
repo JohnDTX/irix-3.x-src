@@ -1,0 +1,51 @@
+.TH wintitle 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B wintitle
+\- adds a title bar to the current graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "wintitle(name)"
+.B "char name[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine wintit(name, length)"
+.B "character*(*) name"
+.B "integer*4 length
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure wintitle(name: pstring128);"
+.SH DESCRIPTION
+.B wintitle
+adds a title bar to the current graphics window. The title bar is drawn
+using color 
+\f2menu\f1
+and 
+\f2menuback\f1, 
+the default that the 
+configuration file  
+.I ".mexrc" 
+assigns. 
+You can override these defaults  by defining a modified
+.I ".mexrc"
+in your home directory.
+.sp
+.B wintitle("")
+removes the title bar.
+.sp
+In FORTRAN, there is an extra argument,
+.I length,
+which is the number of characters in the name string.
+.SH "SEE ALSO"
+pupcolor
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode under the window manager. 
+

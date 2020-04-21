@@ -1,0 +1,23 @@
+#! /bin/sh
+#
+# Make the configuration files for all the various products
+
+TYPES="xns tcp nfs mix"
+PRODS="1000 2000 3000"
+
+# make the (more or less) standard configuration files
+devs=
+for product in $PRODS
+do
+	devs="$devs proto_dv$product"
+	for type in $TYPES;
+	do
+		cat proto_$product $devs proto_$type > $product.$type
+	done
+done
+
+# generate debugging configurations
+for product in $PRODS
+do
+	cat $product.nfs proto_dbg > $product.dbg
+done

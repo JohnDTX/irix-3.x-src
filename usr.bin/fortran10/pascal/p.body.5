@@ -1,0 +1,624 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.BODY.5.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               26-Aug-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+    procedure assignment(fpn: pn; var fstmt: pstmt);
+      var lattr: attr; PckdFlag,PckdStorage: Boolean; lstmt: pstmt;
+          lo,hi,lsize: longint; op,subop,subop2: integer;
+    begin
+    new(lstmt,ASSIGNST); fstmt := lstmt; op := 0; subop := 0; subop2 := 0;
+    with lstmt^ do begin
+      nextstmt := nil; stmtop := ASSIGNST; assexpr := nil;
+      stmtno := stmtnumb; LeftHandSide := TRUE;
+      selector(fsys + [ASSIGNSY],fpn,PckdFlag,PckdStorage);
+      LeftHandSide := FALSE;
+      assvar := gattr.treeptr;
+      end;
+    if token = ASSIGNSY
+    then begin
+      lattr := gattr; scan; expression(fsys);
+      if (gattr.typtr <> nil) and (lattr.typtr <> nil)
+      then begin
+        fixfltass(gattr,lattr.typtr);
+        if FltCheck
+        then
+          if (lattr.typtr = doubleptr) or (lattr.typtr = realptr)
+          then begin
+            gattr.treeptr := newbinnode(46{RNGCHK},nil,gattr.treeptr);
+            gattr.treeptr^.binsubop := 3 + ord(lattr.typtr = doubleptr);
+            end;
+        if StringAss(lattr.typtr,gattr) or CompTypes(lattr.typtr,gattr.typtr)
+        then begin
+          if lattr.typtr^.Ftype then error(141);
+          if RangeFlag
+          then
+            if lattr.typtr^.form = SUBRANGE
+            then
+              if (lattr.typtr <> sintptr) and (lattr.typtr <> intptr)
+              then begin
+                getbounds(lattr.typtr,lo,hi);
+                if gattr.treeptr^.node = CSTNODE
+                then begin
+                  if (gattr.treeptr^.cstvalu.ivalu < lo) or
+                     (gattr.treeptr^.cstvalu.ivalu > hi)
+                  then error(169);
+                  end
+                else begin
+                  if lattr.asize > 2 then makescsize(gattr,4);
+                  if gattr.asize <= 2
+                  then begin makescsize(gattr,2); subop := 1; end
+                  else subop := 2;
+                  gattr.treeptr :=
+                       newbinnode(46{RCHECK},nil,gattr.treeptr);
+                  gattr.treeptr^.leftpt := lattr.typtr;
+                  gattr.treeptr^.binsubop := subop;
+                  end;
+                end;
+          if (lattr.typtr^.form <= SUBRANGE) and
+             (lattr.typtr <> realptr) and (lattr.typtr <> doubleptr)
+          then
+            if lattr.asize <> gattr.asize
+            then makescsize(gattr,lattr.asize);
+          if lattr.typtr^.form = SETS
+          then begin
+            op := 37; subop := lattr.asize;
+            if gattr.asize <> lattr.asize
+            then makesetsize(gattr,lattr.asize);
+            end
+          else
+            if lattr.typtr^.form = STRINGS
+            then begin
+              op := 39; subop := lattr.typtr^.stringlen;
+              if gattr.typtr^.form = SCONST
+              then subop := gattr.typtr^.stringlen;
+              end
+            else begin
+              lsize := fullbytes(lattr.typtr);
+              if Paoc(lattr.typtr) and (lsize <= 255)
+              then begin
+                getbounds(lattr.typtr^.indexedby,lo,hi);
+                op := 40; subop := hi;
+                end
+              else
+                if PckdStorage
+                then begin
+                  op := 38{PCKDASS};
+                  if lattr.treeptr <> nil
+                  then
+                    if (CHIP = M68000) or (CHIP = M68020)
+                    then begin
+                      if lattr.treeptr^.node = TRINODE { --> Packed Array }
+                      then makescsize(gattr,1);
+                      end
+                    else begin
+                      if lattr.treeptr^.node = INDEXNODE { --> Packed Array }
+                      then makescsize(gattr,1);
+                      end;
+                  end
+                else
+                  if lattr.typtr = doubleptr
+                  then op := 35
+                  else
+                    if lsize <= 4
+                    then if lattr.asize = 1
+                         then op := 32
+                         else op := 33 + ord(lattr.asize > 2)
+                    else begin
+                      op := 36; subop := lsize;
+                      if lsize > 32766
+                      then subop2 := lsize div 65536;
+                      end;
+              end;
+          end
+        else error(144);
+        end;
+      with lstmt^ do begin
+        assexpr := gattr.treeptr; assop := op;
+        asssubop := subop; assbop2 := subop2;
+        end;
+      end
+    else error(40);
+    end; {assignment}
+    
+    procedure compoundstatement(var fstmt: pstmt);
+      var lstmt,laststmt: pstmt; lstmtno: integer;
+    begin
+    CountAhead := TRUE; lstmtno := stmtnumb;
+    repeat
+      statement(fsys + [SEMISY,ENDSY],laststmt); fstmt := laststmt;
+      if token in statbegsys then error(36);
+    until not (token in statbegsys);
+    while token = SEMISY do
+      begin
+      scan;
+      repeat
+        statement(fsys + [SEMISY,ENDSY],lstmt);
+        if laststmt = nil
+        then begin laststmt := lstmt; fstmt := lstmt end
+        else
+          if lstmt <> nil
+          then begin laststmt^.nextstmt := lstmt; laststmt := lstmt; end;
+        if token in statbegsys then error(36);
+      until not (token in statbegsys);
+      end;
+    if token = ENDSY then scan else error(44);
+    new(lstmt,BEGINST);
+    with lstmt^ do begin
+      nextstmt := nil; stmtop := BEGINST; stmtno := lstmtno; subst := fstmt;
+      end;
+    fstmt := lstmt;
+    if stmtnumb = lstmtno then CountAhead := FALSE;
+    end; {compoundstatement}
+  
+    procedure casestatement(var fstmt: pstmt);
+      label 1;
+      var ExitFlag,Exit2Flag: Boolean; lvalu: valu; casetype,constype: pt;
+          casestmt,lastcstmt,thiscstmt,lstmt: pstmt; 
+          thiscons,lastcons: plnglist; oldstno: integer;
+    begin
+    new(casestmt,CASEST); fstmt := casestmt; lastcstmt := nil;
+    with casestmt^ do begin
+      nextstmt := nil; stmtop := CASEST; stmtno := stmtnumb;
+      cstmtlist := nil; otherstmt := nil;
+      expression(fsys + [OFSY,COMMASY,COLONSY]);
+      casetype := gattr.typtr;
+      if gattr.asize < 2 then makescsize(gattr,2);
+      caseexpr := gattr.treeptr; cexpsize := gattr.asize;
+      end;
+    if casetype <> nil
+    then 
+      if (casetype^.form > SUBRANGE) or (casetype = realptr) or
+         (casetype = doubleptr)
+      then begin error(166); casetype := nil; end;
+    if token = OFSY then scan else error(42);
+    ExitFlag := FALSE;
+    repeat
+      if (token <> SEMISY) and (token <> ENDSY) and (token <> OTHERSY)
+      then begin
+        Exit2Flag := FALSE; lastcons := nil;
+        bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+        repeat
+          constant(fsys + [COMMASY,COLONSY],lvalu,constype);
+          if constype <> nil
+          then
+            if CompTypes(casetype,constype)
+            then begin
+              lstmt := casestmt^.cstmtlist;
+              while lstmt <> nil do begin
+                thiscons := lstmt^.casevals;
+                while thiscons <> nil do
+                  if thiscons^.lngval = lvalu.ivalu
+                  then begin error(150); goto 1; end
+                  else thiscons := thiscons^.nextlng;
+                lstmt := lstmt^.nextstmt;
+                end;
+              new(thiscons);
+              thiscons^.nextlng := nil; thiscons^.lngval := lvalu.ivalu;
+              if lastcons = nil
+              then begin
+                new(thiscstmt,CSTMTST);
+                with thiscstmt^ do begin
+                  nextstmt := nil; stmtop := CSTMTST; stmtno := oldstno;
+                  casevals := thiscons; thiscase := nil;
+                  end;
+                if lastcstmt = nil 
+                then casestmt^.cstmtlist := thiscstmt
+                else lastcstmt^.nextstmt := thiscstmt;
+                lastcstmt := thiscstmt;
+                end
+              else lastcons^.nextlng := thiscons;
+              lastcons := thiscons;
+              end
+            else error(142);
+      1:  if token = COMMASY then scan else Exit2Flag := TRUE;
+        until Exit2Flag;
+        if token = COLONSY then scan else error(35);
+        repeat
+          statement(fsys + [SEMISY],lstmt);
+          if lastcstmt <> nil then lastcstmt^.thiscase := lstmt;
+          if token in statbegsys then error(36);
+        until not (token in statbegsys);
+        if stmtnumb = oldstno then CountAhead := FALSE;
+        end;
+      if token = SEMISY then scan else ExitFlag := TRUE;
+    until ExitFlag;
+    if token = OTHERSY
+    then begin
+      bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+      scan;
+      if token = COLONSY then scan else error(35);
+      statement(fsys + [SEMISY,ENDSY],lstmt);
+      casestmt^.otherstmt := lstmt;
+      if stmtnumb = oldstno then CountAhead := FALSE;
+      if token = SEMISY then scan;
+      end;
+    if token = ENDSY then scan else error(44);
+    end; {casestatement}
+    
+    procedure forstatement(var fstmt:pstmt);
+      var forn: pn; fort: pt; lstmt: pstmt; lforsize,oldstno: integer;
+    begin
+    fort := nil;
+    new(fstmt,FORTOST);
+    with fstmt^ do begin
+      nextstmt := nil; stmtop := FORTOST; stmtno := stmtnumb; forvar := nil; 
+      forinit := nil; forlimit := nil; lforsize := 2;
+      if token = IDENTSY
+      then begin
+        forn := searchall([VARS]); forvar := forn;
+        fort := forn^.idtype; lforsize := fullbytes(fort);
+        if fort <> nil
+        then
+          if (fort^.form > SUBRANGE) or (fort = realptr) or (fort = doubleptr)
+          then begin error(139); fort := nil; end
+          else
+            if (forn^.vlev <> level) or (forn^.vkind <> DRCT)
+            then error(172)
+            else forn^.refcount := forn^.refcount + 3;
+        scan;
+        end
+      else skip(29,fsys + [ASSIGNSY,TOSY,DOWNTOSY,DOSY]);
+      if token = ASSIGNSY
+      then begin
+        scan;
+        expression(fsys + [TOSY,DOWNTOSY,DOSY]);
+        makescsize(gattr,lforsize); forinit := gattr.treeptr;
+        if gattr.typtr <> nil
+        then
+          if not CompTypes(fort,gattr.typtr)
+          then error(140);
+        end
+      else skip(40,fsys + [TOSY,DOWNTOSY,DOSY]);
+      if (token = TOSY) or (token = DOWNTOSY)
+      then begin
+        if token = DOWNTOSY then stmtop := FORDOWNST;
+        scan;
+        expression(fsys + [DOSY]); makescsize(gattr,lforsize);
+        forlimit := gattr.treeptr;
+        if gattr.typtr <> nil
+        then
+          if not CompTypes(fort,gattr.typtr)
+          then error(140);
+        end
+      else skip(48,fsys + [DOSY]);
+      bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+      if token = DOSY then scan else error(47);
+      statement(fsys,lstmt);
+      if stmtnumb = oldstno then CountAhead := FALSE;
+      if lstmt = nil
+      then begin
+        new(lstmt,BEGINST);
+        with lstmt^ do begin
+          nextstmt := nil; stmtop := BEGINST; stmtno := stmtnumb; subst := nil;
+          end;
+        end;
+      forst := lstmt; forsize := lforsize;
+      end;
+    end; {forstatement}
+    
+    procedure gotostatement(var fstmt: pstmt);
+      label 1;
+      var llevel: levrange; lab: plabrec; lstmt: pstmt;
+    begin
+    new(lstmt,GOTOST); fstmt := lstmt;
+    with lstmt^ do begin
+      nextstmt := nil; stmtop := GOTOST; stmtno := stmtnumb;
+      lablev := level; gotolab := nil;
+      end;
+    if token = ICONSTSY
+    then begin
+      for llevel := level downto 1 do begin
+        lab := display[llevel].labels;
+        while lab <> nil do
+          if lab^.labelno = intval
+          then goto 1
+          else lab := lab^.nextlabel;
+        end;
+      error(158);
+      1: scan;
+      lstmt^.lablev := llevel; lstmt^.gotolab := lab;
+      end
+    else error(30);
+    end; {gotostatement}
+    
+    procedure ifstatement(var fstmt: pstmt);
+      var lstmt: pstmt; oldstno: integer;
+    begin
+    new(fstmt,IFST);
+    with fstmt^ do begin
+      nextstmt := nil; stmtop := IFST; stmtno := stmtnumb;
+      expression(fsys + [THENSY]); ifexpr := gattr.treeptr;
+      if not CompTypes(gattr.typtr,boolptr) then error(132);
+      bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+      if token = THENSY then scan else error(45);
+      statement(fsys + [ELSESY],lstmt); thenst := lstmt;
+      if oldstno = stmtnumb then CountAhead := FALSE;
+      if token = ELSESY
+      then begin
+        bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+        scan;
+        statement(fsys,lstmt); elsest := lstmt;
+        if oldstno = stmtnumb then CountAhead := FALSE;
+        end
+      else elsest := nil;
+      end;
+    end; {ifstatement}
+    
+    procedure repeatstatement(var fstmt: pstmt);
+      var lstmt, laststmt: pstmt;
+    begin
+    new(fstmt,REPST);
+    with fstmt^ do begin
+      nextstmt := nil; stmtop := REPST; stmtno := stmtnumb; condexpr := nil;
+      repeat
+        statement(fsys + [UNTILSY,SEMISY],lstmt);
+        loopstmt := lstmt; laststmt := lstmt;
+        if token in statbegsys then error(36);
+      until not (token in statbegsys);
+      while token = SEMISY do
+        begin
+        scan;
+        repeat
+          statement(fsys + [UNTILSY,SEMISY],lstmt);
+          if laststmt = nil
+          then begin laststmt := lstmt; loopstmt := lstmt end
+          else
+            if lstmt <> nil
+            then begin laststmt^.nextstmt := lstmt; laststmt := lstmt; end;
+          if token in statbegsys then error(36);
+        until not (token in statbegsys);
+        end;
+      if token = UNTILSY
+      then begin
+        scan;
+        expression(fsys); condexpr := gattr.treeptr;
+        if not CompTypes(gattr.typtr,boolptr) then error(132);
+        end
+      else error(46);
+      end;
+    end; {repeatstatement}
+    
+    procedure whilestatement(var fstmt: pstmt);
+      var lstmt: pstmt; oldstno: integer;
+    begin
+    new(fstmt,WHILEST);
+    with fstmt^ do begin
+      nextstmt := nil; stmtop := WHILEST; stmtno := stmtnumb;
+      expression(fsys + [DOSY]); condexpr := gattr.treeptr;
+      if not CompTypes(gattr.typtr,boolptr) then error(132);
+      bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+      if token = DOSY then scan else error(47);
+      statement(fsys,lstmt);
+      if lstmt = nil
+      then begin
+        new(lstmt,BEGINST);
+        with lstmt^ do begin
+          nextstmt := nil; stmtop := BEGINST; stmtno := stmtnumb; subst := nil;
+          end;
+        end;
+      loopstmt := lstmt;
+      if oldstno = stmtnumb then CountAhead := FALSE;
+      end;
+    end; {whilestatement}
+    
+    procedure withstatement(var fstmt: pstmt);
+      var PckdFlag,ExitFlag,PckdStorage,InAReg: Boolean; oldtop: disprange;
+          lpn: pn; lstmt,laststmt: pstmt; oldnwreg,i,oldstno: integer;
+    begin
+    laststmt := nil; ExitFlag := FALSE;
+    oldtop := top; oldnwreg := nextwreg;
+    repeat
+      PckdFlag := FALSE;
+      if token = IDENTSY
+      then begin
+        lpn := searchall([VARS,FIELD]); scan;
+        end
+      else begin error(29); lpn := UVARPTR; end;
+      selector(fsys + [COMMASY,DOSY],lpn,PckdFlag,PckdStorage);
+      new(lstmt,WITHST);
+      with lstmt^ do begin
+        nextstmt := nil; stmtop := WITHST; stmtno := stmtnumb;
+        withvar := gattr.treeptr; withbody := nil;
+        end;
+      InAReg := TRUE;
+      if gattr.treeptr <> nil
+      then
+        with gattr.treeptr^ do
+          if node = IDENTNODE
+          then
+            if class = VARS
+            then
+              if vkind = DRCT
+              then
+                if (vlev = 1) or (vlev = level)
+                then InAReg := FALSE;
+      if laststmt = nil then fstmt := lstmt else laststmt^.withbody := lstmt;
+      laststmt := lstmt;
+      if gattr.typtr <> nil
+      then
+        with gattr.typtr^ do
+          if form = RECORDS
+          then
+            if top < MAXDISPLAY
+            then begin
+              top := top + 1;
+              with display[top] do begin
+                nametree := fields; occur := REC; RecPckd := PckdRec;
+                withcount := 0;
+                if InAReg
+                then begin withreg := nextwreg; nextwreg := nextwreg + 1; end
+                else withreg := 0;
+                end;
+              end
+            else error(300)
+          else error(137);
+      if token = COMMASY then scan else ExitFlag := TRUE;
+    until ExitFlag;
+    bumpstno; CountAhead := TRUE; oldstno := stmtnumb;
+    if token = DOSY then scan else error(47);
+    statement(fsys,lstmt);
+    if lstmt = nil
+    then begin
+      new(lstmt,BEGINST);
+      with lstmt^ do begin
+        nextstmt := nil; stmtop := BEGINST; stmtno := stmtnumb; subst := nil;
+        end;
+      end;
+    laststmt^.withbody := lstmt;
+    if oldstno = stmtnumb then CountAhead := FALSE;
+    for i := top downto oldtop + 1 do
+      with display[top] do
+        if (withreg > 0) and (withreg <= 15)
+        then acount[withreg] := acount[withreg] + withcount;
+    top := oldtop; nextwreg := oldnwreg;
+    end; {withstatement}
+    
+  begin {statement}
+  fstmt := nil; lstmt := nil;
+  if token = ICONSTSY
+  then begin
+    if intval > 9999 then error(178);
+    lab := display[level].labels;
+    while lab <> nil do
+      if lab^.labelno = intval
+      then begin
+        if lab^.Defined
+        then error(155)
+        else lab^.Defined := TRUE;
+        goto 1;
+        end
+      else lab := lab^.nextlabel;
+    error(158);
+    1: new(fstmt,LABEDST);
+    with fstmt^ do begin
+      nextstmt := nil; stmtop := LABEDST; stmtno := stmtnumb;
+      stlab := lab; labstmt := nil;
+      end;
+    scan;
+    if token = COLONSY then scan else error(35);
+    end;
+  if not (token in fsys + [IDENTSY])
+  then skip(20,fsys);
+  if token in statbegsys + [IDENTSY]
+  then begin
+    bumpstno;
+    case token of
+      IDENTSY:  begin
+                lpn := searchall([VARS,FIELD,PROC,FUNC]);
+                scan;
+                case lpn^.class of
+                  VARS,
+                  FIELD,
+                  FUNC:  assignment(lpn,lstmt);
+                  PROC:  begin
+                         call(fsys,lpn);
+                         new(lstmt,CALLST);
+                         with lstmt^ do begin
+                           nextstmt := nil; stmtop := CALLST;
+                           stmtno := stmtnumb;
+                           procpn := lpn; parglist := gattr.treeptr;
+                           end;
+                         end;
+                end; {case}
+                end;
+      BEGINSY:  begin scan; compoundstatement(lstmt); end;
+      CASESY:   begin scan; casestatement(lstmt); end;
+      FORSY:    begin scan; forstatement(lstmt); end;
+      GOTOSY:   begin scan; gotostatement(lstmt); end;
+      IFSY:     begin scan; ifstatement(lstmt); end;
+      REPEATSY: begin scan; repeatstatement(lstmt); end;
+      WHILESY:  begin scan; whilestatement(lstmt); end;
+      WITHSY:   begin scan; withstatement(lstmt); end;
+    end;
+    if not (token in fsys)
+    then skip(20,fsys);
+    end;
+  if fstmt = nil then fstmt := lstmt else fstmt^.labstmt := lstmt;
+  end; {statement}
+  
+  procedure zerocnts(fpn: pn);
+  begin
+  if fpn <> nil
+  then
+    with fpn^ do begin
+      InReg := FALSE; refcount := 0;
+      zerocnts(llink); zerocnts(rlink);
+      end;
+  end; {zerocnts}
+  
+begin {body}
+for i := 1 to 15 do acount[i] := 0;
+for i := 2 to level do begin uplevref[i] := 0; uplevloc[i] := 0; end;
+for i := 1 to level do zerocnts(display[i].nametree);
+nextwreg := 1;
+if not (ListFlag or QuietFlag)
+then begin
+     makidstr(lstr,pfname);
+     write(' ':(level-1)*3+1,lstr);
+     if (HOSTOS <> UNISOFT) and
+        (HOSTOS <> UNOS) and
+        (HOSTOS <> REGULUS) and
+        (HOSTOS <> ELITE) and
+        (HOSTOS <> GENIX) and
+        (HOSTOS <> TEK)
+     then write(' ':9-length(lstr),'[',memavail:5,' bytes]');
+     writeln;
+     end;
+CountAhead := FALSE; bumpstno; CountAhead := TRUE;
+repeat
+  statement(fsys + [SEMISY,ENDSY],laststmt); bodystmt := laststmt;
+  if token in statbegsys
+  then error(36);
+until not (token in statbegsys);
+while token = SEMISY do
+  begin
+  scan;
+  repeat
+    statement(fsys + [SEMISY,ENDSY],lstmt);
+    if laststmt = nil
+    then begin laststmt := lstmt; bodystmt := lstmt end
+    else
+      if lstmt <> nil
+      then begin laststmt^.nextstmt := lstmt; laststmt := lstmt; end;
+    if token in statbegsys
+    then error(36);
+  until not (token in statbegsys);
+  end;
+if token = ENDSY then scan else error(44);
+
+(****
+{ Define the hidden EXIT label }
+
+new(lstmt,LABEDST);
+with lstmt^ do begin
+  nextstmt := nil; stmtop := LABEDST; stmtno := stmtnumb;
+  stlab := display[level].exitlabel; labstmt := nil;
+  end;
+if bodystmt = nil then bodystmt := lstmt else laststmt^.nextstmt := lstmt;
+****)
+
+lab := display[level].labels;
+while lab <> nil do
+  begin if not lab^.Defined then error(157); lab := lab^.nextlabel; end;
+if not (ListFlag or QuietFlag)
+then begin
+     if (HOSTOS <> UNISOFT) and
+        (HOSTOS <> UNOS) and
+        (HOSTOS <> REGULUS) and
+        (HOSTOS <> ELITE) and
+        (HOSTOS <> GENIX) and
+        (HOSTOS <> TEK)
+     then writeln(' ':(level-1)*3+10,'{',memavail:5,' bytes}');
+     end;
+stmtnumb := 0;
+end; {body}
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                         

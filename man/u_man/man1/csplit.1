@@ -1,0 +1,196 @@
+'\"macro stdmacro
+.TH CSPLIT 1
+.bd S B 3
+.SH NAME
+csplit \- context split
+.SH SYNOPSIS
+.B csplit
+.B \-s 
+] [
+.B \-k
+] [
+.B \-f
+prefix ]
+file arg1 [ \s+3.\|.\|.\s0 argn ]
+.SH DESCRIPTION
+.I Csplit\^
+reads
+.I file\^
+and separates it into n+1 sections,
+defined by the arguments
+.IR arg1 "\s+3.\|.\|.\s0"
+.IR argn .
+By default the sections are placed in
+xx00 \s+3.\|.\|.\s0
+.RI xx n\^
+.RI ( n\^
+may not be greater than 99).
+These sections get the following pieces of
+.IR file :
+.RS .3i
+.TP \w'n+1:\ \ 'u
+00:
+From the start of
+.I file\^
+up to (but not including) the line referenced by
+.IR arg1 .
+.PD 0
+.TP
+01:
+From the line referenced by
+.I arg1\^
+up to the line referenced by
+.IR arg2 .
+.sp -.5v
+.IP "" \w'n+1:\ \ 'u
+.B "."
+.sp -.5v
+.B "."
+.sp -.5v
+.B "."
+.TP \w'n+1:\ \ 'u
+n+1:
+From the line referenced by
+.I argn\^
+to the end of
+.IR file .
+.PD
+.RE
+.PP
+The options to
+.I csplit\^
+are:
+.RS .3i
+.TP "\w'\f3\-f \f2prefix\fP\ \ 'u"
+.B \-s
+.I Csplit\^
+normally prints the character counts for each file created.
+If the 
+.B \-s
+option is present,
+.I csplit\^
+suppresses the printing of all character counts.
+.TP
+.B \-k
+.I Csplit\^
+normally removes created files if an error occurs.
+If the
+.B \-k
+option is present,
+.I csplit\^
+leaves previously created files intact.
+.TP
+.BI \-f \ prefix
+If the
+.B \-f
+option is used, the created files are named
+.IB prefix 00
+\&\s+3.\|.\|.\s0\&
+.IR prefixn .
+The default is \f3xx00\fP \s+3.\|.\|.\s0
+.BI xx n\f1.\fP
+.RE
+.PP
+The arguments
+.RI ( arg1 " \s+3.\|.\|.\s-3"
+.IR argn\^ )
+to
+.I csplit\^
+can be a combination of the following:
+.RS .3i
+.TP \w'%\f2rexp\f1%\ \ 'u
+.RI / rexp /
+A file is to be created for the section from the current line
+up to (but not including) the line containing the regular expression
+.IR rexp .
+The current line becomes the line containing
+.IR rexp .
+This argument may be followed by an optional
+.BR + " or"
+.B \-
+some number of lines
+(e.g., \f3/Page/\-5\fP).
+.TP
+.RI % rexp %
+This argument is the same as
+.RI / rexp /,
+except that no file is created for the section.
+.TP
+.I lnno\^
+A file is to be created from the current line up to (but not including)
+.IR lnno .
+The current line becomes
+.IR lnno .
+.TP
+.RI { num }
+Repeat argument.
+This argument may follow any of the above arguments.
+If it follows a
+.I rexp\^
+type argument, that argument is applied
+.I num\^
+more times.
+If it follows
+.IR lnno ,
+the file will be split every
+.I lnno\^
+lines
+.RI ( num\^
+times)
+from that point.
+.RE
+.PP
+Enclose all
+.I rexp\^
+type arguments that contain blanks or other characters meaningful to
+the Shell in the appropriate quotes.
+Regular expressions may not contain embedded new-lines.
+.I Csplit\^
+does not affect the original file;
+it is the users responsibility to remove it.
+.SH EXAMPLE
+.IP
+csplit \-f cobol file\ \ '/procedure division/'\ \ /par5./\ \ /par16./
+.PP
+creates four files, "cobol00 \s+3.\|.\|.\s0 cobol03".
+After editing the 
+.I  split\^
+files, they can be recombined as follows:
+.IP
+cat cobol0[0\-3] > file
+.PP
+Note that this example overwrites the original file.
+.IP
+csplit \-k file\ \ 100\ \ {99}
+.PP
+splits the file at every 100 lines, up to
+10,000 lines.
+The
+.B \-k
+option causes the created files to be retained if there
+are less than 10,000 lines; however, an error message would
+still be printed.
+.IP
+csplit \-k prog.c\ \ '%main(%'\ \ '/\^^}/+1'\ \ {20}
+.PP
+assuming that "prog.c"
+follows the normal
+.B C
+coding convention of
+ending routines with a
+.B }
+at the beginning of the line,
+this example will create a file containing each separate
+.B C
+routine (up to 21) in
+"prog.c".
+.SH SEE ALSO
+ed(1), sh(1), regexp(5).
+.SH DIAGNOSTICS
+Self explanatory except for:
+.RS
+arg \- out of range
+.RE
+which means that the given argument did not reference a line
+between the current position and the end of the file.
+.\"	@(#)csplit.1	5.1 of 10/27/83

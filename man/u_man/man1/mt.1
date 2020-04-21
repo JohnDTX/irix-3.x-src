@@ -1,0 +1,112 @@
+'\"macro stdmacro
+.TH MT 1
+.SH NAME
+mt \- magnetic tape manipulating program
+.SH SYNOPSIS
+.B mt
+[
+.B \-t
+.BR /dev/ tapedevice
+]
+command
+[ count ]
+.SH DESCRIPTION
+.I mt\^
+is used to give commands to the magnetic tape drives.
+By default,
+.I mt
+performs the requested operation with the Quarter Inch Cartridge
+tape drive. Normally the operations are performed once.
+Operations may be performed multiple times by specifying
+.IR count .
+.PP
+To use the Half Inch tape drive the
+.B \-t
+.BR /dev/ tapedevice
+is used to specify which tape device to use.
+.PP
+The default tape device uses the no-rewind device.
+No filemark is written to the no-rewind device on close.
+.PP
+The available commands are listed below.  Only as many
+characters as are required to uniquely identify a command
+need be specified.
+.RS
+.TP
+.B eof
+Write 
+.I count
+end-of-file marks at the current position on the tape.
+.TP
+.B fsf
+Forward space
+.I count
+files.
+.TP
+.B fsr
+Forward space 
+.I count
+records. This operation will have little real effect with the
+Quarter Inch Cartridge tape drive.
+.TP
+.B bsf
+Backspace
+.I count
+files. This operation will have no effect with the
+Quarter Inch Cartridge tape drive.
+.TP
+.B bsr
+Backspace 
+.I count
+records. This operation will have no effect with the
+Quarter Inch Cartridge tape drive.
+.TP
+.B rewind
+Rewind the tape
+.RI ( Count
+is ignored.)
+.TP
+.B status
+Print status information about the tape unit.
+.RI ( Count
+is ignored.)
+.TP
+.B blksize
+Print the default block size to be used by tar.
+.TP
+.B retension
+Retension the Quarter Inch Cartridge installed in the drive.
+This does not effect the Half Inch tape drive.
+.RI ( Count
+is ignored.)
+.TP
+.B erase
+Erase the Quarter Inch Cartridge installed in the drive.
+This does not effect the Half Inch tape drive.
+.RI ( Count
+is ignored.)
+.TP
+.B help
+Print command usage information about the command.
+.RI ( Count
+is ignored.)
+.RE
+.PP
+.I mt\^
+returns a 0 exit status when the operations were successful,
+a 1 if a command was unrecognized,
+and a 2 if a operation failed.
+.I mt\^
+without any arguments defaults to
+.BR help .
+.SH FILES
+.br
+/dev/rmt1	Raw magnetic Quarter Inch Cartridge Tape drive
+.br
+/dev/rmt2	No rewind Quarter Inch Cartridge Tape drive
+.br
+/dev/rmt3	Raw magnetic Half Inch tape drive
+.br
+/dev/rmt4	No-rewind Half Inch tape drive
+.SH "SEE ALSO"
+mtio(7)

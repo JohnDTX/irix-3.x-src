@@ -1,0 +1,100 @@
+'\"macro stdmacro
+.\" @(#)nfsmount.2 1.2 85/04/04 SMI; from UCB 4.2
+.TH NFSMOUNT 2
+.SH NAME
+nfsmount \- mount an NFS file system
+.SH SYNOPSIS
+.nf
+.B nfsmount(argp, dir, readonly)
+.B struct nfs_args *argp;
+.B char *dir;
+i.B int readonly;
+.fi
+.SH DESCRIPTION
+.I Nfsmount
+mounts an
+.IR NFS 
+file system on the directory
+.IR dir .
+.I argp
+points to a structure of the following form:
+.nf
+.ta \w'#include'u +\w'fhandle_t\0\0'u +\w'retrans;\0\0'u
+#include	<netinet/in.h>
+#include	<nfs/nfs_export.h>
+struct nfs_args {
+	struct sockaddr_in  *addr;  /* file server address */
+	fhandle_t	*fh;	/* File handle to be mounted */
+	int	flags;	/* flags */
+	int	wsize;	/* write size in bytes */
+	int	rsize;	/* read size in bytes */
+	int	timeo;	/* initial timeout in .1 secs */
+	int	retrans;	/* times to retry send */
+};
+.fi
+.PP
+The
+.I readonly
+argument determines whether
+the file system can be written on; if it is 0 writing
+is allowed; if non-zero no writing is done.
+.SH "RETURN VALUE
+.I Nfsmount
+returns 0 if the action occurred, \-1 if
+some error occurred.
+.SH ERRORS
+.I Nfsmount
+will fail when one of the following occurs:
+.TP 15
+[EPERM]
+The caller is not the super-user.
+.TP 15
+[ENAMETOOLONG]
+The path name for
+.I dir
+is too long.
+.TP 15
+[ELOOP]
+.I Dir
+contains a symbolic link loop.
+.TP 15
+[ETIMEDOUT]
+The server at
+.I addr
+is not accessible.
+This can only happen if the
+.I NFSMNT_SOFT
+bit is set in
+.I argp->flags .
+.TP 15
+[ENOTDIR]
+A component of the path prefix in
+.I dir
+is not a directory.
+.TP 15
+[EBUSY]
+Another process currently holds a reference to 
+.IR argp->fh .
+.TP 15
+[EFAULT]
+.I argp ,
+.I argp->addr ,
+or
+.I argp->fh
+does not point within the user's address space.
+.TP 15
+[EPFNOSUPPORT]
+NFS is not supported by the protocol family of
+.I argp->addr .
+.TP 15
+[EINVAL]
+One of
+.I argp->timeo ,
+.I argp->rsize ,
+or
+.I argp->wsize
+is not positive, or
+.I argp->retrans
+is negative.
+.SH "SEE ALSO"
+mount(2), umount(2), mount(1M).

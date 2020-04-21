@@ -1,0 +1,617 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: F.EXEC.1.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               02-Jan-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure execstmts;
+  var ExitFlag,FirstTime,LLabeledFlag,FormatFlag,DataFlag: Boolean;
+  
+  procedure compexecstmt; forward;
+  
+  function gettypecode(ftype: ftntype): typecodes;
+  begin {gettypecode}
+  if ftype.typ = INTEGR
+  then
+    if ftype.siz = 1 
+    then gettypecode := INT1
+    else
+      if ftype.siz = 2 
+      then gettypecode := INT2 
+      else gettypecode := INT4
+  else { ftype.typ = REEL }
+    if ftype.siz = 4 
+    then gettypecode := REEL4 
+    else gettypecode := REEL8
+  end; {gettypecode}
+  
+  
+  { Serves the role of "variable" or "expression" when only an identifier }
+  { is expected, i.e. no array element such as for do control variable.   }
+  
+  procedure identifier;
+    var lpn: pn;
+  begin
+  if token = IDENTSY
+  then begin
+    lpn := lookupname(localtree,ident);
+    if lpn = nil
+    then lpn := declarevar(localtree,ident)
+    else
+      if lpn^.nkind = UNKN then declunkn(lpn);
+    xref(lpn);
+    with lpn^, gattr do
+      if nkind = VARS
+      then begin atype := idtype; treeptr := lpn; refcount := refcount + 3; end
+      else begin
+        error(51); atype := int4type; treeptr := nil;
+        end;
+    end
+  else begin error(136); gattr.treeptr := nil; end;
+  end; {identifier}
+  
+  procedure datastmt;
+    var vcount: longint;
+      lval,implevel: integer; lname: idstring; ltoken: symbol;
+      IntFlag,ExitFlag,Exit2Flag: Boolean;
+      lpn: pn; ltype: ftntype; v: valu;
+      headvarb,lvarb,lv2: pvarbrec;
+      headdata,ldata,ld2: pdatarec;
+      ldatalist: pdatael;
+      
+    function varbitem(ftoken: symbol; fname: idstring): pvarbrec;
+      var lvarb,lvarblist,lv: pvarbrec; ExitFlag,OK: Boolean; lpn: pn;
+          lname,doname,initident: idstring; initstmtbufp: integer;
+          inittoken: symbol;
+      
+      procedure impdook(var fname: idstring; var OK: Boolean);
+        var lname: idstring; ExitFlag: Boolean;
+        
+        procedure expr(var OK: Boolean);
+          
+          procedure factor(var OK: Boolean);
+          begin
+          OK := TRUE;
+          if token = IDENTSY
+          then fscan
+          else
+            if token = ICONSTSY
+            then fscan
+            else
+              if token = LPARENSY
+              then begin
+                fscan; expr(OK);
+                if token = RPARENSY then fscan else OK := FALSE;
+                end
+              else OK := FALSE;
+          end; {factor}
+          
+        begin {expr}
+        OK := TRUE; factor(OK);
+        while OK and (token in [EXPSY,STARSY,SLASHSY,PLUSSY,MINUSSY,CONCATSY]) do
+          begin fscan; factor(OK); end;
+        end; {expr}
+        
+        procedure subscript(var OK: Boolean);
+          
+          procedure substr(var OK: Boolean);
+          begin
+          OK := TRUE;
+          if token = COLONSY
+          then begin
+            fscan;
+            if token <> RPARENSY then expr(OK);
+            if token = RPARENSY then fscan else OK := FALSE;
+            end
+          else OK := FALSE;
+          end; {substr}
+          
+        begin {subscript}
+        OK := TRUE;
+        if token = LPARENSY
+        then begin
+          fscan;
+          if token = COLONSY
+          then substr(OK)
+          else begin
+            expr(OK);
+            if OK
+            then
+              if token = COLONSY
+              then substr(OK)
+              else begin
+                while OK and (token <> RPARENSY) do
+                  if token = COMMASY
+                  then begin fscan; expr(OK); end
+                  else OK := FALSE;
+                if token = RPARENSY then fscan else OK := FALSE;
+                if token = LPARENSY
+                then begin
+                  fscan;
+                  if token <> COLONSY
+                  then expr(OK);
+                  if OK and (token = COLONSY) then substr(OK) else OK := FALSE;
+                  end;
+                end;
+            end;
+          end
+        else OK := FALSE;
+        end; {subscript}
+        
+      begin {impdook}
+      OK := TRUE; ExitFlag := FALSE; { Initial '(' already skipped }
+      repeat
+        if token = LPARENSY
+        then begin fscan; impdook(lname,OK); end
+        else
+          if token = IDENTSY
+          then begin
+            fscan;
+            if token = ASSIGNSY
+            then begin
+              fname := ident; fscan; expr(OK);
+              if OK
+              then begin
+                if token = COMMASY
+                then begin
+                  fscan; expr(OK);
+                  if token = COMMASY then begin fscan; expr(OK); end;
+                  end
+                else OK := FALSE;
+                end;
+              ExitFlag := TRUE;
+              end
+            else
+              if token = LPARENSY
+              then subscript(OK);
+            end
+          else OK := FALSE;
+        if OK and (not ExitFlag)
+        then
+          if token = COMMASY then fscan else OK := FALSE;
+      until ExitFlag or not OK;
+      if token = RPARENSY then fscan else OK := FALSE;
+      end; {impdook}
+      
+      procedure ckimpexpr(var fpn: pn);
+        var ErrorFlag: Boolean;
+        
+        procedure cie(fpn: pn);
+        begin
+        with fpn^ do
+          case node of
+            IDENTNODE: if (nkind <> IMPDO) and (nkind <> PARAMETER)
+                       then ErrorFlag := TRUE;
+            UNNODE:    if unop in [74{NEG2},75{NEG4}]
+                       then cie(unarg)
+                       else ErrorFlag := TRUE;
+            BINNODE:   if binop in [64..71 {+-*/24 integer} ]
+                       then begin cie(leftarg); cie(rightarg); end
+                       else ErrorFlag := TRUE;
+            CSTNODE:   ;
+          end; {case}
+        end; {cie}
+        
+      begin {ckimpexpr}
+      ErrorFlag := FALSE;
+      cie(fpn);
+      if ErrorFlag
+      then begin error(241); fpn := nil; end;
+      end; {ckimpexpr}
+      
+      function subscript(fpn: pn): pvarbrec;
+        var lvarb: pvarbrec; lindexlist,lindex,li: pnlist; pdim: pbound;
+            ExitFlag,OK: Boolean;
+            
+        procedure substr(fvarb: pvarbrec);
+        begin
+        fscan; {skip ':'}
+        if token <> RPARENSY
+        then begin
+          exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+          if gattr.atype.typ <> INTEGR then error(212);
+          fold(gattr.treeptr);
+          if gattr.treeptr^.node = CSTNODE
+          then lvarb^.hisub := gattr.treeptr^.cstvalu.ival
+          else error(209);
+          end;
+        if token = RPARENSY then fscan else error(213);
+        end; {substr}
+        
+      begin {subscript}
+      pdim := fpn^.bounds; lindexlist := nil;
+      new(lvarb,DVARB);
+      with lvarb^ do begin
+        vrnext := nil; vkind := DVARB; vrvarb := fpn;
+        vrindex := nil; SubString := FALSE;
+        end;
+      if token = LPARENSY
+      then begin
+        fscan;
+        if token = COLONSY
+        then begin
+          lvarb^.SubString := TRUE;
+          lvarb^.losub := 1; lvarb^.hisub := 32767;
+          substr(lvarb);
+          end
+        else begin
+          exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+          if gattr.atype.typ <> INTEGR then error(225);
+          fold(gattr.treeptr);
+          if token = COLONSY
+          then begin
+            lvarb^.SubString := TRUE;
+            lvarb^.losub := 1; lvarb^.hisub := 32767;
+            if gattr.treeptr^.node = CSTNODE
+            then lvarb^.losub := gattr.treeptr^.cstvalu.ival
+            else error(209);
+            substr(lvarb);
+            end
+          else begin
+            OK := TRUE; ExitFlag := FALSE;
+            repeat
+              new(lindex);
+              lindex^.next := nil; lindex^.nrec := nil;
+              if lindexlist = nil
+              then lindexlist := lindex
+              else begin
+                li := lindexlist;
+                while li^.next <> nil do li := li^.next;
+                li^.next := lindex;
+                end;
+              if pdim <> nil
+              then begin
+                with pdim^ do
+                  if (lo.bkind <> CONSTBOUND) or (hi.bkind <> CONSTBOUND)
+                  then error(172);
+                ckimpexpr(gattr.treeptr);
+                lindex^.nrec := gattr.treeptr;
+                end
+              else error(56);
+              if token = COMMASY
+              then begin
+                fscan;
+                exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+                if gattr.atype.typ <> INTEGR then error(225);
+                fold(gattr.treeptr);
+                end
+              else
+                if token = RPARENSY
+                then ExitFlag := TRUE
+                else begin error(226); OK := FALSE; end;
+              if pdim <> nil then pdim := pdim^.next;
+            until ExitFlag or (not OK);
+            if token = RPARENSY then fscan else error(226);
+            if token = LPARENSY
+            then begin
+              fscan;
+              if token = COLONSY
+              then begin
+                lvarb^.SubString := TRUE;
+                lvarb^.losub := 1; lvarb^.hisub := 32767;
+                substr(lvarb);
+                end
+              else begin
+                exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+                if gattr.atype.typ <> INTEGR then error(225);
+                fold(gattr.treeptr);
+                if token = COLONSY
+                then begin
+                  lvarb^.SubString := TRUE;
+                  lvarb^.losub := 1; lvarb^.hisub := 32767;
+                  if gattr.treeptr^.node = CSTNODE
+                  then lvarb^.losub := gattr.treeptr^.cstvalu.ival
+                  else error(209);
+                  substr(lvarb);
+                  end
+                else error(213);
+                end;
+              end;
+            end;
+          end;
+        lvarb^.vrindex := lindexlist;
+        if pdim <> nil then error(57);
+        end;
+      subscript := lvarb;
+      end; {subscript}
+      
+      function removename(var fname: idstring; ftree: pn): pn;
+      begin
+      if idEQstr(ftree^.name,fname)
+      then removename := nil
+      else begin
+        removename := ftree;
+        if idLTstr(ftree^.name,fname)
+        then ftree^.llink := removename(fname,ftree^.llink)
+        else ftree^.rlink := removename(fname,ftree^.rlink);
+        end;
+      end; {removename}
+      
+    begin {varbitem}
+    varbitem := nil;
+    if ftoken = LPARENSY
+    then begin
+      initstmtbufp := stmtbufp; inittoken := token; initident := ident;
+      impdook(doname,OK);
+      if OK
+      then begin
+        implevel := implevel + 1; lpn := lookupname(impdotree,doname);
+        if lpn = nil
+        then begin
+          newn(lpn,IMPDO,doname);
+          lpn^.implev := implevel;
+          entername(lpn,impdotree);
+          end
+        else error(227);
+        stmtbufp := initstmtbufp; token := inittoken; ident := initident;
+        ExitFlag := FALSE; lvarblist := nil;
+        repeat
+          if token = LPARENSY
+          then begin fscan; lvarb := varbitem(LPARENSY,lname); end
+          else begin {token = IDENTSY}
+            lname := ident; fscan;
+            if token = ASSIGNSY
+            then begin
+              new(lvarb,DLOOP);
+              with lvarb^ do begin
+                vrnext := nil; vkind := DLOOP; looplist := lvarblist;
+                loloop := nil; hiloop := nil; steploop := nil;
+                end;
+              fscan;
+              exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+              if gattr.atype.typ <> INTEGR then error(229);
+              ckimpexpr(gattr.treeptr);
+              lvarb^.loloop := gattr.treeptr; fscan; {Skip ','}
+              exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+              if gattr.atype.typ <> INTEGR then error(229);
+              ckimpexpr(gattr.treeptr);
+              lvarb^.hiloop := gattr.treeptr;
+              if token = COMMASY
+              then begin
+                fscan; exprkind := DATAEXPR; expression; exprkind := NORMEXPR;
+                if gattr.atype.typ <> INTEGR then error(229);
+                ckimpexpr(gattr.treeptr);
+                lvarb^.steploop := gattr.treeptr; end;
+              varbitem := lvarb; ExitFlag := TRUE;
+              end
+            else lvarb := varbitem(IDENTSY,lname);
+            end;
+          if not ExitFlag
+          then begin
+            if lvarblist = nil
+            then lvarblist := lvarb
+            else
+              begin
+              lv := lvarblist;
+              while lv^.vrnext <> nil do
+                lv := lv^.vrnext;
+              lv^.vrnext := lvarb;
+              end;
+            fscan; {Skip ','}
+            end;
+          if token = EOLNSY then begin error(1102); ExitFlag := TRUE; end;
+        until ExitFlag;
+        impdotree := removename(doname,impdotree);
+        implevel := implevel - 1; fscan; {Skip ')'}
+        end
+      else begin error(223); skip([SLASHSY]); end;
+      end
+    else
+      if ftoken = IDENTSY
+      then begin
+        lpn := lookupname(localtree,fname);
+        if lpn = nil
+        then lpn := declarevar(localtree,fname)
+        else
+          if lpn^.nkind = UNKN then declunkn(lpn);
+        xref(lpn);
+        if lpn^.nkind = VARS
+        then
+          begin
+          lpn^.AddrNeeded := TRUE; { So it won't be put in a reg }
+          if lpn^.Indirect then error(72);
+          if lpn^.incommon <> nil
+          then
+            if lpn^.incommon^.nkind = COMMON
+            then begin
+              if blockkind <> BLOCKBLOCK
+              then
+                if OnlyAnsi then error(224);
+              end
+            else begin
+                 lpn^.incommon^.eqkind := SAVEDVAR;
+                 lpn^.SaveFlag := TRUE;  { So will be allocated in a }
+                 end
+          else lpn^.SaveFlag := TRUE;    { fixed area, not on stack. }
+          if lpn^.nlev = COMMONVAR then error(73);
+          varbitem := subscript(lpn);
+          end
+        else error(74);
+        end
+      else error(28);
+    end; {varbitem}
+    
+    procedure constoken(var fv: valu; var ft: ftntype);
+      var Neg,Signed,CErrorFlag: Boolean; lpn: pn;
+      
+      procedure cerror;
+      begin
+      if not CErrorFlag then error(220);
+      CErrorFlag := TRUE;
+      end; {cerror}
+      
+      function IsSigned(var Negative: Boolean): Boolean;
+        var Signed: Boolean;
+      begin
+      Negative := token = MINUSSY;
+      Signed := (token = PLUSSY) or Negative;
+      if Signed then fscan;
+      IsSigned := Signed;
+      end; {IsSigned}
+      
+      function getrealconst: real;
+        var Signed,Neg: Boolean;
+      begin
+      Signed := IsSigned(Neg);
+      if token = ICONSTSY
+      then begin token := RCONSTSY; realval := intval; end;
+      if token = RCONSTSY
+      then begin
+        if Neg then realval := -realval;
+        getrealconst := realval; fscan;
+        end
+      else cerror;
+      end; {getrealconst}
+      
+    begin {constoken}
+    fv.ival := 1; ft.typ := INTEGR; ft.siz := 1; {!!!}
+    Signed := IsSigned(Neg);
+    if token = ICONSTSY
+    then
+      begin
+      if Neg then intval := -intval;
+      ft.typ := INTEGR; fv.ival := intval; fscan;
+      end
+    else
+      if token = RCONSTSY
+      then
+        begin
+        if Neg then realval := -realval;
+        ft := realtype; fv.rval := realval; fscan;
+        end
+      else
+        if token = DCONSTSY
+        then
+          begin
+          if Neg then dblval := -dblval;
+          ft := doubletype; fv.dval := dblval; fscan;
+          end
+        else
+          if token = LCONSTSY
+          then
+            begin
+            if Signed then error(219);
+            ft.typ := LOGICAL; fv.ival := intval; fscan;
+            end
+          else
+            if token = CCONSTSY
+            then
+              begin
+              if Signed then error(219);
+              fv.clen := chlen; fv.cval := chval;
+              ft.typ := CHARACTER; ft.siz := chlen; fscan;
+              end
+            else
+              if token = LPARENSY
+              then begin
+                CErrorFlag := FALSE;
+                if Signed then cerror;
+                fv.creal := 0; fv.cimag := 0;
+                ft := cmplxtype; fscan;
+                fv.creal := getrealconst;
+                if token = COMMASY then fscan else cerror;
+                fv.cimag := getrealconst;
+                if token = RPARENSY then fscan else cerror;
+                end
+              else
+                if token = IDENTSY
+                then begin
+                  lpn := lookupname(localtree,ident);
+                  if lpn = nil
+                  then error(217)
+                  else begin
+                    xref(lpn);
+                    if lpn^.nkind = PARAMETER
+                    then begin
+                      if Signed then error(218);
+                      xref(lpn); fv := lpn^.pvalu; ft := lpn^.idtype;
+                      end
+                    else error(77);
+                    end;
+                  fscan;
+                  end
+                else error(77);
+    end; {constoken}
+    
+  begin {datastmt}
+  needstate(STMTFUNSTATE,EXECSTATE);
+  fscan;
+  ExitFlag := FALSE;
+  impdotree := nil; implevel := 0;
+  repeat
+    headvarb := nil; headdata := nil; Exit2Flag := FALSE;
+    repeat
+      ltoken := token; lname := ident; fscan;
+      lvarb := varbitem(ltoken,lname);
+      if headvarb = nil
+      then headvarb := lvarb
+      else
+        begin
+        lv2 := headvarb;
+        while lv2^.vrnext <> nil do
+          lv2 := lv2^.vrnext;
+        lv2^.vrnext := lvarb;
+        end;
+      if token = COMMASY then fscan else Exit2Flag := TRUE;
+    until Exit2Flag;
+    if token <> SLASHSY then begin error(38); skip([SLASHSY]); end;
+    if token = SLASHSY
+    then begin
+      if IsHollerith then fscanhollerith else fscan;
+      Exit2Flag := FALSE;
+      repeat
+        vcount := 1; constoken(v,ltype);
+        if token = STARSY
+        then begin
+          if (ltype.typ = INTEGR) and (v.ival > 0)
+          then vcount := v.ival
+          else error(76);
+          if IsHollerith then fscanhollerith else fscan; 
+          constoken(v,ltype);
+          end;
+        repeat
+          new(ldata);
+          with ldata^ do begin
+            drvalu := v; drtype := ltype;
+            if vcount > 32766
+            then begin drnumb := 32766; vcount := vcount - 32766; end
+            else begin drnumb := vcount; vcount := 0; end;
+            drnext := nil;
+            end;
+          if headdata = nil
+          then headdata := ldata
+          else
+            begin
+            ld2 := headdata;
+            while ld2^.drnext <> nil do
+              ld2 := ld2^.drnext;
+            ld2^.drnext := ldata;
+            end;
+        until vcount <= 0;
+        if token = COMMASY 
+        then if ISHollerith then fscanhollerith else fscan 
+        else Exit2Flag := TRUE;
+      until Exit2Flag;
+      if token <> SLASHSY then begin error(38); skip([SLASHSY]); end;
+      if token = SLASHSY then fscan;
+      if token = COMMASY
+      then fscan
+      else ExitFlag := token <> IDENTSY;
+      datacode(headdata,headvarb,FALSE);
+      new(ldatalist);
+      with ldatalist^ do begin
+        next := datalist; data := headdata; varb := headvarb;
+        end;
+      datalist := ldatalist;
+      end
+    else ExitFlag := TRUE;
+  until ExitFlag;
+  end; {datastmt}
+  
+  
+ 

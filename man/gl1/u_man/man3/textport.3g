@@ -1,0 +1,22 @@
+.TH textport 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2textport\fP - allocate an area of the screen for the textport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textport(left, right, bottom, top)"
+.B "Screencoord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textpo(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.sp
+.SH DESCRIPTION
+\f2Textport\fP allocates an area on the screen for the textport.
+.SH "SEE ALSO"
+.I pagecolor, pagewritemask, textcolor,
+.I textwritemask, tpoff, tpon, viewport
+.SH NOTE
+This command can only be used in immediate mode.

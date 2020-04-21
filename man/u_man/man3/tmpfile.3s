@@ -1,0 +1,23 @@
+'\"macro stdmacro
+.TH TMPFILE 3S 
+.SH NAME
+tmpfile \- create a temporary file
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B
+.SM FILE
+.B "\(**tmpfile (\|)"
+.SH DESCRIPTION
+.I Tmpfile\^
+creates a temporary file and returns a
+corresponding
+.SM FILE
+pointer.
+The file will
+automatically be deleted when the process using
+it terminates.
+The file is opened for update.
+.SH SEE ALSO
+creat(2), unlink(2), fopen(3S), mktemp(3C), tmpnam(3S).
+.\"	@(#)tmpfile.3s	5.1 of 10/21/83

@@ -1,0 +1,25 @@
+../bin/asm68k -s ubuf; ../bin/jlinker ubuf.obj -oubuf.o
+../bin/asm68k -s ugotoxy; ../bin/jlinker ugotoxy.obj -ougotoxy.o
+../bin/asm68k -s uio; ../bin/jlinker uio.obj -ouio.o
+../bin/asm68k -s umem; ../bin/jlinker umem.obj -oumem.o
+../bin/asm68k -s 20umisc; ../bin/jlinker 20umisc.obj -o20umisc.o
+../bin/asm68k -s utexti; ../bin/jlinker utexti.obj -outexti.o
+../bin/asm68k -s utexto; ../bin/jlinker utexto.obj -outexto.o
+../bin/asm68k -s 20muinit; ../bin/jlinker 20muinit.obj -o20muinit.o
+../bin/asm68k -s pascheck; ../bin/jlinker pascheck.obj -opascheck.o
+../bin/asm68k -s pasmath; ../bin/jlinker pasmath.obj -opasmath.o
+../bin/asm68k -s pasmove; ../bin/jlinker pasmove.obj -opasmove.o
+../bin/asm68k -s junpwr10; ../bin/jlinker junpwr10.obj -ojunpwr10.o
+../bin/asm68k -s junflt; ../bin/jlinker junflt.obj -ojunflt.o
+../bin/asm68k -s jundbl; ../bin/jlinker jundbl.obj -ojundbl.o
+../bin/asm68k -s juninit; ../bin/jlinker juninit.obj -ojuninit.o
+../bin/asm68k -s passcomp; ../bin/jlinker passcomp.obj -opasscomp.o
+../bin/asm68k -s passet; ../bin/jlinker passet.obj -opasset.o
+../bin/asm68k -s pastext; ../bin/jlinker pastext.obj -opastext.o
+../bin/asm68k -s pastring; ../bin/jlinker pastring.obj -opastring.o
+../bin/asm68k -s nan; ../bin/jlinker nan.obj -onan.o
+../bin/pascal pasrio.pas; ../bin/jcode pasrio.i; ../bin/jlinker pasrio.obj -opasrio.o
+../bin/pascal d13.pas; ../bin/jcode d13.i; ../bin/jlinker d13.obj -od13.o
+../bin/pascal f13.pas; ../bin/jcode f13.i; ../bin/jlinker f13.obj -of13.o
+mv *.o ../lib.hardware
+rm *.obj

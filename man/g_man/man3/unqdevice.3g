@@ -1,0 +1,39 @@
+.TH unqdevice 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B unqdevice
+\- disables the specified device from making entries in the event queue
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "unqdevice(dev) "
+.B "Device dev;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine unqdev(dev)"
+.B "integer*4 dev"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure unqdevice(dev: Device);"
+.SH DESCRIPTION
+.B unqdevice
+removes the specified device from the list of devices whose changes are
+recorded in the event queue. 
+If a device has recorded events that have
+not been read, they remain in the queue.
+.PP
+Use
+.B qreset
+to flush the event queue.
+.SH "SEE ALSO"
+qdevice, qreset
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

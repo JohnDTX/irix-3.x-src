@@ -1,0 +1,91 @@
+'\"macro stdmacro
+.TH RMDIR 2
+.SH NAME
+rmdir \- remove a directory
+.SH SYNOPSIS
+.B int rmdir (path)
+.br
+.B char \(**path;
+.SH DESCRIPTION
+.I rmdir\^
+removes the directory named by the
+path name
+pointed to by
+.IR path .
+The directory must not have any entries other
+than "." and "..".
+.PP
+The named directory is removed unless one or more of the following are true:
+.TP 15
+.SM
+\%[EINVAL]
+The current directory may not be removed.
+.TP 15
+.SM
+\%[EINVAL]
+The "." entry of a directory may not be removed.
+.TP 15
+.SM
+\%[ENOTEMPTY]
+The directory contains entries other than those for "." and "..".
+.TP
+.SM
+\%[ENOTDIR]
+A component of the
+path prefix
+is not a directory.
+.TP
+.SM
+\%[ENOENT]
+The named directory does not exist.
+.TP
+.SM
+\%[EACCES]
+Search permission is denied for a component of the
+path prefix.
+.TP
+.SM
+\%[EACCES]
+Write permission is denied on the directory containing the directory
+to be removed.
+.TP
+.SM
+\%[EBUSY]
+The directory to be removed is the mount point for a mounted file system.
+.TP
+.SM
+\%[EROFS]
+The directory entry to be removed is part of a
+read-only file system.
+.TP
+.SM
+\%[EFAULT]
+.I Path\^
+points outside the process's allocated address space.
+.TP
+.SM
+\%[EIO]
+An I/O error occurred while accessing the
+file system.
+.\".TP
+.\".SM
+.\"\%[ENOLINK]
+.\"\f2Path\f1 points to a remote machine, and the link
+.\"to that machine is no longer active.
+.\".TP
+.\".SM
+.\"\%[EMULTIHOP]
+.\"Components of \f2path\f1 require hopping to
+.\"multiple remote machines.
+.SH "DIAGNOSTICS"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+mkdir(2).
+.br
+rmdir(1), rm(1), and mkdir(1)
+in the
+\f2User's Reference Manual\f1.
+.Ee

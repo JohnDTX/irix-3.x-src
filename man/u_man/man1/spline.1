@@ -1,0 +1,116 @@
+'\" e
+'\"macro stdmacro
+.TH SPLINE 1
+.SH NAME
+spline \- interpolate smooth curve
+.SH SYNOPSIS
+.B spline
+[ options ]
+.SH DESCRIPTION
+.EQ
+gsize 9
+.EN
+.I Spline\^
+takes pairs of numbers from the standard input as abscissas and ordinates
+of a function.
+It produces a similar set, which
+is approximately equally spaced and
+includes the input set, on the standard output.
+The cubic spline output
+(R. W. Hamming,
+.IR "Numerical Methods for Scientists and Engineers" ,
+2nd ed., pp.\ 349ff)
+has two continuous derivatives,
+and sufficiently many points to look smooth when plotted.
+.PP
+The following
+.I options\^
+are recognized,
+each as a separate argument:
+.TP "\w'\f3\-k\f1\ \ \ 'u"
+.B \-a
+Supply abscissas automatically (they are missing from
+the input); spacing is given by the next
+argument, or is assumed to be 1 if next argument is not a number.
+.TP
+.B \-k
+The constant
+.I k\^
+used in the boundary value computation:
+.EQ
+tdefine prime2 'sup down 20 \(fm\(fm'
+ndefine prime2 'sup \(fm\(fm'
+y sub 0 prime2 ~=~ ky sub 1 prime2 , ~~~~ y sub n prime2 ~=~ ky sub n-1 prime2
+.EN
+.TP
+\&
+is set by the next argument
+(default
+.I k\^
+= 0).
+.TP
+.B \-n
+Space output points
+so that approximately
+.I n\^
+intervals occur between the lower and upper
+.I x\^
+limits
+(default
+.I n\^
+= 100).
+.TP
+.B \-p
+Make output periodic, i.e., match
+derivatives at ends.
+First and last input values should normally agree.
+.TP
+.B \-x
+Next
+1 (or 2) arguments are lower (and upper)
+.I x\^
+limits.
+Normally, these limits are calculated from the data.
+Automatic abscissas start at lower limit
+(default 0).
+.SH EXAMPLE
+.IP "" 5
+spline -n 10 > spline.out
+.br
+0 0
+.br
+1 2
+.br
+2 4
+.br
+3 9
+.PP
+will create the file "spline.out" with the contents:
+.IP
+3.000000   8.999999
+.br
+2.666667   7.096296
+.br
+2.333333   5.370370
+.br
+2.000000   4.000000
+.br
+1.666667   3.096296
+.br
+1.333333   2.503703
+.br
+1.000000   2.000000
+.br
+0.666667   1.407407
+.br
+0.333333   0.725926
+.br
+0.000000   0.000000
+.SH DIAGNOSTICS
+When data is not strictly monotone in
+.IR x ,
+.I spline\^
+reproduces the input without interpolating extra points.
+.SH BUGS
+A limit of 1,000 input points is enforced silently.
+.\"	@(#)spline.1	5.1 of 11/15/83

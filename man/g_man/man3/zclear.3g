@@ -1,0 +1,31 @@
+.TH zclear 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B zclear
+\- initializes the z-buffer 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "zclear()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine zclear"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure zclear;"
+.SH DESCRIPTION
+.B zclear
+loads the z-buffer with the largest possible positive integer. 
+This is done most
+before a z-buffer picture is drawn to clear the buffer so
+that primitives drawn in z-buffer mode are only affected by each other.
+.SH "SEE ALSO"
+zbuffer
+.sp
+.I Programming Guide,
+Section 12.1, Z-Buffer Mode

@@ -1,0 +1,30 @@
+'\"#ident	"@(#)shells:troff.fonts	1.4"
+.rs
+.sp 4
+.ps 14
+.vs 16
+.ls 2
+.P
+However sophisticated your printer is, \fItroff\fR can probably handle your font control.
+By placing .ft on a line by itself before the line of text you want to change
+or \ef before the word or words you want to change, you can modify your typography.
+.ft I
+This is a line of italic made with .ft I (italic).
+.br
+.ft B
+If you prefer a heavier emphasis, use bold roman type made with .ft B (bold).
+.br
+.ft H
+For the clean appearance of a sans serif type, use .ft H (Helvetica).
+.br
+.ft R
+Roman is the most popular, of course.
+.P
+The \ef allows for a finer level of control:
+The individual \fIitalic\fR, \fBbold\fR, or \fHHelvetica\fR word can be done in-line.
+.P
+All printers were not created equal, so consult your systems manager to find what is
+available.
+.ps 10
+.vs 12
+.ls 1

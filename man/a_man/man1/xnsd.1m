@@ -1,0 +1,38 @@
+'\"macro stdmacro
+.TH XNSD 1M
+.SH NAME
+xnsd \- network utility daemon
+.SH SYNOPSIS
+.B /etc/xnsd 
+[ -xx ] [ -login] [ -xsh ] [ -xcp ] [ boot directory ]
+.SH DESCRIPTION
+.I xnsd
+is a daemon that is the server for the XNS network utilities.
+This server listens for connections and will start up the 
+appropriate programs.
+A connection to the login socket will start \f2/bin/login\f1.
+The shell will be invoked if a connection to the shell socket is made.
+A connection on the boot socket will start 
+.IR sgboot (1M).
+The optional boot directory argument is passed to 
+\f2sgboot\f1.
+The default boot directory is \f2/usr/local/boot\f1.
+.sp
+.fi
+\f2xnsd\fP can be started by hand but is
+normally started in a 
+.I /etc/rc.xns 
+file.
+.SH OTHER OPTIONS
+The shell script
+.B /etc/rc.xns
+which invokes \f2xnsd\f1 can be modified to disallow certain network
+operations.  The command line which executes the \f2xnsd\f1 can be
+changed to include any combination of the optional flags.
+The \f2-xx\f1 flag disallows remote \f2xx\f1 connections.
+The \f2-xsh\f1 flag disallows remote \f2xsh\f1 connections (archaic).
+The \f2-login\f1 flag disallows remote login connections.  Finally, the
+\f2-xcp\f1 flag disallows remote \f2xcp\f1 connections.
+.SH SEE ALSO
+.nf
+xcp(1C), xx(1C).

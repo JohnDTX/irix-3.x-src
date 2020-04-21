@@ -1,0 +1,38 @@
+.TH qdevice 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B qdevice
+\- queues a device (keyboard, button, or valuator)
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qdevice(dev) "
+.B "Device dev;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qdevic(dev)
+.B "integer*4 dev"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qdevice(dev: Device);"
+.SH DESCRIPTION
+.B qdevice
+changes the state of the specified device so that events occurring
+within the device are entered 
+in the event queue.  The device can be the keyboard,
+a button, a valuator, or certain other pseudo-devices.  
+(See Appendix A for device valuators.)
+.PP
+The maximum number of queue entries is 50.
+.SH "SEE ALSO"
+noise, unqdevice, tie
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,40 @@
+'\"#ident	"@(#)shells:tbl.pres	1.5"
+.ad n
+.TS
+center box tab(;);
+c s s s s
+c | c | l | l | l
+l | l | l | l | l.
+American Presidents
+=
+Name;Party;Term;Election-Oppnts;Notes
+_
+T{
+Gerald 
+R. Ford
+T};Republican;1974-1977;Never elected;T{
+Became V.P. when 
+Agnew resigned
+T}
+_
+T{
+Jimmy 
+Carter
+T};Democratic;1977-1981;1976-Ford;T{
+Negotiated
+Camp David
+treaties
+T}
+_
+T{
+Ronald 
+Reagan
+T};Republican;1981-;T{
+1980-Carter
+     Anderson
+1984-Mondale
+T};T{
+Oldest
+President
+T}
+.TE

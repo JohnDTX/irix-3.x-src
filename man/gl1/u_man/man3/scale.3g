@@ -1,0 +1,32 @@
+.TH scale  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I scale
+- scale and mirror objects
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "scale(x, y, z) "
+.B "float x, y, z;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine scale(x, y, z)"
+.B "real x, y, z"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure scale(x, y, z: real);"
+.sp
+.SH DESCRIPTION
+.I Scale
+shrinks, expands, and mirrors objects.  Its three arguments specify scaling
+in each of the three coordinate directions.  Values with magnitude of \f21\fP 
+or more expand the object;
+values with magnitude less than \f21\fP shrink it.  Negative values 
+cause mirroring.  \f2Scale\f1 is a modeling command;
+it changes the current transformation matrix.  All objects drawn after 
+the \f2scale\f1 command is executed will be affected.  Use \f2pushmatrix\f1
+and \f2popmatrix\f1 to limit the scope of the \f2scale\f1 command.
+.SH "SEE ALSO"
+.I  popmatrix, pushmatrix, rotate, translate

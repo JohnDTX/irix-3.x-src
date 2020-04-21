@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH MKPS 1M
+.SH NAME
+mkps \- register a LaserWriter printer with \s-1LP\s0
+.SH SYNOPSIS
+.B /usr/spool/lp/etc/util/mkPS 
+printer tty
+.SH DESCRIPTION
+.I mkps
+creates a filter program that controls a LaserWriter printer, then
+registers the printer with \s-1LP\s0.  A log file is also created.
+.IR printer
+is the name you give the printer (see
+.I lpadmin (1M)).
+.I tty
+is a tty in /dev that the printer is attached to.
+After running this program, you might consider making this printer the
+default printer using
+.IR lpadmin (1M) .
+.PP
+Run this program as superuser from directory
+.IR /usr/spool/lp/etc/util .
+.SH FILES
+/dev/tty\f2n\f1
+.br
+/usr/spool/lp/transcript/\f2printer\f1-log
+.br
+/usr/spool/lp/interface/\f2printer\f1
+.SH SEE ALSO
+.na
+accept(1M),
+addclient(1M),
+enable(1),
+lp(1),
+lpadmin(1M),
+lpsched(1M),
+lpshut(1M),
+lpstat(1),
+mknetpr(1M),
+rmprinter(1M).

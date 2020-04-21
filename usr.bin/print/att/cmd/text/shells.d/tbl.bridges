@@ -1,0 +1,24 @@
+'\"#ident	"@(#)shells:tbl.bridges	1.3"
+.TS
+box,center;
+c s s
+c | c | c
+l | l | n.
+Major New York Bridges
+_
+Bridge	Designer	Length
+_
+Brooklyn	J. A. Roebling	1595
+Manhattan	G. Lindenthal	1470
+Williamsburg	L. L. Buck	1600
+_
+Queensborough	Palmer &	1182
+	  Hornbostel
+_
+		1380
+Triborough	O. H. Ammann	_
+		383
+_
+Bronx Whitestone	O. H. Ammann	2300
+Throgs Neck	O. H. Ammann	1800
+.TE

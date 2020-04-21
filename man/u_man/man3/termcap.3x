@@ -1,0 +1,165 @@
+'\"macro stdmacro
+.TH TERMCAP 3X
+.SH NAME
+termcap, termlib: tgetent, tgetnum, tgetflag, tgetstr, tgoto, tputs \- terminal independent operation routines
+.SH SYNOPSIS
+.nf
+.B extern char PC, *BC, *UP;
+.B extern short ospeed;
+.PP
+.B tgetent(bp, name)
+.B char *bp, *name;
+.PP
+.B tgetnum(id)
+.B char *id;
+.PP
+.B tgetflag(id)
+.B char *id;
+.PP
+.B char *tgetstr(id, area)
+.B char *id, **area;
+.PP
+.B char *tgoto(cm, destcol, destline)
+.B char *cm;
+.PP
+.B tputs(cp, affcnt, outc)
+.B register char *cp;
+.B int affcnt;
+.B int (*outc)();
+.fi
+.SH DESCRIPTION
+These functions extract and use capabilities from the terminal capability data
+base
+.IR termcap\^ (4).
+To link with these routines, use the loader option
+.BI \-ltermcap .
+Note that these are low level routines.
+.PP
+.I tgetent\^
+extracts the entry for terminal
+.I name\^
+into the buffer at
+.IR bp .
+.I bp\^
+should be a character buffer of size
+1024 and must be retained through all subsequent calls
+to
+.IR tgetnum ,
+.IR tgetflag ,
+and
+.IR tgetstr .
+.I tgetent\^
+returns \-1 if it cannot open the
+.I termcap\^
+file, 0 if the terminal name given does not have an entry,
+and 1 if all goes well.
+It will look in the environment for a 
+.SM TERMCAP
+variable.
+If found, and the value does not begin with a slash,
+and the terminal type
+.B name\^
+is the same as the environment string 
+.SM TERM\*S,
+the 
+.SM TERMCAP
+string is used instead of reading the termcap file.
+If it does begin with a slash, the string is used as a path name rather than
+\f2/etc/termcap\f1.
+This can speed up entry into programs that call
+.IR tgetent ,
+as well as to help debug new terminal descriptions
+or to make one for your terminal if you can't write the file
+\f2/etc/termcap\f1.
+.PP
+.I tgetnum\^
+gets the numeric value of capability
+.IR id ,
+returning \-1 if it is not given for the terminal.
+.I tgetflag\^
+returns 1 if the specified capability is present in
+the terminal's entry, 0 if it is not.
+.I tgetstr\^
+gets the string value of capability
+.IR id ,
+placing it in the buffer at
+.IR area ,
+advancing the
+.I area\^
+pointer.
+It decodes the abbreviations for this field described in
+.IR termcap\^ (4),
+except for cursor addressing and padding information.
+.PP
+.I tgoto\^
+returns a cursor addressing string decoded from
+.I cm\^
+to go to column
+.I destcol\^
+in line
+.IR destline .
+It uses the external variables
+.B \s-1UP\s+1
+(from the \f3up\f1 capability)
+and
+.B \s-1BC\s+1
+(if \f3bc\f1 is given rather than \f3bs\f1)
+if necessary to avoid placing \f3\en\f1, \f3^D\f1 or \f3^@\f1 in
+the returned string.
+(Programs which call 
+.I tgoto\^
+should be sure to turn off the 
+.SM XTABS
+bit(s),
+since 
+.I tgoto\^
+may now output a tab.
+Note that programs using 
+.I termcap\^
+should in general turn off 
+.SM XTABS
+anyway since some terminals use control-I for other functions,
+such as nondestructive space.)
+If a \f3%\f1 sequence is given which is not understood, then
+.I tgoto\^
+returns 
+.SM OOPS\*S.
+.PP
+.I tputs\^
+decodes the leading padding information of the string
+.IR cp ;
+.I affcnt\^
+gives the number of lines affected by the operation, or 1 if this is
+not applicable,
+.I outc\^
+is a routine which is called with each character in turn.
+The external variable
+.I ospeed\^
+should contain the output speed of the terminal as encoded by
+.SM ANDing
+the
+.I c_cflag
+field of the
+.I termio
+structure with
+.SM CBAUD
+see \f2termio\f1(7)).
+The external variable
+.B \s-1PC\s+1
+should contain a pad character to be used (from the \f3pc\f1 capability)
+if a null (\f3^@\f1) is inappropriate.
+.SH FILES
+.ta \w'/usr/lib/libtermcap_p.a\ \ \ \ 'u
+/usr/lib/libtermcap.a	termcap library
+.br
+/usr/lib/libtermcap_p.a	termcap library (for profiling)
+.br
+/etc/termcap	data base
+.DT
+.SH SEE ALSO
+ex(1), termcap(4), termio(7)
+.SH AUTHOR
+William Joy
+.\"	@(#)termcap.3	5.1 of 11/16/83
+.SH NOTES
+This manual page used to be called \f2termlib\f1.

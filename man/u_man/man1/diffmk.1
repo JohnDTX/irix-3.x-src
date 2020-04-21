@@ -1,0 +1,99 @@
+'\"macro stdmacro
+.\".if t .ds ' \h@.05m@\s+4\v@.333m@\'\v@-.333m@\s-4\h@.05m@
+.if t .ds ' '
+.if n .ds ' '
+.\".if t .ds ` \h@.05m@\s+4\v@.333m@\`\v@-.333m@\s-4\h@.05m@
+.if t .ds ` `
+.if n .ds ` `
+.TH DIFFMK 1
+.SH NAME
+diffmk \- mark differences between files
+.SH SYNOPSIS
+.B diffmk
+name1 name2 name3
+.SH DESCRIPTION
+.I Diffmk\^
+compares two versions of a file and creates a
+third file that includes ``change mark'' commands for
+.IR nroff\^ (1)
+or
+.IR troff\^ (1).
+.I Name1\^
+and
+.I name2\^
+are the old and new versions of the file.
+.I Diffmk\^
+generates
+.IR name3 ,
+which contains the lines of
+.I name2\^
+plus inserted formatter ``change mark''
+.RB ( .mc )
+requests.
+When
+.I name3\^
+is formatted,
+changed or inserted text is shown by \||\| at the right
+margin of each line.
+The position of deleted text is shown by a single
+.BR \(** .
+.PP
+If the characters \||\| and
+.B \(**
+are inappropriate,
+a copy of
+.I diffmk\^
+can be edited to change them
+.RI ( diffmk\^
+is a shell script).
+.PP
+If anyone is so inclined,
+.I diffmk\^
+can be used to produce listings of C (or other)
+programs with changes marked.
+.SH EXAMPLE
+.IP
+diffmk \|old.c \|new.c \|tmp; \|nroff \|macs \|tmp\| | \|pr
+.PP
+produces a listing of two versions of a C program with changes marked.
+First the two versions are compared and a new file, "tmp", is
+created containing the 
+.I change 
+.I mark\^ 
+commands.  The temporary file
+is then passed to 
+.IR nroff\^ (1)
+using the file "macs" which contains:
+.PP
+.RS
+.nf
+\&.pl \|1
+\&.ll \|77
+\&.nf
+\&.eo
+\&.ne \|\*`
+.fi
+.RE
+.PP
+The
+.B \&.ll
+request might specify a different line length, depending on the
+nature of the program being printed.
+The
+.B \&.eo
+and
+.B \&.ne
+requests are probably needed only for C programs.
+.SH SEE ALSO
+diff(1), nroff(1), troff(1).
+.SH BUGS
+Aesthetic considerations may dictate manual adjustment of some output.
+File differences involving only formatting requests may produce undesirable
+output,
+i.e., replacing
+.B \&.sp
+by
+.B \&.sp 2
+will
+produce a ``change mark'' on the preceding or following line of output.
+.\"	@(#)diffmk.1	5.1 of 10/31/83

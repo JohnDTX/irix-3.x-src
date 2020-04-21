@@ -1,0 +1,87 @@
+|
+|
+|	lowpm2.s  -  	low-level routines for handling a program break 
+|			for the quirk proms
+|
+|
+	.globl	_ResetStack,_RestoreStackandGO
+	.globl	_trapF
+	.globl	_level6int,_level2int
+|
+|	level6int is the level 6 interrupt handler.  It catches level
+|	6 interrupts, saves the stack frame in one piece, and passes
+|	a pointer to this saved stack frame to serialHandler (C).
+|
+|	serialHandler either returns, in which case the registers
+|	are restorred and an rte done, or it calls RestoreStackandGO,
+|	passing it the pointer to the saved stack frame. RestoreStackandGO
+|	restores the stack pointer to the passed value and jumps to the
+|	stack unwinding part of level6int.
+|
+_level6int:
+	movw	#0,sp@-		| stack one word for alignment
+	moveml	#0xffff,sp@-	| save all registers
+	jbsr	_serialHandler
+offintospace:
+|
+|	offintospace trusts that the sp points to a full register set
+|	and interrupt stack frame as if level6int
+|	had simply returned.
+|
+	moveml	sp@+,#0xffff	| restore all the registers
+	tstw	sp@+		| unstack the alignment word
+	rte			| and return from exception
+|
+|	level2int is the interrupt receivor for the ethernet 
+|
+_level2int:
+	movw	#0,sp@-		| stack one word for alignment
+	moveml	#0xffff,sp@-	| save all registers
+	jbsr	_nxintr
+	bra	offintospace
+|
+|	ResetStack expects three arguments - 
+|	    ResetStack(savedword,newstack,nbytesforglobals)
+|	it returns savedword as its value, sets the stack to newstack,
+|	subtracts nbytesforglobals from sp and places it in a6
+|	
+_ResetStack:
+	movl	sp@,a0		| return address
+	movl	sp@(4),d0	| savedword
+	movl	sp@(12),d1	| amount for fake stack frame
+	movl	sp@(8),sp	| reset stack
+	movl	sp,a6		| reset stack frame for C
+	addl	d1,a6
+	subl	#12,sp		| subtract number of args to pop
+				| (this is so the sp will be at newstack 
+				| after C is finished unwinding )
+	jmp	a0@		| and return
+|
+|
+|	
+|
+_RestoreStackandGO:
+	movl	sp@(4),sp	| restore the stack pointer
+	bra	offintospace	| and go unwind it.
+|
+|
+|	trapF is the user trap F receivor.
+|
+	.globl _bstart
+_trapF:
+	movw	#0x2700,sr	| spl7
+	movw	#0,sp@-		| stack one word for alignment
+	moveml	#0xffff,sp@-	| save all registers
+	movl	sp,d7		| save the stack
+	movl	#_bstart,sp	| new stack
+	movl	d7,sp@-		| pass frame ptr
+	jbsr	_godebugger
+	movl	d7,sp		| restore the stack
+	bra 	offintospace
+|
+|	int 4 -- catch the level 4 interrupt and call squeek()
+|
+	.globl	_squeek,_int4
+_int4:
+	jbsr	_squeek
+	rte

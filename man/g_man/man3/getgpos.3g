@@ -1,0 +1,34 @@
+.TH getgpos 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getgpos
+\- returns the current graphics position
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getgpos(fx, fy, fz, fw)"
+.B "Coord *fx, *fy, *fz, *fw;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getgpo(fx, fy, fz, fw)"
+.B "real fx, fy, fz, fw"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getgpos(var fx, fy, fz, fw: Coord);"
+.SH DESCRIPTION
+.B getgpos
+returns the current graphics position after transformation
+by the current matrix.
+.SH "SEE ALSO"
+getcpos
+.sp
+.I Programming Guide,
+Section 3.1, Current Drawing Positions
+.SH NOTE
+This routine
+is available only in immediate mode.

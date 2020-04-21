@@ -1,0 +1,3 @@
+install -o $USER -c -m 555 tocrc.sh tocrc
+tocrc all
+tocrc all

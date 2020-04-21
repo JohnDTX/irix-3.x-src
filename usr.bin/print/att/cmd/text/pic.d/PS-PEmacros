@@ -1,0 +1,16 @@
+'\"#ident	"@(#)pic:PS-PEmacros	1.4"
+'\"		Copyright (c) 1984 AT&T
+'\"		  All Rights Reserved
+'\"     THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF AT&T
+'\"   The copyright notice above does not evidence any actual
+'\"   or intended publication of such source code.
+.de PS	\" start picture
+.	\" $1 is height, $2 is width, both in inches
+.if t .sp .3
+.in (\\n(.lu-\\$2)/2u
+.ne \\$1
+..
+.de PE	\" end of picture
+.in
+.if t .sp .6
+..

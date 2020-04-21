@@ -1,0 +1,132 @@
+'\"macro stdmacro
+.TH PASTE 1
+.SH NAME
+paste \- merge same lines of several files or subsequent lines of one file
+.SH SYNOPSIS
+\f3paste \fPfile1 file2 .\|.\|.
+.br
+\f3paste \-d\fP\|list file1 file2 .\|.\|.
+.br
+\f3paste \-s [\-d\fP\|list\|\f3] \fPfile1 file2 .\|.\|.
+.SH DESCRIPTION
+In the first two forms,
+.I paste\^
+concatenates corresponding lines of the given input
+files
+.IR file1 ,
+.IR file2 ,
+etc.
+It treats each file as a column or columns
+of a table and pastes them together horizontally
+(parallel merging).
+If you will, it is
+the counterpart of
+.IR cat\^ (1)
+which concatenates vertically, i.e.,
+one file after the other.
+In the last form above,
+.I paste\^
+subsumes the function of an older command with the same name
+by combining subsequent lines of the input file (serial merging).
+In all cases,
+lines are glued together with the
+.I tab\^
+character,
+or with characters from an optionally specified
+.IR list .
+Output is to the standard output, so it can be used as
+the start of a pipe,
+or as a filter,
+if \f3\-\fP is used in place of a file name.
+.PP
+The meanings of the options are:
+.TP "\w'\f3\-d\f1\ \ \ 'u"
+.B \-d
+Without this option,
+the new-line characters of each but the last file
+(or last line in case of the
+.B \-s
+option)
+are replaced
+by a
+.I tab\^
+character.
+This option allows replacing the
+.I tab\^
+character by one or more alternate characters (see below).
+.TP
+.I list\^
+One or more characters immediately following
+.B \-d
+replace the default
+.I tab\^
+as the line concatenation character.
+The list is used circularly, i.e., when exhausted, it is reused.
+In parallel merging (i.e., no
+.B \-s
+option),
+the lines from the last file are always terminated with a new-line character,
+not from the
+.IR list .
+The list may contain the special escape sequences:
+.B \e\|n
+(new-line),
+.B \et
+(tab),
+.B \e\e
+(backslash), and
+.B \e0
+(empty string, not a null character).
+Quoting may be necessary, if characters have special meaning to the shell
+(e.g., to get one backslash, use
+.I \-d\|"\^\e\e\e\e\^"
+).
+.TP
+.B \-s
+Merge subsequent lines rather than one from each input file.
+Use
+.I tab\^
+for concatenation, unless a
+.I list\^
+is specified
+with
+.B \-d
+option.
+Regardless of the
+.IR list ,
+the very last character of the file is forced to be a new-line.
+.TP
+.B \-
+May be used in place of any file name,
+to read a line from the standard input.
+(There is no prompting).
+.SH EXAMPLE
+.IP
+ls \||\| paste \|\-d" " \|\-
+.PP
+list directory in one column.
+.IP
+ls \||\| paste \|\- \|\- \|\- \|\-
+.PP
+list directory in four columns.
+.IP
+paste \|\-s \|\-d"\^\e\|t\e\|n" \|file
+.PP
+combine pairs of lines into lines.
+.SH "SEE ALSO"
+cut(1),
+grep(1), 
+.br
+pr(1):
+.BR "pr \-t \-m" .\|.\|.
+works similarly, but creates extra blanks, tabs and new-lines for a nice page layout.
+.SH DIAGNOSTICS
+.TP "\w'\f2too many files\f1\ \ \ \ 'u"
+.I "line too long\^"
+Output lines are restricted to 511 characters.
+.TP
+.I "too many files\^"
+Except for
+.B \-s
+option, no more than 12 input files may be specified.
+.\"	@(#)paste.1	5.1 of 11/9/83

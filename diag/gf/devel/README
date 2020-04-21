@@ -1,0 +1,4 @@
+This directory is for making "gfdevel" -- the console for the development
+system.  Contains .b's, a special gfdev.h, and a minimum of special .c's.
+
+BE SURE TO update header.c anytime you make a substantive change to gfdevel.

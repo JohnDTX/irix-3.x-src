@@ -1,0 +1,69 @@
+'\"macro stdmacro
+.TH loadst 1
+.SH NAME
+loadst \- print current time and load statistics.
+.SH SYNOPSIS
+.PP
+.B
+loadst
+[\-n] [\-a] [\-x] [\-t] [\-u] 
+.I
+[interval]
+.SH DESCRIPTION
+.PP
+.B
+loadst
+is an Emacs helper utility used to drive a mode-line clock for Emacs.
+It indicates whether you have new mail, prints the current time, and can
+display load average, disk-usage and cumulative cpu-time statistics.
+.SH OPTIONS
+.PP
+With no arguments,  loadst prints the word "Mail" if you have new mail, or
+nothing if you do not.
+Specifying flags adds other information to the
+display as follows:
+.IP "-a" 17
+display system load average
+.IP "-x" 17
+display disk transfer statistics
+.IP "-t" 17
+print the current time
+.PP
+If you specify a decimal
+.I
+interval
+argument,
+.B
+loadst
+will go to sleep and produce its output every
+.I
+interval
+seconds.  If no interval is specified, loadst prints once and exits.
+.IP "-n" 17
+prevents a newline from being added to the end of the status
+line.  Otherwise,  a newline is appended.
+.IP "-u" 17
+causes it to use your real uid rather than the value of the
+USER shell variable (which may not be defined on non-BSD systems)
+to figure out the name of your mail file.
+.SH NOTE
+In order to produce the load, disk, and cpu-usage statistics,
+.B
+loadst
+must be able to read /dev/kmem.  If /dev/kmem is protected against
+unprivileged users, you must run loadst setuid or setgid so it can read
+/dev/kmem.
+.SH FILES
+.IP "/dev/kmem" 17
+for load, cpu-usage, disk-usage statistics
+.IP "time.ml" 17
+Emacs MLisp library that uses loadst to drive a mode-line clock
+.SH SEE ALSO
+.IP "emacs(1)" 17
+the Emacs editor
+.SH BUGS
+The options must be given one per word, as in "-a -t" rather than
+"-at".  This is not considered to be a problem, since
+.B
+loadst
+is intended to be invoked by time.ml, and not interactively.

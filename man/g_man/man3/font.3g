@@ -1,0 +1,40 @@
+.TH font 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B font
+\- selects a raster font for drawing text strings
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "font(fntnum) "
+.B "short fntnum;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine font(fntnum)"
+.B "integer*4 fntnum"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure font(fntnum: Short);"
+.SH DESCRIPTION
+.B font
+selects the raster font that \f3charstr\f1 uses
+when it draws a text string.  \f2fntnum\f1 is an
+index into the font table that \f3defrasterfont\f1 builds.
+This font remains in effect until another \f3font\f1 executes.
+Font 0 is the default.
+.PP
+If 
+.B font
+specifies a font number that is not defined, the system selects 
+.br
+font 0.
+.SH "SEE ALSO"
+charstr, defrasterfont, getdescender, getfont, getheight, strwidth
+.sp
+.I Programming Guide,
+Section 5.3, Fonts

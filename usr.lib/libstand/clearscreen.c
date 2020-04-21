@@ -1,0 +1,4 @@
+clearscreen()
+{
+    ScreenClear();
+}

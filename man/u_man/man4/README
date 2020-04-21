@@ -1,0 +1,40 @@
+1) deleted empty ".so" files
+2) added	cshrc.4
+		login.4
+		profile.4
+		TZ.4
+		sys_id.4
+		motd.4
+		mt.4
+		smtio.4
+3) deleted:	errfile.4
+		issue.4
+		master.4
+4) no eqn
+5) tbl:		TZ.4
+		a.out.4
+		acct.4
+		ar.4
+		cpio.4
+		fs.4
+		inode.4
+		mnttab.4
+		tp.4
+		utmp.4
+6) moved	mtio.4 --> smtio.4
+
+
+RobinF.  The following manual pages were added to represent the file systems
+which are available on the IRIS 3400:
+
+	inode.4,fs.4		gives the generic information for both
+				the new and old file systems.
+	bellinode.4,bellfs.4	gives information that is specific to
+				the Bell file system
+	efsinode.4,efs.4	gives information specific to the new file
+				system
+
+Both file systems are supported on the 3400.
+
+November 2, 1985.  Robinf created a directory called tools.  In this directory
+are tools which can be used to check files in and out of the RCS directory.

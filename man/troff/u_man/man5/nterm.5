@@ -1,0 +1,249 @@
+'\"macro stdmacro
+.TH NTERM 5
+.SH NAME
+nterm \- terminal driving tables for nroff
+.SH DESCRIPTION
+.BR nroff (1)
+uses driving table to customize its output for various types of output
+devices, such as printing terminals, special word processing terminals
+(such as Diablo, Qume, or NEC Spinwriter mechanisms), or special
+output filter programs.  These driving tables are written as 
+.SM ASCII
+files, and are installed in
+.BI /usr/lib/nterm/tab. name, 
+where
+.I name
+is the name for that terminal types as given in 
+.BR term (5).
+.PP
+The first line of a driving table should contain the name of the 
+terminal: simply a string with no embedded white space.
+"White space" means any combination of spaces, tabs and new-lines.
+The next part of the driver table is structure as follows:
+.RS
+\f3bset\f1 [\f2integer\f1] (not supported in all versions of \f3nroff\f1)
+.br
+\f3breset\f1 [\f2integer\f1] (not supported in all versions of \f3nroff\f1)
+.br
+\f3Hor\f1 [\f2integer\f1]
+.br
+\f3Vert\f1 [\f2integer\f1]
+.br
+\f3Newline\f1 [\f2integer\f1]
+.br
+\f3Char\f1 [\f2integer\f1]
+.br
+\f3Em\f1 [\f2integer\f1]
+.br
+\f3Halfline\f1 [\f2integer\f1]
+.br
+\f3Adj\f1 [\f2integer\f1]
+.br
+\f3twinit\f1 [\f2character string\f1]
+.br
+\f3twrest\f1 [\f2character string\f1]
+.br
+\f3twnl\f1 [\f2character string\f1]
+.br
+\f3hlr\f1 [\f2character string\f1]
+.br
+\f3hlf\f1 [\f2character string\f1]
+.br
+\f3flr\f1 [\f2character string\f1]
+.br
+\f3bdon\f1 [\f2character string\f1]
+.br
+\f3bdoff\f1 [\f2character string\f1]
+.br
+\f3iton\f1 [\f2character string\f1]
+.br
+\f3itoff\f1 [\f2character string\f1]
+.br
+\f3ploton\f1 [\f2character string\f1]
+.br
+\f3plotoff\f1 [\f2character string\f1]
+.br
+\f3up\f1 [\f2character string\f1]
+.br
+\f3down\f1 [\f2character string\f1]
+.br
+\f3right\f1 [\f2character string\f1]
+.br
+\f3left\f1 [\f2character string\f1]
+.br
+.RE
+The meanings of these fields are as follows:
+.sp
+.TP 9
+.B breset
+bits to set in the 
+.B c_oflag
+field of the
+.B termio
+structure before output.
+.TP
+.B breset
+bits to reset in the 
+.B c_oflag
+field of the
+.B termio
+structure before output.
+.TP
+.B Hor
+horizontal resolution in units of 1/240 of an inch.
+.TP
+.B Vert
+vertical resolution in units of 1/240 of an inch
+.TP
+.B Newline 
+space moved by a newline (linefeed) character in units of 1/240 of an inch.
+.TP
+.B Char
+quantum of character sizes, in units of 1/240 of an inch. (i.e., a character
+is a multiple of Char units wide)
+.TP
+.B Em
+size of an em in units of 1/240 of an inch.
+.TP
+.B Halfline
+space moved by a half-linefeed (or half-reverse-linefeed) character
+in units of 1/240 of an inch.
+.TP
+.B Adj
+quantum of white space, in 1/240 of an inch (i.e., white spaces are a
+multiple of Adj units wide)  Note:  if this is less than the size
+of the space character, nroff will ouput fractional spaces using plot
+mode.  Also, if the  \-e switch to nroff is used, Adj is set equal to
+Hor by nroff.
+.TP
+.B twinit
+sequence of characters used to initialize the terminal in a mode
+suitable for nroff.
+.TP
+.B twrest
+sequence of characters used to restore the terminal to normal mode.
+.TP
+.B twnl
+sequence of characters used to move down one line.
+.TP
+.B hlr
+sequence of characters used to move up one-half line.
+.TP
+.B hlf
+sequence of characters used to move down one-half line.
+.TP
+.B flr
+sequence of characters used to move up one line
+.TP
+.B bdon
+sequence of characters used to turn on hardware boldface mode, if any.
+.TP
+.B bdoff
+sequence of characters used to turn off hardware boldface mode, if any.
+.TP
+.B iton
+sequence of characters used to turn on hardware italics mode, if any.
+.TP
+.B itoff
+sequence of characters used to turn off hardware italics mode, if any.
+.TP
+.B ploton 
+sequence of characters used to turn on hardware plot mode (for Diablo type
+mechanisms) if any.
+.TP
+.B plotoff
+sequence of characters used to turn off hardware plot mode (for Diablo type
+mechanism) if any.
+.TP
+.B up
+sequence of characters used to move up one resolution unit (Vert) in 
+plot mode, if any.
+.TP
+.B down
+sequence of characters used to move down one resolution unit (Vert) in
+plot mode, if any.
+.TP
+.B right
+sequence of characters used to move right one resolution unit (Hor)
+in plot mode, if any.
+.TP
+.B left
+sequence of characters used to move left one resolution unit (Hor)
+in plot mode, if any.
+.PP
+This part of the driving table is fixed format, and you cannot change the
+order of entries.  You should put entries of separate lines, and these
+lines shoudl contain exactly two fields (no comments allowed) separated
+by white space.  For example:
+.RS
+bset 0
+.br
+breset 0
+.br
+Hor
+.RE
+and so on.
+.PP
+Follow this first part of the driving table with a line
+containing the word "charset," and then specify a table of
+special characters that you want to include.  That is, specify
+all the non-ASCII characters that
+.BR nroff (1)
+knows by two character names. such as 
+\\hy.
+If 
+.B nroff
+does not find the word "charset" where it expects to, it will abort with
+an error message.
+.PP
+Each definition in the part after "charset" occupies one line and
+has the following format:
+.RS
+chname width output
+.RE
+where "chname" is the (two letter) name of the special character,
+"width"is its width in ems, and "output" is the string of characters
+and escape sequences to send to the terminal to produce the special
+character.
+.PP
+If any field in the "charset" part of the driving table does not pertain
+to the output device, you may give that particular sequence as a null
+string, or leave out the entry.  Special characters that do not have a 
+definition in this field are ignored on output by 
+.BR nroff (1).
+.PP
+You may put the "charset" definitions in any order, so it is possible to speed
+up 
+.B nroff
+by putting the most used characters first.  For example,
+.RS
+charset
+.br
+em 1\-
+.br
+hy 1
+.br
+\\\- 1\-
+.br
+bu 1 + \\bo
+.br
+.RE
+and so on.
+.PP
+The best way to create a terminal table for a new device is to take
+an existing terminal table and edit it to suit your needs.  Once you
+create such a file, put it in the directory
+.B /usr/lib/nterm
+and give it the name
+.BI tab. xyz
+where 
+.I xyz
+is the name of the terminal and the name that you pass
+.B nroff
+via the
+.B \-T
+option (for example, \f3nroff \-Txyz\f1).
+.SH FILES
+/usr/lib/nterm/tab.\f2name\f1	terminal files
+.SH SEE ALSO
+.BR nroff (1).

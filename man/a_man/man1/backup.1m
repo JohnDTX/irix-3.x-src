@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH BACKUP 1M
+.SH NAME
+backup \- interactive backup program for SGI IRIS workstation
+.SH SYNOPSIS
+.B /etc/backup
+.SH DESCRIPTION
+.PP
+.I Backup
+is an interactive backup program designed for use on the
+Silicon Graphics IRIS workstation.
+.I Backup
+will determine whether a full backup has been done in the past week.
+If it has not been done
+.I backup
+will prompt the operator to mount cartridge tapes to backup both the root and
+/usr file systems.
+If a full backup has been done within the last week
+.I backup
+will prompt the operator to mount a cartridge tape to do an incremental backup
+of the entire file system (both root and /usr).
+.PP
+.I Backup
+uses one tape for doing incremental backups on Mondays, Wednesdays, and
+Fridays and a different tape for doing incremental backups on Tuesdays
+and Thursdays.
+It also alternates between two sets of tapes for doing full backups on
+alternate weeks.
+This causes backup versions to exist longer and also handles the case where
+the disk fails in the middle of a backup in which case the backup
+being made is incomplete.
+.PP
+.I Backup
+uses
+.I tar
+to do the backups with relative pathnames relative to either
+.B /
+or
+.BR /usr .
+.I Backup
+also keeps a log of backups in the file
+.B /etc/back.log
+which is written to backup tapes as the first file and named
+.BR back.log .
+.I Backup
+is designed to handle systems with two file systems,
+.B root
+and
+.BR /usr .
+Other configurations require modifications to
+.IR backup .
+.SH FILES
+.ta +10m
+/etc/back.log	log of backups
+.br
+/etc/backfull.last	time of last full backup
+.br
+/etc/backincrO.last	time of last Monday/Wednesday/Friday backup
+.br
+/etc/backincrE.last	time of last Tuesday/Thursday backup
+.br
+/tmp/back?*	temporaries
+.SH SEE ALSO
+tar(1),
+cpio(1).
+.\" $Source: /d2/3.7/src/man/a_man/man1/RCS/backup.1m,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:20:11 $

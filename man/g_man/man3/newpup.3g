@@ -1,0 +1,36 @@
+.TH newpup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B newpup 
+\- allocates and initializes a structure for a new menu
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long newpup()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function newpup()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function newpup: longint;"
+.SH DESCRIPTION
+.B newpup
+allocates and initializes a structure for a new menu; it returns
+a positive menu identifier.
+Use
+.B newpup
+with 
+.B addtop
+to create pop-up menus in FORTRAN programs.
+.SH "SEE ALSO"
+addtopup, defpup, dopup, freepup
+.sp
+\f2Using mex\fP, Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode under the window manager.  
+It cannot be used remotely. 

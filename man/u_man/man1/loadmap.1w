@@ -1,0 +1,14 @@
+'\"macro stdmacro
+.TH LOADMAP 1W
+.SH NAME
+loadmap \- load a part of the color map from a file
+.SH SYNOPSIS
+.B loadmap 
+filename
+.SH DESCRIPTION
+.I loadmap
+loads the color map from the named file,
+.I filename.
+.SH SEE ALSO
+makemap(1W),
+savemap(1W)

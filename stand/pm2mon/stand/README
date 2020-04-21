@@ -1,0 +1,5 @@
+mini standalone library.
+link with prom libraries in this order:
+	... libstand.a libglxprom.a libpm2prom.a
+crtstand.s and standmain.c are the standalone startup code.
+other .c files are standalone equivalents of prom routines.

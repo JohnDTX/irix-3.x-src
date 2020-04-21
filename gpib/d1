@@ -1,0 +1,1 @@
+exec dib -u 1 $*

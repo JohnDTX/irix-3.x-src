@@ -1,0 +1,48 @@
+'\"macro stdmacro
+.TH TWINKLE 6 
+.SH NAME
+twinkle \- twinkle stars on the screen
+.SH SYNOPSIS
+/usr/games/twinkle [-+[s save]] [density1] [density2]
+.SH DESCRIPTION
+.PP
+.I Twinkle
+causes a specified density of `stars' to twinkle on the screen.
+The following options are available:
+.TP
+\-
+print out the present screen density (the percentage of the screen
+that will be filled with stars) in the lower left hand corner of the
+screen.  This number will change as stars go on and off.
+.TP
+\+
+do not `randomize' before starting.  The screen starts out completely
+blank and stars are added, bit by bit.  In this case the density rises
+beyond the specified density, then falls to the required percentage.
+.TP
+s
+save binary density on file `save', in case you want to see the
+density curve that a particular density specification produced
+during the life of the show.
+.TP
+density
+If no density is specified, density is .5 (50% of the screen
+will be filled with stars).
+.br
+If only 
+.I density1
+is given, density is 1/density1
+.br
+If both density1 and density2 are given, 
+.I density
+is the resultant of density1/density1+density2.
+.SH EXAMPLE
+.IP
+twinkle -+ 2 6 
+.PP
+would start from a blank screen and twinkle stars to a final
+density of 2/8, or 25%.  The densities would be shown in the
+lower left hand corner, as a three-place decimal.
+.SH AUTHOR
+Kurt Shoens
+.\"	@(#)twinkle.6	5.1 of 10/18/83

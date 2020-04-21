@@ -1,0 +1,74 @@
+'\"macro stdmacro
+.TH QIC 7
+.SH NAME
+qic \- st-506 disk/tape controller
+.SH SYNOPSIS
+.B "controller dsd0 at mb0 csr 0x7F00 priority 1 vector dsdintr
+.br
+.B "tape md0 at dsd0 drive 0 flags 0x02
+.SH DESCRIPTION
+This is a MULTIBUS ST-506 disk and tape controller.
+The driver software supports 2 winchester hard disk drives,
+one qic-02 tape drive, and one floppy.
+This documents the tape support.
+.PP
+There is a `raw' interface
+which provides for direct transmission between the tape
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.' Also, the \f3mtio\f1(7)
+interface to the drive is provided.
+.PP
+In raw I/O counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.SH FILES
+/dev/rmt1	rewinding device
+.br
+/dev/rmt2	non rewinding device
+.SH SEE ALSO
+autoconf(7),
+qic(7),
+floppy(7)
+.SH DIAGNOSTICS
+\f3qic%d: No cartridge in drive\f1.  Can't write on nothing.
+.br
+\f3qic%d: Unit not ready\f1.  Something strange is going on.
+.br
+\f3qic%d: write protected\f1.  Tape must be writable if the drive
+is opened for read/write or write.
+.br
+\f3qic%d: couldn't rewind on open\f1.
+up the driver.
+.br
+\f3panic: qicstart: couldn't start!\f1.  Controller is probably wedged.
+.br
+\f3qic%d: Hard error cmd %s No status available\f1.  Something is wrong
+with the tape drive such that the controller would hang if it attempted
+to read the drive status.
+.br
+\f3%s on qic%d\f1.  Were one to actually mount a filesystem on the
+tape drive, this is the message that would be printed if you ran out
+of space on the filesystem proceeded by ``out of space''.
+.br
+\f3qic%d: cannot read the Tape Status\f1.  Another way of saying
+that things are broken.
+.br
+\f3qic%d: cannot get Tape Status into memory\f1.  Yet another way of saying
+that things are really gosh darn awfully broken.
+.br
+\f3qic%d: Couldn't write file mark %d\f1.  For some reason, the drive
+was unable to write a file mark.
+.br
+\f3Failed %d files\f1.  While skipping forward %d files, the tape drive
+returned an error.  Usually means that the tape does not contain %d files.
+.br
+\f3Failed %d records\f1.  While skipping forward %d records, the tape drive
+returned an error.  Usually means that the tape does not contain %d records.
+.br
+.SH BUGS
+There are far too many printouts in the driver.
+More specific messages should be printed.

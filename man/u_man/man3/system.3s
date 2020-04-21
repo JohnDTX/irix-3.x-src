@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH SYSTEM 3S 
+.SH NAME
+system \- issue a shell command 
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int system (string)
+.br
+.B char \(**string;
+.SH DESCRIPTION
+.I System\^
+causes the
+.I string\^
+to be given to
+.IR  sh\^ (1)
+as input, as if the string had been typed as a command
+at a terminal.
+The current process waits until the shell has
+completed, then returns the exit status of the shell.
+.SH FILES
+/bin/sh
+.SH "SEE ALSO"
+sh(1), exec(2).
+.SH DIAGNOSTICS
+.I System\^
+forks to create a child process
+that in turn exec's
+.B /bin/sh\^
+in order to execute
+.IR string .
+If the fork or exec fails,
+.I system\^
+returns \-1 and sets
+.IR errno .
+.\"	@(#)system.3s	5.1 of 10/25/83

@@ -1,0 +1,46 @@
+.TH blkqread 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B blkqread
+\- reads multiple entries from the queue
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long blkqread(data, n)"
+.B "short *data" 
+.B "short n;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function blkqre(data, n)"
+.B "integer*2 data(*)"
+.B "integer*4 n"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function blkqread(var data: Short; n: longint): 
+.br
+.B	longint;
+.SH DESCRIPTION
+.B blkqread
+reads multiple entries from the input queue.
+.I data
+is an array of short integers, and
+.I n
+is the size of the array data.
+.B blkqread
+returns the number of queue entries read, and 
+.I data
+is filled alternatively with device numbers and
+device values.  Note that the number of entries read is at \f2n\fP/2.
+
+.SH "SEE ALSO"
+qread
+.sp
+.I  Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

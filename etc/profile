@@ -1,0 +1,5 @@
+umask 002
+cat /etc/motd
+if /bin/mail -e
+then echo "You have mail."
+fi

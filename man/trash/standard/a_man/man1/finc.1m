@@ -1,0 +1,81 @@
+.TH FINC 1M
+.SH NAME
+finc \- fast incremental backup 
+.SH SYNOPSIS
+.B finc
+[selection-criteria] file-system raw-tape
+.SH DESCRIPTION
+.I Finc\^
+selectively copies the input
+.I file-system
+to the output
+.IR raw-tape .
+The cautious will want to mount the input
+.I file-system\^
+read-only to insure an accurate backup,
+although acceptable results can be obtained in read-write mode.
+The tape must be previously labelled by \f2labelit\fP (see
+.IR volcopy (1M)).
+The selection is controlled by the 
+.IR "selection-criteria" ,
+accepting only those inodes/files for whom the conditions are true.
+.PP
+It is recommended that production of a
+.I finc
+tape be preceded by the
+.I ff
+command, and the output of
+.I ff
+be saved as an index of the tape's contents.
+Files on a
+.I finc
+tape may be recovered with the
+.I frec
+command.
+.PP
+The argument
+.B n\^
+in the \f2selection-criteria\fP which follow is used 
+as a decimal integer (optionally signed), where
+.BI + n
+means
+more than
+.IR n ,
+.BI \- n
+means
+less than
+.IR n ,
+and 
+.I n\^
+means exactly
+.IR n .
+A day is defined as 24 hours.
+.TP "\w'\f3-n\f2 file\f1\ \ \ 'u"
+.BI \-a " n"
+True if the file has been accessed in
+.I n
+days.
+.TP "\w'\f3-n\f2 file\f1\ \ \ 'u"
+.BI \-m " n"
+True if the file has been modified in
+.I n\^
+days.
+.TP "\w'\f3-n\f2 file\f1\ \ \ 'u"
+.BI \-c " n"
+True if the i-node has been changed in 
+.I n\^
+days.
+.TP "\w'\f3-n\f2 file\f1\ \ \ 'u"
+.BI \-n " file"
+True for any file which has been modified more recently than the argument
+.IR file .
+.SH EXAMPLE
+.IP
+finc \|\-m \|\-2 \|/dev/rdiskusr \|/dev/rtp0
+.PP
+writes a tape consisting of all files from file-system
+.B /usr
+modified in the last 48 hours.
+.SH "SEE ALSO"
+cpio(1), ff(1M), frec(1M), volcopy(1M).
+.\"	@(#)finc.1m	5.1 of 11/1/83

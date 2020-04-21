@@ -1,0 +1,226 @@
+'\"macro stdmacro
+.tr ~ 
+.TH SEMCTL 2
+.SH NAME
+semctl \- semaphore control operations
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/ipc.h>
+.br
+.B #include <sys/sem.h>
+.PP
+.nf
+.B "int semctl (semid, semnum, cmd, arg)"
+.B int semid, cmd;
+.B int semnum;
+.B union semun {
+.B ~~~~~int val;
+.B ~~~~~struct semid_ds \(**buf;
+.B ~~~~~ushort array[ ];
+.B } arg;
+.fi
+.tr ~~
+.SH DESCRIPTION
+.I Semctl\^
+provides a variety of semaphore control operations as specified by
+.IR cmd .
+.PP
+The following
+.I cmds
+are executed with respect to the semaphore specified by
+.IR semid\^ " and " semnum :
+.RS .3i
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B GETVAL
+Return the value of semval (see
+.IR intro\^ (2)).
+.SM {READ}
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B SETVAL
+Set the value of semval to
+.IR arg.val .
+.SM {ALTER}
+When this cmd is successfully executed the semadj value corresponding to the
+specified semaphore in all processes is cleared.
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B GETPID
+Return the value of sempid.
+.SM {READ}
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B GETNCNT
+Return the value of semncnt.
+.SM {READ}
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B GETZCNT
+Return the value of semzcnt.
+.SM {READ}
+.RE
+.PP
+The following
+.I cmds
+return and set, respectively, every semval in the set of semaphores.
+.RS .3i
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B GETALL
+Place semvals into array pointed to by
+.IR arg.array .
+.SM {READ}
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B SETALL
+Set semvals according to the array pointed to by
+.IR arg.array .
+.SM {ALTER}
+When this cmd is successfully executed the semadj values corresponding to each
+specified semaphore in all processes are cleared.
+.RE
+.PP
+The following
+.I cmds
+are also available:
+.RS .3i
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B IPC_STAT
+Place the current value of each member of the data structure associated with
+.I semid\^
+into the structure pointed to by
+.IR arg.buf .
+The contents of this structure are defined in
+.IR intro\^ (2).
+.SM {READ}
+.bp
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B IPC_SET
+Set the value of the following members of the data structure associated with
+.I semid\^
+to the corresponding value found in the structure pointed to by
+.IR arg.buf :
+.IP "" \w'\f3IPC_RMID\fP\ \ \ \ \ \ \ 'u
+.nf
+.B sem_perm.uid
+.B sem_perm.gid
+.B "sem_perm.mode\ \  /\(** only low 9 bits \(**/"
+.fi
+.IP "" \w'\f3IPC_RMID\fP\ \ 'u
+This cmd can only be executed by a process that has an effective user
+.SM ID
+equal to either that of super user or to the value of
+.B sem_perm.uid
+in the data structure associated with
+.IR semid .
+.TP \w'\f3IPC_RMID\fP\ \ 'u
+.SM
+.B IPC_RMID
+Remove the semaphore identifier specified by
+.I semid\^
+from the system and destroy the set of semaphores and data structure
+associated with it.
+This cmd can only be executed by a process that has an effective user
+.SM ID
+equal to either that of super user or to the value of
+.B sem_perm.uid
+in the data structure associated with
+.IR semid .
+.RE
+.PP
+.I Semctl\^
+will fail if one or more of the following are true:
+.IP "" .3i
+.I Semid\^
+is not a valid semaphore identifier.
+.SM
+\%[EINVAL]
+.IP
+.I Semnum\^
+is less than zero or greater than
+.BR sem_nsems .
+.SM
+\%[EINVAL]
+.IP
+.I Cmd\^
+is not a valid command.
+.SM
+\%[EINVAL]
+.IP
+Operation permission is denied to the calling process (see
+.IR intro\^ (2)).
+.SM
+\%[EACCES]
+.IP
+.I Cmd\^
+is
+.SM
+.B SETVAL
+or
+.SM
+.B SETALL
+and the value to which semval is to be set is greater than
+the system imposed maximum.
+.SM
+\%[ERANGE]
+.IP
+.I Cmd\^
+is equal to
+.SM
+.B IPC_RMID
+or
+.SM
+.B IPC_SET
+and the effective user
+.SM ID
+of the calling process is not equal to that of super user and it is
+not equal to the value of
+.B sem_perm.uid
+in the data structure associated with
+.IR semid .
+.SM
+\%[EPERM]
+.IP
+.I Arg.buf\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion,
+the value returned depends on
+.I cmd\^
+as follows:
+.PD 0
+.RS .3i
+.TP \w'\f3\s-1GETNCNT\ \ \ \ 'u
+.SM
+.B GETVAL
+The value of semval.
+.TP
+.SM
+.B GETPID
+The value of sempid.
+.TP
+.SM
+.B GETNCNT
+The value of semncnt.
+.TP
+.SM
+.B GETZCNT
+The value of semzcnt.
+.TP
+All others
+A value of 0.
+.RE
+.PD
+.PP
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+semget(2), semop(2).
+.\"	@(#)semctl.2	5.1 of 11/1/83

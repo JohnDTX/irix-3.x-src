@@ -1,0 +1,26 @@
+.TH getlwidth 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getlwidth
+- return the current linewidth
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short getlwidth()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getlwi()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlwidth: Short;"
+.sp
+.SH DESCRIPTION
+.I Getlwidth
+returns the current linewidth, in pixels.  A line can be one or two
+pixels wide.
+.SH "SEE ALSO"
+.I linewidth
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,18 @@
+'\"#ident	"@(#)shells:tbl.language	1.4"
+.TS
+box,center;
+c c c
+l l l.
+Language	Authors	Primary Use
+.sp
+_
+APL	IBM	Mathematics, Applications
+Basic	Dartmouth	Teaching, Applications
+C	BTL	Systems, Applications
+COBOL	Many	Business Applications
+Fortran	Many	Scientific Applications
+LISP	M.I.T.	Artificial Intelligence
+Pascal	Stanford	Teaching, Systems
+PL/1	IBM	Applications
+SNOBOL4	AT&T	Applications
+.TE

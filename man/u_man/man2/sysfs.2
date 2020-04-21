@@ -1,0 +1,64 @@
+'\"macro stdmacro
+.TH SYSFS 2
+.SH NAME
+sysfs \- get file system type information
+.SH SYNOPSIS
+.B #include <sys/fstyp.h>
+.br
+.B #include <sys/fsid.h>
+.sp
+.B int sysfs (opcode, fsname)
+.br
+.B int opcode;
+.br
+.B char *fsname;
+.sp
+.B int sysfs (opcode, fs_index, buf)
+.br
+.B int opcode;
+.br
+.B int fs_index;
+.br
+.B char *buf;
+.br
+.sp
+.B int sysfs (opcode)
+.br
+.B int opcode;
+.br
+.SH DESCRIPTION
+\f2sysfs\f1  returns information about the file system types configured 
+in the system. The number of arguments accepted by \f2sysfs\f1 varies and 
+depends on the \f2opcode\f1. The currently recognized \f2opcodes\f1 and their 
+functions are described below:
+.TP 1.5i
+\f3GETFSIND\f1
+translates \f2fsname\f1, a null-terminated file-system identifier, 
+into a file-system type index.
+.TP
+\f3GETFSTYP\f1
+translates \f2fs_index\f1, a file-system type index, into a null-terminated
+file-system identifier and writes it into the buffer pointed to by \f2buf\f1;
+this buffer must be at least of size \f3FSTYPSZ\f1 as defined in 
+\f2<sys/fstyp.h>\f1.
+.TP
+\f3GETNFSTYP\f1
+returns the total number of file system types configured in
+the system.
+.P
+\f2sysfs\f1 will fail if one or more of the following are true:
+.TP 1.5i
+[EINVAL]
+\f2Fsname\f1 points to an invalid file-system identifier; \f2fs_index\f1 is
+zero, or invalid; \f2opcode\f1 is invalid.
+.TP
+[EFAULT]
+\f2Buf\f1 or \f2fsname\f1 point to an invalid user address.
+.SH DIAGNOSTICS
+Upon successful completion, \f2sysfs\f1 returns the file-system type index if
+the \f2opcode\f1 is \f3GETFSIND\f1, a value of 0 if the \f2opcode\f1 is 
+\f3GETFSTYP\f1, or the number of file system types configured if the 
+\f2opcode\f1 is \f3GETNFSTYP\f1.  Otherwise, a value of -1 is returned 
+and \f2errno\f1 is set to indicate the error.
+.\"	@(#)SYSFS.2	0.0 of 0/0/00
+.Ee

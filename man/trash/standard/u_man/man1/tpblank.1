@@ -1,0 +1,26 @@
+.TH TPBLANK 1
+.SH NAME
+tpblank \- prohibits the system from updating the textport
+.SH SYNOPSIS
+.B tpblank
+.SH DESCRIPTION
+.PP
+.I Tpblank\^
+prohibits the textport from being updated by non-graphics programs or when
+graphics programs exit.
+This is useful for preventing UNIX from affecting the screen image while
+running a series of graphics programs, each of which
+produces part of a complete image.
+.SH "SEE ALSO"
+reshape(1), tpon(1)
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/tpblank.1,v 1.1 89/03/27 16:41:39 root Exp $
+.\" $Log:	tpblank.1,v $
+Revision 1.1  89/03/27  16:41:39  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  84/12/14  10:04:31  bob
+.\" Made minor style changes.
+.\" 
+.\" Revision 1.1  84/12/11  13:38:14  bob
+.\" Initial revision
+.\" 

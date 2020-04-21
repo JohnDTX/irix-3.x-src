@@ -1,0 +1,67 @@
+#! /bin/sh
+
+PATH=.:$PATH
+
+deflist="
+dist
+boot
+root
+usr
+upd
+man
+nfs
+games
+gifts
+gltut
+demos
+ftn
+pas
+tcp
+488
+ibm
+xns
+"
+
+root=$DEST
+listdir=.
+case "$machine" in
+juniper) bootdev=md0b ;;
+iris) bootdev=md0c ;;
+*) bootdev=..error.. ;;
+esac
+
+while test $# -gt 0
+do
+	case $1 in
+	-r)	shift ; root=$1 ;;
+	-l)	shift ; listdir=$1 ;;
+	-b)	shift ; bootdev=$1 ;;
+	*)	break ;;
+	esac
+	shift
+done
+
+if test $# -eq 0
+then
+	set -- $deflist
+fi
+
+for e in $*
+do
+	version=`getvers $e`
+	heading=`cat $root/$version`
+	echo "$heading"
+	case $e in
+	boot)
+		mount /dev/$bootdev /root
+		mklist -r /root -l
+		umount /dev/$bootdev
+		;;
+	dist)
+		mklist -r $root -l dist
+		;;
+	*)
+		mklist -r $root -sl - < $root/dist/list.$e
+		;;
+	esac | pr -l88 -h "$heading" > $listdir/long.$e
+done

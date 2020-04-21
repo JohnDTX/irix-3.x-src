@@ -1,0 +1,55 @@
+'\"macro stdmacro
+.TH ALARM 2 
+.SH NAME
+alarm \- set a process's alarm clock
+.SH SYNOPSIS
+.B unsigned alarm (sec)
+.br
+.B unsigned sec;
+.SH DESCRIPTION
+.I Alarm\^
+instructs the calling process's alarm clock to send the signal
+.B
+.SM SIGALRM
+to the calling process after the number of real time seconds specified by
+.I sec\^
+have elapsed;
+see 
+.IR signal (2).
+.PP
+Alarm requests are not stacked;
+successive calls reset the calling process's alarm clock.
+If the argument is 0, any alarm request is canceled.
+Because the clock has a 1-second resolution,
+the signal may occur up to one second early;
+because of scheduling delays,
+resumption of execution of when the signal is
+caught may be delayed an arbitrary amount.
+The longest specifiable delay time is 4,294,967,295 
+(2**32-1)
+seconds,
+or
+136 years.
+.PP
+If
+.I sec\^
+is 0, any previously made alarm request is canceled.
+.SH RETURN VALUE
+.I Alarm\^
+returns the amount of time
+previously remaining in the calling process's alarm clock.
+.SH "SEE ALSO"
+pause(2), signal(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#27,D0
+.B movl	sec,A0
+.B trap	#0
+.fi
+.PP
+On return, 
+.B D0 
+will contain the amount of time previously remaining in the alarm clock.
+.DT
+.\"	@(#)alarm.2	5.1 of 10/19/83

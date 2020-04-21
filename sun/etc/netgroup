@@ -1,0 +1,15 @@
+#
+# This file defines network wide groups
+#
+# The format of a line in this file is:
+#
+#	groupname member1 member2 ...
+#
+# where a member entry can be either another group name
+# or a triple of the form
+#
+#	(hostname,username,domainname)
+#
+# Refer to the NETGROUP(4) manual page for more
+# information.
+#

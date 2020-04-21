@@ -1,0 +1,90 @@
+'\"macro stdmacro
+.TH CB 1
+.SH NAME
+cb \- C program beautifier
+.SH SYNOPSIS
+.B cb
+[
+.B \-s
+] [
+.B \-j
+] [
+.B \-l
+leng
+] [ file ... ]
+.SH DESCRIPTION
+.I Cb\^
+reads C programs either from its arguments or from the
+standard input
+and writes them
+on the standard output with spacing and indentation
+that displays the structure of the code.
+Under default options,
+.I cb\^
+preserves all user new-lines.
+Under the
+.B \-s
+flag
+.I cb\^
+canonicalizes the code to the style of
+Kernighan and Ritchie in
+.IR "The C Programming Language" .
+The
+.B \-j
+flag
+causes split lines to be put back together.
+The
+.B \-l
+flag causes
+.I cb\^
+to split lines that are longer than
+.IR leng .
+.SH EXAMPLE
+.PP
+If there is a C program called
+.I test.c
+which looks like this:
+.RS
+.nf
+#define COMING 1
+#define GOING 0
+.sp
+main ()
+{
+/*  This is a test of the C Beautifier  */
+if (COMING)
+printf ("Hello, world\\n");
+else
+printf ("Goodbye, world\\n");
+}
+.fi
+.RE
+.PP
+Then using the 
+.I cb\^
+command as shown below produces the output shown:
+.RS
+.nf
+cb test.c
+#define COMING 1
+#define GOING 0
+
+main ()
+{
+	/*  This is a test of the C Beautifier  */
+	if (COMING)
+		printf ("Hello, world\\n");
+	else
+		printf ("Goodbye, world\\n");
+}
+.fi
+.RE
+.SH "SEE ALSO"
+cc(1).
+.br
+.I "The C Programming Language\^"
+by B. W. Kernighan and D. M. Ritchie.
+.SH BUGS
+Punctuation that is hidden in
+preprocessor statements will cause indentation errors.
+.\"	@(#)cb.1	5.1 of 10/26/83

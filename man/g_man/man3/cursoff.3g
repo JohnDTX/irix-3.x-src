@@ -1,0 +1,43 @@
+.TH cursoff 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B cursoff
+\- turns off the cursor
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "cursoff()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine cursof"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure cursoff;"
+.SH DESCRIPTION
+.B cursoff
+turns off the cursor so that it is no longer visible.
+\f3cursoff\f1 should precede drawing routines
+that write into the currently displayed
+cursor bitplanes.
+.PP
+The cursor is always displayed by default.
+Before the cursor is drawn on the screen,
+the IRIS saves the image that the cursor covers.
+When the cursor moves, the system restores
+the saved image.
+If the image changes while the cursor is displayed,
+the saved image may no longer be valid.
+This is a concern in single buffer and RGB modes,
+and in double buffer mode when the front buffer is enabled.
+.SH "SEE ALSO"
+curson, getcursor, setcursor
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

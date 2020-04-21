@@ -1,0 +1,88 @@
+'\"macro stdmacro
+'\" t
+.TH INODE 4
+.SH NAME
+inode \- format of an inode
+.SH SYNOPSIS
+.B #include <sys/param.h>
+.br
+.B #include <sys/inode.h>
+.SH DESCRIPTION
+An
+.I inode
+is the volume data structure used by a file system
+to implement the abstraction of a
+U\s-2NIX\s0
+file.
+(This is not to be confused with the
+.I in-core inode
+used by the
+U\s-2NIX\s0
+kernel to manage files in use.)
+The size and exact layout of an
+.I inode
+depends on the type of file system
+(e.g., Bell file system or Extent file system).
+The size and layout of a Bell file system
+.I inode
+is described in
+.IR bellinode (4).
+The size and layout of an Extent file system
+.I inode
+is described in
+.IR efsinode (4).
+.PP
+Generally,
+an
+.I inode
+contains the type
+(e.g., plain file, directory, symbolic link, or device file)
+of the file;
+its owner, group, and public access permissions;
+the owner and group id numbers;
+its size in bytes;
+the number of links (directory references) to the file;
+and the times of last access and last modification to the file.
+These times are given in seconds since
+the beginning of 1970 GMT.
+In addition,
+there is
+a file system type-dependent representation of
+the list of data blocks claimed by the file.
+.PP
+.nf
+.in +.3i
+/*
+ * This information occurs at the start of all inodes
+ * independent of file system type.
+ */
+struct	icommon {
+	ushort	ic_mode;		/* type and access permissions */
+	short	ic_nlink;    		/* number of links */
+	ushort	ic_uid;      		/* owner's user id number */
+	ushort	ic_gid;      		/* group's group id number */
+	off_t	ic_size;     		/* number of bytes in file */
+};
+
+/*
+ * This information occurs somewhere in all inodes,
+ * but its location varies according to file system type.
+ */
+struct itimes {
+	time_t	ic_atime;		/* time of last access (to contents) */
+	time_t	ic_mtime;		/* of last modification (of contents) */
+	time_t	ic_ctime;		/* of last modification to inode */
+};
+.fi
+.in -.3i
+.LP
+The types
+.IR ushort ,
+.IR off_t ,
+and
+.I time_t
+are defined in
+.IR types (5).
+.SH SEE ALSO
+bellinode(4), efsinode(4), stat(2), fs(4), types(5).
+.\"	@(#)inode.4	5.1 of 10/15/83

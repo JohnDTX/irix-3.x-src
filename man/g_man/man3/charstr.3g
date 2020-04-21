@@ -1,0 +1,45 @@
+.TH charstr 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B charstr
+\- draws a string of raster characters on the screen
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "charstr(str) "
+.B "String str;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine charst(str, length)"
+.B "character*(*) str"
+.B "integer*4 length
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure charstr(str: pstring128);"
+.SH DESCRIPTION
+\f3charstr\f1 draws a string of text 
+(\f2str\f1) using a raster font.  
+The current character position is the position of the first character
+in the string.
+After each character is drawn, the character's spacing parameter updates
+the current character position.
+The text string
+is drawn in the current raster font and color, using the
+current writemask.  The system ignores characters that are not
+defined in the current raster font.
+.PP
+In FORTRAN,
+.I str
+is the name of the text string and
+.I length
+is the number of characters in that string.
+.SH "SEE ALSO"
+cmov, defrasterfont, font
+.sp
+.I Programming Guide,
+Section 3.8, Text

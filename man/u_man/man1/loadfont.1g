@@ -1,0 +1,28 @@
+'\"macro stdmacro
+.TH LOADFONT 1G
+.SH NAME
+loadfont \- replace the system font
+.SH SYNOPSIS
+.B loadfont
+fontfile
+.SH DESCRIPTION
+When the iris is started, the default system font is used for the
+characters displayed in text windows, and by graphics programs
+that do not define their own fonts.
+.I loadfont\^
+replaces the system font with a font from the specified file.
+This file must contain a font in iris font format.
+A collection of fonts is provided in the directory 
+.I /usr/lib/gl2/fonts.
+The source for the program that reads and writes these fonts can be
+found in 
+.I /usr/people/gifts/mextools/portlib/fontlib.c.
+The system font may not be changed while the window manager is running.
+.SH EXAMPLE
+.IP
+loadfont /usr/lib/gl2/fonts/small7.fnt
+.PP
+This will replace the system font with an itty bitty font that is 7 
+pixels high.
+.SH FILES
+/usr/lib/gl2/fonts/*

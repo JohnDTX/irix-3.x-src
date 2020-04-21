@@ -1,0 +1,161 @@
+.TH EFL 1
+.SH NAME
+ef\^l \- Extended Fortran Language
+.SH SYNOPSIS
+.B ef\^l
+[ options ]
+[ files ]
+.SH DESCRIPTION
+.I Ef\^l\^
+compiles a program written in the
+.SM EFL
+language into clean Fortran
+on the standard output.
+.I Ef\^l\^
+provides the C-like control constructs similar to
+.IR ratfor :
+.RS .3i
+.TP .3i
+statement grouping with braces.
+.TP .3i
+decision-making:
+.BR if ,
+.BR if - else ,
+and
+.BR select - case
+(also known as
+.BR switch - case );
+.br
+.BR while ,
+.BR for ,
+Fortran
+.BR do ,
+.BR repeat ,
+and
+.BR repeat " .\|.\|. " until
+loops;
+.br
+multi-level
+.B break
+and
+.BR next .
+.RE
+.PP
+.SM EFL
+has C-like data structures, e.g.:
+.RS .3i
+.PP
+.ta \w'struct\ 'u
+.nf
+struct
+	{
+	integer \|flags(3)
+	character(8) \|name
+	long \|real \|coords(2)
+	} \|table(100)
+.fi
+.RE
+.PP
+The language offers generic functions,
+assignment operators
+.RB ( += ,
+.BR &= ,
+etc.), and
+sequentially evaluated logical operators
+.RB ( &&
+and
+.BR \(bv\(bv\^ ).
+There is a uniform input/output syntax:
+.IP
+write(6,x,y\f3:\fPf(7,2), \|do \|i=1,10 \|{ \|a(i,j),z\f3.\fPb(i) \|}\|)
+.PP
+.SM EFL
+also provides
+some syntactic ``sugar'':
+.RS .3i
+.TP .3i
+free-form input:
+multiple statements per line; automatic continuation;
+statement label names (not just numbers).
+.TP
+comments:
+.B #
+this is a comment.
+.TP
+translation of relational and logical operators:
+.BR > ,
+.BR >= ,
+.BR & ,
+etc., become
+.BR \&.\s-1GT\s+1. ,
+.BR \&.\s-1GE\s+1. ,
+.BR \&.\s-1AND\s+1. ,
+etc.
+.TP
+return expression to caller from function:
+.BI "return (" expression )\f1
+.TP
+defines:
+.br
+.B define
+.I name replacement\^
+.TP
+includes:
+.br
+.B include
+.I file\^
+.RE
+.PP
+.I Ef\^l\^
+understands several option arguments:
+.B \-w
+suppresses warning messages,
+.B \-#
+suppresses comments in the generated program,
+and the default option
+.B \-C
+causes comments to be included in the generated program.
+.PP
+An argument with an embedded
+.B =
+(equal sign)
+sets an
+.SM EFL
+option
+as if it had appeared in an
+.B option
+statement at the start of the program.
+Many options are described in the reference manual.
+A set of defaults for a particular target machine may be selected
+by one of the choices:
+.BR "system=unix" ,
+.BR "system=gcos" ,
+or
+.BR "system=cray" .
+The default setting of the
+.B system
+option is the same as the machine the compiler is running on.
+Other specific options determine the style of input/output,
+error handling, continuation conventions, the number of characters packed
+per word, and default formats.
+.PP
+.I Ef\^l\^
+is best used with fortran.
+.SH EXAMPLE
+.IP
+efl prog.for | fortran -o prog
+.PP
+will process the program 
+.I prog.for\^
+through
+.I ef\^l\^
+and then run the fortran
+compiler on the output from 
+.IR efl ,
+generating an executable file named "prog".
+.SH SEE ALSO
+cc(1).
+.br
+.I "The Programming Language \s-1EFL\s+1\^"
+by S.I. Feldman.
+.\"	@(#)efl.1	5.1 of 10/31/83

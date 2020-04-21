@@ -1,0 +1,1167 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.4.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               11-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure docall(var fname: alfa8; StackFlag: Boolean; fsize: integer);
+  var d,d2: pregrec;
+begin
+if not StackFlag
+then if fsize > 0
+     then begin
+          d := getreg(D0,D0);
+          if fsize = 8 then d2 := getreg(D1,D1);
+          end;
+genjsra(fname);
+if StackFlag
+then gcattr.ckind := STCK
+else if fsize > 0
+     then if fsize = 8
+          then begin
+               { MOVEM.L D0/D1,-(SP) } gen(18663); gen(-16384);
+               gcattr.ckind := STCK; freereg(d); freereg(d2);
+               end
+          else begin
+               gcattr.ckind := EXPR; gcattr.exreg := d;
+               end;
+end; {docall}
+
+procedure push4call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,L);
+docall(fname,StackFlag,n);
+end; {push4call}
+
+procedure push44call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,L);
+expression(nextbyte); pushvalue(gcattr,L);
+docall(fname,StackFlag,n);
+end; {push44call}
+
+procedure push8call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,D);
+docall(fname,StackFlag,n);
+end; {push8call}
+
+procedure push88call(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+expression(nextbyte); pushvalue(gcattr,D);
+expression(nextbyte); pushvalue(gcattr,D);
+docall(fname,StackFlag,n);
+end; {push88call}
+
+procedure pushaacall(fname: alfa8; StackFlag: Boolean; n: integer);
+begin
+exppushaddr(nextbyte); exppushaddr(nextbyte);
+docall(fname,StackFlag,n);
+end; {pushaacall}
+
+procedure uintexpr(fop: integer; fd: pregrec);
+  var lop: integer; lsiz: sizes; d1: pregrec; DoIt: Boolean;
+begin
+{ fop: 0=UINT12, 1=UINT14, 2=UINT24 }
+expression(nextbyte); DoIt := FALSE;
+if fop <= 1 then lsiz := B else lsiz := W;
+case gcattr.ckind of
+  CNST: begin
+        if fop = 0
+        then d1 := loadintd(fd,gcattr.cvalu.lvalu,W)
+        else d1 := loadintd(fd,gcattr.cvalu.lvalu,L);
+        end;
+  EXPR,
+  ADDR,
+  VARB,
+  FDAT,
+  INDX,
+  INDR: begin
+        if fd <> nil
+        then if gcattr.ckind = EXPR
+             then if gcattr.exreg^.regno = fd^.regno
+                  then DoIt := TRUE;
+        if not DoIt
+        then begin
+             d1 := loadintd(fd,0,L);
+             if fd = nil then isolate(d1);
+             if lsiz = B then lop := _MOVE_B else lop := _MOVE_W;
+             lock(d1); genrea(lop,d1,gcattr,lsiz);
+             unlock(d1); erase(d1); ccodereg := d1^.regno;
+             end;
+        end;
+  COND,
+  BOOL,
+  BITZ: begin
+        if gcattr.ckind = COND then loadccd(fd,gcattr);
+        d1 := gcattr.exreg;
+        if fop = 0
+        then begin genr(_ANDI_W,d1); gen(1); end
+        else begin genr(_ANDI_L,d1); gen2(1); end;
+        ccodereg := d1^.regno;
+        end;
+  otherwise:
+        DoIt := TRUE;
+end; {case}
+if DoIt
+then begin
+     d1 := loaddd(fd,gcattr,lsiz);
+     if fd = nil then isolate(d1);
+     erase(d1);
+     if fop = 0
+     then genr(_ANDI_W,d1)
+     else begin genr(_ANDI_L,d1); gen(0); end;
+     if lsiz = B then gen(255) else gen(-1);
+     ccodereg := d1^.regno;
+     end;
+gcattr.ckind := EXPR; gcattr.exreg := d1;
+end; {uintexpr}
+
+{ Note: i-code views bit fields as if }
+{ specific bits in a 2 byte integer.  }
+{ Thus, the target machine address of }
+{ the byte containing a specific bit  }
+{ is byte sex dependent but the value }
+{ of that bit when viewed as part of  }
+{ an integer is not.  Thus, for       }
+{                                     }
+{    < Numbits = 7, Rightbit = 6 >    }
+{                                     }
+{ things are stored as:               }
+
+{ As i-code sees it:                  }
+{                                     }
+{    15            8               0  }
+{   2             2               2   }
+{   |             |               |   }
+{  |.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|  }
+{  |F E D C B A 9 8 7 6 5 4 3 2 1 0|  }
+{         x x x x x x x               }
+
+{ As N16000 sees it:                  }
+{                                     }
+{  |....faddr+1....|....faddr+0....|  }
+{  |F E D C B A 9 8|7 6 5 4 3 2 1 0|  }
+{         x x x x x x x               }
+
+{ As M68000 sees it:                  }
+{                                     }
+{  |....faddr+0....|....faddr+1....|  }
+{  |F E D C B A 9 8|7 6 5 4 3 2 1 0|  }
+{         x x x x x x x               }
+
+{ As M68020 bit field instructions    }
+{    see it:                          }
+{                                     }
+{  |....faddr+0....|....faddr+1....|  }
+{  |0 1 2 3 4 5 6 7|8 9 A B C D E F|  }
+{         x x x x x x x               }
+
+
+procedure extfield(Signed: Boolean; fregno: integer);
+  var rightbit,numbits,leftbit,lregno,lop: integer; d: pregrec;
+begin
+{ Returns either CC or D.L }
+numbits := nextbyte; rightbit := nextbyte; expression(nextbyte);
+if (numbits and $40) = 0
+then incoffset(gcattr,-2); { Adjust for 4 byte size }
+numbits := numbits and $1f;
+(*****
+if (numbits = 1) and (not Signed) and (fregno < 0)
+then begin
+     if rightbit <= 7 then incoffset(gcattr,1);
+     geneai(_BTST,gcattr,W,rightbit and 7);
+     gcattr.ckind := COND; gcattr.cc := NE;
+     end
+else *****)
+     begin
+     leftbit := 32 - (rightbit + numbits);
+     if leftbit >= 16
+     then begin incoffset(gcattr,2); leftbit := leftbit - 16; end;
+     if fregno < 0
+     then begin d := getreg(D0,D7); lock(d); lregno := d^.regno; end
+     else lregno := fregno;
+     if Signed then lop := _BFEXTS else lop := _BFEXTU;
+     geneai(lop,gcattr,W,lregno*4096+leftbit*64+numbits);
+     if fregno < 0
+     then begin unlock(d); gcattr.ckind := EXPR; gcattr.exreg := d; end;
+     if Signed then ccodereg := lregno;
+     end;
+end; {extfield}
+
+procedure storebexpr(fcattr: cattr; fop: integer);
+  var DoIt: Boolean; d1: pregrec; lsiz: sizes;
+begin
+DoIt := TRUE;
+case fop of
+  53: {INT41}
+      begin
+      fop := nextbyte;
+      case fop of
+        58, {TRUNC4}
+        59, {TRUNC8}
+        60, {ROUND4}
+        61: {ROUND8}
+            if FPHardware and M81_FLAG
+            then begin
+                 if odd(fop) then lsiz := D else lsiz := S;
+                 if fop <= 59 then funop(_FINTRZ,lsiz) else fround(lsiz);
+                 store(gcattr,fcattr,B); DoIt := FALSE;
+                 end;
+      end; {case}
+      if DoIt
+      then begin
+           expression(fop);
+           if (gcattr.ckind = ADDR) or (gcattr.ckind = VARB) or
+              (gcattr.ckind = INDX) or (gcattr.ckind = INDR) or
+              (gcattr.ckind = FDAT)
+           then incoffset(gcattr,3)
+           else d1 := loadd(gcattr,L);
+           store(gcattr,fcattr,B);
+           DoIt := FALSE;
+           end;
+      end;
+  {:: MUST LOOK FOR INT21 FIRST ::}
+  62, {EXTUFLD}
+  63: {EXTSFLD}
+      if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+      then begin
+           extfield(fop = 63,fcattr.exreg^.regno);
+           DoIt := FALSE;
+           end;
+end; {case}
+if DoIt
+then begin
+     expression(fop); store(gcattr,fcattr,B);
+     end;
+end; {storebexpr}
+
+procedure storewexpr(fcattr: cattr; fop: integer);
+  var DoIt: Boolean; d1: pregrec; lsiz: sizes;
+begin
+DoIt := TRUE;
+case fop of
+  48: {INT12}
+      begin
+      if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+      then begin
+           storebexpr(fcattr,nextbyte);
+           genr(_EXT_W,fcattr.exreg);
+           DoIt := FALSE;
+           end;
+      end;
+  52: {INT42}
+      begin
+      fop := nextbyte;
+      case fop of
+        58, {TRUNC4}
+        59, {TRUNC8}
+        60, {ROUND4}
+        61: {ROUND8}
+            if FPHardware and M81_FLAG
+            then begin
+                 if odd(fop) then lsiz := D else lsiz := S;
+                 if fop <= 59 then funop(_FINTRZ,lsiz) else fround(lsiz);
+                 store(gcattr,fcattr,W); DoIt := FALSE;
+                 end;
+      end; {case}
+      if DoIt
+      then begin
+           expression(fop);
+           if (gcattr.ckind = ADDR) or (gcattr.ckind = VARB) or
+              (gcattr.ckind = INDX) or (gcattr.ckind = INDR) or
+              (gcattr.ckind = FDAT)
+           then incoffset(gcattr,2)
+           else d1 := loadd(gcattr,L);
+           store(gcattr,fcattr,W);
+           DoIt := FALSE;
+           end;
+      end;
+  62, {EXTUFLD}
+  63: {EXTSFLD}
+      if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+      then begin
+           extfield(fop = 63,fcattr.exreg^.regno);
+           DoIt := FALSE;
+           end;
+ 224: {C-UnOp}
+      begin
+      case peekbyte of
+        0: {UINT12}
+           begin
+           fop := nextbyte{0};
+           if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+           then uintexpr(0,fcattr.exreg)
+           else begin
+                uintexpr(0,nil); store(gcattr,fcattr,W);
+                end;
+           DoIt := FALSE;
+           end;
+      end; {case}
+      end;
+end; {case}
+if DoIt
+then begin
+     expression(fop); store(gcattr,fcattr,W);
+     end;
+end; {storewexpr}
+
+procedure storelexpr(fcattr: cattr; fop: integer);
+  var DoIt: Boolean; d1: pregrec; lsiz: sizes; lop: integer;
+begin
+DoIt := TRUE;
+case fop of
+  49, {INT24}
+  50: {INT14}
+      begin
+      lop := nextbyte;
+      case lop of
+        62, {EXTUFLD}
+        63: {EXTSFLD}
+            begin
+            if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+            then extfield(lop = 63,fcattr.exreg^.regno)
+            else begin
+                 extfield(lop = 63,-1); store(gcattr,fcattr,L);
+                 end;
+            DoIt := FALSE;
+            end;
+        end; {case}
+      if DoIt
+      then begin
+           expression(lop);
+           if fop = 50
+           then begin lsiz := B; lop := _EXTB_L; end
+           else begin lsiz := W; lop := _EXT_L; end;
+           if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+           then begin
+                d1 := loaddd(fcattr.exreg,gcattr,lsiz);
+                genr(lop,d1);
+                end
+           else begin
+                d1 := loadd(gcattr,lsiz); isolate(d1);
+                genr(lop,d1); gcattr.exreg := d1;
+                store(gcattr,fcattr,L);
+                end;
+           DoIt := FALSE;
+           end;
+      end;
+  58, {TRUNC4}
+  59, {TRUNC8}
+  60, {ROUND4}
+  61: {ROUND8}
+      if FPHardware and M81_FLAG
+      then begin
+           if odd(fop) then lsiz := D else lsiz := S;
+           if fop <= 59 then funop(_FINTRZ,lsiz) else fround(lsiz);
+           store(gcattr,fcattr,L); DoIt := FALSE;
+           end;
+  62, {EXTUFLD}
+  63: {EXTSFLD}
+      if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+      then begin
+           extfield(fop = 63,fcattr.exreg^.regno);
+           DoIt := FALSE;
+           end;
+ 224: {C-UnOp}
+      begin
+      case peekbyte of
+        1, {UINT14}
+        2: {UINT24}
+           begin
+           lop := nextbyte{1or2};
+           if peekbyte = 62 {EXTUFLD}
+           then storelexpr(fcattr,nextbyte)
+           else if (fcattr.ckind = EXPR) and (fcattr.exreg^.regno <= D7)
+                then uintexpr(lop,fcattr.exreg)
+                else begin
+                     uintexpr(lop,nil);
+                     if gcattr.ckind = FEXP then lsiz := S else lsiz := L;
+                     store(gcattr,fcattr,lsiz);
+                     end;
+           DoIt := FALSE;
+           end;
+      end; {case}
+      end;
+end; {case}
+if DoIt
+then begin
+     expression(fop);
+     if gcattr.ckind = FEXP then lsiz := S else lsiz := L;
+     store(gcattr,fcattr,lsiz);
+     end;
+end; {storelexpr}
+
+procedure storeqexpr(fcattr: cattr; fop: integer);
+  var DoIt: Boolean;
+begin
+DoIt := TRUE;
+case fop of
+end; {case}
+if DoIt
+then begin
+     expression(fop); store(gcattr,fcattr,D);
+     end;
+end; {storeqexpr}
+
+procedure expression{fop: integer};
+
+  procedure genindex(elementsize: integer);
+    var lo,shiftcount,lvlev,lop,dregno: integer; lcattr: cattr;
+        AddFlag,BigD: Boolean; d,a: pregrec; lv: regvalrec;
+        lsiz: sizes; loffset,elsize: longint;
+  begin
+  lo := nextword; expression(nextbyte);
+  lcattr := gcattr; expression(nextbyte);
+  if gcattr.ckind = CNST
+  then incoffset(lcattr,elementsize*(gcattr.cvalu.ivalu[1] - lo))
+  else begin
+       makevalid(lcattr); lockcattr(lcattr);
+       lv.rvinxcst := elementsize; lv.RVReadOnly := FALSE;
+       lv.rvsiz := W;
+       if gcattr.ckind = VARB
+       then begin
+            lv.rvkind := INDXRV; lv.rvlev := gcattr.vlev;
+            lv.rvoffset := gcattr.voffset;
+            end
+       else if gcattr.ckind = FDAT
+            then begin
+                 lv.rvkind := INDXRV; lv.rvlev := -gcattr.flev;
+                 lv.rvoffset := gcattr.doffset;
+                 end
+            else if gcattr.ckind = EXPR
+                 then begin
+                      dregno := gcattr.exreg^.regno;
+                      if reg[dregno].Perm
+                      then begin
+                           lv.rvkind := INDXRV; lv.rvlev := 0;
+                           lv.rvoffset := dregno*4;
+                           end
+                      else lv.rvkind := UNKNRV;
+                      end
+                 else lv.rvkind := UNKNRV;
+       elsize := elementsize; lsiz := B; BigD := FALSE;
+       if not FindIndex(gcattr,elsize,W,d)
+       then d := loadd(gcattr,W);
+       if elsize > 1
+       then begin
+            if elsize = 2
+            then lsiz := W
+            else if elsize = 4
+                 then lsiz := L
+                 else if elsize = 8
+                      then lsiz := Q;
+            if lsiz = B
+            then begin
+                 isolate(d);
+                 if ShiftMult(elsize,shiftcount)
+                 then begin
+                      if shiftcount > 8
+                      then { ASL.W #8,D } genr(-7872,d);
+                      { ASL.W #xx,D } gennr(-7872,shiftcount,d);
+                      end
+                 else begin
+                      { MULS } genr0(-15876,d); gen(elsize); BigD := TRUE;
+                      end;
+                 reg[d^.regno].v := lv;
+                 end;
+            end;
+       AddFlag := FALSE; unlockcattr(lcattr); lock(d);
+       with lcattr do
+            case ckind of
+                 ADDR: begin
+                       a := adreg; loffset := aoffset;
+                       ckind := INDX; inoffset := loffset; insz := lsiz;
+                       inxareg := a; inxrreg := d; LongIndex := FALSE;
+                       end;
+                 INDX: begin
+                       AddFlag := TRUE;
+                       end;
+                 VARB: begin
+                       loffset := voffset; lvlev := vlev; ckind := INDX;
+                       inoffset := loffset; inxrreg := d; insz := lsiz;
+                       inxareg := getbase(lvlev);
+                       LongIndex := FALSE;
+                       end;
+                 FDAT: begin
+                       a := loadaddress(lcattr); ckind := INDX; inoffset := 0;
+                       inxareg := a; inxrreg := d; LongIndex := FALSE;
+                       insz := lsiz;
+                       end;
+                 INDR: begin
+                       if AllowIndirect and (ixreg = nil)
+                       then begin
+                            ixreg := d; LongIIndex := FALSE; iinsz := lsiz;
+                            end
+                       else begin
+                            a := loadaddress(lcattr); ckind := INDX;
+                            inoffset := 0; inxareg := a; inxrreg := d;
+                            LongIndex := FALSE; insz := lsiz;
+                            end;
+                       end;
+            end; {case}
+       incoffset(lcattr,-lo*elementsize); unlock(d);
+       if AddFlag
+       then if lcattr.insz <> lsiz
+            then begin
+                 a := loadaddress(lcattr);
+                 lcattr.ckind := INDX; lcattr.inoffset := 0;
+                 lcattr.LongIndex := FALSE; lcattr.insz := lsiz;
+                 lcattr.inxareg := a; lcattr.inxrreg := d;
+                 end
+            else begin
+                 lock(d); isolate(lcattr.inxrreg); unlock(d); lop := -12224;
+                 if lcattr.LongIndex
+                 then begin
+                      lop := lop + 64;
+                      if not BigD then { EXT.L D } genr(18624,d);
+                      end;
+                 { ADD.? D,INXRREG } genrr(lop,lcattr.inxrreg,d);
+                 freereg(d); erase(lcattr.inxrreg);
+                 end;
+       end;
+  gcattr := lcattr;
+  end; {genindex}
+  
+  procedure pckdindex;
+    var bitsperel,lo,datamask,addrmask,lbitsperel,i,ashiftcount,lop: integer;
+        d,d2,d3: pregrec; lcattr: cattr; Signed: Boolean;
+  begin
+  bitsperel := nextbyte; lo := nextword; Signed := bitsperel > 127;
+  if Signed then bitsperel := bitsperel - 128;
+  expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+  { What about constant index? }
+  makevalid(lcattr);
+  if (gcattr.ckind = CNST) and (bitsperel = 8)
+  then begin
+       incoffset(lcattr,gcattr.cvalu.lvalu-lo);
+       d := loadd(lcattr,B);
+       gcattr.ckind := EXPR; gcattr.exreg := d;
+       end
+  else begin
+       lockcattr(lcattr);
+       d3 := loadd(gcattr,W);
+       if bitsperel <> 8 then isolate(d3);
+       lock(d3); unlockcattr(lcattr);
+       if bitsperel = 8
+       then incoffset(lcattr,-lo)
+       else begin
+            addidreg(d3,-lo,W);
+            datamask := 0; addrmask := 0; lbitsperel := bitsperel;
+            ashiftcount := 0;
+            for i := 1 to bitsperel do datamask := datamask*2 + 1;
+            while lbitsperel < 8 do begin
+                  ashiftcount := ashiftcount + 1;
+                  lbitsperel := lbitsperel*2; addrmask := addrmask*2 + 1;
+                  end;
+            lockcattr(lcattr); d2 := getreg(D0,D7);
+            lock(d2); unlockcattr(lcattr);
+            { MOVE.B D3,D2 } genrr(4096,d2,d3); erase(d3);
+            { ANDI.W #am,D2 } genr(576,d2); gen(addrmask);
+            { ASR.W #sc,D3 } gennr(-8128,ashiftcount,d3);
+            if ashiftcount < 3
+            then { LSL.B #3-sc,D2 } gennr(-7928,3-ashiftcount,d2);
+            end;
+       gcattr.ckind := INDX; gcattr.LongIndex := FALSE; gcattr.insz := B;
+       gcattr.inxrreg := d3; (*** <<--<< Moved up - 4-Jun-85 ***)
+       case lcattr.ckind of
+            ADDR: begin
+                  gcattr.inoffset := lcattr.aoffset;
+                  gcattr.inxareg := lcattr.adreg;
+                  end;
+            INDX: begin
+                  lockcattr(lcattr); unlock(d3); isolate(d3);
+                  lock(d3); unlockcattr(lcattr);
+                  if lcattr.insz = B
+                  then begin
+                       gcattr := lcattr; freereg(lcattr.inxrreg);
+                       lop := -12224; { ADD.W }
+                       if lcattr.LongIndex
+                       then begin lop := lop + 64; genr(_EXT_L,d3); end;
+                       { ADD.? } genrr(lop,d3,lcattr.inxrreg);
+                       erase(d3);
+                       end
+                  else begin
+                       gcattr.inoffset := 0;
+                       gcattr.inxareg := loadaddress(lcattr);
+                       end;
+                  gcattr.inxrreg := d3;
+                  end;
+            VARB: if lcattr.vlev > 0
+                  then begin
+                       gcattr.inoffset := lcattr.voffset;
+                       gcattr.inxareg := getbase(lcattr.vlev);
+                       end
+                  else begin
+                       gcattr.inoffset := 0;
+                       gcattr.inxareg := loadaddress(lcattr);
+                       end;
+            FDAT: begin
+                  gcattr.inoffset := 0;
+                  gcattr.inxareg := loadaddress(lcattr);
+                  end;
+            INDR: begin
+                  if lcattr.ixreg = nil
+                  then begin
+                       lcattr.ixreg := d3; lcattr.LongIndex := FALSE;
+                       lcattr.iinsz := B; gcattr := lcattr;
+                       end
+                  else begin
+                       gcattr.inoffset := 0;
+                       gcattr.inxareg := loadaddress(lcattr);
+                       end;
+                  end;
+       end; {case}
+       (*** gcattr.inxrreg := d3; Moved up - 4-Jun-85 ***)
+       unlock(d3); d := loadd(gcattr,B);
+       end;
+  isolate(d); gcattr.exreg := d;
+  if bitsperel < 8
+  then begin
+       { LSR.B D2,D } genrr(-8152,d2,d);
+       unlock(d2); freereg(d2);
+       if Signed
+       then begin
+            { ROR.B #bpe,D } gennr(-8168,bitsperel,d);
+            { ASR.B #8-bpe,D } gennr(-8192,8-bitsperel,d);
+            { EXT.W D } genr(18560,d);
+            end
+       else begin
+            { ANDI.W #datamask,d } genr(576,d); gen(datamask);
+            end;
+       end
+  else begin
+       { 8 bits is always unsigned. }
+       { ANDI.W #FF,D } genr(576,d); gen(255);
+       end;
+  ccodereg := d^.regno; erase(d);
+  end; {pckdindex}
+  
+  procedure genfindex;
+    var d,d2,a: pregrec; szcattr,locattr,adcattr,incattr: cattr;
+        SzConst,LoConst,InConst,SubFlag,BigIndex,BigElSize,ShiftFlag: Boolean;
+        loffset,elsize,ll: longint; i,lvlev,shiftcount,shift2count: integer;
+        lv: regvalrec; DoIt,ConstMult,AutoScaled: Boolean; lsiz: sizes;
+  begin
+  i := nextbyte; BigIndex := odd(i); BigElSize := i >= 2;
+  expression(nextbyte); szcattr := gcattr; SzConst := szcattr.ckind = CNST;
+  expression(nextbyte); locattr := gcattr; LoConst := locattr.ckind = CNST;
+  expression(nextbyte); adcattr := gcattr;
+  expression(nextbyte); incattr := gcattr; InConst := incattr.ckind = CNST;
+  if SzConst
+  then begin
+       elsize := szcattr.cvalu.lvalu; lv.rvkind := UNKNRV; AutoScaled := FALSE;
+       if elsize = 2
+       then lsiz := W
+       else if elsize = 4
+            then lsiz := L
+            else if elsize = 8
+                 then lsiz := Q
+                 else lsiz := B;
+       if (elsize = 1) or (lsiz <> B) then AutoScaled := TRUE;
+       if LoConst
+       then begin
+            incoffset(adcattr,-(locattr.cvalu.lvalu*elsize));
+            if InConst
+            then incoffset(adcattr,incattr.cvalu.lvalu*elsize)
+            else begin
+                 lv.rvinxcst := elsize; lv.RVReadOnly := FALSE;
+                 if BigElSize then lv.rvsiz := L else lv.rvsiz := W;
+                 if incattr.ckind = VARB
+                 then begin
+                      lv.rvkind := INDXRV; lv.rvlev := incattr.vlev;
+                      lv.rvoffset := incattr.voffset;
+                      end
+                 else if incattr.ckind = FDAT
+                      then begin
+                           lv.rvkind := INDXRV; lv.rvlev := -incattr.flev;
+                           lv.rvoffset := incattr.doffset;
+                           end
+                      else if gcattr.ckind = EXPR
+                           then begin
+                                i := gcattr.exreg^.regno;
+                                if reg[i].Perm
+                                then begin
+                                     lv.rvkind := INDXRV; lv.rvlev := 0;
+                                     lv.rvoffset := i*4;
+                                     end;
+                                end;
+                 if not FindIndex(incattr,elsize,lv.rvsiz,d)
+                 then d := loadd(incattr,L);
+                 if (not AutoScaled) or (adcattr.ckind = INDX) then isolate(d);
+                 lock(d);
+                 end;
+            end
+       else begin
+            d := loadd(incattr,L); isolate(d); erase(d); lock(d);
+            genrea(_SUB_L,d,locattr,L);
+            end;
+       if not (LoConst and InConst)
+       then with adcattr do begin
+            if (not AutoScaled) and (elsize <> 1)
+            then
+              if ShiftMult(elsize,shiftcount)
+              then begin
+                if shiftcount > 8
+                then { ASL.L #8,D } genr(-7808,d);
+                { ASL.L #xx,D } gennr(-7808,shiftcount,d);
+                end
+              else
+                if not (BigIndex or BigElSize)
+                then begin
+                  { MULS #xx,D } genr0(-15876,d); gen(elsize);
+                  end
+                else
+                  if ShShMult(elsize,shiftcount,SubFlag,shift2count)
+                  then begin
+                    d2 := getreg(D0,D7);
+                    { MOVE.L D,D2 } genrr(8192,d2,d);
+                    { ASL.L #xx,D } gennr(-7808,shiftcount,d);
+                    if SubFlag
+                    then { SUB.L D2,D } genrr(-28544,d,d2)
+                    else { ADD.L D2,D } genrr(-12160,d,d2);
+                    if shift2count > 0
+                    then { ASL.L #x,D } gennr(-7808,shift2count,d);
+                    freereg(d2);
+                    end
+                  else begin
+                    DoIt := TRUE;
+                    if BigElSize
+                    then begin
+                      shiftcount := 0; ll := elsize;
+                      while (shiftcount < 8) and not odd(ll) do
+                            begin
+                            shiftcount := shiftcount + 1;
+                            ll := ll div 2;
+                            end;
+                      if (shiftcount > 0) and (ll <= 32767)
+                      then begin
+                           { MULS #elsiz,D } genr0(-15876,d); gen(ll);
+                           { LSL.L #sc,D } gennr(-7800,shiftcount,d);
+                           DoIt := FALSE;
+                           end
+                      end;
+                    if DoIt
+                    then geneaxrr(_MULS_L,$0800,szcattr,L,d,nil);
+                    end;
+            case ckind of
+                 ADDR: begin
+                       a := adreg; loffset := aoffset;
+                       ckind := INDX; inoffset := loffset; insz := lsiz;
+                       inxareg := a; inxrreg := d;
+                       end;
+                 INDX: if lsiz = insz
+                       then begin
+{dar fix -makevalid- intrinsic functions in array ref cause invalid inxrreg}
+			if inxrreg^.regno = d^.regno then 
+			     begin
+				makevalid(adcattr);
+				end;
+{dar end fix}
+
+                            { ADD.L INXRREG,D } genrr(-12160,d,inxrreg);
+                            freereg(inxrreg); inxrreg := d;
+                            lv.rvkind := UNKNRV; erase(d);
+                            end
+                       else begin
+                            a := loadaddress(adcattr);
+                            ckind := INDX; inoffset := 0; insz := lsiz;
+                            inxareg := a; inxrreg := d;
+                            end;
+                 VARB: begin
+                       loffset := voffset; lvlev := vlev;
+                       ckind := INDX; inoffset := loffset; inxrreg := d;
+                       insz := lsiz; inxareg := getbase(lvlev)
+                       end;
+                 FDAT: begin
+                       loffset := 32767;
+                       if not FindAddr(adcattr,a,loffset)
+                       then begin a := loadaddress(adcattr); loffset := 0; end;
+                       ckind := INDX; inxrreg := d; insz := lsiz;
+                       inxareg := a; inoffset := loffset;
+                       end;
+                 INDR: begin
+                       if ixreg = nil
+                       then begin
+                            ixreg := d; iinsz := lsiz; LongIIndex := TRUE;
+                            end
+                       else begin
+                            a := loadaddress(adcattr);
+                            ckind := INDX; inxrreg := d; insz := lsiz;
+                            inxareg := a; inoffset := 0;
+                            end;
+                       end;
+            end; {case}
+            unlock(d); 
+            if not AutoScaled then reg[d^.regno].v := lv;
+            if ckind <> INDR then LongIndex := TRUE;
+            end; {with adcattr}
+       gcattr := adcattr;
+       end
+  else begin { not SzConst }
+       DoIt := TRUE; ConstMult := FALSE;
+       if LoConst and InConst
+       then begin
+            incattr.cvalu.lvalu := incattr.cvalu.lvalu -
+                                   locattr.cvalu.lvalu;
+            locattr.cvalu.lvalu := 0;
+            if incattr.cvalu.lvalu = 0
+            then begin gcattr := adcattr; DoIt := FALSE; end
+            else ConstMult := TRUE;
+            end;
+       if DoIt
+       then begin
+            a := loadaddress(adcattr); lock(a);
+            if ConstMult and (incattr.cvalu.lvalu > 0) and
+               ShiftMult(incattr.cvalu.lvalu,shiftcount)
+            then begin
+                 d := loadd(szcattr,L);
+                 if shiftcount > 0
+                 then begin
+                      isolate(d); erase(d);
+                      if shiftcount > 8
+                      then { ASL.L #8,D } genr(-7808,d);
+                      { ASL.L #xx,D } gennr(-7808,shiftcount,d);
+                      end;
+                 end
+            else begin
+                 d := loadd(incattr,L);
+                 isolate(d); erase(d); lock(d);
+                 if LoConst
+                 then addidreg(d,-locattr.cvalu.lvalu,L)
+                 else genrea(_SUB_L,d,locattr,L);
+                 geneaxrr(_MULS_L,$0800,szcattr,L,d,nil);
+                 unlock(d);
+                 end;
+            unlock(a);
+            with gcattr do begin
+                 ckind := INDX; insz := B; inoffset := 0; inxareg := a;
+                 inxrreg := d; LongIndex := TRUE;
+                 end;
+            end;
+       end;
+  end; {genfindex}
+  
+  procedure expr1(fop: integer);
+    var i,lsize,count,junk,off1,off2,lregno,lop: integer; d1,a: pregrec;
+        DoIt: Boolean; lstring: pstrcrec; lo,hi: longint;
+        lsiz: sizes;
+  begin
+  with gcattr do begin
+       case fop of
+         1: { GLOBAL }
+            begin
+            ckind := VARB; vlev := 1; voffset := nextword;
+            end;
+         2: { LOCAL }
+            begin
+            ckind := VARB; vlev := level; voffset := nextword;
+            end;
+         3: { INTER }
+            begin
+            ckind := VARB; vlev := level - nextbyte; voffset := nextword;
+            end;
+         4: { BIGOFF }
+            begin
+            ckind := VARB; vlev := nextbyte;
+            lo := nextword; voffset := lo*256 + nextbyte;
+            end;
+         5: { FCOMMON }
+            begin
+            i := nextbyte;
+            if i >= 128 then i := (i - 128)*256 + nextbyte;
+            ckind := FDAT; flev := i; doffset := next3bytes;
+            end;
+         7: { REFREG }
+            begin
+            junk := nextbyte; lregno := junk and 7; junk := junk and $60;
+            if junk = $40
+            then lregno := FMAX - lregno
+            else if junk = $20
+                 then lregno := AMAX - lregno
+                 else lregno := D7 - lregno;
+            ckind := EXPR; exreg := reg[lregno].r;
+            end;
+        12: { UPARROW }
+            begin
+            i := nextbyte;
+            if i = 22 {ADDR}
+            then expression(nextbyte)
+            else begin expression(i); uparrow(gcattr); end;
+            end;
+        13, { FILE^ }
+        14: { TEXT^ }
+            begin
+            exppushaddr(nextbyte);
+            a := getreg(A0,A0); genjsra('%_UPARR ');
+            ckind := ADDR; adreg := a; aoffset := 0;
+            end;
+         8, { BIGFLD }
+        15: { FIELD }
+            begin
+            if fop = 8 then lo := next3bytes else lo := nextword;
+            expression(nextbyte); incoffset(gcattr,lo);
+            end;
+        16: { INDX1 } genindex(1);
+        17: { INDX2 } genindex(2);
+        18: { INDX4 } genindex(4);
+        19: { INDX8 } genindex(8);
+        20: { INDXBIG } genindex(nextword);
+        21: { INDXPCK } pckdindex;
+        22: { ADDRESS }
+            begin
+            i := nextbyte;
+            if i = 12 {UPARROW}
+            then expression(nextbyte)
+            else begin
+                 expression(i); a := loadaddress(gcattr);
+                 ckind := EXPR; exreg := a;
+                 end;
+            end;
+        23: { NIL }
+            with gcattr do begin
+                 ckind := CNST; cvalu.cstkind := SCALCNST;
+                 cvalu.lvalu := 0;
+                 end;
+        24, { CONST1 }
+        25, { CONST2 }
+        26, { CONST4 }
+        27: { CONST8 }
+            with gcattr do
+                 begin
+                 ckind := CNST; cvalu.cstkind := SCALCNST;
+                 case fop - 23 of
+                   BYTE: begin
+                      i := nextbyte;
+                      if i > 127 then i := i - 256;
+                      cvalu.lvalu := i;
+                      end;
+                   WORD:
+                      cvalu.lvalu := nextword;
+                   LONG: begin
+                      cvalu.ivalu[0] := nextword;
+                      cvalu.ivalu[1] := nextword;
+                      end;
+                   QUAD: begin
+                      cvalu.ivalu[0] := nextword;
+                      cvalu.ivalu[1] := nextword;
+                      cvalu.ivalu[2] := nextword;
+                      cvalu.ivalu[3] := nextword;
+                      end;
+                 end; {case}
+                 end;
+        28, { STRCNST }
+        29: { PAOCNST }
+            begin
+            lsize := nextbyte;
+            if (fop = 29) and (lsize > 127)
+            then lsize := (lsize - 128)*256 + nextbyte;
+            if lsize > 0
+            then begin
+                 new(lstring);
+                 with lstring^ do begin
+                      strval := '        '; next := nil;
+                      end;
+                 end
+            else lstring := nil;
+            with gcattr do begin
+                 ckind := CNST;
+                 if fop = 28
+                 then cvalu.cstkind := STRCNST
+                 else cvalu.cstkind := PAOCCNST;
+                 cvalu.len := lsize; cvalu.strvalu := lstring;
+                 end;
+            count := 0;
+            for i := 1 to lsize do begin
+                count := count + 1;
+                if count > 8
+                then begin
+                     new(lstring^.next); lstring := lstring^.next;
+                     with lstring^ do begin
+                          strval := '        '; next := nil;
+                          end;
+                     count := 1;
+                     end;
+                lstring^.strval[count] := chr(nextbyte);
+                end;
+            end;
+        43: { WITHREC }
+            begin
+            i := nextbyte; gcattr.ckind := VARB;
+            with bases[level + i] do
+                 if bwhere = BADR
+                 then begin
+                      gcattr.vlev := balev; gcattr.voffset := baoffset;
+                      end
+                 else begin
+                      gcattr.vlev := level + i; gcattr.voffset := 0;
+                      end;
+            end;
+        46: { RANGE }
+            case nextbyte of
+              0: { String }
+                 begin
+                 hi := nextbyte; expression(nextbyte);
+                 a := loadaddress(gcattr); genr(7952,a); { MOVE.B (A),-(SP) }
+                 pushint(hi,W); genjsra('%_SRCHK ');
+                 gcattr.ckind := ADDR; gcattr.adreg := a; gcattr.aoffset := 0;
+                 end;
+              1: { 2 byte }
+                 begin
+                 lo := nextword; hi := nextword; expression(nextbyte);
+                 d1 := loadd(gcattr,W); genr(16128,d1); { MOVE.W D,-(SP) }
+                 pushint(lo,W); pushint(hi,W); genjsra('%_RCHCK ');
+                 end;
+              2: { 4 byte }
+                 begin
+                 lo := nextlong; hi := nextlong; expression(nextbyte);
+                 d1 := loadd(gcattr,L); genr(12032,d1); { MOVE.L D,-(SP) }
+                 pushint(lo,L); pushint(hi,L); genjsra('%_LRCHK ');
+                 end;
+              3: { Real check }
+                 push4call('%_FLTCHK',TRUE,4);
+              4: { Double check }
+                 push8call('%_DBLCHK',TRUE,8);
+             17: { IsNum4 }
+                 begin
+                 expression(nextbyte); d1 := loadd(gcattr,L); isolate(d1);
+                 { BCLR #31,d1 } genr(2176,d1); gen(31);
+                 { CMPI.L #$7f800000,d1 } genr(3200,d1); gen2($7f800000);
+                 freereg(d1); erase(d1);
+                 gcattr.ckind := COND; gcattr.cc := LT;
+                 end;
+            end; {case}
+        48, { INT12 }
+        49, { INT24 }
+        50: { INT14 }
+            begin
+            lop := nextbyte;
+            if lop = 62{EXTUFLD}
+            then extfield(FALSE,-1)
+            else if lop = 63{EXTSFLD}
+                 then extfield(TRUE,-1)
+                 else begin
+                      if odd(fop) then lsiz := W else lsiz := B;
+                      expression(lop); d1 := loadd(gcattr,lsiz);
+                      isolate(d1); gcattr.exreg := d1;
+                      case fop of
+                        48: lop := _EXT_W;
+                        49: lop := _EXT_L;
+                        50: lop := _EXTB_L;
+                      end; {case}
+                      genr(lop,d1);
+                      ccodereg := d1^.regno;
+                      end;
+            end;
+        51, { INT21 }
+        52, { INT42 }
+        53: { INT41 }
+            begin
+            if fop = 51 then lsiz := W else lsiz := L;
+            expression(nextbyte);
+            case gcattr.ckind of
+                 ADDR,
+                 VARB,
+                 FDAT,
+                 INDX,
+                 INDR: incoffset(gcattr,fop - 50);
+            otherwise: d1 := loadd(gcattr,lsiz)
+            end; {case}
+            end;
+        54: { REAL48 } if FPHardware
+                       then if SKY_FLAG
+                            then skyarg(66,S,D)
+                            else if MAX_FLAG
+                                 then max1expr(54)
+                                 else if JUN_FLAG
+                                      then juncvt(J_REAL48,S,D)
+                                      else floadexpr(S)
+                       else push4call('%F_2_D  ',TRUE,4);
+        55: { REAL84 } if FPHardware
+                       then if SKY_FLAG
+                            then skyarg(67,D,S)
+                            else if MAX_FLAG
+                                 then max1expr(55)
+                                 else if JUN_FLAG
+                                      then juncvt(J_REAL84,D,S)
+                                      else floadexpr(D)
+                       else push8call('%D_2_F  ',TRUE,4);
+        56: { FLOAT4 } if FPHardware
+                       then if SKY_FLAG
+                            then skyarg(36,L,S)
+                            else if MAX_FLAG
+                                 then max1expr(56)
+                                 else if JUN_FLAG
+                                      then juncvt(J_FLT4,L,S)
+                                      else floadexpr(L)
+                       else push4call('%I_2_F  ',TRUE,4);
+        57: { FLOAT8 } if FPHardware
+                       then if SKY_FLAG
+                            then skyarg(68,L,D)
+                            else if MAX_FLAG
+                                 then max1expr(57)
+                                 else if JUN_FLAG
+                                      then juncvt(J_FLT8,L,D)
+                                      else floadexpr(L)
+                       else push4call('%I_2_D  ',TRUE,8);
+        58: { TRUNC4 } if FPHardware
+                       then if SKY_FLAG
+                            then skyarg(39,S,L)
+                            else if MAX_FLAG
+                                 then max1expr(58)
+                                 else if JUN_FLAG
+                                      then juncvt(J_INT4,S,L)
+                                      else begin
+                                           funop(_FINTRZ,S);
+                                           d1 := loadd(gcattr,L);
+                                           end
+                       else push4call('%F_2_I  ',TRUE,4);
+        59: { TRUNC8 } if FPHardware
+                       then if SKY_FLAG
+                            then skyarg(69,D,L)
+                            else if MAX_FLAG
+                                 then max1expr(59)
+                                 else if JUN_FLAG
+                                      then juncvt(J_INT8,D,L)
+                                      else begin
+                                           funop(_FINTRZ,D);
+                                           d1 := loadd(gcattr,L);
+                                           end
+                       else push8call('%D_2_I  ',TRUE,4);
+        60: { ROUND4 } 
+		{ hw roundingf doesn't work according to f77 standard
+		if FPHardware and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                       then if MAX_FLAG
+                            then max1expr(60)
+                            else if JUN_FLAG
+                                 then jround(S)
+                                 else begin
+                                      fround(S);
+                                      d1 := loadd(gcattr,L);
+                                      end
+                       else 
+		}
+			push4call('%I_NINT ',FALSE,4);
+        61: { ROUND8  if FPHardware and (MAX_FLAG or M81_FLAG or JUN_FLAG)
+                       then if MAX_FLAG
+                            then max1expr(61)
+                            else if JUN_FLAG
+                                 then jround(D)
+                                 else begin
+                                      fround(D);
+                                      d1 := loadd(gcattr,L);
+                                      end
+                       else }push8call('%I_IDNIN',FALSE,4);
+        62: { EXTUFLD } extfield(FALSE,-1);
+        63: { EXTSFLD } extfield(TRUE,-1);
+       end; {case}
+       end;
+  end; {expr1}
+  
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        

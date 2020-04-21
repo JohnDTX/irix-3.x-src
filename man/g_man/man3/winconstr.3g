@@ -1,0 +1,38 @@
+.TH winconstraints 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winconstraints
+\- changes the constraints of the current graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winconstraints()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine wincon"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winconstraints();"
+.SH DESCRIPTION
+.B winconstraints
+binds the currently specified constraints to the current graphics window.
+These constraints are  
+\f3minsize\fP, 
+\f3maxsize\fP, 
+\f3keepaspect\fP,
+\f3prefsize\fP
+and
+\f3prefposition\fP.
+These constraints are reset to none after
+they are bound to the graphics window.
+.SH "SEE ALSO"
+getport, minsize, maxsize, keepaspect, prefsize, prefposition, 
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

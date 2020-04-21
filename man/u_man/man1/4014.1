@@ -1,0 +1,70 @@
+'\"macro stdmacro
+.TH 4014 1
+.SH NAME
+4014 \- paginator for the Tektronix 4014 terminal
+.SH SYNOPSIS
+.B 4014
+[
+.B \-t
+] [
+.B \-n
+] [
+.BR \-c N
+] [
+.BR \-p L
+] [ file ]
+.SH DESCRIPTION
+The output of
+.I 4014\^
+is intended for a Tektronix 4014 terminal;
+.I 4014\^
+arranges for 66 lines to fit on the screen,
+divides the screen into
+.I N\^
+columns,
+and
+contributes an eight-space page offset
+in the (default) single-column case.
+Tabs, spaces, and backspaces are collected and plotted
+when necessary.
+.SM TELETYPE\*S\*R
+Teletypewriter Model 37 half- and reverse-line sequences
+are interpreted and plotted.
+At the end of each page,
+.I 4014\^
+waits for a new-line (empty line) from the keyboard before
+continuing on to the next page.
+In this wait state, the command
+.BI ! cmd\^
+will send the
+.I cmd\^
+to the shell.
+.PP
+The command line options are:
+.TP "\w'\f3\-c\f2N\f1\ \ 'u"
+.B \-t
+Don't wait between pages (useful for directing output into a file).
+.TP
+.B \-n
+Start printing at the current cursor position and never erase the screen.
+.TP
+.BI \-c N
+Divide the screen into
+.I N\^
+columns and
+wait after the last column.
+.TP
+.BI \-p L
+Set page length to
+.IR L ;
+.I L\^
+accepts the scale factors
+.B i
+(inches)
+and
+.B l
+(lines);
+default is lines.
+.SH SEE ALSO
+pr(1), tc(1), troff(1).
+.\"	@(#)4014.1	5.1 of 11/15/83

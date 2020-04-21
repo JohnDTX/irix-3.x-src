@@ -1,0 +1,23 @@
+#		Copyright (c) 1984 AT&T
+#		  All Rights Reserved
+#     THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF AT&T
+#   The copyright notice above does not evidence any actual
+#   or intended publication of such source code.
+#	macros crunch procedure
+#
+
+if [ $# -ne 1 ]
+	then echo usage: macrunch ".src name" 
+	exit 1
+fi
+
+name=$1
+sed -e "7,\${
+		/^''*\\\\\"/d
+		s/	*\\\\\".*//
+		s/@//g
+		s/^\(['.]\)[ 	]*/\1/
+		s/^\\([.'][a-z][a-z]\\)  */\\1/
+		s/\\\\{[ 	]*/\\\\{/g
+	    } " \
+	${name}.src >  ${name}

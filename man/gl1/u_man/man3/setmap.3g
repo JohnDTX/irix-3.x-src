@@ -1,0 +1,28 @@
+.TH setmap  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setmap
+- choose one of the sixteen small color maps (in multimap mode only)
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setmap(mapnum) "
+.B "short mapnum; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setmap(mapnum)"
+.B "integer*2 mapnum"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setmap(mapnum: Short);"
+.sp
+.SH DESCRIPTION
+.I Setmap
+chooses one of the sixteen small maps, numbered 0 through 15.
+This command is ignored in singlemap mode.
+.SH "SEE ALSO"
+.I getmap, multimap, onemap
+.SH NOTE
+This command can only be used in immediate mode.

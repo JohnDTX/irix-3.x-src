@@ -1,0 +1,52 @@
+.TH TELNETD 1M 
+.SH NAME
+telnetd \- DARPA TELNET protocol server
+.SH DESCRIPTION
+The EXOS 8000 TCP/IP protocol module implements a
+DARPA standard TELNET server on the EXOS front-end processor board
+(instead of on the host system).
+The on-board server communicates through the EXOS message queues with 
+the \f2xty(7)\f1 driver, which emulates a normal tty driver.
+Message semantics functionally resemble a typical terminal multiplexer
+board, such as a DEC DMF32.
+.PP
+The TELNET server listens on the standard TCP port number
+for TELNET (23).
+When a TELNET session starts, it sends the TELNET WILL ECHO option to 
+the client side, 
+indicating a willingness to  "remotely echo" characters.
+Thereafter, it responds with a WILL when requested by the client
+to DO one of the following options:
+.RS
+.nf
+
+ECHO
+SUPPRESS-GO-AHEAD
+TRANSMIT-BINARY
+
+.fi
+.RE
+and returns a DONT in response to requests for any other options.
+Option policy can be modified if necessary [see \f2net(4)\f1].
+Whenever the server's option state changes, it notifies the host.
+ECHO option semantics are implemented by \f2xty(7)\f1.
+In reality, the server does not send GO-AHEADs in any event.
+When TRANSMIT-BINARY is enabled, the on-board TELNET server
+sends data verbatim to the client and expands IAC to IAC-IAC.
+Otherwise, it masks off the eighth bit of all data transmitted 
+to the client.
+.PP
+The on-board TELNET server passes network virtual terminal (NVT)
+functions [such as interrupt process (IP)] to the host system,
+where they are interpreted by the xty driver.
+.PP
+The on-board TELNET server normally supports up to eight
+TELNET connections.  If eight connections are already established
+when a new client tries to connect, it returns the message
+"All server ports in use" to the client and closes the connection.
+The on-board server can be disabled or the number of connections
+supported modified with a \f2netload(1M)\f1 command line option.
+.SH FILES
+/dev/ttyT[0-7]	xty device nodes
+.SH SEE ALSO
+telnet(1C), xty(7), net(4), netload(1M), rlogind(1M) 

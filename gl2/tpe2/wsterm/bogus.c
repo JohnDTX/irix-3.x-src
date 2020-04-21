@@ -1,0 +1,5 @@
+/*captur() {}
+rcaptu() {}
+devport() {}
+getdev() {}
+*/

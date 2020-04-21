@@ -1,0 +1,96 @@
+'\"macro stdmacro
+.TH PLOCK 2
+.SH NAME
+plock \- lock process, text, or data in memory
+.SH SYNOPSIS
+.B #include <sys/lock.h>
+.PP
+.B int plock (op)
+.br
+.B int op;
+.SH DESCRIPTION
+.I Plock\^
+allows the calling process to lock its text segment (text lock),
+its data segment (data lock), or both its text and data segments (process lock)
+into memory.
+Locked segments are immune to all routine swapping.
+.I Plock\^
+also allows these segments to be unlocked.
+The effective user \s-1ID\s+1 of the calling process must be super-user to
+use this call.
+.I Op\^
+specifies the following:
+.RS .3i
+.TP \w'\f3\s-1PROCLOCK \-\s+1\f1\ \ 'u
+.SM
+.B PROCLOCK \-
+lock text & data segments into memory (process lock)
+.TP
+.SM
+.B TXTLOCK \-
+lock text segment into memory (text lock)
+.TP
+.SM
+.B DATLOCK \-
+lock data segment into memory (data lock)
+.TP
+.SM
+.B UNLOCK \-
+remove locks
+.RE
+.PP
+.I Plock\^
+will fail and not perform the requested operation if one or more of
+the following are true:
+.IP "" .3i
+The effective user \s-1ID\s+1 of the calling process is not super-user.
+.SM
+\%[EPERM]
+.IP
+.I Op\^
+is equal to
+.SM
+.B PROCLOCK
+and a process lock, a text lock, or a data lock already exists on the calling
+process.
+.SM
+\%[EINVAL]
+.IP
+.I Op\^
+is equal to
+.SM
+.B TXTLOCK
+and a text lock, or a process lock already exists on the calling process.
+.SM
+\%[EINVAL]
+.IP
+.I Op\^
+is equal to
+.SM
+.B DATLOCK
+and a data lock, or a process lock already exists on the calling
+process.
+.SM
+\%[EINVAL]
+.IP
+.I Op\^
+is equal to
+.SM
+.B UNLOCK
+and no type of lock exists on the calling process.
+.SM
+\%[EINVAL]
+.SH RETURN VALUE
+Upon successful completion, a value of 0 is returned to the calling process.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+exec(2), exit(2), fork(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#45,D0
+.B movl	op,A0
+.B trap	#0
+.\"	@(#)plock.2	5.1 of 11/1/83

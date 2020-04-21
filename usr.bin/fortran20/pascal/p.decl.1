@@ -1,0 +1,421 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.DECL.1.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               08-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure declarations(fsys: setofsys; fsymbol: symbol;
+                       var fpn: pn; var heapmark: pBoolean);
+  var ltoken: symbol; lpn: pn; lstr: idstring;
+  
+  procedure typ(fsys: setofsys; var fpt: pt);
+    var ExitFlag,PackedFlag,FileFlag: Boolean; lvalu: valu;
+      lpt,lpt2,lpt3: pt; lpn,lpn2: pn; min,max: longint; oldtop: integer;
+    
+    
+    { Number of bits to store 0..fval }
+    
+    function nrofbits(fval: longint): integer;
+      var count: integer;
+    begin
+    count := 0;
+    repeat
+      fval := fval div 2;
+      count := count + 1;
+    until fval = 0;
+    nrofbits := count;
+    end; {nrofbits}
+    
+    
+    procedure calcsize(ft: pt);
+      var bitcnt,displbits: integer;
+          LPckdRec: Boolean; displbytes,l,lmin,lmax,numels: longint;
+      
+      
+      function totalbits(fpt: pt): integer;
+      begin
+      if fpt <> nil
+      then totalbits := (fpt^.bytes * 8) + fpt^.bits
+      else totalbits := 32;
+      end;
+      
+      
+      { Tells if the record will be an even number of bytes }
+      
+      function recevenlength: Boolean;
+      begin
+      recevenlength := ((displbits <> 0) and (displbytes <> 0)) or 
+                       (displbytes > 1);
+      end;
+      
+      
+      { Assign foff, PckdField, and bitoff for list of fields starting }
+      { at displbytes and displbits.  Only called on correct programs. }
+      
+      procedure calcfieldaddrs(ffldlist: pn; NoVariant: Boolean);
+        var ltotalbits: integer; fieldfullbytes: longint; 
+            lfldlist, prevfield: pn;
+      
+        procedure packtightly;
+        begin
+        lfldlist := ffldlist;
+        while lfldlist <> nil do 
+          with lfldlist^ do begin
+            fieldfullbytes := fullbytes(idtype);
+            if (fieldfullbytes < 1000) and (idtype^.form <= SUBRANGE)
+            then ltotalbits := totalbits(idtype)
+            else ltotalbits := 32;
+            if LPckdRec
+            then begin
+              foff := displbytes; bitoff := displbits; { Assume current disp }
+              if (ltotalbits + displbits) < 8
+              then 
+                begin 
+                if Odd(displbytes)
+                then begin foff := foff - 1; bitoff := bitoff + 8; end;
+                PckdField := TRUE; displbits := displbits + ltotalbits; 
+                end
+              else
+                if (ltotalbits + displbits) = 8
+                then begin
+                  PckdField := (ltotalbits <> 8)  { Shares a byte }
+                            or (fieldfullbytes > 1);  { Unsigned 8 bits }
+                  if TARGSEX = FEMALE
+                  then
+                    if not PckdField
+                    then
+                      if Odd(displbytes)
+                      then foff := foff - 1
+                      else foff := foff + 1;
+                  if Odd(displbytes) and PckdField
+                  then begin foff := foff - 1; bitoff := bitoff + 8; end;
+                  displbits := 0; displbytes := displbytes + 1;
+                  end
+                else
+                  if ((ltotalbits + displbits) < 16) and (not Odd(displbytes))
+                  then begin
+                    PckdField := TRUE; displbytes := displbytes + 1;
+                    displbits := displbits + ltotalbits - 8;
+                    end
+                  else
+                    if ((ltotalbits + displbits) = 16) and (not Odd(displbytes))
+                    then begin
+                      PckdField := ltotalbits <> 16; displbits := 0;
+                      displbytes := displbytes + 2;
+                      end
+                    else begin { No hope for current disp }
+                      if Odd(displbytes)
+                      then begin 
+                        displbytes := displbytes + 1; displbits := 0; 
+                        end;
+                      if displbits <> 0
+                      then begin
+                        displbits := 0; displbytes := displbytes + 2;
+                        end;
+                      foff := displbytes; bitoff := displbits; { New disp }
+                      if ltotalbits < 16 
+                      then begin
+                        PckdField := (ltotalbits <> 8)  { Packable }
+                               or (fieldfullbytes > 1);  { Possible unsigned }
+                        if TARGSEX = FEMALE
+                        then
+                          if not PckdField
+                          then foff := foff + 1;
+                        displbits := ltotalbits mod 8;
+                        displbytes := displbytes + (ltotalbits div 8);
+                        end
+                      else begin
+                        PckdField := FALSE;
+                        displbytes := displbytes + fieldfullbytes;
+                        end;
+                      end;
+              end
+            else begin { not LPckdRec }
+              if Odd(displbytes) and (fieldfullbytes > 1)
+              then displbytes := displbytes + 1;
+              foff := displbytes; PckdField := FALSE; bitoff := 0;
+              displbytes := displbytes + fieldfullbytes;
+              end;
+            lfldlist := next;
+            end;
+        end; {packtightly}
+        
+      begin {calcfieldaddrs}
+      
+      { First pack fields tightly }
+      
+      packtightly;
+  
+      { Look for fields which straddle a byte boundary and  }
+      { are followed by a hole which fit into the odd byte. }
+      
+      if LPckdRec
+      then begin
+        lfldlist := ffldlist; prevfield := nil; 
+        while lfldlist <> nil do 
+          with lfldlist^ do begin
+            if prevfield <> nil
+            then 
+              if prevfield^.PckdField and ((prevfield^.foff + 2) = foff)
+                 and (prevfield^.bitoff <> 0)
+              then 
+                if (prevfield^.bitoff <= 8) { prevfld doesnt slop into odd }
+                       and
+                   (totalbits(prevfield^.idtype) <= 8) { prev fits in odd }
+                then prevfield^.bitoff := 8;
+            prevfield := lfldlist; lfldlist := next;
+            end;
+        if NoVariant and recevenlength
+        then { Last field of record will expand to an even number of bytes }
+          if prevfield <> nil
+          then 
+            if prevfield^.PckdField and (prevfield^.bitoff <> 0) and
+               (prevfield^.bitoff <= 8) { prevfield doesn't slop into odd }
+                     and
+               (totalbits(prevfield^.idtype) <= 8) { prevfield fits in odd }
+            then prevfield^.bitoff := 8;
+      
+        { Look for fields which are "packed" but alone in bytes }
+        
+        prevfield := nil; 
+        lfldlist := ffldlist;
+        while lfldlist <> nil do 
+          with lfldlist^ do begin
+            if prevfield <> nil
+            then begin { There is a previous field }
+              if prevfield^.PckdField and 
+                 (prevfield^.bitoff = 0) and
+                 ((prevfield^.foff <> foff) or (bitoff = 8))
+              then { Can safely expand into a byte }
+                if fullbytes(prevfield^.idtype) <= 1
+                then begin
+                  prevfield^.PckdField := FALSE;
+                  if TARGSEX = FEMALE
+                  then prevfield^.foff := prevfield^.foff + 1;
+                  end;
+              if prevfield^.PckdField and 
+                 (prevfield^.bitoff = 0) and
+                 ((prevfield^.foff + 2) = foff)
+              then { Can safely expand into even/odd bytes }
+                prevfield^.PckdField := FALSE;
+              if prevfield^.PckdField and 
+                 (prevfield^.bitoff = 8) and
+                 (prevfield^.foff <> foff)
+              then begin
+                prevfield^.PckdField := fullbytes(prevfield^.idtype) > 1;
+                if not prevfield^.PckdField
+                then begin 
+                  if TARGSEX = MALE then prevfield^.foff := prevfield^.foff+1;
+                  prevfield^.bitoff := 0;
+                  end;
+                end;
+              
+              { Attempt to right justify any fields still packed }
+              
+              if prevfield^.PckdField and
+                 ((prevfield^.foff + 2) = foff) and
+                 (prevfield^.bitoff <> 0)
+              then prevfield^.bitoff := 16 - totalbits(prevfield^.idtype);
+              if prevfield^.PckdField and
+                 ((prevfield^.foff + 1) = foff) and
+                 (prevfield^.bitoff <> 0)
+              then prevfield^.bitoff := 8 - totalbits(prevfield^.idtype);
+              if prevfield^.PckdField and
+                 (prevfield^.foff = foff) and (bitoff = 8) and
+                 (prevfield^.bitoff <> 0)
+              then prevfield^.bitoff := 8 - totalbits(prevfield^.idtype);
+              end;
+            
+            prevfield := lfldlist; lfldlist := next;
+            end;
+        if (prevfield <> nil) and NoVariant
+        then { Last byte of record }
+          with prevfield^ do
+            if PckdField 
+            then begin
+              if (bitoff = 0) and (recevenlength or (displbits <> 0))
+              then 
+                PckdField := FALSE;
+              if bitoff = 8
+              then begin
+                PckdField := (totalbits(idtype) = 8) and 
+                             (fullbytes(idtype) = 2);
+                if not PckdField
+                then begin
+                     if TARGSEX = MALE then foff := foff + 1;
+                     bitoff := 0;
+                     end;
+                end;
+              
+              { Attempt to right justify final field if still packed }
+              
+              if recevenlength
+              then begin
+                if PckdField and (bitoff <> 0)
+                then bitoff := 16 - totalbits(idtype);
+                end
+              else
+                if PckdField and (bitoff <> 0)
+                then bitoff := 8 - totalbits(idtype);
+              end;
+            
+        end;
+      end; {calcfieldaddrs}
+      
+      
+      { Call calcvarpart on a pt of form TAGFIELD which may be nil }
+      
+      procedure calcvarpart(ftagfield: pt);
+        var initbytes,maxbytes: longint;
+            initbits,maxbits: integer;
+            lt: pt;
+      begin
+      if ftagfield <> nil
+      then begin
+        initbytes := displbytes; initbits := displbits;
+        maxbytes := displbytes; maxbits := displbits;
+        lt := ftagfield^.variants;
+        while lt <> nil do begin
+          displbytes := initbytes; displbits := initbits;
+          calcfieldaddrs(lt^.varfldlst,lt^.subvar = nil);
+          calcvarpart(lt^.subvar);
+          lt^.bytes := displbytes + ord(displbits <> 0);
+          if Odd(lt^.bytes) then lt^.bytes := lt^.bytes + 1;
+          if lt^.bytes < 2 then lt^.bytes := 2;
+          lt^.bits := 0;
+          if (displbytes > maxbytes) or
+             ((displbytes = maxbytes) and (displbits > maxbits))
+          then begin maxbytes := displbytes; maxbits := displbits; end;
+          lt := lt^.nextvar;
+          end;
+        displbytes := maxbytes; displbits := maxbits;
+        end;
+      end; {calcvarpart}
+      
+    begin {calcsize}
+    if ft <> nil
+    then
+      with ft^ do begin
+        bytes := 0;
+        bits := 0;
+        case form of
+          SCALAR:   if maxconst <> nil
+                    then 
+                      with maxconst^.valueof do begin
+                        if ivalu <= 127
+                        then bits := nrofbits(ivalu)
+                        else begin
+                          bytes := 1;
+                          bits := nrofbits(ivalu) - 8;
+                          end;
+                        end;
+          SUBRANGE: if min >= 0
+                    then { Positive minimum }
+                      if max <= 127
+                      then bits := nrofbits(max)
+                      else 
+                        if max <= 32767
+                        then begin
+                          bytes := 1;
+                          bits := nrofbits(max) - 8;
+                          end
+                        else bytes := 4
+                    else begin { Negative minimum }
+                      if (-(min + 1)) > max
+                      then bitcnt := nrofbits(-(min + 1)) + 1
+                      else bitcnt := nrofbits(max) + 1;
+                      if bitcnt < 8
+                      then bits := bitcnt
+                      else 
+                        if bitcnt < 16
+                        then begin
+                          bits := bitcnt - 8;
+                          bytes := 1;
+                          end
+                        else bytes := ((bitcnt - 1) div 8) + 1;
+                      end;
+          RECORDS:    begin
+                      LPckdRec := PckdRec; displbytes := 0; displbits := 0;
+                      if errors = 0
+                      then begin
+                        calcfieldaddrs(fstfield,varpart = nil); 
+                        calcvarpart(varpart);
+                        end;
+                      { :: ??? !!!
+                      if CHIP = M68000
+                      then if displbytes > 32766 then error(312);
+                      :: }
+                      bytes := displbytes + ord(displbits <> 0);
+                      if bytes <= 1 then bytes := 2;
+                      end;
+          VARIANT,TAGFIELD,SCONST: error(3001);
+          POINTERS: bytes := 4;
+          SETS:     begin
+                    getbounds(setof,lmin,lmax);
+                    bits := 0; bytes := (lmax div 8) + 1;
+                    end;
+          ARRAYS:   if (arrayof <> nil) and (indexedby <> nil)
+                    then begin
+                      getbounds(indexedby,lmin,lmax);
+                      bits := 0; numels := lmax - lmin + 1;
+                      l := fullbytes(arrayof); bytes := l*numels;
+                      if PckdArr 
+                      then
+                        if (arrayof^.bits = 0) and 
+                           (arrayof^.bytes <> fullbytes(arrayof))
+                        then begin { Unsigned 8 bits }
+                          bytes := numels;
+                          BitPacked := TRUE; bitsperel := 8;
+                          end
+                        else 
+                          if arrayof^.bytes = 0
+                          then
+                            if arrayof^.bits = 1
+                            then begin
+                              bytes := (numels + 7) div 8;
+                              BitPacked := TRUE; bitsperel := 1;
+                              end
+                            else
+                              if arrayof^.bits = 2
+                              then begin
+                                bytes := (numels + 3) div 4;
+                                BitPacked := TRUE; bitsperel := 2;
+                                end
+                              else 
+                                if (arrayof^.bits = 3) or (arrayof^.bits = 4)
+                                then begin
+                                  bytes := (numels + 1) div 2;
+                                  BitPacked := TRUE; bitsperel := 4;
+                                  end;
+                      if BitPacked
+                      then begin
+                           getbounds(arrayof,lmin,lmax);
+                           SignedEl := lmin < 0;
+                           if numels > 32766 then error(313);
+                           end
+                      else begin
+                           if l > 32766 then BigElement := TRUE;
+                           if (lmin < -32766) or (lmax > 32766)
+                           then BigIndex := TRUE;
+                           if (lmin*l < -32766) or (lmax*l > 32766)
+                           then BigArray := TRUE;
+                           end;
+                      end;
+          FILES:    if fileof <> nil
+                    then bytes := (FIBSIZE + 512) + fullbytes(fileof)
+                    else if TARGETOS = ADVENTURE
+                         then bytes := FIBSIZE + 512
+                         else bytes := FIBSIZE; { T = file; }
+          STRINGS:  bytes := stringlen + 1;
+        end; {case}
+        if (bytes <> 1) and Odd(bytes) then bytes := bytes + 1;
+        end;
+    end; {calcsize}
+    
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   

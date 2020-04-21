@@ -1,0 +1,40 @@
+.TH doublebuffer  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I doublebuffer
+- set the display mode to double buffer mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "doublebuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine double"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure doublebuffer;"
+.sp
+.SH DESCRIPTION
+\f2Doublebuffer\f1 sets the display mode to double buffer mode.
+It does not take effect until after a call to \f2gconfig\f1.
+In double buffer mode, the bitplanes are partitioned into two groups,
+called the front and back planes.  Only the front planes are displayed.
+Drawing commands normally update only the back planes; the
+\f2frontbuffer\f1 and \f2backbuffer\f1 commands can override the
+default.
+.PP
+.I Gconfig
+sets 
+.I frontbuffer
+.I "= TRUE"
+and
+.I backbuffer
+.I "= FALSE"
+in double buffer mode.
+.SH "SEE ALSO"
+.I backbuffer, frontbuffer, gconfig, getbuffer, getdisplaymode, RGBmode, 
+.I singlebuffer, swapbuffers
+.SH NOTE
+This command can only be used in immediate mode.

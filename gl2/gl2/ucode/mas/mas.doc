@@ -1,0 +1,319 @@
+		mas ---  A MICROASSEMBLER
+
+14-Jun-85					Mark S. Grossman
+
+CHANGES:	symbol tables go to .sym file
+		repairs to scratch ram declaration
+		added sreloc(n)
+		deleted enddeclares
+
+INTRODUCTION
+
+The microassembler "mas" is a collection of C procedures and macros for
+convenient implementation of RAM/PROM microcode.  Mas provides facilities
+for default field assignment, redundancy and omission checking of field
+assignments, parameter type checking, scratchpad ram allocation, and
+relocation of code.  Because mas is C-based, all the benefits of modular
+coding, constant substitution, and rapid compilation are available to the
+programmer.  Mas is used to compile an executable module which, when run,
+outputs a C file to stdout containing an initialized microstore array.
+
+
+
+STRUCTURE
+
+The microcode is viewed as a finite-state machine described by a sequence of
+state definitions.  Each state represents a (single) word of some width in
+the microstore, and contains any number of calls to user-written procedures
+(C functions).  These procedures can have parameters that can be type-
+checked and used to set any combination of fields or pseudo-fields in the
+current state.  At the end of each state definition, defaults can be
+supplied and checking can be performed based on which fields or pseudo-
+fields have been set, and errors can be printed.  Facilities are provided
+to allocate static variables kept in a scratchpad RAM and to refer to
+them by name in microcode procedures.
+
+The microprogrammer thus will write sequences of procedure calls to set bits
+in a microword, bracketed into states which are optionally tagged with
+labels.  This source is compiled, then linked with the mas object modules.
+The resulting executable file is run.
+Complete symbol tables, containing both microcode and scratch ram addresses,
+are output as text to a .sym file, along with any errors.
+Errors also appear on the stdout.  A .b and/or .o file is also produced - an
+initialized array of microwords to be downloaded to the target machine.
+
+
+
+FILES
+
+The user must first describe the microcode environment; i.e., the set of
+procedures that set microcode fields, the set of parameters, and
+descriptions of the fields themselves.  A main program that runs the
+generation and calls the user's microcode files is also needed.
+
+For example, a skeleton machine.c and main.c:
+
+    /* machine.c */
+
+    #include "mas.h"		/* the microassembler */
+
+    #include "userparams.h"	/* the user's parameter definitions */
+
+    <parameter declarations>
+
+    <output declarations>
+
+    <user procedures>
+
+_____________
+
+    /* main.c for machine */
+
+    #include "mas.h"
+
+    main()
+    {
+    <generation specification>
+
+    fsm();		/* start microcode part */
+
+    usercode1();	/* first user module */
+    usercode2();	/* second user module */
+    ...
+    endfsm();	/* end microcode part; generate output */
+    }
+
+
+A module of user microcode looks like:
+
+    #include "mas.h"
+    #include "userparams.h"
+
+    usercode1()
+    {
+    newfile("usercode1.c");	/* prints subheading in symbol table */
+
+    <constant definitions>
+
+    <scratch declarations>
+
+    <state definitions>
+    }
+
+
+
+<PARAMETER DECLARATIONS>
+
+	<parameter declaration> ::= Paramtype <ident> = {<const>,<const>};
+
+It is convenient to use symbolic parameters when specifying machine actions,
+e.g. SIGNAL(RED)  or  ALU(ADD,SHIFT1).  To do this, use the #define
+directive to create a list of possible parameters of a particular type, and
+then declare a parameter type to cover this list.  The #defines should go
+into a separate header file (userparams.h in the example) for inclusion by
+the microcode modules.  The actual constants used don't matter, but they
+should be contiguous and not overlap with any other parameter type.
+
+    #define RED     100
+    #define YELLOW  101
+    #define GREEN   102
+
+    Paramtype color = {RED, GREEN};	/* RED is lower bound, GREEN upper */
+
+See USER PROCEDURES for example use of parameter types.
+
+
+
+<OUTPUT DECLARATIONS>
+
+	<output declaration> ::=
+		Output <ident> = {<string>,<const>,<const>,<const>};
+
+Any field or pseudo-field that is to be used must first be declared.  The
+string value is used in error reporting.  The three constants in the
+initializer are the (1) the position of the lsb of the field in the state
+output; (2) the position of the msb of the field; (3) the value to be used
+as a default.  Default values must be explicitly assigned elsewhere (see
+ENDSTATE PROCEDURE).
+
+	Output light = {"light", 4, 6, 1};
+
+
+
+USER PROCEDURES
+
+User procedures can be arbitrary legal C procedures.  Mas provides tools for
+setting fields and checking parameters.  Example:
+
+    SIGNAL(c)
+	Param c;
+    {
+	Procname(SIGNAL);	/* string for error reporting */
+	Typecheck(c,color);
+	switch (c) {
+	    case RED: Setfield(light,1); break;
+	    case YELLOW: Setfield(light,2); break;
+	    case GREEN: Setfield(light,4);
+	}
+    }
+
+Here c is declared to be a parameter of some type. The call to Procname
+supplies a (quoteless) string to be used when mas errors are reported.  The
+call to Typecheck insures that c is a parameter of type color (defined in
+example above).  If c were out of range, an error message would be printed
+on the standard output.  Setfield is used to actually turn on bits in the
+microcode output.  The first parameter is a field identifier of type Output,
+and the second is the value to be assigned to the field, which is checked to
+be within the number of bits allowed by the output definition.  If the same
+field is set more than once in the same state, an error message is printed.
+
+Note that if RED, YELLOW, and GREEN were defined to be 101, 102, and 104,
+the switch statement could have been replaced by
+	Setfield(light,c-100);
+
+
+
+ENDSTATE PROCEDURE
+
+In order to supply defaults for fields and perform other kinds of checking,
+the user writes the endstate() procedure.  Some additional tools for this
+purpose are provided:
+
+Default(fieldident);	
+		store predeclared default value in field fieldident.
+
+Assert(fieldident);
+		insure that field fieldident has been explicitly assigned
+		to some value.  An error message is printed if it is not.
+
+Exclude(cond1,cond2);
+		Prints an error message if cond1 and cond2 are both true;
+		e.g. if two fields are assigned in the same state.  Field
+		assignment conditions are expressed using Is(), Eq(), and
+		the other functions below.
+
+Is(fieldident)
+Eq(fieldident,value)
+Lt(fieldident,value)
+Le(fieldident,value)
+		These allow the construction of conditional expressions for
+		reporting user's errors in output assignment.  Is() returns
+		a one if field fieldident has been assigned.  Eq() returns
+		a one if field fieldident has been assigned "value".
+		Relative comparisons are made similarly by Lt() ("less than")
+		and Le() ("less than or equal to").  Example:
+
+    Exclude( Eq(light,GREEN), !Lt(seconds,30) );
+
+says to report an error if the light field has been set to GREEN and the
+seconds field has a value >= 30.
+
+
+<GENERATION SPECIFICATIONS>
+
+	<generation specification> ::= Generate(<fieldident>);
+
+Although all fields have been declared in the output declaration section, a
+specification of which fields are to be actually generated must occur
+sometime before endfsm() is invoked. Ordering of the Generate() calls is not
+important.
+
+
+
+<CONSTANT DEFINITIONS>
+
+The preprocessor's #define directive is used to declare any symbolic
+constants the user may need in producing readable microcode.  This may
+include fixed allocations of registers and scratch ram.
+
+
+
+<SCRATCH DECLARATIONS>
+
+As an alternative to allocating fixed scratch ram symbols, storage can be
+declared flexibly by individual code modules.  Blocks (one-dimensional
+arrays) of any size can be declared anywhere in the ram.  The default
+behavior is to allocate single addresses in ascending order from 1.  Once
+symbols are declared, their addresses can be compiled into the NextAddress
+field using the scratch() or sarray() call, or into ANY microcode field
+using scratchlookup().
+     (See NEXT ADDRESS SPECIFICATION section below.)
+
+    <scratch declaration> ::= <scratchdeclare>  <scratchdeclare> .....
+
+    <scratchdeclare> ::= [sreloc(<adr>);] <scratchdecl> 
+
+    <scratchdecl> ::= <declwords> || <decl call>
+
+    <declwords> ::=  declare(<name>)  [blok(<const>)]  [external]
+
+    <decl call> ::=  decl(<name>,<const>,<externflag>);
+
+  A declaration may appear anywhere in the current code module
+(delineated by newfile() calls) above where the symbol is used.
+It must appear inside a C function block of course.  The declare() call
+allocates the next available single word of storage for the named variable.
+If preceded with the optional sreloc() call, sequential allocation begins
+at 'adr'.
+Add the blok() call to allocate more than one word. E.g. if a symbol FOO is
+declared by: declare(FOO) blok(20); then location FOO + 5 can be assembled
+into the NextAddress field with: sarray(FOO,5) or into a parameter with:
+scratchlookup(FOO) + 5.
+
+The "external" tag causes the symbol table to be checked before space is
+allocated.  If the symbol is already defined, its old location is used.
+Thus all global variables must be declared ahead of any external reference.
+
+The decl() call takes the place of declare(), blok() and external.
+<name> is a C character string for the symbol name; <const> is the block
+size; and <externflag> is 0 for a new declaration or 1 for an external
+declaration.  A symbol may be declared any number of times using <externflag>
+equal to 1; the symbol will be allocated only the first time, and the
+declaration is ignored all other times.
+
+A scratch symbol table, sorted first numerically, then alphabetically, is
+printed on the standard output.
+
+
+
+STATE DEFINITIONS
+
+     <state definition> ::= _NS <procedure call>; <procedure call>; ...; _ES
+
+Each state is a set of procedure calls (may be empty) surrounded by
+"brackets".  The left bracket is "_NS"; the right bracket is "_ES".
+
+States are normally assigned sequentially starting from 0.  The reloc()
+function can be used to coerce the next state to a desired location.  The
+call to reloc() is placed before _NS.
+
+
+
+NEXT-STATE SPECIFICATION AND LABELS
+
+label(<labelstring>);
+next(<labelstring>);
+const(<const>);
+scratch(<name>);
+sarray(<name>,<const>);
+
+State assignments and labels are fully relocatable.  A special output field,
+NextAddress, must be declared in the output declaration section.  In any
+state, a call to the special procedure next() will set the NextAddress field
+to the address of the state identified by <labelstring>.  The NextAddress
+field may be set to a constant value (or other expression) by using the
+const() call.  It may also be set to the address of a scratch symbol using
+scratch() and sarray().
+
+During execution, labels are output with their corresponding state numbers
+in the order they are seen by the assembler.
+
+	reloc(40)
+	label(ENTRY)
+	label(GREEN)	/* multiple labels on a state are OK; also, label
+			 * names can be the same as defined parameters or
+			 * procedures.
+			 */
+	_NS  SIGNAL(GREEN); TIMER(DECR); IF(NOTIMEOUT); next(GREEN);  _ES
+    label(YELLOW)
+	_NS  ...

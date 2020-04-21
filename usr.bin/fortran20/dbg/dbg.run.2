@@ -1,0 +1,1223 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: DBG.RUN.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1983, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                           All Rights Reserved.                07-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure scanhex;
+  var ch: char;
+begin
+ch := getnonblank;
+if ch <> chr(0)
+then begin chno := chno - 2; line[chno] := '$'; end;
+scan;
+end; {scanhex}
+
+procedure sysmem;
+  var lo,hi: longint; i: integer; ch : char;
+begin
+if (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+   (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin
+  ch := makechuc(getnonblank);
+  case ch of
+    'P': begin
+         scanhex;
+         if (token <> EOLNSY) and (token <> DOLLARSY)
+         then if token = ICONSTSY
+              then begin
+                   lo := ival; hi := lo; scanhex;
+                   if token = ICONSTSY
+                   then begin
+                        if ival <= lo
+                        then hi := lo + ival
+                        else hi := ival;
+                        end;
+                   if odd(lo) then lo := lo - 1;
+                   repeat
+                          write(lo:6 hex,':  ');
+                          i := 0;
+                          while i <= 15 do begin
+                              write(getsl(lo + i):8 hex,' ');
+                              i := i + 4;
+                              end;
+                          writeln;
+                          lo := lo + 16;
+                   until lo >= hi;
+                   end
+              else writeln('?NP xxx [xxx]');
+         end;
+  otherwise: writeln('?NP');
+  end; {case}
+  end
+else writeln('?No system space');
+end; {sysmem}
+
+procedure memory;
+  type rec = record case integer of
+                      1: (b: array[0..3] of -128..127);
+                      2: (l: longint);
+             end;
+  var lo,hi,q: longint; i: integer; ch : char; r: rec;
+begin
+ch := makechuc(getnonblank);
+case ch of
+  'P': begin
+       scanhex;
+       if (token <> EOLNSY) and (token <> DOLLARSY)
+       then if token = ICONSTSY
+            then begin
+                 lo := ival; hi := lo; scanhex;
+                 if token = ICONSTSY
+                 then begin
+                      if ival <= lo
+                      then hi := lo + ival
+                      else hi := ival;
+                      end;
+                 repeat
+                        write(lo:6 hex,':  ');
+                        for i := 0 to 15 do begin
+                            write(getub(lo + i):2 hex);
+                            if odd(lo) or odd(i) or (HOSTSEX = FEMALE)
+                            then write(' ');
+                            end;
+                        write('   ''');
+                        for i := 0 to 15 do begin
+                            ch := chr(getub(lo + i));
+                            if (ch < ' ') or (ch > '~') then ch := '.';
+                            write(ch);
+                            end;
+                        writeln('''');
+                        lo := lo + 16;
+                 until lo >= hi;
+                 end
+            else writeln('?MP xxx [xxx]');
+       end;
+  'S': begin
+       scanhex;
+       if token = ICONSTSY
+       then begin
+            q := ival; scanhex;
+            while token = ICONSTSY do begin
+                  r.l := ival;
+                  for i := scansize downto 1 do begin
+                      setub(q + scansize - i,r.b[4 - i]);
+                      end;
+                  q := q + scansize;
+                  scanhex;
+                  end;
+            end
+       else writeln('?MS xxx xxx [xxx] ...');
+       end;
+otherwise: writeln('?MP MS');
+end; {case}
+end; {memory}
+
+procedure dobreaks(fch: char);
+  type rec = record nstmts: integer; s: array[1..9999] of integer; end;
+  var lach,ch: char; lname: string63; lentry: pentryrec;
+      i,index,offset,line,count,countinit: integer; ptr: pbyte;
+      l: longint; p: ^rec; mnam: alfa31; mnamlen: integer; stmtoff: longint;
+      lkind: integer; IndexSet, ClearFlag, Done: Boolean;
+begin
+ch := makechuc(getnonblank);
+if fch = 'C'
+then begin
+     ClearFlag := TRUE;
+     if ch = '*'
+     then lkind := 2
+     else if ch = 'T'
+          then begin
+               lkind := 1; ch := makechuc(getnonblank);
+               end
+          else begin
+               lkind := 0;
+               if ch = 'B' then ch := makechuc(getnonblank);
+               end;
+     if (ch = '*') or (lkind = 2)
+     then begin
+          for i := 1 to 100 do
+              with bpoint[i] do
+                   if BSet or TSet
+                   then begin
+                        if lkind = 2
+                        then begin BSet := FALSE; TSet := FALSE; end
+                        else
+                          if lkind = 0 then BSet := FALSE else TSet := FALSE;
+                        if not (BSet or TSet)
+                        then if ENVIRONMENT = GENIX
+                             then setub(address,oldinst)
+                             else setuw(address,oldinst);
+                        end;
+          exit(dobreaks);
+          end;
+     end
+else begin
+     ClearFlag := FALSE;
+     if fch = 'B' then lkind := 0 else lkind := 1;
+     end;
+count := 0; countinit := 0;
+while (ch >= '0') and (ch <= '9') do begin
+      count := count*10 + ord(ch) - ord('0');
+      ch := makechuc(nextch);
+      end;
+if ch = ' ' then ch := makechuc(getnonblank);
+if ch = '*'
+then begin
+     countinit := count;
+     ch := makechuc(getnonblank);
+     end;
+case ch of
+  'A',
+  'E',
+  'X': begin
+       Done := FALSE; l := 0; lach := getnonblank;
+       chno := chno - 1;
+       if (lach >= '0') and (lach <= '9') and (ch = 'A')
+       then begin
+            scanhex; l := ival;
+            lach := getnonblank;
+            if lach = chr(0)
+            then begin
+                 if ClearFlag
+                 then clearbreak(l,lkind)
+                 else setbreak(l,lkind,count,countinit);
+                 Done := TRUE;
+                 end
+            else if lach <> '+'
+                 then begin
+                      writeln('???Syntax error');
+                      Done := TRUE;
+                      end;
+            end;
+       if not Done
+       then begin
+            scan;
+            if (token = IDENTSY) or (token = LINKSY)
+            then begin
+                 lname := sval;
+                 if token = IDENTSY
+                 then index := usrindex(lname)
+                 else begin
+                      linkname(lname,mnam,mnamlen);
+                      index := getindex(entrylookup(@mnam,mnamlen));
+                      end;
+                 if ChkPIndex(index,lname)
+                 then begin
+                      lentry := getpentry(index);
+                      with lentry^ do begin
+                           if ch = 'A'
+                           then offset := 0
+                           else if ch = 'E'
+                                then offset := entryoff
+                                else offset := exitoff;
+                           if offset >= 0
+                           then begin
+                                l := l + realaddress(address) + offset;
+                                lach := getnonblank;
+                                if (lach = '+') and (ch = 'A')
+                                then begin scanhex; l := l + ival; end;
+                                if ClearFlag
+                                then clearbreak(l,lkind)
+                                else setbreak(l,lkind,count,countinit);
+                                end
+                           else writeln('?No entry/exit offset for ',lname);
+                           end;
+                      end;
+                 end
+            else writeln('?Procedure');
+            end;
+       end;
+  'L': begin
+       scan;
+       if token = ICONSTSY
+       then begin
+            line := ival; scan; IndexSet := FALSE;
+            if token = EOLNSY
+            then begin
+                 getentryoff(envpc,index,l);
+                 if index >= 0
+                 then begin
+                      lentry := getpentry(index);
+                      if lentry^.username <> nil
+                      then begin
+                           ptr := lentry^.username;
+                           for l := 1 to lentry^.usernlen do begin
+                               lname[l] := chr(ptr^);
+                               ptr := pointer(ord(ptr) + 1);
+                               end;
+                           lname[0] := chr(lentry^.usernlen);
+                           writeln('in procedure ',lname);
+                           IndexSet := TRUE;
+                           end;
+                      end;
+                 end;
+            if (token = IDENTSY) or (token = LINKSY) or IndexSet
+            then begin
+                 if not IndexSet
+                 then begin
+                      lname := sval;
+                      if token = IDENTSY
+                      then index := usrindex(lname)
+                      else begin
+                           linkname(lname,mnam,mnamlen);
+                           index := getindex(entrylookup(@mnam,mnamlen));
+                           end;
+                      end;
+                 if ChkPIndex(index,lname)
+                 then begin
+                      lentry := getpentry(index);
+                      with lentry^ do begin
+                           if statements = nil
+                           then begin
+                                writeln('?No statement offsets for ',
+                                        lname);
+                                exit(dobreaks);
+                                end;
+                           p := pointer(ord(statements));
+                           if (line <= 0) or (line > p^.nstmts)
+                           then begin
+                                writeln('?',lname,' has ',p^.nstmts,
+                                        ' statements');
+                                exit(dobreaks);
+                                end;
+                           stmtoff := 0;
+                           for i := 1 to line do
+                             stmtoff := stmtoff + p^.s[i];
+                           l := realaddress(address) + stmtoff;
+                           if ClearFlag
+                           then clearbreak(l,lkind)
+                           else setbreak(l,lkind,count,countinit);
+                           end;
+                      end;
+                 end
+            else writeln('?Procedure');
+            end
+       else writeln('?Line number');
+       end;
+otherwise: if fch = 'C'
+           then writeln('?CE CLnnn CX CA CTE CTLnnn CTX CTA C* CB* CT*')
+           else if fch = 'B'
+                then writeln('?BE BLnnn BX BA')
+                else writeln('?TE TLnnn TX TA');
+end; {case}
+end; {dobreaks}
+
+procedure initenv(fpc: longint; fenv: envrec; fdepth: integer);
+  var lentryno,lparent,i,j: integer; lentry,lentry2: pentryrec;
+      loffset: longint; slink: plong;
+begin
+envlevel := 0; envdepth := fdepth; envpc := fpc;
+display[0].a := fenv.a; display[0].d := fenv.d;
+display[0].dentryno := -1;
+display[0].sb := fenv.sb; display[0].fp := fenv.fp;
+getentryoff(fpc,lentryno,loffset);
+if lentryno >= 0
+then begin
+     lentry := getpentry(lentryno);
+     with lentry^ do 
+          if (entryoff <> -1) and (exitoff <> -1) and
+             (loffset >= entryoff) and (loffset <= exitoff)
+          then begin
+               display[0].dentryno := lentryno;
+               case language of
+                 PASCAL:
+                   begin
+                   envlevel := level;
+                   if ENVIRONMENT = GENIX
+                   then slink := display[0].fp
+                   else slink := display[0].a[6];
+                   if slink <> nil
+                   then if (ENVIRONMENT = GENIX) and
+                           (not (TEKFLAG or DYNIXFLAG or OPUSFLAG))
+                        then slink := pointer(getul(ord4(slink)) + 12) {CXP}
+                        else slink := pointer(getul(ord4(slink)) + 8);
+                   display[envlevel] := display[0];
+                   lparent := parent;
+                   for i := envlevel - 1 downto 1 do begin
+                       for j := 0 to 7 do begin
+                           display[i].a[j] := nil; 
+                           display[i].d[j] := nil;
+                           end;
+                       if (ENVIRONMENT = GENIX) and
+                          (not (TEKFLAG or DYNIXFLAG or OPUSFLAG))
+                       then
+                         if lparent < 4095
+                         then begin
+                           lentry2 := getpentry(lparent);
+                           display[i].sb := pointer(lastmodule^.modtable);
+                           end
+                         else display[i].sb := nil
+                       else 
+                         if not (TEKFLAG or DYNIXFLAG or OPUSFLAG)
+                         then begin
+                           if (ENVIRONMENT <> XENIX_O) and
+                              (ENVIRONMENT <> CT_O) and
+                              (ENVIRONMENT <> SG_O) and
+                              (ENVIRONMENT <> SYS5_2)
+                           then display[i].a[4] := display[i + 1].a[4];
+                           display[i].a[5] := display[i + 1].a[5];
+                           end;
+                       if odd(ord(slink)) then slink := nil;
+                       if slink <> nil
+                       then 
+                         with display[i] do begin
+                           { !!! Make RegsValid !!! }
+                           if i > 1
+                           then begin
+                             if ENVIRONMENT = GENIX
+                             then fp := slink 
+                             else a[6] := slink; 
+                             if (ENVIRONMENT = GENIX) and
+                                (not (TEKFLAG or DYNIXFLAG or OPUSFLAG))
+                             then slink := pointer(getul(ord4(slink))+12) {CXP}
+                             else slink := pointer(getul(ord4(slink))+8);
+                             end;
+                           if lparent < 4095
+                           then begin
+                             dentryno := lparent;
+                             lentry2 := getpentry(lparent);
+                             lparent := lentry2^.parent;
+                             end
+                           else dentryno := 4095;
+                           end;
+                       end;
+                   end;
+                 FORTRAN:
+                   begin
+                   envlevel := 1; display[1] := display[0];
+                   end;
+                 C:
+                   begin
+                   envlevel := 1; display[1] := display[0];
+                   if parent < 4095
+                   then begin
+                        envlevel := 2; display[2] := display[1];
+                        for i := 0 to 7 do begin
+                            display[1].a[i] := nil; display[1].d[i] := nil;
+                            end;
+                        display[1].fp := nil; display[1].sb := nil;
+                        display[1].dentryno := parent;
+                        end;
+                   end;
+               end; {case}
+               end;
+     end;
+end; {initenv}
+
+procedure walkback;
+  var l,lpc,offset,la6,la5: longint; 
+      entryno: integer; pl: plong; lentry: pentryrec;
+begin
+scan;
+if token = EOLNSY
+then l := 3
+else if token = ICONSTSY
+     then l := ival
+     else l := 0;
+if l > 0
+then begin
+     prcurenv;
+     lpc := envpc;
+     if ENVIRONMENT = GENIX
+     then pl := display[0].fp
+     else pl := display[0].a[6];
+     if pl <> nil then la6 := getul(ord4(pl));
+     if TEKFLAG or DYNIXFLAG or OPUSFLAG
+     then pl := nil
+     else
+       if ENVIRONMENT = GENIX
+       then pl := display[0].sb
+       else pl := display[0].a[5];
+     if pl <> nil then la5 := getul(ord4(pl));
+     while l > 0 do begin
+           getentryoff(lpc,entryno,offset);
+           if entryno >= 0
+           then begin
+                lentry := getpentry(entryno);
+                with lentry^ do
+                     if (entryoff <> -1) and (exitoff <> -1) and
+                        (offset >= entryoff) and (offset <= exitoff)
+                     then begin
+                          case language of
+                            PASCAL,
+                            FORTRAN:
+                              if (language = FORTRAN) and (lowestversion < 204)
+                              then begin
+                                writeln('*** Can''t do FORTRAN WALKBACK ***');
+                                writeln('*** with V2.3 compiled code   ***');
+                                l := 0;
+                                end
+                              else begin
+                                if (level = 1) and (ENVIRONMENT <> GENIX) and
+                                   (language <> FORTRAN)
+                                then if la5 <> 0
+                                     then begin
+                                          lpc := getul(la5 + 4);
+                                          la5 := getul(la5);
+                                          end
+                                     else l := 0
+                                else if la6 <> 0
+                                     then begin
+                                          lpc := getul(la6 + 4);
+                                          la6 := getul(la6);
+                                          end
+                                     else l := 0;
+                                end;
+                            C:
+                              begin
+                              if la6 <> 0
+                              then begin
+                                   lpc := getul(la6 + 4);
+                                   la6 := getul(la6);
+                                   end
+                              else l := 0;
+                              end;
+                          otherwise: l := 0;
+                          end; {case}
+                          end
+                     else l := 0
+                end
+           else l := 0;
+           write('Returning to ');
+           if l > 0 then prfullloc(lpc,TRUE) else write('???');
+           writeln;
+           l := l - 1;
+           end;
+     end
+else writeln('?W Wnnn');
+end; {walkback}
+
+function MvEnv(var fpc: longint; var fenv: envrec; fcount: longint): Boolean;
+  var i,offset,l: longint; entryno,j,bit: integer; lentry: pentryrec;
+begin
+MvEnv := TRUE;
+for i := 1 to fcount do begin
+     getentryoff(fpc,entryno,offset);
+     if entryno >= 0
+     then begin
+          lentry := getpentry(entryno);
+          with lentry^ do 
+               if (entryoff <> -1) and (exitoff <> -1) and
+                  (offset >= entryoff) and (offset <= exitoff)
+               then begin
+                    case language of
+                      PASCAL,
+                      FORTRAN,
+                      C:
+                        if (language = FORTRAN) and (lowestversion < 204)
+                        then MvEnv := FALSE
+                        else
+                          if ENVIRONMENT = GENIX
+                          then begin
+                            
+                            { 1. Update saved registers' values }
+                            
+                            if (wherereg = 2) and (fenv.fp <> nil) and
+                               not odd(ord(fenv.fp))
+                            then begin
+                                 bit := 1; 
+                                 l := regoffset + getul(ord4(fenv.fp));
+                                 if odd(l)
+                                 then begin
+                                      writeln('---Odd address ',l hex);
+                                      halt(OKHALT);
+                                      end;
+                                 for j := 0 to 15 do begin
+                                     if (bit and regmask) <> 0
+                                     then begin
+                                          l := l - 4;
+                                          if j > 7
+                                          then fenv.d[j - 8] := pointer(l)
+                                          else fenv.a[j] := pointer(l);
+                                          end;
+                                     bit := bit + bit;
+                                     end;
+                                 clearregs(fenv,[D0..D2,A0..A3]);
+                                 end
+                            else clearregs(fenv,[D0..D7,A0..A7]);
+                            
+                            { 2. Update base register's value }
+                            
+                            fpc := getul(getul(ord4(fenv.fp)) + 4);
+                            if not (TEKFLAG or DYNIXFLAG or OPUSFLAG)
+                            then fenv.sb :=
+                                   pointer(getuw(getul(ord4(fenv.fp)) + 8));
+                            fenv.fp := pointer(getul(ord4(fenv.fp)));
+                            end
+                          else begin {not GENIX}
+                            
+                            { 1. Update saved registers' values }
+                            
+                            if (wherereg = 1) and (fenv.a[6] <> nil) and
+                               not odd(ord(fenv.a[6]))
+                            then begin
+                                 bit := 8192; 
+                                 l := regoffset + getul(ord4(fenv.a[6]));
+                                 if odd(l)
+                                 then begin
+                                      writeln('---Odd address ',l hex);
+                                      halt(OKHALT);
+                                      end;
+                                 for j := 13 downto 0 do begin
+                                     if (bit and regmask) <> 0
+                                     then begin
+                                          l := l - 4;
+                                          if j <= 7
+                                          then fenv.d[j] := pointer(l)
+                                          else fenv.a[j - 8] := pointer(l);
+                                          end;
+                                     bit := bit div 2;
+                                     end;
+                                 clearregs(fenv,[D0..D2,A0..A1,A7]);
+                                 end
+                            else clearregs(fenv,[D0..D7,A0..A3,A7]);
+                            
+                            { 2. Update base register's value }
+                            
+                            if (level = 1) and (language <> FORTRAN)
+                            then begin
+                                 fpc := getul(getul(ord4(fenv.a[5])) + 4);
+                                 fenv.a[5] := pointer(getul(ord4(fenv.a[5])));
+                                 end
+                            else begin
+                                 fpc := getul(getul(ord4(fenv.a[6])) + 4);
+                                 fenv.a[6] := pointer(getul(ord4(fenv.a[6])));
+                                 end;
+                            end;
+                    otherwise: MvEnv := FALSE;
+                    end; {case}
+                    end
+               else MvEnv := FALSE
+          end
+     else MvEnv := FALSE;
+     end;
+end; {MvEnv}
+
+procedure moveup;
+  var count,newpc: longint; newenv: envrec;
+begin
+scan;
+if token = ICONSTSY
+then count := ival
+else if token = EOLNSY
+     then count := 1
+     else begin writeln('?U Unnn'); exit(moveup); end;
+newenv := display[0]; newpc := envpc;
+if MvEnv(newpc,newenv,count)
+then initenv(newpc,newenv,envdepth + count)
+else writeln('?Can''t move up that far');
+prcurenv;
+end; {moveup}
+
+procedure movedown;
+  var count,newpc: longint; newenv: envrec; i: integer;
+begin
+scan;
+if token = ICONSTSY
+then count := ival
+else if token = EOLNSY
+     then count := 1
+     else if token = STARSY
+          then count := envdepth
+          else begin writeln('?D Dnnn D*'); exit(movedown); end;
+newenv.dentryno := -1;
+if ENVIRONMENT = GENIX
+then begin
+  newenv.fp := pointer(dataareabase + 68);
+  newenv.sb := pointer(dataareabase + 72);
+  end;
+for i := 0 to 7 do
+    if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+       (ENVIRONMENT = CROMIX)
+    then begin newenv.a[i] := @prog.a[i]; newenv.d[i] := @prog.d[i]; end
+    else
+      if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or
+         (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+         (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+         (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+      then begin
+        newenv.a[i] := pointer(dataareabase + 36 + 4*i);
+        newenv.d[i] := pointer(dataareabase + 4 + 4*i);
+        end;
+newpc := prog.pc;
+if count <= envdepth
+then if MvEnv(newpc,newenv,envdepth - count)
+     then initenv(newpc,newenv,envdepth - count)
+     else writeln('?Internal error')
+else writeln('?Can''t move down that far');
+prcurenv;
+end; {movedown}
+
+procedure commands(fch: char);
+  var lfname: string63; i,len: integer; lch: char;
+      lfile: text;
+  
+  procedure outbreaki(fch: char);
+  begin {outbreaki}
+  with bpoint[i] do begin
+       write(lfile,fch);
+       if brcountinit <> 0
+       then write(lfile,brcountinit+1:1,'*')
+       else if brcount <> 0
+            then write(lfile,brcount+1:1);
+       writeln(lfile,'A',address:8 hex);
+       end;
+  end; {outbreaki}
+  
+begin {commands}
+len := 0; lch := getnonblank;
+while (lch <> chr(0)) and (lch <> ' ') do begin
+      len := len + 1; lfname[len] := lch;
+      lch := nextch;
+      end;
+lfname[0] := chr(len);
+if fch = '<'
+then begin
+     reset(commandfile,lfname);
+     if ioresult = 0
+     then CommandFileOpen := TRUE
+     else writeln('Can''t open ',lfname);
+     end
+else begin {'>'}
+     rewrite(lfile,lfname);
+     if ioresult = 0
+     then begin
+          for i := 1 to 100 do begin
+              if bpoint[i].Bset then outbreaki('B');
+              if bpoint[i].Tset then outbreaki('T');
+              end;
+          writeln(lfile,'lb');
+          close(lfile,lock);
+          writeln('File created.');
+          end
+     else writeln('Can''t open ',lfname);
+     end;
+end; {commands}
+
+procedure callsystem;
+  var lpac: packed array[1..66] of char; len: integer; lch: char;
+begin {callsystem}
+if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or
+   (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+   (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+   (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+then begin
+  len := 0;
+  repeat
+    lch := nextch; len := len + 1; lpac[len] := lch;
+  until lch = chr(0);
+  if USCOREFLAG then _system(@lpac) else system(@lpac);
+  end;
+end; {callsystem}
+
+procedure runit;
+  label 99;
+  var lstatus: statustype; llong: longint; 
+      regvalidval: integer; garbage, signum, startrequest: cint;
+      cwaitval, llong1, llong2: longint;
+  
+  procedure trap(i: integer);
+    label 2;
+    var curbreak: integer; lch: char; ExitFlag,BreakFlag,StepFlag: Boolean;
+        lenv: envrec; llong: longint; lstatus: statustype;
+  begin
+  BreakFlag := FALSE; StepFlag := FALSE;
+  if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+     (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or ALTOSFLAG
+  then begin
+    if startrequest <> 9 {Single step} then prog.pc := prog.pc - 2;
+    end
+  else
+    if (ENVIRONMENT <> GENIX) and
+       (ENVIRONMENT <> SYS5_2) {BPT doesn't advance pc}
+    then prog.pc := prog.pc - 2; 
+  envpc := prog.pc; envdepth := -1;
+  if (prog.state = CONTINUE) or (prog.state = STEPPING)
+  then 
+    if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+       (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+       (ENVIRONMENT = SYS5_2)
+    then begin setuw(contbadr,contbins); startrequest := 7; end
+    else 
+      if ENVIRONMENT = GENIX
+      then begin setub(contbadr,contbins); startrequest := 7; end
+      else begin
+        if contadr2 <> -1 then setuw(contadr2,contins2);
+        setuw(contadr1,contins1);
+        setuw(contbadr,contbins);
+        if (prog.pc <> contadr1) and (prog.pc <> contadr2)
+        then begin
+          writeln;
+          writeln('*** Error in CONTINUING/STEPPING ***');
+          writeln('    PC=',prog.pc hex,', CBADR=',contbadr hex,
+                  ', CADR1=',contadr1 hex,', CADR2=',contadr2 hex);
+          prog.state := ERROR; goto 999;
+          end;
+        end;
+  if prog.state = CONTINUE
+  then begin prog.state := RUNNING; end
+  else begin
+       ExitFlag := FALSE;
+       case i of
+         1: begin { TRAP7 }
+            curbreak := breakno(prog.pc);
+            if curbreak > 0
+            then begin
+                 if FirstBreak
+                 then begin
+                      FirstBreak := FALSE;
+                      clearbreak(prog.pc,0);
+                      write('Begin execution at ');
+                      end
+                 else begin
+                      BreakFlag := TRUE; contcount := 0;
+                      with bpoint[curbreak] do begin
+                           if brcount > 0
+                           then begin
+                                brcount := brcount - 1;
+                                ExitFlag := TRUE;
+                                goto 2;
+                                end;
+                           brcount := brcountinit;
+                           if BSet
+                           then write('Break at ')
+                           else if TSet
+                                then begin write('Trace ');
+                                     ExitFlag := TRUE;
+                                     end;
+                           end;
+                      end;
+                 prfullloc(prog.pc,TRUE); writeln;
+              2: end
+            else if prog.state = STEPPING
+                 then begin
+                      contcount := contcount - 1;
+                      if contcount > 0
+                      then begin StepFlag := TRUE; ExitFlag := TRUE; end
+                      else contcount := 0;
+                      end
+                 else if (ENVIRONMENT = MERLIN) or
+                         (ENVIRONMENT = ADVENTURE) or
+                         (ENVIRONMENT = CROMIX)
+                      then begin
+                           writeln('*** TRAP7 not a breakpoint ***');
+                           prregs;
+                           prog.pc := prog.pc + 2;
+                           end
+                      else if (ENVIRONMENT = UNISOFT) or
+                              (ENVIRONMENT = UNOS) or
+                              (ENVIRONMENT = XENIX) or
+                              (ENVIRONMENT = GENIX) or
+                              (ENVIRONMENT = XENIX_O) or
+                              (ENVIRONMENT = CT_O) or
+                              (ENVIRONMENT = SG_O) or
+                              (ENVIRONMENT = SYS5_2)
+                           then begin
+                             write('Halted at '); prfullloc(prog.pc,TRUE); 
+                             writeln(', not a breakpoint');
+                             end;
+            end;
+       otherwise: begin
+                  writeln('??? Unknown cause - I = ',i,' ???');
+                  prregs; prog.pc := prog.pc + 2;
+                  end;
+       end; {case}
+       if not ExitFlag
+       then begin
+         lenv.dentryno := -1;
+         if ENVIRONMENT = GENIX
+         then begin
+           setul(dataareabase +  4,getsl(nsregaddr(NSR0)));
+           setul(dataareabase +  8,getsl(nsregaddr(NSR1)));
+           setul(dataareabase + 12,getsl(nsregaddr(NSR2)));
+           setul(dataareabase + 16,getsl(nsregaddr(NSR3)));
+           setul(dataareabase + 20,getsl(nsregaddr(NSR4)));
+           setul(dataareabase + 24,getsl(nsregaddr(NSR5)));
+           setul(dataareabase + 28,getsl(nsregaddr(NSR6)));
+           setul(dataareabase + 32,getsl(nsregaddr(NSR7)));
+           
+           setul(dataareabase + 36,getsl(nsregaddr(NSF0)));
+           setul(dataareabase + 40,getsl(nsregaddr(NSF1)));
+           setul(dataareabase + 44,getsl(nsregaddr(NSF2)));
+           setul(dataareabase + 48,getsl(nsregaddr(NSF3)));
+           setul(dataareabase + 52,getsl(nsregaddr(NSF4)));
+           setul(dataareabase + 56,getsl(nsregaddr(NSF5)));
+           setul(dataareabase + 60,getsl(nsregaddr(NSF6)));
+           setul(dataareabase + 64,getsl(nsregaddr(NSF7)));
+           for i := 0 to 7 do begin
+             lenv.d[i] := pointer(dataareabase + 4 + 4*i);
+             lenv.a[i] := pointer(dataareabase + 36 + 4*i);
+             end;
+           setul(dataareabase + 68,getsl(nsregaddr(NSFP)));
+           lenv.fp := pointer(dataareabase + 68);
+           setul(dataareabase + 72,getul(prog.jt {modtable} {SB}));
+           lenv.sb := pointer(dataareabase + 72);
+           end
+         else
+           for i := 0 to 7 do
+             if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+                (ENVIRONMENT = CROMIX)
+             then begin lenv.a[i] := @prog.a[i]; lenv.d[i] := @prog.d[i]; end
+             else
+               if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS)
+               then begin
+                 lenv.a[i] := pointer(dataareabase + 36 + 4*i);
+                 lenv.d[i] := pointer(dataareabase + 4 + 4*i);
+                 end
+               else
+                 if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+                    (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+                    (ENVIRONMENT = SYS5_2)
+                 then begin
+                   lenv.a[i] := pointer(dataareabase + 36 + 4*i);
+                   setul(dataareabase + 36 + 4*i,getproga(i));
+                   lenv.d[i] := pointer(dataareabase + 4 + 4*i);
+                   setul(dataareabase + 4 + 4*i,getprogd(i));
+                   end;
+         initenv(prog.pc,lenv,0);
+         while not ExitFlag do begin
+           repeat
+             if CommandFileOpen
+             then 
+               if eof(commandfile)
+               then begin close(commandfile); CommandFileOpen := FALSE; end;
+             if CommandFileOpen
+             then begin readln(commandfile,line); writeln(': ',line); end
+             else begin write('- '); readln(line); end;
+             chno := 1;
+             while (length(line) >= chno) and (line[chno] = ' ') do
+               chno := chno + 1;
+             lch := makechuc(nextch);
+           until lch <> chr(0);
+           case lch of
+             'B','T','C': dobreaks(lch);
+             'D': movedown;
+             'I': if ENVIRONMENT = ADVENTURE
+                  then writeln('Commands: B C D L M P Q R S T U W')
+                  else 
+                    if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS)
+                    then writeln('Commands: B C D L M P Q R S T U W !')
+                    else begin { MERLIN, GENIX, XENIX, XENIX_O,
+                                 CT_O, SG_O, SYS5_2}
+                         scan;
+                         if (token = ICONSTSY) or (token = EOLNSY)
+                         then begin
+                              StepFlag := TRUE; ExitFlag := TRUE;
+                              QuietStep := FALSE;
+                              if token = EOLNSY
+                              then contcount := 1
+                              else begin
+                                   contcount := ival; lch := nextch;
+                                   if (lch = 'q') or (lch = 'Q')
+                                   then QuietStep := TRUE;
+                                   end;
+                              end
+                         else writeln('?I Innn');
+                         end;
+             'L': listnames;
+             'N': sysmem; (***)
+             'M': memory;
+             'P': printvars;
+             'Q': begin
+                  write('Exit program (Y/N) ? '); 
+                  if CommandFileOpen
+                  then if eof(commandfile)
+                       then begin
+                            close(commandfile);
+                            CommandFileOpen := FALSE;
+                            end;
+                  if CommandFileOpen
+                  then readln(commandfile,line)
+                  else readln(line);
+                  if length(line) > 0
+                  then if (line[1] = 'Y') or (line[1] = 'y')
+                       then begin prog.state := STOPPED;
+                            if (ENVIRONMENT = UNISOFT) or 
+                               (ENVIRONMENT = GENIX) or
+                               (ENVIRONMENT = XENIX) or
+                               (ENVIRONMENT = XENIX_O) or
+                               (ENVIRONMENT = CT_O) or
+                               (ENVIRONMENT = SG_O) or
+                               (ENVIRONMENT = SYS5_2)
+                            then if USCOREFLAG
+                                 then begin
+                                      llong := _ptrace(0,0,childpid,8);
+                                      _wait(lstatus);
+                                      end
+                                 else begin
+                                      llong := ptrace(0,0,childpid,8);
+                                      wait(lstatus);
+                                      end;
+                            goto 99;
+                            end;
+                  end;
+             'R': if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS)
+                  then
+                    if regvalidval = 1
+                    then ExitFlag := TRUE
+                    else writeln('Program not restartable')
+                  else ExitFlag := TRUE;
+             'S': setvars;
+             'U': moveup;
+             'W': walkback;
+             '!': callsystem;
+             '<',
+             '>': commands(lch);
+         {?}'\\': begin i := 0; i := i div i; end;
+          otherwise: if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS)
+                     then writeln('Commands: B C D L M P Q R S T U W !')
+                     else 
+                       if (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+                          (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+                          (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+                       then writeln('Commands: B C D L M P Q R S T U W I !')
+                       else writeln('Commands: B C D L M P Q R S T U W');
+           end; {case}
+           end; {while}
+         if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+            (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+            (ENVIRONMENT = SYS5_2)
+         then {Restore system registers}
+           for i := 0 to 7 do begin
+             setsl(mregaddr(i+8),getul(dataareabase + 36 + 4*i));
+             setsl(mregaddr(i),getul(dataareabase +  4 + 4*i));
+             end
+         else
+           if ENVIRONMENT = GENIX
+           then begin
+             setsl(nsregaddr(NSR0),getul(dataareabase +  4));
+             setsl(nsregaddr(NSR1),getul(dataareabase +  8));
+             setsl(nsregaddr(NSR2),getul(dataareabase + 12));
+             setsl(nsregaddr(NSR3),getul(dataareabase + 16));
+             setsl(nsregaddr(NSR4),getul(dataareabase + 20));
+             setsl(nsregaddr(NSR5),getul(dataareabase + 24));
+             setsl(nsregaddr(NSR6),getul(dataareabase + 28));
+             setsl(nsregaddr(NSR7),getul(dataareabase + 32));
+
+             setsl(nsregaddr(NSF0),getul(dataareabase + 36));
+             setsl(nsregaddr(NSF1),getul(dataareabase + 40));
+             setsl(nsregaddr(NSF2),getul(dataareabase + 44));
+             setsl(nsregaddr(NSF3),getul(dataareabase + 48));
+             setsl(nsregaddr(NSF4),getul(dataareabase + 52));
+             setsl(nsregaddr(NSF5),getul(dataareabase + 56));
+             setsl(nsregaddr(NSF6),getul(dataareabase + 60));
+             setsl(nsregaddr(NSF7),getul(dataareabase + 64));
+             end;
+         end; {if not ExitFlag}
+       if BreakFlag
+       then begin
+            curbreak := breakno(prog.pc);
+            if curbreak = 0 then BreakFlag := FALSE;
+            end;
+       if BreakFlag or StepFlag
+       then if (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+               (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+               (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+            then begin
+                 contbadr := prog.pc;
+                 if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+                    (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+                    (ENVIRONMENT = SYS5_2)
+                 then begin
+                   contbins := getuw(contbadr);
+                   if BreakFlag then setuw(contbadr,bpoint[curbreak].oldinst);
+                   end
+                 else begin {GENIX}
+                   contbins := getub(contbadr);
+                   if BreakFlag then setub(contbadr,bpoint[curbreak].oldinst);
+                   end;
+                 if StepFlag
+                 then begin
+                      if not QuietStep
+                      then begin
+                           write('STEP: '); prfullloc(prog.pc,TRUE);
+                           writeln;
+                           end;
+                      end;
+                 startrequest := 9; {Single step mode}
+                 if StepFlag
+                 then prog.state := STEPPING
+                 else prog.state := CONTINUE;
+                 end
+            else begin
+                 contbadr := prog.pc; contbins := getuw(contbadr);
+                 if BreakFlag then setuw(contbadr,bpoint[curbreak].oldinst);
+                 if StepFlag
+                 then begin
+                      if not QuietStep
+                      then begin
+                           write('STEP: '); prfullloc(prog.pc,TRUE);
+                           write(' INST=');
+                           llong := prog.pc;
+                           i := instsize(getuw(llong));
+                           while i > 0 do begin
+                                 write(getuw(llong):4 hex,' '); i := i - 2;
+                                 llong := llong + 2;
+                                 end;
+                           writeln;
+                           end;
+                      end;
+                 getnxtaddrs(prog.pc,contadr1,contadr2);
+                 contins1 := getuw(contadr1); setuw(contadr1,TRAP7);
+                 if contadr2 <> -1
+                 then begin
+                      contins2 := getuw(contadr2); setuw(contadr2,TRAP7);
+                      end;
+                 if StepFlag
+                 then prog.state := STEPPING
+                 else prog.state := CONTINUE;
+                 end
+       else prog.state := RUNNING;
+       end; { prog.state <> CONTINUE }
+  end; {trap}
+  
+begin {runit}
+signum := 0; startrequest := 7;
+if ENVIRONMENT = MERLIN then %_trapon;
+if prog.state = LOADED
+then begin
+     if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+        (ENVIRONMENT = CROMIX)
+     then setbreak(prog.pc,0,0,0)
+     else 
+       if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or
+          (ENVIRONMENT = XENIX)
+       then setbreak(textareabase+6,0,0,0) {Need A4 loaded}
+       else
+         if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+            (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+            (ENVIRONMENT = SYS5_2)
+         then setbreak(textareabase,0,0,0);
+     prog.state := RUNNING;
+     FirstBreak := TRUE;
+     if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+        (ENVIRONMENT = CROMIX)
+     then %_run(ord(@prog),trap)
+     else if ENVIRONMENT = UNISOFT
+     then begin
+       repeat
+        if USCOREFLAG
+        then begin
+             garbage := _ptrace(signum,1,childpid,7);
+             _wait(lstatus);
+             end
+        else begin
+             garbage := ptrace(signum,1,childpid,7);
+             wait(lstatus);
+             end;
+        if lstatus[CINTSIZE - 1] = $7f
+        then begin
+          regvalidval:= getuw(dataareabase + 2); {Register valid flag}
+          if regvalidval = 0
+          then begin
+            (***)
+            writeln('Program stopped due to unexpected cause, attempting to');
+            writeln('simulate breakpoint at location near fatal operation...');
+            signum := 11; {restart simulating signal 11}
+            setuw(dataareabase + 2,2); {No way allow restart}
+            (***)
+            (***
+            writeln('Program stopped in unrecognizable state');
+            halt(ERRHALT);
+            ***)
+            end
+          else begin
+            llong := getproga(7); {User stack pointer}
+            prog.sr := getuw(llong);
+            prog.pc := getul(llong + 2);
+            if regvalidval = 1 then setul(llong + 2,prog.pc - 2);
+            trap(1);
+            end;
+          end;
+       until lstatus[CINTSIZE - 1] <> $7f;
+       end
+     else if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+             (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+             (ENVIRONMENT = SYS5_2)
+     then begin
+       repeat
+        if USCOREFLAG
+        then begin
+             garbage := _ptrace(signum,1,childpid,startrequest);
+             _wait(lstatus);
+             end
+        else begin
+             garbage := ptrace(signum,1,childpid,startrequest);
+             wait(lstatus);
+             end;
+        if lstatus[CINTSIZE - 1] = $7f
+        then begin
+          prog.sr := 0; {FOR NOW}
+          prog.pc := getsl(mregaddr(16) {System pc});
+          if startrequest <> 9 {if not single step, back up pc over trap}
+          then 
+            if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+               (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or ALTOSFLAG
+            then setsl(mregaddr(16) {System pc},prog.pc - 2);
+          trap(1);
+          end;
+       until lstatus[CINTSIZE - 1] <> $7f;
+       end
+     else if ENVIRONMENT = GENIX
+     then begin
+       repeat
+        if USCOREFLAG
+        then begin
+             garbage := _ptrace(signum,1,childpid,startrequest);
+             _wait(lstatus);
+             end
+        else begin
+             garbage := ptrace(signum,1,childpid,startrequest);
+             wait(lstatus);
+             end;
+        if lstatus[0] = $7f
+        then begin
+          prog.sr := getsl(nsregaddr(NSMODPSR)) div 65536; {Negatives?}
+          prog.jt := getsl(nsregaddr(NSMODPSR)) and $FFFF; {Module address}
+          prog.pc := getsl(nsregaddr(NSPC));
+          trap(1);
+          end;
+       until lstatus[0] <> $7f;
+       end
+     else if ENVIRONMENT = UNOS
+     then begin
+       repeat
+        _presume(childpid);
+        cwaitval := _cwait(llong1,llong2);
+        if cwaitval = 4
+        then begin
+          regvalidval:= getuw(dataareabase + 2); {Register valid flag}
+          if regvalidval = 0
+          then begin
+            writeln('Program stopped in unrecognizable state');
+            halt(ERRHALT);
+            end
+          else begin
+            llong := getproga(7); {User stack pointer}
+            prog.sr := getuw(llong);
+            prog.pc := getul(llong + 2);
+            if regvalidval = 1 then setul(llong + 2,prog.pc - 2);
+            trap(1);
+            end;
+          end;
+       until cwaitval <> 4;
+       end;
+     writeln('Termination of target program.');
+     prog.state := FINISHED;
+     end
+else writeln('*** Can''t run a program that''s not LOADED ***');
+99: if ENVIRONMENT = MERLIN
+    then begin
+      %_trapof;
+      if ofname <> '' then close(fout,lock);
+      end;
+end; {runit}
+
+

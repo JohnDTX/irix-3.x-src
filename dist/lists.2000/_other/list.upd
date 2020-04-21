@@ -1,0 +1,12 @@
+Versions/004-0131-031
+Versions/004-0141-031
+Versions/004-0334-022
+dev/EXOS
+etc/mnttab
+etc/model
+etc/rc.fs
+usr/etc/nfs
+usr/include/EXOS
+usr/lib/libsocket.a
+usr/spool/colord
+version

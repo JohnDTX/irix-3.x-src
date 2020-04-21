@@ -1,0 +1,90 @@
+.TH FUSER 1M
+.SH NAME
+fuser \- identify processes using a file or file structure
+.SH SYNOPSIS
+.B /etc/fuser
+.RB [ \|\-ku\| ]
+files
+.RB [ \|\-\| ]
+.RB [\|[ \|\-ku\| "] files\|]"
+.SH DESCRIPTION
+.I Fuser
+lists the process \s-1ID\s+1s of the processes
+using the \f2files\fP specified as arguments.
+For block special devices, all processes using any file on that device are
+listed.
+The process \s-1ID\s+1 is followed by
+.BR c ,
+.B p
+or
+.B r
+if the process is using the
+file as its \f3c\fPurrent directory, the \f3p\fParent of its current directory
+(only when in use by the system), or its \f3r\fPoot directory, respectively.
+If the 
+.B \-u
+option is specified, the login name, in parentheses,
+also follows the process \s-1ID\s+1.
+In addition, if the
+.B \-k
+option is specified, the 
+.SM
+.B SIGKILL
+signal is sent to each process.
+Only the super-user can terminate another user's process
+(see 
+.IR kill (2)).
+Options may be respecified between groups of files.
+The new set of options replaces the old set, with a lone dash canceling any
+options currently in force.
+.PP
+The process \s-1ID\s+1s are printed as a single line on the standard output,
+separated by spaces and terminated with a single new line.
+All other output is written on standard error.
+.SH EXAMPLE
+.TP 3
+fuser \-ku /dev/dsk1?
+will terminate all processes that are preventing disk drive one from being
+unmounted if typed by the super-user,
+listing the process \s-1ID\s+1 and login name
+of each as it is killed.
+.TP
+fuser \-u /etc/passwd
+will list process \s-1ID\s+1s and login names
+of processes that have the password
+file open.
+.TP
+fuser \-ku /dev/dsk1? \-u /etc/passwd
+will do both of the above examples in a single command line.
+.PP
+Note that the device names for disks are 
+system dependent.
+.SH FILES
+.PD 0
+.TP \w'/dev/kmem\ \ \ \ 'u
+/unix
+for namelist
+.TP
+/dev/kmem
+for system image
+.TP
+/dev/mem
+also for system image
+.PD
+.SH SEE ALSO
+mount(1M),
+ps(1),
+kill(2),
+signal(2).
+.\"	@(#)fuser.1m	5.1 of 10/17/83
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/a_man/man1/RCS/fuser.1m,v 1.1 89/03/27 16:40:21 root Exp $
+.\" $Log:	fuser.1m,v $
+Revision 1.1  89/03/27  16:40:21  root
+Initial check-in for 3.7
+
+Revision 1.0  85/05/01  16:33:21  robinf
+Initial Revision
+
+.\" Revision 1.2  85/01/08  12:26:25  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

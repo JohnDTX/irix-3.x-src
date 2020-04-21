@@ -1,0 +1,26 @@
+console# B9600 # B9600 SANE TAB3 #\r\n\n$HOSTNAME console login: #console
+
+co_9600# B9600 # B9600 SANE TAB3 #\r\n\n$HOSTNAME login: #co_4800
+
+co_4800# B4800 # B4800 SANE TAB3 #\r\n\n$HOSTNAME login: #co_2400
+
+co_2400# B2400 # B2400 SANE TAB3 #\r\n\n$HOSTNAME login: #co_1200
+
+co_1200# B1200 # B1200 SANE TAB3 #\r\n\n$HOSTNAME login: #co_300
+
+co_300# B300 # B300 SANE TAB3 #\r\n\n$HOSTNAME login: #co_9600
+
+dx_9600# B9600 # B9600 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #dx_9600
+
+dx_4800# B4800 # B4800 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #dx_4800
+
+dx_2400# B2400 # B2400 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #dx_2400
+
+dx_1200# B1200 # B1200 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #dx_1200
+
+du_2400# B2400 # B2400 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #du_1200
+
+du_1200# B1200 # B1200 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #du_300
+
+du_300# B300 # B300 SANE TAB3 HUPCL #\r\n\n$HOSTNAME login: #du_2400
+

@@ -1,0 +1,69 @@
+
+# lp interface for printronix line printer with	parallel interface
+#
+#	All output is passed through the /usr/lib/pprx filter
+#  If this filter is not executable, then this interface will disable
+#  the lp printer which	it was called to service.
+# @(#)pprx	1.2
+# @(#)$Header: /d2/3.7/src/usr.bin/lp/model/RCS/pprx,v 1.1 89/03/27 18:05:17 root Exp $
+# $Log:	pprx,v $
+# Revision 1.1  89/03/27  18:05:17  root
+# Initial check-in for 3.7
+# 
+# Revision 1.2  85/03/15  15:20:05  bob
+# Added initial blank line (for csh) and what
+# 
+
+x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+if [ ! -x /usr/lib/pprx	]
+then
+	disable	-r"can't execute /usr/lib/pprx filter" `basename $0`
+	exit 1
+fi
+(
+echo "\014\c"
+echo "$x\n$x\n$x\n$x\n"
+banner "$2"
+echo "\n"
+user=`grep "^$2:" /etc/passwd |	line | cut -d: -f5`
+if [ -n	"$user"	]
+then
+	echo "User: $user\n"
+else
+	echo "\n"
+fi
+echo "Request id: $1	Printer: `basename $0`\n"
+date
+echo "\n"
+if [ -n	"$3" ]
+then
+	banner $3
+fi
+copies=$4
+echo "\014\c"
+shift; shift; shift; shift; shift
+files="$*"
+i=1
+while [	$i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "\014\c"
+	done
+	i=`expr	$i + 1`
+done
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n$x\n$x\n$x\n$x"
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "$x\n$x\n$x\n$x\n$x\n$x\n$x\n$x\n"
+) | /usr/lib/pprx
+if [ $? != 0 ]
+then
+	disable -r"write error" `basename $0`
+	exit 1
+fi
+
+exit 0
+

@@ -1,0 +1,101 @@
+'\"macro stdmacro
+.TH PASSWD 4
+.SH NAME
+passwd \- password file
+.SH SYNOPSIS
+.B /etc/passwd
+.SH DESCRIPTION
+.LP
+The
+.I passwd
+file contains for each user the following information:
+.IP name 10
+User's login name \(em contains no upper case characters and must not be
+greater than eight characters long.
+.IP password 10
+encrypted password
+.IP "numerical user ID" 10
+This is the user's ID in the system and it must be unique.
+.IP "numerical group ID" 10
+This is the number of the group that the user belongs to.
+.IP "user's real name" 10
+In some versions of UNIX, this field also contains the user's office,
+extension, home phone, and so on.  For historical reasons this field is
+called the
+.SM GCOS
+field.
+.IP "initial working directory" 10
+The directory that the user is positioned in when they log in \(em this
+is known as the `home' directory.
+.IP shell 10
+program to use as Shell when the user logs in.
+.LP
+The user's real name field may contain `&', meaning insert the login name.
+.LP
+The password file is an
+.SM ASCII
+file.  Each field within each user's entry
+is separated from the next by a colon.  Each user is separated from the
+next by a new-line.  If the password field is null, no password is demanded;
+if the Shell field is null,
+.I /bin/sh
+is used.
+.LP
+The
+.I passwd
+file can also have line beginning with a plus (+),
+which means to incorporate entries from the yellow pages.
+There are three styles of + entries:
+all by itself, + means to insert the entire contents
+of the yellow pages password file at that point;
+.I +name
+means to insert the entry (if any) for
+.I name
+from the yellow pages at that point;
+.I +@name
+means to insert the entries for all members of the network group
+.I name
+at that point.
+If a + entry has a non-null password, directory, gecos, or shell field,
+they will overide what is contained in the yellow pages.
+The numerical user ID and group ID fields cannot be overridden.
+.SH EXAMPLE
+.LP
+Here is a sample
+.I /etc/passwd
+file:
+.IP
+.nf
+root:q.mJzTnu8icF.:0:10:superuser:/:/bin/csh
+tut:6k/7KCFRPNVXg:508:10:Bill Tuthill:/usr2/tut:/bin/csh
++john:
++@documentation:no-login:
++:::Guest
+.fi
+.LP
+In this example, there are specific entries for users
+.I root
+.and
+.IR tut ,
+in case the yellow pages are out of order.
+The user
+.L john
+will have his password entry in the yellow pages
+incorporated without change;
+anyone in the netgroup
+.I documentation
+will have their password field disabled,
+and anyone else will be able to log in with their usual password,
+shell, and home directory, but with a gecos field of
+.I Guest.
+.LP
+The password file resides in the
+.I /etc 
+directory.  Because of the encrypted passwords,
+it has general read permission and can be used,
+for example, to map numerical user ID's to names.
+does the necessary locking.
+.SH FILES
+/etc/passwd
+.SH "SEE ALSO"
+getpwent(3C), login(1), passwd(1), group(4)

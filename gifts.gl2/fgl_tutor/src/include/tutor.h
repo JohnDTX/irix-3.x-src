@@ -1,0 +1,9 @@
+#define HELPCOLOR	8
+#define HIGHCOLOR	9
+#define NORMCOLOR	10
+#define UNPICKCOLOR	11
+#define AXESCOLOR	12
+#define LABELCOLOR	11
+#define CBARCOLOR	13
+#define CBAR2COLOR	14
+#define OBJECTCOLOR	15

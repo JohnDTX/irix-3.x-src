@@ -1,0 +1,35 @@
+.TH popviewport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B popviewport
+\- restores viewport, screenmask, and \f3setdepth\f1 parameters
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popviewport()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popvie"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popviewport;"
+.SH DESCRIPTION
+.B popviewport
+pops the stack of viewports and screenmasks.
+When \f3popviewport\f1 executes, 
+the viewports on top of the stack are lost.
+.B popviewport
+also
+restores the
+.B setdepth
+parameters.  
+.SH "SEE ALSO"
+getscrmask, pushviewport, setdepth, viewport
+.sp
+.I Programming Guide,
+Section 4.4, Viewports

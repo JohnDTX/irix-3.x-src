@@ -1,0 +1,36 @@
+.TH deflinestyle  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I deflinestyle
+- define a linestyle
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "deflinestyle(n, ls) "
+.B "short n;"
+.B "Linestyle ls;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine deflin(n, ls)"
+.B "integer*2 n, ls"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure deflinestyle(n: Short; ls: Linestyle);"
+.sp
+.SH DESCRIPTION
+.I Deflinestyle
+defines a linestyle.  
+The least-significant bit of the linestyle is applied first.
+The arguments specify an index into a table where the linestyles are stored
+and a sixteen-bit pattern.
+Up to 2\u\s-2\&16\s0\d linestyles can be defined.
+By default, index 0 contains the pattern FFFF\d\s-2\&x\s0\u
+which draws solid lines.  There is no performance penalty for
+drawing non-solid lines.  To replace a linestyle, define the new
+one to have the same index as the old one.
+.SH "SEE ALSO"
+.I defcursor, defobjfont, defrasterfont, deftexture, getlstyle, setlinestyle
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,31 @@
+.TH picksize 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I picksize
+- set the dimensions of the picking window
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "picksize(deltax, deltay) "
+.B "short deltax, deltay;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine picksi(deltax, deltay)"
+.B "integer*2 deltax, deltay"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure picksize(deltax, deltay: Short);"
+.sp
+.SH DESCRIPTION
+.I Picksize
+has two arguments, \f3deltax\f1 and \f3deltay\f1, which define the
+dimensions of a rectangle, called the picking window, 
+centered at the current cursor position, the lower left
+corner of the cursor glyph.  In picking mode, any objects
+that intersect the picking window are reported.
+.SH "SEE ALSO"
+.I pick 
+.SH NOTE
+This command can only be used in immediate mode.

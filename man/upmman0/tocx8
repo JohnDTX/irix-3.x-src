@@ -1,0 +1,3 @@
+boot(8) boot: startup procedures.
+crash(8) crash: what to do when the system crashes.
+intro(8) intro: introduction to system maintenance procedures.

@@ -1,0 +1,29 @@
+.TH gflush 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gflush
+- force all unsent commands down the network to the geometry pipeline
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gflush()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gflush"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gflush;"
+.sp
+.SH DESCRIPTION
+Most graphics commands are buffered at the host by the communication software
+for efficient block transfer of data from the host to the IRIS.
+\f2Gflush\f1 delivers all buffered, yet untransmitted graphics data to
+the IRIS.  Certain graphics commands (notably those
+which return values) flush the host buffer when they are
+executed.
+.SH "SEE ALSO"
+.I finish
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,154 @@
+.TH DUMP 1
+.SH NAME
+\*pdump \- dump selected parts of an object file
+.SH SYNOPSIS
+.B \*pdump
+.RB [ \-a ]
+.RB [ \-f ]
+.RB [ \-o ]
+.RB [ \-h ]
+.RB [ \-s ]
+.RB [ \-r ]
+.RB [ \-l ]
+.RB [ \-t ]
+.RB [ \-z " name]"
+files
+.SH DESCRIPTION
+The
+.I \*pdump
+command
+dumps selected parts of each
+of its object \f3file\fP arguments.
+.tr ~
+.PP
+This command
+will accept both object files and archives of object files.
+It 
+processes each file argument according to one or more of the following 
+options:
+.TP \w'\f3\-d~number~~'u
+.B \-a
+Dump the archive header of each member of each archive file
+argument.
+.TP
+.B \-f
+Dump each file header.
+.TP
+.B \-o
+Dump each optional header.
+.TP
+.B \-h
+Dump section headers.
+.TP
+.B \-s
+Dump section contents.
+.TP
+.B \-r
+Dump relocation information.
+.TP
+.B \-l
+Dump line number information.
+.TP
+.B \-t
+Dump symbol table entries.
+.TP
+.BR \-z ~name
+Dump line number entries for the named function.
+.PP
+The following \f3modifiers\fP are used in conjunction with the options
+listed above to modify their capabilities.
+.TP \w'\f3\-d~number~~'u
+.BR \-d ~number
+Dump the section number or range of sections starting at \f3number\fP
+and ending either at the last section number or \f3number\fP specified by
+.BR +d .
+.TP
+.BR +d ~number
+Dump sections in the range either beginning with 
+first section or beginning
+with section specified by \f3\-d\fP.
+.TP
+.BR \-n ~name
+Dump information pertaining only to the named entity.
+This
+.I modifier
+applies to
+.BR \-h ,
+.BR \-s ,
+.BR \-r ,
+.BR \-l ,
+and 
+.BR \-t .
+.TP
+.BR \-t ~index
+Dump only the indexed symbol table entry.
+The 
+.B \-t
+used in conjunction with
+.BR +t ,
+specifies a range of symbol
+table entries.
+.TP
+.BR +t ~index
+Dump the symbol table entries in the range ending with the indexed entry.
+The range begins at the first symbol table entry or at the entry
+specified by the 
+.B \-t
+option.
+.TP
+.B \-v
+Dump information in symbolic representation rather than numeric
+(e.g.,
+.SM C_STATIC
+instead of 
+.BR \s-10X02\s+1 ).
+This \f3modifier\fP can be used with all the above options
+except
+.B \-s
+and
+.B \-o
+options
+of
+.IR \*pdump.
+.TP
+.BR \-z ~name,number
+Dump line number entry or range of line numbers starting at
+.I number
+for the named function.
+.TP
+.BR +z\ ~number
+Dump line numbers starting at either function
+.IR name " or " number
+specified 
+by
+.BR \-z,
+up to
+.I number
+specified by
+.BR +z .
+.PP
+.PP
+Blanks separating an \f3option\fP and its \f3modifier\fP are optional.
+The comma separating the name from the number modifying the
+.B \-z
+option may
+be replaced by a blank.
+.PP
+The
+.I \*pdump
+command
+attempts to format the information it dumps in a meaningful way,
+printing certain information in character,
+hex, octal or decimal representation as appropriate.
+.SH "SEE ALSO"
+a.out(4), ar(4).
+.tr ~~
+.\"	@(#)dump.1	5.2 of 5/18/82
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/dump.1,v 1.1 89/03/27 16:41:13 root Exp $
+.\" $Log:	dump.1,v $
+Revision 1.1  89/03/27  16:41:13  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  85/01/08  11:03:46  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

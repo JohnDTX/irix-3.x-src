@@ -1,0 +1,50 @@
+.TH setvaluator 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B setvaluator
+\- assigns an initial value to a valuator
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setvaluator(v, init, min, max) "
+.B "Device v; "
+.B "short init, min, max;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setval(v, init, min, max)"
+.B "integer*4 v, init, min, max"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setvaluator(v: Device; init, min, max: 
+.br
+.B	Short);
+.SH DESCRIPTION
+.B setvaluator
+assigns an initial value
+.I init
+to a valuator.
+.I min
+and
+.I max
+are the lower and upper bounds for
+the values the device can assume.  
+.PP
+Some devices,
+such as tablets,
+report values fixed to a grid.
+In this case,
+the device defines an initial position and
+.I init
+is ignored.
+.SH "SEE ALSO"
+getvaluator
+.sp
+.I Programming Guide,
+Section 7.2, Initializing a Device
+.SH NOTE
+This routine is available only in immediate mode.

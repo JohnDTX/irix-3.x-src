@@ -1,0 +1,151 @@
+'\"macro stdmacro
+.TH CREAT 2 
+.SH NAME
+creat \- create a new file or rewrite an existing one
+.SH SYNOPSIS
+.B int creat (path, mode)
+.br
+.B char \(**path;
+.br
+.B int mode;
+.SH DESCRIPTION
+.I Creat\^
+creates a new ordinary file or prepares to rewrite an existing file
+named by the
+path name
+pointed to by
+.IR path .
+.PP
+If the file exists, the length is truncated to 0 and the mode
+and owner are unchanged.
+Otherwise,
+the file's owner
+.SM ID
+is set to the process's effective
+user
+.SM ID\*S,
+the file's group
+.SM ID
+is set to the process's effective group
+.SM ID\*S,
+and
+the low-order 12 bits of the file mode are set to the value of
+.I mode\^
+modified as follows:
+.IP "" .3i
+All bits set in the process's file mode creation mask are cleared.
+See
+.IR umask (2).
+.IP
+The ``save text image after execution bit'' of the mode is cleared.
+See
+.IR chmod (2).
+.PP
+Upon successful completion, a non-negative integer,
+namely the file descriptor,
+is returned and the file is open for writing,
+even if the mode does not permit writing.
+The file pointer is set to the beginning of the file.
+The file descriptor is set to remain open across
+.I exec\^
+system calls.
+See
+.IR fcntl (2).
+No process may have more than 40 files open simultaneously.
+.PP
+The
+.I mode
+given is arbitrary; it need not allow writing.
+This feature is used by programs which deal with 
+temporary files of fixed names.
+The creation is done with a mode that forbids writing.
+Then, if a second instance of the program attempts a
+.IR creat ,
+an error is returned and the program knows that the 
+name is unusable for the moment.
+.PP
+The system-scheduling algorithm does not make this a
+true uninterruptible operation, 
+and a race condition may develop if
+.I creat
+is done at precisely the same time by two different processes.
+.PP
+.I Creat\^
+will fail if one or more of the following are true:
+.IP "" .3i
+A component of the
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+A component of the
+path prefix
+does not exist.
+.SM
+\%[ENOENT]
+.IP
+Search permission is denied on a component of the
+path prefix.
+.SM
+\%[EACCES]
+.IP
+The path name is null.
+.SM
+\%[ENOENT]
+.IP
+The file does not exist and the directory in which the file
+is to be created does not permit writing.
+.SM
+\%[EACCES]
+.IP
+The named file resides or would reside on a read-only file system.
+.SM
+\%[EROFS]
+.IP
+The file is a pure procedure (shared text) file that is being executed.
+.SM
+\%[ETXTBSY]
+.IP
+The file exists and write permission is denied.
+.SM
+\%[EACCES]
+.IP
+The named file is an existing directory.
+.SM
+\%[EISDIR]
+.IP
+Forty (40)
+file descriptors are currently open.
+.SM
+\%[EMFILE]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion,
+a non-negative integer,
+namely the file descriptor,
+is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+close(2), dup(2), lseek(2), open(2), read(2), umask(2), write(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#8,D0
+.B movl	path,A0
+.B movl	mode,D1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.PP
+The file descriptor is returned in 
+.BR D0 .
+.DT
+.\"	@(#)creat.2	5.1 of 11/16/83

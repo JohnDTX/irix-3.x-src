@@ -1,0 +1,29 @@
+.TH clkon 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B clkon 
+\- turns on the keyboard click
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clkon()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clkon"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clkon;"
+.SH DESCRIPTION
+\f3clkon\fP turns on the keyboard click.
+.SH "SEE ALSO"
+clkoff, lampoff, lampon, ringbell, setbell
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

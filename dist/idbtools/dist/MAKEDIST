@@ -1,0 +1,78 @@
+# ident "$Header: "
+#
+# Notes: Makefile for distributions; not part of normal build pass.
+# This makefile expects a compiled tree (including a miniroot) and an
+# idb to be available; it builds a distribution directory at $(DIST) that
+# can be used to make tapes or for remote installations.
+
+#
+# Common Definitions
+#
+include	$(ROOT)/usr/include/make/commondefs
+
+#
+# Compile Time Options
+#
+
+#
+# Local Definitions
+#
+
+#
+# (generally) imported values:
+#
+# MRDEV=device on which miniroot can be built.
+# DIST=directory in which distribution will be built.
+
+images	= $(DIST)/std.sw $(DIST)/std.man \
+	  $(DIST)/nfs.sw $(DIST)/nfs.man \
+	  $(DIST)/ftn.sw $(DIST)/ftn.man \
+	  $(DIST)/dwb.sw $(DIST)/dwb.man \
+	  $(DIST)/trans.sw $(DIST)/trans.man
+
+#
+# Targets/Rules
+#
+
+default:	sa mr images products
+
+clean:
+	rm -f salist proto.mr
+
+clobber:	clean
+
+FRC:
+
+#
+# Specific Target/Rules follow
+#
+
+install: default
+
+sa:
+	mkboottape -f $(DIST)/sa \
+		`idbscan 'sa&&type=="f"&&print(spath(srcpath))'`
+
+mr:	mrbyproto
+
+images: 
+	genimage -o $(DIST) -v -a spec
+
+products:
+	genprod -o $(DIST) spec
+
+# make miniroot by proto file
+
+mrbyproto:
+	idbproto mr > proto.mr
+	rm -f $(DIST)/mr ; touch $(DIST)/mr
+	mkfs $(DIST)/mr 19840 1000 10 32 3936 32 32 proto.mr
+
+# make miniroot on a spare device
+
+mrbydev:
+	if test ! -d /mr ; then mkdir /mr ; fi
+	umount $(MRDEV) && mkfs $(MRDEV) 19840 1000 10 32 3936 32 32
+	mount $(MRDEV) /mr && idbinst -v -r /mr mr
+	umount $(MRDEV)
+	dd if=$(MRDEV) of=$(DIST)/mr bs=160k count=64

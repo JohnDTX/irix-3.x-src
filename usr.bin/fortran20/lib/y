@@ -1,0 +1,105 @@
+	.globl	%_DATN
+%_DATN:
+		linkw	a6,#-44
+			movl	a6@(8),a0
+			movl	a0@,d0
+			cmpl	#0x7ff00000,d0
+			beqs	%_DATN18
+			cmpl	#0xfff00000,d0
+			bnes	%_DATN20
+%_DATN18:	lea		a6@(-16),a0
+			movl	#0x3FF921FB,fpaop(DOUBLEHI,1,0)
+			movl	#0x54442D18,fpaop(DOUBLELO,1,0)
+			bra	%_DATN22C
+%_DATN20:
+		movl	a6@(8),a0
+		addql	#8,a0
+|	f1 = x = abs(arg)
+		movl	a0@-,fpaop(DOUBLELO,1,0)
+		movl	a0@-,fpaop(DOUBLEHI,1,0)
+		movb	d0,fpaop(TSTDBL,1,1)
+		tstb	fpaop(CR,0,0)
+		bpls	%_DATN22
+		movb	d0,fpaop(NEGDBLUPD,1,1)
+%_DATN22:
+|	if x >= 2
+		movl	#0x0,fpaop(DOUBLELO,0,0)
+		movl	#0x40000000,fpaop(CMPDBL,1,0)
+		tstb	fpaop(CR,0,0)
+		blts	%_DATN84
+|	then
+		movl	#0x0,fpaop(DOUBLELO,0,0)
+		movl	#0xBFF00000,fpaop(REVDIVDBLUPD,1,0)
+|	f2 = quad = pi_2, d1 = reduced = TRUE
+		movl	#0x3FF921FB,fpaop(DOUBLEHI,2,0)
+		movl	#0x54442D18,fpaop(DOUBLELO,2,0)
+		moveq	#1,d1
+		bras	%_DATNFA
+|	else
+%_DATN84:
+|	if(x > .5)
+		movl	#0x0,fpaop(DOUBLELO,0,0)
+		movl	#0x3FE00000,fpaop(CMPDBL,1,0)
+		tstb	fpaop(CR,0,0)
+		bles	%_DATNF8
+|	then
+		movl	#0x0,fpaop(DOUBLELO,0,0)
+		movl	#0x3FF00000,fpaop(SUBDBLUPD,1,0)
+		movl	#0x0,fpaop(DOUBLELO,0,0)
+		movl	#0x40000000,fpaop(ADDDBL,1,0)
+		movb	d0,fpaop(DIVDBLUPD,1,f)
+		movl	#0x3FE921FB,fpaop(DOUBLEHI,2,0)
+		movl	#0x54442D18,fpaop(DOUBLELO,2,0)
+		moveq	#1,d1
+		bras	%_DATNFA
+%_DATNF8:
+|	else
+		clrb	d1
+%_DATNFA:
+|	f3 = xsq = x**2
+		movb	d0,fpaop(MULDBL,1,1)
+		movb	d0,fpaop(COPY,3,f)
+|	f4 = numerator
+		movl	#0xABB1127,fpaop(DOUBLELO,0,0)
+		movl	#0x3FEAFDFC,fpaop(MULDBL,3,0)
+		movl	#0x77A1DB86,fpaop(DOUBLELO,0,0)
+		movl	#0x402237D6,fpaop(ADDDBL,f,0)
+		movb	d0,fpaop(MULDBL,f,3)
+		movl	#0x266ED388,fpaop(DOUBLELO,0,0)
+		movl	#0x4036ED3B,fpaop(ADDDBL,f,0)
+		movb	d0,fpaop(MULDBL,f,3)
+		movl	#0xF9D8F82A,fpaop(DOUBLELO,0,0)
+		movl	#0x402F8669,fpaop(ADDDBL,f,0)
+		movb	d0,fpaop(MULDBL,f,3)
+		movb	d0,fpaop(MULDBL,f,1)
+		movb	d0,fpaop(COPY,4,f)
+|	ff = denominator
+		movl	#0x85349ABF,fpaop(DOUBLELO,0,0)
+		movl	#0x402FBC4E,fpaop(ADDDBL,3,0)
+		movb	d0,fpaop(MULDBL,f,3)
+		movl	#0x760B164F,fpaop(DOUBLELO,0,0)
+		movl	#0x40505691,fpaop(ADDDBL,f,0)
+		movb	d0,fpaop(MULDBL,f,3)
+		movl	#0x35098C6A,fpaop(DOUBLELO,0,0)
+		movl	#0x405849C4,fpaop(ADDDBL,f,0)
+		movb	d0,fpaop(MULDBL,f,3)
+		movl	#0x7B62BD8F,fpaop(DOUBLELO,0,0)
+		movl	#0x4047A4CF,fpaop(ADDDBL,f,0)
+|	ff = quotient:
+		movb	d0,fpaop(DIVDBL,4,f)
+		movb	d0,fpaop(SUBDBLUPD,1,f)
+		tstb	d1
+		beqs	%_DATN22C
+		movb	d0,fpaop(ADDDBLUPD,1,2)
+%_DATN22C:
+|	give result same sign as arg:
+		movl	fpaop(DOUBLEHI,1,0),d0
+		movl	a6@(8),a0
+		movl	a0@,d1
+		roxll	#1,d0
+		roxll	#1,d1
+		roxrl	#1,d0
+		movl	d0,fpaop(DOUBLEHI,1,0)
+		unlk	a6
+		rtd	#4
+

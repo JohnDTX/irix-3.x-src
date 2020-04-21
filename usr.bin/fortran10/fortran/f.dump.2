@@ -1,0 +1,1205 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.DUMP.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               30-Apr-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  procedure copyparams(plist: pnlist; foffset: longint);
+    var lop,loffset,lsize: integer;
+  begin
+  while plist <> nil do
+        with plist^.nrec^ do begin
+             if nkind = VARS
+             then begin
+                  loffset := addr;
+                  if idtype.typ = CHARACTER
+                  then begin lsize := 8; loffset := loffset - 4; end
+                  else lsize := 4;
+                  end
+             else if nkind = LABL
+                  then begin
+                       lsize := 4;
+                       loffset := labp^.ilabno*4 + altrettable;
+                       end
+                  else begin { nkind = EXTERN/FUNC/SUBR }
+                       lsize := 8; loffset := parambytes;
+                       end;
+             foffset := foffset - lsize;
+             if loffset < 0
+             then begin
+                  case lsize of
+                    4: lop := 34; {ASS4}
+                    8: lop := 35; {ASS8}
+                  end; {case}
+                  lout(lop); localref(loffset); localref(foffset);
+                  end;
+             plist := plist^.next;
+             end;
+  end; {copyparams}
+  
+  procedure setbounds(fplist: pnlist);
+    var lpb,lastlpb: pbound; Char0Flag: Boolean; lpadj: padjarrsz;
+        constpart: longint; mulcount: integer;
+    
+    procedure mulsiz68(fpb: pbound);
+    begin
+    { Compute: lastsize*((lasthi + 1) - lastlo) }
+    lout(69{MUL4});
+    with fpb^ do begin
+         if esize <> 0
+         then outintcnst(esize)
+         else localref(sizoff);
+         if (hi.bkind = CONSTBOUND) and (lo.bkind = CONSTBOUND)
+         then outintcnst(hi.i - lo.i + 1)
+         else begin
+              lout(67{SUB4});
+              if hi.bkind = CONSTBOUND
+              then outintcnst(hi.i + 1)
+              else begin
+                   lout(65{ADD4}); outintcnst(1);
+                   expression(hi.adjexpr);
+                   end;
+              if lo.bkind = CONSTBOUND
+              then outintcnst(lo.i)
+              else localref(lo.adjboff);
+              end;
+         end;
+    end; {mulsiz68}
+    
+  begin {setbounds}
+  while fplist <> nil do
+    with fplist^.nrec^ do begin
+      if nkind = VARS
+      then begin
+           Char0Flag := (idtype.siz = 0) and (idtype.typ = CHARACTER);
+           lpb := bounds; lastlpb := nil; constpart := 1; mulcount := -1;
+           while lpb <> nil do
+             with lpb^ do begin
+                  if lo.bkind = ADJUSTBOUND
+                  then begin
+                       lout(34{ASS4}); localref(lo.adjboff);
+                       expression(lo.adjexpr);
+                       end;
+                  if CHIP = N32000
+                  then begin
+                       if (lo.bkind = CONSTBOUND) and
+                          (hi.bkind = CONSTBOUND)
+                       then constpart := constpart*(hi.i - lo.i + 1);
+                       if (lo.bkind = ADJUSTBOUND) or
+                          (hi.bkind = ADJUSTBOUND)
+                       then begin
+                            
+                            { size := hi - lo }
+                            
+                            lout(34{ASS4}); localref(sizoff);
+                            mulcount := mulcount + 1;
+                            lout(67{SUB4});
+                            if hi.bkind = ADJUSTBOUND
+                            then expression(hi.adjexpr)
+                            else outintcnst(hi.i);
+                            if lo.bkind = ADJUSTBOUND
+                            then expression(lo.adjexpr)
+                            else outintcnst(lo.i);
+                            end;
+                       end
+                  else begin
+                       if esize = 0
+                       then begin
+                            
+                            { size := lastsize*((lasthi + 1) - lastlo) }
+                            
+                            lout(34{ASS4}); localref(sizoff);
+                            if Char0Flag
+                            then localref(addr - 4)
+                            else mulsiz68(lastlpb);
+                            end;
+                       end;
+                  lastlpb := lpb; lpb := next; Char0Flag := FALSE;
+                  end;
+           lpadj := onadjlst(fplist^.nrec);
+           if lpadj <> nil
+           then begin
+                lout(34{ASS4}); localref(lpadj^.addr);
+                if CHIP = N32000
+                then begin
+                     if constpart > 1
+                     then begin lout(69{MUL4}); outintcnst(constpart); end;
+                     while mulcount > 0 do
+                           begin lout(69{MUL4}); mulcount := mulcount - 1; end;
+                     lpb := bounds;
+                     while lpb <> nil do
+                           with lpb^ do begin
+                                if (lo.bkind = ADJUSTBOUND) or
+                                   (hi.bkind = ADJUSTBOUND)
+                                then begin
+                                     lout(65{ADD4}); outintcnst(1);
+                                     localref(sizoff);
+                                     end;
+                                lpb := next;
+                                end;
+                     end
+                else begin
+                     if idtype.siz <> 1 then lout(71{DIV4});
+                     mulsiz68(lastlpb);
+                     if idtype.siz <> 1
+                     then if (idtype.siz = 0) and (idtype.typ = CHARACTER)
+                          then localref(addr - 4)
+                          else outintcnst(idtype.siz);
+                     end;
+                end;
+           end;
+      fplist := fplist^.next;
+      end;
+  end; {setbounds}
+  
+  procedure dumpstmt(fstmt: pstmt);
+    var lop,lsize,lab1,lab2,nlab,zlab,plab,i: integer; lname: idstring;
+        GoToFlag,LocalVar,Marked: Boolean; llabel: plabellist; lpn: pn;
+	{ added for dbx by jim t at SGI }
+	lstr: idstring;
+	savefstmt: pstmt;
+    
+    procedure passint4(fpn: pn);
+    begin
+    lout(186{VALPRM4}); 
+    if fpn = nil then outintcnst(0) else expression(fpn);
+    end; {passint4}
+    
+    procedure passpointer(fpn: pn);
+    begin
+    if fpn = nil
+    then begin lout(186{VALPRM4}); lout(23 {NIL}); end
+    else begin lout(183{REFPARM}); expression(fpn); end;
+    end; {passpointer}
+    
+    procedure passchval(fpn: pn);
+    begin
+    if fpn = nil
+    then begin 
+      lout(186{VALPRM4}); lout(23{NIL}); 
+      lout(186{VALPRM4}); outintcnst(0);
+      end
+    else begin lout(218{FCHPARM}); expression(fpn); end;
+    end; {passchval}
+    
+    procedure passlabel(flabel: plabelrec);
+    begin
+    if flabel = nil
+    then begin lout(186{VALPRM4}); lout(23{NIL}); end
+    else begin
+      lout(183{REFPARM}); lout(204{ADRILAB}); lout2(flabel^.ilabno);
+      end;
+    end; {passlabel}
+    
+    procedure fmtref(fmtlab: plabelrec);
+      var i,k,limit: integer; lchval: chvaltype;
+    begin
+    with fmtlab^ do begin
+         if fmtcstno < 0
+         then begin
+              fmtcstno := nextfmtno; lchval := fmtstring; k := fmtlen;
+              out(156{DEFFMT}); out2(nextfmtno); out2(k);
+              while k > 0 do begin
+                    if k > 10 then limit := 10 else limit := k;
+                    for i := 1 to limit do out(ord(lchval^.chpart[i]));
+                    k := k - limit; lchval := lchval^.next;
+                    end;
+              nextfmtno := nextfmtno + 1;
+              end;
+         end;
+    end; {fmtref}
+    
+    procedure fjump(fexpr: pn; flab: integer); forward;
+    
+    procedure tjump(texpr: pn; tlab: integer);
+      var DoIt: Boolean; flab: integer;
+    begin
+    DoIt := TRUE;
+    with texpr^ do
+         if node = BINNODE
+         then begin
+              if binop = 80 {AND}
+              then begin
+                   flab := nextlabel;
+                   fjump(leftarg,flab);
+                   tjump(rightarg,tlab);
+                   lout(192{DEFILAB}); lout2(flab);
+                   DoIt := FALSE;
+                   end
+              else if binop = 83 {OR}
+                   then begin
+                        tjump(leftarg,tlab);
+                        tjump(rightarg,tlab);
+                        DoIt := FALSE;
+                        end;
+              end
+         else if node = UNNODE
+              then if unop = 110 {BOOLNOT}
+                   then begin
+                        fjump(unarg,tlab); DoIt := FALSE;
+                        end;
+    if DoIt
+    then begin lout(195{TJUMP}); lout2(tlab); expression(texpr); end;
+    end; {tjump}
+    
+    procedure fjump{fexpr: pn; flab: integer};
+      var DoIt: Boolean; tlab: integer;
+    begin
+    DoIt := TRUE;
+    with fexpr^ do
+         if node = BINNODE
+         then begin
+              if binop = 83 {OR}
+              then begin
+                   tlab := nextlabel;
+                   tjump(leftarg,tlab);
+                   fjump(rightarg,flab);
+                   lout(192{DEFILAB}); lout2(tlab);
+                   DoIt := FALSE;
+                   end
+              else if binop = 80 {AND}
+                   then begin
+                        fjump(leftarg,flab);
+                        fjump(rightarg,flab);
+                        DoIt := FALSE;
+                        end;
+              end
+         else if node = UNNODE
+              then if unop = 110 {BOOLNOT}
+                   then begin
+                        tjump(unarg,flab); DoIt := FALSE;
+                        end;
+    if DoIt
+    then begin lout(194{FJUMP}); lout2(flab); expression(fexpr); end;
+    end; {fjump}
+    
+    procedure dumpiolist(fiolist: piolistel; fch: char); forward;
+    
+    procedure dumpdo(dotypecode: typecodes; dovar,doinit,doterm,doinc: pn;
+                     dotemp: addrrange; IOListFlag: Boolean; dobody: pstmt;
+                     iolist: piolistel; ioch: char);
+      var lop,lsize,lab1,lab2: integer; WorstCase: Boolean;
+    begin
+    if dotypecode <= INT4
+    then begin { integer }
+      WorstCase := FALSE;
+      if (doinc <> nil) or
+         dovar^.Indirect
+      then WorstCase := TRUE
+      else
+        if dovar^.incommon <> nil
+        then
+          if dovar^.incommon^.nkind = COMMON
+          then WorstCase := TRUE;
+      if not (WorstCase or F66DoFlag)
+      then begin
+        if dotypecode = INT1
+        then lsize := 1
+        else
+          if dotypecode = INT2
+          then lsize := 2
+          else lsize := 4;
+        lout(202 {FOR}); lout(lsize);
+        expression(dovar); expression(doinit);
+        expression(doterm); outintcnst(1);
+        if IOListFlag then dumpiolist(iolist,ioch) else dumpstmt(dobody);
+        lout(203 {FOREND});
+        end
+      else begin { WorstCase or F66DoFlag }
+        
+        { DO 200 V=INIT,LIMIT,STEP }
+        
+        if dotypecode = INT1
+        then begin lsize := 0; lop := 50 {INT1->4}; end
+        else
+          if dotypecode = INT2
+          then begin lsize := 1; lop := 49 {INT2->4}; end
+          else begin lsize := 2; lop := 0; end;
+        lab1 := nextlabel; lab2 := nextlabel;
+        
+        { TEMP = STEP }
+        
+        if doinc <> nil
+        then begin
+          lout(32 {ASS1} + lsize); localref(dotemp + 4);
+          expression(doinc);
+          end;
+        
+        { V = INIT }
+        
+        lout(32 {ASS1} + lsize); expression(dovar); expression(doinit);
+        
+        {!!! This is wrong if LIMIT depends on V !!!}
+      
+        { COUNT = (TEMP + LIMIT - V)/TEMP }
+        
+        lout(34 {ASS4}); localref(dotemp);
+        if doinc <> nil
+        then begin
+          lout(71 {IDIV4}); lout(65 {IADD4});
+          if lop <> 0 then lout(lop);
+          localref(dotemp + 4);
+          end;
+        lout(67 {ISUB4});
+        if lop <> 0 then lout(lop);
+        expression(doterm);
+        if lop <> 0 then lout(lop);
+        expression(dovar);
+        if doinc <> nil
+        then begin
+          if lop <> 0 then lout(lop);
+          localref(dotemp + 4);
+          end;
+        
+        { GOTO LAB2 }
+        
+        if not F66DoFlag
+        then begin lout(193{JUMP}); lout2(lab2); end;
+        
+        { Lab1: Body }
+        
+        lout(192{DEFLAB}); lout2(lab1);
+        if IOListFlag then dumpiolist(iolist,ioch) else dumpstmt(dobody);
+        
+        { 200: <STMT> V = V + STEP }
+        
+        lout(32 {ASS1} + lsize); expression(dovar);
+        if lsize = 0
+        then lout(53 {INT4->1})
+        else if lsize = 1
+             then lout(52 {INT4->2});
+        lout(65 {IADD4});
+        if lop <> 0 then lout(lop);
+        expression(dovar);
+        if doinc <> nil
+        then begin
+          if lop <> 0 then lout(lop);
+          localref(dotemp + 4);
+          end
+        else outintcnst(1);
+        
+        { COUNT = COUNT - 1 }
+        
+        if NoRMW
+        then begin
+          if CHIP = N32000
+          then begin
+            lout(34{ASS4}); localref(dotemp);
+            lout(67{SUB4}); localref(dotemp); outintcnst(1);
+            end;
+          end
+        else begin
+          lout(41{OPTO}); lout(67{SUB4}); localref(dotemp); outintcnst(1);
+          end;
+        
+        { Lab2: }
+        
+        lout(192{DEFLAB}); lout2(lab2);
+        
+        { IF COUNT >= <or> > 0 THEN GOTO LAB1 }
+        
+        lout(194 {FJUMP}); lout2(lab1);
+        if doinc <> nil then lout(100 {ILE4}) else lout(94 {ILT4});
+        localref(dotemp); outintcnst(0);
+        
+        end;
+      end
+    else begin { real or double }
+      
+      { DO 200 V=INIT,LIMIT,STEP }
+      
+      if dotypecode = REEL4 then lsize := 0 else lsize := 1;
+      lab1 := nextlabel; lab2 := nextlabel;
+      
+      { TEMP = STEP }
+      
+      if doinc <> nil
+      then begin
+           lout(34 {ASS4} + lsize); localref(dotemp + 4);
+           expression(doinc);
+           end;
+      
+      { V = INIT }
+      
+      lout(34 {ASS4} + lsize); expression(dovar); expression(doinit);
+      
+      {!!! This is wrong if LIMIT depends on V !!!}
+      
+      { COUNT = (TEMP + LIMIT - V)/TEMP }
+      
+      lout(34 {ASS4}); localref(dotemp);
+      lout(58 {TRUNC4} + lsize);
+      if doinc <> nil
+      then begin
+           lout(118 {FDIV4} + lsize); lout(112 {FADD4} + lsize);
+           localref(dotemp + 4);
+           end;
+      lout(114 {FSUB4} + lsize);
+      expression(doterm); expression(dovar);
+      if doinc <> nil
+      then localref(dotemp + 4);
+      
+      { GOTO LAB2 }
+      
+      if not F66DoFlag
+      then begin lout(193{JUMP}); lout2(lab2); end;
+      
+      { Lab1: Body }
+      
+      lout(192{DEFLAB}); lout2(lab1);
+      if IOListFlag then dumpiolist(iolist,ioch) else dumpstmt(dobody);
+      
+      { 200: <STMT>  V = V + STEP }
+      
+      lout(34 {ASS4} + lsize); expression(dovar);
+      lout(112 {FADD4} + lsize); expression(dovar);
+      if doinc = nil
+      then begin
+           new(lpn,CSTNODE);
+           with lpn^ do begin
+                node := CSTNODE;
+                if lsize = 0
+                then begin
+                     csttype := realtype; cstvalu.rval := 1;
+                     end
+                else begin
+                     csttype := doubletype; cstvalu.dval := 1;
+                     end;
+                end;
+           expression(lpn);
+           end
+      else localref(dotemp + 4);
+      
+      { COUNT = COUNT - 1 }
+      
+      if NoRMW
+      then begin
+        if CHIP = N32000
+        then begin
+          lout(34{ASS4}); localref(dotemp);
+          lout(67{SUB4}); localref(dotemp); outintcnst(1);
+          end;
+        end
+      else begin
+        lout(41{OPTO}); lout(67{SUB4}); localref(dotemp); outintcnst(1);
+        end;
+      
+      { Lab2: }
+      
+      lout(192{DEFLAB}); lout2(lab2);
+      
+      { IF COUNT > <or> >= 0 THEN GOTO LAB1 }
+      
+      lout(194 {FJUMP}); lout2(lab1);
+      if doinc <> nil then lout(100 {ILE4}) else lout(94 {ILT4});
+      localref(dotemp); outintcnst(0);
+      
+      end;
+    end; {dumpdo}
+    
+    procedure dumpiolist{*fiolist: piolistel; fch: char;*};
+      var lattr: attr; ioelname: alfa8;
+    
+      procedure passioel;
+        var lop: integer;
+      begin
+      ioelname[7] := chr(lattr.atype.siz + ord('0'));
+      if (fstmt^.stmtop = READST) or (fiolist^.listtag = IOLARRTAG)
+      then lop := 183{REFPARM}
+      else 
+        if lattr.atype.siz = 1
+        then lop := 184 {VALPRM1}
+        else
+          if lattr.atype.siz = 2
+          then lop := 185 {VALPRM2}
+          else
+            if lattr.atype.siz = 4
+            then lop := 186 {VALPRM4}
+            else lop := 187 {VALPRM8};
+      lout(lop); expression(lattr.treeptr);
+      end; {passioel}
+      
+      procedure pushasiz(fpn: pn);
+        var lbounds: pbound; lcount: longint; lpadj: padjarrsz;
+      begin
+      lcount := 1; lbounds := fpn^.bounds;
+      while lbounds <> nil do
+        with lbounds^ do
+          if (lo.bkind = CONSTBOUND) and (hi.bkind = CONSTBOUND)
+          then begin
+            lcount := lcount*(hi.i - lo.i + 1);
+            lbounds := next;
+            end
+          else begin lcount := 0; lbounds := nil; end;
+      lout(186 {VALPRM4});
+      if lcount > 0
+      then outintcnst(lcount)
+      else begin
+        lpadj := onadjlst(fpn);
+        localref(lpadj^.addr);
+        end;
+      end; {pushasiz}
+      
+    begin {dumpiolist}
+    while fiolist <> nil do 
+      with fiolist^ do begin
+        
+        { Call on I/O system for iolistel:   }
+        { Read             Formatted          Type Code   }
+        { Read Array       Unformatted                    }
+        { Write            List Directed                  }
+        { Write Array                                     }
+        { RD,RA,WR,WA      F,U,L              I1,I2,I4    }
+        {                                     L1,L2,L4    }
+        {                                     R4,R8,C8,CH }
+        {                                        or       }
+        {                                     1,2,4,8     }
+        
+        if listtag = IOLIMPDOTAG
+        then dumpdo(impdotypecode,impdovar,impdoinit,impdoterm,impdoinc,
+                    impdotemp,TRUE,nil,impdoiolist,fch)
+        else begin { IOLEXPTAG or IOLARRTAG }
+          if fstmt^.stmtop = READST 
+          then ioelname := '%_RDFCH ' 
+          else ioelname := '%_WRFCH ';
+          ioelname[5] := fch;
+          lout(190 {PARMLST});
+          if listtag = IOLEXPTAG
+          then lattr := iolexp
+          else begin lattr := iolarr; ioelname[4] := 'A'; end;
+          case lattr.atype.typ of
+            INTEGR:    begin ioelname[6] := 'I'; passioel; end;
+            REEL:      begin ioelname[6] := 'R'; passioel; end;
+            CHARACTER: passchval(lattr.treeptr);
+            LOGICAL:   begin ioelname[6] := 'L'; passioel; end;
+            COMPLEX:   begin ioelname[6] := 'C'; passioel; end;
+          end; {case}
+          if listtag = IOLARRTAG then pushasiz(iolarrcount);
+          if (fstmt^.fmtkind = FMTUNFORMATTEDKIND) and 
+             (lattr.atype.typ <> CHARACTER)
+          then begin 
+            ioelname[6] := ioelname[7]; ioelname[7] := ' ';
+            end;
+          call(ioelname);
+          end;
+        fiolist := nextiolistel;
+        end;
+    end; {dumpiolist}
+    
+    procedure dumprwstmt(fstmt: pstmt);
+      var initname,termname: alfa8;
+    begin
+    with fstmt^ do begin
+      
+      { Initial call for read, write, or print statement:    }
+      {    Initialize    Xternal    Formatted      Read      }
+      {    Position      Internal   Unformatted    Write     }
+      {                             List Directed            }
+      {    I,P           X,I        F,U,L          RD,WR     }
+      
+      { Argument sequence:                                   }
+      {    unitnum                      ! ffmt ffmtlen ! rec }
+      {    intfile,intreclen,intnumrecs !              !     }
+      
+      if stmtop = READST
+      then initname := '%_IXFRD '
+      else initname := '%_IXFWR ';
+      lout(190 {PARMLST});
+      if InternalFlag
+      then begin
+        initname[4] := 'I'; passchval(rwunit);
+        end
+      else
+        if rwunit^.node = CSTNODE
+        then
+          if (rwunit^.cstvalu.ival = 0) and (rwrec = nil)
+          then initname[8] := 'D'
+          else passint4(rwunit)
+        else passint4(rwunit);
+      case fmtkind of
+        FMTUNFORMATTEDKIND: initname[5] := 'U';
+        FMTLABKIND:         begin
+                            fmtref(fmtlab);
+                            lout(183{REFPARM}); lout(157{REFFMT});
+                            lout2(fmtlab^.fmtcstno);
+                            lout(186{VALPRM4}); outintcnst(fmtlab^.fmtlen);
+                            end;
+        FMTCHKIND:          passchval(fmtchval);
+        FMTARRAYKIND:       begin
+                            lout(183{REFPARM}); expression(fmtarrayvar);
+                            { Push infinite length since unknown }
+                            lout(186{VALPRM4}); outintcnst(32766);
+                            end;
+        FMTASVARKIND:       begin
+                            passint4(fmtvar);
+                            { Push infinite length since unknown }
+                            lout(186{VALPRM4}); outintcnst(32766);
+                            end;
+        FMTLISTKIND:        initname[5] := 'L';
+      end; {case}
+      if rwrec <> nil
+      then begin
+        initname[3] := 'P'; passint4(rwrec);
+        end;
+      call(initname);
+      
+      dumpiolist(rwiolist,initname[5]);
+      
+      { Final call for read, write, or print statement: }
+      {    Terminate    Formatted      Read             }
+      {                 Unformatted    Write            }
+      {                 List Directed                   }
+      {    T            F,U,L          RD,WR            }
+      
+      { Argument sequence:                              }
+      {    iostat   errexit   endexit                   }
+      
+      if stmtop = READST
+      then termname := '%_TFRD  '
+      else termname := '%_TFWR  ';
+      termname[4] := initname[5];
+      lout(190 {PARMLST});
+      if (stmtop <> READST) and (rwiostat = nil) and (rwerr = nil)
+      then termname[7] := 'D'
+      else begin
+        passpointer(rwiostat); passlabel(rwerr);
+        if stmtop = READST then passlabel(rwend);
+        end;
+      call(termname);
+      end;
+    end; {dumprwstmt}
+    
+  begin {dumpstmt}
+  Marked := FALSE;
+  savefstmt := nil;
+  while fstmt <> nil do
+    with fstmt^ do begin
+      if DebugFlag
+      then
+        if stmtop <> LABEDST
+        then begin 
+          lout(239{MARKSTMT}); 
+          { added for dbx by jim t at SGI }
+	        lout2(linenumber);
+		if filename <> lastcppfilename then
+		begin
+			louts(filename);
+			lastcppfilename := cppfilename;
+		end else
+		begin
+			lout(0);
+		end;
+          Marked := TRUE;
+          end;
+      case stmtop of
+        ASMTST:
+          begin
+          lout(asmtop);
+          if asmtop = 41 {OPTO} then lout(asmtop2);
+          expression(asmtvar); expression(asmtexpr);
+          end;
+        ASSGNST:
+          begin
+          lout(34{ASS4}); expression(assignvar); lout(22{ADDR});
+          if assignlab^.labkind = FORMATLAB
+          then begin
+               fmtref(assignlab);
+               lout(157{REFFMT}); lout2(assignlab^.fmtcstno);
+               end
+          else begin lout(204{ADRILAB}); lout2(assignlab^.ilabno); end;
+          end;
+        GOTOST:
+          begin
+          lout(193{JUMP}); lout2(gotolab^.ilabno);
+          end;
+        CGOTOST:
+          begin
+          lab1 := nextlabel;
+          lout(200 {CASEJ}); lout(cgotosiz); expression(cgotoexp);
+          lout(201 {CTABLE}); lout2(lab1); lout2(cgotocnt);
+          llabel := cgotolabs; i := 1;
+          while llabel <> nil do begin
+            lout2(llabel^.labrec^.ilabno); lout2(0); lout2(i);
+            llabel := llabel^.next; i := i + 1;
+            end;
+          lout(192 {ILABDEF}); lout2(lab1);
+          end;
+        AGOTOST:
+          begin
+          lout(205{JMPEXPR}); expression(agotovar);
+          end;
+        AIFST:
+          begin
+          nlab := neglab^.ilabno;
+          zlab := zerolab^.ilabno;
+          plab := poslab^.ilabno;
+          if nextstmt <> nil
+          then
+            if nextstmt^.stmtop = LABEDST
+            then begin
+              lop := nextstmt^.stlab^.ilabno;
+              if nlab = lop then nlab := -1;
+              if zlab = lop then zlab := -1;
+              if plab = lop then plab := -1;
+              end;
+          lout(212 {AIFJ}); lout(ord(aiftypecode));
+          lout2(nlab); lout2(zlab); lout2(plab);
+          expression(aifexpr);
+          end;
+        IFST:
+          begin
+          GoToFlag := FALSE;
+          if thenst <> nil
+          then
+            if thenst^.stmtop = GOTOST
+            then GoToFlag := (thenst^.nextstmt = nil) and (elsest = nil);
+          if GoToFlag
+          then begin { statement is: IF (EXPR) GOTO 999 }
+            if DebugFlag then 
+            begin 
+		lout(239{MARKSTMT}); 
+          { added for dbx by jim t at SGI }
+	        lout2(linenumber);
+		if filename <> lastcppfilename then
+		begin
+			louts(filename);
+			lastcppfilename := cppfilename;
+		end else
+		begin
+			lout(0);
+		end;
+          Marked := TRUE;
+            end;
+            tjump(ifexpr,thenst^.gotolab^.ilabno);
+            end
+          else begin
+            lab1 := nextlabel;
+            fjump(ifexpr,lab1); dumpstmt(thenst);
+            if elsest <> nil
+            then begin lab2 := nextlabel; lout(193{JUMP}); lout2(lab2); end;
+            lout(192{DEFLAB}); lout2(lab1);
+            if elsest <> nil
+            then begin dumpstmt(elsest); lout(192{DEFLAB}); lout2(lab2); end;
+            end;
+          end;
+        DOST:
+          dumpdo(dotypecode,dovar,doinit,doterm,doinc,
+                 dotemp,FALSE,dobody,nil,'?');
+        STOPST,
+        PAUSEST:
+          begin
+          lout(190 {PARMLST});
+          if sparg <> nil
+          then begin
+            lout(183 {REFPARM}); outchcnst(sparg,sparglen);
+            lout(186 {VALPRM4}); outintcnst(sparglen);
+            end
+          else begin
+            lout(186 {VALPRM4}); lout(23 {NIL});
+            lout(186 {VALPRM4}); outintcnst(0);
+            end;
+          if stmtop = STOPST then call('%_STOP  ') else call('%_PAUSE ');
+          end;
+        CALLST:
+          begin
+          dumpucall(procpn,parglist);
+          end;
+        RETRNST:
+          begin
+          if (altret <> nil) and (maxaltreturn > 0)
+          then begin
+               lout(33 {ASS2}); localref(altrettable + 2);
+               expression(altret);
+               end;
+          lout(193 {JUMP}); lout2(returnlab);
+          end;
+        LABEDST:
+          begin
+          if CCallFlag and stlab^.LabIsArg
+          then begin
+               lout(197{GLOBLAB}); lout2(stlab^.ilabno);
+               lout2(stlab^.ilabno); lout2(-1);
+               end
+          else begin lout(192{DEFLAB}); lout2(stlab^.ilabno); end;
+          end;
+        INQREST:
+          begin
+          lout(190 {PARMLST});
+          passint4(iqunit); passchval(iqfile); passpointer(iqiostat); 
+          passpointer(iqexist); passpointer(iqopened); passpointer(iqnumber); 
+          passpointer(iqnamed); passpointer(iqrecl); passpointer(iqnextrec); 
+          passlabel(iqerr); passchval(iqname); passchval(iqaccess); 
+          passchval(iqsequential); passchval(iqdirect); passchval(iqform); 
+          passchval(iqformatted); passchval(iqunformatted);
+          passchval(iqblank); call('%_INQ   ');
+          end;
+        CLOSEST:
+          begin
+          lout(190 {PARMLST});
+          passint4(clunit); passpointer(cliostat); passlabel(clerr);
+          passchval(clstatus); call('%_RTSCL ');
+          end;
+        OPENST:
+          begin
+          lout(190 {PARMLST});
+          passint4(opunit); passpointer(opiostat); passlabel(operr);
+          passchval(opfile); passchval(opstatus); passchval(opaccess);
+          passchval(opform); passint4(oprecl); lout(185 {VALPRM2});
+          if oprecl = nil then outintcnst(0) else outintcnst(1);
+          passchval(opblank); passchval(opbuffed);
+          lout(185{VALPRM2}); outintcnst(ord(OpBinary));
+          call('%_RTSOP ');
+          end;
+        REWDST,
+        ENDFST,
+        BACKST:
+          begin
+          lout(190 {PARMLST});
+          passint4(rebunit); passpointer(rebiostat); passlabel(reberr);
+          if stmtop = REWDST
+          then call('%_REWD  ')
+          else
+            if stmtop = ENDFST
+            then call('%_ENDF  ')
+            else call('%_BACK  ');
+          end;
+        PRINTST,
+        READST,
+        WRITEST: dumprwstmt(fstmt);
+        STFUNST:
+          begin
+          error(1101); { Statement functions don't come here. }
+          end;
+        ENTRYST:
+          begin
+          lab1 := nextlabel; lout(193{JUMP}); lout2(lab1);
+          makidstr(lname,entryname^.name);
+          if CCallFlag then maklcstr(lname);
+          
+          { Entry Point Block }
+          
+          lout($F5); lout2(-1); louts(lname);
+          
+          copyparams(entryname^.arglist,entryname^.parambytes + deltapb);
+          setbounds(entryname^.arglist);
+          if (entryname^.nkind = FUNCT) and (entryname^.idtype.typ = CHARACTER)
+          then begin
+               lout(35{ASS8}); localref(-8);
+               localref(entryname^.parambytes + deltapb);
+               end;
+          lout(33 {ASS2}); localref(entrynoloc); outintcnst(enum);
+          if maxaltreturn > 0
+          then begin
+               lout(33 {ASS2}); localref(altrettable);
+               outintcnst(entryname^.numaltret);
+               lout(33 {ASS2}); localref(altrettable + 2);
+               outintcnst(0);
+               end;
+          if DebugFlag
+          then begin
+               lout(238{MARKENTRY}); lout(0); lout2(-1); louts(lname);
+               end;
+          lout(192 {DEFILAB}); lout2(lab1);
+          end;
+        CONTST: ;
+      end; {case}
+      flushlbuff;
+	savefstmt := fstmt;
+      fstmt := nextstmt;
+      end;
+  if DebugFlag and not Marked and (savefstmt <> nil) then
+  begin
+	 lout(239{MARKSTMT});
+          { added for dbx by jim t at SGI }
+	        lout2(savefstmt^.linenumber);
+		if savefstmt^.filename <> lastcppfilename then
+		begin
+			louts(savefstmt^.filename);
+			lastcppfilename := cppfilename;
+		end else
+		begin
+			lout(0);
+		end;
+  end
+  end; {dumpstmt}
+  
+  procedure defregvars;
+    
+    procedure defcommons;
+      var lpn: pn;
+    begin
+    lpn := commonlist;
+    while lpn <> nil do
+          with lpn^ do begin
+               if InReg
+               then begin
+                    lout(6{DEFREG}); lout(refcount + 128);
+                    lout(34{ASS4}); lout(7); lout(refcount);
+                    lout(22{ADDR}); lout(5{FCOMMON});
+                    if commonno <= 127
+                    then lout(commonno)
+                    else lout2(commonno or $8000);
+                    lout3(0);
+                    end;
+               lpn := next;
+               end;
+    end; {defcommons}
+  
+    procedure defvars(fpn: pn);
+    begin
+    if fpn <> nil
+    then with fpn^ do begin
+              defvars(llink);
+              if InReg and (nkind = VARS)
+              then begin
+                   lout(6{DEFREG}); lout(refcount + 128);
+                   if InDirect or (bounds <> nil) or AddrNeeded or
+                      (idtype.siz > 4) or (incommon <> nil)
+                   then begin
+                        lout(34{ASS4}); lout(7); lout(refcount);
+                        InReg := FALSE; lout(22{ADDR});
+                        expression(fpn); InReg := TRUE;
+                        end;
+                   end;
+              defvars(rlink);
+              end;
+    end; {defvars}
+  
+  begin {defregvars}
+  defcommons;
+  defvars(localtree);
+  end; {defregvars}
+  
+  procedure undefregvars;
+    
+    procedure undcommons;
+      var lpn: pn;
+    begin
+    lpn := commonlist;
+    while lpn <> nil do
+          with lpn^ do begin
+               if InReg
+               then begin lout(6{UNDEFREG}); lout(refcount); end;
+               lpn := next;
+               end;
+    end; {undcommons}
+    
+    procedure undvars(fpn: pn);
+    begin
+    if fpn <> nil
+    then with fpn^ do begin
+              undvars(llink);
+              if InReg
+              then begin lout(6{UNDEFREG}); lout(refcount); end;
+              undvars(rlink);
+              end;
+    end; {undvars}
+    
+  begin {undefregvars}
+  undcommons;
+  undvars(localtree);
+  end; {undefregvars}
+  
+begin {dump}
+lbyteno := 0; extlist := nil; nextextno := 0; nextfmtno := 0;
+
+{ Module Begin Block }
+
+out($F0);
+if procn^.rtnlev = 1 then outname8('        ') else outname8(segname);
+out(procn^.rtnlev);
+if StmtFunFlag
+then out3(0)
+else out3(-nextaddr);
+{ FORTRAN procedure }
+GlobLabs := CCallFlag and PassLabels and not StmtFunFlag;
+out(ord(GlobLabs) + 2 + ord(QuietFlag)*16 + ord(FPHardware)*64 +
+    ord(CALLCXP)*128);
+out(ord(LONGNAMES) + ord(NoRMW)*2); out(TARGETOS);
+out(ord(ZeroStack) + ord(SWDivinHW)*16);
+
+{ FORTRAN Data Area Definition }
+
+if (nextsaddr > 0) or (CHIP = M68000)
+then begin
+     out($F7); out2(1);
+     if nextsaddr = 0 then out4(-1) else out4(nextsaddr);
+     out2(-1); outs(procname);
+     j := 1;
+     end
+else j := 0;
+
+{ FORTRAN COMMON Definitions }
+
+lcommon := commonlist;
+while lcommon <> nil do
+      with lcommon^ do begin
+           makidstr(lname,name); j := j + 1; commonno := j;
+           lc := comsize; if odd(lc) then lc := lc + 1;
+           out($F7); out2(j); out4(lc); out2(-1); outs(concat('/',lname,'/'));
+           lcommon := next;
+           end;
+
+{ Entry Block }
+
+makidstr(lname,procn^.name);
+if CCallFlag then maklcstr(lname);
+out($F5); out2(procn^.rtnno); outs(lname);
+
+if procn^.rtnlev = 1
+then begin lout(190 {PARMLST}); call('%F850401'); end;
+
+if CALLCXP then deltapb := 4 else deltapb := 0;
+
+if not StmtFunFlag
+then begin
+  copyparams(procn^.arglist,procn^.parambytes + deltapb);
+  if (procn^.nkind = FUNCT) and (procn^.idtype.typ = CHARACTER)
+  then begin
+       lout(35{ASS8}); localref(-8);
+       localref(procn^.parambytes + deltapb);
+       end;
+  if entrycount > 0
+  then begin
+       lout(33 {ASS2});
+       localref(entrynoloc); outintcnst(0);
+       end;
+  defregvars;
+  setbounds(procn^.arglist);
+  end;
+
+if maxaltreturn > 0
+then begin
+     
+     { Alternate return table:       }
+     {                               }
+     { +------+------+------+------+ }
+     { | Max valid # |  Current #  | }
+     { +------+------+------+------+ }
+     { |    Alternate Return #1    | }
+     { +------+------+------+------+ }
+     { |           . . .           | }
+     { +------+------+------+------+ }
+     { |   Alternate Return #Max   | }
+     { +------+------+------+------+ }
+     
+     lout(33 {ASS2}); localref(altrettable);
+     outintcnst(procn^.numaltret);
+     lout(33 {ASS2}); localref(altrettable + 2);
+     outintcnst(0);
+     end;
+returnlab := nextlabel;
+
+if StmtFunFlag and (procn^.idtype.typ <> CHARACTER)
+then begin
+     lout(178{LDPFUN}); i := procn^.idtype.siz;
+     if (procn^.idtype.typ = REEL) or (procn^.idtype.typ = COMPLEX)
+     then i := i + 32; { Set floating-point bit }
+     lout(i);
+     expression(fproctree^.asmtexpr);
+     end
+else begin
+     if DebugFlag
+     then begin lout(238{MARKENTRY}); lout(0); lout2(-1); louts(lname); end;
+     dumpstmt(fproctree);
+     if DebugFlag
+     then begin
+          lout(238{MARKEXIT}); lout(1); lout2(-1); louts(lname);
+          if entrycount > 0
+          then begin
+               lstmt := fproctree;
+               while lstmt <> nil do
+                     with lstmt^ do begin
+                          if stmtop = ENTRYST
+                          then begin
+                               makidstr(lname2,entryname^.name);
+                               if CCallFlag then maklcstr(lname2);
+                               lout(238{MARKEXIT}); lout(1);
+                               lout2(-1); louts(lname2);
+                               flushlbuff;
+                               end;
+                          lstmt := nextstmt;
+                          end;
+               end;
+          end;
+     end;
+if not StmtFunFlag then undefregvars;
+
+lout(192 {DEFILAB}); lout2(returnlab);
+if (maxaltreturn > 0) and not StmtFunFlag
+then begin
+     lout(206 {ASALTRET}); localref(altrettable);
+     end;
+if (entrycount > 0) and not StmtFunFlag
+then begin
+     lab1 := nextlabel;
+     lout(200 {CASEJ}); lout(2); localref(entrynoloc);
+     lout(201 {CTABLE}); lout2(lab1); lout2(entrycount + 1);
+     for i := 0 to entrycount do
+         begin lout2(lab1 + i); lout2(0); lout2(i); flushlbuff; end;
+     lstmt := fproctree;
+     while lstmt <> nil do
+           with lstmt^ do begin
+                if stmtop = ENTRYST
+                then begin
+                     lout(192 {ILABDEF}); lout2(nextlabel);
+                     if (entryname^.nkind = FUNCT) and
+                        (entryname^.idtype.typ <> CHARACTER)
+                     then begin
+                          i := entryname^.idtype.siz;
+                          if (entryname^.idtype.typ = REEL) or
+                             (entryname^.idtype.typ = COMPLEX)
+                          then i := i + 32; { Set floating-point bit }
+                          lout(178 {LDFRES}); lout(i);
+                          if entryname^.idtype.siz = 8
+                          then localref(-8)
+                          else localref(-4);
+                          end;
+                     lout($F6 {RTN});
+                     if CCallFlag
+                     then lout2(0)
+                     else lout2(entryname^.parambytes);
+                     flushlbuff;
+                     end;
+                lstmt := nextstmt;
+                end;
+     lout(192 {ILABDEF}); lout2(lab1);
+     end;
+if (procn^.nkind = FUNCT) and
+   (procn^.idtype.typ <> CHARACTER) and
+    not StmtFunFlag
+then begin
+     i := procn^.idtype.siz;
+     if (procn^.idtype.typ = REEL) or (procn^.idtype.typ = COMPLEX)
+     then i := i + 32; { Set floating-point bit }
+     lout(178 {LDFRES}); lout(i);
+     if procn^.idtype.siz = 8 then localref(-8) else localref(-4);
+     end;
+if procn^.rtnlev = 1 then begin lout(190 {PARMLST}); call('%_RTSFIN'); end;
+lout($F6 {RTN});
+if CCallFlag and not StmtFunFlag then lout2(0) else lout2(procn^.parambytes);
+
+flushlbuff;
+
+{ Generate any DATA statements }
+
+while datalist <> nil do
+  with datalist^ do begin
+    datacode(data,varb,TRUE);
+    datalist := next;
+    end;
+
+if DebugFlag then dumpsymbols(lname,procn);
+
+{ Module End Block }
+
+out($FE);
+
+end; {dump}
+
+

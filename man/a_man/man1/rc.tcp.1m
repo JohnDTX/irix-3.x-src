@@ -1,0 +1,35 @@
+'\"macro stdmacro
+.TH RC.TCP 1M
+.SH NAME
+rc.tcp, rc.nfs, rc.mail, rc.488, rc.xns \- communication option initialization 
+.SH SYNOPSIS
+.B /etc/rc.tcp
+.PP
+.B /etc/rc.nfs
+.PP
+.B /etc/rc.mail
+.PP
+.B /etc/rc.488
+.PP
+.B /etc/rc.xns
+.SH DESCRIPTION
+These scripts are called by
+.I rc 
+(see 
+.IR brc (1M))
+to initialize the communication options used by the IRIS.
+TCP/IP Ethernet communications are initialized by
+.IR rc.tcp ,
+the Network File System is initialized by
+.IR rc.nfs ,
+the network mail system is initialized by
+.IR rc.mail ,
+IEEE 488 communications are initialized by
+.IR rc.488 ,
+and XNS Ethernet communications are initialized by
+.IR rc.xns .
+.SH SEE ALSO
+brc(1M).
+.\" $Source: /d2/3.7/src/man/a_man/man1/RCS/rc.tcp.1m,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:21:24 $

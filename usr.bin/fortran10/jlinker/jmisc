@@ -1,0 +1,264 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: JMISC.TEXT                              *)
+(*                                                                           *)
+(*          (C) Copyright 1984, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               30-Jul-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure outsymfile;
+  var i,count: integer; lstr: string31; lmodlist: pmodlist; l: longint;
+      symfile: file; symbuffer: array[0..1023] of byte;
+      symbyte,symblock: integer;
+  
+  procedure flushsymfile;
+    var b: integer;
+  begin
+  if symbyte > 0
+  then begin
+       for b := symbyte to 1023 do symbuffer[b] := 0;
+       b := (symbyte + 511) div 512;
+       if blockwrite(symfile,symbuffer,b,symblock) <> b
+       then fatal_error('Can''t write .dbg file');
+       symblock := symblock + b; symbyte := 0;
+       end;
+  end; {flushsymfile}
+  
+  procedure sout(n: integer);
+  begin
+  if symbyte > 1023 then flushsymfile;
+  symbuffer[symbyte] := n; symbyte := symbyte + 1;
+  end; {sout}
+  
+  procedure sout2(n: integer);
+    var c: array[0..1] of byte;
+  begin
+  moveleft(n,c,2);
+  if HOSTSEX = MALE
+  then begin sout(c[0]); sout(c[1]); end
+  else begin sout(c[1]); sout(c[0]); end;
+  end; {sout2}
+  
+  procedure sout4(n: longint);
+    var c: array[0..3] of byte;
+  begin
+  moveleft(n,c,4);
+  if HOSTSEX = MALE
+  then begin sout(c[0]); sout(c[1]); sout(c[2]); sout(c[3]); end
+  else begin sout(c[3]); sout(c[2]); sout(c[1]); sout(c[0]); end;
+  end; {sout4}
+  
+  procedure souts(fstr: string31);
+    var i: integer;
+  begin
+  for i := 0 to length(fstr) do sout(ord(fstr[i]));
+  end; {souts}
+  
+  function numentries(fsymbol: psymbol): integer;
+  begin {numentries}
+  if fsymbol <> nil
+  then with fsymbol^ do
+            if Defined and (symname.n4 <> '***L') and (symname.n4 <> '$STA')
+            then numentries := numentries(llink) + numentries(rlink) + 1
+            else numentries := numentries(llink) + numentries(rlink)
+  else numentries := 0;
+  end; {numentries}
+  
+  procedure outentries(fsymbol: psymbol);
+    var i: integer; lstr: string31;
+  begin
+  if fsymbol <> nil
+  then with fsymbol^ do begin
+            outentries(rlink);
+            if Defined and (symname.n4 <> '***L') and (symname.n4 <> '$STA')
+            then begin
+                 makestr(symname,lstr); sout2(symname.linkno);
+                 souts(lstr); sout4(loc);
+                 end;
+            outentries(llink);
+            end;
+  end; {outentries}
+  
+  function numdatas(fcommon: pcommon): integer;
+  begin {numdatas}
+  if fcommon <> nil
+  then numdatas := numdatas(fcommon^.llink) + numdatas(fcommon^.rlink) + 1
+  else numdatas := 0;
+  end; {numdatas}
+  
+  procedure outdatas(fcommon: pcommon);
+  begin
+  if fcommon <> nil
+  then with fcommon^ do begin
+            outdatas(rlink);
+            makestr(datname,lstr); sout2(datname.linkno);
+            souts(lstr); sout4(size); 
+            if initlist <> nil (***QQQ split common and bss QQQ***)
+            then sout4(loc)
+            else sout4(-1);
+            outdatas(llink);
+            end;
+  end; {outdatas}
+  
+  procedure souta(fname: alfa8);
+    var i: integer;
+  begin
+  for i := 1 to 8 do sout(ord(fname[i]));
+  end; {souta}
+  
+  procedure copytvs;
+    var i,kind,ltypeno,len: integer; PackedFlag: Boolean; lstr: string31;
+  begin {copytvs}
+  
+  { L.V.S.L LinkName PrntName }
+  
+  sout(nextbyte); {Language}
+  sout(nextbyte); {Version}
+  sout(nextbyte); {Subversion}
+  sout(nextbyte); {Level}
+{ added by jim t at SGI for dbx }
+  sout(nextbyte); {return level}
+  sout2(nextword); nexts(lstr); souts(lstr);
+  sout2(nextword); nexts(lstr); souts(lstr);
+  
+  { UserName }
+  
+  nexts(lstr); souts(lstr);
+  
+  { Types }
+  
+  ltypeno := nextword;
+  while ltypeno <> 0 do begin
+        sout2(ltypeno);
+        kind := nextbyte; sout(kind); PackedFlag := kind > 15;
+        case kind mod 16 of
+          0: {SCALAR}
+             sout2(nextword);
+          1: {SUBRANGE}
+             begin
+             sout2(nextword); sout4(next4bytes); sout4(next4bytes);
+             end;
+          2, {POINTER}
+          3: {SET}
+             sout2(nextword);
+          4: {ARRAY}
+             begin
+             sout2(nextword); sout2(nextword);
+             if PackedFlag then sout(nextbyte);
+             end;
+          5: {STRING}
+             sout(nextbyte);
+          6: {FILE}
+             sout2(nextword);
+          7: {RECORD}
+             begin
+             sout4(next4bytes);
+             len := nextbyte;
+             while len > 0 do begin
+                   sout(len);
+                   for i := 1 to len do sout(nextbyte);
+                   sout2(nextword); len := nextword; sout2(len);
+                   if len < 0 then sout2(nextword);
+                   if PackedFlag then sout2(nextword);
+                   len := nextbyte;
+                   end;
+             sout(0);
+             end;
+          9: {FCHAR}
+             sout2(nextword);
+         10: {FARRAY}
+             begin
+             len := nextbyte; sout(len); sout2(nextword);
+             for i := 1 to len*13 do sout(nextbyte);
+             end;
+        otherwise: writeln('*** Bad $A0 Block ***');
+        end; {case}
+        ltypeno := nextword;
+        end;
+  sout2(0);
+  
+  { Variables }
+  
+  len := nextbyte;
+  while len <> 0 do begin
+        sout(len);
+        for i := 1 to len do sout(nextbyte);
+        sout2(nextword);
+        kind := nextbyte; sout(kind);
+        case kind mod 16 of
+          0,1: sout2(nextword);
+          2,3: ;
+          4:   begin
+               sout2(nextword); nexts(lstr); souts(lstr);
+               sout4(next4bytes);
+               end;
+          6,7: sout4(next4bytes);
+        end; {case}
+        len := nextbyte;
+        end;
+  sout(0);
+  end; {copytvs}
+  
+  procedure copybpts;
+    var i,n: integer; lstr: string31;
+  begin
+  n := nextword; sout2(n);
+  i := nextbyte; sout(i);
+  case i of
+    0: ;
+    1,2: begin sout2(nextword); sout4(next4bytes); end;
+  end; {case}
+  for i := 1 to n do begin
+      sout2(nextword); nexts(lstr); souts(lstr);
+      sout4(next4bytes); sout4(next4bytes); {Entry/Exit}
+      end;
+  n := nextword; sout2(n);
+  { extra sout2 added for dbx by jim t at SGI }
+  for i := 1 to n do begin sout2(nextword); sout2(nextword); end;
+  end; {copybpts}
+  
+begin {outsymfile}
+if length(sfname) = 0
+then begin
+     sfname := ofname; sfname[0] := chr(length(sfname) - length(BINSUFFIX));
+     suffix(sfname,'.dbg');
+     end;
+rewrite(symfile,sfname);
+if ioresult = 0
+then begin
+     symbyte := 0; symblock := 0;
+     sout4(0); sout4(0); sout4(0); sout4(0); {header}
+     
+     sout2(1); {Number of segments}
+     souta('?*>dbg<*'); {Segment name}
+     sout4(nxttaddr {Size});
+     sout4(0); {Address, unknown}
+     
+     sout2(numentries(nametree)); outentries(nametree);
+     
+     sout2(numdatas(ftndatatree)); outdatas(ftndatatree);
+     
+     lmodlist := vartypelist;
+     while lmodlist <> nil do begin
+           seekmodule(lmodlist);
+           count := nextbyte; l := next3bytes; copytvs;
+           lmodlist := lmodlist^.nextmodule;
+           end;
+     sout(255);
+     
+     lmodlist := bpointlist;
+     while lmodlist <> nil do begin
+           seekmodule(lmodlist);
+           count := nextbyte; l := next3bytes; copybpts;
+           lmodlist := lmodlist^.nextmodule;
+           end;
+     sout2(0);
+     flushsymfile; close(symfile,lock);
+     end
+else writeln('Can''t open symbol file');
+end; {outsymfile}
+
+

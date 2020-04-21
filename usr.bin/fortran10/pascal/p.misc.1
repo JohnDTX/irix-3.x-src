@@ -1,0 +1,713 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: P.MISC.1.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               08-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure fillinbuf;
+  label 1;
+begin
+1: inbuf[512] := 0;
+if blockread(sourcefile,
+             inbuf,
+             2,
+             filestack[topoffilestack].lastrelblkread + 2)
+  <= 0
+then { Top of stack read failed }
+  if topoffilestack = 1
+  then { EOF }
+    begin inbufp := 0; inbuf[0] := 3; end
+  else begin
+    topoffilestack := topoffilestack - 1;
+    with filestack[topoffilestack] do
+      begin
+      close(sourcefile);
+      reset(sourcefile,fname);
+      inbufp := nextchtoread;
+      curfile := fname;
+      curlineinfile := lineinfile;
+      end;
+    if blockread(sourcefile,
+                 inbuf,
+                 2,
+                 filestack[topoffilestack].lastrelblkread)
+        <= 0
+    then 
+      
+      { Fatal error in rereading previously read block }
+      { Replace halt with global goto                  }
+      
+      begin error(406); halt(ERRHALT); end;
+    
+    { Block just reread might have just hit last <CR> }
+    { before it was pushed onto the stack.            }
+    
+    if HOSTOS = CPM then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+    if inbuf[inbufp] = 0 then goto 1;
+    linestate := INLINE;
+    end
+else
+  begin { Top of stack read succeeded }
+  filestack[topoffilestack].lastrelblkread :=
+    filestack[topoffilestack].lastrelblkread + 2;
+  inbufp := 0;
+  if HOSTOS = CPM then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+  if (HOSTOS = ADVENTURE) or (HOSTOS = CPM)
+  then
+    if inbuf[0] = 0 then goto 1;
+  end;
+end; {fillinbuf}
+
+procedure bumpstno;
+begin
+if CountAhead then CountAhead := FALSE else stmtnumb := stmtnumb + 1;
+if frststno = 0 then frststno := stmtnumb;
+end; {bumpstno}
+
+procedure nextch;
+  label 2,9;
+begin
+if HOSTOS = MERLIN
+then begin
+  { If the last nextch terminated a line there is a chance }
+  { that the dottext page in inbuf has been fully read     }
+  if EolSource
+  then
+    begin
+    EolSource := FALSE;
+    if inbuf[inbufp] = 0 { NULL } then fillinbuf;
+    if inbuf[inbufp] = 16 { DLE }
+    then begin
+      fillchar(curline,inbuf[inbufp+1] - 31,' ');
+      pcurline := inbuf[inbufp+1] - 31;
+      inbufp := inbufp + 2; { Need to skip blanks at beginning of line }
+      end;
+    end;
+  end
+else begin { HOSTOS <> MERLIN }
+  EolSource := FALSE;
+  if inbuf[inbufp] = 0 { NULL } then fillinbuf;
+  end;
+
+{ Pick up the next character in inbuf }
+
+ch := chr(inbuf[inbufp]);
+if HOSTOS = ADVENTURE
+then
+  if ord(ch) < 0
+  then begin
+    if ord(ch) = -1
+    then inbufp := inbufp + 1
+    else inbuf[inbufp] := ord(ch) + 1;
+    ch := ' ';
+    end
+  else inbufp := inbufp + 1
+else inbufp := inbufp + 1;
+
+{ If this character is the <CR> or <LF> it gets special treatment }
+
+if ch <= '\0D'
+then begin
+  if ch = '\0D'
+  then begin
+    if linestate = INLINE
+    then linestate := SAWCR
+    else
+      if linestate = SAWLF
+      then begin linestate := INLINE; ch := ' '; goto 9; end;
+    end
+  else
+    if ch = '\0A'
+    then begin
+      if linestate = INLINE
+      then linestate := SAWLF
+      else
+        if linestate = SAWCR
+        then begin linestate := INLINE; ch := ' '; goto 9; end;
+      end
+    else goto 2;
+  ch := ' ';
+  EolSource := TRUE;
+  if ListFlag and ListOpen
+  then begin 
+       write(listfile,linenumber:6,'.');
+       if frststno = 0 then frststno := stmtnumb;
+       if frststno > 0
+       then write(listfile,frststno:5,':  ')
+       else write(listfile,' ':8);
+       writeln(listfile,curline:pcurline);
+       end;
+  frststno := 0;
+  prevline := curline; pprevline := pcurline; pcurline := 1;
+  linenumber := linenumber + 1;
+  curlineinfile := filestack[topoffilestack].lineinfile + 1;
+  filestack[topoffilestack].lineinfile := curlineinfile;
+  end { ch <= '\0D' }
+else begin
+2:linestate := INLINE;
+  if pcurline < 81
+  then begin pcurline := pcurline + 1; curline[pcurline] := ch; end;
+  end;
+9:;
+end; {nextch}
+
+procedure scan;
+  label 1;
+  var i,k,mask: integer;
+  
+  procedure hexconstant;
+    var k,n: integer; lch: char;
+  begin
+  intval := 0; n := 0; nextch;
+  if ch < 'a' then lch := ch else lch := chr(ord(ch) - 32);
+  while ((lch >= '0') and (lch <= '9')) or
+        ((lch >= 'A') and (lch <= 'F')) do
+    begin
+    if intval <= 268435455
+    then begin
+      k := ord(lch) - ord('0');
+      if lch >= 'A' then k := k - 7;
+      intval := intval*16 + k;
+      end
+    else begin error(12); intval := 0; end;
+    n := n + 1; nextch;
+    if ch < 'a' then lch := ch else lch := chr(ord(ch) - 32);
+    end;
+  if n > 0 then token := ICONSTSY else token := DOLLARSY;
+  end; {hexconstant}
+  
+  procedure unsignednumber;
+    const DIGITMAX = 31;
+    var digits: alfa31;
+        k,scale,i: integer;
+    
+    procedure getexp;
+      var Negative: Boolean; exp: integer;
+    begin
+    nextch; Negative := FALSE; exp := 0;
+    if ch = '+'
+    then nextch
+    else
+      if ch = '-'
+      then begin nextch; Negative := TRUE; end;
+    if chclass[ord(ch)] <> DIGITCL then error(13);
+    while chclass[ord(ch)] = DIGITCL do begin
+      exp := exp * 10 + ord(ch) - ord('0');
+      nextch;
+      end;
+    if Negative then exp := -exp;
+    scale := scale + exp;
+    end; {getexp}
+    
+  begin {unsignednumber}
+  scale := 0; token := ICONSTSY; k := 0;
+  repeat
+    if (k > 0) or (ch <> '0')
+    then begin k := k + 1; digits[k] := ch; end;
+    nextch;
+  until (chclass[ord(ch)] <> DIGITCL) or (k >= DIGITMAX);
+  if chclass[ord(ch)] = DIGITCL
+  then begin
+    error(10);
+    repeat
+      nextch;
+    until chclass[ord(ch)] <> DIGITCL;
+    end;
+  if k = 0 then begin k := 1; digits[k] := '0'; end;
+  if ch = '.'
+  then begin
+    nextch;
+    if ch = '.'
+    then ch := ':'
+    else begin
+      token := RCONSTSY;
+      if chclass[ord(ch)] <> DIGITCL then error(11);
+      while chclass[ord(ch)] = DIGITCL do begin
+        if k < DIGITMAX
+        then begin k := k + 1; digits[k] := ch; scale := scale - 1; end
+        else
+          if digits[1] = '0'
+          then begin
+            for i := 2 to DIGITMAX do digits[i-1] := digits[i];
+            digits[DIGITMAX] := ch; scale := scale - 1;
+            end;
+        nextch;
+        end;
+      end;
+    end; { digits . digits }
+  if (ch = 'E') or (ch = 'e')
+  then begin token := RCONSTSY; getexp; end
+  else
+    if (ch = 'D') or (ch = 'd')
+    then begin token := DCONSTSY; getexp; end;
+  if token = ICONSTSY
+  then begin
+    intval := 0;
+    for i := 1 to k do
+      if (intval >= 214748365) or
+        ((intval  = 214748364) and (digits[i] > '8'))
+      then
+        begin error(12); intval := 0; end { Prevent too many error messages }
+      else
+        intval := intval * 10 + ord(digits[i]) - ord('0');
+    end
+  else %a_2_d(digits,k,scale,doubleval);
+  end; {unsignednumber}
+    
+  procedure getstring;
+    label 2;
+    var lstrval: strvaltype; Done: Boolean; lenmod8,lintval: integer;
+        count,lval,mval: integer; lch: char;
+    
+    procedure concat;
+    begin
+    if intval = 0
+    then lintval := ord(ch)
+    else begin
+      if intval = 1
+      then begin
+        new(strval);
+        lstrval := strval;
+        strval^.next := nil;
+        strval^.strpart := '        ';
+        strval^.strpart[1] := chr(lintval);
+        lenmod8 := 1;
+        end;
+      if lenmod8 = 8
+      then begin
+        new(lstrval^.next);
+        lstrval := lstrval^.next;
+        lstrval^.next := nil;
+        lstrval^.strpart := '        ';
+        lenmod8 := 0;
+        end;
+      lenmod8 := lenmod8 + 1;
+      lstrval^.strpart[lenmod8] := ch;
+      end;
+    intval := intval + 1;
+    end; {concat}
+  
+  begin {getstring}
+  intval := 0;
+  Done := FALSE;
+  repeat
+    if {*[[[ EOLN(sourcefile) ]]]*} EolSource
+    then error(14)
+    else nextch;
+    while ch <> '''' do begin
+      if ch = '\\'
+      then begin
+        nextch; lval := 0; count := 0;
+        while (count <= 1) and (ch in ['0'..'9','A'..'F','a'..'f']) do begin
+          mval := ord(ch) - ord('0');
+          if ch >= 'A'
+          then
+            if ch >= 'a'
+            then mval := mval - 39
+            else mval := mval - 7;
+          lval := lval*16 + mval; count := count + 1; nextch;
+          end;
+        if count > 0
+        then begin
+          lch := ch; ch := chr(lval); concat;
+          ch := lch; goto 2;
+          end;
+        end;
+      concat;
+      if {*[[[ EOLN(sourcefile) ]]]*} EolSource
+      then begin error(14); ch := '''' end
+      else nextch;
+   2: end;
+    nextch;                         { Found first ', is there another }
+    if ch = ''''
+    then concat                     { Double ' }
+    else Done := TRUE;
+  until Done;
+  if intval = 1 
+  then begin intval := lintval; token := CCONSTSY; end
+  else token := SCONSTSY;
+  end; {getstring}
+  
+  procedure comment(termch:char);
+    const MAXFNAME = 80;
+    var EndOfOptions,ToggleFlag,ToggleValue: Boolean;
+        optionch,lch: char;
+        filename: string[MAXFNAME];
+        InclOptFlag: Boolean;
+        i: integer;
+    
+    { Getfilename scans remainder of comment,        }
+    { accumulating a file name.  Blanks are ignored. }
+    
+    procedure getfilename;
+      var j : integer;
+      
+      { Nextfilech concatenates ch to the current file name }
+      
+      procedure nextfilech;
+      begin
+      if j < MAXFNAME - 5
+      then
+        begin
+        if ch <> ' '
+        then begin
+          j := j + 1;
+          filename := concat(filename,' ');
+          filename[j] := ch;
+          end;
+        end
+      else 
+        error(351); { File name too long }
+      nextch;
+      end; {nextfilech}
+    
+    begin {getfilename}
+    filename := '';
+    j := 0;
+    if termch = '*'
+    then
+      begin
+      nextfilech;
+      while ch <> '*' do nextfilech;
+      end
+    else
+      while ch <> '}' do nextfilech;
+    EndOfOptions := TRUE;
+    end; {getfilename}
+    
+  begin {comment}
+  InclOptFlag := FALSE;
+  nextch;
+  if ch = '$' 
+  then
+    begin { Options, including prining for character after options }
+    EndOfOptions := FALSE;
+    repeat
+      nextch;
+      if (ch >= 'a') and (ch <= 'z')
+      then ch := chr(ord(ch) - 32);
+      if ch in ['%','C','D','E','F','I','L','M','N','O','P','Q','R','S','U','V']
+      then
+        begin
+        optionch := ch; nextch; ToggleFlag := TRUE;
+        if ch = '+'
+        then ToggleValue := TRUE
+        else
+          if ch = '-'
+          then ToggleValue := FALSE
+          else ToggleFlag := FALSE;
+        case optionch of
+          '%': if ToggleFlag
+               then
+                 if ToggleValue
+                 then chclass[ord('%')] := LETCL
+                 else chclass[ord('%')] := ERRSY
+               else EndOfOptions := TRUE;
+          'C': if ToggleFlag
+               then CodeFlag := ToggleValue
+               else EndOfOptions := TRUE;
+          'D': if ToggleFlag
+               then DebugFlag := ToggleValue
+               else EndOfOptions := TRUE;
+          'E': if ToggleFlag
+               then CCallFlag := not ToggleValue
+               else
+                 begin
+                 if ErrFileOpen then close(errfile,LOCK);
+                 getfilename;
+                 rewrite(errfile,filename);
+                 ErrFileOpen := TRUE;
+                 end;
+          'F': if ToggleFlag
+               then FPHardware := ToggleValue
+               else EndOfOptions := TRUE;
+          'I': begin
+               if ToggleFlag
+               then IOFlag := ToggleValue
+               else 
+                 begin
+                 if InterFlag then error(305);
+                 getfilename;
+               
+                 { Don't actually do file include until comment }
+                 { fully scanned to prevent comment tail from   }
+                 { being scanned on EOF of the include file.    }
+                 
+                 InclOptFlag := TRUE;
+                 end;
+               end;
+          'L': if ToggleFlag
+               then ListFlag := ToggleValue
+               else
+                 begin
+                 getfilename;
+                 if ListOpen then close(listfile,LOCK);
+                 rewrite(listfile,filename);
+                 ListOpen := ioresult = 0; ListFlag := ListOpen;
+                 if not ListOpen then error(410);
+                 end;
+          'M': if ToggleFlag
+               then MemCheck := ToggleValue
+               else EndOfOptions := TRUE;
+          'N': if ToggleFlag
+               then FltCheck := ToggleValue
+               else begin
+                 EndOfOptions := TRUE;
+                 if CHIP = N32000
+                 then begin
+                   getfilename;
+                   for i := 1 to length(filename) do
+                     if (filename[i] >= 'a') and (filename[i] <= 'z')
+                     then filename[i] := chr(ord(filename[i]) - 32);
+                   if filename = 'ORMW'
+                   then begin
+                     NoRMW := TRUE;
+                     writeln(
+                       'Code generated with restrictions on addressing modes');
+                     end;
+                   end;
+                 end;
+          'O': if ToggleFlag
+               then OptFlag := ToggleValue
+               else EndOfOptions := TRUE;
+          'P': if ToggleFlag
+               then PromptFlag := ToggleValue
+               else EndOfOptions := TRUE;
+          'Q': if ToggleFlag
+               then QuietFlag := ToggleValue
+               else EndOfOptions := TRUE;
+          'R': if ToggleFlag
+               then RangeFlag := ToggleValue
+               else EndOfOptions := TRUE;
+          'S': if ToggleFlag
+               then SwapFlag := ToggleValue
+               else begin
+                 getfilename;
+                 for i := 1 to 8 do
+                   if i <= length(filename)
+                   then begin
+                        lch := filename[i];
+                        if (lch >= 'a') and (lch <= 'z')
+                        then lch := chr(ord(lch) - 32);
+                        segname[i] := lch;
+                        end
+                   else segname[i] := ' ';
+                 end;
+          'U': begin
+               getfilename;
+               if not Using then ufname := filename;
+               end;
+          'V': if ToggleFlag
+               then RefValues := ToggleValue
+               else EndOfOptions := TRUE;
+        end; {case}
+        if not EndOfOptions
+        then
+          begin nextch; EndOfOptions := ch <> ','; end;
+        end
+      else { ch not in [...] }
+        EndOfOptions := TRUE;
+    until EndOfOptions;
+    end;
+  if termch = '*'
+  then
+    repeat
+      while (ch <> '*') and (ch <> chr(3)) do nextch;
+      if ch <> chr(3) then nextch;
+    until (ch = ')') or (ch = chr(3))
+  else
+    while (ch <> '}') and (ch <> chr(3)) do nextch;
+  if ch = chr(3) then begin error(18); goto 999; end;
+  if InclOptFlag
+  then
+    
+    { Process include file here }
+    
+    begin
+    
+    { Attempt to flush out current line }
+    
+    if inbufp < 1024
+    then
+      if inbuf[inbufp] = $0D
+      then begin
+        nextch;
+        if inbufp < 1024
+        then
+          if inbuf[inbufp] = $0A
+          then nextch;
+        end
+      else
+        if inbuf[inbufp] = $0A
+        then begin
+          nextch;
+          if inbufp < 1024
+          then
+            if inbuf[inbufp] = $0D
+            then nextch;
+          end;
+      
+    { Remember position in current sourcefile }
+    
+    filestack[topoffilestack].nextchtoread := inbufp;
+    
+    { Push include file on filestack }
+    
+    if topoffilestack = MAXFILES
+    then
+      error(304)
+    else
+      begin
+      topoffilestack := topoffilestack + 1;
+      close(sourcefile);
+      if HOSTOS = MERLIN
+      then
+        if (pos('.TEXT',filename) = 0) and (pos('.text',filename) = 0)
+        then filename := concat(filename,'.TEXT');
+      if HOSTOS = CROMIX
+      then
+        if (pos('.PAS',filename) = 0) and (pos('.pas',filename) = 0)
+        then filename := concat(filename,'.pas');
+      reset(sourcefile,filename);
+      if ioresult <> 0
+      then begin error(405); goto 999; end;
+      with filestack[topoffilestack] do
+        begin
+        lastrelblkread := -2;
+        nextchtoread := 0;
+        fname := filename;
+        lineinfile := 1;
+        curlineinfile := 1;
+        curfile := filename;
+        end;
+      fillinbuf;         { Get a buffer full of include file     }
+      if HOSTOS <> ADVENTURE
+      then
+        if inbuf[0] <= 1 then fillinbuf;
+      EolSource := TRUE; { Do start of line procession on nextch }
+      linestate := INLINE;
+      end;
+    end;
+  nextch;
+  end; {comment}
+  
+begin {scan}
+1:
+while chclass[ord(ch)] = BLANKCL do { Skip blanks and tabs }
+  nextch;
+case chclass[ord(ch)] of
+  
+  DIGITCL: unsignednumber;
+  DOLLARSY: hexconstant;
+  
+  LETCL: begin
+    k := 0; lcbitmap := 0; mask := 1; ident.a8 := '        ';
+    repeat
+      if k < 31
+      then begin
+        if ch >= 'a'
+        then begin ch := chr(ord(ch) - 32); lcbitmap := lcbitmap + mask; end;
+        k := k + 1; mask := mask*2;
+        ident.s[k] := ch;
+        if k <= 8 then ident.a8[k] := ch;
+        end;
+      nextch;
+    until chclass[ord(ch)] < LETCL;
+    ident.s[0] := chr(k); token := IDENTSY;
+    if k <= 8
+    then begin
+      for i := lrwnames[k-1] + 1 to lrwnames[k] do
+        if rwnames[i] = ident.a8 then token := rwsymbol[i];
+      end
+    else
+      if k = 9
+      then begin
+        if ident.s = 'PROCEDURE' then token := PROCSY
+        else if ident.s = 'OTHERWISE' then token := OTHERSY
+        else if ident.s = 'INTERFACE' then token := INTERSY;
+        end
+      else
+        if k = 14
+        then
+          if ident.s = 'IMPLEMENTATION' then token := IMPLESY;
+    end;
+  
+  RPARENSY,COMMASY,SEMISY,UPARROWSY,
+  LBRACKSY,RBRACKSY,STARSY,PLUSSY,
+  MINUSSY,SLASHSY,EQSY,ATSIGNSY: begin 
+    token := chclass[ord(ch)];
+    nextch;
+    end;
+  
+  LPARENSY: begin
+    nextch;
+    if ch = '*' 
+    then
+      begin comment('*'); goto 1; end
+    else
+      token := LPARENSY;
+    end;
+  
+  LBRACECL:
+    begin comment('}'); goto 1; end;
+  
+  LTSY: begin
+    nextch;
+    if ch = '='
+    then
+      begin nextch; token := LESY; end
+    else
+      if ch = '>'
+      then
+        begin nextch; token := NESY; end
+      else
+        token := LTSY;
+    end;
+  
+  GTSY: begin
+    nextch;
+    if ch = '='
+    then
+      begin nextch; token := GESY; end
+    else
+      token := GTSY;
+    end;
+  
+  PERIODSY: begin
+    nextch;
+    if ch = '.'
+    then
+      begin nextch; token := COLONSY; end
+    else
+      token := PERIODSY;
+    end;
+  
+  COLONSY: begin
+    nextch;
+    if ch = '='
+    then
+      begin nextch; token := ASSIGNSY; end
+    else
+      token := COLONSY;
+    end;
+  
+  SCONSTSY: getstring;
+  
+  EOFSY: if token = EOFSY
+         then begin error(16); { Two times is an error } goto 999; end
+         else token := EOFSY;
+  
+  ERRSY: begin
+    error(15); { Illegal character input }
+    nextch;
+    goto 1;
+    end;
+end; {case}
+end; {scan}
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

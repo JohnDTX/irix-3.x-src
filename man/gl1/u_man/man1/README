@@ -1,0 +1,9 @@
+
+The following demos only work in gl1:
+	patran.1d
+	dog.1d
+	radar.1d
+
+These files should be moved into the gl1
+directory before giving the release of on-line
+man pages to the release group.	

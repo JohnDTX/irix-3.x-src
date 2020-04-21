@@ -1,0 +1,48 @@
+.TH lsbackup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B lsbackup 
+\- controls whether the last two pixels of a line are colored 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lsbackup(b)"
+.sp
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lsback(b)"
+.sp
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lsbackup(b: Boolean);"
+.sp
+.SH DESCRIPTION
+.B lsbackup
+is one of two routines that modify the application of the linestyle
+pattern.  If enabled, it overrides
+the current linestyle to guarantee that the last
+two pixels in a line are colored.  
+It takes one argument (\f2b\f1), a boolean.  If 
+.I b
+is
+TRUE(1),
+backup mode is enabled.  Set
+.B resetls
+to
+TRUE(1)
+when backup mode is enabled.  
+If \f2b\f1 is FALSE(0),
+the default setting, the linestyle is used as it stands, 
+and lines can have invisible endpoints. 
+.SH "SEE ALSO"
+deflinestyle, getlsbackup, resetls, setlinestyle 
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles

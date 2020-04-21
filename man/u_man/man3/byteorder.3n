@@ -1,0 +1,45 @@
+'\"macro stdmacro
+.\" Copyright (c) 1983 Regents of the University of California.
+.\" All rights reserved.  The Berkeley software License Agreement
+.\" specifies the terms and conditions for redistribution.
+.\"
+.\"	@(#)byteorder.3n	6.2 (Berkeley) 5/15/86
+.\"
+.TH BYTEORDER 3N
+.UC 5
+.SH NAME
+byteorder: htonl, htons, ntohl, ntohs \- convert values between host and network byte order 
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <netinet/in.h>
+.PP
+.B u_long htonl(hostlong);
+.B u_long hostlong;
+.PP
+.B u_short htons(hostshort);
+.B u_short hostshort;
+.PP
+.B u_long ntohl(netlong);
+.B u_long netlong;
+.PP
+.B u_short ntohs(netshort);
+.B u_short netshort;
+.fi
+.SH DESCRIPTION
+These routines convert 16 and 32 bit quantities between network
+byte order and host byte order.  On machines such as the IRIS
+these routines are defined as null macros in the include file
+.IR <netinet/in.h> .
+.PP
+These routines are most often used in conjunction with Internet
+addresses and ports as returned by
+.IR gethostbyname (3N)
+and
+.IR getservent (3N).
+.SH "SEE ALSO"
+gethostbyname(3N),
+getservent(3N)
+.SH BUGS
+The VAX handles bytes backwards from most everyone else in
+the world.  This is not expected to be fixed in the near future.

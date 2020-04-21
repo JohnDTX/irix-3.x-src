@@ -1,0 +1,50 @@
+'\"macro stdmacro
+.TH TIME 1 
+.SH NAME
+time \- time a command
+.SH SYNOPSIS
+.B time
+command
+.SH DESCRIPTION
+The
+\f2command\^\fP is executed; after it is complete,
+.I time\^
+prints the elapsed time during the command, the time
+spent in the system, and the time spent in execution
+of the command.
+Times are reported in seconds.
+.PP
+The execution time can depend on what kind of memory
+the program happens to land in;
+the user time in \s-1MOS\s0 is often half what it is in core.
+.PP
+The times are printed on standard error.
+.SH EXAMPLE
+.IP
+time nroff man filea
+.PP
+will, in
+.IR sh ,
+perform the formatting and report the time at the end of the
+file, e.g.:
+.IP
+real  22.0
+.br
+user   8.6
+.br
+sys    6.4
+.PP
+In
+.IR csh ,
+on the other hand, the time report might be:
+.IP
+8.9u  7.0s  0:29  54%
+.PP
+which reports the user time, system time, real time, and
+percentage of real time that the 
+.SM CPU
+was active, which
+is the sum of the user and system times divided by real elapsed time.
+.SH SEE ALSO
+times(2).
+.\"	@(#)time.1	5.1 of 11/15/83

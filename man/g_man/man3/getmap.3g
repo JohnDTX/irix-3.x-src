@@ -1,0 +1,32 @@
+.TH getmap 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getmap
+\- returns the number of the current color map
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getmap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getmap()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getmap: longint;"
+.SH DESCRIPTION
+.B getmap
+returns the number (from 0 to 15) of the current
+color map.  
+In onemap mode, \f3getmap\f1 returns zero.
+.SH "SEE ALSO"
+multimap, onemap
+.sp
+.I Programming Guide,
+Section 6.6, Onemap and Multimap Modes 
+.SH NOTE
+This routine is available only in immediate mode.

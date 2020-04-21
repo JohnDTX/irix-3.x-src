@@ -1,0 +1,220 @@
+Mterm3279	term3279.c	?^main()$?
+Sure_reset	functions.c	?^Sure_reset()$?
+Sure_x_aid	functions.c	?^Sure_x_aid(c)$?
+alloca	irisio3279.c	?^char *alloca( nbytes )$?
+asc_status	display.c	?^asc_status()$?
+attrb2col	conio.c	?^attrb2col(attrb)$?
+backgrnd	conio.c	?^backgrnd(attrb)$?
+beep	conio.c	?^beep()$?
+bin_encode	functions.c	?^bin_encode(readptr,encodeptr)$?
+blkqread	pxdio.c	?^blkqread()$?
+bogus	bogus.c	?^}$?
+but2c	conio.c	?^u_char $?
+clear_screen	conio.c	?^clear_screen()$?
+closecom	hostio3279.c	?^closecom()$?
+closepxd	pxdio.c	?^closepxd()$?
+cmd_ack	emulint.c	?^cmd_ack()$?
+cmd_alarm	emulint.c	?^cmd_alarm()$?
+cmd_clear	emulint.c	?^cmd_clear()$?
+cmd_cursor	emulint.c	?^cmd_cursor()$?
+cmd_dum1	emulint.c	?^cmd_dum1()$?
+cmd_dummy	emulint.c	?^cmd_dummy()$?
+cmd_extended	emulint.c	?^cmd_extended()$?
+cmd_flow	emulint.c	?^cmd_flow()$?
+cmd_identify	emulint.c	?^cmd_identify()$?
+cmd_incr	emulint.c	?^cmd_incr()$?
+cmd_insert	emulint.c	?^cmd_insert()$?
+cmd_loadctl	emulint.c	?^cmd_loadctl()$?
+cmd_reset	emulint.c	?^cmd_reset()$?
+cmd_sethigh	emulint.c	?^cmd_sethigh()$?
+cmd_setlow	emulint.c	?^cmd_setlow()$?
+cmd_wrbuffer	emulint.c	?^cmd_wrbuffer()$?
+cmd_write	emulint.c	?^cmd_write()$?
+conclose	conio.c	?^conclose(flag)$?
+conin	conio.c	?^conin(cp)$?
+conopen	conio.c	?^conopen(flag)$?
+conout	conio.c	?^conout(c)$?
+db_conopen	conio.c	?^db_conopen()$?
+db_emulator	emulator.c	?^db_emulator()$?
+dbgmenu	dbgmenu.c	?^dbgmenu()$?
+dblator	emulator.c	?^dblator()$?
+delay	pxdio.c	?^delay(t)$?
+disp_attrb	conio.c	?^disp_attrb(attrb)$?
+dispdots	display.c	?^dispdots(cursor)$?
+display_row	display.c	?^display_row(row, attrb)$?
+disprow	display.c	?^disprow(cursor)$?
+doprimitive	callfunc.c	?^doprimitive()$?
+dosync	irisio3279.c	?^#define dosync(i)	( ((i)&7) == 0 )$?
+eat_3274	pxdio.c	?^eat_3274()$?
+eat_trailing	pxdio.c	?^eat_trailing()$?
+ebx_status	display.c	?^ebx_status()$?
+emulator	emulator.c	?^emulator()$?
+emulint	emulint.c	?^emulint()$?
+end_row	emulint.c	?^end_row()$?
+end_status	conio.c	?^end_status()$?
+erase_cursor	conio.c	?^erase_cursor(r,c)$?
+erase_eol	conio.c	?^erase_eol()$?
+f13_diag	functions.c	?^u_short $?
+f13_loop	functions.c	?^u_short $?
+fillhostbuffer	hostio3279.c	?^fillhostbuffer()$?
+flushhost	hostio3279.c	?^flushhost()$?
+flushhostbuffer	hostio3279.c	?^flushhostbuffer()$?
+flushscreen	pxdio.c	?^flushscreen()$?
+force_asc_str	functions.c	?^force_asc_str(str, len)$?
+force_ebx_str	functions.c	?^force_ebx_str(str, len)$?
+force_str	functions.c	?^force_str(str, len)$?
+frecl	irisio3279.c	?^frecl( ptr )$?
+freearrays	irisio3279.c	?^freearrays()$?
+gdownload	bogus.c	?^gdownload()$?
+get3270	emulator.c	?^get3270()$?
+get_diag_byte	functions.c	?^get_diag_byte()$?
+get_it	pxdio.c	?^get_it()$?
+get_screen	pxdio.c	?^get_screen()$?
+getby_nowait	emulint.c	?^getby_nowait()$?
+getby_spl	emulint.c	?^getby_spl()$?
+getbyte	emulint.c	?^getbyte()$?
+getspot	display.c	?^getspot(index)$?
+gl_DisplayListRetrace	getline.c	?^gl_DisplayListRetrace()$?
+gl_IdleForRetrace	getline.c	?^gl_IdleForRetrace()$?
+gversion	irisio3279.c	?^gversion()$?
+hup_intr	emulator.c	?^hup_intr(sig)$?
+ignore	irisio3279.c	?^ignore()$?
+initcom	hostio3279.c	?^initcom( medium )$?
+initpxd	pxdio.c	?^initpxd()$?
+initserial	hostio3279.c	?^initserial()$?
+inkindex	display.c	?^inkindex(index)$?
+inkspot	display.c	?^inkspot(index,spot)$?
+inkwbspot	display.c	?^inkwbspot(index,spot)$?
+ioctl	pxdio.c	?^ioctl(dev, cmd, addr)$?
+irisinit	context.c	?^irisinit()$?
+isattrb	display.c	?^#define isattrb(a)	((((a) & 0xc0))==0xc0)$?
+istviprint	emulator.c	?^istviprint(c)$?
+kb	emulint.c	?^kb()$?
+kb_zero	emulint.c	?^kb_zero()$?
+lastone	bogus.c	?^lastone()$?
+localprim	pxdio.c	?^localprim()$?
+lockoutput	hostio3279.c	?^lockoutput(addr)$?
+message	pxdio.c	?^message( s )$?
+message1	pxdio.c	?^message1( s, v )$?
+messagef	pxdio.c	?^messagef( s, a,b,c,d,e,f,g,h,i,j )$?
+new_x_row	emulator.c	?^new_x_row(buf, i, j)$?
+normalize_kb	conio.c	?^normalize_kb() $?
+outbread	pxdio.c	?^outbread()$?
+pack_sn_bits	emulint.c	?^pack_sn_bits(c)$?
+printRbuf	pxdio.c	?^printRbuf(rdpp,count)$?
+print_dma	emulint.c	?^print_dma()$?
+printmenu	dbgmenu.c	?^printmenu()$?
+putscrchar	pxdio.c	?^putscrchar( onechar )$?
+pxdclose	pxdio.c	?^pxdclose()$?
+pxdioctl	pxdio.c	?^pxdioctl(dev, cmd, addr)$?
+pxdopen	pxdio.c	?^pxdopen()$?
+pxdread	pxdio.c	?^pxdread(dest, destsize)$?
+pxstat	pxdio.c	?^pxstat()$?
+qkeys	conio.c	?^qkeys()$?
+qoutb	dbgmenu.c	?^qoutb()$?
+readhost	term3279.c	?^readhost()$?
+readlen	pxdio.c	?^readlen()$?
+readpxd	pxdio.c	?^readpxd()$?
+rec6	irisio3279.c	?^rec6()$?
+rec8	irisio3279.c	?^#define rec8()		gethostchar()$?
+reca	irisio3279.c	?^char *reca()$?
+recb	irisio3279.c	?^recb()$?
+receivef	irisio3279.c	?^receivef(f, arg) $?
+recgcmd	irisio3279.c	?^recgcmd()$?
+recl	irisio3279.c	?^long recl()$?
+recs	irisio3279.c	?^recs()$?
+reload	functions.c	?^reload(wasread)$?
+repaint	display.c	?^repaint(row1, row2)$?
+repainter	pxdio.c	?^repainter()$?
+reread	pxdio.c	?^reread()$?
+restart_emulator	emulator.c	?^restart_emulator()$?
+ret_blkqread	ret.c	?^ret_blkqread( )$?
+ret_endfeedback	ret.c	?^int ret_endfeedback()$?
+ret_endpick	ret.c	?^int ret_endpick()$?
+ret_endselect	ret.c	?^int ret_endselect()$?
+ret_getmatrix	ret.c	?^ret_getmatrix( )$?
+ret_readRGB	ret.c	?^ret_readRGB( )$?
+ret_readpixels	ret.c	?^ret_readpixels( )$?
+rglmulator	functions.c	?^rglmulator(wasread)$?
+rowinc	display.c	?^#define	rowinc(a,b)	((a)+1 == (b) ? 1 : (a) + 1)$?
+rowisnull	display.c	?^rowisnull(cursor)$?
+sameattrb	display.c	?^#define sameattrb(a,b)	(!((a) & 0xec ^ (b) & 0xec)?
+send	pxdio.c	?^send(c)$?
+send6	irisio3279.c	?^#define send6(n)	puthostchar( ((n)&077) + ' ' )$?
+sendB	irisio3279.c	?^sendB( val )$?
+sendBs	irisio3279.c	?^sendBs(array, n)$?
+sendFs	irisio3279.c	?^sendFs(array, n)$?
+sendL	irisio3279.c	?^sendL( val )$?
+sendLs	irisio3279.c	?^sendLs(array, n)$?
+sendS	irisio3279.c	?^sendS( val )$?
+sendSs	irisio3279.c	?^sendSs(array, n)$?
+send_ack	emulint.c	?^send_ack()$?
+send_asc_str	functions.c	?^send_asc_str(str, len)$?
+send_binary_str	functions.c	?^send_binary_str(str, len)$?
+send_dly	pxdio.c	?^send_dly(c)$?
+send_ebx_str	functions.c	?^send_ebx_str(str, len)$?
+send_key	emulator.c	?^send_key(c)$?
+send_shift_alt	emulator.c	?^send_shift_alt(mode)$?
+send_str	functions.c	?^send_str(str, len)$?
+send_x_key	emulator.c	?^send_x_key(i)$?
+senda	irisio3279.c	?^senda( buffer, nlongs )$?
+sendbreakchar	hostio3279.c	?^sendbreakchar()$?
+senddata	irisio3279.c	?^senddata(f) $?
+sendkbdchar	hostio3279.c	?^sendkbdchar(c)$?
+set_color	conio.c	?^set_color(attrb)$?
+setkeypadmode	hostio3279.c	?^setkeypadmode( value )$?
+setlocalecho	hostio3279.c	?^setlocalecho( value )$?
+setserialmode	hostio3279.c	?^setserialmode( modcode, modarg )$?
+setspot	display.c	?^setspot(index,spot)$?
+show_cursor	conio.c	?^show_cursor(c)$?
+show_hex_screen	display.c	?^show_hex_screen()$?
+show_msg	emulator.c	?^show_msg()$?
+show_screen	display.c	?^show_screen()$?
+show_status	display.c	?^show_status()$?
+show_str	display.c	?^show_str(str)$?
+spclose	term3279.c	?^spclose()$?
+spl_feedback	ret.c	?^int spl_feedback()$?
+spl_pick	ret.c	?^int spl_pick()$?
+spl_select	ret.c	?^int spl_select()$?
+start_status	conio.c	?^start_status()$?
+stopnow	pxdio.c	?^stopnow()$?
+strnout	conio.c	?^strnout(s,len)$?
+strt_row	emulint.c	?^strt_row()$?
+switchtographics	context.c	?^switchtographics()$?
+switchtotext	context.c	?^switchtotext()$?
+tadelay	irisio3279.c	?^tadelay( d )$?
+text_close	textio.c	?^text_close( d )$?
+text_open	textio.c	?^text_open(name,mode)$?
+text_read	textio.c	?^text_read( d, buf, nbytes )$?
+text_write	textio.c	?^text_write( d, buf, nbytes )$?
+tr_conio	conio.c	?^tr_conio(flag)$?
+tr_dbgm	dbgmenu.c	?^tr_dbgm(flag)$?
+tr_disp	display.c	?^tr_disp(flag)$?
+tr_emul	emulint.c	?^tr_emul(flag)$?
+tr_emulator	emulator.c	?^tr_emulator(flag)$?
+tr_fnct	functions.c	?^tr_fnct(flag)$?
+tr_main	term3279.c	?^tr_main(flag)$?
+tr_pxdio	pxdio.c	?^tr_pxdio(flag)$?
+ttyclear	pxdio.c	?^ttyclear()$?
+ttygetline	getline.c	?^ttygetline(buf)$?
+ttyinit	pxdio.c	?^ttyinit()$?
+ttynewline	pxdio.c	?^ttynewline()$?
+turndelay	irisio3279.c	?^turndelay()$?
+unlockoutput	hostio3279.c	?^unlockoutput()$?
+unqkeys	conio.c	?^unqkeys()$?
+update3270	emulator.c	?^update3270()$?
+user_line	conio.c	?^user_line(flag)$?
+usrclose	emulator.c	?^usrclose()$?
+usropen	emulator.c	?^usropen()$?
+writehost	term3279.c	?^writehost()$?
+writepxd	pxdio.c	?^writepxd(fd,bufptr,count)$?
+xcharstr	special3279.c	?^void xcharstr(ptr)$?
+xexit	pxdio.c	?^xexit()$?
+xgexit	special3279.c	?^void xgexit()$?
+xginit	special3279.c	?^void xginit()$?
+xgreset	special3279.c	?^void xgreset()$?
+xlat_idx	emulator.c	?^xlat_idx(c, i)$?
+xsetfastcom	irisio3279.c	?^void xsetfastcom()$?
+xsetslowcom	irisio3279.c	?^void xsetslowcom()$?
+xy	conio.c	?^xy(r,c)$?
+zerodown	callfunc.c	?^zerodown( ptr, n )$?

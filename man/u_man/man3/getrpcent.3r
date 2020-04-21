@@ -1,0 +1,92 @@
+'\"macro stdmacro
+.TH GETRPCENT 3R
+.SH NAME
+getrpcent, getrpcbyname, getrpcbynumber, setrpcent, endrpcent \- get rpc entry
+.SH SYNOPSIS
+.nf
+.B #include <sun/netdb.h>
+.PP
+.B struct rpcent *getrpcent()
+.PP
+.B struct rpcent *getrpcbyname(name)
+.B char *name;
+.PP
+.B struct rpcent *getrpcbynumber(number)
+.B int number;
+.PP
+.B setrpcent(stayopen)
+.B int stayopen;
+.PP
+.B endrpcent()
+.fi
+.SH DESCRIPTION
+.IR Getrpcent ,
+.IR getrpcbyname ,
+and
+.I getrpcbynumber
+each return a pointer to an object with the
+following structure
+containing the broken-out
+fields of a line in the rpc program number data base,
+.IR /etc/rpc .
+.RS
+.PP
+.nf
+struct	rpcent {
+	char	*r_name;	/* name of server for this rpc program */
+	char	**r_aliases;	/* alias list */
+	long	r_number;	/* rpc program number */
+};
+.ad
+.fi
+.RE
+.PP
+The members of this structure are:
+.TP \w'r_aliases'u+2n
+r_name
+The name of the server for this rpc program.
+.TP \w'r_aliases'u+2n
+r_aliases
+A zero terminated list of alternate names for the rpc program.
+.TP \w'r_aliases'u+2n
+r_number
+The rpc program number for this service.
+.PP
+.I Getrpcent
+reads the next line of the file, opening the file if necessary.
+.PP
+.I Setrpcent
+opens and rewinds the file.  If the
+.I stayopen
+flag is non-zero,
+the net data base will not be closed after each call to 
+.I getrpcent
+(either directly, or indirectly through one of
+the other \*(lqgetrpc\*(rq calls).
+.PP
+.I Endrpcent
+closes the file.
+.PP
+.I Getrpcbyname
+and
+.I getrpcbynumber
+sequentially search from the beginning
+of the file until a matching
+rpc program name or
+program number is found,
+or until EOF is encountered.
+.SH FILES
+.nf
+/etc/rpc
+.fi
+.SH "SEE ALSO"
+rpc(4), rpcinfo(1M)
+.SH DIAGNOSTICS
+Null pointer
+(0) returned on EOF or error.
+.SH BUGS
+All information
+is contained in a static area
+so it must be copied if it is
+to be saved.
+

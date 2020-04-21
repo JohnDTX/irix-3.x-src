@@ -1,0 +1,95 @@
+#ident "$Header: /d2/3.7/src/include/make/RCS/commonrules,v 1.1 89/03/27 16:12:34 root Exp $"
+#
+# Common makefile rules.
+#
+# Notes:
+#	- After including ${ROOT}/usr/include/make/commondefs, a makefile may
+#	  say ``include ${COMMONRULES}'' to get this file.
+#	- It is up to the including makefile to define a default rule before
+#	  including ${COMMONRULES}.
+#	- This file defines the following lists: SOURCES, enumerating all
+#	  source files; OBJECTS, the .o files derived from compilable source;
+#	  and DIRT, which lists intermediates and temporary files to be
+#	  removed by clean.
+#	- The including (parent) makefile may define source file lists for each
+#	  standard suffix: CFILES for .c, ASFILES for .s (named after ASFLAGS),
+#	  YFILES for .y, etc.  This file combines all such lists into SOURCES.
+#	- The parent makefile must define TARGETS in order for clobber to work.
+#	- If the parent makefile must overload the common targets with special
+#	  rules (e.g. to perform recursive or subdirectory makes), then set
+#	  COMMONPREF to some unique prefix before including ${COMMONRULES},
+#	  and make sure that each common target depends on its prefixed name.
+#	  For example, a makefile which passes common targets and install on
+#	  to makes in subdirectories listed in DIRS might say
+#
+#		COMMONPREF= xxx
+#		include ${COMMONRULES}
+#
+#		${COMMONTARGS} install: ${COMMONPREF}$$@
+#			for d in ${DIRS}; do cd $$d; ${MAKE} $@; cd ..; done
+#
+#	  Thus, all of the common rules plus install are passed to sub-makes
+#	  *and* executed in the current makefile (as xxxclean, xxxclobber,
+#	  xxxinstall, etc).
+#
+SOURCES= ${ASFILES} ${CFILES} ${EFILES} ${FFILES} ${LFILES} ${PFILES} \
+	 ${RFILES} ${SHFILES} ${YFILES}
+
+OBJECTS= ${ASFILES:.s=.o} ${CFILES:.c=.o} ${EFILES:.e=.o} ${FFILES:.f=.o} \
+	 ${LFILES:.l=.o} ${PFILES:.p=.o} ${RFILES:.r=.o} ${YFILES:.y=.o}
+
+# perhaps these lists should go in commondefs?
+DEPFILES= ${ASFILES} ${CFILES} ${LFILES} ${YFILES}
+TAGFILES= ${CFILES} ${FFILES} ${HFILES} ${PFILES}
+
+# what gets cleaned, apart from objects
+DIRT= ${GDIRT} ${VDIRT} ${LDIRT}
+GDIRT= a.out core lex.yy.[co] y.tab.[co] .emacs_[0-9]* .[BC]* *.BAK *.CKP \
+	${_FORCE}
+
+#
+# An always-unsatisfied target.  The name is unlikely to occur in a file tree,
+# but if _force existed in a make's current directory, this target would be
+# always-satisfied and targets that depended on it would not be made.
+#
+_FORCE= ${COMMONPREF}_force
+${_FORCE}:
+
+#
+# Automated header dependency inference.
+# XXX collapse incremental case and make mkdepend really work
+#
+${COMMONPREF}depend: ${_FORCE}
+	${MKDEPEND} ${MKDEPFILE} ${DEPFILES}
+
+${COMMONPREF}incdepend: ${DEPFILES}
+	${MKDEPEND} -i ${MKDEPFILE} $?
+	touch $@
+
+#
+# Lint and C tags support.
+# XXX need a better tags
+#
+${COMMONPREF}fluff: ${_FORCE}
+	${LINT} ${LINTFLAGS} ${CDEFS} ${CINCS} ${CFILES} ${LDLIBS}
+
+${COMMONPREF}tags: ${_FORCE}
+	if test -n "${TAGFILES}"; then ${CTAGS} ${TAGFILES}; fi
+
+#
+# File removal rules: there are three.
+#	- clean removes intermediates and dirt
+#	- clobber removes targets as well as intermediates and dirt
+#	- rmtargets removes targets only
+# One might 'make clean' in a large tree to reclaim disk space after targets
+# are built, but before they are archived into distribution images on disk.
+# One might 'make rmtargets' to remove badly-linked executables, and then
+# run a 'make' to re-link the good objects.
+#
+${COMMONPREF}clobber: ${COMMONPREF}clean ${COMMONPREF}rmtargets
+
+${COMMONPREF}clean: ${_FORCE}
+	rm -f ${OBJECTS} ${DIRT}
+
+${COMMONPREF}rmtargets: ${_FORCE}
+	rm -f ${TARGETS}

@@ -1,0 +1,358 @@
+'\"macro stdmacro
+.TH MSGOP 2
+.SH NAME
+msgop: msgsnd, msgrcv \- message operations
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/ipc.h>
+.br
+.B #include <sys/msg.h>
+.PP
+.nf
+.B int msgsnd (msqid, msgp, msgsz, msgflg)
+.B int msqid;
+.B struct msgbuf \(**msgp;
+.B int msgsz, msgflg;
+.PP
+.B "int msgrcv (msqid, msgp, msgsz, msgtyp, msgflg)"
+.B int msqid;
+.B struct msgbuf \(**msgp;
+.B int msgsz;
+.B long msgtyp;
+.B int msgflg;
+.fi
+.SH DESCRIPTION
+Msgsnd is used to send a message to the queue associated with the message
+queue identifier specified by
+.IR msqid .
+.SM {WRITE}
+.I Msgp\^
+points to a structure containing the message.
+This structure is composed of the following members:
+.PP
+.RS
+.ta \w'long\ \ \ 'u +\w'mtext[];\ \ \ 'u
+.nf
+long	mtype;	/\(** message type \(**/
+char	mtext[];	/\(** message text \(**/
+.fi
+.RE
+.PP
+.I Mtype\^
+is a positive integer that can be used by the receiving process for
+message selection (see
+.I msgrcv\^ 
+below).
+.I Mtext\^
+is any text of length
+.I msgsz\^
+bytes.
+.I Msgsz\^
+can range from 0 to a system imposed maximum.
+.PP
+.I Msgflg\^
+specifies the action to be taken if one or more of the following are true:
+.RS .3i
+.PP
+The number of bytes already on the queue is equal to
+.BR msg_qbytes
+(see 
+.IR intro\^ (2)).
+.PP
+The total number of messages on all queues system wide is equal to the system
+imposed limit.
+.RE
+.PP
+These actions are as follows:
+.RS .3i
+.PP
+If
+.RI ( msgflg " & "
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true'', the message will not be sent and the calling process will
+return immediately.
+.PP
+If
+.RI ( msgflg " & "
+.SM
+.BR IPC_NOWAIT\*S )
+is ``false'',
+the calling process will suspend execution until one of the following occurs:
+.RS .3i
+.PP
+The condition responsible for the suspension no longer exists, in which case
+the message is sent.
+.PP
+.I Msqid\^
+is removed from the system (see
+.IR msgctl\^ (2)).
+When this occurs,
+.I errno\^
+is set equal to
+.SM
+\%EIDRM\*S,
+and a value of \-1 is returned.
+.PP
+The calling process receives a signal that is to be caught.
+In this case the message is not sent and the calling process resumes
+execution in the manner prescribed in
+.IR signal\^ (2)).
+.RE
+.RE
+.PP
+.I Msgsnd\^
+will fail and no message will be sent if one or more of the following are true:
+.RS .3i
+.PP
+.I Msqid\^
+is not a valid message queue identifier.
+.SM
+\%[EINVAL]
+.PP
+Operation permission is denied to the calling process (see
+.IR intro\^ (2)).
+.SM
+\%[EACCES]
+.PP
+.I Mtype\^
+is less than 1.
+.SM
+\%[EINVAL]
+.PP
+The message cannot be sent for one of the reasons cited above and
+.RI ( msgflg " & "
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true''.
+.SM
+\%[EAGAIN]
+.PP
+.I Msgsz\^
+is less than zero or greater than the system imposed limit.
+.SM
+\%[EINVAL]
+.PP
+.I Msgp\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.RE
+.PP
+Upon successful completion, the following actions are taken with respect to
+the data structure associated with
+.IR msqid\^
+(see 
+.IR intro\^ (2)).
+.RS .3i
+.PP
+.B Msg_qnum
+is incremented by 1.
+.PP
+.B Msg_lspid
+is set equal to the process
+.SM ID
+of the calling process.
+.PP
+.B Msg_stime
+is set equal to the current time.
+.RE
+.PP
+.I Msgrcv\^
+reads a message from the queue associated with the message queue identifier
+specified by
+.IR msqid\^
+and places it in the structure pointed to by
+.IR msgp .
+.SM {READ}
+This structure is composed of the following members:
+.PP
+.RS
+.ta \w'long\ \ \ 'u +\w'mtext[];\ \ \ 'u
+.nf
+long	mtype;	/\(** message type \(**/
+char	mtext[];	/\(** message text \(**/
+.fi
+.RE
+.PP
+.I Mtype\^
+is the received message's type as specified by the sending process.
+.I Mtext\^
+is the text of the message.
+.I Msgsz\^
+specifies the size in bytes of
+.IR mtext .
+The received message is truncated to
+.I msgsz\^
+bytes
+if it is larger than
+.I msgsz\^
+and
+.RI ( msgflg " &"
+.SM
+.BR MSG_NOERROR\*S )
+is ``true''.
+The truncated part of the message is lost and no indication of the truncation is
+given to the calling process.
+.PP
+.I Msgtyp\^
+specifies the type of message requested as follows:
+.RS .3i
+.PP
+If
+.I msgtyp\^
+is equal to 0, the first message on the queue is received.
+.PP
+If
+.I msgtyp\^
+is greater than 0, the first message of type
+.I msgtyp\^
+is received.
+.PP
+If
+.I msgtyp\^
+is less than 0,
+the first message of the lowest type that is less than or equal
+to the absolute value of
+.I msgtyp\^
+is received.
+.RE
+.PP
+.I Msgflg\^
+specifies the action to be taken if a message of the desired type
+is not on the queue.
+These are as follows:
+.RS .3i
+.PP
+If
+.RI ( msgflg " & "
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true'', the calling process will return immediately with a return value
+of \-1 and
+.I errno\^
+set to
+.SM
+ENOMSG\*S.
+.PP
+If 
+.RI ( msgflg " & "
+.SM
+.BR IPC_NOWAIT\*S )
+is ``false'', the calling process will suspend execution until one of the
+following occurs:
+.RS .3i
+.PP
+A message of the desired type is placed on the queue.
+.PP
+.I Msqid\^
+is removed from the system.
+When this occurs,
+.I errno\^
+is set equal to
+.SM
+\%EIDRM\*S,
+and a value of \-1 is returned.
+.PP
+The calling process receives a signal that is to be caught.
+In this case a message is not received and the calling process resumes
+execution in the manner prescribed in
+.IR signal\^ (2)).
+.RE
+.RE
+.PP
+.I Msgrcv\^
+will fail and no message will be received if one or more of the following are
+true:
+.RS .3i
+.PP
+.I Msqid\^
+is not a valid message queue identifier.
+.SM
+\%[EINVAL]
+.PP
+Operation permission is denied to the calling process.
+.SM
+\%[EACCES]
+.PP
+.I Msgsz\^
+is less than 0.
+.SM
+\%[EINVAL]
+.PP
+Mtext is greater than
+.I msgsz\^
+and
+.RI ( msgflg " &"
+.SM
+.BR MSG_NOERROR\*S )
+is ``false''.
+.SM
+\%[E2BIG]
+.PP
+The queue does not contain a message of the desired type and
+.RI ( msgtyp " & "
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true''.
+.SM
+\%[ENOMSG]
+.PP
+.I Msgp\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.RE
+.PP
+Upon successful completion, the following actions are taken with respect to
+the data structure associated with
+.IR msqid\^
+(see 
+.IR intro\^ (2)).
+.RS .3i
+.PP
+.B Msg_qnum
+is decremented by 1.
+.PP
+.B Msg_lrpid
+is set equal to the process
+.SM ID
+of the calling process.
+.PP
+.B Msg_rtime
+is set equal to the current time.
+.RE
+.SH RETURN VALUES
+.RI If " msgsnd " or " msgrcv"
+return due to the receipt of a signal, a value of \-1 is returned to the
+calling process and
+.I errno\^
+is set to
+.SM
+\%EINTR\*S.
+If they return due to removal of
+.I msqid\^
+from the system, a value of \-1 is returned and
+.I errno\^
+is set to
+.SM
+\%EIDRM\*S.
+.PP
+Upon successful completion, the return value is as follows:
+.PP
+.RS .3i
+.I Msgsnd\^
+returns a value of 0.
+.PP
+.I Msgrcv\^
+returns a value equal to the number of bytes actually placed into
+.IR mtext .
+.RE
+.PP
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+msgctl(2), msgget(2).
+.\"	@(#)msgop.2	5.1 of 11/1/83

@@ -1,0 +1,37 @@
+'\"#ident	"@(#)shells:nroff.letter	1.4"
+.in +0.5i
+October 14, 1984
+.sp 2
+.nf
+John Smith
+Business Computer Systems, Inc.
+190 River Boulevard
+Durham, NC 27707
+.sp 2 
+Dear Mr. Smith:
+.sp 2
+.fi
+I would like to be considered for the position of Document Production Coordinator
+with Business Computer Systems, Inc.
+I have a B.A. in English and have finished course work for a Masters in English.
+Currently, I am assisting Steve Foley, Production Editor with Techno-Publishing 
+in Jonesville.
+My duties consist of proofreading documents and coordinating graphics production.
+.sp
+While I enjoy my position here, I know I am ready for more challenging work and 
+greater responsibility.
+Our shop uses a computer running UNIX System V.  
+I am confident in my potential for growth with the Technical Writing Staff 
+at Business Computer Systems.
+I have enclosed my resume and two letters of recommendation.
+Please feel free to contact my present supervisor with any questions you may have.
+I am available for an interview at any time, and I look forward to hearing from you.
+.sp 2
+.nf
+Sincerely yours,
+.sp 5
+John Jones
+41 Stanford Drive
+Bridgewater, NJ 08807
+.sp 2
+Enclosures:  3

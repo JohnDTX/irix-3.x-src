@@ -1,0 +1,40 @@
+.TH gRGBcolor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gRGBcolor
+\- returns the current RGB value
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gRGBcolor(red, green, blue)"
+.B "short *red, *green, *blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gRGBco(red, green, blue)"
+.B "integer*2 red, green, blue"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gRGBcolor(var red, green, blue: Short);"
+.SH DESCRIPTION
+.B gRGBcolor
+returns the current RGB color values.
+\f2red\f1, \f2green\f1, \f2blue\f1 are the addresses of three locations
+that are filled with the red,
+green, and blue values.
+The system must be in RGB mode
+when 
+.B gRGBcolor
+executes.
+.SH "SEE ALSO"
+RGBcolor, RGBmode
+.sp
+.I Programming Guide,
+Section 6.3,  Colors and Writemasks 
+.SH NOTE
+This routine
+is available only in immediate mode.

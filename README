@@ -1,0 +1,39 @@
+ The following steps are necessary to do a full build of the IRIS 3.6 
+ release:
+	
+
+ Requirements:
+		
+		Target drive = /TARGET: at least 200 Mbytes Free Space 
+			      (110 Mbytes for objects and binaries)
+			      (110 Mbytes for cpio image files)
+
+		Bootable Image Build Drive = /BOOT:
+			     3Mb partition of target drive (or any drive)
+			     This drive must be a separate partition as it
+			     is mkfs'ed.
+
+			     (if this is not to be done then remove booti
+			      from Makefile)
+
+		Pascal and Fortan must both be install on your system
+
+	NFS Builds:
+
+		1) NFS Mount this directory ( /SOURCE) to the target machine
+		2) cd /TARGET and do:
+			
+			tlink /SOURCE /TARGET
+
+		   Then create a local copy of Makefile.DEMO that correctly
+		   identifies each of the following: SRCROOT, TOOLROOT, ROOT
+		   TROOT, DIST, and BOOT. Name this file Makefile. 
+
+		        cd /TARGET
+			make 
+
+
+		This will build the whole 3.6 release and generate a build
+		log in /TARGET/log called curlog. Examine the log for any
+		build errors.
+

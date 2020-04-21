@@ -1,0 +1,40 @@
+#Minute	Hour	Day	Month	Weekday	Command
+#
+# Support 'at' command
+0,10,20,30,40,50 * *	*	*	exec /usr/lib/atrun
+#
+# generate mail for 'calendar' command
+0	4	*	*	*	exec calendar -
+#
+# remove old trash
+0	5	*	*	*	find / -local -type f '(' -name core -o -name dead.letter ')' -atime +7 -mtime +7 -print -exec rm -f '{}' ';'
+# discard old man pages
+1	5	*	*	*	find /usr/man/*/cat? -local -type f -atime +7 -print -exec rm -f '{}' ';'
+# remove old sendmail mail files
+2	5	*	*	*	find /usr/spool/mqueue -local -type f -mtime +30 -print -exec rm -f '{}' ';'
+# remove old rwhod files
+2	5	*	*	*	find /usr/spool/rwho -local -type f -mtime +7 -print -exec rm -f '{}' ';'
+# remove old vi/ex 'preserved' files
+3	5	*	*	*	find /usr/preserve -local -type f -atime +30 -mtime +30 -print -exec rm -f '{}' ';'
+#
+1,16,31,46 *	*	*	*	exec /usr/lib/uucp/uucico -r1
+#
+# trim growing uucp files
+0	1	*	*	0	umask 033;cd /usr/spool/uucp;mv -f LOGFILE oLOGFILE; touch LOGFILE; chown uucpadm LOGFILE
+0	1	*	*	0	umask 033;cd /usr/spool/uucp;mv -f SYSLOG oSYSLOG; touch SYSLOG; chown uucpadm SYSLOG
+0	1	*	*	0	umask 033;cd /usr/spool/uucp;mv -f AUDIT oAUDIT; touch AUDIT; chown uucpadm AUDIT
+0	1	*	*	0	umask 033;cd /usr/spool/uucp;mv -f ERRLOG oERRLOG; touch ERRLOG; chown uucpadm ERRLOG
+#
+#12	4	*	*	*	sh /usr/spool/lp/etc/lib/log.rotate
+1	1	*	*	0	umask 033;cd /usr/adm;mv -f cronlog OLDcronlog;touch cronlog
+1	1	*	*	0	umask 033;cd /usr/adm;mv -f SYSLOG oSYSLOG;touch SYSLOG; kill -1 `cat /etc/syslog*.pid`
+1	1	*	*	0	umask 077;cd /usr/adm;mv -f sulog OLDsulog;touch sulog
+#
+2	1	*	*	0	umask 033;cd /etc;mv -f wtmp OLDwtmp;touch wtmp
+#
+# update YP data bases
+#15	*	*	*	*	/usr/etc/yp/ypxfr_1ph
+#17	9,15	*	*	*	/usr/etc/yp/ypxfr_2pd
+#19	9	*	*	*	/usr/etc/yp/ypxfr_1pd
+#
+##############################

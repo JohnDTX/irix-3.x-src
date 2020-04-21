@@ -1,0 +1,33 @@
+.TH istag 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I istag 
+- tell whether a given tag is in use within the currently open object
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean istag(t)"
+.B "Tag t;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function istag(t)"
+.B "integer t"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function istag(t: Tag): Boolean;"
+.sp
+.SH DESCRIPTION
+.I Istag
+returns 
+.I TRUE
+if \f3t\f1 is in use within the currently
+open object and
+.I FALSE
+if it is not
+in use.
+.SH "SEE ALSO"
+.I gentag, isobj
+.SH NOTE
+This command can only be used in immediate mode.

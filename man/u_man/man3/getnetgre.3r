@@ -1,0 +1,47 @@
+'\"macro stdmacro
+.TH GETNETGRENT 3R
+.SH NAME
+getnetgrent, setnetgrent, endnetgrent, innetgr \- get network group entry
+.SH SYNOPSIS
+.nf
+.B innetgr(netgroup, machine, user, domain)
+.B char *netgroup, *machine, *user, *domain;
+.PP
+.B setnetgrent(netgroup)
+.B char *netgroup;
+.PP
+.B endnetgrent()
+.PP
+.B getnetgrent(machinep, userp, domainp)
+.B char **machinep, **userp, **domainp;
+.fi
+.SH DESCRIPTION
+\f2Inngetgr\fP returns 1 or 0, depending on whether
+\f2netgroup\fP contains the machine, user, domain triple as a member.
+Any of the three strings machine, user, or domain can be NULL, in
+which case it signifies a wild card.
+.PP
+\f2Getnetgrent\fP
+returns the next member of a network group.  After the call,
+machinep will contain a pointer to a string containing the name
+of the machine part of the network group member, and similarly
+for userp and domainp.  If any of machinep, userp or domainp is 
+returned as a NULL pointer, it signifies a wild card. Getnetgrent will
+malloc space for the name.  This space is released when a endnetgrent
+call is made.
+Getnetgrent returns 1 if it succeeding in obtaining another
+member of the network group, 0 if it has reached the
+end of the group.
+.PP
+.I Setnetgrent
+establishes the network group from which getnetgrent will
+obtain members, and also restarts calls to getnetgrent
+from the beginning of the list.  If the previous setnetgrent
+call was to a different network group, a endnetgrent call is
+implied.
+.I Endnetgrent
+frees the space allocated during the getnetgrent calls.
+.SH FILES
+.nf
+/etc/netgroup
+.fi

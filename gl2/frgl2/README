@@ -1,0 +1,34 @@
+As of: Mon Apr  7 17:12:58 PST 1986
+This directory has been reworked to produce only lib.f
+for standard "make install" durring the release procces.
+
+The rest of this file is of historical interest only, next time I'm in
+here I will blow it away.
+;;peter
+
+~/host/f77
+
+This directory is set up for making the remote Fortran library and associated
+files.  It needs $IRIS/lib.prim (the same lib.prim used for c and local
+Fortran).  Everything else needed is here.  I just ran the Makefile, and it
+works on olympus with everything where it is.
+
+lib.f and fgl.h should be useable for any host, not just UNIX bsd4.2 on a VAX.
+io.f, with customization, should be similarly useful.  fsys.c, on the other
+hand, is likely to need a rewrite for each host the Fortran graphics library
+is ported to.
+
+'mandefs.fr' is a new innovation which as much as possible mimics the function
+call definitions in the gl2 manual.  It is very useful for checking the manual
+against to keep it correct and up to date, as it is automatically generated
+whenever a new graphics library is compiled.  I suggest regularly sending a
+copy to the documentation department.  'mandefs.cr' is available for c, too.
+
+As much as possible, intelligence was taken out of the awk script and put into
+lib.prim.  'trybad' is used to try frlibgen.awk with a lib.prim with many
+errors in it, thereby trying many of the error conditions and messages in the
+awk script.
+
+I don't know why defgen.awk, param.awk, or the generic directories are here.
+If they aren't needed, remove them.  Also, I didn't do any work with dliris,
+so I commented it out of the Makefile.

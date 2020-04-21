@@ -1,0 +1,61 @@
+.TH pclos 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pclos
+\- polygon close
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pclos()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pclos"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pclos;"
+.SH DESCRIPTION
+.B pclos
+closes a filled polygon.
+It terminates a sequence of
+.B pmv
+and
+\f3pdr\f1,
+or
+.B rpmv
+and
+.BR rpdr .
+The polygon so defined is filled using the current pattern, color,
+and writemask.
+For example, the following sequence draws a square:
+.sp
+.nf
+.in +0.5
+.ft 7
+.ps -2
+pmv(0.0, 0.0, 0.0);
+pdr(1.0, 0.0, 0.0);
+pdr(1.0, 1.0, 0.0);
+pdr(0.0, 1.0, 0.0);
+pclos();\f1
+.ps
+.ft 1
+.fi
+.sp
+.in -0.5
+.PP
+All polygons must be convex.
+.PP
+Be careful not to confuse 
+.B plcos
+with the UNIX system call \f2pclose\fP, which
+closes a UNIX pipe.
+.SH "SEE ALSO"
+pdr, pmv, rpdr, rpmv
+.sp
+.I Programming Guide,
+Section 3.6, Polygons

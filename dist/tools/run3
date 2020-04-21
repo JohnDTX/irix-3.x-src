@@ -1,0 +1,3 @@
+#! /bin/sh
+
+./newboot -m juniper -e /d1/images -r /d0/d/d/dest.3000 ../lists.3000/boot

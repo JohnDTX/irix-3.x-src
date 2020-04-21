@@ -1,0 +1,96 @@
+'\"macro stdmacro
+.TH IBTAB 4
+.SH NAME
+ibtab \- format of ibtab file
+.SH SYNOPSIS
+.B /etc/ibtab
+.SH DESCRIPTION
+The ibtab file is an unordered collection of entries,
+each of which describes one IEEE 488 bus node.
+Its format is understood by the
+\f2ibtab\f1(3N)
+subroutine package,
+which is used by programs such as
+\f2iib\f1(1M).
+The format and the package are loosely
+patterned after
+\f2getpw\f1(3C)
+and
+\f2passwd\f1(4).
+Each entry consists of a line with colon-separated fields.
+Numeric items are interpreted according to the usual C rules:
+leading 0x implies hex, leading 0 implies octal,
+default decimal.
+.PP
+FIELDS
+.br
+.IP File
+.br
+the device file used to access the node.
+.IP Cfile
+.br
+the device file used to control (ioctl) the node, 
+either \f2/dev/lib0\f1 or \f2/dev/ib8\f1.
+.IP Node
+.br
+driver node number. In most cases, this field should
+be the low order 3 bits of the minor device number
+(which is the digit in the device filename.) The controller's
+node number must be 0. Note that this is not the same
+thing as the node's 488 address.  See \f2ib\f1(7) for 
+further details.
+.IP Flags
+.br
+flags pertaining to the node,
+as defined in
+the include file
+.IR <sys/ib_ioctl.h> .
+This field may be numeric or symbolic,
+with symbols separated by the '|' character or white space.
+Possible flags are:
+SWAB,
+if the node does byte-reversed IEEE 488 bus i/o;
+VALID,
+if the node is for real;
+SRQ,
+if the node can assert SRQ;
+PPE,
+if the node can respond to parallel polls;
+PPC,
+if the node can be remotely configured for parallel polls;
+SC,
+if the node is system controller.
+.IP Tag
+.br
+the IEEE 488 bus address of the node.
+.IP Ppr
+.br
+the parallel poll response.
+The low-order 3 bits specify which line the node uses
+for parallel poll responses.
+This field is significant only if
+the
+PPC or PPE flags are present.
+.IP Comment
+ignored.
+.PP
+Lines beginning with the '#' character are ignored.
+.PP
+There must be entries for each node on the bus,
+including two IRIS.
+.SH EXAMPLE
+.nf
+# sample entry
+# node 1, /dev/ib1
+# controlled by /dev/ib0
+# byte-reversed, can srq and ppoll
+# gpib address 19
+# ppoll line 3
+/dev/ib1:/dev/ib0:1:VALID|SWAB|SRQ|PPE:19:03:board 0 node 1
+.fi
+.SH FILES
+/etc/ibtab
+.SH "SEE ALSO"
+ib(7),
+ibtab(3N)
+iib(1M)

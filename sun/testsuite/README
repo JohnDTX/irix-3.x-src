@@ -1,0 +1,60 @@
+These are the nfs test programs.  The directory basic contains the basic
+tests of NFS operations.  General contains some random general filesystem
+tests, and special contains tests that poke certain common problem areas.
+'Testitems' is a list of NFS funtionality for reference. 'runtests',
+'runbasic' and 'server' are shell scripts to run the tests.
+
+When running any of the tests, you will want to save stdout and stderr
+output in a file for future reference.
+
+The basic tests should be passed completely before other tests are
+attempted.  The basic test programs are all written so that a "-h"
+option will make them print a usage line, a "-t" option will print a
+running time for the test, and a "-f" option will set parameters for a
+quick functional test.  With no option flag, the tests run like "-t",
+but with no timing.  The runtests script in the basic directory is set
+up to call each test with the argument that it is called with.
+runtests in this directory calls basic/runtests with the -t argument.
+You will probably want to run 'runbasic' before 'runtests' as this uses
+the -f option.  [Note that not all os's support symlink and readlink.
+If the errno EOPNOTSUPP is returned during test8, the test will be
+counted as passing.  For clients not supporting S_IFLNK, the test will
+not be attempted.]
+
+In the basic directory, the tests are set up to run in directory
+'/client/testmount/nfstestdir'.  The intent is to mount the server
+under test on /client/testmount.  This can be changed at compile time
+if desired by changing the TESTDIR define in tests.h and defs.csh to
+some other directory.  The tests also believe the environment variable
+NFSTESTDIR if it is set.  [runtests sets the environment.]
+
+Note that basic test test2 is a csh script.  You may need to check this
+or convert it to a Bourne shell script if necessary.
+
+
+To run the whole series of tests type "runtests" in this directory.
+("runbasic" can be used first to check basic test functionality; it
+behaves similarly to "runtests.")  To run one of the sets of tests, cd
+to the basic, general, or special directory and run "runtests".   The
+master 'runtests' in this directory is set up to use the NFSTESTDIR
+environment variable.  It defaults to /client/testmount/nfstestdir, but
+can be overridden with a command line argument.  Runtests will cause
+the basic tests to be run in place with the test directory NFSTESTDIR
+used.  The general and special tests will then be copied over to the
+test directory and executed there.
+
+Two special targets are included in the makefiles: copy and dist.
+Copy will cause the compiled tests to be copied to the DESTDIR.
+Dist will copy the test sources to DESTDIR.  DESTDIR must be specified
+on the make command line when making either of these targets.
+
+To build the test programs for your machine just type "make" in this directory.
+Please report any portability problems to Mark Stein at Sun Microsystems
+(sun!mstein or mstein@sun.com).  Please include any fixes you make.
+
+Programs in 'tools' are provided for your use as you see fit.  Please
+feel free to add to this (or any other) directory!  If you do, please
+make sure that Mark Stein at Sun gets a copy so we can add it to the
+master test distribution.
+
+Still to come are yellow pages tests.

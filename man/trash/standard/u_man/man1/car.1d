@@ -1,0 +1,44 @@
+'\" t
+.TH CAR 1D
+.SH NAME
+car \- display of car body in wireframe & surface form
+.SH SYNOPSIS
+.B /usr/people/demos/car
+.SH DESCRIPTION
+.PP
+A car body is viewed in wireframe form. Once the car is positioned,
+the surface patches are filled in to give a rendered image of the car.
+.sp .5v
+.TS
+doublebox center;
+cB s
+lI | lI
+l | l.
+Commands
+_
+Mouse button	Function
+=
+Left	Mouse x-motion controls view azimuth,
+	Mouse y-motion controls view elevation
+Left & middle 	Mouse x-motion controls view distance
+Middle & right	Toggle between wireframe & rendered images
+.sp .1v
+.TE
+.PP
+The appropriate viewing action taken as a result of mouse button
+control is briefly flashed in the
+lower left and lower right hand corners of the screen.
+.SH "HARDWARE REQUIREMENTS"
+.I Car\^
+requires 12 bitplanes.
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/car.1d,v 1.1 89/03/27 16:41:09 root Exp $
+.\" $Log:	car.1d,v $
+Revision 1.1  89/03/27  16:41:09  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  84/12/13  17:05:49  bob
+.\" Adjusted tables to properly space for descenders.
+.\" 
+.\" Revision 1.1  84/12/11  13:35:02  bob
+.\" Initial revision
+.\" 

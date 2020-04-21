@@ -1,0 +1,9 @@
+cc -S -O -DMC68000 -DPM2 -DQPROM -I../include numargs.c 
+mv numargs.s temp
+sed 's/\.text/.data/' <temp > numargs.s
+cc -c numargs.s
+rm -f numargs.s temp
+mv numargs.o numargs.do
+ar r ../libpm2prom.a Launch.do  appendstr.do  argcnt.do  awful.do  beep.do  drboot.do  dummy.do  getnline.do  getstr.do  gmalloc.do  illegal.do  isnum.do  joinspec.do  memread.do  memwrite.do  newline.do  numargs.do  panic.do  prf.do  readargs.do  sbrk.do  splitspec.do  spystr.do  strlcpy.do  warmboot.do  wdumpmem.do
+:
+:

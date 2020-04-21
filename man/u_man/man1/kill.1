@@ -1,0 +1,47 @@
+'\"macro stdmacro
+.TH KILL 1
+.SH NAME
+kill \- terminate a process
+.SH SYNOPSIS
+.B kill
+[
+.BR \- signo
+]
+\s-1PID\s+1 ...
+.SH DESCRIPTION
+.I Kill\^
+sends signal 15 (terminate) to the specified processes.
+This will normally kill processes that do not catch or ignore the signal.
+The process number of each asynchronous process
+started with \f3&\fP is reported by the Shell
+(unless more than one process is started in a pipeline,
+in which case the number of the last process in
+the pipeline is reported).
+Process numbers can also be found by using
+.IR ps\^ (1).
+.PP
+The details of the kill are described in
+.IR  kill\^ (2).
+For example, if process number 0 is specified, all processes
+in the process group are signaled.
+.PP
+The killed process must belong
+to the current user unless
+he is the super-user.
+.PP
+If a signal number preceded by \f3\-\fP is given
+as first argument, that signal is sent instead of
+terminate
+(see
+.IR signal\^ (2)).
+In particular "kill \-9 .\|.\|." is a sure kill.
+.SH EXAMPLE
+.IP
+kill 24068
+.PP
+stops the process with the 
+.SM ID 
+number 24068.
+.SH "SEE ALSO"
+ps(1), sh(1), kill(2), signal(2).
+.\"	@(#)kill.1	5.1 of 11/8/83

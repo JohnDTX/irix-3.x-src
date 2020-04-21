@@ -1,0 +1,32 @@
+.TH charstr 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I charstr
+- draw a string of raster characters on the screen
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "charstr(str) "
+.B "String str;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine charst(str)"
+.B "character*(*) str"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure charstr(str: String);"
+.sp
+.SH DESCRIPTION
+\f2Charstr\f1 draws a string of text using a raster font.  
+The origin of the first character
+in the string will be placed at the current character position.  
+After each character is drawn, the current character position is 
+updated by the character's spacing parameter.
+The text string
+is drawn in the currently selected raster font and color, using the
+current writemask.  Characters that are not
+defined in the current raster font are ignored.
+.SH "SEE ALSO"
+.I cmov, defrasterfont, font

@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH DEVPORT 1G
+.UC
+.SH NAME
+devport \- assign a serial port to an external graphics device
+.SH SYNOPSIS
+.B devport 
+[
+.B \-t
+portno ] [
+.B \-d
+portno ]
+.SH DESCRIPTION
+The serial ports on the back panel of the IRIS are called 0 through 3.
+Port 0 is used to connect the keyboard to the IRIS system. The remaining
+ports may be used to connect additional terminals to the IRIS, or to
+connect graphics peripherals such as a dial and button box, or 
+a digitizing tablet.  The system software initially assumes that 
+a dial box or a tablet will be connected to port number 3. However, if
+both a dial box and a tablet are to be used with the IRIS, the system
+must be told the port that is being used for each device. 
+The program \f2devport\f1 
+allows external graphics peripherals like the dial box and the digitizing 
+tablet to be assigned to specific serial ports on the back of the IRIS.
+Following the 
+.B \-t 
+option with a port number between 1 and 3 assigns the port
+for the digitizing tablet.
+Following the 
+.B \-d 
+option with a port number between 1 and 3 assigns the port
+for the dial box.
+This command can be installed in \f2/etc/rc.local\f1
+so it happens on system
+start-up.
+.SH "NOTE"
+This program should be used before the devices are accessed for the first
+time.
+.SH "SEE ALSO"
+devport(3G)

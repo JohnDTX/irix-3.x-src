@@ -1,0 +1,28 @@
+'\"macro stdmacro
+.TH CSHRC 4
+.SH NAME
+cshrc \- csh system-wide .login file
+.SH SYNOPSIS
+.B /etc/cshrc
+.SH DESCRIPTION
+The file
+.B /etc/cshrc
+contains a list of commands to be invoked when someone logs into the system
+with
+.I csh
+as their login shell.
+These commands are in addition to those in the
+.B .cshrc
+and
+.B .login
+files in their home directory.
+.SH FILES
+/etc/cshrc
+.SH SEE ALSO
+csh(1).
+.SH BUGS
+It should be called
+.B login
+or
+.B .login
+but these are inappropriate.

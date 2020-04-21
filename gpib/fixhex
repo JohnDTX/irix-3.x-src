@@ -1,0 +1,13 @@
+#! /bin/sh
+file=$1
+set `strings -o $1 | grep '0123456789abcdef'`
+if [ $# -ne 2 ]
+then
+    echo error - $*
+    exit 1
+fi
+doff=`expr $1 + 10`
+(echo '?m 0 0x40000000 0';\
+	echo '$d';\
+	echo $doff'?w' "'AB' 'CD' 'EF'")\
+	| adb -w $file -

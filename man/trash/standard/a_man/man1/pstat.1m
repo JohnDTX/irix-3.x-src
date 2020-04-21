@@ -1,0 +1,336 @@
+.TH PSTAT 1M
+.SH NAME
+pstat \- print system facts
+.SH SYNOPSIS
+.B pstat
+[
+.B \-aixptuf
+] [ suboptions ]
+[ file ]
+.SH DESCRIPTION
+.I Pstat
+interprets the contents of certain system tables.
+If
+.I file
+is given, the tables are sought there, otherwise in
+.B /dev/mem.
+The required namelist is taken from
+.B /unix.
+Options are:
+.IP "\f3-a\fP" .3i
+Under
+.BR \-p ,
+describe all process slots rather than just active ones.
+.IP "\f3-i\fP" .3i
+Print the inode table with these headings:
+.PD 0
+.RS .3i
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM
+LOC
+The core location of this table entry.
+.TP 
+.SM
+FLAGS
+Miscellaneous state variables encoded thus:
+.RS .3i
+.IP "\s-1L\s+1" .3i
+locked
+.IP \s-1U\s+1
+update time
+.IR fs (4)
+must be corrected
+.IP \s-1A\s+1
+access time must be corrected
+.IP \s-1M\s+1
+file system is mounted here
+.IP \s-1W\s+1
+wanted by another process (\s-1L\s+1 flag is on)
+.IP \s-1T\s+1
+contains a text file
+.IP \s-1C\s+1
+changed time must be corrected
+.RE
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM
+CNT
+Number of open file table entries for this inode.
+.TP 
+.SM
+DEV
+Major and minor device number of file system in which this inode resides.
+.TP
+.SM
+INO
+I-number within the device.
+.TP
+.SM
+MODE
+Mode bits, see
+.IR chmod (2).
+.TP
+.SM
+NLK
+Number of links to this inode.
+.TP
+.SM
+UID
+User 
+.SM ID
+of owner.
+.TP
+.SM
+SIZ/DEV
+Number of bytes in an ordinary file, or major and minor device of special file.
+.RE
+.PD
+.IP "\f3-x\fP" .3i
+Print the text table with these headings:
+.PD 0
+.RS .3i
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM LOC
+The core location of this table entry.
+.TP 
+.SM FLAGS
+Miscellaneous state variables encoded thus:
+.RS .3i
+.IP "\s-1T\s+1" .3i
+.IR ptrace (2)
+in effect
+.IP \s-1W\s+1
+text not yet written on swap device
+.IP \s-1L\s+1
+loading in progress
+.IP \s-1K\s+1
+locked
+.IP w
+wanted (L flag is on)
+.RE
+.TP 
+.SM DADDR
+Disk address in swap, measured in multiples of 512 bytes.
+.TP 
+.SM CADDR
+Core address, measured in multiples of core clicks (machine dependent).
+.TP
+.SM SIZE
+Size of text segment, measured in multiples of core clicks (machine dependent).
+.TP
+.SM IPTR
+Core location of corresponding inode.
+.TP
+.SM CNT
+Number of processes using this text segment.
+.TP
+.SM CCNT
+Number of processes in core using this text segment.
+.PD
+.RE
+.bp
+.IP "\f3-p\fP" .3i
+Print process table for active processes with these headings:
+.PD 0
+.RS .3i
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM LOC
+The core location of this table entry.
+.TP
+.SM S
+Run state encoded thus:
+.RS .3i
+.IP "0" .3i
+no process
+.IP 1
+waiting for some event
+.IP 3
+runnable
+.IP 4
+being created
+.IP 5
+being terminated
+.IP 6
+stopped under trace
+.RE
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM F
+Miscellaneous state variables, or-ed together:
+.RS .3i
+.IP "01" .5i
+loaded
+.IP 02
+the scheduler process
+.IP 04
+locked
+.IP 010
+swapped out
+.IP 020
+traced
+.IP 040
+used in tracing
+.RE
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM PRI
+Scheduling priority, see
+.IR nice (2).
+.TP
+.SM SIGNAL
+Signals received (signals 1-16 coded in bits 0-15),
+.TP
+.SM UID
+Real user 
+.SM ID.
+.TP
+.SM TIM
+Time resident in seconds; times over 127 coded as 127.
+.TP
+.SM CPU
+Weighted integral of CPU time, for scheduler.
+.TP
+.SM NI
+Nice level, see
+.IR nice (2).
+.TP
+.SM PGRP
+Process number of root of process group (the opener of the controlling
+terminal).
+.TP
+.SM PID
+The process 
+.SM ID
+number.
+.TP
+.SM PPID
+The process 
+.SM ID
+of parent process.
+.TP
+.SM ADDR
+If in core, the physical address of the "u-area" of the process measured in
+multiples of 64 bytes.
+If swapped out, the position in the swap area measured in multiples of 512
+bytes.
+.TP
+.SM SIZE
+Size of process image in multiples of 64 bytes.
+.TP
+.SM WCHAN
+Wait channel number of a waiting process.
+.TP
+.SM LINK
+Link pointer in list of runnable processes.
+.TP
+.SM TEXTP
+If text is pure, pointer to location of text table entry.
+.TP
+.SM CLKT
+Countdown for
+.IR alarm (2)
+measured in seconds.
+.RE
+.PD
+.IP "\f3-t\fP" .3i
+Print table for terminals 
+(only \s-1DH\s+111 and \s-1DL\s+111 handled) with these headings:
+.PD 0
+.RS .3i
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM RAW
+Number of characters in raw input queue.
+.TP
+.SM CAN
+Number of characters in canonicalized input queue.
+.TP
+.SM OUT
+Number of characters in output queue.
+.TP
+.SM MODE
+See
+.IR termio (7).
+.TP
+.SM ADDR
+Physical device address.
+.TP
+.SM DEL
+Number of delimiters (newlines) in canonicalized input queue.
+.TP
+.SM COL
+Calculated column position of terminal.
+.TP
+.bp
+.SM STATE
+Miscellaneous state variables encoded thus:
+.RS .3i
+.IP "\s-1W\s+1" .3i
+waiting for open to complete
+.IP \s-1O\s+1
+open
+.IP \s-1S\s+1
+has special (output) start routine
+.IP \s-1C\s+1
+carrier is on
+.IP \s-1B\s+1
+busy doing output
+.IP \s-1A\s+1
+process is awaiting output
+.IP \s-1X\s+1
+open for exclusive use
+.IP \s-1H\s+1
+hangup on close
+.RE
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM PGRP
+Process group for which this is controlling terminal.
+.RE
+.PD
+.IP "\f3-u\fP" .3i
+print information about a user process; the next argument is its address as
+given by
+.IR ps (1).
+The process must be in main memory, or the file used can be a core image and
+the address 0.
+.IP "\f3-f\fP" .3i
+Print the open file table with these headings:
+.PD 0
+.RS .3i
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM LOC
+The core location of this table entry.
+.TP
+.SM FLG
+Miscellaneous state variables encoded thus:
+.RS .3i
+.IP "\s-1R\s+1" .3i
+open for reading
+.IP \s-1W\s+1
+open for writing
+.IP \s-1P\s+1
+pipe
+.RE
+.TP \w'\s-1SIZ/DEV\s+1\ \ 'u
+.SM CNT
+Number of processes that know this open file.
+.TP
+.SM INO
+The location of the inode table entry for this file.
+.TP
+.SM OFFS
+The file offset, see
+.IR lseek (2).
+.PD
+.SH FILES
+.ta \w'/dev/mem\ \ 'u
+/unix	namelist
+.br
+/dev/mem	default source of tables
+.SH EXAMPLE
+.IP
+pstat -i 
+.PP
+displays all the active inodes in a table format with headings.
+.SH SEE ALSO
+ps(1), stat(2), fs(4)
+.br
+.I UNIX Implementation,
+by K. Thompson.
+.\"	@(#)pstat.1m	5.1 of 10/22/83

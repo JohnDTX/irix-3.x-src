@@ -1,0 +1,58 @@
+'\"macro stdmacro
+.TH GREEK 5
+.SH NAME
+greek \- graphics for the extended \s-1TTY\s+1-37 type-box
+.SH SYNOPSIS
+.B cat /usr/pub/greek
+[ \(bv
+.BR "greek \-T" terminal
+]
+.SH DESCRIPTION
+.I Greek\^
+gives the mapping
+from
+.SM ASCII
+to the ``shift-out'' graphics in effect between
+.SM
+.B SO
+and
+.SM
+.B SI
+on
+.SM TELETYPE\*S\*R
+Model 37 terminals equipped
+with a 128-character type-box.
+These are the default greek characters produced by
+.IR nroff .
+The filters of
+.IR greek (1)
+attempt to print them on various other terminals.
+The file contains:
+.PP
+.RS 3
+.nf
+.if n .ta 10 +3 +6 +10 +3 +6 +10 +3
+.if t .ta 6m +2m +4m +5m +2m +4m +5m +2m
+alpha	\(*a	A	beta	\(*b	B	gamma	\(*g	\e
+GAMMA	\(*G	G	delta	\(*d	D	DELTA	\(*D	W
+epsilon	\(*e	S	zeta	\(*z	Q	eta	\(*y	N
+THETA	\(*H	T	theta	\(*h	O	lambda	\(*l	L
+LAMBDA	\(*L	E	mu	\(*m	M	nu	\(*n	@
+xi	\(*c	X	pi	\(*p	J	PI	\(*P	P
+rho	\(*r	K	sigma	\(*s	Y	SIGMA	\(*S	R
+tau	\(*t	I	phi	\(*f	U	PHI	\(*F	F
+psi	\(*q	V	PSI	\(*Q	H	omega	\(*w	C
+OMEGA	\(*W	Z	nabla	\(gr	[	not	\(no	_
+partial	\(pd	]	integral	\(is	^
+.fi
+.RE
+.SH FILES
+/usr/pub/greek
+.SH SEE ALSO
+300(1),
+4014(1),
+450(1),
+greek(1),
+tc(1),
+nroff(1).
+.\"	@(#)greek.5	5.1 of 10/15/83

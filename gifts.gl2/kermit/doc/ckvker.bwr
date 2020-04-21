@@ -1,0 +1,43 @@
+List of known bugs or problems with C-Kermit under VAX/VMS:
+
+Version: 4D(0060)
+As of:   11:20am  Tuesday, 6 May 1986
+
+See CKUKER.BWR which lists problems with Unix Kermit.  Many of these
+problems may also apply to VMS C-Kermit.  This file lists only those that
+are unique to VMS C-Kermit.
+
+- The fact that VMS C-Kermit is built with CKU* files as well as CKC* and
+  CKV* files is confusing.  Well...  It's that way because VAX-11 C does
+  its best to provide a Unix programming environment -- to the extent it
+  succeeds, VMX C-Kermit can use certain Unix-specific modules.
+
+- VMS C-Kermit, unlike Bliss Kermit, is NOT interruptible,
+  either with ^C or ^Y.  The latter can be interrupted by two (?) ^Ys.
+  This is a serious shortcoming.  (There is code whose intention is
+  make the program interruptible, but it apparently does not work.)
+
+- VMS C-Kermit is less efficient than Bliss Kermit, and may require
+  the use of lower baud rates when sending TO it.
+
+- If using LAT (Local Area Transport) terminal connections, you may
+  need to use a lower baud rate when transferring from your "terminal"
+  to the host, or a smaller send-packet length.  Some LAT software doesn't
+  expect "fast typing" from the terminal direction (applies mainly to
+  old F11-based LAT boxes; newer DECserver-100s work fine with Kermit).
+
+- VMS VAX-11 C V2 allows DEFINEs by a command line qualifer, and CKVKER.COM
+  makes use of this to include debugging and transaction logging code if
+  it believes that VAX-C V2 is being used.  VAX-C V1 had no such feature.
+  If you want the DEBUG and TLOG symbols defined for use with VAX-C V1,
+  modify the CKCDEB.H file.
+
+- The local "directory" command defaults to * rather than *.*.
+
+- Execution of local commands (C-Kermit>! <command>): 
+
+The problem with "! XXX" in VMS is related to the BYTLM in user authorization
+file, as we discovered soon after we installed C-kermit on our system.   For
+VMS to create a subprocess, the BYTLM must exceed 4096 (which is our previous
+setting), and of course, PRCLM must be at least 1.  I don't know the exact
+minimum for BYTLM, but after we set it to 6144, it worked.

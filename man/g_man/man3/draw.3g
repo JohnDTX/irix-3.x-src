@@ -1,0 +1,83 @@
+.TH draw 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B draw
+\- draws a line 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "draw(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "drawi(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "draws(x, y, z)"
+.B "Scoord x, y, z;"
+.IP
+.B "draw2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "draw2i(x, y) "
+.B "Icoord x, y;"
+.IP
+.B "draw2s(x, y)"
+.B "Scoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine draw(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine drawi(x, y, z)"
+.B "integer*4 x, y, z"
+.IP 
+.B "subroutine draws(x, y, z)"
+.B "integer*2 x, y, z"
+.IP
+.B "subroutine draw2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine draw2i(x, y)"
+.B "integer*4 x, y"
+.IP
+.B "subroutine draw2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.ne 15
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure draw(x, y, x: Coord);"
+.IP
+.B "procedure drawi(x, y, z: Icoord);:
+.IP
+.B "procedure draws(x, y, z: Scoord);"
+.IP
+.B "procedure draw2(x, y: Coord);"
+.IP
+.B "procedure draw2i(x, y: Icoord);"
+.IP
+.B "procedure draw2s(x, y: Scoord);"
+.SH DESCRIPTION
+.B draw
+connects the
+point \f2x\f1, \f2y\f1, \f2z\f1 
+and the current graphics position with a line segment.
+It uses the current linestyle, linewidth, color (if in depth- cue mode,
+the depth-cued color is used), and writemask.
+.PP
+\f3draw\f1 updates the current graphics position to the specified
+point.
+.PP
+Do not place routines
+that invalidate the current graphics
+position within sequences of 
+moves and draws.
+.SH "SEE ALSO"
+pnt, rdr, rmv, move
+.sp
+.I Programming Guide,
+Section 3.4, Lines

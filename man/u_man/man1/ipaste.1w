@@ -1,0 +1,19 @@
+'\"macro stdmacro
+.TH IPASTE 1W
+.SH NAME
+ipaste \- display an image file on the screen 
+.SH SYNOPSIS
+.B ipaste 
+imagefile
+.SH DESCRIPTION
+.I ipaste 
+displays the specified 
+.I imagefile 
+on the screen.  The input image
+may be a black and white image, a dithered image, or a screen image.
+.I ipaste 
+uses the type field in the header of the image file to display 
+the image in the correct part of the color map. 
+See \f2/usr/people/gifts/mextools/images\f1 for example image files.
+.SH SEE ALSO
+iset(1W), makemap(1W)

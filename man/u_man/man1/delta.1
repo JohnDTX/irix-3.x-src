@@ -1,0 +1,330 @@
+'\"macro stdmacro
+.tr ~
+.ds P UNIX
+.nr f 0
+.bd S B 3
+.de SP
+.if n .ul
+\%[\f3\-\\$1\f1\\c
+.if n .ul 0
+\\$2\\$3
+..
+.de SF
+.if n .ul
+\%[\f3\-\\$1\f1]
+.if n .ul 0
+..
+.de AR
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS .3i
+.TP 15
+\f3\-\\$1\\f1
+\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.de C1
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS .3i
+.TP 15
+\\$1
+\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.de A1
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS .3i
+.TP 15
+\f3\-\\$1\f1[\f2\\$2\f1]
+\\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.de A2
+.if \\nf \{ \
+.    RE
+.    nr f 0 \}
+.PP
+.RS .3i
+.TP 15
+\f3\-\\$1\f2\\$2\f1
+\\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.nr f 1
+..
+.ds W)  \f2\s-1WARNINGS\s+1\f1
+.ds M)  \f3\s-1MR\s+1\f1
+.ds S)  \s-1SCCS\s+1
+.ds I)  \s-1SID\s+1
+.TH DELTA 1
+.SH NAME
+delta \- make a delta (change) to an \s-1SCCS\s+1 file
+.SH SYNOPSIS
+.B delta
+.SP r SID ]
+.SF s
+.SF n
+.SP g list]
+.SP m \%[mrlist] ]
+.SP y \%[comment] ]
+.SF p
+files
+.SH DESCRIPTION
+.I Delta\^
+is used to permanently introduce into
+the named \*(S) file changes that were made to the file retrieved by
+.IR get\^ (1)
+(called the
+.IR g-file ,
+or generated file).
+.PP
+.I Delta\^
+makes a delta to each named \*(S) file.
+If a directory is named,
+.I delta\^
+behaves as though each file in the directory were
+specified as a named file,
+except that non-\*(S) files
+(last component of the path name does not begin with \f3s.\f1)
+and unreadable files
+are silently ignored.
+If a name of \f3\-\f1 is given, the standard input is read
+(see \*(W));
+each line of the standard input is taken to be the name of an \*(S) file
+to be processed.
+.PP
+.I Delta\^
+may issue prompts on the standard output depending upon
+certain keyletters specified and flags
+(see
+.IR admin\^ (1))
+that may be
+present in the \*(S) file
+(see
+.B \-m
+and
+.B \-y
+keyletters below).
+.PP
+Keyletter arguments
+apply independently
+to each named file.
+.A2 r SID Uniquely
+identifies which delta is to be made to the \*(S) file.
+The use of this keyletter is necessary only if two or more
+outstanding
+.IR get s
+for editing
+.RB ( "get \-e" )
+on the same \*(S) file were done by the same person
+(login name).
+The \*(I) value specified with the
+.B \-r
+keyletter can be either the \*(I) specified on the
+.I get\^
+command line or the \*(I) to be made as reported by the
+.I get\^
+command
+(see
+.IR get\^ (1)).
+A diagnostic results if the specified \*(I) is ambiguous, or,
+if necessary and omitted on the command line.
+.AR s Suppresses
+the issue on the standard output of the created delta's \*(I),
+as well as the number of lines inserted, deleted and unchanged in the
+\*(S) file.
+.AR n Specifies retention of the edited
+.I g-file\^
+(normally removed at completion of delta processing).
+.A2 g list Specifies
+a \f2list\f1 (see
+.IR get\^ (1)
+for the definition of \f2list\f1)
+of deltas which are to be
+.I ignored\^
+when the file is accessed at the change level (\*(I))
+created by this delta.
+.A1 m mrlist If
+the \*(S) file has the
+.B v
+flag set
+(see
+.IR admin\^ (1))
+then a Modification Request (\*(M)) number \f2must\f1 be
+supplied as the reason for creating the new delta.
+.C1 \& If
+.B \-m
+is not used and the standard input is a terminal, the prompt
+.SM
+.B MR\*Ss?
+is issued on the standard output before the standard input
+is read; if the standard input is not a terminal, no prompt is issued.
+The
+.SM
+.B MR\*Ss?
+prompt always precedes the
+.B comments?
+prompt
+(see
+.B \-y
+keyletter).
+.PP
+.C1 \& \*(M)s
+in a list are separated by blanks and/or tab characters.
+An unescaped new-line character terminates the \*(M) list.
+.C1 \& Note
+that if the
+.B v
+flag has a value
+(see
+.IR admin\^ (1)),
+it is taken to be the name of a program (or shell procedure) which will validate
+the correctness of the \*(M) numbers.
+If a non-zero exit status is returned from \*(M) number validation program,
+.I delta\^
+terminates
+(it is assumed that the \*(M) numbers were not all valid).
+.A1 y comment Arbitrary
+text
+used to describe the reason for making the delta.
+A null string is considered a valid \f2comment\f1.
+.C1 \& If
+.B \-y
+is not specified and the standard input is a terminal, the prompt
+.B comments?
+is issued on the standard output before the standard
+input is read; if the standard input is not a terminal, no
+prompt is issued.
+An unescaped new-line character terminates the comment text.
+.AR p Causes
+.I delta\^
+to print (on the standard output) the \*(S) file
+differences before and after the delta is applied
+in a
+.IR diff\^ (1)
+format.
+.RE
+.SH EXAMPLE
+.IP
+.nf
+% delta s.test1.c
+  comments?  second version
+  1.2
+  1 inserted
+  0 deleted
+  12 unchanged
+.fi
+.PP
+does a 
+.I delta\^
+on file "test1.c".
+.SH FILES
+.PP
+.PD 0
+.TP "\w`/usr/bin/bdiff\ \ \ `u"
+g-file
+Existed
+before the execution of
+.IR delta ;
+removed after completion of
+.IR delta .
+.TP
+p-file
+Existed
+before the execution of
+.IR delta ;
+may exist after completion of
+.IR delta .
+.TP
+q-file
+Created during the execution of
+.IR delta ;
+removed after completion of
+.IR delta .
+.TP
+x-file
+Created during the execution of
+.IR delta ;
+renamed to \*(S) file after completion of
+.IR delta .
+.TP
+z-file
+Created during the execution of
+.IR delta ;
+removed during the execution of
+.IR delta .
+.TP
+d-file
+Created during the execution of
+.IR delta ;
+removed after completion of
+.IR delta .
+.TP
+/usr/bin/bdiff
+Program to compute differences
+between the ``gotten'' file and the
+.IR g-file .
+.PD
+.SH WARNINGS
+Lines beginning with an \s-1\f3SOH\fP ASCII\s+1 character (binary 001)
+cannot be placed in the \*(S) file unless the
+.SM
+.B SOH
+is escaped.
+This character has special meaning to \*(S)
+(see
+.I sccsfile\c\^
+(5)) and will cause an error.
+.PP
+A
+.I get\^
+of many \*(S) files,
+followed by a
+.I delta\^
+of those files, should be avoided when the
+.I get\^
+generates a large amount of data.
+Instead,
+multiple
+.I "get/delta\^"
+sequences should be used.
+.PP
+If the standard input
+(\f3\-\f1)
+is specified on the
+.I delta\^
+command line,
+the
+.B \-m
+(if necessary)
+and
+.B \-y
+keyletters
+.I must\^
+also be present.
+Omission of these keyletters causes an error to occur.
+.PP
+Comments are limited to text strings of at most 512 characters.
+.SH "SEE ALSO"
+admin(1),
+bdiff(1),
+cdc(1),
+get(1),
+help(1),
+prs(1),
+rmdel(1),
+sccsfile(4).
+.br
+.\".I "Source Code Control System User's Guide"
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.tr ~~
+.\"	@(#)delta.1	5.1 of 11/17/83

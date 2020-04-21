@@ -1,0 +1,225 @@
+'\"macro stdmacro
+.TH INTRO 3
+.SH NAME
+intro \- introduction to subroutines and libraries
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B #include <math.h>
+.PP
+.B #include <device.h>
+.PP
+.B #include <get.h>
+.PP
+.B #include <gl.h>
+.SH DESCRIPTION
+This section describes functions found
+in various libraries, other than those functions
+that directly invoke U\s-2NIX\s+2
+system primitives,
+which are described in Section\ 2 of this volume.
+Certain major collections are identified by a
+letter after the section number:
+.PP
+.PD 0
+.TP \w'(3M)\ \ 'u
+(3C)
+These functions, together with those of Section\ 2 and those
+marked (3S), constitute the Standard C Library
+.IR libc ,
+which is automatically loaded by the C compiler,
+.IR cc\^ (1).
+The link editor
+.IR ld\^ (1)
+searches this library under the
+.B \-lc
+option.
+Declarations for some of these functions may be obtained
+from
+.I #include
+files indicated on the appropriate pages.
+.TP
+(3S)
+These functions constitute the
+``standard
+.SM I/O
+package''
+(see
+.IR stdio\^ (3S)).
+These functions are in the library
+.IR libc ,
+already mentioned.
+Declarations for these functions may be obtained from
+the
+.I #include
+file
+.IR <stdio.h> .
+.TP
+(3M)
+These functions constitute the Math Library,
+.IR libm .
+They are not automatically loaded by the C compiler,
+.IR cc ;
+however, the link editor searches this library under the
+.B \-lm
+option.
+Declarations for these functions may be obtained from
+the
+.I #include
+file
+.IR <math.h> .
+.TP
+(3G)
+These functions constitute the IRIS Graphics Library which are documented
+in the 
+.IR "IRIS User's Guide" .
+If the 
+.B \-Zg 
+flag is specified, the C compiler searches this library.
+Declarations for these functions may be obtained from the 
+.I #include
+file
+.IR <gl.h> .
+Other constants used by the Graphics Library are defined in
+.I <device.h>
+and
+.IR <get.h> .
+.TP
+(3B)
+Berkeley compatibility routines.
+This library provides compatible implementations of a
+.B limited
+subset of the functions provided by the Standard C Library
+in the Berkeley 4.3 Distribution of UNIX.
+Include files needed for routines in this library are
+in the tree
+.IR /usr/include/bsd .
+To compile and link a program that calls (3B) routines,
+use a compile command of the form:
+.br
+.in +\n(INu
+\f3cc \-I/usr/include/bsd \f2prog.c\f3 \-lbsd\f1
+.in
+.br
+.TP
+(3N)
+These functions constitute the internet network library.
+Compiling instructions are the same as for (3B)
+routines.
+.TP
+(3R)
+RPC support routines and Yellow Pages (YP) routines.
+This library contains routines that 
+implement the RPC protocol
+and routines that 
+provide a programmatic
+interface to Sun's YP distributed lookup service.
+The library also contains YP versions of standard routines
+like
+.IR getpwent (3C)
+that are different in a YP environment.
+To compile and link a program that calls (3R) routines,
+use a compile command of the form:
+.br
+.in +\n(INu
+\f3cc \-I/usr/include/sun \-I/usr/include/bsd \f2prog.c\f3 \-lsun \-lbsd\f1
+.in
+.br
+The
+.B \-I/usr/include/bsd
+and 
+.B \-lbsd 
+are required because routines in the (3R) library call routines
+in the (3B) library.
+Note that the order of the libraries must be as
+given in order for the references to be resolved.
+This library is provided as part of the
+NFS option package, so it may not be present on
+all systems.
+.TP
+(3X)
+Various
+specialized routines.
+The libraries in which these routines are found are given
+on the appropriate pages.
+.SH DEFINITIONS
+A
+.I character\^
+is any bit pattern able to fit into a byte on the machine.
+The
+.I null character\^
+is a character with value 0,
+represented in the C language as '\e0'.
+A
+.I character array\^
+is a sequence of characters.
+A
+.I "null-terminated character array\^"
+is a sequence of
+characters, the last of which is the
+.IR "null character" .
+A
+.I string\^
+is a designation for a
+.IR "null-terminated character array" .
+The
+.I "null string"
+is a character array containing only the null character.
+A
+.SM
+NULL
+pointer is the value that is obtained by casting
+.B 0
+into a pointer.
+The C language guarantees that this value will not match
+that of any legitimate pointer, so many functions that
+return pointers return it to indicate an error.
+.SM
+NULL
+is defined as
+.B 0
+in
+.IR <stdio.h> ;
+the user can include his own definition if he is
+not using
+.IR <stdio.h> .
+.SH FILES
+/lib/libc.a
+.br
+/usr/lib/libm.a
+.br
+/usr/lib/libgl.a
+.br
+/usr/lib/libbsd.a
+.br
+/usr/lib/libsun.a
+.SH SEE ALSO
+\f2IRIS User's Guide\fP
+.br
+\f2IRIS Workstation Guide\fP
+.br
+ar(1),
+cc(1),
+ld(1),
+nm(1),
+intro(2),
+stdio(3S).
+.\".SH DIAGNOSTICS
+.\"Functions in the Math Library (3M) may return
+.\"the conventional values
+.\".B 0
+.\"or
+.\".SM
+.\".B HUGE
+.\"(the largest single-precision floating-point number)
+.\"when the function is undefined for the
+.\"given arguments or when the value is not representable.
+.\"In these cases, the external variable
+.\".I errno\^
+.\"(see
+.\".IR intro\^ (2))
+.\"is set to the value
+.\".SM EDOM
+.\"or
+.\".SM ERANGE\*S.
+.\"	@(#)intro.3	5.1 of 11/15/83

@@ -1,0 +1,20 @@
+To install the LP software:
+
+1.  Establish a login "lp" on your system
+
+2.  As the super user:
+	cd /usr/src/cmd/lp
+	make -f lp.mk install
+
+3.  Add the following code to /etc/rc:
+	rm -f /usr/spool/lp/SCHEDLOCK
+	/usr/lib/lpsched
+	echo "line printer scheduler started"
+
+4.  If your LP system includes either a Printronix P-300
+    or an HP2631a line printer, these require the prx and
+    hp2631a filters, respectively.  To install these:
+	cd /usr/src/cmd/lp/filter
+	cc -O -s -o /usr/lib/prx prx.c
+	cc -O -s -o /usr/lib/hp2631a hp2631a.c
+SCCS ID: @(#)README	1.1

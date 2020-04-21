@@ -1,0 +1,28 @@
+.TH RGBcolor  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I RGBcolor
+- set the current color in RGB mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "RGBcolor(red, green, blue) "
+.B "RGBvalue red, green, blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine RGBcol(red, green, blue)"
+.B "integer*2 red, green, blue"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure RGBcolor(red, green, blue: RGBvalue);"
+.sp
+.SH DESCRIPTION
+In RGB mode, the current color is set with the \f2RGBcolor\f1 command.  Its
+arguments are three eight-bit values, one each for red, green, and blue.  These
+numbers are written directly into the bitplanes whenever a pixel is drawn;
+they control the intensity of red, green, and blue displayed on the screen.
+\f2RGBcolor\f1 is ignored in single or double buffer mode.
+.SH "SEE ALSO"
+.I color, gRGBcolor, RGBwritemask

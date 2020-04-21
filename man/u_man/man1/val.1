@@ -1,0 +1,157 @@
+'\"macro stdmacro
+.TH VAL 1
+.SH NAME
+val \- validate \s-1SCCS\s0 file
+.SH SYNOPSIS
+\f3val \-\f1
+.br
+.B val
+.RB [ \-s ]
+.RB [ \-r \s-1SID\s0 ]
+.RB [ \-m name ]
+.RB [ \-y type ]
+files
+.SH DESCRIPTION
+.I Val\^
+determines if the specified
+.I file\^
+is an 
+.SM SCCS
+file meeting the characteristics specified by the optional
+argument list.
+Arguments to
+.I val\^
+may appear in any order.
+The arguments consist of keyletter arguments, which begin with a \f3\-\f1, and
+named files.
+.PP
+.I Val\^
+has a special argument, \f3\-\f1, which causes reading of the standard input
+until an end-of-file condition is detected.
+Each line read is independently processed as if it were a command line argument
+list.
+.PP
+.I Val\^
+generates diagnostic messages on the standard output for each command line
+and file processed and also returns a single 8-bit code upon exit as
+described below.
+.PP
+The keyletter arguments are defined as follows.
+The effects of any keyletter argument apply independently to each named file
+on the command line.
+.RS .3i
+.TP "\w'\f3\-m\f2name\f1\ \ \ 'u"
+.B \-s
+The presence of this argument silences the diagnostic 
+message normally generated on the standard output for 
+any error that is detected while processing each named file on
+a given command line.
+.TP
+.BI \-r \s-1SID\s0 
+The argument value
+.SM 
+.I SID\^
+.RI ( S \s-1CCS\s+1 " ID" entification
+String) is an 
+.SM SCCS
+delta number.
+A check is made to determine if the
+.SM 
+.I SID\^
+is ambiguous (e.g.,
+.BR \-r 1
+is ambiguous because it physically does not exist but implies 1.1, 1.2,
+etc. which may exist) or invalid (e.g.,
+.BR \-r 1.0 
+or
+.BR \-r 1.1.0 
+are invalid because neither case can exist as a valid delta number).
+If the
+.SM 
+.I SID\^
+is valid and not ambiguous, a check is made
+to determine if it actually exists.
+.TP
+.BI \-m name 
+The
+argument value
+.I name\^
+is compared with the 
+.SM SCCS 
+\&%\&M% keyword in
+.IR file .
+.TP
+.BI \-y type 
+The
+argument value
+.I type\^
+is compared with the 
+.SM SCCS
+\&%\&Y% keyword in
+.IR file .
+.RE
+.PP
+The 8-bit code returned by
+.I val\^
+is a disjunction of the possible errors, i.e., can be interpreted as
+a bit string where (moving from left to right) 
+set bits are interpreted as follows:
+.PP
+.RS .3i
+.nf
+bit 0 = missing file argument;
+bit 1 = unknown or duplicate keyletter argument;
+bit 2 = corrupted \s-1SCCS\s+1 file;
+bit 3 = can't open file or file not \s-1SCCS\s+1;
+bit 4 = \f2\s-1SID\s+1\^\f1 is invalid or ambiguous;
+bit 5 = \f2\s-1SID\s+1\^\f1 does not exist;
+bit 6 = %\&Y%, \f3\-y\f1 mismatch;
+bit 7 = %\&M%, \f3\-m\f1 mismatch;
+.fi
+.RE
+.PP
+Note that
+.I val\^
+can process two or more files on a given command line and in turn can
+process multiple command lines (when reading the standard input).
+In these cases an aggregate code is returned \- a logical \f3\s-1OR\s0\f1 of the
+codes generated for each command line and file processed.
+.SH EXAMPLE
+.IP
+val -
+.br
+-yc -mabc s.abc
+.br
+-mxyz -ypll s.xyz
+.PP
+first checks if file "s.abc" has a value 
+.I c\^
+for its 
+.B type
+flag and value 
+.I abc\^
+for the 
+.B module
+name flag. 
+Once processing of the first file
+is completed, 
+.I val\^
+then processes the remaining files (in
+this case "s.xyz") to determine if they meet the characteristics 
+specified by the keyletter arguments associated with them.
+.SH "SEE ALSO"
+admin(1),
+delta(1),
+get(1),
+prs(1).
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.SH BUGS
+.I Val\^
+can process up to 50 files on a single command line.
+Any number above 50 will produce a
+.B core
+dump.
+.\"	@(#)val.1	5.1 of 11/15/83

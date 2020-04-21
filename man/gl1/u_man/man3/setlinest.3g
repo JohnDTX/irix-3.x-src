@@ -1,0 +1,31 @@
+.TH setlinestyle 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setlinestyle
+- select a linestyle 
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setlinestyle(index) "
+.B "short index;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setlin(index)"
+.B "integer*2 index"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setlinestyle(index: Short);"
+.sp
+.SH DESCRIPTION
+.I Setlinestyle
+chooses a linestyle pattern.  Its argument 
+is an index into the linestyle table
+built by calls to the \f2deflinestyle\f1 command.  
+There is always a current
+linestyle; it is used for drawing lines and curves and for outlining 
+rectangles, polygons, circles, and arcs.  The default linestyle is 
+linestyle 0.  Unless redefined by the user, linestyle 0 is solid.
+.SH "SEE ALSO"
+.I deflinestyle, getlstyle, linewidth, lsbackup, resetls

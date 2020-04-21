@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH ADDCLIENT 1M
+.SH NAME
+addclient \- allow remote printing clients to connect
+.SH SYNOPSIS
+.B /usr/spool/lp/etc/util/addclient
+client
+.br
+.SH DESCRIPTION
+This command is used on an IRIS that has a printer attached to it.  The
+command registers a remote user's machine, allowing it to
+connect to this machine
+in order to submit a printing request using
+.I lp (1) .
+.br
+.I client
+is the name of the remote machine.  This command modifies the 
+.I .rhosts
+file in the home directory of user
+.IR lp
+and possibly
+.IR /etc/passwd .
+.PP
+Execute this command once for each client machine that will use the
+network to submit printing jobs on this machine.  This command is necessary
+when using TCP/IP protocols; it is not necessary when using XNS.
+.SH FILES
+/etc/passwd /usr/spool/lp/.rhosts
+.SH SEE ALSO
+mknetpr(1M),
+mkcentpr(1M),
+mkPS(1M).
+

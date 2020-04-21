@@ -1,0 +1,154 @@
+'\"macro stdmacro
+.TH KILL 2 
+.SH NAME
+kill \- send a signal to a process or a group of processes
+.SH SYNOPSIS
+.B int kill (pid, sig)
+.br
+.B int pid, sig;
+.SH DESCRIPTION
+.PP
+.I Kill\^
+sends a signal
+to a process or a group of processes.
+The process or group of
+processes to which the signal is to be sent is specified by
+.IR pid .
+The signal that is to be sent is specified by
+.I sig\^
+and is either one from the list given in
+.IR signal\^ (2),
+or 0.
+If
+.I sig\^
+is 0 (the null signal), error checking is performed but no signal is
+actually sent.
+This can be used to check the validity of
+.IR pid .
+.PP
+The real or effective user
+.SM ID
+of the sending process must match the real or effective user
+.SM ID
+of the receiving process unless, the effective user
+.SM ID
+of the sending process is super-user,
+or the process is sending to itself.
+.PP
+The processes with a process
+.SM ID
+of 0 and a process
+.SM ID
+of 1 are special processes (see
+.IR intro\^ (2))
+and will be referred to below as
+.I proc0\^ 
+and
+.I proc1\^
+respectively.
+.PP
+If
+.I pid\^
+is greater than zero,
+.I sig\^
+will be sent to the process whose process
+.SM ID
+is equal to 
+.IR pid .
+.I Pid\^
+may equal 1.
+.PP
+If
+.I pid\^
+is 0,
+.I sig\^
+will be sent to all processes excluding
+.I proc0\^ 
+and
+.I proc1\^
+whose process group
+.SM ID
+is equal to the process group
+.SM ID
+of the sender.
+.PP
+If
+.I pid\^
+is \-1 and the effective user
+.SM ID
+of the sender is not super-user,
+.I sig\^
+will be sent to all processes excluding
+.I proc0\^ 
+and
+.I proc1\^ 
+whose real user
+.SM ID
+is equal to the effective user
+.SM ID
+of the sender.
+.PP
+If
+.I pid\^
+is \-1 and the effective user
+.SM ID
+of the sender is super-user,
+.I sig\^
+will be sent to all processes excluding
+.I proc0\^
+and
+.IR proc1 .
+.PP
+If
+.I pid\^
+is negative but not \-1,
+.I sig\^
+will be sent to all processes whose process group
+.SM ID
+is equal to the absolute value of
+.IR pid .
+.PP
+.I Kill\^
+will fail and no signal will be sent if one or more of the following are true:
+.RS .3i
+.PP
+.I Sig\^
+is not a valid signal number.
+.SM
+\%[EINVAL]
+.PP
+No process can be found corresponding to that specified by
+.IR pid .
+.SM
+\%[ESRCH]
+.PP
+The sending process is not sending to itself, 
+its effective user 
+.SM ID 
+is not super-user, and its real or effective user
+.SM ID
+does not match the real or effective user
+.SM ID
+of the receiving process.
+.SM
+\%[EPERM]
+.RE
+.SH RETURN VALUE
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+kill(1), getpid(2), setpgrp(2), signal(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf 
+.B moveq	#37,D0
+.B movl	pid,A0
+.B movl	sig,D1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)kill.2	5.1 of 11/1/83

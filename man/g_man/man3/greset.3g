@@ -1,0 +1,124 @@
+'\" t
+.TH greset 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B greset
+\- resets all global state attributes to their initial values
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "greset()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine greset"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure greset;"
+.SH DESCRIPTION
+.B greset
+resets all global state attributes to their initial values; you
+can call these attributes at any time.
+See the following table for a listing of
+global state attributes.
+.sp
+.TS
+center box;
+cB | cB
+l l.
+Attribute	Initial Value
+_
+available bitplanes	all bitplanes\u\s-2\&1\s0\d
+backface mode	off
+blinking	turned off
+color	undefined
+color map mode	one map
+cursor	0 (arrow)\u\s-2\&2\s0\d
+depthcue mode	off
+display mode	single buffer	
+font	0 \u\s-2\&3\s0\d 
+linestyle	0 (solid)
+linestyle backup	off
+linewidth	1 pixel
+lsrepeat	1
+pattern	0 (solid)
+picking size	10\&\(mu\&10 pixels
+reset linstyle	on
+RGB color	undefined
+RGB writemask	undefined
+shaderanges	0,7,0,1023
+viewport	entire screen
+writemask	all planes enabled\u\s-2\&1\s0\d
+zbuffer mode	off
+.TE
+.sp
+.RS
+1.  If there are more than 3 bitplane boards installed, 
+.br
+the number of available bitplanes is set to 12.
+.br
+2.  The color is set to 1 and the writemask and cursor
+.br
+are set to 0xfff.
+.br
+3.  Rasterfont 0 is a Helvetica-like font.
+.fi
+.RE
+.sp
+.B greset
+puts a 2-D orthographic projection transformation on 
+the matrix stack with left, right, bottom, and top set to the
+boundaries of the screen.
+It also turns on the cursor; ties it to 
+MOUSEX
+and
+MOUSEY;
+and unqueues
+all buttons, valuators, and the keyboard.
+Each button is set to 
+FALSE
+and untied from valuators.
+Each valuator is set to 
+XMAXSCREEN/2;
+the range is 
+0..XMAXSCREEN.
+MOUSEY
+is set to 
+YMAXSCREEN/2
+and has range
+0..YMAXSCREEN.
+.PP
+.B greset
+also defines certain entry in the color map, as follows:
+.sp
+.TS 
+center, box;
+cB | cB | cB s s
+cB | cB | cB s s
+cB | lB | cI | cI | cI
+n l n n n.
+Index	Name	RGB Value
+\^	\^	_
+\^	\^	Red	Green	Blue
+_
+0	BLACK	0	0	0
+1	RED	255	0	0
+2	GREEN	0	255	0
+3	YELLOW	255	255	0
+4	BLUE	0	0	255
+5	MAGENTA	255	0	255
+6	CYAN	0	255	255
+7	WHITE	255	255	255
+all others	unnamed	\&	undefined	\&
+.TE
+.SH "SEE ALSO"
+gbegin, ginit, winopen
+.sp
+.I Programming Guide,
+Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.

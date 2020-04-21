@@ -1,0 +1,262 @@
+'\"macro stdmacro
+.TH CPIO 1
+.SH NAME
+cpio \- copy file archives in and out
+.SH SYNOPSIS
+.B cpio
+.BR \-o\0 [
+.BR #aBchHLv\0 ]
+[ name-list ]
+.PP
+.B cpio
+.B \-i
+[
+.IR # BcdhHLmrtuvfsSb6
+] [ patterns ]
+.PP
+.B cpio
+.B \-p
+[
+.B adHLlmruv
+] directory
+.SH DESCRIPTION
+.B Cpio \-o
+(copy out)
+uses the
+.I name-list
+arguments, or
+reads the standard input to obtain a list of pathnames
+and copies those files onto the
+standard output (or to the device 
+\f3/dev/rmt\f2#\f1)
+together with pathname and status information.
+.PP
+.B Cpio \-i
+(copy in)
+extracts files from the
+standard input (or from the device 
+\f3/dev/rmt\f2#\f1)
+which is assumed to be the product of a previous
+.BR "cpio \-o" .
+Only files with names that match
+.I patterns\^
+are selected.
+.I Patterns\^
+are given in the name-generating notation of
+.IR sh\^ (1).
+In
+.IR patterns ,
+meta-characters
+.BR ? ,
+.BR \(** ,
+and
+.BR [ \|.\|.\|. ]
+match the slash
+.B /
+character.
+Multiple
+.I patterns\^
+may be specified and
+if no
+.I patterns\^
+are specified, the default for
+.I patterns\^
+is
+.BR \(**
+(i.e., select all files).
+The extracted files are conditionally created and copied
+into the current directory tree
+based upon the options described below.
+.PP
+.B Cpio \-p
+(pass)
+reads the standard input to obtain a list of path names
+of files that are conditionally created and copied
+into the destination
+.I directory\^
+tree based upon the options described below.
+.PP
+The meanings of the available options are:
+.PP
+.PD 0
+.TP "\w'\f3m\f1\ \ 'u"
+.I #
+Use 
+.BI /dev/rmt # 
+as input (for
+.BR \-i )
+or output (for
+.BR \-o ).
+Note: 6 has another meaning described below.
+.TP
+.B a
+Reset access times of input files after they have been copied.
+.TP
+.B B
+Input/output is to be blocked 5,120 bytes to the record
+(does not apply to the
+.I pass\^
+option; meaningful only with data directed to or from
+.BR /dev/rmt? ).
+.TP
+.B c
+Write
+.I header\^
+information in
+.SM ASCII
+character form for portability.
+.TP
+.B d
+.I Directories\^
+are to be created as needed.
+.TP
+.B H
+Don't follow symbolic links.
+This option is meaningful only with the
+.B o
+or
+.B p
+option.
+Symbolic links, if any, are copied out as such.
+This is the default.
+.TP
+.B h
+Similar to
+.B B
+option, but block input/output to 250K bytes.
+This option is only useful for streaming tape drive
+operation.
+.TP
+.B L
+Follow symbolic links.
+This option is meaningful only with the
+.B o
+or
+.B p
+option.
+If symbolic links are encountered,
+the referenced files,
+rather than the symbolic links themselves,
+are copied out.
+.TP
+.B r
+Interactively
+.I rename\^
+files.
+If the user types a null line, the
+file is skipped.
+.TP
+.B t
+Print a
+.I table of contents\^
+of the input.
+No files are created.
+.TP
+.B u
+Copy
+.I unconditionally\^
+(normally, an older file will not replace a newer file with the same name).
+.TP
+.B v
+.IR Verbose :
+causes a list of file
+names to be printed.
+When used with
+the
+.B t
+option,
+the table of contents looks like the output of an
+.B ls\ \|\-l
+command
+(see
+.IR ls\^ (1)).
+.TP
+.B l
+Whenever possible, link files rather than copying them.
+Usable only with
+the
+.B \-p
+option.
+.TP
+.B m
+Retain previous file modification time.
+This option is ineffective on directories that are being copied.
+.TP
+.B f
+Copy in all files except those in
+.IR patterns .
+.TP
+.B s
+Swap bytes.
+Use only with the
+.B \-i
+option.
+.TP
+.B S
+Swap halfwords.
+Use only with the
+.B \-i
+option.
+.TP
+.B b
+Swap both bytes and halfwords.
+Use only with the
+.B \-i
+option.
+.TP
+.B 6
+Process an old (i.e.,
+.SM UNIX
+System
+.I Sixth\^
+Edition format)
+file.
+Only useful with
+.B \-i
+(copy in).
+.PD
+.SH EXAMPLE
+.IP
+ls \|\(bv \|cpio \|\-o \|>/dev/rmt1
+.br
+or
+.br
+cpio \|\-o0 \|.
+.PP
+copies the contents of a directory into an archive;
+.IP
+cd \|olddir
+.br
+find
+.B \|.\|
+\-depth \-print \|\(bv \|cpio \|\-pdl \|newdir
+.PP
+duplicates a directory hierarchy.
+.PP
+The trivial case
+``find
+.B \|.\|
+\-depth \-print \|\(bv \|cpio \|\-oB \|>/dev/rmt1''
+can be handled more efficiently by:
+.IP
+find
+.B \|.\|
+\-cpio \|/dev/rmt1
+.SH SEE ALSO
+ar(1), find(1), symlink(2), cpio(4).
+.SH BUGS
+Spreading an archive over multiple tapes is not supported.  Inserting a 
+second tape could cause the system to crash.
+.PP
+Pathnames are restricted to 128 characters.
+If there are too many unique linked files,
+the program runs out of
+memory to keep track of them
+and, thereafter, linking information is lost.
+Only the superuser can copy special files.
+The
+.B -B
+and
+.B -h
+options do not work with certain magnetic tape drives.
+.\"	@(#)cpio.1	5.1 of 10/27/83

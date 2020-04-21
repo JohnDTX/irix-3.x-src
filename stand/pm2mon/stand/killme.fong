@@ -1,0 +1,6 @@
+cc -O -DMC68000 -DPM2 -I../include -c ab.c
+ld crtstand.o -o ab ab.o libstand.a libglxprom.a libpm2prom.a -lc
+ld:crtstand.o: cannot open
+*** Error code 4
+
+Stop.

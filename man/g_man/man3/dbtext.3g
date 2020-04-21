@@ -1,0 +1,33 @@
+.TH dbtext 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B dbtext
+\- sets the dial and button box text
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "dbtext(str)"
+.B "char *str"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine dbtext(str)"
+.B "character*(8) str"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure dbtext(var str: Byte);"
+.SH DESCRIPTION
+.B dbtext
+places up to eight characters of text into the text window on the 
+dial and button box.  Use only digits, spaces, and uppercase letters.
+.SH SEE ALSO
+setdblights
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

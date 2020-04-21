@@ -1,0 +1,55 @@
+#! /bin/sh
+#
+# kpatch kernel [ m68010 | m68020 ] parameters
+#
+#	The parameters are "symbol value" pairs, all separated by spaces,
+#	to be passed to adb.  Normally 2 byte valuesare written; preceed
+#	the "symbol value" pair with "long" to change this to 4 bytes.
+#
+#	We look at kernel strings to figure out the
+#	type of machinery involved to get the right address mapping.
+
+if test -f $1
+then
+	kernel=$1 ; shift
+else
+	echo "usage: kpatch kernel parameters" ; exit 1
+fi
+
+case $1 in
+m68010|m68020)
+	machine=$1 ; shift
+	;;
+*)	machine=`strings $kernel | grep m680[12]0`
+	if test -z "$machine"
+	then
+		echo "Can't figure out what kind of kernel it is."
+		exit 1
+	fi
+	;;
+esac
+
+case $machine in
+m68010)
+	commands="?m c00400 cfffff" ;;
+m68020)
+	commands="?m 20000000 2fffffff" ;;
+esac
+
+w=w
+
+while test $# -ge 1
+do
+	if test $1 = long ; then w=W ; shift ; continue ; fi
+	if test $# -lt 2 ; then break ; fi
+	commands="$commands
+	$1?$w $2"
+	shift 
+	shift
+	w=w
+done
+
+commands="$commands
+	\$q"
+
+echo "$commands" | adb -w $kernel

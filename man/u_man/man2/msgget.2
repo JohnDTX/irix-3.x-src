@@ -1,0 +1,125 @@
+'\"macro stdmacro
+.TH MSGGET 2
+.SH NAME
+msgget \- get message queue
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/ipc.h>
+.br
+.B #include <sys/msg.h>
+.PP
+.nf
+.B "int msgget (key, msgflg)"
+.B key_t key;
+.B int msgflg;
+.fi
+.SH DESCRIPTION
+.I Msgget\^
+returns the message queue identifier associated with
+.IR key .
+.PP
+A message queue identifier and associated message queue and data structure
+(see
+.IR intro\^ (2))
+are created for
+.I key\^
+if one of the following are true:
+.RS .3i
+.PP
+.I Key\^
+is equal to
+.SM
+.BR IPC_PRIVATE .
+.PP
+.I Key\^
+does not already have a message queue identifier associated with it, and
+.RI ( msgflg " & "
+.SM
+.BR IPC_CREAT\*S )
+is ``true''.
+.RE
+.PP
+Upon creation, the data structure associated with the new message queue
+identifier is initialized as follows:
+.RS .3i
+.PP
+.BR Msg_perm.cuid ", " msg_perm.uid ,
+.BR msg_perm.cgid ", and " msg_perm.gid
+are set equal to the effective user
+.SM ID
+and effective group
+.SM ID\*S,
+respectively, of the calling process.
+.PP
+The low-order 9 bits of
+.B msg_perm.mode
+are set equal to the low-order 9 bits of
+.IR msgflg .
+.PP
+.BR Msg_qnum ", " msg_lspid ", " msg_lrpid ,
+.BR msg_stime ", and " msg_rtime "
+are set equal to 0.
+.PP
+.B Msg_ctime
+is set equal to the current time.
+.PP
+.B Msg_qbytes
+is set equal to the system limit.
+.RE
+.PP
+.I Msgget\^
+will fail if one or more of the following are true:
+.RS .3i
+.PP
+A message queue identifier exists for
+.I key\^
+but operation permission (see
+.IR intro\^ (2))
+as specified by the low-order 9 bits of
+.I msgflg\^
+would not be granted. 
+.SM
+\%[EACCES]
+.PP
+A message queue identifier does not exist for
+.I key\^
+and
+.RI ( msgflg " &"
+.SM
+.BR IPC_CREAT\*S )
+is ``false''.
+.SM
+\%[ENOENT]
+.PP
+A message queue identifier is to be created but
+the system imposed limit on the maximum number of
+allowed message queue identifiers system wide
+would be exceeded.
+.SM
+\%[ENOSPC]
+.PP
+A message queue identifier exists for
+.I key\^
+but
+.RI "( (" msgflg " & "
+.SM
+.RB IPC_CREAT\*S ") & ("
+.IR msgflg " & "
+.SM
+.BR IPC_EXCL\*S ") )"
+is ``true''.
+.SM
+\%[EEXIST]
+.RE
+.bp
+.SH "RETURN VALUE"
+Upon successful completion,
+a non-negative integer,
+namely a message queue identifier is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+msgctl(2), msgop(2).
+.\"	@(#)msgget.2	5.1 of 11/1/83

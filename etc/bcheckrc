@@ -1,0 +1,70 @@
+#! /bin/sh
+#	@(#)bcheckrc.sh	1.3
+# ***** This file has those commands necessary to check the file
+# system, date, and anything else that should be done before mounting
+# the file systems.
+trap "" 2
+TZ=`cat /etc/TZ`
+export TZ
+
+trap 'echo ; echo Warning: verifying the date - interrupted! ; echo ; break' 2
+
+if [ -x /etc/rc.getdate ] && date `/etc/rc.getdate`
+then
+	:
+else
+	while :
+	do
+		echo "\nIs the date `date` correct? (y or n) \c"
+		read reply
+		if [ "$reply" = y ]
+		then
+			break
+		else
+			echo "Enter the correct date (mmddhhmm[yy][.ss]):  \c"
+			read reply
+			date "$reply" > /dev/null
+		fi
+	done
+fi
+# **** Auto check, if necessary
+
+: skipit
+
+# For the 2300, 2300T and 3010 we always autocheck and throw away the output
+
+case `/bin/uname -t` in
+
+	2300 | 2300T | 3010)
+		trap "" 2
+		/etc/fsck -D -y > /dev/null 2>&1
+		exit 0
+		;;
+	*)
+		;;
+esac
+
+trap 'echo ; echo Warning: filesystem consistency checking - interrupted! ; echo ; exit 1' 2
+
+while :
+do
+	echo "Do you want to check filesystem consistency? (y or n) \c"
+	read reply
+	case "$reply" in
+		y )
+			break
+			;;
+
+		n* )
+			exit 0
+			;;
+
+		* )
+			echo "Invalid input. Try again."
+			continue
+			;;
+	esac
+done
+
+	/etc/fsck -D
+	trap "" 2

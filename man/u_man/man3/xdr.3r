@@ -1,0 +1,49 @@
+'\"macro stdmacro
+.\" @(#)xdr.3r	1.3 87/11/09 3.2/4.3NFSSRC
+.\" @(#)xdr.3r 1.1 86/09/25 SMI; new on release 3.0
+.TH XDR 3R 
+.SH NAME
+xdr \- library routines for external data representation
+.SH SYNOPSIS
+.B #include <rpc/xdr.h>
+.SH DESCRIPTION
+.IX "XDR routines"
+.IX "external data representation routines"
+These routines allow C programmers to describe
+arbitrary data structures in a machine-independent fashion.
+Data for remote procedure calls are transmitted using these routines.
+.SH FUNCTIONS
+.ta \w'xdrrec_endofrecord()\0\0'u
+.nf
+\s-1xdr_array()	translate arrays to/from external representation
+xdr_bool()	translate Booleans to/from external representation
+xdr_bytes()	translate counted byte strings to/from external representation
+xdr_destroy()	destroy XDR stream and free associated memory
+xdr_double()	translate double precision to/from external representation
+xdr_enum()	translate enumerations to/from external representation
+xdr_float()	translate floating point to/from external representation
+xdr_getpos()	return current position in XDR stream
+xdr_inline()	invoke the in-line routines associated with XDR stream
+xdr_int()	translate integers to/from external representation
+xdr_long()	translate long integers to/from external representation
+xdr_opaque()	translate fixed-size opaque data to/from external representation
+xdr_reference()	chase pointers within structures
+xdr_setpos()	change current position in XDR stream
+xdr_short()	translate short integers to/from external representation
+xdr_string()	translate null-terminated strings to/from external representation
+xdr_u_int()	translate unsigned integers to/from external representation
+xdr_u_long()	translate unsigned long integers to/from external representation
+xdr_u_short()	translate unsigned short integers to/from external representation
+xdr_union()	translate discriminated unions to/from external representation
+xdr_void()	always return one (1)
+xdr_wrapstring()	package RPC routine for XDR routine, or vice-versa
+xdrmem_create()	initialize an XDR stream
+xdrrec_create()	initialize an XDR stream with record boundaries
+xdrrec_endofrecord()	mark XDR record stream with an end-of-record
+xdrrec_eof()	mark XDR record stream with an end-of-file
+xdrrec_skiprecord()	skip remaining record in XDR record stream
+xdrstdio_create()	initialize an XDR stream as standard I/O FILE stream\s+1
+.SH SEE ALSO
+.IR "External Data Representation Protocol Specification" ,
+in Appendix C of the
+.IR "IRIS Communications Guide" .

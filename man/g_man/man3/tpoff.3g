@@ -1,0 +1,34 @@
+.TH tpoff  3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B tpoff 
+\- turns off the textport 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "tpoff()"
+.sp
+.B ""
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine tpoff"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure tpoff;"
+.SH DESCRIPTION
+.B tpoff 
+turns off the textport.  When the textport is off, 
+characters are not written to the textport and the
+textport does not appear on the screen.  The texport
+automatically turns on when you exit a program.
+.SH SEE ALSO
+textport, tpon
+.sp 
+\f2Programming Guide\fP, Chapter 14, Textports 
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,128 @@
+.TH NETLOAD 1M 
+.SH NAME 
+netload \- download TCP/IP protocol module to EXOS board
+.SH SYNOPSIS
+.nf
+.na
+\f3netload [ \-d ] [ \-h \f2host\f3 ] [ \-E \f2ENET_addr\f3 ] [ \-t \f2n\f3 ] [ \-m ] [ \-r \f2n\f3 ]
+.br
+	 [ \-x \f2n\f3 ] [ \-p \f2n\f3 ] [ \i ] [ \f2net_file\f3 ]\f1
+.fi
+.ad
+.SH DESCRIPTION
+\f2netload\f1 loads \f2net_file\f1
+onto the EXOS Ethernet front-end processor board.
+\f2net_file\f1 is the EXOS 8010 TCP/IP protocol module,
+which is supplied by Excelan in executable object format.
+.PP
+If no options are specified, \f2netload\f1
+configures TCP/IP with the following defaults:
+.RS
+.IP \(bu 3
+Debug messages are not printed.
+.IP \(bu 3
+The \f2/etc/hosts\f1 is checked
+for a host with the name or alias \f2localhost\f1; this name is used
+for the host's Internet address.
+.IP \(bu 3
+The Ethernet address supplied by the board's is used.
+.IP \(bu 3
+The on-board TELNET/rlogin server is enabled
+and supports eight connections.
+.IP \(bu 3
+ARP is enabled.
+.IP \(bu 3
+The maximum number of simultaneous blocking host requests supported 
+is 66.
+.IP \(bu 3
+A minimum of 10 (more on boards with 256 or 512 Kbytes of RAM)
+extended memory buffers are allocated.
+.IP \(bu 3
+The protocol module found at \f2/etc/net/net\f1 is loaded.
+.RE
+.SH OPTIONS
+.TP
+\f3\-d\f1
+Prints debugging messages.
+.TP
+\f3\-h\f2\ host
+\f1Supplies an explicit host name or Internet address.  If
+\f2host\f1 begins with a digit, \f2netload\f1
+attempts to convert it to an Internet address in standard ``dot'' format.
+Otherwise, it tries to look up a host by this
+name in the \f2/etc/hosts\f1 file and uses the Internet address therein.
+.TP
+\f3\-E\f1\ ENET_addr
+\f1Supplies an Ethernet address, which is used instead
+of the board's default address (supplied by Excelan).
+This should be specified in the customary Ethernet format,
+as six hexadecimal numbers separated hyphens (-).
+For example, 08-00-14-E0-2A-56.
+.TP
+\f3\-t\f1\ n
+\f1Specifies how many TELNET/rlogin connections
+to support via the on-board telnet/rlogin server.
+\f2n\f1 must be a number between 0 and 8.
+If 0, then the server is disabled and these protocol
+servers may be implemented on the host system.
+.TP
+.B \-m
+Disables ARP and enables mapping of Ethernet to Internet addresses
+as was done in 4.1BSD (lower three bytes of Ethernet address
+become the host part of the Internet address).  The \f3-E\f1
+option can be used to emulate another Ethernet vendor's address
+block, and the \f3-h\f1
+option can be used to specify a network number other than the
+default (89 decimal).
+.TP
+.B \f3\-r\f1 `` n''
+Specifies how many simultaneously blocking host requests will
+be supported.  
+This number cannot exceed 127, and should usually
+be at least as great as the maximum expected number of connections.
+.TP
+.B \f3\-x\f1 `` n''
+Specifies how many extended memory buffers will be allocated.
+A minimum of 10 are always allocated, regardless of the requested
+number.  For 128 Kbyte EXOS boards, specifying a larger number can
+improve bulk transfer performance, but may affect operation when
+a great many (more than 32) connections are required.
+.TP
+\f3\-p\f1 n
+Sets the level of diagnostic messages from
+the board that the host displays.
+The level is determined by the value of \f2n\f1, as follows:
+.DS
+.ta 0.5i 1.0i
+.nf
+.na
+.sp
+	\f3Level	Types of Messages\f1
+
+	  1	All
+	  2	Errors that are benign (such as retransmissions)
+		or more severe (default)
+	  3	Errors that are nonfatal (such as bad host-requests)
+		or more severe
+	  4	Fatal errors, such as NX call failures
+.fi
+.ad
+.DE
+.TP
+\f3\-i\f1
+Disables the timeout feature of \f2netload\f1.
+Normally, \f2netload\f1 times out one minute after the board is
+reset and the diagnostics are unsuccessful or if an
+initialization message to the board is unsuccessful.
+The \f3\-i\f1  option is useful for debugging the board's processor or
+when using an emulator.
+.SH FILES
+.ta 2.0i
+/etc/net/net	TCP/IP protocol module
+.br
+/dev/EXOS/xmem	device driver for downloading
+.br
+/etc/hosts	host name/Internet address database
+.SH SEE ALSO
+xmem(7), net(7P), hosts(4)
+.KE

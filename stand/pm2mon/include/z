@@ -1,0 +1,15 @@
+IrisConf.h:extern unsigned short switches;
+Qglobals.h:extern
+Qglobals.h:extern
+Qglobals.h:extern
+Qglobals.h:extern
+common.h:	/* 0x224 (0x02) */	/* mbmem parameters.  external
+common.h:extern char common_area[];
+dprintf.h:extern char DEBUG;
+pm2.1.h:#define EN0		0x100	/* 0 enables external multibus memory access */
+pm2.1.h:#define EN1		0x200	/* 0 enables external multibus memory
+pm2map.h:extern char *MBioVA;
+pm2map.h:extern char *MBMemVA;
+pm2map.h:extern char *MBMemArea;
+pm2map.h:extern long MBMemSize;
+pm2map.h:extern long MBioSize;

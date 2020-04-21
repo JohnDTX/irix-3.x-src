@@ -1,0 +1,52 @@
+.TH SPUTL 3X
+.SH NAME
+sputl, sgetl \- access long numeric data in a machine independent fashion
+.SH SYNOPSIS
+.nf
+.B sputl ( value, buffer )
+.B long value;
+.B char \(**buffer;
+.PP
+.B long sgetl ( buffer )
+.B char \(**buffer;
+.fi
+.SH DESCRIPTION
+.PP
+.IR sputl\^ (3X)
+will take the 4 bytes of the long
+.I value
+and place them in memory starting at the address pointed to by 
+.IR buffer .
+The ordering of the bytes is the same across all machines.
+.I Sgetl\^
+will retrieve the 4 bytes in memory starting at the address
+pointed to by 
+.IR buffer
+and return the long value in the byte ordering of the host machine.
+.PP
+The usage of 
+.IR sputl\^ (3X)
+and
+.IR sgetl\^
+in combination provides a machine independent way of storing long numeric
+data in an
+.SM ASCII
+file.  The numeric data stored in the portable archive
+file format (see
+.IR ar (4))
+is written and read into/from buffers with 
+.IR sputl\^ (3X)
+and
+.IR sgetl\^
+respectively.
+.PP
+A program which uses these functions must be loaded with the object file access routine library
+.ie '\*p'' \{\
+.BR libld.a .
+\}
+.el \{\
+.BR \s-1LIBDIR\s+1\/libld.a .
+\}
+.SH SEE ALSO
+ar(4).
+.\"	@(#)sputl.3x	5.1 of 10/24/83

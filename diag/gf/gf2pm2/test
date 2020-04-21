@@ -1,0 +1,11 @@
+I added your fifo tests to test/gf2pm2.
+The sequence to use is:
+	S   ft<n>   c#    ft<n>    c#   ......
+where <n> is the test pattern number:
+	0  floating 1, floating 0, other misc. data
+	1  all 0's
+	2  all 1's
+	3  checker
+	4  other checker
+
+Eventually I will make it a little more convenient to run.

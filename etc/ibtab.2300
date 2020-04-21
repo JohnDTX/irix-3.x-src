@@ -1,0 +1,6 @@
+#
+# ibfile:control_file:nodeno:flags:ieee_addr:ppoll_code:comment
+#
+/dev/ib0:/dev/ib0:0:VALID|SWAB|SRQ|PPC     :7:013:board 0 self
+/dev/ib1:/dev/ib0:1:VALID|     SRQ         :5:010:board 0 to host
+/dev/ib2:/dev/ib0:2:VALID|     SRQ         :5:012:board 0 to gpib host

@@ -1,0 +1,17 @@
+Kurt Akeley
+13 May 1984
+Changes to memtest for inclusion in bpcd
+
+    1.	Added typedef "long jmp_buf[16]" to mem.h to avoid depending
+	on setjmp.h.
+
+    2.	Added character argument to memtest so that it sets its global
+	"verbose" itself.  Avoids exporting any globals to bpcd.
+
+    3.	Changed end and edata to _end and _edata in memtest.c
+
+    4.	Attempted to have memtest return the number of errors encountered.
+	There are 3 return statements in memtest.  Two looked like initial
+	error conditions, so I had them return 1.  The third is at the
+	end, so I had it return memterrs.  I'm not at all sure that these
+	changes really do the job.

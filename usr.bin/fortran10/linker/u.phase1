@@ -1,0 +1,664 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: U.PHASE1.TEXT                            *)
+(*                                                                           *)
+(*          (C) Copyright 1982, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               20-Jun-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure phase1(var fthisfile: filerec);
+  var firstbyte: integer;
+  
+  procedure incode(LibraryFlag: Boolean; firstbyte: integer);
+    var i: integer; DoneFlag: Boolean;
+
+    { +----+ }
+    { | 80 | }
+    { +----+ }
+    
+    procedure head1block;
+      var blocksize,size: integer; lname: alfa8; comment: string50;
+          lseg: psegment; lmod,mmod: pmodlist; mblock,mbyte: integer;
+          ExitFlag: Boolean;
+    begin
+    mblock := inblock + (inword - 1) div 256;
+    mbyte := ((inword - 1) mod 256)*2;
+    blocksize := next3bytes;
+    reada8(lname);
+    reada8(lname);
+    size := next4bytes;
+    reads25(comment,blocksize - 24);
+    lseg := lookupsegment(lname);
+    if lseg = nil
+    then begin {New segment, guaranteed to fit}
+         new(lseg);
+         with lseg^ do begin
+              segname := lname; llink := nil; rlink := nil;
+              nextseg := nil; jtbaseloc := 0; modlist := nil;
+              codesize := 0; segreloclist := nil; reloclist := nil;
+              segnum := nextsegnum; nextsegnum := nextsegnum + 1;
+              if nextsegnum > 128 then error('Too many segments');
+              end;
+         entersegment(lseg);
+         end
+    else begin
+         if (lseg^.codesize + size) > 32767
+         then begin {Module won't fit}
+              lseg := overflowsegs; ExitFlag := FALSE;
+              while (not ExitFlag) and (lseg <> nil) do 
+                    if (lseg^.codesize + size) <= 32767
+                    then ExitFlag := TRUE
+                    else lseg := lseg^.llink;
+              if lseg = nil
+              then begin
+                   new(lseg);
+                   with lseg^ do begin
+                        segname := 'OVERFLOW'; llink := overflowsegs; 
+                        rlink := nil; jtbaseloc := 0; modlist := nil;
+                        codesize := 0; segreloclist := nil; reloclist := nil;
+                        segnum := nextsegnum; nextsegnum := nextsegnum + 1;
+                        if nextsegnum > 128 then error('Too many segments');
+                        end;
+                   overflowsegs := lseg;
+                   lseg^.nextseg := seglist; seglist := lseg;
+                   end;
+              end;
+         reloclist := lseg^.segreloclist;
+         if reloclist <> nil
+         then begin
+              lastreloc := reloclist;
+              while lastreloc^.nextint <> nil do
+                    lastreloc := lastreloc^.nextint;
+              end;
+         end;
+    thisseg := lseg;
+    baseloc := lseg^.codesize;
+    new(lmod);
+    with lmod^ do begin
+         modinfile := thisfile; modblock := mblock;
+         modbyte := mbyte; nextmodule := nil;
+         end;
+    if thisseg^.modlist = nil
+    then thisseg^.modlist := lmod
+    else begin
+         mmod := thisseg^.modlist;
+         while mmod^.nextmodule <> nil do
+               mmod := mmod^.nextmodule;
+         mmod^.nextmodule := lmod;
+         end;
+    if DebugFlag
+    then writeln(listfile,'Head Block ',lname,'   ',comment);
+    end; {head1block}
+    
+    { +----+ }
+    { | 81 | }
+    { +----+ }
+    
+    procedure end1block;
+      var blocksize,modcodesize: integer;
+    begin
+    blocksize := next3bytes;
+    modcodesize := next4bytes;
+    baseloc := baseloc + modcodesize;
+    thisseg^.codesize := baseloc;
+    if blocksize <> 8
+    then error('End block size <> 8');
+    if LibraryFlag then DoneFlag := TRUE;
+    end; {end1block}
+    
+    { +----+ }
+    { | 82 | }
+    { +----+ }
+    
+    procedure entry1block;
+      var blocksize,lloc: integer; lname,uname: alfa8; comment: string50;
+          lsymbol: psymbol; s: string[8]; i: integer; lref: preflist;
+    begin
+    blocksize := next3bytes;
+    reada8(lname);
+    if LocalName(lname)
+    then inclname(lname,lprocbase);
+    reada8(uname);
+    lloc := next4bytes;
+    reads25(comment,blocksize - 24);
+    lsymbol := lookupname(lname);
+    if lsymbol = nil
+    then begin
+         if lname[1] <> ' ' {Don't put block data name in nametree}
+         then begin
+           new(lsymbol);
+           with lsymbol^ do
+                begin linkname := lname; username := uname;
+                llink := nil; rlink := nil;
+                Defined := TRUE; loc := baseloc + lloc; sreflist := nil;
+                seg := thisseg; Visible := FALSE;
+                end;
+           entername(lsymbol);
+           end;
+         end
+    else with lsymbol^ do
+              if Defined
+              then begin
+                   s := '12345678';
+                   for i := 1 to 8 do s[i] := lname[i];
+                   error(concat('Double defined: ',s));
+                   end
+              else begin
+                   Defined := TRUE;
+                   loc := baseloc + lloc;
+                   seg := thisseg;
+                   if not lsymbol^.Visible
+                   then begin
+                        lref := lsymbol^.sreflist;
+                        while lref <> nil do
+                              if lref^.refseg <> thisseg^.segnum
+                              then begin
+                                   lsymbol^.Visible := TRUE;
+                                   lref := nil;
+                                   end
+                              else lref := lref^.nextref;
+                        end;
+                   end;
+    if DebugFlag
+    then writeln(listfile,'Entry Block ',lname,' - ',uname,'   ',comment);
+    end; {entry1block}
+    
+    { +----+      +----+ }
+    { | 83 |  or  | 89 | }
+    { +----+      +----+ }
+    
+    procedure extern1block(FShortRef: Boolean);
+      var blocksize,bytesleft,loc: integer; lname,uname: alfa8;
+          lsymbol: psymbol; lref: preflist;
+    begin
+    blocksize := next3bytes;
+    reada8(lname);
+    if LocalName(lname)
+    then inclname(lname,lprocbase);
+    reada8(uname);
+    lsymbol := lookupname(lname);
+    if lsymbol = nil
+    then begin
+         new(lsymbol);
+         with lsymbol^ do
+              begin linkname := lname; username := uname;
+              llink := nil; rlink := nil;
+              sreflist := nil; Visible := FALSE; Defined := FALSE;
+              end;
+         entername(lsymbol);
+         end
+    else if lsymbol^.Defined
+         then if lsymbol^.seg <> thisseg
+              then lsymbol^.Visible := TRUE;
+    bytesleft := blocksize - 20;
+    while bytesleft > 0 do
+          begin
+          if FShortRef
+          then begin loc := nextword; bytesleft := bytesleft - 2; end
+          else begin loc := next4bytes; bytesleft := bytesleft - 4; end;
+          new(lref);
+          with lref^ do begin
+               refloc := loc + baseloc;
+               refseg := thisseg^.segnum;
+               ShortRef := FShortRef;
+               nextref := lsymbol^.sreflist;
+               lsymbol^.sreflist := lref;
+               end;
+          end;
+    end; {extern1block}
+    
+    { +----+ }
+    { | 84 | }
+    { +----+ }
+    
+    procedure start1block;
+      var lloc,blocksize: integer; comment: string50;
+    begin
+    blocksize := next3bytes;
+    lloc := next4bytes;
+    globalsize := next4bytes;
+    reads25(comment,blocksize - 12);
+    if StartFlag
+    then error('Multiple start locations')
+    else begin
+         startloc := lloc + baseloc;
+         startseg := thisseg;
+         StartFlag := TRUE;
+         with nametree^ do begin
+              Defined := TRUE; loc := startloc; seg := thisseg;
+              end;
+         end;
+    end; {start1block}
+    
+    { +----+ }
+    { | 85 | } { Self-relocating }
+    { +----+ }
+    
+    procedure code1block;
+      var blocksize: longint;
+    begin
+    blocksize := next3bytes; skip(blocksize - 4);
+    end; {code1block}
+    
+    { +----+ }
+    { | 86 | } { Relocation Block }
+    { +----+ }
+    
+    procedure reloc1block;
+      var blocksize,loc,i: integer; lpint: pintlist;
+    begin
+    blocksize := next3bytes;
+    for i := 1 to (blocksize - 4) div 4 do
+        begin
+        loc := next4bytes;
+        new(lpint); lpint^.nextint := nil; lpint^.intval := loc + baseloc;
+        if reloclist = nil
+        then reloclist := lpint
+        else lastreloc^.nextint := lpint;
+        lastreloc := lpint;
+        end;
+    end; {reloc1block}
+    
+    { +----+ }
+    { | 87 | } { FORTRAN Data Area Relocated by Function Address }
+    { +----+ }
+    
+    procedure fdfrel1block;
+      var blocksize: integer; lfdfreloc: pfdreloc; lsymbol: psymbol;
+          dataname,funname: alfa8; doffset: longint;
+    begin
+    blocksize := next3bytes;
+    reada8(dataname);
+    doffset := next4bytes;
+    reada8(funname);
+    if LocalName(funname)
+    then inclname(funname,lprocbase);
+    lsymbol := lookupname(funname);
+    if lsymbol = nil
+    then begin
+         new(lsymbol);
+         with lsymbol^ do begin
+              linkname := funname; username := funname;
+              llink := nil; rlink := nil;
+              sreflist := nil; Visible := TRUE; Defined := FALSE;
+              end;
+         entername(lsymbol);
+         end
+    else lsymbol^.Visible := TRUE;
+    new(lfdfreloc);
+    with lfdfreloc^ do begin
+      dname := dataname; daddr := doffset; rname := funname;
+      next := fdfreloclist; fdfreloclist := lfdfreloc;
+      end;
+    CConstructs := TRUE;
+    end; {fdfrel1block}
+    
+    { +----+ }
+    { | 88 | } { Not Used }
+    { +----+ }
+    
+    { +----+ }
+    { | 8A | } { FORTRAN Data Area Definition Block }
+    { +----+ }
+    
+    procedure fddef1block;
+      var blocksize,i,junk: integer; lftndata: pfcommon; lname: alfa8;
+          comsize: addrrange;
+    begin
+    blocksize := next3bytes;
+    reada8(lname);
+    comsize := next4bytes;
+    lftndata := lookupfcommon(ftndatatree,lname);
+    with lftndata^ do
+         if Defined
+         then begin
+              if size < comsize
+              then size := comsize;
+              end
+         else begin
+              Defined := TRUE;
+              size := comsize;
+              next := ftndatalist;
+              ftndatalist := lftndata;
+              end;
+    for i := 17 to blocksize do
+        junk := nextbyte;
+    end; {fddef1block}
+    
+    { +----+ }
+    { | 8B | } { FORTRAN Data Area Initialization Block }
+    { +----+ }
+    
+    procedure fdinit1block;
+      var blocksize,i,addr,junk,mblock,mbyte: integer; lname: alfa8;
+          lftndata: pfcommon; lmodlist: pmodlist; ExitFlag: Boolean;
+          thispdata, lastpdata, lpdatainit: pdatainit;
+    begin
+    mblock := inblock + (inword - 1) div 256;
+    mbyte := ((inword - 1) mod 256)*2;
+    new(lmodlist);
+    with lmodlist^ do begin
+         modinfile := thisfile; nextmodule := nil;
+         modblock := mblock; modbyte := mbyte;
+         end;
+    blocksize := next3bytes;
+    reada8(lname);
+    lftndata := lookupfcommon(ftndatatree,lname);
+    new(lpdatainit);
+    with lpdatainit^ do begin
+      datamodule := lmodlist; dataloc := next4bytes;
+      datanext := nil;
+      if lftndata^.initlist = nil
+      then lftndata^.initlist := lpdatainit
+      else 
+        if dataloc < lftndata^.initlist^.dataloc
+        then begin
+          datanext := lftndata^.initlist;
+          lftndata^.initlist := lpdatainit;
+          end
+        else begin
+          if dataloc > lftndata^.lastinit^.dataloc
+          then thispdata := lftndata^.lastinit 
+          else thispdata := lftndata^.initlist;
+          ExitFlag := FALSE;
+          repeat
+            lastpdata := thispdata;
+            thispdata := thispdata^.datanext;
+            if thispdata <> nil
+            then ExitFlag := thispdata^.dataloc > dataloc
+            else ExitFlag := TRUE;
+          until ExitFlag;
+          lpdatainit^.datanext := thispdata; 
+          lastpdata^.datanext := lpdatainit;
+          end;
+      lftndata^.lastinit := lpdatainit;
+      end;
+    for i := 17 to blocksize do
+        junk := nextbyte;
+    if odd(blocksize) then junk := nextbyte;
+    end; {fdinit1block}
+    
+    { +----+ }
+    { | 8C | } { FORTRAN Data Area Reference Block }
+    { +----+ }
+    
+    procedure fdref1block;
+      var blocksize,loc,i: integer; lpint: pintlist; lfcommon: pfcommon;
+          lref: preflist; lname: alfa8;
+    begin
+    blocksize := next3bytes;
+    reada8(lname);
+    lfcommon := lookupfcommon(ftndatatree,lname);
+    for i := 1 to (blocksize - 12) div 4 do
+        begin
+        loc := next4bytes;
+        new(lref);
+        with lref^ do begin
+             refloc := loc + baseloc;
+             refseg := thisseg^.segnum;
+             nextref := lfcommon^.reflist;
+             lfcommon^.reflist := lref;
+             end;
+        end;
+    end; {fdref1block}
+    
+    { +----+ }
+    { | 8D | } { FORTRAN Data Area Relocation Block }
+    { +----+ }
+    
+    procedure fdrel1block;
+      var blocksize: integer; lfdreloc: pfdreloc;
+    begin
+    blocksize := next3bytes;
+    new(lfdreloc);
+    with lfdreloc^ do begin
+      reada8(dname); daddr := next4bytes; reada8(rname);
+      next := fdreloclist; fdreloclist := lfdreloc;
+      end;
+    CConstructs := TRUE;
+    end; {fdrel1block}
+    
+    { +----+ }
+    { | A0 | } { Var/type Def }
+    { +----+ }
+    
+    procedure vartyp1block;
+      var blocksize: longint; lmodlist: pmodlist; mblock,mbyte: integer;
+    begin
+    mblock := inblock + (inword - 1) div 256;
+    mbyte := ((inword - 1) mod 256)*2;
+    new(lmodlist);
+    with lmodlist^ do begin
+         modinfile := thisfile; nextmodule := nil;
+         modblock := mblock; modbyte := mbyte;
+         end;
+    if vartypelist = nil
+    then vartypelist := lmodlist
+    else lastvartype^.nextmodule := lmodlist;
+    lastvartype := lmodlist;
+    blocksize := next3bytes;
+    if odd(blocksize) then blocksize := blocksize + 1;
+    skip(blocksize - 4);
+    end; {vartyp1block}
+    
+    { +----+ }
+    { | A1 | } { Break Points }
+    { +----+ }
+    
+    procedure bpoint1block;
+      var blocksize: longint; lmodlist: pmodlist; mblock,mbyte: integer;
+    begin
+    mblock := inblock + (inword - 1) div 256;
+    mbyte := ((inword - 1) mod 256)*2;
+    new(lmodlist);
+    with lmodlist^ do begin
+         modinfile := thisfile; nextmodule := nil;
+         modblock := mblock; modbyte := mbyte;
+         end;
+    if bpointlist = nil
+    then bpointlist := lmodlist
+    else lastbpoint^.nextmodule := lmodlist;
+    lastbpoint := lmodlist;
+    blocksize := next3bytes;
+    if odd(blocksize) then blocksize := blocksize + 1;
+    skip(blocksize - 4);
+    end; {bpoint1block}
+    
+  begin {incode}
+  DoneFlag := FALSE; i := firstbyte;
+  while (i <> 0) and not DoneFlag do
+        begin
+        if DebugFlag
+        then begin
+             write(listfile,'*** Block ');
+             printhex(listfile,i,2);
+             writeln(listfile);
+             end;
+        i := i - 128;
+        case i of
+             0: head1block;
+             1: end1block;
+             2: entry1block;
+             3: extern1block(FALSE);
+             4: start1block;
+             5: code1block;
+             6: reloc1block;
+             7: fdfrel1block;
+             9: extern1block(TRUE);
+            10: fddef1block;
+            11: fdinit1block;
+            12: fdref1block;
+            13: fdrel1block;
+            32: vartyp1block;
+            33: bpoint1block;
+            otherwise: begin
+                       error('Bad Block'); write('*** Value = ');
+                       printhex(output,i + 128,2); writeln(' ***');
+                       DoneFlag := TRUE;
+                       end;
+        end; (* case *)
+        i := nextbyte;
+        end;
+  end; {incode}
+  
+  procedure unitblock;
+    var junk,lword,lblock,lcommonsize,firstbyte: integer;
+        ldiskaddr: pdiskaddr; lcommon: pcommon; lname: alfa8;
+  begin
+  junk := next3bytes;
+  reada8(lname);
+  lblock := nextword; lblock := lblock*256 + nextbyte; lword := nextbyte;
+  if odd(lblock) then lword := lword + 256;
+  lblock := lblock div 2; lword := lword div 2;
+  junk := next4bytes; junk := next4bytes;
+  lcommonsize := next4bytes;
+  lcommon := commonlist;
+  while lcommon <> nil do begin
+    if lname = lcommon^.name then error('Double defined unit');
+    lcommon := lcommon^.nextcommon;
+    end;
+  new(lcommon);
+  with lcommon^ do begin
+    nextcommon := commonlist; commonlist := lcommon;
+    name := lname;
+    end;
+  inblock := lblock; inword := lword;
+  readinfile('unit file');
+  new(ldiskaddr);
+  with ldiskaddr^ do
+       begin block := lblock; byte := lword*2; next := nil; end;
+  fthisfile.libflag := TRUE; fthisfile.modreflist := ldiskaddr;
+  HalfFlag := FALSE; firstbyte := nextbyte;
+  incode(FALSE,firstbyte);
+  end; {unitblock}
+  
+  procedure libmodblock(firstbyte: integer);
+    type pmodrec = ^modrec;
+         modrec = record next: pmodrec;
+                         modno,modbyte,modblock: integer;
+                         reflist: pintlist;
+                         Included: Boolean;
+                  end;
+    var i,k,l,junk,lword,lblock,globsize,blocksize,mods: integer;
+        ldiskaddr,lastmodref: pdiskaddr; lname: alfa8;
+        lmod,firstmod,lastmod: pmodrec; lpint: pintlist; lsymbol: psymbol;
+    
+    procedure includemodule(moduleno: integer);
+      var lmod: pmodrec; lpint: pintlist;
+    begin
+    lmod := firstmod;
+    while lmod <> nil do
+          if lmod^.modno = moduleno
+          then if lmod^.Included
+               then lmod := nil
+               else begin
+                    lmod^.Included := TRUE;
+                    lpint := lmod^.reflist;
+                    while lpint <> nil do
+                          begin
+                          includemodule(lpint^.intval);
+                          lpint := lpint^.nextint;
+                          end;
+                    lmod := nil;
+                    end
+          else lmod := lmod^.next;
+    end; {includemodule}
+    
+  begin {libmodblock}
+  firstmod := nil; mods := 0;
+  fthisfile.LibFlag := TRUE; fthisfile.modreflist := nil;
+  while firstbyte = 144 do
+        begin
+        blocksize := next3bytes; reada8(lname);
+        junk := next4bytes; lblock := nextword;
+        lblock := lblock*256 + nextbyte; lword := nextbyte;
+        if odd(lblock) then lword := lword + 256;
+        lblock := lblock div 2; lword := lword div 2;
+        new(lmod);
+        with lmod^ do begin
+             next := nil; modno := mods; mods := mods + 1;
+             modbyte := lword*2; modblock := lblock;
+             reflist := nil; Included := FALSE;
+             end;
+        if firstmod = nil
+        then firstmod := lmod
+        else lastmod^.next := lmod;
+        lastmod := lmod;
+        junk := next4bytes; junk := next4bytes; k := nextword;
+        for i := 1 to k do begin
+            l := nextword;
+            new(lpint);
+            with lpint^ do begin
+                 intval := l; nextint := lmod^.reflist;
+                 lmod^.reflist := lpint;
+                 end;
+            end;
+        firstbyte := nextbyte;
+        end;
+  if firstbyte = 150 {Library Starting Address Block}
+  then begin
+       blocksize := next3bytes; l := nextword;
+       if not StartFlag then includemodule(l);
+       firstbyte := nextbyte;
+       end;
+  while firstbyte = 145 do {Library Entry Block}
+        begin
+        blocksize := next3bytes; reada8(lname);
+        l := nextword; junk := next4bytes;
+        lsymbol := lookupname(lname);
+        if lsymbol <> nil
+        then if not lsymbol^.Defined
+             then includemodule(l);
+        firstbyte := nextbyte;
+        end;
+  lmod := firstmod;
+  while lmod <> nil do
+        with lmod^ do begin
+             if Included
+             then begin
+                  if (modblock < inblock) or (modblock >= nextinblock)
+                  then begin
+                       inblock := modblock;
+                       readinfile('library module');
+                       end;
+                  inword := (modblock - inblock)*256 + (modbyte div 2);
+                  HalfFlag := FALSE; firstbyte := nextbyte;
+                  incode(TRUE,firstbyte);
+                  new(ldiskaddr);
+                  with ldiskaddr^ do begin
+                       block := modblock; byte := modbyte; next := nil;
+                       end;
+                  if fthisfile.modreflist = nil
+                  then fthisfile.modreflist := ldiskaddr
+                  else lastmodref^.next := ldiskaddr;
+                  lastmodref := ldiskaddr;
+                  end;
+             lmod := next;
+             end;
+  end; {libmodblock}
+  
+begin {phase1}
+HalfFlag := FALSE;
+firstbyte := nextbyte;
+if DebugFlag
+then begin
+     write(listfile,'File: ',fthisfile.name,'.   First byte = ');
+     printhex(listfile,firstbyte,2);
+     writeln(listfile);
+     end;
+if firstbyte = 128 { Normal }
+then begin
+     fthisfile.LibFlag := FALSE;
+     incode(FALSE,firstbyte);
+     end
+else if firstbyte = 146 { Unit Block }
+     then unitblock
+     else if firstbyte = 144 { Library Module Block }
+          then libmodblock(firstbyte)
+          else error('Bad block');
+end; {phase1}
+
+

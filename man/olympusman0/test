@@ -1,0 +1,28 @@
+if [ $# -eq 0 ]
+then
+	echo "Usage: tocrc section | \"all\" | \"tr\""
+	exit 1
+fi
+if [ $# -eq 2 ]
+then
+	: create toc input file for one section only
+
+	dirs="../[au]_man/man$1"
+	if [ $1 = 1 ]
+	then
+    		dirs="$dirs ../u_man/man1/gl2"
+	fi
+	for dir in $dirs
+	do
+	    	( cd $dir ; csh -cf "/usr/lib/getNAME -t *.$1 *.$1[a-z]" )
+	done | sort | sed > tocx$1 \
+			-e 's/\\s[-+][0-9]//g' \
+			-e 's/\\s0//g' \
+			-e 's/\\f[1234RIBP]//g' \
+			-e 's/  *\\-  */: /' \
+			-e 's/ *$/./' \
+			-e 's/.TH.*	//'
+			# remove font and size changes as they alphabetize
+			# wrong.
+
+else 

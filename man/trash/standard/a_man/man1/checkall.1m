@@ -1,0 +1,70 @@
+'\"macro stdmacro
+.TH CHECKALL 1M
+.SH NAME
+checkall \- faster file system checking procedure
+.SH SYNOPSIS
+.B /etc/checkall
+.SH DESCRIPTION
+The \f2checkall\f1 procedure is a prototype and must be modified
+to suit local conditions.  The following will serve as an
+example:
+
+.nf
+
+     # check the root file system by itself
+     /etc/fsck /dev/md0a
+
+     # dual fsck of drives 0 and 1
+     /etc/dfsck /dev/rmd0c \- /dev/rmd1[ac]
+.fi
+
+\f2Dfsck\f1 is a program that permits an operator to interact with
+two \f2fsck\f1(1M) programs at once.  To aid in this, \f2dfsck\f1 will
+print the file system name for each message to the operator.
+When answering a question from \f2dfsck\f1, the operator must
+prefix the response with a \f31\f1 or a \f32\f1 (indicating that the
+answer refers to the first or second file system group).
+
+Due to the file system load balancing required for dual
+checking, the \f2dfsck\f1(1M) command should always be executed
+through the \f2checkall\f1 shell procedure.
+
+In a practical sense, the file systems are divided as
+follows:
+
+.nf
+     fsck  root_file_system
+     dfsck file_systems_on_drive_0 \- file_systems_on_drive_1
+     dfsck file_systems_on_drive_2 \- file_systems_on_drive_3
+       \f3.\f1 \f3.\f1 \f3.\f1
+.fi
+
+A three-drive system can be handled by this
+example (assuming three file systems per drive, ipab is swap):
+
+.nf
+     fsck  /dev/rip0a
+     dfsck /dev/rip2[ab] /dev/rip0[bc] \- /dev/rip1[abc] /dev/rip2c
+.fi
+
+Note that the first file system on drive 2 is first in the
+\f2filesystems1\f1 list and is last in the \f2filesystems2\f1 list
+assuring that references to that drive will not overlap at
+execution time.
+.SH WARNINGS
+.ta \w'1.\ \ 'u
+.in +\w'1.\ \ 'u
+.ti -\w'1.\ \ 'u
+1.	Do not use \f2dfsck\f1 to check the \f2root\f1 file system.
+
+.ti -\w'1.\ \ 'u
+2.	On a check that requires a scratch file (see \f3-t\f1 above),
+be careful not to use the same temporary file for the two
+groups (this would surely scramble the file systems).
+
+.ti -\w'1.\ \ 'u
+3.	The \f2dfsck\f1 procedure is useful only if the system is set
+up for multiple physical I/O buffers.
+.ti -\w'1.\ \ 'u
+.SH "SEE ALSO"
+dfsck(1M), fsck(1M)

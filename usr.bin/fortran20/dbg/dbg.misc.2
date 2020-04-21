@@ -1,0 +1,1196 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: DBG.MISC.2.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                           All Rights Reserved.                09-Aug-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure clearregs(var fenv: envrec; fregs: setofregs);
+  var i: integer;
+begin
+for i := D0 to A7 do
+    if i in fregs
+    then if i <= D7 then fenv.d[i] := nil else fenv.a[i - 8] := nil;
+end; {clearregs}
+
+function makechuc(fch: char): char;
+begin {makechuc}
+if (fch >= 'a') and (fch <= 'z')
+then makechuc := chr(ord(fch) - 32)
+else makechuc := fch;
+end; {makechuc}
+
+procedure uppercase(var fname: string63);
+  var i: integer; ch: char;
+begin
+for i := 1 to length(fname) do
+    fname[i] := makechuc(fname[i]);
+end; {uppercase}
+
+procedure lowercase(var fname: string63);
+  var i: integer;
+begin
+for i := 1 to length(fname) do
+  if (fname[i] >= 'A') and (fname[i] <= 'Z')
+  then fname[i] := chr(ord(fname[i]) + 32);
+end; {lowercase}
+
+procedure linkname(fstr: string63; var fname: alfa31; var flen: integer);
+  var i: integer; lname: alfa8;
+begin
+if fstr[1] = '$'
+then begin lname := '$0000000'; moveleft(lname,fname,8); end;
+if length(fstr) > 31 then flen := 31 else flen := length(fstr);
+for i := 1 to flen do
+    fname[i] := fstr[i];
+end; {linkname}
+
+function nxtusrindex(var fname: string63; first: integer): integer;
+  var i: integer; lname, lname2: string63; lentry: pentryrec;
+      pfnam,plnam,plnam2: pbyte; namlen: integer;
+begin
+lname := fname; uppercase(lname); namlen := length(lname);
+lname2 := fname; lowercase(lname2);
+plnam := pointer(ord(@lname) + 1); pfnam := pointer(ord(@fname) + 1);
+plnam2 := pointer(ord(@lname2) + 1);
+for i := first + 1 to numentrys - 1 do begin
+    lentry := getpentry(i);
+    with lentry^ do begin
+         if username <> nil
+         then if (language = PASCAL) or (language = FORTRAN) or
+                 (language = FTNENTRY)
+              then begin
+                   if namEQnam(username,usernlen,plnam,namlen) or
+                      namEQnam(username,usernlen,plnam2,namlen)
+                   then begin nxtusrindex := i; exit(nxtusrindex); end;
+                   end
+              else begin
+                   if namEQnam(username,usernlen,pfnam,namlen)
+                   then begin nxtusrindex := i; exit(nxtusrindex); end;
+                   end;
+         end;
+    end;
+nxtusrindex := -1;
+end; {nxtusrindex}
+
+function usrindex(fname: string63): integer;
+  var index: integer;
+begin
+index := nxtusrindex(fname,-1); usrindex := index;
+if index >= 0
+then begin
+     index := nxtusrindex(fname,index);
+     if index > 0 then usrindex := -2;
+     end;
+end; {usrindex}
+
+function FindField(fieldlist: pbyte; fname: string63; FPacked: Boolean;
+            var foffset: longint; var ftypeno,flbit,fnbit: integer;
+            var FSigned: Boolean): Boolean;
+  var lname: string63;
+begin
+FindField := FALSE;
+if fieldlist <> nil
+then while fieldlist^ <> 0 do
+           begin
+           nextfield(fieldlist,FPacked,lname,
+                     foffset,ftypeno,flbit,fnbit,FSigned);
+           if lname = fname
+           then begin FindField := TRUE; exit(FindField); end;
+           end;
+end; {FindField}
+
+function FindVar(fvarlist: pbyte; vname: string63;
+            var vtypeno,vkind,vreg: integer; var voffset: longint): Boolean;
+  var lname: string63;
+begin
+FindVar := FALSE;
+if fvarlist <> nil
+then while fvarlist^ <> 0 do
+           begin
+           nextvar(fvarlist,lname,vtypeno,vkind,vreg,voffset);
+           if lname = vname
+           then begin FindVar := TRUE; exit(FindVar); end;
+           end;
+end; {FindVar}
+
+function FindVarAll(var fname: string63; var ftypeno,fkind,freg: integer;
+                    var foffset: longint; var flev: integer;
+                    var flang: langs): Boolean;
+  var lname: string63; varlist: pbyte; llev: integer; lentry: pentryrec;
+begin
+FindVarAll := FALSE;
+for llev := envlevel downto 1 do begin
+    if display[llev].dentryno < 4095
+    then begin
+         lentry := getpentry(display[llev].dentryno);
+         varlist := lentry^.symbols;
+         flang := lentry^.language;
+         end
+    else begin varlist := nil; flang := UNKNOWN; end;
+    lname := fname;
+    if (flang = PASCAL) or (flang = FORTRAN)
+    then begin
+      uppercase(lname);
+      if length(lname) > 31 then lname[0] := chr(31);
+      end;
+    if FindVar(varlist,lname,ftypeno,fkind,freg,foffset)
+    then begin flev := llev; FindVarAll := TRUE; exit(FindVarAll); end;
+    end;
+end; {FindVarAll}
+
+function breakno(faddress: longint): integer;
+  var i: integer;
+begin
+breakno := 0;
+for i := 1 to 100 do
+    with bpoint[i] do
+         if (BSet or TSet) and (address = faddress)
+         then begin
+              breakno := i;
+              exit(breakno);
+              end;
+end; {breakno}
+
+procedure clearbreak(faddress: longint; bkind: integer);
+  var i: integer;
+begin
+i := breakno(faddress);
+if i <> 0
+then with bpoint[i] do begin
+          if bkind = 0 then BSet := FALSE else TSet := FALSE;
+          if BSet then writeln('Breakpoint remains set');
+          if TSet then writeln('Tracepoint remains set');
+          if not (BSet or TSet)
+          then if ENVIRONMENT = GENIX
+               then setub(faddress,oldinst)
+               else setuw(faddress,oldinst);
+          end
+else writeln('*** No Break or Trace at ',faddress:8 hex,' ***');
+end; {clearbreak}
+
+procedure prbreak(i: integer);
+begin
+with bpoint[i] do begin
+     if BSet or TSet
+     then begin
+          if BSet 
+          then if TSet
+               then write('B/')
+               else write('B $');
+          if TSet then write('T $');
+          write(address:6 hex,': ');
+          prfullloc(address,TRUE);
+          (* write(' INST=',oldinst:4 hex); *)
+          if (brcount > 0) or (brcountinit > 0)
+          then write(' Count=',brcount+1:1,'/',brcountinit+1:1);
+          writeln;
+          end
+     else writeln('*** PRBREAK(',i,') not set ***');
+     end;
+end; {prbreak}
+
+procedure setbreak(faddress: longint; bkind,count,countinit: integer);
+  var i,j: integer;
+begin
+if ENVIRONMENT <> GENIX
+then
+  if odd(faddress)
+  then begin writeln('???Odd address'); exit(setbreak); end;
+if count > 0 then count := count - 1 else count := 0;
+if countinit > 0 then countinit := countinit - 1 else countinit := 0;
+i := breakno(faddress);
+if i = 0
+then begin {New Breakpoint Address}
+     j := 1;
+     while (i = 0) and (j <= 100) do begin
+         with bpoint[j] do
+              if not (BSet or TSet)
+              then begin
+                   i := j; address := faddress;
+                   if ENVIRONMENT = GENIX
+                   then begin 
+                        oldinst := getub(faddress); setub(faddress,TRAP7);
+                        end
+                   else begin
+                        oldinst := getuw(faddress); setuw(faddress,TRAP7);
+                        end;
+                   end;
+         j := j + 1;
+         end;
+     end
+else with bpoint[i] do begin
+          if bkind = 0
+          then begin {Setting Break}
+               if BSet then write('Break already set. ');
+               if TSet then write('Trace also set. ');
+               end
+          else begin {Setting Trace}
+               if TSet then write('Trace already set. ');
+               if BSet then write('Break also set. ');
+               end;
+          if (count <> brcount) or (countinit <> brcountinit)
+          then writeln('Updating count.')
+          else writeln;
+          end;
+if i > 0
+then with bpoint[i] do begin
+          if bkind = 0 then BSet := TRUE else TSet := TRUE; 
+          brcount := count; brcountinit := countinit;
+          end
+else writeln('*** Break Point Table Full ***');
+end; {setbreak}
+
+function typesize(ftypeno: integer): longint;
+  var i,j,elsperbyte: integer; lo,hi,numels: longint;
+begin
+typesize := 0;
+if ftypeno <= -100
+then typesize := (-ftypeno) - 100
+else case ftypeno of
+    -1,
+    -4,
+    -7,
+   -11,
+   -16: typesize := 1;
+    -2,
+    -5,
+    -8,
+   -12: typesize := 2;
+    -3,
+    -6,
+    -9,
+   -13: typesize := 4;
+   -10,
+   -15: typesize := 8;
+   -14: typesize := 90;
+  otherwise: if ftypeno > 0
+             then begin
+                  i := ftypeno mod 128; j := ftypeno div 128;
+                  with types[j]^[i]^ do begin
+                       case form of
+                         SCALAR: if maxconst > 127
+                                 then typesize := 2
+                                 else typesize := 1;
+                         SUBRANGE: if (min >= -128) and (max <= 127)
+                                   then typesize := 1
+                                   else if (min >= -32768) and (max <= 32767)
+                                        then typesize := 2
+                                        else typesize := 4;
+                         POINTERS: typesize := 4;
+                         SETS:    begin
+                                  getbounds(setof,lo,hi);
+                                  i := hi - lo;
+                                  typesize := ((i div 16) + 1)*2;
+                                  end;
+                         ARRAYS:  begin
+                                  getbounds(indexedby,lo,hi);
+                                  numels := hi - lo + 1;
+                                  if PckdType
+                                  then begin
+                                       i := bitsperel;
+                                       if i = 0 then i := 1;
+                                       elsperbyte := 8 div i;
+                                       lo := (numels + elsperbyte - 1)
+                                              div elsperbyte;
+                                       if lo > 1
+                                       then if odd(lo) then lo := lo + 1;
+                                       typesize := lo;
+                                       end
+                                  else typesize := typesize(arrayof)*numels;
+                                  end;
+                         RECORDS: typesize := recsize;
+                         STRINGS,
+                         SCONST:  begin
+                                  i := stringlen + 1;
+                                  if odd(i) then i := i + 1;
+                                  typesize := i;
+                                  end;
+                         FCHAR:   typesize := charlen;
+                         FARRAY:  begin
+                                  typesize := (bounds[dims].hi -
+                                               bounds[dims].lo + 1)*
+                                               typesize(farrayof);
+                                  end;
+                       end; {case}
+                       end;
+                  end
+             else typesize := 0;
+  end; {case}
+end; {typesize}
+
+procedure getaddr(var faddr: addr; var vtypeno: integer; vkind,vreg: integer;
+                  voffset: longint; var fenv: envrec);
+  var p: record case integer of
+                  0: (l: plong);
+                  1: (li: longint);
+         end;
+      llong: longint;
+begin
+p.l := nil; faddr.address := 0; faddr.PackedFlag := FALSE;
+case vkind of
+  0, { d(r) }
+  1, { *d(r) }
+  6, { d(r) long d}
+  7: { *d(r) long d}
+     begin
+     if ENVIRONMENT = GENIX
+     then
+       if vreg = 13
+       then p.l := fenv.sb
+       else
+         if vreg = 14
+         then p.l := fenv.fp
+         else p.l := nil
+     else {68000}
+       if vreg >= 8
+       then p.l := fenv.a[vreg - 8]
+       else p.l := fenv.d[vreg];
+     if p.l <> nil
+     then begin
+          p.li := getul(p.li) + voffset;
+          if odd(vkind)
+          then begin
+               if vtypeno = -100 {character*(*)}
+               then begin
+                    llong := getul(p.li - 4);
+                    if llong <= 255 then vtypeno := (-100) - llong;
+                    end;
+               p.li := getul(p.li);
+               end;
+          end
+     else writeln('?Base reg value unknown');
+     end;
+  2: { r }
+     begin
+     if vreg >= 8
+     then p.l := fenv.a[vreg - 8]
+     else p.l := fenv.d[vreg];
+     if p.l = nil
+     then writeln('?Reg value unknown')
+     else
+       if HOSTSEX = MALE
+       then p.li := p.li + (4 - typesize(vtypeno));
+     end;
+  3: { *r }
+     begin
+     if vreg >= 8
+     then p.l := fenv.a[vreg - 8]
+     else p.l := fenv.d[vreg];
+     if p.l <> nil
+     then p.li := getul(p.li)
+     else writeln('?Reg value unknown');
+     end;
+  4: { 32 bit }
+     begin
+     p.li := voffset + database;
+     end;
+end; {case}
+if p.l = nil then vtypeno := 0;
+faddr.address := p.li;
+end; {getaddr}
+
+procedure setvalu(var fvalu: valu; faddr: addr; ftypeno: integer);
+  label 9;
+  var OK,PackedFlag: Boolean; lkind,i,j,mask,val: integer;
+      lo,hi: longint; pp: pbyte; lreal: real; li, llong: longint;
+begin
+OK := FALSE;
+if (faddr.address <> 0) and (fvalu.vkind <> 0)
+then begin
+     
+     { Set required vkind }
+     
+     li := faddr.address; lkind := -1;
+     if ftypeno <= -100
+     then lkind := 6
+     else
+       case ftypeno of
+         -1,
+         -2,
+         -3,
+         -4,
+         -5,
+         -6: lkind := 2;
+         -7,
+         -8,
+        -16: begin
+             lkind := 4;
+             if (fvalu.vkind = 6 {STRING}) and (length(fvalu.svalu) = 1)
+             then begin fvalu.vkind := 4; fvalu.cvalu := fvalu.svalu[1]; end;
+             end;
+         -9: lkind := 8;
+        -10: lkind := 3;
+        -11,
+        -12,
+        -13: begin {BOOL}
+             lkind := 1;
+             if (fvalu.vkind = 2 {INT}) and
+                ((fvalu.ivalu = 0) or (fvalu.ivalu = 1))
+                then lkind := 2;
+             end;
+        -15: lkind := 7;
+       otherwise:
+          if ftypeno > 0
+          then begin
+               i := ftypeno mod 128; j := ftypeno div 128;
+               with types[j]^[i]^ do begin
+                    PackedFlag := PckdType;
+                    case form of
+                      SCALAR,
+                      SUBRANGE: lkind := 2;
+                      POINTERS: lkind := 5;
+                      SETS: ;
+                      ARRAYS: begin
+                              if not PackedFlag then goto 9;
+                              getbounds(indexedby,lo,hi);
+                              if (lo <> 1) or (hi > 255) then goto 9;
+                              if (arrayof <> -7) and 
+                                 (arrayof <> -8) and
+                                 (arrayof <> -16) {char}
+                              then goto 9;
+                              lkind := 6;
+                              end;
+                      RECORDS: ;
+                      STRINGS: lkind := 6;
+                      SCONST:  ;
+                      FCHAR:   lkind := 6;
+                      FARRAY:  ;
+                    end; {case}
+                    end;
+               end;
+       end; {case}
+     if (lkind = 3) and (fvalu.vkind = 2)
+     then begin fvalu.dvalu := fvalu.ivalu; fvalu.vkind := 3; end;
+     if (lkind = 8) and (fvalu.vkind = 2)
+     then begin fvalu.rvalu := fvalu.ivalu; fvalu.vkind := 8; end;
+     if (lkind = 3) and (fvalu.vkind = 8)
+     then begin fvalu.dvalu := fvalu.rvalu; fvalu.vkind := 3; end;
+     if (lkind = 8) and (fvalu.vkind = 3)
+     then begin fvalu.rvalu := fvalu.dvalu; fvalu.vkind := 8; end;
+     if (lkind = 5) and (fvalu.vkind = 2) then fvalu.vkind := 5;
+     
+     { Set Value }
+     
+     if fvalu.vkind = lkind
+     then begin
+          OK := TRUE;
+          if faddr.PackedFlag
+          then begin
+               mask := 0;
+               for i := 1 to faddr.numbits do mask := mask*2 + 1;
+               val := fvalu.ivalu and mask;
+               for i := 1 to 16 - faddr.numbits - faddr.leftbit do
+                   begin val := val*2; mask := mask*2; end;
+               setuw(li,(getuw(li) and not mask) or val);
+               end
+          else begin
+               if ftypeno <= -100
+               then begin
+                    for i := 1 to typesize(ftypeno) do
+                        begin
+                        if i <= length(fvalu.svalu)
+                        then setub(li,ord(fvalu.svalu[i]))
+                        else setub(li,ord(' '));
+                        li := li + 1;
+                        end;
+                    end
+               else
+                 case ftypeno of
+                   -1,
+                   -4,
+                  -11: setub(li,fvalu.ivalu);
+                   -2,
+                   -5,
+                  -12: setuw(li,fvalu.ivalu);
+                   -3,
+                   -6,
+                   -9,
+                  -13: setul(li,fvalu.ivalu);
+                   -7,
+                  -16: setub(li,ord(fvalu.cvalu));
+                   -8: setuw(li,ord(fvalu.cvalu));
+                  -10, {double}
+                  -15: {complex}
+                       begin
+                       moveleft(fvalu.xvalu.rpart,llong,4);
+                       setul(li,llong);
+                       moveleft(fvalu.xvalu.ipart,llong,4);
+                       setul(li+4,llong);
+                       end;
+                 otherwise:
+                    if ftypeno > 0
+                    then begin
+                         i := ftypeno mod 128; j := ftypeno div 128;
+                         with types[j]^[i]^ do begin
+                              case form of
+                                SCALAR,
+                                SUBRANGE: begin
+                                          case typesize(ftypeno) of
+                                            1: setub(li,fvalu.ivalu);
+                                            2: setuw(li,fvalu.ivalu);
+                                            4: setul(li,fvalu.ivalu);
+                                          end; {case}
+                                          end;
+                                POINTERS: setul(li,fvalu.ivalu);
+                                SETS: ;
+                                ARRAYS: begin
+                                        for llong := 0 to hi - 1 do
+                                          setub(li + llong,ord(' '));
+                                        if hi > length(fvalu.svalu)
+                                        then hi := length(fvalu.svalu);
+                                        pp := pointer(ord(@fvalu.svalu) + 1);
+                                        for llong := 0 to hi - 1 do begin
+                                          setub(li + llong,pp^);
+                                          pp := pointer(ord(pp) + 1);
+                                          end;
+                                        end;
+                                RECORDS: ;
+                                STRINGS: begin
+                                         i := typesize(ftypeno);
+                                         if length(fvalu.svalu) > i
+                                         then fvalu.svalu[0] := chr(i);
+                                         pp := @fvalu.svalu;
+                                         for llong := 0 to 
+                                           length(fvalu.svalu) do begin
+                                           setub(li + llong,pp^);
+                                           pp := pointer(ord(pp) + 1);
+                                           end;
+                                         end;
+                                SCONST:  ;
+                                FCHAR:   begin
+                                         for i := 1 to typesize(ftypeno) do
+                                             begin
+                                             if i <= length(fvalu.svalu)
+                                             then setub(li,ord(fvalu.svalu[i]))
+                                             else setub(li,ord(' '));
+                                             li := li + 1;
+                                             end;
+                                         end;
+                                FARRAY:  ;
+                              end; {case}
+                              end;
+                         end;
+                 end; {case}
+               end;
+          end;
+     end;
+9: if not OK then writeln('???');
+end; {setvalu}
+
+procedure prchar(fch: char);
+begin
+if (fch >= ' ') and (fch <= '~')
+then if fch = ''''
+     then write('''''')
+     else write(fch)
+else write('\\',ord(fch):2 hex);
+end; {prchar}
+
+procedure prvalu(var fvalu: valu);
+  var i,j: integer; FirstOne: Boolean;
+begin
+with fvalu do
+     case vkind of
+       0: case fvalu.ivalu of
+            1: write('?Array');
+            2: write('?Record');
+            3: write('?File');
+            4: write('?Set');
+          otherwise: write('???');
+          end; {case}
+       1: if ivalu = 0
+          then write('FALSE')
+          else if ivalu = 1
+               then write('TRUE')
+               else write('UNDEF');
+       2: write(ivalu);
+       3: write(dvalu);
+       4: begin write(''''); prchar(cvalu); write(''''); end;
+       5: write('$',ivalu:8 hex);
+       6: begin
+          write('''');
+          for i := 1 to length(svalu) do prchar(svalu[i]);
+          write('''');
+          end;
+       7: write('(',xvalu.rpart,',',xvalu.ipart,')');
+       8: write(rvalu);
+       9: begin
+          write('['); FirstOne := TRUE;
+          i := 0;
+          while i <= 2031 do
+            if (i in stvalu)
+            then begin
+                 j := i + 1;
+                 while (j <= 2031) and (j in stvalu) do
+                   j := j + 1;
+                 if not FirstOne then write(','); FirstOne := FALSE;
+                 if i = (j - 1)
+                 then write(i)
+                 else if i = (j - 2)
+                      then write(i,',',j - 1)
+                      else write(i,'..',j - 1);
+                 i := j;
+                 end
+            else i := i + 1;
+          write(']');
+          end;
+     end; {case}
+end; {prvalu}
+
+procedure getvalu(var fvalu: valu; faddr: addr; ftypeno: integer);
+  var i,j,mask,signbit: integer;
+      llong,val,lo,hi,li: longint; pp: pbyte; lreal: real;
+begin
+fvalu.vkind := 0; fvalu.ivalu := 0;
+if faddr.address <> 0
+then begin
+     
+     { Set result vkind }
+     
+     if ftypeno <= -100
+     then fvalu.vkind := 6
+     else
+       case ftypeno of
+         -1,
+         -2,
+         -3,
+         -4,
+         -5,
+         -6: fvalu.vkind := 2;
+         -7,
+         -8,
+        -16: fvalu.vkind := 4;
+         -9: fvalu.vkind := 8;
+        -10: fvalu.vkind := 3;
+        -11,
+        -12,
+        -13: fvalu.vkind := 1;
+        -15: fvalu.vkind := 7;
+       otherwise:
+          if ftypeno > 0
+          then begin
+               i := ftypeno mod 128; j := ftypeno div 128;
+               with types[j]^[i]^ do begin
+                    case form of
+                      SCALAR,
+                      SUBRANGE: fvalu.vkind := 2;
+                      POINTERS: fvalu.vkind := 5;
+                      SETS:     fvalu.vkind := 9;
+                      ARRAYS: { Done Below } ;
+                      RECORDS: ;
+                      STRINGS: fvalu.vkind := 6;
+                      SCONST:  ;
+                      FCHAR:   fvalu.vkind := 6;
+                      FARRAY:  ;
+                    end; {case}
+                    end;
+               end;
+       end; {case}
+     
+     { Get Value }
+     
+     li := faddr.address;
+     if faddr.PackedFlag
+     then begin
+          mask := 0; signbit := 1;
+          for i := 1 to faddr.numbits do begin
+              if mask <> 0
+              then signbit := signbit*2;
+              mask := mask*2 + 1;
+              end;
+          val := getuw(li); val := val and $ffff;
+          for i := 1 to 16 - faddr.numbits - faddr.leftbit do
+              val := val div 2;
+          val := val and mask;
+          if faddr.SignedFlag
+          then if (val and signbit) <> 0
+               then val := val - signbit - signbit;
+          if fvalu.vkind = 4
+          then fvalu.cvalu := chr(val)
+          else fvalu.ivalu := val;
+          end
+     else begin
+          if ftypeno <= -100
+          then begin
+               if ((-ftypeno) - 100) > 63
+               then fvalu.svalu[0] := chr(63)
+               else fvalu.svalu[0] := chr((-ftypeno) - 100);
+               for i := 1 to ord(fvalu.svalu[0]) do begin
+                   fvalu.svalu[i] := chr(getub(li));
+                   li := li + 1;
+                   end;
+               end
+          else
+            case ftypeno of
+              -1,
+             -11: fvalu.ivalu := getub(li);
+              -2,
+             -12: fvalu.ivalu := getuw(li);
+              -3,
+              -6,
+              -9,
+             -13: fvalu.ivalu := getul(li);
+              -4: fvalu.ivalu := getub(li) and $ff;
+              -5: fvalu.ivalu := ord4(getuw(li)) and $ffff;
+              -7,
+             -16: fvalu.cvalu := chr(getub(li));
+              -8: fvalu.cvalu := chr(getuw(li));
+             -10, {double}
+             -15: {complex}
+                  begin
+                  llong := getul(li); moveleft(llong,lreal,4);
+                  fvalu.xvalu.rpart := lreal;
+                  llong := getul(li + 4); moveleft(llong,lreal,4);
+                  fvalu.xvalu.ipart := lreal;
+                  end;
+            otherwise:
+               if ftypeno > 0
+               then begin
+                    i := ftypeno mod 128; j := ftypeno div 128;
+                    with types[j]^[i]^ do begin
+                         case form of
+                           SCALAR,
+                           SUBRANGE: begin
+                                     case typesize(ftypeno) of
+                                       1: fvalu.ivalu := getub(li);
+                                       2: fvalu.ivalu := getuw(li);
+                                       4: fvalu.ivalu := getul(li);
+                                     end; {case}
+                                     end;
+                           POINTERS: fvalu.ivalu := getul(li);
+                           SETS:   begin
+                                   getbounds(types[ftypeno div 128]^
+                                                  [ftypeno mod 128]^.setof,
+                                             lo,hi);
+                                   j := ((hi div 16) + 1) * 2; {Bytes}
+                                   if hi < 8 then j := 1;
+                                   if HOSTSEX = MALE
+                                   then begin
+                                     pp := pointer(ord(@fvalu.stvalu) + 253);
+                                     for llong := 253 downto 0 do begin
+                                       if (253 - llong) < j
+                                       then pp^ := getub(li + llong - 254 + j)
+                                       else pp^ := 0;
+                                       pp := pointer(ord(pp) - 1);
+                                       end;
+                                     end
+                                   else begin
+                                     pp := @fvalu.stvalu;
+                                     for llong := 0 to 253 do begin
+                                       if llong < j
+                                       then pp^ := getub(li + llong)
+                                       else pp^ := 0;
+                                       pp := pointer(ord(pp) + 1);
+                                       end;
+                                     end;
+                                   end;
+                           ARRAYS: begin
+                                   fvalu.ivalu := 1; {Error No}
+                                   if not PckdType then exit(getvalu);
+                                   getbounds(indexedby,lo,hi);
+                                   if (lo <> 1) or (hi > 255)
+                                   then exit(getvalu);
+                                   if (arrayof <> -7) and 
+                                      (arrayof <> -8) and
+                                      (arrayof <> -16) {char}
+                                   then exit(getvalu);
+                                   pp := pointer(ord(@fvalu.svalu) + 1);
+                                   for llong := 0 to hi - 1 do begin
+                                     pp^ := getub(li + llong);
+                                     pp := pointer(ord(pp) + 1);
+                                     end;
+                                   fvalu.svalu[0] := chr(hi);
+                                   fvalu.vkind := 6;
+                                   end;
+                           RECORDS: fvalu.ivalu := 2; {Error No}
+                           FILES:   fvalu.ivalu := 3; {Error No}
+                           STRINGS: begin
+                                    pp := @fvalu.svalu;
+                                    for llong := 0 to 
+                                          getub(li) and $FF do begin
+                                      pp^ := getub(li + llong);
+                                      pp := pointer(ord(pp) + 1);
+                                      end;
+                                    end;
+                           SCONST:  ;
+                           FCHAR:   begin
+                                    if charlen > 63
+                                    then fvalu.svalu[0] := chr(63)
+                                    else fvalu.svalu[0] := chr(charlen);
+                                    for i := 1 to ord(fvalu.svalu[0]) do begin
+                                        fvalu.svalu[i] := chr(getub(li));
+                                        li := li + 1;
+                                        end;
+                                    end;
+                           FARRAY:  fvalu.ivalu := 1; {Error No}
+                         end; {case}
+                         end;
+                    end;
+            end; {case}
+          end; { not PackedFlag }
+     end;
+end; {getvalu}
+
+function locnew(i: integer; LinkFlag: Boolean): pbyte;
+  type ar = array[0..1023] of byte;
+  var p: ^ar;
+begin
+if lmemleft - 5 < i
+then begin
+     new(p);
+     if LinkFlag
+     then begin
+       lmemaddr^ := -1;
+       lmemaddr := pointer(ord(lmemaddr) + 1);
+       moveleft(p,lmemaddr^,4);
+       end;
+     lmemaddr := @p^; lmemleft := 1024;
+     end;
+locnew := lmemaddr;
+lmemaddr := pointer(ord(lmemaddr) + i);
+lmemleft := lmemleft - i;
+end; {locnew}
+
+procedure loceven;
+begin
+if odd(ord(lmemaddr))
+then begin
+     lmemaddr := pointer(ord(lmemaddr) + 1); lmemleft := lmemleft - 1;
+     end;
+end; {loceven}
+
+function savenam(var fname: alfa31; flen: integer): pbyte;
+  var p: pbyte;
+begin
+p := getmem(flen);
+moveleft(fname,p^,flen);
+savenam := p;
+end; {savenam}
+
+function nextbyte: integer;
+  var i: integer;
+begin
+if fbufp >= 512
+then begin
+  fbufp := 0;
+  if blockread(f,fbuf,1) <> 1
+  then begin writeln('***EOF'); halt(ERRHALT); end;
+  end;
+i := fbuf[fbufp]; fbufp := fbufp + 1;
+if i < 0 then i := i + 256;
+nextbyte := i;
+end; {nextbyte}
+
+function nextword: integer;
+  var i: integer; c: array[0..1] of byte;
+begin
+if HOSTSEX = MALE
+then begin
+  if fbufp <= 510
+  then begin
+    moveleft(fbuf[fbufp],i,2); fbufp := fbufp + 2;
+    end
+  else begin
+    for i := 0 to 1 do begin c[i] := nextbyte; end;
+    moveleft(c,i,2);
+    end;
+  nextword := i;
+  end
+else begin {HOSTSEX = FEMALE}
+  for i := 1 downto 0 do begin c[i] := nextbyte; end;
+  moveleft(c,i,2); nextword := i;
+  end;
+end; {nextword}
+
+function nextlong: longint;
+  var i: integer; l: longint; c: array[0..3] of byte;
+begin
+if HOSTSEX = MALE
+then begin
+  if fbufp <= 508
+  then begin
+    moveleft(fbuf[fbufp],l,4); fbufp := fbufp + 4;
+    end
+  else begin
+    for i := 0 to 3 do begin c[i] := nextbyte; end;
+    moveleft(c,l,4);
+    end;
+  nextlong := l;
+  end
+else begin {HOSTSEX = FEMALE}
+  for i := 3 downto 0 do begin c[i] := nextbyte; end;
+  moveleft(c,l,4); nextlong := l;
+  end;
+end; {nextlong}
+
+function effaddr(pc: longint; mode,reg,size: integer): longint;
+  type memrec = packed record case integer of
+                         0: (i: integer);
+                         1: (l: longint);
+                         2: (ARegFlag: Boolean; r: 0..7;
+                             LongFlag: Boolean; f: 0..7;
+                             disp: -128..127);
+                       end;
+  var answer,l: longint; p: longint; lmemrec: memrec; w: integer;
+begin
+if (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+   (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+   (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+then begin writeln('effaddr not implemented'); halt; end
+else begin
+  answer := -1; p := pc + 2;
+  case mode of
+    0: { D } ;
+    1: { A } ;
+    2: { (A) }    answer := getproga(reg);
+    3: { -(A) }   answer := getproga(reg) - size;
+    4: { (A)+ }   answer := getproga(reg);
+    5: { d(A) }   answer := getproga(reg) + getuw(p);
+    6: { d(A,R) } begin
+                  lmemrec.i := getuw(p);
+                  answer := getproga(reg) + lmemrec.disp;
+                  if lmemrec.ARegFlag
+                  then l := getproga(lmemrec.r)
+                  else l := getprogd(lmemrec.r);
+                  w := l;
+                  if lmemrec.LongFlag
+                  then answer := answer + l
+                  else answer := answer + w;
+                  end;
+    7: case reg of
+         0: { .W }      answer := getuw(p);
+         1: { .L }      answer := getul(p);
+         2: { d(PC) }   answer := pc + 2 + getuw(p);
+         3: { d(PC,R) } begin
+                        lmemrec.i := getuw(p);
+                        answer := pc + 2 + lmemrec.disp;
+                        if lmemrec.ARegFlag
+                        then l := getproga(lmemrec.r)
+                        else l := getprogd(lmemrec.r);
+                        w := l;
+                        if lmemrec.LongFlag
+                        then answer := answer + l
+                        else answer := answer + w;
+                        end;
+       end; {case}
+  end; {case}
+  if answer = -1
+  then begin
+       writeln('*** EFFADDR(PC=',pc:8 hex,',MODE=',mode,',REG=',reg,
+               ') ERROR ***');
+       goto 999;
+       end;
+  effaddr := answer;
+  end;
+end; {effaddr}
+
+function instsize(fop: integer): integer;
+  var answer,lsize: integer;
+      op: packed record case integer of
+                          0: (i: integer);
+                          1: (ins: 0..15;
+                              r2: 0..7; m2: 0..7;
+                              m1: 0..7; r1: 0..7);
+                          2: (ins2: 0..15; mid: 0..63; low: 0..63);
+                          3: (j1: 0..127; Bit8Flag: Boolean;
+                              byte2: -128..127);
+                          4: (j2: 0..15; cond: 0..15;
+                              sz: 0..3; j4: 0..63);
+                 end;
+  
+  function easize(m,r,s: integer): integer;
+  begin {easize}
+  if (ENVIRONMENT <> XENIX) and (ENVIRONMENT <> GENIX) and
+     (ENVIRONMENT <> XENIX_O) and (ENVIRONMENT <> CT_O) and
+     (ENVIRONMENT <> SG_O) and (ENVIRONMENT <> SYS5_2)
+  then
+    case m of
+      0,1,2,3,4: { D A (A) (A)+ -(A) } easize := 0;
+      5,6:       { d(A) d(A,R) } easize := 2;
+      7: case r of
+           0, { .W }
+           2, { d(PC) }
+           3: { d(PC,R) } easize := 2;
+           1: { .L }      easize := 4;
+           4: if s <= 2 then easize := 2 else easize := 4;
+         end; {case}
+    end; {case}
+  end; {easize}
+  
+begin {instsize}
+if (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+   (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+   (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+then begin writeln('instsize not implemented'); halt; end
+else begin
+  answer := -1; op.i := fop;
+  case op.ins of
+    0: if op.Bit8Flag
+       then if op.m1 = 1
+            then { MOVEP } answer := 4
+            else { dyBIT } answer := 2 + easize(op.m1,op.r1,2)
+       else case op.r2 of
+              0, { ORI }
+              1, { ANDI }
+              5: { EORI } begin
+                          if op.sz <= 1 then lsize := 2 else lsize := 4;
+                          answer := 2 + lsize;
+                          if (op.m1 <> 7) or (op.r1 <> 4) {==> CCR or SR }
+                          then answer := answer + easize(op.m1,op.r1,lsize);
+                          end;
+              2, { SUBI }
+              3, { ADDI }
+              6: { CMPI } begin
+                          if op.sz <= 1 then lsize := 2 else lsize := 4;
+                          answer := 2 + lsize + easize(op.m1,op.r1,lsize);
+                          end;
+              4: { stBIT } answer := 4 + easize(op.m1,op.r1,0);
+             {7: ---}
+            end; {case}
+    1, { MOVE.B }
+    3: { MOVE.W } answer := 2 + easize(op.m1,op.r1,2) + easize(op.m2,op.r2,2);
+    2: { MOVE.L } answer := 2 + easize(op.m1,op.r1,4) + easize(op.m2,op.r2,4);
+    4: case op.mid of
+         $00,$01,$02, { NEGX }
+         $03, { MOVE from SR }
+         $08,$09,$0a, { CLR }
+         $10,$11,$12, { NEG }
+         $18,$19,$1a, { NOT }
+         $20, { NBCD }
+         $28,$29,$2a, { TST }
+         $2b, { TAS }
+         $07,$0f,$17,$1f,$27,$2f,$37,$3f, { LEA }
+         $3a, { JSR }
+         $3b: { JMP }             answer := 2 + easize(op.m1,op.r1,0);
+         $06,$0E,$16,$1e,$26,$2e,$36,$3e, { CHK }
+         $32,$33: { MOVEM EA->R } answer := 4 + easize(op.m1,op.r1,0);
+         $13, { MOVE to CCR }
+         $1b: { MOVE to SR }      answer := 2 + easize(op.m1,op.r1,2);
+         $21: if op.m1 = 0
+              then { SWAP } answer := 2
+              else { PEA }  answer := 2 + easize(op.m1,op.r1,0);
+         $22,$23: if op.m1 = 0
+                  then { EXT.W/L }     answer := 2
+                  else { MOVEM R->EA } answer := 4 + easize(op.m1,op.r1,0);
+         $39: case op.m1 of
+                0,1, { TRAP }
+                3,   { UNLK }
+                4,   { MOVE to USP }
+                5:   { MOVE from USP } answer := 2;
+                2:   { LINK } answer := 4;
+                6: case op.r1 of
+                     0, { RESET }
+                     1, { NOP }
+                     3, { RTE }
+                     5, { RTS }
+                     6, { TRAPV }
+                     7: { RTR } answer := 2;
+                     2: { STOP } answer := 4;
+                    {4: ---}
+                   end; {case}
+               {7: ---}
+              end; {case}
+       end; {case}
+    5: if (op.sz = 3) and (op.m1 = 1)
+       then { DBcc } answer := 4
+       else { ADDQ SUBQ Scc } answer := 2 + easize(op.m1,op.r1,0);
+    6: { Bcc }
+       if op.byte2 = 0 then answer := 4 else answer := 2;
+    7: { MOVEQ }
+       if not op.Bit8Flag then answer := 2 {else ---} ;
+    8,12:
+       if ((op.m2 = 4) and (op.m1 <= 1)) or  { SBCD ABCD }
+          ((op.m2 = 5) and (op.m1 <= 1)) or  { EXGd EXGa }
+          ((op.m2 = 6) and (op.m1 = 1))      { EXGM }
+       then answer := 2
+       else begin { OR DIVU DIVS - AND MULU MULS }
+            if op.sz <> 2 then lsize := 2 else lsize := 4;
+            answer := 2 + easize(op.m1,op.r1,lsize);
+            end;
+    9,13:
+       if op.Bit8Flag and (op.m1 <= 1)
+       then { SUBX ADDA } answer := 2
+       else begin { SUB ADD }
+            if op.sz <> 2 then lsize := 2 else lsize := 4;
+            answer := 2 + easize(op.m1,op.r1,lsize);
+            end;
+   11: if op.Bit8Flag and (op.m1 = 1)
+       then { CMPM } answer := 2
+       else begin { CMP EOR }
+            if op.sz <> 2 then lsize := 2 else lsize := 4;
+            answer := 2 + easize(op.m1,op.r1,lsize);
+            end;
+   14: if op.sz = 3
+       then { D Reg Shifts } answer := 2
+       else { Mem Shifts } answer := 2 + easize(op.m1,op.r1,0);
+  end; {case}
+  if answer <= 0 then begin writeln('*** Bad INSTSIZE ',fop:4 hex);
+  goto 999; end;
+  instsize := answer;
+  end;
+end; {instsize}
+
+procedure getnxtaddrs(pc: longint; var pc1,pc2: longint);
+  var op: packed record case integer of
+                          0: (i: integer);
+                          1: (ins: 0..15;
+                              r2: 0..7; m2: 0..7;
+                              m1: 0..7; r1: 0..7);
+                          2: (ins2: 0..15; mid: 0..63; low: 0..63);
+                          3: (j1: 0..127; Bit8Flag: Boolean;
+                              byte2: -128..127);
+                          4: (j2: 0..15; cond: 0..15;
+                              sz: 0..3; j4: 0..63);
+                 end;
+begin
+if (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+   (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+   (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+then begin writeln('getnxtaddrs not implemented'); halt; end
+else begin
+  pc1 := -1; pc2 := -1;
+  op.i := getuw(pc);
+  if DebugFlag then writeln('***** PC=',pc hex,' = ',op.i:4 hex);
+  case op.ins of
+    4: if op.i = $4e75 { RTS }
+       then pc1 := getul(getproga(7))
+       else case op.mid of
+              $3a, { JSR }
+              $3b: { JMP }
+                   pc1 := effaddr(pc,op.m1,op.r1,0);
+            otherwise: pc1 := pc + instsize(op.i);
+            end; {case}
+    5: if (op.sz = 3) and (op.m1 = 1)
+       then begin { DBcc }
+            pc1 := pc + 4;
+            pc2 := pc + 2 + getuw(pc + 2);
+            end
+       else pc1 := pc + instsize(op.i);
+    6: { Bcc } begin
+               if op.cond > 1 then pc2 := pc + instsize(op.i);
+               if op.byte2 <> 0
+               then pc1 := pc + 2 + op.byte2
+               else pc1 := pc + 2 + getuw(pc + 2);
+               end;
+  otherwise: pc1 := pc + instsize(op.i);
+  end; {case}
+  if pc1 = -1
+  then begin
+       writeln('*** Can''t find the next instruction for $',op.i:4 hex,' ***');
+       goto 999;
+       end;
+  if DebugFlag
+  then begin
+       write('***** PC1 = ',pc1:8 hex);
+       if pc2 <> -1 then write('  PC2 = ',pc2:8 hex);
+       writeln(' *****');
+       end;
+  end;
+end; {getnxtaddrs}
+
+

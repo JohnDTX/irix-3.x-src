@@ -1,0 +1,73 @@
+'\"macro stdmacro
+.TH GRAP 1
+.SH NAME
+grap \- pic preprocessor for drawing graphs
+.SH SYNOPSIS
+.B grap 
+[
+.B \-l
+] [
+.BR \-T tty_type
+] [ files ]
+.SH DESCRIPTION
+.I grap
+is a language for typesetting graphs.  It is also the name of the
+preprocessor that feeds input to
+.IR pic (1).
+Thus, a typical command line would appear as follows:
+.PP
+.RS
+grap \f2files\f1 \||\| pic \||\| troff [ \||\| \f2typesetter\f1 ]
+.RE
+.PP
+If you do not specify 
+.IR files , " grap"
+reads the standard input.
+.I grap
+will also read the standard input if it encounters
+.B \-
+as a
+.I file
+argument.
+.PP
+Graphs are surrounded by the 
+.IR troff (1)
+"commands"
+.B .G1
+and 
+.BR .G2 .
+Data that is enclosed is scaled and plotted, with tick marks
+supplied automatically.  Command exist to modify the frame, add
+labels, override the default ticks, change the plotting style, define
+coordinate ranges and transformations, and include data from files.
+In addition,
+.I grap
+provides the same loops, conditionals and macro processing that
+.I pic
+does.
+.SS Options
+.TP 9
+.B \-l
+Stops
+.I grap
+from include a library file of macro defines,
+.B /usr/lib/dwb/grap.defines.
+.TP
+.B \-T
+specifies
+.I tty_type 
+as
+.IR grap 's
+output device.  Currently supported devices are
+.B aps
+(Autologic APS-5) and
+.B di10
+(Imagen Imprint 10).
+.B \-Taps
+is default.
+.SH FILES
+/usr/lib/dwb/grap.defines	definitions for standard plotting characters, e.g. bullet.
+.SH SEE ALSO
+pic(1), troff(1).
+.PP
+The section entitled ``grap'' in the \f2Documenter's Workbench User's Guide\f1.

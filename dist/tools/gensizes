@@ -1,0 +1,56 @@
+#! /bin/sh
+
+after=@
+shared=+
+config=-
+
+while test $# -gt 0
+do
+	case $1 in
+	-r) shift ; rbase=$1 ;;
+	-s) shift ; sbase=$1 ;;
+	-i) shift ; idb=$1 ;;
+	-m) shift ; machine=$1 ;;
+	--) shift ; break ;;
+	*) break ;;
+	esac
+	shift
+done
+
+if test -z "$rbase" ; then rbase=/dest ; fi
+if test -z "$sbase" ; then sbase=/usr/src ; fi
+if test -z "$idb" ; then idb=$sbase/idb ; fi
+
+case "$machine" in
+2000|iris) other=3000 ;;
+3000|juniper) other=2000 ;;
+*) echo "setenv machine or use '-m' option'" ; exit 1 ;;
+esac
+
+
+#  Create nsizesi
+#	Get byte sizes of all files for release.  Add appropriate
+#	suffixes to configuration files, et cetera.  Sort list so
+#	link files in multible images are ordered identically.
+#	Remove the multible entries for files.  The result is an
+#	nsizesi list with the largest file entry for a file that
+#	appears in multible images.
+
+$ROOT/usr/sbin/idbscan -r$rbase -s$sbase -i$idb "
+	if (!@$other && access (spath (srcpath), 0) == 0)
+		printf('%7d\t%s%s\n', bytes(spath(srcpath)),
+			dstpath, after ? '$after' :
+				shared ? '$shared' :
+				config ? '$config' : '');" |
+sort -r +1 | uniq -1 | sort +1 > nsizesi
+
+#  Create nsizes
+#	
+$ROOT/usr/sbin/idbscan -r$rbase -s$sbase -i$idb "
+	if (!@$other && access (spath (srcpath), 0) == 0 &&
+	    (!links || dstpath < links[1] || @after || @shared || @config))
+		printf('%7d\t%s%s\n', blocks(spath(srcpath)),
+			dstpath, after ? '$after' :
+				shared ? '$shared' :
+				config ? '$config' : '');" |
+sort -r +1 | uniq -1 | sort +1 > nsizes

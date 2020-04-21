@@ -1,0 +1,91 @@
+'\"macro stdmacro
+.TH FWTMP 1M
+.SH NAME
+fwtmp, wtmpfix \- manipulate connect accounting records
+.SH SYNOPSIS
+.B /usr/lib/acct/fwtmp
+.RB [\^ \-ic \^]
+.br
+.B /usr/lib/acct/wtmpfix
+[\^files\^]
+.SH DESCRIPTION
+.SS Fwtmp
+\f2Fwtmp\fP reads from the standard input and
+writes to the standard output,
+converting binary records of the type found in
+.B wtmp
+to formated \s-1ASCII\s0 records.
+The \s-1ASCII\s0 version is useful to enable editing, via \f2ed\fP(1),
+bad records or general purpose maintenance of the file.
+.PP
+The argument \f3\-ic\fP is used to denote that input is in \s-1ASCII\s0 form,
+and output is to be written in binary form.
+.SS Wtmpfix
+.I Wtmpfix\^
+examines the standard input or named files in
+.B wtmp
+format, corrects the time/date stamps to make the
+entries consistent, and writes to the standard output.
+A \f3\-\fP can be used in place of \f2files\fP to indicate
+the standard input.
+If time/date corrections are not performed,
+.I acctcon1\^
+will fault when it encounters certain date change records.
+.PP
+Each time the date is set,
+a pair of date change records are written to
+.BR /etc/wtmp .
+The first record is the old date denoted
+by
+the string
+.B "old time"
+placed in
+the line field and the
+flag
+.SM
+.B OLD_TIME
+placed
+in the type field of the \f3<utmp.h>\fP structure.
+The second record specifies the new date and is
+denoted by the string
+.B "new time"
+placed in the line field and the flag
+.SM
+.B NEW_TIME
+placed in the type field.
+.I Wtmpfix\^
+uses these records to synchronize all time stamps in the file.
+.PP
+In addition to correcting time/date stamps,
+\f2wtmpfix\fP will check the validity
+of the name field to ensure that it consists
+solely of alphanumeric characters, a
+.B $
+or spaces.
+If it encounters a name that is considered invalid,
+it will change the login name to
+.SM
+.B INVALID
+and write a diagnostic to the standard error.
+In this way,
+.I wtmpfix
+reduces the chance that
+.I acctcon1
+will fail when processing connect accounting records.
+.SH FILES
+/etc/wtmp
+.br
+/usr/include/utmp.h
+.SH SEE ALSO
+acct(1M),
+acctcms(1M),
+acctcom(1),
+acctcon(1M),
+acctmerg(1M),
+acctprc(1M),
+acctsh(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.\"	@(#)fwtmp.1m	5.1 of 10/17/83

@@ -1,0 +1,31 @@
+.TH getlsrepeat 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getlsrepeat
+\- returns the linestyle repeat count
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getlsrepeat()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getlsr()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlsrepeat: longint;"
+.SH DESCRIPTION
+.B getlsrepeat
+returns the current linestyle repeat factor, which is set by
+\f3lsrepeat\fP.
+.SH "SEE ALSO"
+lsrepeat
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles
+.SH NOTE
+This routine is available only in immediate mode.

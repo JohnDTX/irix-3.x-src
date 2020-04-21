@@ -1,0 +1,402 @@
+#include "mas.h"
+#include "fbcparams.h"
+#include "fbc.h"
+#include "consts.h"
+#include "fbc.mic.h"
+#include "polydefs.h"
+
+szbuff()
+{
+newfile("szbuff.c");
+
+label(DB_SHADED_ZBUFF)
+    _NS /* now check the config to see what I'm displaying */
+	ALUOP(ANDOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(1);
+	SETSOP(NONQOP, 0, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+    _ES
+
+    _NS /* now branch to the buffer of choice */
+	SEQ(JUMP);
+	NEXT(DB_SHADED_ZBUFF_A);
+	COND(IFNZ);
+    _ES
+
+    _NS /* point at the free ram location */
+	LOADMAR(_SAVE1+7);
+	CONST(_SAVE1+7);
+    _ES
+
+    _NS
+	ALUOP(RONLYOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(0x2016);
+	SETSOP(NONQOP, 0, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADCONFIG);
+    _ES
+
+label(DB_SHADED_ZBUFF_B)
+    _NS /* request the Z value while writing the high value out to scratch */
+	ALUOP(SONLYOP, P0);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMWR);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	BPCCMD(READPIXELAB);
+	DOTOOUTREG;
+    _ES
+
+    _NS /* read and compare pixel z with Z_LINE_HI */
+	ALUOP(SUBSROP, P1);
+	SETROP(0, ALL16);
+	READBPCBUS;
+	LOADDI(BPCDATA);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOOUTREG; COND(IFFALSE); SEQ(CJPP);
+    _ES
+
+    _NS /* check for overflow */
+	ALUOP(COMPSOP, P1);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	SEQ(JUMP);
+	COND(IFOVF);
+	NEXT(OVERFLOW_Z_S_B);
+    _ES
+
+    _NS
+	ALUOP(SONLYOP, P0);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	SEQ(JUMP);
+	COND(IFNEG); /* not visible */
+	NEXT(FAST_SKIP_ZS_DRAW_B);
+	DOTOMAR(DEC);		/* decrement the MAR back to point at the
+				fractional Z */
+    _ES
+
+label(DRAW_Z_S_B)
+    _NS
+	ALUOP(RONLYOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(0x211a);
+	SETSOP(NONQOP, 0, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADCONFIG);
+    _ES
+
+    _NS /* write the pixel value */
+	REGREG(RONLYOP, P0, _COLOR_LINE_HI, _COLOR_LINE_HI);
+	BPCCMD(DRAWPIXELAB);
+	DOTOOUTREG;
+    _ES
+
+    _NS
+	ALUOP(RONLYOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(0x2016);
+	SETSOP(NONQOP, 0, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADCONFIG);
+    _ES
+
+    _NS /* write the Z value */
+	REGREG(RONLYOP, P0, _Z_LINE_HI, _Z_LINE_HI);
+	BPCCMD(DRAWPIXELAB);
+	DOTOOUTREG;
+    _ES
+
+    _NS /* increment Q along to the next X address */
+	ALUOP(SONLYOP, P1);
+	SETROP(0, NONE);
+	SETSOP(QOPERAND, 0, RAMNOP);
+	FTOYANDQ(FF, LDQ, REGWRD);
+	SEQ(JUMP);
+	NEXT(FAST_SKIP_XS_INCREMENT_B);
+    _ES
+
+label(OVERFLOW_Z_S_B)
+    _NS
+	ALUOP(SONLYOP, P0);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	SEQ(JUMP);
+	NEXT(DRAW_Z_S_B);
+	COND(IFNEG);
+    _ES
+
+label(FAST_SKIP_ZS_DRAW_B)
+    _NS /* increment Q along to the next X address */
+	ALUOP(SONLYOP, P1);
+	SETROP(0, NONE);
+	SETSOP(QOPERAND, 0, RAMNOP);
+	FTOYANDQ(FF, LDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADXS);
+    _ES
+
+    _NS /* set the address */
+	REGREG(RONLYOP, P0, 0, 0);
+	BPCCMD(SETADDRS);
+	DOTOOUTREG;
+    _ES
+
+label(FAST_SKIP_XS_INCREMENT_B)
+    _NS /* add DEL_LO to Z_LINE_LO */
+	ALUOP(ADDOP, P0);
+	SETROP(_Z_LINE_LO, NONE);
+	SETSOP(NONQOP, _Z_LINE_LO, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	PROPOUT16;
+    _ES
+
+    _NS /* add DEL_HI to Z_LINE_HI */
+	ALUOP(ADDOP, P0);
+	SETROP(_Z_LINE_HI, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	PROPIN;
+    _ES
+
+    _NS /* add DEL_LO to COLOR_LINE_LO */
+	ALUOP(ADDOP, P0);
+	SETROP(_COLOR_LINE_LO, NONE);
+	SETSOP(NONQOP, _COLOR_LINE_LO, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	PROPOUT16;
+    _ES
+
+    _NS /* add DEL_HI to COLOR_LINE_HI */
+	ALUOP(ADDOP, P0);
+	SETROP(_COLOR_LINE_HI, NONE);
+	SETSOP(NONQOP, _COLOR_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	PROPIN;
+    _ES
+
+    _NS /* load the MAR with the address of the scratch location */
+	LOADMAR(_SAVE1+7);
+	CONST(_SAVE1+7);
+    _ES
+
+    _NS
+	SEQ(RPCT);
+	NEXT(DB_SHADED_ZBUFF_B);
+    _ES
+
+    _NS /* load the MAR with the address of the trashed z_left_lo reg */
+	LOADMAR(_SCR_Z_LEFT_LO_ZS_SAVE);
+	CONST(_SCR_Z_LEFT_LO_ZS_SAVE);
+    _ES
+	
+    _NS /* restore it */
+	RAM(RAMRD, _Z_LEFT_LO_ZS, INC);
+    _ES
+
+    _NS /* restore it */
+	RAM(RAMRD, _Z_RIGHT_HI_ZS, HOLD);
+    _ES
+
+    _NS /* return */
+	REGCOMP(EQ, _I, _YVALUE);
+	SEQ(RETN);
+    _ES
+
+label(DB_SHADED_ZBUFF_A)
+    _NS
+	LOADMAR(_SAVE1+7);
+	CONST(_SAVE1+7);
+    _ES
+
+    _NS
+	ALUOP(RONLYOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(0x2019);
+	SETSOP(NONQOP, 0, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADCONFIG);
+    _ES
+
+label(DB_SHADED_ZBUFF_A_LOOP)
+    _NS /* request the Z value while writing the high value out to scratch */
+	ALUOP(SONLYOP, P0);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMWR);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	BPCCMD(READPIXELCD);
+	DOTOOUTREG;
+    _ES
+
+    _NS /* read and compare pixel z with Z_LINE_HI */
+	ALUOP(SUBSROP, P1);
+	SETROP(0, ALL16);
+	READBPCBUS;
+	LOADDI(BPCDATA);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOOUTREG; COND(IFFALSE); SEQ(CJPP);
+    _ES
+
+    _NS /* check for overflow */
+	ALUOP(COMPSOP, P1);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	SEQ(JUMP);
+	COND(IFOVF);
+	NEXT(OVERFLOW_Z_S_A);
+    _ES
+
+    _NS
+	ALUOP(SONLYOP, P0);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	SEQ(JUMP);
+	COND(IFNEG); /* not visible */
+	NEXT(FAST_SKIP_ZS_DRAW_A);
+	DOTOMAR(DEC);		/* decrement the MAR back to point at the
+				fractional Z */
+    _ES
+
+label(DRAW_Z_S_A)
+    _NS
+	ALUOP(RONLYOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(0x2115);
+	SETSOP(NONQOP, 0, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADCONFIG);
+    _ES
+
+    _NS /* write the pixel value */
+	REGREG(RONLYOP, P0, _COLOR_LINE_HI, _COLOR_LINE_HI);
+	BPCCMD(DRAWPIXELAB);
+	DOTOOUTREG;
+    _ES
+
+    _NS
+	ALUOP(RONLYOP, P0);
+	SETROP(0, ALL16); LOADDI(UCONST); CONST(0x2019);
+	SETSOP(NONQOP, 0, RAMNOP);
+	FTOYANDQ(FF, OLDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADCONFIG);
+    _ES
+
+    _NS /* write the Z value */
+	REGREG(RONLYOP, P0, _Z_LINE_HI, _Z_LINE_HI);
+	BPCCMD(DRAWPIXELAB);
+	DOTOOUTREG;
+    _ES
+
+    _NS /* increment Q along to the next X address */
+	ALUOP(SONLYOP, P1);
+	SETROP(0, NONE);
+	SETSOP(QOPERAND, 0, RAMNOP);
+	FTOYANDQ(FF, LDQ, REGWRD);
+	SEQ(JUMP);
+	NEXT(FAST_SKIP_XS_INCREMENT_A);
+    _ES
+
+label(OVERFLOW_Z_S_A)
+    _NS
+	ALUOP(SONLYOP, P0);
+	SETROP(0, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	SEQ(JUMP);
+	NEXT(DRAW_Z_S_A);
+	COND(IFNEG);
+    _ES
+
+label(FAST_SKIP_ZS_DRAW_A)
+    _NS /* increment Q along to the next X address */
+	ALUOP(SONLYOP, P1);
+	SETROP(0, NONE);
+	SETSOP(QOPERAND, 0, RAMNOP);
+	FTOYANDQ(FF, LDQ, REGWRD);
+	DOTOOUTREG;
+	BPCCMD(LOADXS);
+    _ES
+
+    _NS /* set the address */
+	REGREG(RONLYOP, P0, 0, 0);
+	BPCCMD(SETADDRS);
+	DOTOOUTREG;
+    _ES
+
+label(FAST_SKIP_XS_INCREMENT_A)
+    _NS /* add DEL_LO to Z_LINE_LO */
+	ALUOP(ADDOP, P0);
+	SETROP(_Z_LINE_LO, NONE);
+	SETSOP(NONQOP, _Z_LINE_LO, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	PROPOUT16;
+    _ES
+
+    _NS /* add DEL_HI to Z_LINE_HI */
+	ALUOP(ADDOP, P0);
+	SETROP(_Z_LINE_HI, NONE);
+	SETSOP(NONQOP, _Z_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	PROPIN;
+    _ES
+
+    _NS /* add DEL_LO to COLOR_LINE_LO */
+	ALUOP(ADDOP, P0);
+	SETROP(_COLOR_LINE_LO, NONE);
+	SETSOP(NONQOP, _COLOR_LINE_LO, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	DOTOMAR(DEC);
+	PROPOUT16;
+    _ES
+
+    _NS /* add DEL_HI to COLOR_LINE_HI */
+	ALUOP(ADDOP, P0);
+	SETROP(_COLOR_LINE_HI, NONE);
+	SETSOP(NONQOP, _COLOR_LINE_HI, RAMRD);
+	FTOYANDQ(FF, OLDQ, REGWRE);
+	PROPIN;
+    _ES
+
+    _NS /* load the MAR with the address of the scratch location */
+	LOADMAR(_SAVE1+7);
+	CONST(_SAVE1+7);
+    _ES
+
+    _NS
+	SEQ(RPCT);
+	NEXT(DB_SHADED_ZBUFF_A_LOOP)
+    _ES
+
+    _NS /* load the MAR with the address of the trashed z_left_lo reg */
+	LOADMAR(_SCR_Z_LEFT_LO_ZS_SAVE);
+	CONST(_SCR_Z_LEFT_LO_ZS_SAVE);
+    _ES
+	
+    _NS /* restore it */
+	RAM(RAMRD, _Z_LEFT_LO_ZS, INC);
+    _ES
+
+    _NS /* restore it */
+	RAM(RAMRD, _Z_RIGHT_HI_ZS, HOLD);
+    _ES
+
+    _NS /* return */
+	REGCOMP(EQ, _I, _YVALUE);
+	SEQ(RETN);
+    _ES
+}

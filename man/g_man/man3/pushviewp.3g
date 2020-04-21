@@ -1,0 +1,40 @@
+.TH pushviewport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pushviewport
+\- duplicates the current viewport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushviewport()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushvi"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushviewport;"
+.SH DESCRIPTION
+The current viewport is the top element in a stack of viewports.
+.B pushviewport
+duplicates the current viewport
+and pushes it on the stack.
+After
+.B pushviewport
+executes, there are two copies of the 
+current viewport in the stack; you can change 
+the top one without 
+losing the previous one.
+In addition,
+it saves the screenmask and the 
+\f3setdepth\fP
+parameters.
+.SH "SEE ALSO"
+getscrmask, popviewport, setdepth, viewport
+.sp
+.I Programming Guide,
+Section 4.4, Viewports

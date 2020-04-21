@@ -1,0 +1,38 @@
+.TH getbutton 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getbutton
+\- returns the state (up or down) of a button
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getbutton(num)"
+.B "Device num;"
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getbut(num)"
+.B "integer*4 num"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getbutton(num: Device): Boolean;"
+.SH DESCRIPTION
+.B getbutton
+returns the state of the button numbered 
+.I  num.
+0
+indicates the button is up;
+1
+indicates it is down.
+If
+.I  num
+is invalid, -1 is returned.
+.SH SEE ALSO
+.I Programming Guide,
+Section 7.3, Polling a Device
+.SH NOTE
+This routine is available only in immediate mode.
+

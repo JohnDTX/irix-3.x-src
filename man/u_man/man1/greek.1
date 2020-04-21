@@ -1,0 +1,117 @@
+'\"macro stdmacro
+.TH GREEK 1
+.SH NAME
+greek \- select terminal filter
+.SH SYNOPSIS
+.B greek
+[
+.BR \-T terminal
+]
+.SH DESCRIPTION
+.I Greek\^
+is a filter that reinterprets the extended character set,
+as well as the reverse and half-line motions,
+of a 128-character
+.SM TELETYPE\*S\*R
+Teletypewriter Model 37
+terminal (which is the
+.I nroff\^
+default terminal)
+for certain other terminals.
+Special characters are simulated by overstriking,
+if necessary and possible.
+If the argument is omitted,
+.I greek\^
+attempts to use the environment variable
+.SM
+.B $TERM
+(see
+.IR environ\^ (5)).
+The following
+.IR terminal s
+are recognized currently:
+.RS .3i
+.PP
+.PD 0
+.TP "\w'1620-12\ \ \ 'u"
+300
+.SM DASI
+300.
+.TP
+300-12
+.SM DASI
+300 in 12-pitch.
+.TP
+300s
+.SM DASI
+300s.
+.TP
+300s-12
+.SM DASI
+300s in 12-pitch.
+.TP
+450
+.SM DASI
+450.
+.TP
+450-12
+.SM DASI
+450 in 12-pitch.
+.TP
+1620
+Diablo 1620 (alias
+.SM DASI
+450).
+.TP
+1620-12
+Diablo 1620 (alias
+.SM DASI
+450)
+in 12-pitch.
+.TP
+2621
+Hewlett-Packard 2621, 2640, and 2645.
+.TP
+2640
+Hewlett-Packard 2621, 2640, and 2645.
+.TP
+2645
+Hewlett-Packard 2621, 2640, and 2645.
+.TP
+4014
+Tektronix 4014.
+.TP
+hp
+Hewlett-Packard 2621, 2640, and 2645.
+.TP
+tek
+Tektronix 4014.
+.PD
+.RE
+.SH EXAMPLE
+.IP
+nroff filename \||\| greek -T4014
+.PP
+reinterprets the extended character set on a Tektronix 4014 terminal.
+.SH FILES
+/usr/bin/300
+.br
+/usr/bin/300s
+.br
+/usr/bin/4014
+.br
+/usr/bin/450
+.br
+/usr/bin/hp
+.SH SEE ALSO
+300(1), 
+4014(1),
+450(1),
+eqn(1),
+hp(1),
+mm(1),
+nroff(1),
+environ(5),
+greek(5),
+term(5).
+.\"	@(#)greek.1	5.1 of 11/17/83

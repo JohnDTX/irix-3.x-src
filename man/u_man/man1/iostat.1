@@ -1,0 +1,61 @@
+'\"macro stdmacro
+.TH IOSTAT 1
+.SH NAME
+iostat \- report I/O statistics
+.SH SYNOPSIS
+.B iostat
+[ interval [ count ] ]
+.SH DESCRIPTION
+.I Iostat
+iteratively reports the number of characters read and written to terminals,
+and, for each disk, the number of seeks transfers per second, kilobytes
+transferred per second,
+and the milliseconds per average seek.
+It also gives the percentage of time the system has
+spent in user mode, in user mode running low priority (niced) processes,
+in system mode, and idling.
+.PP
+To compute this information, for each disk, seeks and data transfer completions
+and number of words transferred are counted;
+for terminals collectively, the number
+of input and output characters are counted.
+Also, each sixtieth of a second,
+the state of each disk is examined
+and a tally is made if the disk is active.
+From these numbers and given the transfer rates
+of the devices it is possible to determine
+average seek times for each device.
+.PP
+The optional
+.I interval
+argument causes
+.I iostat
+to report once each
+.I interval
+seconds.
+The first report is for  all time since a reboot and each
+subsequent report is for the last interval only.
+.PP
+The optional
+.I count
+argument restricts the number of reports.
+.SH FILES
+/dev/kmem
+.br
+/vmunix
+.SH "SEE ALSO"
+vmstat(1M)
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/iostat.1,v 1.1 89/03/27 16:46:14 root Exp $
+.\" $Log:	iostat.1,v $
+Revision 1.1  89/03/27  16:46:14  root
+Initial check-in for 3.7
+
+.\" Revision 1.3  86/04/16  10:18:10  celia
+.\" make vmstat.1 to vmstat.1m
+.\" 
+.\" Revision 1.2  85/05/02  18:20:18  robinf
+.\" Updates from 2000 Series Workstation Guide
+.\" 
+.\" Revision 1.1  84/12/11  13:36:40  bob
+.\" Initial revision
+.\" 

@@ -1,0 +1,28 @@
+.TH clearhitcode 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I clearhitcode
+- zero the system hitcode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clearhitcode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clearh"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clearhitcode;"
+.sp
+.SH DESCRIPTION
+.I Clearhitcode
+clears the global variable 
+.B hitcode,
+which records clipping plane hits
+in picking and selecting modes.
+.SH "SEE ALSO"
+.I gethitcode, pick, select
+.SH NOTE
+This command can only be used in immediate mode.

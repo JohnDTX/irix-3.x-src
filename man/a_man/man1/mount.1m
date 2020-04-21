@@ -1,0 +1,354 @@
+'\"macro stdmacro
+.TH MOUNT 1M
+.SH NAME
+mount, umount \- mount and dismount filesystems
+.SH SYNOPSIS
+.B /etc/mount
+[
+.B \-p
+]
+.br
+.B /etc/mount
+.BR \-a [ fv ]
+[ 
+.B \-t
+.I type 
+]
+.br
+.B /etc/mount
+[
+.B \-frv
+]
+[
+.BR \-t " type"
+]
+[
+.BR \-o " options"
+] fsname dir
+.br
+.B /etc/mount
+[
+.B \-vf
+] fsname | dir
+.LP
+.B /etc/umount
+[
+.BR \-h " host"
+]
+[
+.B \-frv
+]
+.br
+.B /etc/umount
+.BR \-a [ v ]
+.br
+.B /etc/umount
+[ 
+.B \-v
+]
+.br
+.B /etc/umount
+[
+.BR \-t " type"
+]
+.IR "" [ fsname " | " dir "]  .\|.\|."
+.SH DESCRIPTION
+.I mount
+announces to the system that a filesystem
+.I fsname
+is to be attached to the file tree at the directory
+.IR dir .
+The directory
+.I dir
+must already exist.
+It becomes the name of the newly mounted root.  The contents of
+.I dir
+are hidden until the filesystem is unmounted.
+If
+.I fsname
+is of the form host:path the filesystem type is assumed to be
+.IR nfs (7).
+.LP
+.I Umount
+announces to the system that the filesystem 
+.I fsname
+previously mounted on directory
+.I dir
+should be removed.  Either the filesystem name or the mounted-on
+directory may be used.
+.LP
+.I mount
+and
+.I umount
+maintain a table of mounted filesystems in
+.B /etc/mtab,
+described in
+.IR mtab (4).
+If invoked without an argument,
+.I mount
+displays the table.  If invoked with only one of
+.I fsname
+or
+.I dir
+mount searches the file
+.B /etc/fstab
+(see 
+.IR mntent (4))
+for an entry whose
+.I dir
+or
+.I fsname
+field matches the given argument.
+For example, if this line is in 
+.BR /etc/fstab :
+.PP
+.RS
+/dev/si0f  /usr  efs  rw,raw=/dev/rsi0f  0  0
+.RE
+.PP
+then the commands
+.B "mount /usr"
+and
+.B "mount /dev/si0f"
+are shorthand for
+.B "mount /dev/si0f /usr"
+.LP
+.\"Physically write-protected and magnetic tape file systems must
+.\"be mounted read-only, or errrors will occur when access times
+.\"are updated \(em whether or not any explicit write is
+.\"attempted.
+.\"More than one remote file system can be mounted on a
+.\"directory.  Successive umounts reveal previously mounted file
+.\"systems.
+.SH "MOUNT OPTIONS"
+.TP
+.B \-p
+Print the list of mounted filesystems in a format suitable for use in 
+.BR /etc/fstab .
+.TP
+.B \-a
+Attempt to mount all the filesystems described in
+.B /etc/fstab.
+(In this case,
+.I fsname
+and
+.I dir
+are taken from
+.BR /etc/fstab. )
+If a type is specified all of the filesystems in
+.B /etc/fstab
+with that type is mounted.
+Filesystems are not necessarily mounted in the order 
+listed in
+.BR /etc/fstab .
+.TP
+.B \-f
+Fake a new
+.B /etc/mtab
+entry, but do not actually mount any filesystems.
+.TP
+.B \-v
+Verbose \(em
+.I mount
+displays a message indicating the filesystem being mounted.
+.TP
+.B \-t
+The next argument is the filesystem type.
+The accepted types are: 
+.BR efs ,
+.BR bell , 
+and 
+.BR nfs ;
+see
+.IR mntent (4)
+for a description of these filesystem types.
+.TP
+.B \-r
+Mount the specified filesystem read-only.  This is a shorthand for:
+.RS
+.IP
+\f3mount \-o ro\f1 \f2fsname dir\f1
+.RE
+.IP
+Physically write-protected and magnetic tape filesystems must be mounted
+read-only, or errors occur when access times are updated,
+whether or not any explicit write is attempted.
+.TP
+.B \-o
+'\" This description should match that in mntent(4)
+Specify 
+.I options,
+a list of comma-separated words from the list below.
+Some 
+.I options 
+are valid for all filesystem types, while others apply
+to a specific type only.
+.I options 
+valid for all file system types are:
+.RS
+.RS
+.IP \f3rw\f1 \w'\f3raw=\f2path\f1\ \ \ 'u
+read/write (default).
+.IP \f3ro\f1
+read-only.
+.IP \f3suid\f1
+set-uid execution allowed (default, can not be disabled).
+.\".IP \f3nosuid\f1
+.\"set-uid execution not allowed (not supported).
+.RE
+.PP
+.I options
+specific to 
+.B efs
+and
+.B bell
+file systems are:
+.RS
+.IP \f3fsck\f1 \w'\f3raw=\f2path\f1\ \ \ 'u
+.IR fsck (1M)
+invoked with no filesystem arguments should check this filesystem (default).
+.IP \f3nofsck\f1
+.I fsck
+should not check this filesystem by default.
+.IP \f3raw=\f2path\f1
+the filesystem's raw device interface pathname.
+.RE
+.PP
+.I options
+specific to 
+.B nfs
+file systems are:
+.RS
+.IP \f3bg\f1 \w'\f3raw=\f2path\f1\ \ \ 'u
+if the first mount attempt fails, retry in the background.
+.IP \f3fg\f1
+retry in the foreground.
+.IP \f3retry=\f2n\f1
+set number of mount failure retries to 
+.I n.
+.IP \f3rsize=\f2n\f1
+set read buffer size to 
+.I n 
+bytes.
+.IP \f3wsize=\f2n\f1
+set write buffer size to 
+.I 
+n bytes.
+.IP \f3timeo=\f2n\f1
+set NFS timeout to 
+.I n 
+tenths of a second.
+.IP \f3retrans=\f2n\f1
+set number of NFS retransmissions to 
+.I n.
+.IP \f3port=\f2n\f1
+set server IP port number to 
+.I n.
+.IP \f3soft\f1
+return error if server doesn't respond.
+.IP \f3hard\f1
+retry request until server responds.
+.RE
+.PP
+The
+.B bg
+option causes 
+.I mount
+to run in the background if the server's
+.IR mountd (1M)
+does not respond.  
+.I mount 
+attempts each request
+.BI retry= n
+times before giving up.  
+If
+.B bg 
+is specified and 
+.B retry 
+is not specified, it
+defaults to 10000.
+Once the filesystem is mounted,
+each 
+.SM NFS 
+request made in the kernel waits
+.BI timeo= n
+tenths of a second for a response.  If no response arrives, the
+time-out is multiplied by 2 
+and the request is retransmitted.  When
+.BI retrans= n
+retransmissions have been sent with no reply a
+.B soft
+mounted filesystem returns an error on the request and a
+.B hard
+mounted filesystem retries the request.
+Filesystems that are mounted 
+.B rw
+(read/write)
+should use the 
+.B hard
+option.
+The number of bytes in a read or write request can be set with the
+.B rsize
+and
+.B wsize
+options.
+The default options are:
+.PP
+.RS
+\f3fg,hard,retry=0,timeo=7,retrans=4,port=\f2NFS_PORT\f1
+.RE
+.PP
+with defaults for 
+.I rsize 
+and 
+.I wsize 
+set by the kernel.
+.RE
+.SH "UMOUNT OPTIONS"
+.TP
+.BI \-h " host"
+Unmount all filesystems listed in
+.I /etc/mtab
+that are remote-mounted from 
+.I host.
+.TP
+.B \-a
+Attempt to unmount all the filesystems currently mounted (listed
+in
+.BR /etc/mtab ).
+In this case,
+.I fsname
+is taken from
+.I /etc/mtab.
+.TP
+.B \-t
+Unmounts all filesystems of a given filesystem type.
+The accepted types are: 
+.BR efs ,
+.BR bell , 
+and 
+.BR nfs .
+.TP
+.B \-v
+Verbose \(em
+.I umount
+displays a message indicating the filesystem being unmounted.
+.SH EXAMPLES
+.nf
+.ta \w'mount \-o soft server:/usr/src /usr/src 'u
+mount /dev/si0f /usr            	mount a local disk
+mount \-at efs                  	mount all EFS filesystems
+mount \-t nfs serv:/usr/src /usr/src	mount remote filesystem
+mount serv:/usr/src /usr/src    	same as above
+mount \-o soft serv:/usr/src /usr/src	same as above but soft mount
+mount \-p > /etc/fstab          	save current mount state
+.fi
+.SH FILES
+.DT
+/etc/fstab	filesystem table
+.br
+/etc/mtab	mount table
+.SH "SEE ALSO"
+mountd(1M), nfsd(1M), nfsmount(2), mntent(4).
+.SH BUGS
+Mounting filesystems full of garbage crashes the system.

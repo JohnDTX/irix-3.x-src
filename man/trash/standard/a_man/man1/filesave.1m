@@ -1,0 +1,27 @@
+.TH FILESAVE 1M
+.SH NAME
+filesave, tapesave \- daily/weekly unix file system backup
+.SH SYNOPSIS
+.B /etc/filesave.?
+.br
+.B /etc/tapesave
+.SH DESCRIPTION
+These shell scripts are provided as models.
+They are designed to provide a simple, interactive
+operator environment for file backup.
+.I Filesave.?
+is for daily disk-to-disk backup and
+.I tapesave
+is for weekly disk-to-tape.
+.PP
+The suffix
+.B .?
+can be used to name another system where two
+(or more)
+machines share disk drives (or tape drives)
+and one or the other of the systems is used to perform backup
+on both.
+.SH "SEE ALSO"
+shutdown(1M),
+volcopy(1M).
+.\"	@(#)filesave.1m	5.1 of 10/17/83

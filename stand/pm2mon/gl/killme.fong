@@ -1,0 +1,8 @@
+cc -c -O -DMC68000 -DPM2 -DQPROM -I../include gl2gl.c
+rm -f ../libglxprom.a
+ar r ../libglxprom.a glbox.o  glchar.o  glclear.o  glcolor.o  glcurs.o  glfill.o  glinit.o  glxfont.o  term.o  screen.o scrinit.o gl1gl.o gl2gl.o
+ar: creating ../libglxprom.a
+ranlib ../libglxprom.a
+:
+:
+:

@@ -1,0 +1,81 @@
+.TH rmv 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rmv
+\- relative move 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rmv(dx, dy, dz)"
+.B "Coord dx, dy, dz;"
+.IP
+.B "rmvi(dx, dy, dz)"
+.B "Icoord dx, dy, dz;"
+.IP
+.B "rmvs(dx, dy, dz)"
+.B "Scoord dx, dy, dz;"
+.IP
+.B "rmv2(dx, dy)"
+.B "Coord dx, dy;"
+.IP
+.B "rmv2i(dx, dy)"
+.B "Icoord dx, dy;"
+.IP
+.B "rmv2s(dx, dy)"
+.B "Scoord dx, dy;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rmv(dx, dy, dz)"
+.B "real dx, dy, dz"
+.IP 
+.B "subroutine rmvi(dx, dy, dz)"
+.B "integer*4 dx, dy, dz"
+.IP 
+.B "subroutine rmvs(dx, dy, dz)"
+.B "integer*2 dx, dy, dz"
+.IP 
+.B "subroutine rmv2(dx, dy)"
+.B "real dx, dy"
+.IP 
+.B "subroutine rmv2i(dx, dy)"
+.B "integer*4 dx, dy"
+.IP 
+.B "subroutine rmv2s(dx, dy)"
+.B "integer*2 dx, dy"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rmv(dx, dy, dz: Coord);"
+.IP
+.B "procedure rmvi(dx, dy, dz: Icoord);"
+.IP
+.B "procedure rmvs(dx, dy, dz: Scoord);"
+.IP
+.B "procedure rmv2(dx, dy: Coord);"
+.IP
+.B "procedure rmv2i(dx, dy: Icoord);"
+.IP
+.B "procedure rmv2s(dx, dy: Scoord);"
+
+.SH DESCRIPTION
+.B rmv
+is the relative version of 
+\f3move\f1.
+It moves (without drawing) the graphics position
+the specified amount relative to its current value.
+The routine has six forms: 3-D floating point, 3-D integer, 2-D
+floating point, 2-D integer, 3-D short integer, and 2-D short integer.
+.B "rmv2(x,y)"
+is equivalent to 
+\f3rmv(x, y, 0.0)\fP.
+.SH "SEE ALSO"
+draw, move, rdr
+.sp
+.I Programming Guide,
+Section 3.4, Lines
+

@@ -1,0 +1,39 @@
+.TH rectf  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I rectf
+- fill a rectangular area
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rectf(x1, y1, x2, y2)  "
+.B "Coord x1, y1, x2, y2;"
+.IP 
+.B "rectfi(x1, y1, x2, y2)  "
+.B "Icoord x1, y1, x2, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rectf(x1, y1, x2, y2)"
+.B "real x1, y1, x2, y2"
+.IP 
+.B "subroutine rectfi(x1, y1, x2, y2)"
+.B "integer x1, y1, x2, y2"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rectf(x1, y1, x2, y2: Coord);"
+.IP 
+.B "procedure rectfi(x1, y1, x2, y2: Icoord);"
+.sp
+.SH DESCRIPTION
+.I Rectf
+produces a filled rectangular region, using the currently selected texture,
+color, and writemask.
+Since a rectangle 
+is a two-dimensional shape, 
+\f2rectf\f1 takes only 2D arguments, and sets \f3z\f1 to zero.
+The four arguments, \f3x1\f1, \f3y1\f1, \f3x2\f1, and \f3y2\f1, are 
+opposite corners of the rectangle.
+.SH "SEE ALSO"
+.I polf, rect

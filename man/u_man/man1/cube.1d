@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH CUBE 1D
+.SH NAME
+cube \- real-time display of famous cube puzzle
+.SH SYNOPSIS
+.B /usr/people/demos/cube
+.SH DESCRIPTION
+.PP
+.I Cube\^
+displays a moving, rotating, 3-D model of the well-known Rubik's cube puzzle.
+As the cube changes, the viewpoint translates in and out and moves around
+and around the object.
+Hidden surfaces are removed in real time.
+The mouse valuators and buttons control the display.
+.PP
+The motion will continue with the system unattended.
+This allows the program to be used as a stress test for the geometry system.
+.SS Automatic Operation
+.PP
+For automatic operation of the cube, use the menu at the top left.
+Move the cursor to the menu entry for the desired mode;
+press and release the right mouse button to select it.
+The
+.I rotate
+mode makes the cube alter itself while the viewpoint's altitude and
+azimuth change.
+.I Translate
+makes the viewpoint move back and forth.
+.I Both
+and
+.I Freeze
+do as one would expect.
+.SS Manual Operation
+.PP
+First select
+.IR Freeze .
+The cube will come to rest as soon as its current internal motion is
+complete.
+.PP
+To rotate a surface of the cube, put the cursor on it.
+Press the left mouse button to rotate the surface counterclockwise; the right
+one to turn it clockwise.
+If the side you wish to rotate is not visible, hold down the middle button and
+move the cursor.
+This changes viewing altitude and azimuth to bring the hidden surfaces into
+view.
+.PP
+The middle menu and the right button can tie the middle button
+to distance and field of
+view rather than altitude and azimuth.
+.PP
+.I Quit
+terminates the program.
+.I Reset
+initializes the program and, incidentally, solves the cube.
+.SH AUTHORS
+.PP
+Herb Kuta and Kurt Akeley
+.SH "HARDWARE REQUIREMENTS"
+Eight bitplanes and 1.5 Megabytes of memory are necessary.
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/cube.1d,v 1.1 89/03/27 16:44:51 root Exp $
+.\" $Log:	cube.1d,v $
+Revision 1.1  89/03/27  16:44:51  root
+Initial check-in for 3.7
+
+.\" Revision 1.1  84/12/11  13:35:37  bob
+.\" Initial revision
+.\" 

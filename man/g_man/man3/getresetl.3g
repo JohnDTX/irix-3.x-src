@@ -1,0 +1,36 @@
+.TH getresetls 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getresetls
+\- returns the current value of \f3resetls\f1
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getresetls()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getres()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getresetls: Boolean;"
+.SH DESCRIPTION
+returns the current value of the reset linestyle flag.  
+TRUE(1), 
+the default value, indicates the linestyle is 
+reinitialized for each
+line segment.  
+FALSE(0)
+indicates the pattern 
+rotates continuously across line segment boundaries.
+.SH "SEE ALSO"
+resetls
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles
+.SH NOTE
+This routine is available only in immediate mode.

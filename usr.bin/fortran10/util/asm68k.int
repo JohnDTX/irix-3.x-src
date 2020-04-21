@@ -1,0 +1,482 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: ASM68K.INT.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               27-Jun-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure initialize;
+    
+    procedure newop(fname: alfa8; fclass,fvalue: integer; fopsize: opsizes);
+        var lpsy: psy;
+    begin
+    new(lpsy,OPSY);
+    with lpsy^ do
+         begin
+         name := fname; llink := nil; rlink := nil;
+         sykind := OPSY; opclass := fclass; opvalue := fvalue;
+         opsize := fopsize;
+         end;
+    entername(lpsy);
+    end; {newop}
+    
+    procedure initpseudoops;
+    begin
+    newop('END     ',1,0,NONE);
+    newop('ORG     ',2,0,NONE);
+    newop('EQU     ',3,0,NONE);
+    newop('EXTERN  ',4,0,NONE);
+    newop('GLOBAL  ',5,0,NONE);
+    newop('RES     ',6,0,NONE);
+    newop('DATA    ',7,0,BWL);
+    newop('PAGE    ',8,1,NONE);
+    newop('IDENT   ',8,2,NONE);
+    newop('LIST    ',8,3,NONE);
+    newop('INCLUDE ',8,4,NONE);
+    newop('SEG     ',8,5,NONE);
+    newop('UPPER   ',8,6,NONE);
+    newop('LOWER   ',8,7,NONE);
+    newop('LITERAL ',8,8,NONE);
+    end; {initpseudoops}
+    
+    procedure initops1;
+    begin
+    newop('NOP     ',10, 20081 {4E71},NONE);
+    newop('RESET   ',10, 20080 {4E70},NONE);
+    newop('RTE     ',10, 20083 {4E73},NONE);
+    newop('RTR     ',10, 20087 {4E77},NONE);
+    newop('RTS     ',10, 20085 {4E75},NONE);
+    newop('TRAPV   ',10, 20086 {4E76},NONE);
+    newop('MOVE    ',11,     0 {0000},BWL);
+    newop('ADD     ',12,-12288 {D000},BWL);
+    newop('AND     ',12,-16384 {C000},BWL);
+    newop('OR      ',12,-32767-1{8000},BWL);
+    newop('SUB     ',12,-28672 {9000},BWL);
+    newop('JMP     ',13, 20160 {4EC0},NONE);
+    newop('JSR     ',13, 20096 {4E80},NONE);
+    newop('PEA     ',13, 18496 {4840},L);
+    newop('BRA     ',14, 24576 {6000},S);
+    newop('BSR     ',14, 24832 {6100},S);
+    newop('BHI     ',14, 25088 {6200},S);
+    newop('BLS     ',14, 25344 {6300},S);
+    newop('BCC     ',14, 25600 {6400},S);
+    newop('BHS     ',14, 25600 {6400},S);
+    newop('BCS     ',14, 25856 {6500},S);
+    newop('BLO     ',14, 25856 {6500},S);
+    newop('BNE     ',14, 26112 {6600},S);
+    newop('BON     ',14, 26112 {6600},S);
+    newop('BEQ     ',14, 26368 {6700},S);
+    newop('BOFF    ',14, 26368 {6700},S);
+    newop('BVC     ',14, 26624 {6800},S);
+    newop('BVS     ',14, 26880 {6900},S);
+    newop('BPL     ',14, 27136 {6A00},S);
+    newop('BMI     ',14, 27392 {6B00},S);
+    newop('BGE     ',14, 27648 {6C00},S);
+    newop('BLT     ',14, 27904 {6D00},S);
+    newop('BGT     ',14, 28160 {6E00},S);
+    newop('BLE     ',14, 28416 {6F00},S);
+    newop('MOVEQ   ',15, 28672 {7000},L);
+    newop('SUBA    ',16,-28672 {9000},WL);
+    newop('ADDA    ',16,-12288 {D000},WL);
+    newop('CMPA    ',16,-20480 {B000},WL);
+    newop('CMPI    ',17,  3072 {0C00},BWL);
+    newop('ANDI    ',17,   512 {0200},BWL);
+    newop('ADDI    ',17,  1536 {0600},BWL);
+    newop('EORI    ',17,  2560 {0A00},BWL);
+    newop('ORI     ',17,     0 {0000},BWL);
+    newop('SUBI    ',17,  1024 {0400},BWL);
+    newop('SUBQ    ',18, 20736 {5100},BWL);
+    newop('ADDQ    ',18, 20480 {5000},BWL);
+    newop('CLR     ',19, 16896 {4200},BWL);
+    newop('NEG     ',19, 17408 {4400},BWL);
+    newop('NEGX    ',19, 16384 {4000},BWL);
+    newop('NOT     ',19, 17920 {4600},BWL);
+    newop('TST     ',19, 18944 {4A00},BWL);
+    newop('NBCD    ',19, 18432 {4800},B);
+    newop('TAS     ',19, 19136 {4AC0},B);
+    newop('LSL     ',20, -7928 {E108},BWL);
+    newop('LSR     ',20, -8184 {E008},BWL);
+    newop('ROL     ',20, -7912 {E118},BWL);
+    newop('ROR     ',20, -8168 {E018},BWL);
+    newop('ROXL    ',20, -7920 {E110},BWL);
+    newop('ROXR    ',20, -8176 {E010},BWL);
+    newop('ASL     ',20, -7936 {E100},BWL);
+    newop('ASR     ',20, -8192 {E000},BWL);
+    newop('EOR     ',21,-20480 {B000},BWL);
+    newop('CMP     ',22,-20480 {B000},BWL);
+    end; {initops1}
+    
+    procedure initops2;
+    begin
+    newop('MULS    ',23,-15936 {C1C0},W);
+    newop('MULU    ',23,-16192 {C0C0},W);
+    newop('CHK     ',23, 16768 {4180},W);
+    newop('DIVS    ',23,-32320 {81C0},W);
+    newop('DIVU    ',23,-32576 {80C0},W);
+    newop('BCHG    ',24,    64 {0040},WL);
+    newop('BCLR    ',24,   128 {0080},WL);
+    newop('BSET    ',24,   192 {00C0},WL);
+    newop('BTST    ',24,     0 {0000},WL);
+    newop('EXT     ',25, 18432 {4800},WL);
+    newop('SWAP    ',26, 18496 {4840},W);
+    newop('LINK    ',27, 20048 {4E50},NONE);
+    newop('UNLK    ',28, 20056 {4E58},NONE);
+    newop('MOVEM   ',29, 18560 {4880},WL);
+    newop('CMPM    ',30,-20216 {B108},BWL);
+    newop('LEA     ',31, 16832 {41C0},L);
+    newop('TRAP    ',32, 20032 {4E40},NONE);
+    newop('ABCD    ',33,-16128 {C100},B);
+    newop('ADDX    ',33,-12032 {D100},BWL);
+    newop('SBCD    ',33,-32512 {8100},B);
+    newop('SUBX    ',33,-28416 {9100},BWL);
+    newop('STOP    ',34, 20082 {4E72},NONE);
+    newop('DBT     ',35, 20680 {50C8},NONE);
+    newop('DBRA    ',35, 20936 {51C8},NONE);
+    newop('DBF     ',35, 20936 {51C8},NONE);
+    newop('DBHI    ',35, 21192 {52C8},NONE);
+    newop('DBLS    ',35, 21448 {53C8},NONE);
+    newop('DBCC    ',35, 21704 {54C8},NONE);
+    newop('DBHS    ',35, 21704 {54C8},NONE);
+    newop('DBCS    ',35, 21960 {55C8},NONE);
+    newop('DBLO    ',35, 21960 {55C8},NONE);
+    newop('DBNE    ',35, 22216 {56C8},NONE);
+    newop('DBEQ    ',35, 22472 {57C8},NONE);
+    newop('DBVC    ',35, 22728 {58C8},NONE);
+    newop('DBVS    ',35, 22984 {59C8},NONE);
+    newop('DBPL    ',35, 23240 {5AC8},NONE);
+    newop('DBMI    ',35, 23496 {5BC8},NONE);
+    newop('DBGE    ',35, 23752 {5CC8},NONE);
+    newop('DBLT    ',35, 24008 {5DC8},NONE);
+    newop('DBGT    ',35, 24264 {5EC8},NONE);
+    newop('DBLE    ',35, 24520 {5FC8},NONE);
+    newop('EXG     ',36,-16128 {C100},L);
+    newop('MOVEA   ',37,     0 {0000},WL);
+    newop('MOVEP   ',38,     8 {0008},WL);
+    newop('ST      ',39, 20672 {50C0},B);
+    newop('SF      ',39, 20928 {51C0},B);
+    newop('SHI     ',39, 21184 {52C0},B);
+    newop('SLS     ',39, 21440 {53C0},B);
+    newop('SCC     ',39, 21696 {54C0},B);
+    newop('SHS     ',39, 21696 {54C0},B);
+    newop('SCS     ',39, 21952 {55C0},B);
+    newop('SLO     ',39, 21952 {55C0},B);
+    newop('SNE     ',39, 22208 {56C0},B);
+    newop('SEQ     ',39, 22464 {57C0},B);
+    newop('SVC     ',39, 22720 {58C0},B);
+    newop('SVS     ',39, 22976 {59C0},B);
+    newop('SPL     ',39, 23232 {5AC0},B);
+    newop('SMI     ',39, 23488 {5BC0},B);
+    newop('SGE     ',39, 23744 {5CC0},B);
+    newop('SLT     ',39, 24000 {5DC0},B);
+    newop('SGT     ',39, 24256 {5EC0},B);
+    newop('SLE     ',39, 24512 {5FC0},B);
+    newop('JSYS    ',40, 20032 {4e40},NONE);
+    end; {initops2}
+    
+    procedure initops20;
+    begin
+    if M68020
+    then begin
+         newop('RTD     ',34,$4e74,NONE);
+         { 68881 instructions }
+         newop('FMOVE   ',51,$00,NONE{?});
+         newop('FINT    ',50,$01,NONE{?});
+         newop('FSINH   ',50,$02,NONE{?});
+         newop('FINTRZ  ',50,$03,NONE{?});
+         newop('FSQRT   ',50,$04,NONE{?});
+         newop('FLNP1   ',50,$06,NONE{?});
+         newop('FEXPM1  ',50,$08,NONE{?});
+         newop('FTANH   ',50,$09,NONE{?});
+         newop('FATAN   ',50,$0A,NONE{?});
+         newop('FASIN   ',50,$0C,NONE{?});
+         newop('FATANH  ',50,$0D,NONE{?});
+         newop('FSIN    ',50,$0E,NONE{?});
+         newop('FTAN    ',50,$0F,NONE{?});
+         newop('FEXP    ',50,$10,NONE{?});
+         newop('F2EXP   ',50,$11,NONE{?});
+         newop('F10EXP  ',50,$12,NONE{?});
+         newop('FLN     ',50,$14,NONE{?});
+         newop('FLOG10  ',50,$15,NONE{?});
+         newop('FLOG2   ',50,$16,NONE{?});
+         newop('FABS    ',50,$18,NONE{?});
+         newop('FCOSH   ',50,$19,NONE{?});
+         newop('FNEG    ',50,$1A,NONE{?});
+         newop('FACOS   ',50,$1C,NONE{?});
+         newop('FCOS    ',50,$1D,NONE{?});
+         newop('FGETEXP ',50,$1E,NONE{?});
+         newop('FGETMAN ',50,$1F,NONE{?});
+         newop('FDIV    ',50,$20,NONE{?});
+         newop('FMOD    ',50,$21,NONE{?});
+         newop('FADD    ',50,$22,NONE{?});
+         newop('FMUL    ',50,$23,NONE{?});
+         newop('FSDIV   ',50,$24,NONE{?});
+         newop('FREM    ',50,$25,NONE{?});
+         newop('FSCALE  ',50,$26,NONE{?});
+         newop('FSMUL   ',50,$27,NONE{?});
+         newop('FSUB    ',50,$28,NONE{?});
+         newop('FCMP    ',50,$38,NONE{?});
+         newop('FTEST   ',52,$3A,NONE{?});
+         { FBcc instructions }
+         newop('FBF     ',53,$00,NONE{?});
+         newop('FBEQ    ',53,$01,NONE{?});
+         newop('FBOGT   ',53,$02,NONE{?});
+         newop('FBOGE   ',53,$03,NONE{?});
+         newop('FBOLT   ',53,$04,NONE{?});
+         newop('FBOLE   ',53,$05,NONE{?});
+         newop('FBOGL   ',53,$06,NONE{?});
+         newop('FBOR    ',53,$07,NONE{?});
+         newop('FBUN    ',53,$08,NONE{?});
+         newop('FBUEQ   ',53,$09,NONE{?});
+         newop('FBUGT   ',53,$0A,NONE{?});
+         newop('FBUGE   ',53,$0B,NONE{?});
+         newop('FBULT   ',53,$0C,NONE{?});
+         newop('FBULE   ',53,$0D,NONE{?});
+         newop('FBNEQ   ',53,$0E,NONE{?});
+         newop('FBT     ',53,$0F,NONE{?});
+         newop('FBSF    ',53,$10,NONE{?});
+         newop('FBSEQ   ',53,$11,NONE{?});
+         newop('FBGT    ',53,$12,NONE{?});
+         newop('FBGE    ',53,$13,NONE{?});
+         newop('FBLT    ',53,$14,NONE{?});
+         newop('FBLE    ',53,$15,NONE{?});
+         newop('FBGL    ',53,$16,NONE{?});
+         newop('FBGLE   ',53,$17,NONE{?});
+         newop('FBNGLE  ',53,$18,NONE{?});
+         newop('FBNGL   ',53,$19,NONE{?});
+         newop('FBNLE   ',53,$1A,NONE{?});
+         newop('FBNLT   ',53,$1B,NONE{?});
+         newop('FBNGE   ',53,$1C,NONE{?});
+         newop('FBNGT   ',53,$1D,NONE{?});
+         newop('FBSNEQ  ',53,$1E,NONE{?});
+         newop('FBST    ',53,$1F,NONE{?});
+         (*
+         newop('FTEST   ',??,$3A,NONE{?});
+         *)
+         end;
+    end; {initops20}
+    
+    procedure initregs;
+        var lpsy: psy; i: integer; lname: alfa8;
+    begin
+    lname := 'A?      ';
+    for i := 0 to 7 do
+        begin
+        new(lpsy,AREGSY);
+        lname[2] := chr(ord('0') + i);
+        with lpsy^ do
+             begin
+             name := lname; llink := nil; rlink := nil;
+             sykind := AREGSY; regno := i;
+             end;
+        entername(lpsy);
+        end;
+    new(lpsy,AREGSY);
+    with lpsy^ do
+         begin
+         name := 'SP      '; llink := nil; rlink := nil;
+         sykind := AREGSY; regno := 7;
+         end;
+    entername(lpsy);
+    lname := 'D?      ';
+    for i := 0 to 7 do
+        begin
+        new(lpsy,DREGSY);
+        lname[2] := chr(ord('0') + i);
+        with lpsy^ do
+             begin
+             name := lname; llink := nil; rlink := nil;
+             sykind := DREGSY; regno := i;
+             end;
+        entername(lpsy);
+        end;
+    new(lpsy,CCREGSY);
+    with lpsy^ do
+         begin
+         name := 'CCR     '; llink := nil; rlink := nil;
+         sykind := CCREGSY;
+         end;
+    entername(lpsy);
+    new(lpsy,SREGSY);
+    with lpsy^ do
+         begin
+         name := 'SR      '; llink := nil; rlink := nil;
+         sykind := SREGSY;
+         end;
+    entername(lpsy);
+    new(lpsy,USPREGSY);
+    with lpsy^ do
+         begin
+         name := 'USP     '; llink := nil; rlink := nil;
+         sykind := USPREGSY;
+         end;
+    entername(lpsy);
+    new(lpsy,PCSY);
+    with lpsy^ do
+         begin
+         name := '%       '; llink := nil; rlink := nil;
+         sykind := PCSY;
+         end;
+    entername(lpsy);
+    if M68020
+    then begin
+         lname := 'F?      ';
+         for i := 0 to 7 do
+             begin
+             new(lpsy,FREGSY);
+             lname[2] := chr(ord('0') + i);
+             with lpsy^ do
+                  begin
+                  name := lname; llink := nil; rlink := nil;
+                  sykind := FREGSY; regno := i;
+                  end;
+             entername(lpsy);
+             end;
+         end;
+    end; {initregs}
+    
+    procedure initmisc;
+    begin
+    sizebits[BYTE] := 0;
+    sizebits[WORD] := 64;
+    sizebits[LONG] := 128;
+    fsizebits[BYTE] := 6;
+    fsizebits[WORD] := 4;
+    fsizebits[LONG] := 0;
+    fsizebits[SNGL] := 1;
+    fsizebits[DBLE] := 5;
+    fsizebits[XTND] := 2;
+    fsizebits[PBCD] := 3;
+    end; {initmisc}
+    
+    procedure askuser;
+      var OK,SFlag: Boolean; tempfname,rootname: string30;
+          l,i: integer; lch: char;
+    begin
+    if M68020 then write(TITLE20) else write(TITLE);
+    writeln(' ',VERSION,' ':16,DATE);
+    writeln(COPYRIGHT); writeln;
+    SourceOpen := FALSE; ListOpen := FALSE; CodeOpen := FALSE; SFlag := FALSE;
+    LongExts := FALSE; lfilename := ''; objfilename := ''; infilename := '';
+    for i := ARGCBASE + 1 to argc do begin
+        OK := TRUE; l := length(argv[i]^);
+        moveleft(argv[i]^,tempfname,l+1);
+        if (ENVIRONMENT = MERLIN) or
+           (ENVIRONMENT = CROMIX) or
+           (ENVIRONMENT = ADVENTURE) or
+           (ENVIRONMENT = CPM)
+        then lowercase(tempfname);
+        if tempfname[1] = '-'
+        then begin
+             if l >= 3
+             then begin
+                  lch := tempfname[2];
+                  delete(tempfname,1,2);
+                  case lch of
+                       'o','O': objfilename := tempfname;
+                       'l','L': lfilename := tempfname;
+                  otherwise: OK := FALSE;
+                  end; {case}
+                  end
+             else if tempfname = '-s'
+                     then LongExts := TRUE
+                     else OK := FALSE;
+             if not OK
+             then begin
+                  writeln('*** Bad option ''',argv[i]^,''' ***');
+                  errors := errors + 1;
+                  end;
+             end
+        else begin
+             infilename := tempfname;
+             suffix(infilename,SRCSUFFIX);
+             rootname := copy(infilename,1,length(infilename) -
+                              length(SRCSUFFIX));
+             if SFlag
+             then begin
+                  errors := errors + 1;
+                  writeln('*** Multiple source files ***');
+                  end;
+             SFlag := TRUE;
+             end;
+        end;
+    if SFlag
+    then begin
+         reset(infile,infilename);
+         if ioresult = 0
+         then begin
+              SourceOpen := TRUE;
+              with filestack[1] do
+                   begin
+                   fname := infilename;
+                   flineno := 0;
+                   lastrelblkread := -2;
+                   nextchtoread := 0;
+                   end;
+              topoffilestack := 1;
+              fillinbuf;
+              if inbuf[0] <= 1 then fillinbuf;
+              end
+         else begin
+              writeln('Can''t open source file');
+              errors := errors + 1;
+              end;
+         end
+    else begin
+         writeln('*** No source file ***');
+         errors := errors + 1;
+         end;
+    
+    if lfilename <> ''
+    then begin
+         rewrite(lfile,lfilename);
+         if ioresult = 0
+         then ListOpen := TRUE
+         else begin
+              writeln('Can''t open list file');
+              errors := errors + 1;
+              end;
+         end;
+    ListFlag := ListOpen;
+    
+    if objfilename = '' then objfilename := rootname;
+    if (ENVIRONMENT = MERLIN) or
+       (ENVIRONMENT = CROMIX) or
+       (ENVIRONMENT = ADVENTURE) or
+       (ENVIRONMENT = CPM)
+    then lowercase(objfilename);
+    suffix(objfilename,'.obj');
+    rewrite(objfile,objfilename);
+    if ioresult = 0
+    then CodeOpen := TRUE
+    else begin
+         writeln('Can''t open obj file');
+         errors := errors + 1;
+         end;
+    if errors > 0 then goto 999;
+    end; {askuser}
+    
+begin {initialize}
+errors := 0; askuser; inbuf[1024] := 0; curlineno := 0;
+lineno := 0; pageno := 0; lineonpage := 999; linesperpage := 60;
+symboltree := nil;
+initpseudoops; initops1; initops2; initregs; initmisc;
+if M68020 then initops20;
+optree := symboltree; PageSetFlag := FALSE;
+MakeUpper := FALSE; MakeLower := FALSE;
+objblock := 0; objword := 0; StartBefore := FALSE;
+NoMore := FALSE;
+end; {initialize}
+
+procedure initp1;
+begin
+EOFFlag := FALSE; StringOK := FALSE; StartFlag := FALSE;
+nextaddress := 0; pc := 0; codeword := 0; codebase := 0;
+modulename := '        '; segmentname := '        ';
+symboltree := nil; reloclist := nil; undefequlist := nil;
+oldlineno := lineno;
+end; {initp1}
+

@@ -1,0 +1,33 @@
+.TH setvaluator  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setvaluator
+- assign an initial value to a valuator
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setvaluator(v, init, min, max) "
+.B "Device v; "
+.B "short init, min, max;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setval(v, init, min, max)"
+.B "integer*2 v, init, min, max"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setvaluator(v: Device; init, min, max: Short);"
+.sp
+.SH DESCRIPTION
+.I Setvaluator
+assigns an initial value \f3init\f1
+to a valuator.
+Some devices, like tablets, report values fixed to a grid.  In this case,
+the device defines an initial position and \f3init\f1 will be ignored.
+\f3Min\f1 and \f3max\f1 are lower and upper bounds for
+the values the device can assume. 
+.SH "SEE ALSO"
+.I getvaluator, qvaluator, setbutton, unqvaluator 
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,44 @@
+.TH XNSWRITE 3X
+.SH NAME
+xnswrite \- write to XNS connection
+.SH SYNOPSIS
+.nf
+.B "xnswrite (fd, buf, count, dtype)"
+.B "int fd, count, dtype;"
+.B "char *buf;"
+.PP
+.B "xnsread (f, s, cc, dtype)"
+.B "int f, cc;"
+.B "char *s, *dtype;"
+.PP
+.B "xnslisten (x)"
+.B "int x;"
+.fi
+.SH DESCRIPTION
+.I Xnswrite
+allows you to write to an XNS file descriptor while
+specifying a particular data type.  This data type
+can be recognized by the server, and can be used to
+pass out-of-band information, for example.
+A count of the number of bytes written is returned.
+The data type is reset to the default after each write.
+.PP
+.I Xnsread
+reads an XNS file descriptor.
+.PP
+.I Xnslisten
+waits for a connection on socket
+.B x.
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1),
+xlogin(1),
+xnsd(1M),
+xx(1),
+utmp(3X),
+xcmd(3X),
+xconnect(3X),
+xnsfile(3X),
+xnsioctl(3X),
+xnslib(3X)

@@ -1,0 +1,277 @@
+
+#	"@(#)makefile.s5	1.17 8/30/84 20:13:31"
+#	makefile.s5: Makefile for making all of games/rogue.
+#	The game of rogue
+
+# To compile on System III or V:
+#	make -f makefile.s5
+# To install on System III or V:
+#	make -f makefile.s5 global I=
+# To compile on Version 7:
+#	make -f makefile.s5 NODES=None NODESG=None2 rogue O= COMPILE=Y
+# To install on version 7:
+#	make -f makefile.s5 NODES=None NODESG=None2 rogue O= COMPILE=Y
+#	cp rogue /usr/games/rogue
+#	cd /usr/games
+#	chmod 4711 rogue ; chown games rogue ; chgrp games rogue
+#	cd lib
+#	cp /dev/null rogue_gal
+#	chmod 600 rogue_gal ; chown games rogue_gal ; chgrp games rogue_gal
+# To send source to other system:
+#	make -f makefile.s5 send
+
+#	Product, i.e. c8002, sbz8000, m68002, or sbm68000, iris1400
+P	= iris1400
+
+#	CPU, i.e. z8000, m68000, vax, pdp11
+C	= m68000
+
+#	UNIX version: V7, SYS3, SYS5, BSD41, BSD42
+U	= SYS5
+
+#	gl.a to include iris graphics library
+GL	= lib$(GLHDWR).a
+GLPATH	= $(LIBROOT)/lib/$(GL)
+
+#	Extent of Local symbol stripping. -x:full; -X:partial; (NULL):none
+L	= -x
+
+#	Install file system, i.e. "" for root, "/srccpy", etc.
+DEST	= 
+
+#	Default CC flags (don't alter except on command line) -O for optomize
+CFLAGS	= -O
+
+#	Default LD flags (don't alter except on command line) -s for strip
+LDFLAGS	=
+
+#	CC flag for pure text
+NFLAG	= -n
+
+#	CC flag for separate I and D space
+IFLAG	= -i
+
+#	CC flag for floating-point
+FFLAG	= -f
+
+#	Regular (curses) or enhanced (Curses) curses package
+CURSES	= Curses
+
+#	Directory where $(CURSES) resides
+CURSDIR	= .
+
+#	-DFAST for speed over space optimization, else (NULL)
+FAST	=
+
+#	-Dregister= for coneheadded MIT CC m68k systems, else (NULL)
+REG	= -Dregister=
+
+#	-DSIGTSTP if you have job control (^Z)
+SIGTSTP	=
+
+#	-DCOLOR for color CRT capability, else (NULL)
+COLOR	= -DCOLOR
+
+#	-DWIZWAND	for informing on creation of wandering monsters.
+WIZWAND	=
+
+#	-DWIZDB		for wizard debugging on interrupt.
+WIZDB	=
+
+#	-DWIZD		for the wizard D command for daemon list.
+WIZD	= -DWIZD
+
+#	-Diris		for Silicon Graphics iris graphics terminal
+IRIS	= -Diris
+
+#	-DCORE		to have quit signals generate core dumps
+#	otherwise quits will trap into save game
+CORE	= -DCORE
+
+#	-DSMALL		for small memory space (16-bit) systems.
+SMALL	= 
+
+#	additional include directories
+INCLUDE	= -I$(DEST)/usr/include/$(GLHDWR)
+
+#	$(IFLAG)	for split I/D (for z8000, pdp11,other 16-bit)
+#	$(NFLAG)	for shared text (m68000,vax,other 32-bit)
+BINMODE	= $(NFLAG)
+
+#	/usr		if libcurses & libtermlib in /usr/lib
+#	<NULL>		if libcurses & libtermlib in /lib
+LIBROOT	= /usr
+
+#	Uucp program
+UUCP	= uucp
+
+#	Uucp flags - send mail to local & remote user
+UUCPFLAGS = -c -m -nbob
+
+#	Uucp source system (only source system can send source)
+UUCPSOURCE= sauron
+
+#	Uucp destination system!directory
+UUCPDEST= olympus!~bob/big/rogue
+
+#	Additional CC flags
+CFLAGS2	= -D$C -D$P -D$U -D$(CURSES) $(FAST) $(REG) $(COLOR) \
+	  $(WIZWAND) $(WIZDB) $(WIZD) $(SMALL) $(SIGTSTP) $(CORE) \
+	  $(IRIS) $(INCLUDE) -D$(GLHDWR)
+
+#	Operations to perform on NODES.  Defaults may be overriden
+#	on command line.
+PULL	= N
+COMPILE	= N
+TEST	= N
+INSTALL	= N
+CLEAN	= N
+CLOBBER	= N
+PRINT	= N
+
+#	Sub-trees/programs to operate on
+NODES	= $(NODESG) $(NODESR)
+NODESG	= rogue
+NODESR	= rogue_gal
+
+#	The parameters to pass down the tree
+PASS	= 'P=$P' 'C=$C' 'U=$U' 'F=$F' 'T=$T' 'I=$I' \
+	  'CFLAGS=$(CFLAGS)' 'ASFLAGS=$(ASFLAGS)' \
+	  'LDFLAGS=$(LDFLAGS)' 'YFLAGS=$(YFLAGS)' 'LFLAGS=$(LFLAGS)' \
+	  'GFLAGS=$(GFLAGS)' 'FRC=$(FRC)' 'CC=$(CC)' 'AS=$(AS)' 'LD=$(LD)' \
+	  'E=$E' 'L=$L' 'USER1=$(USER1)' $(USER2) $(USER3) \
+	  'NFLAG=$(NFLAG)' 'IFLAG=$(IFLAG)' 'FFLAG=$(FFLAG)' \
+	  'GL=$(GL)' 'GLPATH=$(GLPATH)' 'CURSDIR=$(CURSDIR)' \
+	  'FAST=$(FAST)' 'SMALL=$(SMALL)' 'CURSES=$(CURSES)' 'REG=$(REG)' \
+	  'SIGTSTP=$(SIGTSTP)' 'COLOR=$(COLOR)' 'WIZWAND=$(WIZWAND)' \
+	  'WIZDB=$(WIZDB)' 'WIZD=$(WIZD)' 'IRIS=$(IRIS)' 'CORE=$(CORE)' \
+	  'SMALL=$(SMALL)' 'INCLUDE=$(INCLUDE)' 'BINMODE=$(BINMODE)' \
+	  'LIBROOT=$(LIBROOT)' 'UUCP=$(UUCP)' 'UUCPFLAGS=$(UUCPFLAGS)' \
+	  'UUCPSOURCE=$(UUCPSOURCE)' 'UUCPDEST=$(UUCPDEST)'
+
+#	Used for low-level making
+OBJS	= vers.o main.o rooms.o passages.o command.o move.o fight.o \
+	chase.o init.o new_level.o things.o use.o list.o io.o rip.o \
+	daemon.o daemons.o weapons.o monsters.o save.o options.o armor.o \
+	pack.o potions.o rings.o wands.o
+SOURCE	= makefile.s5 makefile.bsd makefile.v7 rogue.h mach_dep.h $(CFILES)
+CFILES	= vers.c main.c rooms.c passages.c command.c move.c fight.c \
+	chase.c init.c new_level.c things.c use.c list.c io.c rip.c \
+	daemon.c daemons.c weapons.c monsters.c save.c options.c armor.c \
+	pack.c potions.c rings.c
+DIRS	= /usr/games /usr/games/lib
+LIBS	= $(CURSDIR)/lib$(CURSES).a $(LIBROOT)/lib/libtermlib.a $(GLPATH) \
+	  $(LIBROOT)/lib/libm.a
+CTAGS	= ctags
+LINT	= lint
+LPASS1	= /usr/lib/lint/lint1
+CC	= cc
+LD	= ld
+AR	= ar
+
+#	For old versions of MAKE
+MAKE	= make
+
+#	Lock for libCurses - so that both may be made simultaneously!
+LIBLCK	= /tmp/LIBCursesLock
+
+all:	rogue
+
+install:all rogue_gal
+	cp rogue $(DEST)/usr/games/rogue
+	cp rogue_gal $(DEST)/usr/games/lib/rogue_gal
+	cd $(DEST)/usr/games ; chmod 4755 rogue ; chmod 600 lib/rogue_gal
+	cd $(DEST)/usr/games ; chgrp games rogue lib/rogue_gal
+	cd $(DEST)/usr/games ; chown games rogue lib/rogue_gal
+
+#	Our list of suffixes
+#	Note that our suffixes are different from MAKE's defaults (added .dat).
+.SUFFIXES:.o  .c  .c~  .y  .y~  .l  .l~  .s  .s~  .sh  .sh~  .h  .h~ .dat
+
+#	Our rule for making programs from single-file C program.
+#	Note that our rules are quite different from MAKE's defaults.
+.c:
+	$(CC) $(CFLAGS) $(CFLAGS2) $(LDFLAGS) $< -o $@
+
+#	Our rule for making programs from single-file shell script.
+#	Note that our rules are quite different from MAKE's defaults.
+.sh:
+	cp $< $@ ; chmod 755 $@
+
+#	Our rule for making programs from single-file yacc grammar.
+#	Note that our rules are quite different from MAKE's defaults.
+.y:
+	$(YACC) $(YFLAGS) $< ; \
+	  $(CC) $(CFLAGS) $(LDFLAGS) y.tab.c -o $@ ; \
+	  /bin/rm -f y.tab.c y.tab.o
+
+#	Our rule for making programs from single-file data files.
+#	Note that our rules are quite different from MAKE's defaults.
+.dat:
+	cp $< $@ ; chmod 644 $@
+
+#	Our rule for making .O intermediate files from C files.
+#	Note that our rules are quite different from MAKE's defaults.
+.c.o:
+	$(CC) $(CFLAGS) $(CFLAGS2) -c $< ; \
+	  set +e;$(LD) -r $L $*.o;set -e;test $$? -le 1 ;\
+	  /bin/mv a.out $*.o
+
+#	Our rule for updating binary libraries from single-file C program.
+#	Note that our rules are quite different from MAKE's defaults.
+.c.a:
+	$(CC) $(CFLAGS) $(CFLAGS2) -c $< ; \
+	  set +e;$(LD) -r $L $*.o;set -e;test $$? -le 1; \
+	  /bin/mv a.out $*.o ; \
+	  ar rv $@ $*.o ; /bin/rm -f $*.o
+
+#	Our rule for making .O intermediate files from AS files.
+#	Note that our rules are quite different from MAKE's defaults.
+.s.o:
+	$(AS) $(ASFLAGS) $(ASFLAGS2) -o $@ $<
+	set +e;$(LD) -r $L $*.o;test $$? -le 1
+	/bin/mv a.out $*.o
+
+#	Our rule for updating binary libraries from single-file AS program.
+#	Note that our rules are quite different from MAKE's defaults.
+.s.a:
+	$(AS) $(ASFLAGS) $(ASFLAGS2) -o $*.o $<
+	set +e;$(LD) -r $L $*.o;test $$? -le 1
+	/bin/mv a.out $*.o ; \
+	  ar rv $@ $*.o ; /bin/rm -f $*.o
+FRC:
+
+ALWAYS:
+
+rogue rogue.$(GLHDWR):flag.$(GLHDWR) rogue.h $(OBJS) $(LIBS)
+	-if [ -f $(LIBLCK) ]; then echo "Waiting on libCurses.mk\c"; fi; exit 0
+	-while [ -f $(LIBLCK) ]; do echo ".\c"; sleep 5; done; exit 0
+	@echo ""
+	$(CC) $(LDPFLAG) $(LDFLAGS) $(BINMODE) $(OBJS) $(LIBS) -o $@
+	`echo $(CC) | sed -e 's,.*/,,' -e 's,cc,size,'` $@
+	sync
+
+rogue_gal:
+	cp /dev/null $@
+
+# Flag.gl? is used to keep track of whether the binaries were made for a
+# gl1 or gl2 system.
+# Removes *.o in case it crashes in middle of initial make.
+flag.gl1 flag.gl2:
+	rm -f flag.gl1 flag.gl2 flag. rogue $(OBJS) 
+	touch $@
+flag.:
+	rm -f flag.gl1 flag.gl2 flag. rogue $(OBJS)
+	set +e;if [ "$(IRIS)" != "" ]; then echo Define GLHDWR to gl1 or gl2;\
+	  exit 1;fi
+	touch $@
+
+#	Send files
+send:	$(SOURCE)
+	if test "`uuname -l|sed 's/ //g'`" = "$(UUCPSOURCE)" ; \
+	then chmod +r $? ; chmod +rx . .. ; \
+	$(UUCP) $(UUCPFLAGS) $? $(UUCPDEST) ; touch $@ ; \
+	else echo "Send from where, you're not $(UUCPSOURCE)!" \
+	; fi
+
+.PRECIOUS:send

@@ -1,0 +1,59 @@
+'\"macro stdmacro
+.TH GETUID 2 
+.SH NAME
+getuid, geteuid, getgid, getegid \- get real user, effective user, real group, and effective group \s-1ID\s+1s
+.SH SYNOPSIS
+.B int getuid (\|)
+.PP
+.B int geteuid (\|)
+.PP
+.B int getgid (\|)
+.PP
+.B int getegid (\|)
+.SH DESCRIPTION
+.I Getuid\^
+returns the real user
+.SM ID
+of the calling process.
+.PP
+.I Geteuid\^
+returns the effective user
+.SM ID
+of the calling process.
+.PP
+.I Getgid\^
+returns the real group
+.SM ID
+of the calling process.
+.PP
+.I Getegid\^
+returns the effective group
+.SM ID
+of the calling process.
+.SH "SEE ALSO"
+intro(2), setuid(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#24,D0	| sys getuid
+.B trap	#0
+.PP
+Real user ID returned in \f3D0\f1. 
+.sp
+.B moveq	#24,D0	| sys geteuid
+.B trap	#0
+.PP
+Effective user ID returned in \f3D1\f1.
+.sp
+.B moveq	#47,D0	| sys getgid
+.B trap	#0
+.PP
+Real group ID returned in \f3D0\f1.
+.sp
+.B moveq	#47,D0	| sys getegid
+.B trap	#0
+.PP
+Effective group ID returned in \f3D1\f1.
+.fi
+.DT
+.\"	@(#)getuid.2	5.1 of 10/19/83

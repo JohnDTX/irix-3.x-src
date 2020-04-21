@@ -1,0 +1,61 @@
+'\"macro stdmacro
+.TH YPINIT 1M
+.SH NAME
+ypinit \- build and install yellow pages database
+.SH SYNOPSIS
+.B /usr/etc/ypinit \-m
+.br
+.B /usr/etc/ypinit \-s
+master_name
+.fi
+.SH DESCRIPTION
+.I ypinit
+sets up a yellow pages database on a YP server.
+It can be used to set up a master or a slave server.
+You must be the superuser to run it.
+It asks a few, self-explanatory  questions, 
+and reports success or failure to the terminal.
+.LP
+It sets up a master server
+using the simple model in which that server
+is master to all maps in the data base.
+This is the way to bootstrap the YP system;
+later if you want you can change the association of maps to masters.
+All databases are built from scratch,
+either from information available to the program at runtime,
+or from the ASCII data base files in
+.IR /etc .
+These files are listed below under
+.B FILES .
+All such files should be in their "traditional" form,
+rather than the abbreviated form used on client machines.
+.LP
+A YP database on a slave server is set up by copying
+an existing database from a running server.  The
+.I master_name
+argument should be the hostname of YP server
+(either the master server for all the maps,
+or a server on which the data base is up-to-date and stable).
+.LP
+Refer to \f2ypfiles\f1(4) and \f2ypserv\f1(1M) for an overview of the yellow
+pages.
+.SH OPTIONS
+.TP
+.B \-m
+Indicates that the local host is to be the YP master.
+.TP
+.B \-s
+Set up a slave database.
+.SH FILES
+.nf
+/etc/passwd
+/etc/group
+/etc/hosts
+/etc/networks
+/etc/services
+/etc/protocols
+/etc/netgroup
+/etc/ethers
+.fi
+.SH "SEE ALSO"
+makedbm(1M), ypfiles(4), yppush(1M), ypxfr(1M), ypmake(1M), ypserv(1M).

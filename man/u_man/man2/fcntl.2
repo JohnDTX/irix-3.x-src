@@ -1,0 +1,159 @@
+'\"macro stdmacro
+.TH FCNTL 2
+.SH NAME
+fcntl \- file control
+.SH SYNOPSIS
+.B #include <fcntl.h>
+.PP
+.B int fcntl (fildes, cmd, arg)
+.br
+.B int fildes, cmd, arg;
+.SH DESCRIPTION
+.I Fcntl\^
+provides for control over open files.
+.I Fildes\^
+is an open
+file descriptor
+obtained from a
+.IR creat ,
+.IR open ,
+.IR dup ,
+.IR fcntl ,
+or
+.I pipe\^
+system call.
+.PP
+The
+.I cmds
+available are:
+.TP \w'\s-1F_DUPFD\s+1\ \ \ \ 'u
+.SM F_DUPFD
+Return a new
+file descriptor
+as follows:
+.IP "" \w'\s-1F_DUPFD\s+1\ \ \ \ 'u
+Lowest numbered available
+file descriptor
+greater than or equal to
+.IR arg .
+.IP
+Same open file (or pipe) as the original file.
+.IP
+Same file pointer as the original file
+(i.e., both file descriptors share one
+file pointer).
+.IP
+Same access mode (read, write or read/write).
+.IP
+Same file status flags (i.e., both file descriptors share the same
+file status flags).
+.IP
+The close-on-exec flag associated with the new file descriptor is set to
+remain open across
+.IR exec\^ (2)
+system calls.
+.TP
+.SM F_GETFD
+Get the close-on-exec flag associated with the file descriptor
+.IR fildes .
+If the low-order bit is
+.B 0
+the file will remain open across
+.IR exec ,
+otherwise
+the file will be closed upon execution of
+.IR exec .
+.TP
+.SM F_SETFD
+Set the close-on-exec flag associated with
+.I fildes\^
+to the low-order bit of
+.I arg\^
+.RB ( 0
+or
+.B 1
+as above).
+.TP
+.SM F_GETFL
+Get
+.I file\^
+status flags.
+.TP
+.SM F_SETFL
+Set
+.I file\^
+status flags to
+.IR arg .
+Only certain flags can be set;
+see
+.IR fcntl\^ (5).
+.PP
+.I Fcntl\^
+will fail if one or more of the following
+are true:
+.IP "" .3i
+.I Fildes\^
+is not a valid open
+file descriptor.
+.SM
+\%[EBADF]
+.IP
+.I Cmd\^
+is
+.SM F_DUPFD
+and 40 file descriptors are currently open.
+.SM
+\%[EMFILE]
+.IP
+.I Cmd\^
+is
+.SM F_DUPFD
+and
+.I arg\^
+is negative or greater than 40.
+.SM
+\%[EINVAL]
+.SH "RETURN VALUE"
+Upon successful completion,
+the value returned depends on
+.I cmd\^
+as follows:
+.PD 0
+.RS .3i
+.TP \w'\s-1F_DUPFD\s+1\ \ \ \ 'u
+.SM F_DUPFD
+A new file descriptor.
+.TP
+.SM F_GETFD
+Value of flag (only the low-order
+bit is defined).
+.TP
+.SM F_SETFD
+Value other than \-1.
+.TP
+.SM F_GETFL
+Value of file flags.
+.TP
+.SM F_SETFL
+Value other than \-1.
+.RE
+.PP
+.PD
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+close(2), exec(2), open(2), fcntl(5).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#62,D0
+.B movl	fildes,A0
+.B movl	cmd,D1
+.B movl	arg,A1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)fcntl.2	5.1 of 11/1/83

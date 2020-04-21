@@ -1,0 +1,13 @@
+#! /bin/sh -e
+#
+# Generate a version header
+#
+set -e
+if [ ! -r .makenumber ]; then echo 0 > .makenumber; fi
+makenumber=`cat .makenumber`
+echo 'char version[] = "SYSTEM 5 UNIX #'$makenumber' ['`date`']";' > vers.c
+echo 'char sgiversion[] = "'$SYS'";' >> vers.c
+echo 'char release[] = "'$RELEASE'";' >> vers.c
+echo 'char utsversion[] = "'`date "+%m%d%H%M`'";' >> vers.c
+makenumber=`expr $makenumber + 1`
+echo $makenumber > .makenumber

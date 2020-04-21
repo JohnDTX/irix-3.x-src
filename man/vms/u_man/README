@@ -1,0 +1,3 @@
+Only the man3 directory actually contains any manual pages.
+The other directories are there to prevent the permuted index
+program from generating error messages about bad directories.

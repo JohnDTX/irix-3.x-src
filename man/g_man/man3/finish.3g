@@ -1,0 +1,40 @@
+.TH finish 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B finish
+\- blocks the user process until the Geometry Pipeline is empty
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "finish()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine finish"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure finish;"
+.SH DESCRIPTION
+.B finish
+blocks the host process until all previous routines
+execute.  
+It forces all unsent routines
+the Geometry Pipeline
+to the bitplanes.
+Then, it sends a final token and blocks the process
+until the token goes through
+the pipeline and an acknowledgment has been sent.
+.PP
+\f3finish\f1 is useful when there are network and
+pipeline delays.
+.SH "SEE ALSO"
+gflush
+.sp
+\f2Programming Guide\fP,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

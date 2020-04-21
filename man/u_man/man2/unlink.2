@@ -1,0 +1,88 @@
+'\"macro stdmacro
+.TH UNLINK 2 
+.SH NAME
+unlink \- remove directory entry
+.SH SYNOPSIS
+.B int unlink (path)
+.br
+.B char \(**path;
+.SH DESCRIPTION
+.I Unlink\^
+removes the directory entry named by the
+path name
+pointed to be
+.IR path .
+.PP
+The named file is unlinked unless one or more of the following are true:
+.IP "" .3i
+A component of the
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+The named file does not exist.
+.SM
+\%[ENOENT]
+.IP
+Search permission is denied for a component of the
+path prefix.
+.SM
+\%[EACCES]
+.IP
+Write permission is denied on the directory containing the link
+to be removed.
+.SM
+\%[EACCES]
+.IP
+The named file is a directory and the effective user
+.SM ID
+of the process is
+not super-user.
+.SM
+\%[EPERM]
+.IP
+The entry to be unlinked is the mount point for a mounted file system.
+.SM
+\%[EBUSY]
+.IP
+The entry to be unlinked is
+the last link to
+a pure procedure (shared text) file
+that is being executed.
+.SM
+\%[ETXTBSY]
+.IP
+The directory entry to be unlinked is part of a
+read-only file system.
+.SM
+\%[EROFS]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.PP
+When all links to a file have been removed and no process has the file open,
+the space occupied by the file is freed and the file
+ceases to exist.
+If one or more processes have the file open when the last link is removed,
+the removal is postponed until all references to the file have been closed.
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+rm(1), close(2), link(2), open(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#10,D0
+.B movl	path,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)unlink.2	5.1 of 10/19/83

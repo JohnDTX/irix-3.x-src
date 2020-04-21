@@ -1,0 +1,410 @@
+product std1
+	id "Std Sys PD 1, 4D1-2.0 808-0003-003"
+	image sw version 0004002${ALPHA}
+		id "Std Sys SW 1, 4D1-2.0 808-0004-002"
+		order 10
+		subsys unix default main
+			id "Basic UNIX"
+			exp "!noship&&(std.sw.unix||std.unix.lboot||std.sw.scsi||std.sw.xyl714)"
+			replaces self
+			.
+		.
+	image man version 0005002${ALPHA}
+		id "Std Sys Man 1, 4D1-2.0 808-0005-002"
+		order 11
+		subsys unix default
+			id "Basic UNIX"
+			exp "!noship && std.man.unix"
+			replaces self
+			.
+		.
+	.
+
+product std2
+	id "Std Sys PD 2, 4D1-2.0 808-0028-002"
+	image sw version 0029002${ALPHA}
+		id "Std Sys SW 2, 4D1-2.0 808-0029-002"
+		order 20
+		subsys cc default
+			id "C compiler and support"
+			exp "!noship && std.sw.cc"
+			replaces self
+			.
+		subsys dfm default
+			id "Directory and File Management Utilities"
+			exp "!noship && std.sw.dfm"
+			replaces self
+			.
+		subsys editors default
+			id "Editing Utilities"
+			exp "!noship && std.sw.editors"
+			replaces self
+			.
+		subsys tcp default
+			id "TCP/IP support"
+			exp "!noship && std.sw.tcp"
+			replaces self
+			.
+		subsys terminf default
+			id "Terminal Information Utilities"
+			exp "!noship && std.sw.terminf"
+			replaces self
+			.
+		subsys usrenv default
+			id "User Environment Utilities"
+			exp "!noship && std.sw.usrenv"
+			replaces self
+			.
+		.
+	image man version 0030002${ALPHA}
+		id "Std Sys Man 2, 4D1-2.0 808-0030-002"
+		order 21
+		subsys cc default
+			id "C compiler and support"
+			exp "!noship && std.man.cc"
+			replaces self
+			.
+		subsys dfm default
+			id "Directory and File Management Utilities"
+			exp "!noship && std.man.dfm"
+			replaces self
+			.
+		subsys editors default
+			id "Editing Utilities"
+			exp "!noship && std.man.editors"
+			replaces self
+			.
+		subsys tcp default
+			id "TCP/IP support"
+			exp "!noship && std.man.tcp"
+			replaces self
+			.
+		subsys terminf default
+			id "Terminal Information Utilities"
+			exp "!noship && std.man.terminf"
+			replaces self
+			.
+		subsys usrenv default
+			id "User Environment Utilities"
+			exp "!noship && std.man.usrenv"
+			replaces self
+			.
+		.
+	.
+
+product std3
+	id "Std Sys PD 3, 4D1-2.0 808-0031-002"
+	image sw version 0032002${ALPHA}
+		id "Std Sys SW 3, 4D1-2.0 808-0032-002"
+		order 30
+		subsys sysadm default
+			id "System Administration Utilities"
+			exp "!noship && std.sw.sysadm"
+			replaces self
+			.
+		subsys ipc
+			id "Inter-Process Communication Utilities"
+			exp "!noship && std.sw.ipc"
+			replaces self
+			.
+		subsys perf
+			id "Performance Measurement Utilities"
+			exp "!noship && std.sw.perf"
+			replaces self
+			.
+		subsys rcs default
+			id "Revision Control System Utilities"
+			exp "!noship && std.sw.rcs"
+			replaces self
+			.
+		subsys sccs
+			id "Source Code Control System Utilities"
+			exp "!noship && std.sw.sccs"
+			replaces self
+			.
+		subsys lp
+			id "Line Printer Spooling Utilities"
+			exp "!noship && std.sw.lp"
+			replaces self
+			.
+		subsys spell default
+			id "SPELL Utilities"
+			exp "!noship && std.sw.spell"
+			replaces self
+			.
+		subsys uucp default
+			id "UUCP Utilities"
+			exp "!noship && std.sw.uucp"
+			replaces self
+			.
+		subsys crypt default
+			id "Security Administration Utilities"
+			exp "!noship && std.sw.crypt"
+			replaces self
+			.
+		subsys cprint default
+			id "Color Printer Utilities"
+			exp "!noship && std.sw.cprint"
+			replaces self
+			.
+		subsys demos
+			id "Graphics Demonstration Programs"
+			exp "!noship && std.sw.demos"
+			replaces self
+			.
+		subsys mas2
+			id "Graphics master spin2"
+			exp "!noship && std.sw.mas2"
+			replaces self
+			.
+		subsys cedgetut
+			id "C Edge Tutorial"
+			exp "!noship && std.sw.cedgetut"
+			replaces self
+			.
+		subsys fedgetut
+			id "FORTRAN Edge Tutorial"
+			exp "!noship && std.sw.fedgetut"
+			replaces self
+			.
+		subsys cdsio
+			id "Multiport Serial Board Support"
+			exp "!noship && std.sw.cdsio"
+			replaces self
+			.
+		subsys ikc
+			id "Ikon Printer Interface"
+			exp "!noship && std.sw.ikc"
+			replaces self
+			.
+		subsys xm
+			id 'Xylogics 1/2" Tape Support'
+			exp "!noship && std.sw.xm"
+			replaces self
+			.
+		subsys ts
+			id "Quarter Inch Streaming Tape Support"
+			exp "!noship && std.sw.ts"
+			replaces self
+			.
+		.
+	image man version 0033002${ALPHA}
+		id "Std Sys Man 3, 4D1-2.0 808-0033-002"
+		order 31
+		subsys sysadm default
+			id "System Administration Utilities"
+			exp "!noship && std.man.sysadm"
+			replaces self
+			.
+		subsys ipc
+			id "Inter-Process Communication Utilities"
+			exp "!noship && std.man.ipc"
+			replaces self
+			.
+		subsys perf
+			id "Performance Measurement Utilities"
+			exp "!noship && std.man.perf"
+			replaces self
+			.
+		subsys rcs default
+			id "Revision Control System Utilities"
+			exp "!noship && std.man.rcs"
+			replaces self
+			.
+		subsys sccs
+			id "Source Code Control System Utilities"
+			exp "!noship && std.man.sccs"
+			replaces self
+			.
+		subsys lp
+			id "Line Printer Spooling Utilities"
+			exp "!noship && std.man.lp"
+			replaces self
+			.
+		subsys help
+			id "HELP Utilities"
+			exp "!noship && std.man.help"
+			replaces self
+			.
+		subsys spell default
+			id "SPELL Utilities"
+			exp "!noship && std.man.spell"
+			replaces self
+			.
+		subsys uucp default
+			id "UUCP Utilities"
+			exp "!noship && std.man.uucp"
+			replaces self
+			.
+		subsys crypt default
+			id "Security Administration Utilities"
+			exp "!noship && std.man.crypt"
+			replaces self
+			.
+		subsys cprint default
+			id "Color Printer Utilities"
+			exp "!noship && std.man.cprint"
+			replaces self
+			.
+		subsys demos
+			id "Graphics Demonstration Programs"
+			exp "!noship && std.man.demos"
+			replaces self
+			.
+		subsys mas2
+			id "Graphics master spin2"
+			exp "!noship && std.man.mas2"
+			replaces self
+			.
+		subsys cedgetut
+			id "C Edge Tutorial"
+			exp "!noship && std.man.cedgetut"
+			replaces self
+			.
+		subsys fedgetut
+			id "FORTRAN Edge Tutorial"
+			exp "!noship && std.man.fedgetut"
+			replaces self
+			.
+		.
+	.
+
+product nfs
+	id "NFS Opt PD, 4D1-2.0 808-0006-003"
+	image sw version 0007002${ALPHA}
+		id "NFS Opt SW, 4D1-2.0 808-0007-002"
+		order 40
+		subsys nfs default
+			id "NFS support"
+			exp "!noship && nfs.sw.nfs"
+			replaces self
+			.
+		subsys yp default
+			id "Yellow Pages"
+			exp "!noship && nfs.sw.yp"
+			replaces self
+			.
+		.
+	image man version 0008002${ALPHA}
+		id "NFS Opt Man, 4D1-2.0 808-0008-002"
+		order 41
+		subsys nfs default
+			id "NFS support"
+			exp "!noship && nfs.man.nfs"
+			replaces self
+			.
+		subsys yp default
+			id "Yellow Pages"
+			exp "!noship && nfs.man.yp"
+			replaces self
+			.
+		.
+	.
+
+product ftn
+	id "FORTRAN Opt PD, 4D1-2.0 808-0009-002"
+	image sw version 0010002${ALPHA}
+		id "FORTRAN Opt SW, 4D1-2.0 808-0010-002"
+		subsys ftn default
+			id "FORTRAN"
+			exp "!noship && ftn.sw.ftn"
+			replaces self
+			.
+		subsys fedgetut default
+			id "FORTRAN Edge Tutorial"
+			exp "!noship && ftn.sw.fedgetut"
+			replaces self
+			.
+		.
+	image man version 0011002${ALPHA}
+		id "FORTRAN Opt Man, 4D1-2.0 808-0011-002"
+		subsys ftn default
+			id "FORTRAN"
+			exp "!noship && ftn.man.ftn"
+			replaces self
+			.
+		subsys fedgetut default
+			id "FORTRAN Edge Tutorial"
+			exp "!noship && ftn.sw.fedgetut"
+			replaces self
+			.
+		.
+	.
+
+product dwb
+	id "DWB Opt PD, 4D1-2.0 808-0012-002"
+	image sw version 0013002${ALPHA}
+		id "DWB Opt SW, 4D1-2.0 808-0013-002"
+		order 50
+		subsys dwb default
+			id "DWB"
+			exp "!noship && dwb.sw.dwb"
+			replaces self
+			.
+		.
+	image man version 0014002${ALPHA}
+		id "DWB Opt Man, 4D1-2.0 808-0014-002"
+		order 51
+		subsys dwb default
+			id "DWB"
+			exp "!noship && dwb.man.dwb"
+			replaces self
+			.
+		.
+	.
+
+product trans
+	id "Laser Opt PD, 4D1-2.0 808-0015-002"
+	image sw version 0016002${ALPHA}
+		id "Laser Opt SW, 4D1-2.0 808-0016-002"
+		order 50
+		subsys trans default
+			id "Laser Printer support"
+			exp "!noship && trans.sw.trans"
+			replaces self
+			.
+		.
+	image man version 0017002${ALPHA}
+		id "Laser Opt Man, 4D1-2.0 808-0017-002"
+		order 51
+		subsys trans default
+			id "Laser Printer support"
+			exp "!noship && trans.man.trans"
+			replaces self
+			.
+		.
+	.
+
+product diag
+	id "Diags PD SGIUseOnly, 4D1-2.0 809-0001-002"
+	image sw version 0002002${ALPHA}
+		id "Diags SW SGIUseOnly, 4D1-2.0 809-0002-002"
+		subsys diag
+			id "Diagnostic Software"
+			exp "!noship && diag.sw.diag"
+			replaces self
+			.
+		.
+	.
+
+product noship
+	id "Unshipped Software PD, SGIUseOnly, 4D1-2.0 000-0000-000"
+	image misc version 0000000${ALPHA}
+		id "Unshipped SW, 4D1-2.0 000-0000-000"
+		subsys pas
+			id "Pascal Compiler"
+			exp "pas.sw.pas"
+			replaces self
+			.
+		subsys other
+			id "other."
+			exp "noship && !std.sw.mas1 && !pas.sw.pas"
+			replaces self
+			.
+		subsys mas1
+			id "graphics master spin 1"
+			exp "std.sw.mas1"
+			replaces self
+			.
+		.
+	.

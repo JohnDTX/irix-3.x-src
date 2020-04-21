@@ -1,0 +1,116 @@
+.TH MOUNT 2 
+.SH NAME
+mount \- mount a file system
+.SH SYNOPSIS
+.B int mount (spec, dir, rwflag)
+.br
+.B char \(**spec, \(**dir;
+.br
+.B int rwflag;
+.SH DESCRIPTION
+.I Mount\^
+requests that a removable file system contained on the
+block special file identified by
+.I spec\^
+be mounted on the directory identified by
+.IR dir .
+.I Spec\^
+and
+.I dir\^
+are pointers to
+path names.
+.PP
+Upon successful completion, references to the file
+.I dir\^
+will refer to the root directory on the mounted file system.
+.PP
+The low-order bit of
+.I rwflag\^
+is used to control write permission on the mounted file system;
+if
+.BR 1 ,
+writing is forbidden,
+otherwise writing is permitted according to individual file accessibility.
+Physically write-protected and magnetic tape file systems must be
+mounted read-only or errors will occur when access times are updated,
+whether or not any explicit write is attempted.
+.PP
+.I Mount\^
+may be invoked only by the super-user.
+.PP
+.I Mount\^
+will fail if one or more of the following are true:
+.RS .3i
+.PP
+The effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.PP
+Any of the named files does not exist.
+.SM
+\%[ENOENT]
+.PP
+A component of a
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.PP
+.I Spec\^
+is not a block special device.
+.SM
+\%[ENOTBLK]
+.PP
+The device associated with
+.I spec\^
+does not exist.
+.SM
+\%[ENXIO]
+.PP
+.I Dir\^
+is not a directory.
+.SM
+\%[ENOTDIR]
+.PP
+.I Spec\^
+or
+.I dir\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.PP
+.I Dir\^
+is currently mounted on, is someone's current working directory
+or is otherwise busy.
+.SM
+\%[EBUSY]
+.PP
+The device associated with
+.I spec\^
+is currently mounted.
+.SM
+\%[EBUSY]
+.RE
+.SH "RETURN VALUE"
+Upon successful completion a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+umount(2).
+.bp
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#21,D0	| sys mount
+.B movl	spec,A0
+.B movl	dir,D1
+.B movl	rwflag,A1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)mount.2	5.1 of 10/19/83

@@ -1,0 +1,228 @@
+'\"macro stdmacro
+.TH ACCTSH 1M
+.SH NAME
+chargefee, ckpacct, dodisk, lastlogin, monacct, nulladm, prctmp, prdaily, prtacct, runacct, shutacct, startup, turnacct \- shell procedures for accounting
+.SH SYNOPSIS
+.B /usr/lib/acct/chargefee
+login-name number
+.PP
+.B /usr/lib/acct/ckpacct
+[\^blocks\^]
+.PP
+.B /usr/lib/acct/dodisk
+.PP
+.B /usr/lib/acct/lastlogin
+.PP
+.B /usr/lib/acct/monacct
+number
+.PP
+.B /usr/lib/acct/nulladm
+file
+.PP
+.B /usr/lib/acct/prctmp
+.PP
+.B /usr/lib/acct/prdaily
+\&[ mmdd ]
+.PP
+.B /usr/lib/acct/prtacct
+file [
+\f3"\fPheading\f3"\fP
+]
+.PP
+.B /usr/lib/acct/runacct
+[\^mmdd\^] [\^mmdd state\^]
+.PP
+.B /usr/lib/acct/shutacct
+[
+\f3"\fPreason\f3"\fP
+]
+.PP
+.B /usr/lib/acct/startup
+.PP
+.B /usr/lib/acct/turnacct
+.BR on " \(bv " off " \(bv " switch
+.SH DESCRIPTION
+.I Chargefee\^
+can be invoked to charge a
+.I number\^
+of units to
+.IR login-name .
+A record is written to
+.BR /usr/adm/fee ,
+to be merged with other accounting records during the night.
+.PP
+.I Ckpacct\^
+should be initiated via \f2cron\fP(1M).
+It periodically checks the size of
+.BR /usr/adm/pacct .
+If the size exceeds \f2blocks\fP, 1000 by default,
+.I turnacct\^
+will be invoked with argument
+.IR switch .
+If the number of free disk blocks in the
+.B /usr
+file system
+falls below 500,
+.I ckpacct
+will automatically turn off the collection of
+process accounting records via
+the
+.B off
+argument to
+.IR turnacct .
+When at least this number of blocks is restored, the
+accounting will be activated again.
+This feature is sensitive to the frequency at which
+.I ckpacct
+is executed, usually by
+.IR cron .
+.PP
+.I Dodisk\^
+should be invoked by
+.I cron\^
+to perform the disk accounting functions.
+.PP
+.I Lastlogin\^
+is invoked by
+.I runacct\^
+to update
+.BR /usr/adm/acct/sum/loginlog ,
+which shows the last date on which each person logged in.
+.PP
+.I Monacct\^
+should be invoked once each month or each accounting
+period.
+.I Number\^
+indicates
+which month or period it is.
+If
+.I number
+is not given, it defaults to the
+current month (01\-12).
+This default is useful if
+.I monacct
+is to executed via
+.IR cron (1M)
+on the first day of each month.
+.I Monacct
+creates summary files in
+.B /usr/adm/acct/fiscal
+and restarts summary files in
+.BR /usr/adm/acct/sum .
+.PP
+.I Nulladm\^
+creates
+.I file\^
+with mode 664 and insures owner and group are
+.BR adm .
+It is called by
+various accounting shell procedures.
+.PP
+.I Prctmp\^
+can be used to print the session record file (normally
+.B /usr/adm/acct/nite/ctmp
+created by
+.I acctcon1\^
+(see
+.IR acctcon (1M)).
+.PP
+.I Prdaily\^
+is invoked by
+.I runacct\^
+to format a report of the previous day's accounting data.
+The report resides in
+.BI /usr/adm/acct/sum/rprt mmdd\^
+where
+.I mmdd\^
+is the month and day of the report.
+The current daily accounting reports may be printed by typing
+.IR prdaily .
+Previous days' accounting reports can be printed by using the
+.I mmdd
+option and specifying the exact report date desired.
+Previous daily reports are cleaned up
+and therefore inaccessible after each invocation of
+.IR monacct .
+.PP
+.I Prtacct\^
+can be used to format and print any total accounting (\f3tacct\fP) file.
+.PP
+.I Runacct\^
+performs the accumulation of connect,
+process,
+fee,
+and disk accounting on a daily basis.
+It also creates summaries of command usage.
+For more information, see \f2runacct\fP(1M).
+.PP
+.I Shutacct\^
+should be invoked during a system shutdown
+(usually in
+.BR /etc/shutdown )
+to turn process accounting
+off and append a
+``reason'' record to
+.BR /etc/wtmp .
+.PP
+.I Startup\^
+should be called by
+.B /etc/rc
+to turn the accounting on
+whenever the system is brought up.
+.PP
+.I Turnacct\^
+is an interface to
+.I accton\^
+(see
+.IR acct (1M))
+to turn process accounting \f3on\fP or \f3off\fP.
+The
+.B switch\^
+argument
+turns accounting off,
+moves the current
+.B /usr/adm/pacct
+to
+the next free name in
+.BI /usr/adm/pacct incr
+(where
+.I incr
+is a number starting with
+.B 1
+and incrementing by one for each
+additional
+.B pacct
+file),
+then turns accounting back on again.
+This procedure is called by
+.I ckpacct\^
+and thus can be taken care of by
+the \f2cron\fP and used to keep \f3pacct\fP
+to a reasonable size.
+.SH FILES
+.ta \w'/usr/adm/pacct[1-9]\ \ \ \ 'u +.5i
+.nf
+/usr/adm/fee	accumulator for fees
+/usr/adm/pacct	current file for per-process accounting
+/usr/adm/pacct\(**	used if pacct gets large and during
+	execution of daily accounting procedure
+/etc/wtmp	login/logoff summary
+/usr/adm/acct/nite	working directory
+/usr/lib/acct	holds all accounting commands listed in
+	sub-class 1M of this manual
+/usr/adm/acct/sum	summary directory, should be saved
+.fi
+.DT
+.SH SEE ALSO
+acct(1M),
+acctcms(1M),
+acctcom(1),
+acctcon(1M),
+acctmerg(1M),
+acctprc(1M),
+fwtmp(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.\"	@(#)acctsh.1m	5.1 of 10/17/83

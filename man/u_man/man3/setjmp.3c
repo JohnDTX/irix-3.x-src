@@ -1,0 +1,67 @@
+'\"macro stdmacro
+.TH SETJMP 3C
+.SH NAME
+setjmp, long\|jmp \- non-local goto
+.SH SYNOPSIS
+.nf
+.B #include <setjmp.h>
+.PP
+.B int setjmp (env)
+.B jmp_buf env;
+.PP
+.B void long\|jmp (env, val)
+.B jmp_buf env;
+.B int val;
+.SH DESCRIPTION
+These functions are useful for dealing with errors 
+and interrupts encountered in
+a low-level subroutine of a program.
+.PP
+.I Set\|jmp\^
+saves its stack environment in
+.I env\^
+(whose type,
+.IR jmp_buf ,
+is defined in the
+.I <set\|jmp.h>\^
+header file), for later use by
+.IR long\|jmp .
+It returns the value 0.
+.PP
+.I Long\|jmp\^
+restores the environment saved by the last call of
+.I set\|jmp
+with the corresponding
+.I env
+argument.
+After
+.I long\|jmp\^
+is completed program execution
+continues as if the corresponding call of 
+.I set\|jmp\^
+(which must not itself have returned in the interim)
+had just returned the value
+.IR val\^ .
+.I Long\|jmp\^
+cannot cause
+.I set\|jmp\^
+to return the value 0.  If
+.I long\|jmp\^
+is invoked with a second argument of 0,
+.I set\|jmp\^
+will return 1.
+All accessible data have values as of the time
+.I long\|jmp\^
+was called.
+.SH SEE ALSO
+signal(2).
+.SH WARNING
+If
+.I long\|jmp\^
+is called when
+.I env\^
+was never primed by a call to
+.IR set\|jmp ,
+or when the last such call is in a function which has since returned,
+absolute chaos is guaranteed.
+.\"	@(#)setjmp.3c	5.1 of 11/1/83

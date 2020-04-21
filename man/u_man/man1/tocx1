@@ -1,0 +1,301 @@
+300(1) 300, 300s: handle special functions of DASI 300 and 300s terminals.
+4014(1) 4014: paginator for the Tektronix 4014 terminal.
+450(1) 450: handle special functions of the DASI 450 terminal.
+Mail(1) Mail: send and receive mail.
+acctcom(1) acctcom: search and print process accounting file(s).
+adb(1) adb: debugger.
+addbib(1) addbib: create or extend bibliographic database.
+admin(1) admin: create and administer SCCS files.
+apply(1) apply: apply a command to a set of arguments.
+ar(1) ar: archive and library maintainer.
+as(1) as: assembler.
+asa(1) asa: interpret ASA carriage control characters.
+at(1) at: execute commands at a later time.
+awk(1) awk: pattern scanning and processing language.
+banner(1) banner: make posters.
+banner7(1) banner7: print large banner on printer.
+basename(1) basename, dirname: deliver portions of path names.
+bc(1) bc: arbitrary-precision arithmetic language.
+bcat(1) bcat: catenate and print (Berkeley cat).
+bdiff(1) bdiff: big diff.
+bfs(1) bfs: big file scanner.
+bs(1) bs: a compiler/interpreter for modest-sized programs.
+cal(1) cal: print calendar.
+calendar(1) calendar: reminder service.
+cat(1) cat: concatenate and print files.
+cb(1) cb: C program beautifier.
+cc(1) cc, pc, f77: C, Pascal and FORTRAN compilers for the 68010/68020.
+cd(1) cd: change working directory.
+cdc(1) cdc: change the delta commentary of an SCCS delta.
+check(1) check: check RCS status of a file.
+checkcw(1) checkcw: verifies constant-width text prepared by cw(1) for troff.
+chmod(1) chmod: change mode.
+chown(1) chown, chgrp: change owner or group.
+ci(1) ci: check in RCS revisions.
+clear(1) clear: clear terminal screen.
+cmp(1) cmp: compare two files.
+co(1) co: check out RCS revisions.
+col(1) col: filter reverse line-feeds.
+collectmail(1) collectmail: convert mail from unix to rmail format.
+comb(1) comb: combine SCCS deltas.
+comm(1) comm: select or reject lines common to two sorted files.
+cp(1) cp, ln, mv: copy, link or move files.
+cpio(1) cpio: copy file archives in and out.
+cpp(1) cpp: the C language preprocessor.
+csh(1) csh: a shell (command interpreter) with C-like syntax.
+csplit(1) csplit: context split.
+ctags(1) ctags: maintain a tags file for a C program.
+cut(1) cut: cut out selected fields of each line of a file.
+cw(1) cw: prepare constant-width text for troff.
+cxref(1) cxref: generate C program cross reference.
+date(1) date: print and set the date.
+dbadd(1) dbadd: add an entry to a database.
+dbbuild(1) dbbuild: build a database from a script.
+dbcreate(1) dbcreate: create a database.
+dblist(1) dblist: list information about the database.
+dbprint(1) dbprint: print a database entry.
+dbx(1) dbx: debugger.
+dc(1) dc: desk calculator.
+dd(1) dd: convert and copy a file.
+delta(1) delta: make a delta (change) to an SCCS file.
+deroff(1) deroff: remove nroff/troff, tbl, and eqn constructs.
+df(1) df: report number of free disk blocks.
+diction(1) diction,explain: print wordy sentences; thesaurus for diction.
+diff(1) diff: differential file comparator.
+diff3(1) diff3: 3-way differential file comparison.
+diffmk(1) diffmk: mark differences between files.
+dircmp(1) dircmp: directory comparison.
+domainname(1) domainname: set or display name of current domain system.
+du(1) du: summarize disk usage.
+echo(1) echo: echo arguments.
+ed(1) ed: text editor.
+emacs(1) EMACS: display editor.
+emacsedit(1) emacsedit: an editor for use in Emacs shell windows .PP .B emacsedit .I args.
+enable(1) enable, disable: enable/disable LP printers.
+env(1) env: set environment for command execution.
+eqn(1) eqn \(em format mathematical text for troff.
+error(1) error: analyze and disperse compiler error messages.
+ex(1) ex, edit: text editor.
+expr(1) expr: evaluate arguments as an expression.
+extcentry(1) extcentry: extract FORTRAN-callable entry points from a C file.
+f77(1) f77: FORTRAN compiler for the 68010/68020.
+factor(1) factor: factor a number.
+file(1) file: determine file type.
+find(1) find: find files.
+flp(1) flp: floppy formatter.
+fmt(1) fmt: simple text formatter.
+fold(1) fold: fold long lines for finite width output device.
+freq(1) freq: report on character frequencies in a file.
+fsplit(1) fsplit: split fortran or ratfor files.
+get(1) get: get a version of an SCCS file.
+getopt(1) getopt: parse command options.
+greek(1) greek: select terminal filter.
+grep(1) grep, egrep, fgrep: search a file for a pattern.
+head(1) head: give first few lines.
+help(1) help: ask for help.
+hostid(1) hostid: set or print identifier of current host system.
+hostname(1) hostname: set or print name of current host system.
+hp(1) hp: handle special functions of HP 2640 and 2621-series terminals.
+hyphen(1) hyphen: find hyphenated words.
+id(1) id: print user and group IDs and names.
+ident(1) ident: identify files.
+indent(1) indent: indent and format C program source.
+intro(1) intro: introduction to commands and application programs.
+iostat(1) iostat: report I/O statistics.
+ipcrm(1) ipcrm: remove a message queue, semaphore set or shared memory id.
+ipcs(1) ipcs: report inter-process communication facilities status.
+join(1) join: relational database operator.
+kill(1) kill: terminate a process.
+last(1) last: indicate last logins of users and teletypes.
+lav(1) lav: show load average.
+ld(1) ld: link editor.
+lex(1) lex: generate programs for simple lexical tasks.
+line(1) line: read one line.
+lint(1) lint: a C program checker.
+loadst(1) loadst: print current time and load statistics..
+login(1) login: sign on.
+logname(1) logname: get login name.
+lookbib(1) indxbib, lookbib: build inverted index for a bibliography, find references in a bibliography.
+lorder(1) lorder: find ordering relation for an object library.
+lp(1) lp, cancel: send/cancel requests to an LP line printer.
+lpr(1) lpr: line printer spooler.
+lpstat(1) lpstat: print LP status information.
+ls(1) ls: list contents of directory (enhanced Berkeley version).
+m4(1) m4: macro processor.
+machid(1) m68000, m68k, pdp11, u3b, vax: provide truth value about your processor type.
+mail(1) mail, rmail: send mail to users or read mail.
+make(1) make: maintain, update, and regenerate groups of programs.
+man(1) man, manprog: print entries in this manual.
+merge(1) merge: three-way file merge.
+mergemail(1) mergemail: merge mail messages from one folder to another.
+mesg(1) mesg: permit or deny messages.
+mkdir(1) mkdir: make a directory.
+mkf2c(1) mkf2c, mkc2f: generate C-FORTRAN interface routines.
+mkstr(1) mkstr: create an error message file by massaging C source.
+mm(1) mm, osdd, checkmm: print/check documents formatted with the MM macros.
+mmt(1) mmt, mvt: typeset documents, view graphs, and slides.
+more(1) more, page: file perusal filter for crt viewing.
+mt(1) mt: magnetic tape manipulating program.
+neqn(1) neqn: format mathematical text for nroff.
+netstat(1) netstat: show network status.
+newaliases(1) newaliases: rebuild the data base for the mail aliases file.
+newform(1) newform: change the format of a text file.
+newgrp(1) newgrp: log in to a new group.
+news(1) news: print news items.
+nice(1) nice: run a command at low priority.
+nl(1) nl: line numbering filter.
+nm(1) nm: print name list.
+nohup(1) nohup: run a command immune to hangups (sh\^ only).
+nroff(1) nroff: format text.
+od(1) od: octal dump.
+pack(1) pack, pcat, unpack: compress and expand files.
+pagesize(1) pagesize: print system page size.
+passwd(1) passwd: change login password.
+paste(1) paste: merge same lines of several files or subsequent lines of one file.
+pc(1)  pc: Pascal compiler for the 68010/68020.
+pr(1) pr: print files.
+printenv(1) printenv: print out the environment.
+prof(1) prof: display profile data.
+prs(1) prs: print an SCCS file.
+ps(1) ps: process status.
+ptx(1) ptx: permuted index.
+pwd(1) pwd: working directory name.
+quota(1) quota: display disk usage and limits.
+ranlib(1) ranlib: convert archives to random libraries.
+ratfor(1) ratfor: rational Fortran dialect.
+rcs(1) rcs: change RCS file attributes.
+rcsdiff(1) rcsdiff: compare RCS revisions.
+rcsintro(1) rcsintro: introduction to RCS commands.
+rcsmerge(1) rcsmerge: merge RCS revisions.
+refer(1) refer: find and insert literature references in documents.
+regcmp(1) regcmp: regular expression compile.
+reset(1) reset: reset the teletype bits to a sensible state.
+rlog(1) rlog: print log messages and other information about RCS files.
+rm(1) rm, rmdir: remove files or directories.
+rmdel(1) rmdel: remove a delta from an SCCS file.
+roffbib(1) roffbib: run off bibliographic database.
+rwall(1) rwall: write to all users over a network.
+sact(1) sact: print current SCCS file editing activity.
+sccsdiff(1) sccsdiff: compare two versions of an SCCS file.
+script(1) script: make typescript of terminal session.
+sdiff(1) sdiff: side-by-side difference program.
+sed(1) sed: stream editor.
+see(1) see: see what a file has in it.
+sh(1) sh: shell, the standard command programming language.
+size(1) size: size of an object file.
+sleep(1) sleep: suspend execution for an interval.
+sno(1) sno: SNOBOL interpreter.
+sort(1) sort: sort and/or merge files.
+sortbib(1) sortbib: sort bibliographic database.
+spell(1) spell, hashmake, spellin, hashcheck: find spelling errors.
+split(1) split: split a file into pieces.
+ssp(1) ssp: make output single spaced.
+strings(1) strings: find the printable strings in an object, or other binary file.
+strip(1) strip: remove symbols and relocation bits.
+stty(1) stty: set the options for a terminal.
+style(1) style: analyze surface characteristics of a document.
+su(1) su: become super-user or another user.
+sum(1) sum: print checksum and block count of a file.
+sync(1) sync: update the super block.
+tabs(1) tabs: set tabs on a terminal.
+tail(1) tail: deliver the last part of a file.
+tar(1) tar: tape archiver.
+tbl(1) tbl: format tables for nroff or troff.
+tc(1) tc: phototypesetter simulator.
+tee(1) tee: pipe fitting.
+test(1) test: condition evaluation command.
+time(1) time: time a command.
+touch(1) touch: update access and modification times of a file.
+tr(1) tr: translate characters.
+troff(1) troff: typeset text.
+true(1) true, false: provide truth values.
+tset(1) tset: terminal dependent initialization.
+tsort(1) tsort: topological sort.
+tty(1) tty: get the terminal's name.
+ul(1) ul: do underlining.
+umask(1) umask: set file-creation mode mask.
+uname(1) uname: print system name and version information.
+unget(1) unget: undo a previous get of an SCCS file.
+uniq(1) uniq: report repeated lines in a file.
+units(1) units: conversion program.
+uptime(1) uptime: show how long system has been up.
+val(1) val: validate SCCS file.
+vc(1) vc: version control.
+vi(1) vi, view: screen oriented (visual) display editor based on ex.
+w(1) w: who is on and what they are doing.
+wait(1) wait: wait for background processes to complete.
+wc(1) wc: word count.
+what(1) what: identify SCCS files.
+whereis(1) whereis: locate source, binary, and or manual for program.
+who(1) who: who is on the system.
+whoami(1) whoami: print effective current user id.
+write(1) write: write to another user.
+xargs(1) xargs: construct argument list(s) and execute command.
+xstr(1) xstr: extract strings from C programs to implement shared strings.
+yacc(1) yacc: yet another compiler-compiler.
+ypcat(1) ypcat - print values in a YP data base.
+ypmatch(1) ypmatch - print the value of one or more keys from a yp map.
+yppasswd(1) yppasswd: change login password in yellow pages.
+ypwhich(1) ypwhich: which host is the YP server or map master?.
+arch(1d) arch: display a simulated architectural model.
+blanktime(1g) blanktime: set the screen blanking timeout.
+capture(1w) .
+cedit(1w) cedit: edit colors on the screen.
+clock(1w) clock: display the current time of day.
+ct(1c) ct: spawn getty to a remote terminal.
+cu(1c) cu: call another UNIX System.
+cube(1d) cube: real-time display of famous cube puzzle.
+curve(1d) curve: fast interactive cubic curve display.
+devport(1g) devport: assign a serial port to an external graphics device.
+dog(1d) dog: cooperative or competitive flight simulator and airshow generator.
+dogscore(1d) dogscore: displays the dogfight score board.
+flight(1d) flight: simulate the flight of any of several aircraft.
+flow(1d) flow: display of complex scientific data base.
+ftp(1c) ftp: ARPANET file transfer program.
+gamma(1w) gamma: set the gamma correction value for mapping colors.
+gclear(1g) gclear: clear IRIS graphics screen.
+heme(1d) heme: depthcued display of the Cytochrome P450 protein molecule.
+ipaste(1w) ipaste: display an image file on the screen.
+iset(1w) iset: change the type field of an image file.
+istat(1w) istat: provide information about an image file.
+jet(1d) jet: depthcued wireframe model of a jet fighter.
+kermit(1c) kermit: kermit file transfer.
+light(1d) light: demonstrates real-time lighting and shadows.
+loadav(1w) loadav: graphically display the system load average.
+loadfont(1g) loadfont: replace the system font.
+loadmap(1w) loadmap: load a part of the color map from a file.
+mag(1w) mag: magnify pixels on the screen.
+makemap(1w) makemap: make the default color map.
+mex(1g) mex: manage windows on the IRIS.
+radar(1d) radar: flight controller's view of the Ethernet dogfight.
+randmap(1w) randmap: randomize a section of the color map.
+rcp(1c) rcp: remote file copy \(em TCP.
+rlogin(1c) rlogin: remote login.
+robot(1d) robot: control a robot arm.
+rsh(1c) rsh: remote shell.
+ruptime(1c) ruptime: show host status of local machines.
+rwho(1c) rwho: who's logged in on local machines.
+savedesktop(1w) savedesktop: saves colors in ~/.desktop.
+savemap(1w) savemap: save a range of the color map.
+set60(1d) set60, set30, setntsc: set video output type.
+shadow(1d) shadow: full-screen armchair pilot's view of the dogfight.
+showmap(1w) showmap: display the contents of the color map.
+showpie(1w) showpie: show the division of a window into rectangles.
+shrink(1w) shrink: shrink an image.
+shuttle(1d) shuttle: depthcued wireframe model of the space shuttle.
+spline(1g) spline: interpolate smooth curve.
+startup(1w) \- start the window manager.
+t3279(1c) t3279: IBM 3270 terminal emulator.
+telnet(1c) telnet: user interface to the TELNET protocol.
+texback(1w) texback: generate a textured background texture.
+textcolors(1g) textcolors: set the colors used by a text window.
+uucp(1c) uucp, uulog, uuname: unix to unix copy.
+uuencode(1c) uuencode,uudecode: encode/decode a binary file for transmission via mail.
+uustat(1c) uustat: uucp status inquiry and job control.
+uuto(1c) uuto, uupick: public unix system-to-unix system file copy.
+uux(1c) uux: unix to unix command execution.
+vis(1w) vis: copy a file to the screen.
+worms(1w) worms: UNIX worms running on the IRIS.
+wsiris(1c) wsiris: remote login with graphics.
+xcp(1c) xcp: remote file copy.
+xx(1c) xx, xlogin: remote execution via XNS.

@@ -1,0 +1,737 @@
+
+#
+# The information for DESC file comes first. The point size list is the
+# most important entry, at least as far as the raster tables are concerned.
+#
+
+fonts 9 R I B H CW S S1 GR S2
+sizes 6 7 8 9 10 11 12 14 16 18 20 22 24 28 36 0
+res 300
+hor 1
+vert 1
+unitwidth 10
+
+
+#
+# We'll want to know the name of the printer that we're building the files
+# for. The new raster files will be put in *nrastdir/"rast"*device and the
+# font files will be put in *fontdir/"dev"*device. *nrastdir and *fontdir
+# are defined in buildrast.c and by default they're equal to ".". They
+# can be changed using the -R and -F options respectively.
+#
+
+device i300
+
+#
+# Next come the instructions on how to build the raster tables. The name
+# of the font, and also its associated raster files, follows the build
+# command.
+#
+
+build R
+ascender m
+comment Times Roman
+using cmr10 take ascii characters 65 to 90
+using cmr10 take ascii characters 97 to 122
+using cmr10 take ascii characters 48 to 57
+using cmr10 take characters
+	33	!
+	37	%
+	38	&
+	39	'
+	40	(
+	41	)
+	42	*
+	43	+
+	44	,
+	45	hy
+	"	-
+	46	.
+	47	/
+	58	:
+	59	;
+	60	<
+using cmsc10 take characters
+	61	=
+using cmr10 take characters
+	62	>
+	63	?
+	91	[
+	93	]
+	96	`
+using cmsy10 take character
+	127	$
+	106	|
+using cmr10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+	123	ff
+	124	fi
+	125	fl
+	126	Fi
+	127	Fl
+	35	fm
+using cmb10 take characters
+	94	ru
+using cmsy10 take characters
+	121	dg
+	15	bu
+#
+# These characters don't exist in the raster tables we got from Imagen.
+# I've defined them all as character 119 from font cmsy10. That's a small
+# diamond character, so if you see it in the output you'll know what's
+# going on.
+#
+# Didn't use synonyms so we force R, I, and B fonts to be the largest.
+#
+	119	14
+	119	34
+	119	12
+	119	ct
+	119	rg
+	119	sq
+edit
+	xref ru = 0
+	yref ru = 0
+	chwidth ru = width ru - xref ru - 1
+
+build I
+comment Times Italic
+ascender m
+using cmti10 take ascii characters 65 to 90
+using cmti10 take ascii characters 97 to 122
+using cmti10 take ascii characters 48 to 57
+using cmti10 take characters
+	33	!
+	37	%
+	38	&
+	39	'
+	40	(
+	41	)
+	42	*
+	43	+
+	44	,
+	45	hy
+	"	-
+	46	.
+	47	/
+	58	:
+	59	;
+	60	<
+	61	=
+	62	>
+	63	?
+	91	[
+	93	]
+	96	`
+using cmsss take character
+	36	$
+	124	|
+using cmti10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+	123	ff
+	124	fi
+	125	fl
+	126	Fi
+	127	Fl
+using cmr10 take characters
+	35	fm
+	94	ru
+using cmsy10 take characters
+	121	dg
+	15	bu
+#
+# These characters don't exist in the raster tables we got from Imagen.
+# I've defined them all as character 119 from font cmsy10. That's a small
+# diamond character, so if you see it in the output you'll know what's
+# going on.
+#
+	119	14
+	119	34
+	119	12
+	119	ct
+	119	rg
+	119	sq
+edit
+	xref ru = 0
+	yref ru = 0
+	chwidth ru = width ru - xref ru - 1
+
+build B
+comment Times Bold
+ascender m
+using cmb10 take ascii characters 65 to 90
+using cmb10 take ascii characters 97 to 122
+using cmb10 take ascii characters 48 to 57
+using cmb10 take characters
+	33	!
+	37	%
+	38	&
+	39	'
+	40	(
+	41	)
+	42	*
+	43	+
+	44	,
+	45	hy
+	"	-
+	46	.
+	47	/
+	58	:
+	59	;
+	60	<
+	61	=
+	62	>
+	63	?
+	91	[
+	93	]
+	96	`
+using cmbsy take character
+	127	$
+	106	|
+using cmb10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+	123	ff
+	124	fi
+	125	fl
+	126	Fi
+	127	Fl
+	35	fm
+using cmsy10 take characters
+	0	ru
+using cmbsy take characters
+	121	dg
+	15	bu
+#
+# These characters don't exist in the raster tables we got from Imagen.
+# I've defined them all as character 119 from font cmsy10. That's a small
+# diamond character, so if you see it in the output you'll know what's
+# going on.
+#
+	119	14
+	119	34
+	119	12
+	119	ct
+	119	rg
+	119	sq
+edit
+	xref ru = 0
+	yref ru = 0
+	chwidth ru = width ru - xref ru - 1
+
+build H
+comment Helvetica
+ascender m
+using cmss10 take ascii characters 65 to 90
+using cmss10 take ascii characters 97 to 122
+using cmss10 take ascii characters 48 to 57
+using cmss10 take ascii characters 33 to 44
+using cmss10 take characters
+	45	hy
+	"	-
+	46	.
+	47	/
+using cmss10 take ascii characters 58 to 64
+using cmss10 take ascii characters 91 to 94
+using cmss10 take characters
+	96	`
+using cmss10 take ascii characters 123 to 126
+using cmb10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+using cmbsy take characters
+	121	dg
+	15	bu
+
+build CW
+comment Constant Width
+ascender m
+using cmasc10 take ascii characters 65 to 90
+using cmasc10 take ascii characters 97 to 122
+using cmasc10 take ascii characters 48 to 57
+using cmasc10 take ascii characters 33 to 44
+using cmasc10 take characters
+	45	hy
+	"	-
+	46	.
+	47	sl
+	"	/
+using cmasc10 take ascii characters 58 to 64
+using cmasc10 take ascii characters 91 to 94
+using cmasc10 take characters
+	95	ul
+	"	_
+	96	`
+	123	{
+	124	or
+	"	|
+	125	}
+	126	~
+using cmsy10 take characters
+	0	ru
+using cmasc10 take characters
+	5	no
+	25	->
+	24	<-
+	1	da
+#
+# These guys weren't define on Imagen's Constant Width raster file. Again
+# I'll put out a small diamond - Constant Width version of course.
+#
+	127	ct
+	"	fm
+	"	lh
+	"	sq
+	"	dg
+	"	ua
+edit
+	xref ru = 0
+	yref ru = 0
+	chwidth ru = 25
+	xref ul = 0
+
+build BI
+comment Bold Italic
+ascender m
+using cmbti take ascii characters 65 to 90
+using cmbti take ascii characters 97 to 122
+using cmbti take ascii characters 48 to 57
+using cmbti take characters
+	33	!
+	37	%
+	38	&
+	39	'
+	40	(
+	41	)
+	42	*
+	43	+
+	44	,
+	45	hy
+	"	-
+	46	.
+	47	/
+	58	:
+	59	;
+	60	<
+	61	=
+	62	>
+	63	?
+	91	[
+	93	]
+	96	`
+using cmsss take character
+	36	$
+	124	|
+using cmbti take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+	123	ff
+	124	fi
+	125	fl
+	126	Fi
+	127	Fl
+using cmb10 take characters
+	35	fm
+using cmbsy take characters
+	121	dg
+	15	bu
+#
+# These characters don't exist in the raster tables we got from Imagen.
+# I've defined them all as character 119 from font cmsy10. That's a small
+# diamond character, so if you see it in the output you'll know what's
+# going on.
+#
+	119	14
+	"	34
+	"	12
+	"	ct
+	"	rg
+	"	sq
+
+build HI
+comment Helvetica Italic
+ascender m
+using cmsss take ascii characters 65 to 90
+using cmsss take ascii characters 97 to 122
+using cmsss take ascii characters 48 to 57
+using cmsss take ascii characters 33 to 44
+using cmsss take characters
+	45	hy
+	"	-
+	46	.
+	47	/
+using cmsss take ascii characters 58 to 64
+using cmsss take ascii characters 91 to 94
+using cmsss take characters
+	96	`
+using cmsss take ascii characters 123 to 126
+using cmti10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+using cmsy10 take characters
+	121	dg
+	15	bu
+
+build PA
+comment Palatino
+ascender m
+using cmsc10 take ascii characters 65 to 90
+using cmsc10 take ascii characters 97 to 122
+using cmsc10 take ascii characters 48 to 57
+using cmsc10 take characters
+	33	!
+	37	%
+	38	&
+	39	'
+	40	(
+	41	)
+	42	*
+	43	+
+	44	,
+	45	hy
+	"	-
+	46	.
+	47	/
+	58	:
+	59	;
+	60	<
+	61	=
+	62	>
+	63	?
+	91	[
+	93	]
+	96	`
+using cmsy10 take character
+	127	$
+	106	|
+using cmsc10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+	123	ff
+	124	fi
+	125	fl
+	126	Fi
+	127	Fl
+using cmsy10 take characters
+	121	dg
+	15	bu
+
+build PI
+comment Palatino Italic
+ascender m
+using cms10 take ascii characters 65 to 90
+using cms10 take ascii characters 97 to 122
+using cms10 take ascii characters 48 to 57
+using cms10 take characters
+	33	!
+	37	%
+	38	&
+	39	'
+	40	(
+	41	)
+	42	*
+	43	+
+	44	,
+	45	hy
+	"	-
+	46	.
+	47	/
+	58	:
+	59	;
+	60	<
+	61	=
+	62	>
+	63	?
+	91	[
+	93	]
+	96	`
+using cmsss take character
+	36	$
+	124	|
+using cms10 take characters
+	95	em
+	23	de
+	94	\-
+	"	en
+	123	ff
+	124	fi
+	125	fl
+	126	Fi
+	127	Fl
+using cmsy10 take characters
+	121	dg
+	15	bu
+
+build S
+comment Special Font
+special
+ascender ==
+using cmasc10 take characters
+	92	\e
+	"	\
+using cms10 take characters
+	14	\'
+	"	aa
+	13	\`
+	"	ga
+using cmb10 take characters
+	43	pl
+using cmsy10 take characters
+	0	mi
+	2	mu
+	13	di
+using cmsc10 take characters
+	61	eq
+using cmsy10 take characters
+	17	==
+	21	>=
+	20	<=
+	28	!=
+	6	+-
+	7	-+
+	58	no
+using cmb10 take characters
+	47	sl
+using cmsy10 take characters
+	24	ap
+	39	~=
+	111	gr
+	33	->
+	32	<-
+	34	ua
+	35	da
+	115	is
+using cmi10 take characters
+	37	pd
+using cmsy10 take characters
+	49	if
+	112	sr
+using cmb10 take characters
+	94	rn
+using cmsy10 take characters
+	26	sb
+	27	sp
+	91	cu
+	92	ca
+	18	ib
+	19	ip
+	50	mo
+using cmcsc take characters
+	29	es
+using cmsy10 take characters
+	120	sc
+	122	dd
+	100	lc
+	101	rc
+	98	lf
+	99	rf
+	106	bv
+	3	**
+	106	br
+	106	or
+	5	ci
+using cmti10 take characters
+	32	ts
+using cmsy10 take characters
+	113	#
+	124	@
+using cmr10 take characters
+	22	"
+using cmsy10 take characters
+	102	{
+	103	}
+using cmr10 take characters
+	60	<
+	62	>
+using cmasc10 take characters
+	126	~
+	94	^
+using cmb10 take characters
+	94	ul
+	"	_
+using cmb10 take characters
+	94	ru
+using cmsy10 take characters
+	125	co
+	121	dg
+	15	bu
+#
+# Most of the bracket building pieces are missing from Imagen's raster
+# files. Actually the problem is that the individual pieces are all there,
+# mostly in cmathx, but they all need to match the pixel width of the
+# bv character and they just don't. I've defined lt, rt, lb, rb, lk, and
+# rk so that you'll at least get something reasonable, even though all
+# brackets will be square. Eventuall we'll want to fix this stuff.
+#
+	100	lt
+	101	rt
+	98	lb
+	99	rb
+	106	lk
+	106	rk
+#
+# These guys weren't properly defined in any of the raster files that we
+# got directly from Imagen. Eventually we'll want to have them digitized.
+# For now I'll print a small diamond out.
+#
+#
+	119	14
+	"	34
+	"	12
+	"	ct
+	"	rg
+	"	sq
+	"	pt
+	"	lh
+	"	rh
+	"	tm
+#
+# Added the \(fm character to the S font. It's used by eqn as "prime".
+# Put it at the end of the raster file so character positions wouldn't
+# be changed.
+#
+using cmr10 take characters
+	35	fm
+edit
+	xref ru = 0
+	yref ru = 0
+	chwidth ru = width ru - xref ru - 1
+	xref br = 0
+	chwidth br = 0
+	xref ul = 0
+	yref ul = - (5 * height ul + 1)
+	chwidth ul = width ul - xref ul - 1
+	xref rn = 1
+	yref rn = yref sr
+	chwidth rn = width rn - xref rn - 1
+	chwidth sr = width sr - xref sr
+	xref rc = width rc - width bv + xref bv
+	xref rf = width rf - width bv + xref bv
+	xref rt = width rt - width bv + xref bv
+	xref rb = width rb - width bv + xref bv
+
+build S1
+comment Special Character Font
+special
+ascender cy
+using cmi10 take characters
+	35	Sl
+using cmsy10 take characters
+	126	ps
+using cms10 take characters
+	26	cs
+using cmasc10 take characters
+	26	cy
+using cmsy10 take characters
+	7	-+
+	94	as
+	95	os
+	29	=.
+	40	ld
+	41	rd
+	20	le
+	21	ge
+	16	pp
+	54	an
+	110	TR
+
+#
+# The next two font definitions are for a few special characters that
+# pre-processors, like eqn and grap, need. S2 is the normal version and
+# it's mounted in the last default font postion. S3 is a bold version of
+# the same font. If you'd prefer to have S3 mounted by default just change
+# S2 to S3 in the DESC file and then rerun makedev.
+#
+
+build S2
+comment Special pre-processor font
+special
+using cmsy10 take characters
+	5	ob
+	8	O+
+	9	O-
+	10	Ox
+	11	O/
+	12	O.
+
+build S3
+comment Special eqn characters - bold versions
+special
+using cmbsy take characters
+	5	ob
+	8	O+
+	9	O-
+	10	Ox
+	11	O/
+	12	O.
+
+build GR
+comment Greek
+special
+ascender *a
+using cmi10 take characters
+	11	*a
+	12	*b
+	13	*g
+	14	*d
+	15	*e
+	16	*z
+	17	*y
+	18	*h
+	19	*i
+	20	*k
+	21	*l
+	22	*m
+	23	*n
+	24	*c
+	111	*o
+	25	*p
+	26	*r
+	27	*s
+	28	*t
+	29	*u
+	30	*f
+	31	*x
+	123	*q
+	124	*w
+using cmr10 take characters
+	65	*A
+	66	*B
+	0	*G
+	1	*D
+	69	*E
+	90	*Z
+	72	*Y
+	2	*H
+	73	*I
+	75	*K
+	3	*L
+	77	*M
+	78	*N
+	4	*C
+	79	*O
+	5	*P
+	6	*S
+	84	*T
+	7	*U
+	8	*F
+	88	*X
+	9	*Q
+	10	*W
+

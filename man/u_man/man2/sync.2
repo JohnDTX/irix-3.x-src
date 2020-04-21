@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH SYNC 2 
+.SH NAME
+sync \- update super-block
+.SH SYNOPSIS
+.B void sync ( )
+.SH DESCRIPTION
+.I Sync\^
+causes all information in
+memory that should be on disk to be written out.
+This includes modified super blocks,
+modified i-nodes, and delayed block I/O.
+.PP
+It should be used by programs which examine a file system,
+for example
+.IR fsck ,
+.IR df ,
+etc.
+It is mandatory before a boot.
+.PP
+The writing, although scheduled, is not necessarily
+complete upon return from 
+.IR sync .
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	36,D0
+.B trap	#0
+.fi
+.DT
+.\"	@(#)sync.2	5.1 of 10/19/83

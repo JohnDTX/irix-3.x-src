@@ -1,0 +1,183 @@
+.TH CFLOW 1
+.SH NAME
+cflow \- generate C flow graph
+.SH SYNOPSIS
+.B cflow
+.RB [ \-r ]
+.RB [ \-ix ]
+.RB [ \-i_ ]
+.RB [ \-d num]
+files
+.SH DESCRIPTION
+.I Cflow\^
+analyzes a collection of
+.SM C\*S,
+.SM YACC\*S,
+.SM LEX\*S,
+assembler, and object files
+and attempts to build a graph charting the external references.
+Files suffixed in
+.BR .y ,
+.BR .l ,
+.BR .c ,
+and
+.BR .i
+are
+.SM YACC\*S'd,
+.SM LEX\*S'd,
+and C-preprocessed
+(bypassed for
+.B .i
+files)
+as appropriate
+and then run through the first pass of
+.IR lint\^ (1).
+(The
+.BR \-I \*S,
+.BR \-D \*S,
+and
+.BR \-U
+options of the C-preprocessor are also understood.)
+Files suffixed with
+.B .s
+are assembled and information
+is extracted
+(as in
+.B .o
+files)
+from the symbol table.
+The output of all this non-trivial processing
+is collected and turned into a graph of external references
+which is displayed upon the standard output.
+.PP
+Each line of output begins with a reference
+(i.e., line)
+number, followed by a suitable number of tabs
+indicating the level.
+Then the name of the global
+(normally only a function not defined as an external or
+beginning with an underscore; see below for the
+.B \-i
+inclusion option)
+a colon
+and its definition.
+For information extracted from C source,
+the definition consists of an abstract type declaration
+(e.g.,
+.BR "char \(**" ),
+and, delimited by angle brackets,
+the name of the source file
+and the line number
+where the definition was found.
+Definitions extracted from object files
+indicate the file name and location
+counter under which the symbol appeared
+(e.g.,
+.IR text\^ ).
+Leading underscores in C-style external names are deleted.
+.PP
+Once a definition of a name has been printed,
+subsequent references to that name contain
+only the reference number of the line
+where the definition may be found.
+For undefined references, only
+.B <\|>
+is printed.
+.PP
+When the nesting level becomes too deep, the
+.BR \-e
+option of
+.IR pr\^ (1)
+can be used to compress the tab expansion to something
+less than every eight spaces.
+.PP
+The following options are interpreted by
+.IR cflow :
+.TP \w'\f3\-d\fPnum\ \ 'u
+.B \-r
+Reverse the ``caller:callee'' relationship producing an inverted listing
+showing the callers of each function.
+The listing is also sorted in
+lexicographical order by callee.
+.TP
+.B \-ix
+Include external and static data symbols. The default is to include
+only functions in the flow graph.
+.TP
+.B \-i_
+Include names that begin with an underscore. The default is to exclude
+these functions (and data if \f2-ix\fP is used).
+.TP
+.BR \-d num
+The
+.I num\^
+decimal integer indicates the depth at which the flow graph
+is cut off.
+By default this is a very large number.
+Attempts to set
+the cutoff depth to a nonpositive integer will be met with contempt.
+.SH EXAMPLE
+.DT
+.PP
+Given the following in
+"file.c":
+.IP
+.nf
+int	i;
+.sp .5
+main()
+{
+	f();
+	g();
+	f();
+}
+.sp .5
+f()
+{
+	i = h();
+}
+.fi
+.PP
+the command:
+.IP
+cflow file.c
+.PP
+produces the the output:
+.IP
+.nf
+1	main: int(), <file.c 4>
+2		f: int(), <file.c 11>
+3			h: <>
+4			i: int, <file.c 1>
+5		g: <>
+.fi
+.SH DIAGNOSTICS
+Complains about bad options.
+Complains about multiple definitions
+and only believes the first.
+Other messages may come from the various
+programs used (e.g., the C-preprocessor).
+.SH SEE ALSO
+as(1),
+cc(1),
+lex(1),
+lint(1),
+nm(1),
+pr(1),
+yacc(1).
+.SH BUGS
+Files produced by
+.IR lex\^ (1)
+and
+.IR yacc\^ (1)
+cause the reordering of line number declarations which can
+confuse
+.IR cflow .
+To get proper results, feed
+.I cflow\^
+the
+.I yacc\^
+or
+.I lex\^
+input.
+.\"	@(#)cflow.1	5.1 of 10/26/83

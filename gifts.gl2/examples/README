@@ -1,0 +1,17 @@
+These directories contain the source code for the programming
+examples in the IRIS User's Guide Version 2.1:
+
+"1.ProgGuide/" contains the C programs in Section 1: Programming Guide.
+
+"2.Append/" contains the C programs in Section 2: Appendices.
+
+"4.WindMgr/" contains the C programs in Section 4: Window Manager.
+
+"5.ProgExamples/" contains the C programs in Section 5: Programming
+Examples.
+
+"Fortran/" contains the Fortran versions of some of the C programs 
+in the User's Guide.
+
+"xns/" contains a sample of how to make two IRIS's talk to each other.
+"tcp/" contains a sample of how to make two IRIS's talk to each other.

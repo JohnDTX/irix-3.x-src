@@ -1,0 +1,1039 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.9.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               04-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure genproc;
+  var i,finalloc,numregs: integer; r: register; lblk: pblk;
+  
+  function realaddr(fblock: integer): longint;
+  begin
+  realaddr := blktable[fblock div (MAXBLOCKS + 1)]^
+                 [fblock and MAXBLOCKS].blkaddr;
+  end; {realaddr}
+  
+  function LiveBlock(fblock: integer): Boolean;
+  begin
+  LiveBlock := not blktable[fblock div (MAXBLOCKS + 1)]^
+                      [fblock and MAXBLOCKS].DeadCode;
+  end; {LiveBlock}
+  
+  procedure reloadregs;
+    var i,bit: integer;
+  begin
+  bit := 1; pushmask := 0; popmask := 0; numregs := 0;
+  if level > 1
+  then for i := D0 to SP do begin
+           pushmask := pushmask + pushmask;
+           if ((i >= D3) and (i <= D7)) or ((i >= A2) and (i <= AMAX))
+           then if GlobalLabels or reg[i].Used
+                then begin
+                     pushmask := pushmask + 1;
+                     popmask := popmask + bit;
+                     numregs := numregs + 1; lastreg := i;
+                     end;
+           bit := bit + bit;
+           end;
+  if numregs = 0
+  then regsavsz := 0
+  else if numregs = 1
+       then regsavsz := 2
+       else regsavsz := 4;
+  end; {reloadregs}
+  
+  procedure printcodebuff;
+    var lpc: longint; bindex,i,j,n,k: integer; lpcbuf: pcbuf;
+  begin
+  if TRACEJUMPS
+  then begin
+       writeln; lpc := 0; bindex := 0; lpcbuf := cbuflist;
+       for i := 1 to nextblk do
+           with blktable[i div (MAXBLOCKS + 1)]^[i and MAXBLOCKS] do begin
+                write('BLK',i:4,'  PC=',blkaddr:6 hex,
+                      '  SZ=',blksize:4 hex);
+                k := 0;
+                case blktag of
+                  TAG_END:  write(' TAG_END');
+                  TAG_LOAD: begin write(' TAG_LOAD'); k := regsavsz; end;
+                  TAG_SAVE: begin write(' TAG_SAVE'); k := regsavsz; end;
+                  TAG_LC:   begin write(' TAG_LC'); k := 2; end;
+                  TAG_A0:   begin
+                            write(' TAG_A0'); k := 4*ord(A0SetFlag);
+                            end;
+                  TAG_RBYT: begin
+                            write(' TAG_RBYT'); k := 2;
+                            end;
+                  TAG_BR0:  write(' TAG_BR0: CC=',brop:2 hex,
+                              '  REFBLK=',refblk);
+                  TAG_BR2:  begin
+                            write(' TAG_BR2: CC=',brop:2 hex,
+                              '  REFBLK=',refblk);
+                            k := 2;
+                            end;
+                  TAG_BR4:  begin
+                            write(' TAG_BR4: CC=',brop:2 hex,
+                              '  REFBLK=',refblk);
+                            k := 4;
+                            end;
+                  TAG_BR8:  begin
+                            write(' TAG_BR8: CC=',brop:2 hex,
+                              '  REFBLK=',refblk);
+                            k := 8;
+                            end;
+                  TAG_PC2:  begin
+                            write(' TAG_PC2: REFBLK=',refblk);
+                            k := 2;
+                            end;
+                  TAG_CJMP: begin
+                            write(' TAG_CJMP: REG=',creg);
+                            k := 10; {???}
+                            end;
+                  TAG_CTAB: begin
+                            write(' TAG_CTAB:');
+                            k := cvallist^.numentrys*cvallist^.entrysz;
+                            end;
+                  TAG_WITH: begin
+                            write(' TAG_WITH: USED=',SaveWith);
+                            if SaveWith then k := 4;
+                            end;
+                  TAG_LAB:  write(' TAG_LAB');
+                end; {case}
+                if DeadCode
+                then write(' *** DEAD CODE ***');
+                n := 16;
+                for j := 1 to (blksize + k) div 2 do begin
+                    if n = 16
+                    then begin writeln; write(lpc:6 hex,':  '); n := 0; end
+                    else if n = 8 then write(' ');
+                    if j*2 > blksize
+                    then write('---- ')
+                    else begin
+                         if bindex > MAXCBUFF
+                         then begin bindex := 0; lpcbuf := lpcbuf^.next; end;
+                         write(lpcbuf^.buff[bindex]:4 hex,' ');
+                         bindex := bindex + 1;
+                         lpc := lpc + 2;
+                         end;
+                    n := n + 2;
+                    end;
+                if not DeadCode then lpc := lpc + k;
+                writeln;
+                end;
+       end;
+  end; {printcodebuff}
+  
+  procedure findlabels;
+    var i,llabblk: integer; lcaserec: pcaserec;
+  begin
+  for i := 1 to nextblk do
+      with blktable[i div (MAXBLOCKS + 1)]^[i and MAXBLOCKS] do begin
+           case blktag of
+             TAG_LC,
+             TAG_LOAD,
+             TAG_SAVE,
+             TAG_A0,
+             TAG_RBYT,
+             TAG_LAB,
+             TAG_WITH,
+             TAG_END:   ;
+             TAG_BR8,
+             TAG_BR4,
+             TAG_BR2,
+             TAG_BR0,
+             TAG_PC2:  begin
+                       llabblk := lookupilabel(refblk);
+                            if llabblk > 0
+                            then refblk := llabblk
+                            else error(9020);
+                       end;
+             TAG_CJMP,
+             TAG_CTAB: begin
+                       llabblk := lookupilabel(cvallist^.tablabno);
+                       if llabblk = 0 then error(9021);
+                       llabblk := lookupilabel(cvallist^.elselabno);
+                       if llabblk = 0 then error(9022);
+                       lcaserec := cvallist^.thistable;
+                       while lcaserec <> nil do begin
+                             llabblk := lookupilabel(lcaserec^.clab);
+                             if llabblk = 0 then error(9023);
+                             lcaserec := lcaserec^.next;
+                             end;
+                       end;
+           end; {case}
+           end;
+  end; {findlabels}
+  
+  procedure finddeadcode;
+    var lentry: pentryrec; lpulab: puserlabel;
+    
+    procedure markblk(k: integer);
+      var lcase: pcaserec;
+    begin
+    with blktable[k div (MAXBLOCKS + 1)]^[k and MAXBLOCKS] do
+         if DeadCode
+         then begin
+              DeadCode := FALSE;
+              case blktag of
+                TAG_END:  ;
+                TAG_BR0,
+                TAG_BR2,
+                TAG_BR4,
+                TAG_BR8:  begin
+                          markblk(refblk);
+                          if brop <> $60 then markblk(k + 1);
+                          end;
+                TAG_PC2:  begin markblk(refblk); markblk(k + 1); end;
+                TAG_LC,
+                TAG_LOAD,
+                TAG_SAVE,
+                TAG_A0,
+                TAG_RBYT,
+                TAG_LAB,
+                TAG_WITH:  markblk(k + 1);
+                TAG_CJMP: begin
+                          markblk(lookupilabel(cvallist^.tablabno));
+                          markblk(lookupilabel(cvallist^.elselabno));
+                          end;
+                TAG_CTAB: begin
+                          lcase := cvallist^.thistable;
+                          while lcase <> nil do begin
+                                markblk(lookupilabel(lcase^.clab));
+                                lcase := lcase^.next;
+                                end;
+                          end;
+              end; {case}
+              end;
+    end; {markblk}
+    
+  begin {finddeadcode}
+  lentry := entrylist;
+  while lentry <> nil do begin
+        markblk(lentry^.entryblk);
+        lentry := lentry^.next;
+        end;
+  lpulab := ulabellist;
+  while lpulab <> nil do
+        with lpulab^ do begin
+             if linkerno >= 0
+             then markblk(lookupilabel(intno));
+             lpulab := next;
+             end;
+  markblk(nextblk);
+  end; {finddeadcode}
+  
+  procedure findshortjumps;
+    var i,pass,saved,deadsaved: integer; delta,bigdelta: longint;
+    
+    procedure blkaddrs;
+      var i, ii: integer; laddr,oldladdr: longint;
+    begin
+    laddr := 0; deadsaved := 0;
+    for i := 1 to nextblk do
+        with blktable[i div (MAXBLOCKS + 1)]^[i and MAXBLOCKS] do begin
+             blkaddr := laddr; oldladdr := laddr; laddr := laddr + blksize;
+             case blktag of
+               TAG_END:  ;
+               TAG_BR0:  ;
+               TAG_BR2:  laddr := laddr + 2;
+               TAG_BR4:  laddr := laddr + 4;
+               TAG_BR8:  laddr := laddr + 8;
+               TAG_PC2:  laddr := laddr + 2;
+               TAG_LC:   laddr := laddr + 2;
+               TAG_LOAD: laddr := laddr + regsavsz;
+               TAG_SAVE: 
+			   begin
+					laddr := laddr + regsavsz;
+					if ZeroStack then
+					begin
+					{ count register clear inst's }
+						if lc > 0 then laddr := laddr + 8;
+						for ii := D3 to D7 do
+						begin
+							if reg[ii].Used then
+							begin
+								laddr := laddr + 2;
+							end;
+						end;
+					end;
+			   end;
+               TAG_A0:   laddr := laddr + 4*ord(A0SetFlag);
+               TAG_RBYT: laddr := laddr + 2;
+               TAG_CJMP: begin
+                         if cvallist^.TabFarAway
+                         then laddr := laddr + 12
+                         else laddr := laddr + 10;
+                         cvallist^.cjmpaddr := laddr - 2;
+                         end;
+               TAG_CTAB: begin
+                         cvallist^.ctabaddr := laddr;
+                         if cvallist^.entrysz = 4
+                         then laddr := laddr + cvallist^.numentrys*4
+                         else laddr := laddr + cvallist^.numentrys*2;
+                         end;
+               TAG_LAB:  ;
+               TAG_WITH: if SaveWith then laddr := laddr + 4;
+             end; {case}
+             if DeadCode
+             then begin
+                  deadsaved := deadsaved + (laddr - oldladdr);
+                  laddr := oldladdr;
+                  end
+             end;
+    end; {blkaddrs}
+    
+    procedure chktabsz(fcvallist: pcaselst);
+      var llabblk: integer; maxdelta,delta: longint; lcaserec: pcaserec;
+    begin
+    with fcvallist^ do begin
+         if AnyHoles
+         then begin
+              llabblk := lookupilabel(elselabno);
+              maxdelta := realaddr(llabblk) - cjmpaddr;
+              end
+         else maxdelta := 0;
+         lcaserec := thistable;
+         while lcaserec <> nil do begin
+               llabblk := lookupilabel(lcaserec^.clab);
+               delta := realaddr(llabblk) - cjmpaddr;
+               if delta > maxdelta then maxdelta := delta;
+               lcaserec := lcaserec^.next;
+               end;
+         if maxdelta < 32767
+         then begin entrysz := 2; saved := saved + numentrys*2; end;
+         end;
+    end; {chktabsz}
+    
+  begin {findshortjumps}
+  blkaddrs; pass := 0;
+  repeat
+         saved := 0;
+         for i := 1 to nextblk do
+             with blktable[i div (MAXBLOCKS + 1)]^[i and MAXBLOCKS] do begin
+                  case blktag of
+                    TAG_END:  ;
+                    TAG_BR0:  ;
+                    TAG_BR2:
+                      begin
+                      delta := realaddr(refblk) - (blkaddr + blksize);
+                      if delta = 2
+                      then begin saved := saved + 2; blktag := TAG_BR0; end;
+                      end;
+                    TAG_BR4:
+                      begin
+                      delta := realaddr(refblk) - (blkaddr + blksize);
+                      if (delta <= 130) and (delta >= -126)
+                      then begin saved := saved + 2; blktag := TAG_BR2; end;
+                      end;
+                    TAG_BR8:
+                      begin
+                      delta := realaddr(refblk) - (blkaddr + blksize);
+                      if (delta <= 130) and (delta >= -126)
+                      then begin saved := saved + 6; blktag := TAG_BR2; end
+                      else if (delta <= 32766) and (delta >= -32766)
+                           then begin
+                                saved := saved + 4; blktag := TAG_BR4;
+                                end;
+                      end;
+                    TAG_PC2,
+                    TAG_LC,
+                    TAG_LOAD,
+                    TAG_SAVE,
+                    TAG_A0,
+                    TAG_RBYT: ;
+                    TAG_CJMP:
+                      with cvallist^ do
+                           if TabFarAway
+                           then if (ctabaddr - cjmpaddr) < 123
+                                then TabFarAway := FALSE;
+                    TAG_CTAB:
+                      if cvallist^.entrysz = 4
+                      then if pc > 32000
+                           then chktabsz(cvallist)
+                           else begin
+                                cvallist^.entrysz := 2;
+                                saved := saved + cvallist^.numentrys*2;
+                                end;
+                    TAG_LAB,
+                    TAG_WITH: ;
+                  end; {case}
+                  end;
+         blkaddrs;
+         pass := pass + 1;
+  until saved = 0;
+  with blktable[nextblk div (MAXBLOCKS + 1)]^[nextblk and MAXBLOCKS] do begin
+       pc := blkaddr + blksize;
+       end;
+  deadbytes := deadbytes + deadsaved;
+  end; {findshortjumps}
+  
+  
+  { Output Big Constants }
+  
+  procedure genbigcs;
+    var i: integer; lint: pintlist;
+  begin
+  while bigclist <> nil do
+        with bigclist^ do begin
+             defilabel(bigclab);
+             case bigval.cstkind of
+                  SETCNST:  begin
+                            lint := bigval.setvalu;
+                            for i := 1 to (bigval.setbytes + 1) div 2 do begin
+                                gen(lint^.int); lint := lint^.next;
+                                end;
+                            if not bigval.FrontAddress
+                            then defilabel(bigclab);
+                            end;
+                  STRCNST,
+                  PAOCCNST: begin
+                            if bigval.cstkind = STRCNST
+                            then genstrcnst(bigval.strvalu,bigval.len)
+                            else genpaoccnst(bigval.strvalu,bigval.len);
+                            end;
+             end; {case}
+             bigclist := next;
+             end;
+  end; {genbigcs}
+  
+  
+  { Output Little Constants }
+  
+  procedure genlitcs;
+  begin
+  while litclist <> nil do
+        with litclist^ do begin
+             defilabel(litclab); gen2(litval);
+             if litvalsz = QUAD then gen2(litval2);
+             litclist := next;
+             end;
+  end; {genlitcs}
+  
+  
+  { Output FORMAT statements }
+  
+  procedure genformats;
+  begin
+  while fmtlist <> nil do
+        with fmtlist^ do begin
+             defilabel(fmtilabno);
+             genpaoccnst(fmt.strvalu,fmt.len);
+             fmtlist := next;
+             end;
+  end; {genformats}
+  
+  procedure formatcode;
+    var i,callrefsize,lblock,lbyte,llabblk: integer; lref: preflist;
+        lstr: idstring; lentry: pentryrec; lpulab: puserlabel; l: longint;
+    
+    procedure outftndtree(fcom: pcommonrec);
+      var i,count: integer; lref: pblkoff;
+    begin
+    if fcom <> nil
+    then with fcom^ do begin
+         outftndtree(left); outftndtree(right);
+         if (commonno = 1) and (language = FORTRAN) and (ftnstaticlc > 0)
+         then datasize := ftnstaticlc;
+         count := 0; lref := reflist;
+         while lref <> nil do begin
+               if LiveBlock(lref^.blk) then count := count + 1;
+               lref := lref^.next;
+               end;
+         
+         { Fixed Data Area Definitions }
+         
+         if datasize >= 0
+         then begin
+              if LongNames
+              then begin
+                   out($B4); out3(namesize(comname) + 10);
+                   outlid(comname);
+                   end
+              else begin
+                   out($8A); out3(16); outlid8(comname);
+                   end;
+              out4(datasize);
+              end;
+         
+         { Fixed Data Area References }
+         
+         if count > 0
+         then begin
+              if LongNames
+              then begin
+                   out($B6); out3(namesize(comname) + count*4 + 6);
+                   outlid(comname);
+                   end
+              else begin
+                   out($8C); out3(count*4 + 12); outlid8(comname);
+                   end;
+              lref := reflist;
+              while lref <> nil do begin
+                    if LiveBlock(lref^.blk)
+                    then out4(realaddr(lref^.blk) + lref^.off);
+                    lref := lref^.next;
+                    end;
+              end;
+         end;
+    end; {outftndtree}
+    
+    procedure dbgoffsets;
+      var lentry: pentryrec; i,j,loutword,loutblock: integer;
+          laddr,taddr: longint; lstr: idstring;
+      
+      procedure patchobj(fblock,fword,fval: integer);
+        var lbuff: array[0..255] of integer;
+      begin
+      if fblock = outblock
+      then outbuff[fword] := fval
+      else begin
+           if blockread(outfile,lbuff,1,fblock) <> 1 then error(401);
+           lbuff[fword] := fval;
+           if blockwrite(outfile,lbuff,1,fblock) <> 1 then error(408);
+           end;
+      end; {patchobj}
+      
+      function localno(fname: alfa8): integer;
+        var i,j: integer; ch: char;
+      begin
+      if fname[1] <> '$'
+      then localno := -1
+      else if fname[2] <= '9'
+           then begin
+                j := 0;
+                for i := 8 downto 2 do begin
+                    ch := fname[i];
+                    if (ch <= '9') and (ch >= '0')
+                    then j := j*10 + ord(ch) - ord('0');
+                    end;
+                localno := j;
+                end
+           else localno := -1;
+      end; {localno}
+      
+      procedure outsalfa(fname: alfa8);
+        var i,n: integer;
+      begin
+      n := 8;
+      while (n > 0) and (fname[n] = ' ') do n := n - 1;
+      out(n);
+      for i := 1 to n do out(ord(fname[i]));
+      end; {outsalfa}
+      
+    begin {dbgoffsets}
+    if entrylist <> nil
+    then begin
+         out($A1{BKPTREC}); out(0);
+         loutword := outword; loutblock := outblock; out2(0);
+         if loutword = 256
+         then begin loutword := 0; loutblock := loutblock + 1; end;
+         lentry := entrylist; i := 0;
+         while lentry <> nil do
+               begin i := i + 1; lentry := lentry^.next; end;
+         out2(i);
+		 (*
+         if language = PASCAL
+         then begin
+		 *)
+              out(1); { Regs saved at xxxxxx(A6) }
+              out2(popmask); { Reg Mask }
+              out4(-lc - extralc);
+(*
+              end
+         else out(0); 
+		 *)
+		 { No RegSave Info }
+         lentry := entrylist;
+         while lentry <> nil do
+               with lentry^ do begin
+                    getusrstr(lstr,entname); out2(entname.linkno); outs(lstr);
+                    taddr := realaddr(entryblk) + entryoff - 
+                         realaddr(entrylist^.entryblk) + entrylist^.entryoff;
+                    out4(realaddr(dbgenblk) + dbgenoff - taddr);
+                    out4(realaddr(dbgexblk) + dbgexoff - taddr);
+                    lentry := next;
+                    end;
+         out2(numstmts);
+         thisstloc := stloclist; j := 0; laddr := 0;
+         for i := 1 to numstmts do begin
+             if j = 100
+             then begin thisstloc := thisstloc^.next; j := 0; end;
+             if LiveBlock(thisstloc^.loc[j].blk)
+             then taddr := realaddr(thisstloc^.loc[j].blk) +
+                              thisstloc^.loc[j].off
+             else taddr := laddr;
+             out2(taddr - laddr);
+             { added for dbx by jim t at SGI }
+             out2(thisstloc^.loc[j].linenumber);
+		if thisstloc^.loc[j].filename = nil then
+		begin
+			out(0);
+		end else
+		begin
+			outs(thisstloc^.loc[j].filename^);
+		end;
+             laddr := taddr;
+             j := j + 1;
+             end;
+         i := (outblock - loutblock)*512 + (outword - loutword)*2 + 2;
+         if HalfFlag then begin out(0); i := i + 1; end;
+         patchobj(loutblock,loutword,i);
+         end;
+    end; {dbgoffsets}
+    
+    procedure outcode;
+      var lpc,delta: longint; i,ii,j,bindex,lop: integer; lpcbuf: pcbuf;
+	  clrreg, nregvars, clrbytes : integer;
+      
+      procedure outctab(fcvallist: pcaselst);
+        var lcase,lastcase: pcaserec; l,delta,elsedelta: longint;
+            llabblk: integer;
+      begin
+      with fcvallist^ do begin
+           llabblk := lookupilabel(elselabno);
+           elsedelta := realaddr(llabblk) - cjmpaddr;
+           lcase := fcvallist^.thistable; lastcase := nil;
+           while lcase <> nil do begin
+                 if lastcase <> nil
+                 then for l := lastcase^.cval + 2 to lcase^.cval do
+                          if entrysz = 4
+                          then out4(elsedelta)
+                          else out2(elsedelta);
+                 llabblk := lookupilabel(lcase^.clab);
+                 delta := realaddr(llabblk) - cjmpaddr;
+                 if entrysz = 4 then out4(delta) else out2(delta);
+                 lastcase := lcase; lcase := lcase^.next;
+                 end;
+           end;
+      end; {outctab}
+      
+    begin {outcode}
+    lpc := 0; bindex := 0; lpcbuf := cbuflist;
+    for i := 1 to nextblk do
+        with blktable[i div (MAXBLOCKS + 1)]^[i and MAXBLOCKS] do begin
+             for j := 1 to blksize div 2 do begin
+                 if bindex > MAXCBUFF
+                 then begin bindex := 0; lpcbuf := lpcbuf^.next; end;
+                 if not DeadCode
+                 then begin
+                      out2(lpcbuf^.buff[bindex]);
+                      lpc := lpc + 2;
+                      end;
+                 bindex := bindex + 1;
+                 end;
+             j := 0;
+             if not DeadCode
+             then case blktag of
+                    TAG_END,
+                    TAG_BR0:
+                        ;
+                    TAG_BR2:
+                        begin
+                        delta := realaddr(refblk) - (blkaddr + blksize + 2);
+                        out(brop); out(delta); j := 2;
+                        end;
+                    TAG_BR4:
+                        begin
+                        delta := realaddr(refblk) - (blkaddr + blksize + 2);
+                        out(brop); out(0); out2(delta); j := 4;
+                        end;
+                    TAG_BR8:
+                        writeln('*** _TAG_BR8 ***');
+                    TAG_PC2:
+                        begin
+                        delta := realaddr(refblk) - (blkaddr + blksize);
+                        out2(delta); j := 2;
+                        end;
+                    TAG_LC:
+                        begin
+                        out2(-lc); j := 2;
+                        end;
+                    TAG_LOAD:
+                        begin
+                        j := regsavsz;
+                        if j > 0
+                        then if j = 2
+                             then begin
+                                  if lastreg <= D7
+                                  then lop := $201F { MOVE.L (SP)+,D }
+                                  else lop := $205F;{ MOVE.L (SP)+,A }
+                                  out2(lop + (lastreg and 7)*512);
+                                  end
+                             else begin
+                                  { MOVEM.L (SP)+,xxx }
+                                  out2(19679); out2(popmask);
+                                  end;
+                        end;
+                    TAG_SAVE:
+                        begin
+                        j := regsavsz;
+                        if j > 0
+                        then if j = 2
+                             then out2($2F00 + lastreg) { MOVE.L R,-(SP) }
+                             else begin
+                                  { MOVEM.L xxx,-(SP) }
+                                  out2(18663); out2(pushmask);
+                                  end;
+						if ZeroStack then
+						begin
+							clrreg := $4283; { clr a3 }
+							nregvars := 0;
+							{ clear registers }
+				        		for ii := D3 to D7 do 
+							begin
+								if reg[ii].Used then
+								begin
+									out2(clrreg);
+									clrreg := clrreg + 1;
+									j := j + 2;
+									nregvars := nregvars + 1;
+								end;
+							end;
+							{ move bzero parm's to stack }
+							if lc > 0 then
+							begin
+								j := j + 8;
+								out2($4878); out2(lc);
+								if level = 1 then
+								begin
+									out2($4840 + $28 + 5);
+								end
+								else
+									out2($4840 + $28 + 6); 
+								out2(-lc);
+							end;
+						end;
+					end;
+                    TAG_A0:
+                        if A0SetFlag
+                        then begin
+                             { LA 8(SP),A0 } out2(16879); out2(8);
+                             j := 4;
+                             end;
+                    TAG_RBYT:
+                        begin
+                        out2(roff + 4*numregs); j := 2;
+                        end;
+                    TAG_CJMP:
+                        begin
+                        with cvallist^ do begin
+                             if entrysz = 4
+                             then { LSL.W #2 } out2(-6840 + creg)
+                             else { LSL.W #1 } out2(-7352 + creg);
+                             if TabFarAway
+                             then begin
+                                  { MOVE.L table(D.W),D }
+                                  out2($0000); out2($0000); out2($0000);
+                                  j := 12;
+                                  error(9231);
+                                  end
+                             else begin
+                                  { MOVE.W table(D.W),D }
+                                  out2(12347 + creg*512);
+                                  out2(creg*4096 + 4 + ctabaddr - cjmpaddr);
+                                  j := 10;
+                                  end;
+                             end;
+                        { JMP $(d) } out2(20219); out2(creg*4096);
+                        end;
+                    TAG_CTAB:
+                        begin
+                        outctab(cvallist);
+                        j := cvallist^.numentrys*cvallist^.entrysz;
+                        end;
+                    TAG_LAB:
+                        ;
+                    TAG_WITH:
+                        if SaveWith
+                        then begin
+                             if level = 1
+                             then out2(11072 + wreg) { MOVE.L ?,d(A5) }
+                             else out2(11584 + wreg); { MOVE.L ?,d(A6) }
+                             out2(withoff);
+                             j := 4;
+                             end
+                        else totalwithsnotsaved := totalwithsnotsaved + 1;
+                  end; {case}
+             lpc := lpc + j;
+             end;
+    if lpc <> pc then writeln('*** LPC <> PC *** ',lpc hex,' <> ',pc hex);
+    if pc > 32767 then error(350);
+    end; {outcode}
+    
+  begin {formatcode}
+  
+  { Module Name Block }
+  
+  out($80); out3(24); outs8(username);
+  for i := 1 to 8 do out(ord(segname[i]));
+  out4(pc);
+  
+  { Starting Address Block }
+  
+  if level = 1
+  then begin
+       out($84); out3(12); out4(0); out4(lc);
+       end;
+  
+  { Entry Point Blocks }
+  
+  lentry := entrylist;
+  while lentry <> nil do
+        with lentry^ do begin
+             if LongNames
+             then begin
+                  out($B0); out3(namesize(entname) + 10);
+                  out4(realaddr(entryblk) + entryoff);
+                  outlid(entname);
+                  end
+             else begin
+                  out($82); out3(24); outlid8(entname); outuid8(entname);
+                  out4(realaddr(entryblk) + entryoff);
+                  end;
+             lentry := next;
+             end;
+  
+  { Global User Label Entry Points }
+  
+  lpulab := ulabellist;
+  while lpulab <> nil do
+        with lpulab^ do begin
+             if linkerno >= 0
+             then begin
+                  llabblk := lookupilabel(intno);
+                  if LongNames
+                  then begin
+(* GB - 11/18/85 - fix from SVS - next three lines were:
+                       out($B0); out3(18);
+                       out4(realaddr(llabblk));
+                       out2(linkerno); outs('Label***');
+	and are now: *)
+                       out($B0); out3(20);
+                       out4(realaddr(llabblk));
+                       out2(linkerno); outs('Label***'); out(0);
+                       end
+                  else begin
+                       makelname(linkerno,lstr);
+                       out($82); out3(24); outs8(lstr); outs8('Label***');
+                       out4(realaddr(llabblk));
+                       end;
+                  end;
+             lpulab := next;
+             end;
+  
+  { External Reference Blocks }
+  
+  if SHORTCALLS
+  then callrefsize := 2
+  else callrefsize := 4;
+  while proclist <> nil do
+        with proclist^ do begin
+             lref := reflist; i := 0;
+             while lref <> nil do begin
+                   if LiveBlock(lref^.refblk) then i := i + 1;
+                   lref := lref^.next;
+                   end;
+             if i > 0
+             then begin
+                  if LongNames
+                  then begin
+                       out($B1); out3(namesize(procname) + i*4 + 6);
+                       outlid(procname);
+                       end
+                  else begin
+                       if SHORTCALLS then out($89) else out($83);
+                       out3(i*callrefsize + 20);
+                       outlid8(procname); outuid8(procname);
+                       end;
+                  lref := reflist;
+                  while lref <> nil do begin
+                        if LiveBlock(lref^.refblk)
+                        then if LongNames or not SHORTCALLS
+                             then out4(realaddr(lref^.refblk) + lref^.refoff)
+                             else out2(realaddr(lref^.refblk) + lref^.refoff);
+                        lref := lref^.next;
+                        end;
+                 end;
+             proclist := next;
+             end;
+  
+  { Fixed Data Area Definitions and Variable References }
+  
+  outftndtree(ftndtree);
+  
+  { Code Block }
+  
+  if pc > 0
+  then begin
+       out($85); out3(pc + 8); out4(0);
+       outcode;
+       end;
+  
+  { Copy Small Transparent Blocks }
+  
+  while translist <> nil do
+        with translist^ do begin
+             for i := 0 to freeword - 1 do out2(b[i]);
+             translist := next;
+             end;
+  
+  { Copy Large Transparent Blocks }
+  
+  if tblocks <> nil
+  then begin
+       lblock := inblock; lbyte := inbyte;
+       while tblocks <> nil do
+             with tblocks^ do begin
+                  seekicode(tblock,tbyte);
+                  for l := 1 to tsize do out(nextbyte);
+                  tblocks := next;
+                  end;
+       seekicode(lblock,lbyte);
+       end;
+  
+  { Debugger Entry/Exit Point Offsets }
+  
+  if DebugInfo then dbgoffsets;
+  
+  { End Block }
+  
+  out($81); out3(8); out4(pc);
+  
+  end; {formatcode}
+  
+  procedure sumitup;
+    
+    procedure countlabels;
+      var i,j: integer;
+    begin
+    if STATISTICS or SUMMARY
+    then for i := 0 to 127 do begin
+             if poslabs[i] <> nil
+             then for j := 0 to 255 do
+                      if poslabs[i]^[j] <> 0
+                      then totalilabels := totalilabels + 1;
+             if neglabs[i] <> nil
+             then for j := 0 to 255 do
+                      if neglabs[i]^[j] <> 0
+                      then totalilabels := totalilabels + 1;
+             end;
+    end; {countlabels}
+    
+  begin {sumitup}
+  if STATISTICS or SUMMARY
+  then begin
+       totalblocks := totalblocks + nextblk - 1;
+       countlabels;
+       end;
+  end; {sumitup}
+  
+begin {genproc}
+for i := 0 to 31 do userprocs[i] := nil;
+release(heapmark);
+new(thiscbuf); thiscbuf^.next := nil; thiscbuf^.last := nil; codeword := 0;
+for i := 0 to MAXBIGBLOCKS do blktable[i] := nil;
+for i := 0 to 127 do begin poslabs[i] := nil; neglabs[i] := nil; end;
+cbuflist := thiscbuf;
+for i := 1 to 8 do segname[i] := chr(nextbyte);
+level := nextbyte; lc := next3bytes;
+if odd(lc) then lc := lc + 1;
+i := nextbyte; { First flag byte }
+GlobalLabels := odd(i);
+language := (i div 2) mod 8;
+QuietFlag := odd(i div 16);
+FPHardWare := odd(i div 64);
+i := nextbyte; { Second flag byte }
+LongNames := odd(i);
+DebugInfo := FALSE;
+if not (SKY_FLAG or MAX_FLAG or HIT_FLAG)
+then if FPHardWare
+     then begin
+          writeln('\07*** Cannot generate floating point hardware code ***');
+          errors := errors + 1;
+          goto 999;
+          end;
+targetos := nextbyte;
+i := nextbyte;
+if language = Fortran then
+begin
+	ZeroStack := odd(i);
+	SWDivinHW := odd(i div 16);
+end else begin
+	ZeroStack := FALSE;
+	SWDivinHW := odd(i div 16);
+end;
+pc := 0; nextblk := 1; blkpc := 0;
+clearregs(TRUE);
+proclist := nil;
+bigclist := nil;
+litclist := nil;
+gcaselist := nil;
+ulabellist := nil;
+ftndtree := nil;
+entrylist := nil;
+translist := nil;
+tblocks := nil;
+fmtlist := nil;
+templist := nil;
+withlevel := 0;
+nextlabel := 0;
+extralc := 0;
+ftnstaticlc := -1;
+BeginMess := FALSE;
+if language = C then crtnlab := newlabel;
+timer := 1;
+for i := 0 to 8 do bases[i].bwhere := BLNK;
+with bases[level] do
+     begin bwhere := BREG; bregno := A6; end;
+bases[1].bwhere := BREG; bases[1].bregno := A5;
+stloclist := nil;
+numstmts := 0;
+username := '<<<<>>>>'; makeid(entryid,-1,username);
+LastPop := FALSE; LastPushQ := FALSE;
+with reg[A5].v do begin
+     rvkind := ADDRRV; rvsize := LONG; rvlev := 1;
+     rvoffset := 0; rvReadOnly := TRUE;
+     end;
+if level > 1
+then with reg[A6].v do begin
+          rvkind := ADDRRV; rvsize := LONG; rvlev := level;
+          rvoffset := 0; rvReadOnly := TRUE;
+          end;
+if GlobalLabels then gettemp(gotocattr,4);
+
+stmtlist($fe {ENDPROC});
+
+for r := AMAX + 1 to SP do freepreg(reg[r].r);
+reloadregs;
+for r := D0 to SP do
+    if reg[r].r^.count <> 0
+    then begin
+         writeln('Register ',ord(r),' still busy'); error(2000);
+         end;
+
+genlitcs; genbigcs; genformats;
+
+lblk := getnewblk(0); lblk^.blktag := TAG_END; nextblk := nextblk - 1;
+
+findlabels;
+if TRACEJUMPS then printcodebuff;
+finddeadcode;
+if TRACEJUMPS then printcodebuff;
+findshortjumps;
+if TRACEJUMPS then printcodebuff;
+formatcode;
+
+if not QuietFlag
+then begin
+     if not BeginMess then write('         -           ');
+     writeln('  Code size = ',pc);
+     end;
+csize := csize + pc;
+if STATISTICS or SUMMARY then sumitup;
+end; {genproc}
+

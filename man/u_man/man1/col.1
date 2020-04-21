@@ -1,0 +1,103 @@
+'\"macro stdmacro
+.TH COL 1
+.SH NAME
+col \- filter reverse line-feeds
+.SH SYNOPSIS
+.B col [ \-bfpx ] [\0\-\0]
+.SH DESCRIPTION
+.B col
+reads from the standard input and writes onto the standard output.
+It performs the line overlays implied by reverse line feeds (
+.SM ASCII
+code
+.B ESC-7
+), and by forward and reverse half-line feeds
+(
+.B ESC-9
+and
+.BR ESC-8 ).
+.B col is particularly useful for filtering multicolumn output
+made with the 
+.B .rt
+command of
+.B nroff
+and output resulting from use of the 
+.BR tbl (1)
+preprocessor.
+.PP
+If the 
+.B \-b
+option is given,
+.B col
+assumes that the output device in use is not capable of backspacing.
+In this case, if two or more characters are to appear in the same
+place, only the last one read will be output.
+.PP
+Although
+.B col
+accepts half-line motions in its input, it normally does not
+emit them on output.  Instead, text that would appear between lines
+is moved to the next lower full-line boundary.  This treatment can
+be suppressed by the
+.B \-f
+(fine) option; in this case, the output from
+.B col
+may contain forward half-line-feeds (\f3ESC-9\f1), but will still
+never contain either kind of reverse line motion.
+.PP
+Unless the
+.B \-x
+option is given,
+.B col
+will convert white space to tabs wherever possible to shorten printing
+time.
+.PP
+The 
+.SM
+ASCII
+control chracters
+.B SO
+(\\017) and
+.B SI
+(\\016)are assumed by
+.B col
+to start and end text in an alternate character set.  The character set
+to which each input character belongs is remembered, and on output
+.B SO
+and 
+.B SI
+characters are generated as appropriate to ensure that each character
+is printed in the correct character set.
+.PP
+On input, the only control characters accepted are space, backspace, tab return
+new-line,
+.BR SO ,
+.BR SI ,
+.BR VT (\\013),
+and
+.B ESC
+followed by
+.BR 7 , 8 ,
+or
+.B 9 .
+The
+.B VT
+character is an alternate form of full reverse line-feed, included for
+compatibility with some earlier programs of this type.  All other
+non-printing characters are ignored.
+.PP
+Normally,
+.B col
+will ignore any escape sequences unknown to it that are found in its
+input; the
+.B\-p
+option may be used to cause
+.B col
+to output these sequences as regular characters, subject to overprinting
+from reverse line motions.  The use of this options is highly discourage
+unless the user if fully aware of the textual position of the escape
+sequences.
+.SH SEE ALSO
+.BR mm (1),
+.BR nroff (1),
+.BR tbl (1).

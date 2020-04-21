@@ -1,0 +1,816 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: F.SYMB.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               03-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure dumpntree{*fpn: pn*};
+  var count,w,l,i: integer; lpb: pbound; lpref: pcomref; ich: char;
+      lstr: idstring;
+  
+  procedure printtype(fpn: pn);
+  begin
+  with fpn^ do
+    begin
+    case idtype.typ of
+      INTEGR:    write(listfile,' INTEGER*',idtype.siz);
+      REEL:      if idtype.siz = 4
+                 then write(listfile,' REAL     ')
+                 else write(listfile,' DOUBLE   ');
+      LOGICAL:   write(listfile,' LOGICAL*',idtype.siz);
+      CHARACTER: write(listfile,' CHAR*',idtype.siz:3,' ');
+      COMPLEX:   write(listfile,' COMPLEX  ');
+    end; {case}
+    end;
+  end; {printtype}
+  
+begin {dumpntree}
+if fpn <> nil
+then
+  with fpn^ do begin
+    dumpntree(rlink);
+    makidstr(lstr,name); write(listfile,lstr);
+    if length(lstr) < 8 then write(listfile,' ':8-length(lstr));
+    if Indirect then ich := '*' else ich := ' ';
+    case nkind of
+      UNKN:      begin
+                 printtype(fpn);
+                 write(listfile,' ':20);
+                 end;
+      VARS:      begin
+                 printtype(fpn);
+                 if InReg
+                 then begin
+                   write(listfile,'     ');
+                   if (CHIP = M68000) or (CHIP = M68020)
+                   then
+                     if refcount <= 31
+                     then write(listfile,'D',7-refcount)
+                     else write(listfile,'A',33+ADDRREGS-refcount)
+                   else
+                     if refcount <= 31
+                     then write(listfile,'R',7-refcount)
+                     else write(listfile,'F',39-refcount);
+                   end
+                 else write(listfile,addr:7);
+                 write(listfile,ich);
+                 if nlev = COMMONVAR
+                 then begin
+                      makidstr(lstr,incommon^.name);
+                      write(listfile,'/',lstr,'/  ');
+                      if length(lstr) < 8
+                      then write(listfile,' ':8-length(lstr));
+                      end
+                 else if nlev = SAVEDVAR
+                      then begin
+                           makidstr(lstr,localtree^.name);
+                           if length(lstr) > 8
+                           then lstr[0] := chr(8);
+                           write(listfile,lstr,' ':12-length(lstr));
+                           end
+                      else write(listfile,' ':12);
+                 end;
+      FUNCT,
+      SUBR,
+      EXTERN:    begin
+                 if nkind = FUNCT
+                 then
+                   begin
+                   printtype(fpn);
+                   write(listfile,' FUNCTION');
+                   w := 10;
+                   end
+                 else
+                   if nkind = SUBR
+                   then begin
+                     write(listfile,' SUBROUTINE');
+                     w := 18;
+                     end
+                   else begin
+                     write(listfile,' EXTERNAL');
+                     w := 20;
+                     end;
+                 write(listfile,ich,' ':w);
+                 end;
+      BLOCKD:    write(listfile,' BLOCK DATA',' ':19);
+      INTRIN:    write(listfile,' INTRINSIC',' ':20);
+      PROG:      write(listfile,' PROGRAM',' ':22);
+      COMMON:    write(listfile,' COMMON SIZE=',comsize:7);
+      PARAMETER: begin
+                 printtype(fpn);
+                 write(listfile,' PARAM=');
+                 case fpn^.idtype.typ of
+                      INTEGR:    write(listfile,fpn^.pvalu.ival:10,' ':3);
+                      REEL:      write(listfile,fpn^.pvalu.rval:10:3,' ':3);
+                      LOGICAL:   if fpn^.pvalu.ival = 0
+                                 then write(listfile,' FALSE       ')
+                                 else write(listfile,' TRUE        ');
+                      COMPLEX:   write(listfile,'             ');
+                      CHARACTER: begin
+                                 if fpn^.pvalu.clen > 10
+                                     then l := 7
+                                     else l := fpn^.pvalu.clen;
+                                 write(listfile,'''');
+                                 for i := 1 to l do
+                                    write(listfile,fpn^.pvalu.cval^.chpart[i]);
+                                 write(listfile,'''');
+                                 if fpn^.pvalu.clen > 10
+                                    then write(listfile,'...');
+                                 write(listfile,'  ');
+                                 end;
+                 end; {case}
+                 end;
+    end;
+    if nref <> nil
+    then
+      begin
+      count := 0; lpref := nref;
+      while lpref <> nil do
+        begin
+        if (count mod 7 = 0) and (count > 0)
+        then
+          begin writeln(listfile); write(listfile,' ':38); end;
+        write(listfile,lpref^.loc:6);
+        count := count + 1; lpref := lpref^.next;
+        end;
+      end;
+    writeln(listfile);
+    {::} {???} {!!!} if TraceCounts
+    {::}        then writeln(listfile,'  InReg=',fpn^.InReg,', AddrNeeded=',
+    {::}                     fpn^.AddrNeeded,', refcount=',refcount);
+    dumpntree(llink);
+    end;
+end; {dumpntree}
+
+procedure varsizes{*fpn: pn*};
+  var vsize: addrrange; lpb: pbound;
+begin
+if fpn <> nil
+then
+  with fpn^ do
+    begin
+    if nkind = VARS
+    then
+      begin
+      vsize := idtype.siz;
+      lpb := bounds;
+      while lpb <> nil do
+        with lpb^ do
+          begin
+          esize := vsize;
+          {---if vsize > 32766 then begin errname := name; error(297); end;---}
+          if (vsize > 32766) or (vsize = 0) then BigElSize := TRUE;
+          if (lo.bkind = CONSTBOUND) and (hi.bkind = CONSTBOUND)
+          then begin
+               vsize := vsize*(hi.i - lo.i + 1);
+               if (abs(hi.i) > 32767) or (abs(lo.i) > 32767) or
+                  (hi.i - lo.i > 32766)
+               then BigIndex := TRUE;
+               end
+          else begin vsize := 0; BigIndex := TRUE; end;
+          lpb := next;
+          end;
+      size := vsize;
+      end;
+    varsizes(llink);
+    varsizes(rlink);
+    end;
+end; {varsizes}
+
+procedure newn{*var fpn: pn; fkind: idkind; fname: idstring*};
+  var ch: char;
+begin
+case fkind of
+  UNKN:   begin
+          new(fpn,IDENTNODE);
+          with fpn^ do begin
+               node := IDENTNODE; nkind := UNKN; unbounds := nil;
+               end;
+          end;
+  VARS:   begin
+          new(fpn,IDENTNODE,VARS);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := VARS; incommon := nil;
+            addr := 0; size := 0; bounds := nil; nlev := LOCALVAR;
+            end;
+          end;
+  FUNCT,
+  SUBR,
+  EXTERN,
+  PROG,
+  BLOCKD: begin
+          new(fpn,IDENTNODE,FUNCT);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := fkind; rtnno := -1; arglist := nil;
+            parambytes := 0; NDefined := FALSE; RtnLocal := FALSE;
+            if fkind = PROG then rtnlev := 1 else rtnlev := 2;
+            end;
+          end;
+  INTRIN: begin
+          new(fpn,IDENTNODE,INTRIN);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := INTRIN; key := 0; ifunno := 0;
+            end;
+          end;
+  COMMON: begin
+          new(fpn,IDENTNODE,COMMON);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := COMMON; comellist := nil;
+            comsize := 0; cdatakind := NODATA;
+            end;
+          end;
+  EQUIVALENCE:
+          begin
+          new(fpn,IDENTNODE,EQUIVALENCE);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := EQUIVALENCE; eqellist := nil;
+            eqsize := 0; eqdatakind := NODATA; addrflag := FALSE; eqaddr := 0;
+            EvenBias := FALSE; eqkind := LOCALVAR;
+            end;
+          end;
+  PARAMETER:
+          begin
+          new(fpn,IDENTNODE,PARAMETER);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := PARAMETER; pvalu.ival := 0;
+            end;
+          end;
+  IMPDO:  begin
+          new(fpn,IDENTNODE,IMPDO);
+          with fpn^ do begin
+            node := IDENTNODE; nkind := IMPDO; implev := 0;
+            end;
+          end;
+  LABL:   begin
+          new(fpn,IDENTNODE,LABL);
+          with fpn^ do begin
+               node := IDENTNODE; nkind := LABL; labp := nil;
+               end;
+          end;
+end;
+with fpn^ do begin
+  makstrid(name,fname); next := nil; llink := nil; rlink := nil; nref := nil;
+  ch := fname[1];
+  if (ch >= 'A') and (ch <= 'Z')
+  then idtype := implicit[ch].imptype
+  else idtype := int4type;
+  ExpType := FALSE; SaveFlag := FALSE; Indirect := FALSE;
+  InReg := FALSE; AddrNeeded := FALSE; refcount := 0;
+  end;
+end; {newn}
+
+function lookupname{*fnametree: pn; fname: idstring): pn*};
+  var lpn: pn; ExitFlag: Boolean;
+begin
+lpn := fnametree;
+ExitFlag := FALSE;
+while (lpn <> nil) and not ExitFlag do
+  if idEQstr(lpn^.name,fname)
+  then ExitFlag := TRUE
+  else
+    if idLTstr(lpn^.name,fname)
+    then lpn := lpn^.llink
+    else lpn := lpn^.rlink;
+lookupname := lpn;
+end; {lookupname}
+
+function lookupid{*fnametree: pn; fid: identrec): pn*};
+  var lpn: pn; ExitFlag: Boolean;
+begin
+lpn := fnametree;
+ExitFlag := FALSE;
+while (lpn <> nil) and not ExitFlag do
+  if idEQid(lpn^.name,fid)
+  then ExitFlag := TRUE
+  else
+    if idLTid(lpn^.name,fid)
+    then lpn := lpn^.llink
+    else lpn := lpn^.rlink;
+lookupid := lpn;
+end; {lookupid}
+
+procedure entername{*fpn: pn; var tree: pn*};
+  var lpn: pn; ExitFlag: Boolean;
+begin
+if tree = nil
+then tree := fpn
+else begin
+  lpn := tree;
+  ExitFlag := FALSE;
+  repeat
+    if idEQid(lpn^.name,fpn^.name) then error(34);
+    if idLTid(lpn^.name,fpn^.name)
+    then
+      if lpn^.llink <> nil
+      then lpn := lpn^.llink
+      else begin lpn^.llink := fpn; ExitFlag := TRUE; end
+    else
+      if lpn^.rlink <> nil
+      then lpn := lpn^.rlink
+      else begin lpn^.rlink := fpn; ExitFlag := TRUE; end;
+  until ExitFlag;
+  end;
+end; {entername}
+
+function declarevar{*var fnametree: pn; fname: idstring): pn*};
+  var lpn: pn;
+begin
+newn(lpn,VARS,fname); varsizes(lpn);
+entername(lpn,fnametree);
+if (lpn^.idtype.typ = CHARACTER) and (lpn^.idtype.siz = 0)
+then begin errname := fname; error(216); end;
+declarevar := lpn;
+end; {declarevar}
+
+procedure unkntovars{*fpn: pn*};
+  var lbounds: pbound;
+begin
+with fpn^ do begin
+  if (idtype.typ = CHARACTER) and (idtype.siz = 0) and
+     (not Indirect) and (fpn <> localtree)
+  then begin makidstr(errname,name); error(216); end;
+  lbounds := unbounds;
+  nkind := VARS; incommon := nil; addr := 0; size := 0;
+  nlev := LOCALVAR; bounds := lbounds;
+  end;
+end; {unkntovars}
+
+procedure declunkn{*fpn: pn*};
+  var ll,rl: pn;
+begin
+unkntovars(fpn);
+with fpn^ do begin
+  ll := llink; rl := rlink; llink := nil; rlink := nil;
+  varsizes(fpn); llink := ll; rlink := rl;
+  end;
+end; {declunkn}
+
+procedure makeglobal{*fpn: pn*};
+  var lpnlist: pnlist;
+begin
+new(lpnlist);
+lpnlist^.next := nil; lpnlist^.nrec := fpn;
+if newglobals = nil
+then newglobals := lpnlist
+else begin
+  lpnlist^.next := newglobals;
+  newglobals := lpnlist;
+  end;
+end; {makeglobal}
+
+procedure xref{*fpn: pn*};
+  var lpref,lpref2: pcomref;
+begin
+if XrefFlag
+then
+  begin
+  new(lpref); lpref^.next := nil; lpref^.loc := fstlinenum;
+  if fpn^.nref = nil
+  then fpn^.nref := lpref
+  else
+    begin
+    lpref2 := fpn^.nref;
+    while lpref2^.next <> nil do lpref2 := lpref2^.next;
+    lpref2^.next := lpref;
+    end;
+  end;
+end; {xref}
+
+procedure skip{*fsys: setofsys*};
+begin
+fsys := fsys + [EOLNSY];
+while not(token in fsys) do fscan;
+end; {skip}
+
+  
+{ findlabel looks down list headed by lastlabel for the label passed as    }
+{ the first argument.  If it does not find the label, a new label entry    }
+{ is created, with labkind set to flabkind and Defined set if appropriate. }
+
+function findlabel{*flabel: alfa6; flabkind: labkinds): plabelrec*};
+  label 1;
+  var llabrec: plabelrec;
+begin
+llabrec := lastlabel;
+while llabrec <> nil do
+  with llabrec^ do begin
+    if labelval = flabel then goto 1;
+    llabrec := nextlabel;
+    end;
+
+{ Fall through indicates first occurance of this label }
+
+new(llabrec);  { Do not provide tag, variants sometimes change }
+with llabrec^ do begin
+  labelval := flabel; nextlabel := lastlabel; labkind := flabkind; 
+  if flabkind = FORMATLAB
+  then FmtDefined := FALSE
+  else begin Defined := FALSE; labreflist := nil; LabIsArg := FALSE; end;
+  end;
+lastlabel := llabrec;
+
+1: findlabel := llabrec;
+end; {findlabel}
+
+function jumptolabel{*flabel: alfa6): plabelrec*};
+  var llabrec: plabelrec; lref: plocofref;
+begin
+llabrec := findlabel(flabel,EXECLAB);
+with llabrec^ do
+  if labkind = FORMATLAB then error(105)
+  else begin
+    labkind := EXECLAB;
+    if Defined
+    then checkgotovalid(ctrlstk,inblk)
+    else begin
+      new(lref);
+      with lref^ do begin
+        refctrlstk := ctrlstk; nextref := labreflist; 
+        end;
+      labreflist := lref;
+      end;
+    end;
+jumptolabel := llabrec;
+end; {jumptolabel}
+
+{ Checks if a label in block labinblk is visible in the control stack }
+{ pointed to by ctrlstk which is the one existing at the goto.        }
+
+procedure checkgotovalid{*ctrlstk: pctrlstkrec; labinblk: integer*};
+  var GotoValid: Boolean;
+begin
+if labinblk <> 0
+then begin
+  GotoValid := FALSE;
+  while ctrlstk <> nil do begin
+    if ctrlstk^.ctrlblknum = labinblk 
+    then GotoValid := TRUE;
+    if ctrlstk^.cbkind in [ELSEIFBLK,ELSEBLK]
+    then
+      repeat
+        ctrlstk := ctrlstk^.nextblk;
+      until ctrlstk^.cbkind = IFBLK;
+    ctrlstk := ctrlstk^.nextblk;
+    end;
+  if not GotoValid then error(102);
+  end;
+end; {checkgotovalid}
+
+function IsVariable{*fpn: pn): Boolean*};
+begin
+if fpn <> nil
+then if fpn^.node = IDENTNODE
+     then IsVariable := (fpn^.nkind = VARS) or (fpn^.nkind = FUNCT)
+     else IsVariable := FALSE
+else IsVariable := TRUE;
+end; {IsVariable}
+
+function IsAddress{*fpn: pn): Boolean*};
+begin
+if fpn <> nil
+then case fpn^.node of
+       IDENTNODE: IsAddress := IsVariable(fpn);
+       UNNODE:    IsAddress := fpn^.unop = 223; {MKFCH}
+       BINNODE:   IsAddress := FALSE;
+       TRINODE:   IsAddress := fpn^.triop in [222{SUBSTR},214{FINDEX}];
+       INDEXNODE: IsAddress := TRUE;
+     otherwise:   IsAddress := FALSE;
+     end {case}
+else IsAddress := TRUE;
+end; {IsAddress}
+
+procedure needaddr{*fpn: pn*};
+begin
+if fpn <> nil
+then
+  with fpn^ do
+    if node = IDENTNODE
+    then
+      if nkind = VARS then AddrNeeded := TRUE;
+end; {needaddr}
+
+function Numeric{*ftyp: types): Boolean*};
+begin
+Numeric := ftyp in [INTEGR,REEL,COMPLEX];
+end; {Numeric}
+
+procedure cmakentype{*var fattr: attr; totype: ftntype*};
+  var lvalu: valu;
+begin
+lvalu := fattr.treeptr^.cstvalu;
+case totype.typ of
+  INTEGR:  case fattr.atype.typ of
+             REEL:    if fattr.atype.siz = 4
+                      then lvalu.ival := trunc(lvalu.rval)
+                      else lvalu.ival := trunc(lvalu.dval);
+             COMPLEX: lvalu.ival := trunc(lvalu.creal);
+           end; {case}
+  REEL:    case fattr.atype.typ of
+             INTEGR:  if totype.siz = 4
+                      then lvalu.rval := lvalu.ival
+                      else lvalu.dval := lvalu.ival;
+             REEL:    if fattr.atype.siz <> totype.siz
+                      then if totype.siz = 4
+                           then lvalu.rval := lvalu.dval
+                           else lvalu.dval := lvalu.rval;
+             COMPLEX: if totype.siz = 4
+                      then lvalu.rval := lvalu.creal
+                      else lvalu.dval := lvalu.creal;
+           end; {case}
+  COMPLEX: case fattr.atype.typ of
+             INTEGR,
+             REEL:   begin
+                     if (fattr.atype.typ = REEL) and (fattr.atype.siz = 8)
+                     then lvalu.rval := lvalu.dval;
+                     if fattr.atype.typ = INTEGR
+                     then lvalu.rval := lvalu.ival;
+                     lvalu.creal := lvalu.rval;
+                     lvalu.cimag := 0;
+                     end;
+           end; {case}
+end; {case}
+fattr.atype := totype; fattr.treeptr^.csttype := totype;
+fattr.treeptr^.cstvalu := lvalu;
+end; {cmakentype}
+
+procedure cmakesnum{*var fattr: attr; totype: ftntype*};
+  var lchval: chvaltype;
+begin
+lchval := fattr.treeptr^.cstvalu.cval;
+if totype.siz <= 1
+then fattr.treeptr^.cstvalu.ival := ord(lchval^.chpart[1])
+else if totype.siz = 2
+     then if HOSTSEX = MALE
+          then fattr.treeptr^.cstvalu.ival :=
+                     ord(lchval^.chpart[1])*256 + ord(lchval^.chpart[2])
+          else fattr.treeptr^.cstvalu.ival :=
+                     ord(lchval^.chpart[2])*256 + ord(lchval^.chpart[1])
+     else moveleft(lchval^.chpart,fattr.treeptr^.cstvalu.dval,8);
+fattr.atype := totype; fattr.treeptr^.csttype := totype;
+end; {cmakesnum}
+
+procedure cmakeslen{*var fattr: attr; tosize: integer*};
+  var i,extra: integer; lchval,mchval: chvaltype;
+begin
+if fattr.atype.siz < tosize
+then begin
+  i := 10; lchval := fattr.treeptr^.cstvalu.cval;
+  while lchval^.next <> nil do
+    begin lchval := lchval^.next; i := i + 10; end;
+  while i < tosize do begin
+    new(mchval);
+    with mchval^ do
+      begin chpart := '          '; next := lchval^.next; end;
+    lchval^.next := mchval; i := i + 10;
+    end;
+  end;
+fattr.atype.siz := tosize;
+fattr.treeptr^.cstvalu.clen := tosize;
+end; {cmakeslen}
+
+procedure flushlbuff;
+  var i: integer;
+begin
+for i := 0 to lbyteno - 1 do out(lbuff[i]);
+lbyteno := 0;
+end; {flushbuff}
+
+procedure lout{*fval: integer*};
+begin
+if lbyteno < MAXLBUFF
+then begin lbuff[lbyteno] := fval; lbyteno := lbyteno + 1; end
+else begin error(403); lbyteno := 0; end;
+end; {lout}
+
+procedure lout2{*fval: integer*};
+  var c: array[0..1] of byte;
+begin
+moveleft(fval,c,2);
+if HOSTSEX = MALE
+then begin lout(c[0]); lout(c[1]); end
+else begin lout(c[1]); lout(c[0]); end;
+end; {lout2}
+
+procedure out{*a: integer*};
+begin
+if icodebyte > 511
+then begin
+     if blockwrite(icodefile,icodebuff,1,icodeblock) <> 1
+     then error(400);
+     icodebyte := 0; icodeblock := icodeblock + 1;
+     end;
+icodebuff[icodebyte] := a; icodebyte := icodebyte + 1;
+end; {out}
+
+procedure out2{*a: integer*};
+  var c: array[0..1] of byte;
+begin
+moveleft(a,c,2);
+if HOSTSEX = MALE
+then begin out(c[0]); out(c[1]); end
+else begin out(c[1]); out(c[0]); end;
+end; {out2}
+
+procedure out3{*fval: addrrange*};
+  var c: array[0..3] of byte;
+begin
+moveleft(fval,c,4);
+if HOSTSEX = MALE
+then begin out(c[1]); out(c[2]); out(c[3]); end
+else begin out(c[2]); out(c[1]); out(c[0]); end;
+end; {out3}
+
+procedure out4{*fval: longint*};
+  var c: array[0..3] of byte;
+begin
+moveleft(fval,c,4);
+if HOSTSEX = MALE
+then begin out(c[0]); out(c[1]); out(c[2]); out(c[3]); end
+else begin out(c[3]); out(c[2]); out(c[1]); out(c[0]); end;
+end; {out4}
+
+procedure outname6{*fname: alfa6*};
+  var i: integer;
+begin
+for i := 1 to 6 do out(ord(fname[i])); out(ord(' ')); out(ord(' '));
+end; {outname6}
+
+procedure outname8{*fname: alfa8*};
+  var i: integer;
+begin
+for i := 1 to 8 do out(ord(fname[i]));
+end; {outname8}
+
+function newbinnode{*fbinop: integer; fleftarg,frightarg: pn): pn*};
+  var lpn: pn;
+begin
+new(lpn,BINNODE);
+with lpn^ do begin
+     node := BINNODE; binop := fbinop; binsubop := 0;
+     leftarg := fleftarg; rightarg := frightarg;
+     end;
+newbinnode := lpn;
+end; {newbinnode}
+
+function newunnode{*funop: integer; funarg: pn): pn*};
+  var lpn: pn;
+begin
+new(lpn,UNNODE);
+with lpn^ do begin
+     node := UNNODE; unop := funop;
+     unsubop := 0; unarg := funarg;
+     end;
+newunnode := lpn;
+end; {newunnode}
+
+procedure makeisize{*var fattr: attr; tosize: integer*};
+  var lsize,lop: integer;
+begin
+{ Assumes fattr.type.typ = INTEGR or LOGICAL }
+lsize := fattr.atype.siz;
+if lsize <> tosize
+then begin
+     case tosize of
+       1: if lsize = 2 then lop := 51 {INT21} else lop := 53 {INT41};
+       2: if lsize = 1 then lop := 48 {INT12} else lop := 52 {INT42};
+       4: if lsize = 1 then lop := 50 {INT14} else lop := 49 {INT24};
+     end; {case}
+     if fattr.treeptr <> nil
+     then if fattr.treeptr^.node = CSTNODE
+          then fattr.treeptr^.csttype.siz := tosize
+          else fattr.treeptr := newunnode(lop,fattr.treeptr);
+     fattr.atype.siz := tosize;
+     end;
+end; {makeisize}
+
+procedure maxlsize{*var aattr,battr: attr*};
+begin
+if aattr.atype.siz <> battr.atype.siz
+then
+  if aattr.atype.siz < battr.atype.siz
+  then makeisize(aattr,battr.atype.siz)
+  else makeisize(battr,aattr.atype.siz);
+end; {maxlsize}
+
+procedure minsize2{*var fattr: attr*};
+begin
+if fattr.atype.siz < 2
+then makeisize(fattr,2);
+end; {minsize2}
+
+procedure makentype{*var fattr: attr; totype: ftntype*};
+  var lop: integer; ltype: ftntype; lpn: pn; ConstNode: Boolean;
+begin
+ConstNode := FALSE;
+if fattr.treeptr <> nil
+then
+  if fattr.treeptr^.node = CSTNODE
+  then ConstNode := TRUE;
+if ConstNode
+then cmakentype(fattr,totype)
+else begin
+  if totype.typ = INTEGR
+  then begin
+    if fattr.atype.typ = COMPLEX
+    then begin
+      fattr.treeptr := newunnode(210{REALPART},fattr.treeptr);
+      fattr.treeptr^.unsubop := 0;
+      fattr.atype := realtype;
+      end;
+    if fattr.atype.typ = REEL
+    then begin
+      if fattr.atype.siz = 4
+      then lop := 58 {TRUNC44}
+      else lop := 59 {TRUNC84};
+      fattr.treeptr := newunnode(lop,fattr.treeptr);
+      fattr.atype := int4type;
+      end;
+    makeisize(fattr,totype.siz);
+    end
+  else
+    if totype.typ = REEL
+    then begin
+      if fattr.atype.typ = INTEGR
+      then begin
+        makeisize(fattr,4);
+        if totype.siz = 4
+        then lop := 56 {FLOAT44}
+        else lop := 57 {FLOAT48};
+        fattr.treeptr := newunnode(lop,fattr.treeptr);
+        end
+      else
+        if fattr.atype.typ = REEL
+        then begin
+          if fattr.atype.siz <> totype.siz
+          then begin
+            if totype.siz = 4
+            then lop := 55 {REAL84}
+            else lop := 54 {REAL48};
+            fattr.treeptr := newunnode(lop,fattr.treeptr);
+            end;
+          end
+        else begin {fattr.atype.typ = COMPLEX}
+          fattr.treeptr := newunnode(210{REALPART},fattr.treeptr);
+          fattr.treeptr^.unsubop := 0;
+          if totype.siz = 8
+          then fattr.treeptr := newunnode(54{REAL48},fattr.treeptr);
+          end;
+      end
+    else begin {totype.typ = COMPLEX}
+      if fattr.atype.typ <> COMPLEX
+      then begin
+        makentype(fattr,realtype);
+        new(lpn,CSTNODE);
+        with lpn^ do begin
+          node := CSTNODE; csttype := realtype; cstvalu.rval := 0;
+          end;
+        fattr.treeptr := newbinnode(208{COMPLEX},lpn,fattr.treeptr);
+        fattr.treeptr^.binsubop := 0;    { L = Imag, R = Real }
+        end;
+      end;
+  fattr.atype := totype;
+  end;
+end; {makentype}
+
+procedure maxnumtypes{*var aattr,battr: attr*};
+begin
+if Numeric(aattr.atype.typ) and Numeric(battr.atype.typ)
+then begin
+     if aattr.atype.typ <> battr.atype.typ
+     then begin
+          if ((aattr.atype.typ = COMPLEX) and
+              (battr.atype.typ = REEL) and
+              (battr.atype.siz = 8)) or
+             ((battr.atype.typ = COMPLEX) and
+              (aattr.atype.typ = REEL) and
+              (aattr.atype.siz = 8))
+          then error(234);
+          if aattr.atype.typ > battr.atype.typ
+          then makentype(battr,aattr.atype)
+          else makentype(aattr,battr.atype);
+          end
+     else if aattr.atype.siz <> battr.atype.siz
+          then if aattr.atype.siz > battr.atype.siz
+               then makentype(battr,aattr.atype)
+               else makentype(aattr,battr.atype)
+     end
+else error(52);
+end; {maxnumtypes}
+
+function onadjlst{fpn: pn): padjarrsz};
+  var lpadj: padjarrsz;
+begin
+lpadj := adjszlst;
+while lpadj <> nil do
+      if lpadj^.arr = fpn
+      then begin onadjlst := lpadj; exit(onadjlst); end
+      else lpadj := lpadj^.next;
+onadjlst := nil;
+end; {onadjlst}
+
+                                                                                                                                                                                          

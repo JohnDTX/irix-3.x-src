@@ -1,0 +1,86 @@
+'\"macro stdmacro
+.TH ARCH 1D
+.SH NAME
+arch \- display a simulated architectural model
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/arch
+.PP
+.B /usr/people/mexdemos/arch
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+.I arch
+displays a model of an imaginary city block.
+Operator controls adjust the viewing position and select one or several
+structures for display.
+.PP
+Most of the user interface is through the mouse buttons.
+Each non-zero combination of mouse buttons causes a different viewpoint
+movement.
+The mouse valuators are ignored.
+.PP
+In the initial state, a single building is displayed.
+Typing keys create different actions.
+.nf
+.sp
+	Key 	Function
+.sp
+	s	turn on (or off) wireframe buildings that complete the block
+.br
+	f 	cover (or uncover) building surfaces
+.br 
+	m	turn on (or off) automatic movement around the city
+.br
+	r 	initialize the program
+.br
+	h 	show help menu (does not work in window manager)
+.br
+	ESC 	exit the program
+.sp
+.fi
+.SH "DISPLAY OPTIONS"
+.PP
+Upon entry into the program,
+.I arch
+is set for NTSC or high resolution output, depending on the currently
+selected monitor.
+The display monitor can be altered during program execution by
+pressing the proper control character.
+.nf
+.sp
+	Key	\ \ \ \ \ \ \ \ \ \ Display Monitor
+.sp
+	CTRL-A60	HZ monitor
+.br
+	CTRL-B	\ \ \ \ \ \ \ \ \ \ \ \ 30 HZ monitor
+.br 
+	CTRL-C		NTSC display
+.br
+	CTRL-D	PAL (European Video) display
+.sp
+.fi
+.SH "WINDOW MANAGER"
+.PP
+The window manager version of \f2usr/people/mexdemos/arch\f1 runs without the
+aforementioned display options.
+If the site is in constant motion, it stays in motion, even if
+the window is detached.
+.sp
+The multiple display options (60-Hz, 30-Hz, NTSC and PAL) are
+not available for the window manager version.
+.sp
+There is no help menu in the window manager version of arch.
+Raster fonts do not scale to arbitrarily sized windows.
+.SH AUTHOR
+.PP
+Gary Tarolli
+.SH "HARDWARE REQUIREMENTS"
+For the non-window manager version,
+twelve bitplanes of image memory are necessary.
+For the window manager version,
+sixteen bitplanes of image memory are necessary.
+

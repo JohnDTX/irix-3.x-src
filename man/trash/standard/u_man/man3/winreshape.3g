@@ -1,0 +1,38 @@
+.TH winreshape "" "Silicon Graphics"
+.rs
+.sp 0.1i
+.SH\(Dy
+.SH NAME
+.B winreshape
+- change the size and position of the current graphics port
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winreshape(x1, x2, y1, y2)"
+.B "long x1, x2, y1, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winres(x1, x2, y1, y2)"
+.B "integer*4 x1, x2, y1, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winreshape(x1, x2, y1, y2: longint);"
+.sp
+.SH DESCRIPTION
+.B winreshape
+moves and reshapes the current graphics port to match the screen coordinates
+\f2x1, x2, y1, y2\f1.  This differs from
+.B prefposition
+in that the reshaped window is not fixed in size and shape, and may be
+reshaped interactively via the window manager.
+.SH "SEE ALSO"
+winmove, prefposition, prefsize,
+.I "Multiple Exposure: The IRIS Window Manager"
+in the
+.I "IRIS User's Guide"
+.SH NOTE
+This command can be used only in immediate mode under the window
+manager.

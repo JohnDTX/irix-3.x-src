@@ -1,0 +1,10 @@
+# devices common to 1000's, 2000's, 3000's
+
+# Dsd tape controller
+controller	qic0	at mb0 csr 0x7F00	priority 1 vector dsdintr
+
+# Dsd floppy/winchester controller
+controller	dsd0	at mb0 csr 0x7F00	priority 1 vector dsdintr
+disk		md0	at dsd0 drive 1
+disk		md1	at dsd0 drive 2
+

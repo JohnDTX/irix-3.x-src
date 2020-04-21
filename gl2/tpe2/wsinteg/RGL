@@ -1,0 +1,24 @@
+	DISCUSSION OF RGL
+
+	SGI terminals were used to display graphically mounds of 'mainframe'
+data. The workstations display mounds of self-contained/self-generated data.
+Many of our richest customers/prospects are not able to contain/generate the
+data on a workstation, but must retrieve it from a 'mainframe'. In many
+cases, the mainframe mips are less expensive than the communications/SGI mips.
+	Let us divide the work into:
+		input process
+		communication process
+		database process
+		function process (windowing, solids modeling)
+		communication process
+		display process
+	In this model, the work is started by operator input, and is completed
+by display. Some of the operator input is directed to the display, some to 
+communications, some to function and database, and some to the mainframe
+operating system. Some is directed to the SGI operating system. The problem
+of input focus is pertinent to this aspect of RGL. Mex is an attempt to
+allow interaction with several processes, and manage the 'display' process
+of each one.
+	A next generation RGL will recognize the 'input focus' problem, and
+allow the gl parsing to be seperate from communications, database, and function
+processing.

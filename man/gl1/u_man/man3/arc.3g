@@ -1,0 +1,49 @@
+.TH arc 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I arc
+- draw a circular arc
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "arc(x, y, radius, startang, endang)"
+.B "Coord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.B "arci(x, y, radius, startang, endang)"
+.B "Icoord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine arc(x, y, radius, stang, endang)"
+.B "real x, y, radius"
+.B "integer*2 stang, endang"
+.IP 
+.B "subroutine arci(x, y, radius, stang, endang)"
+.B "integer x, y, radius"
+.B "integer*2 stang, endang"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure arc(x, y, radius: Coord; startang, endang: Angle);"
+.IP 
+.B "procedure arci(x, y, radius: Icoord; startang, endang: Angle);"
+.sp
+.SH DESCRIPTION
+\f2Arc\f1 draws a circular arc.  The arc is defined
+by a center point, a starting angle, an ending angle, and a radius.  The
+angle is measured from the positive \f3x\f1-axis and specified in 
+integral tenths of degrees.
+Positive angles
+describe counterclockwise rotations.  Since an arc is
+a two-dimensional shape, these commands have only 2D forms.
+The arc is drawn in the \f3x-y\f1
+plane, with \f3z\f1=0, and uses the current color, linestyle, linewidth 
+and writemask.
+It is drawn counterclockwise from \f3startang\f1 to \f3endang\f1, so
+that an arc from 10\(de to 5\(de is a nearly complete circle.  After 
+the execution
+of the \f2arc\f1 command, the graphics position is undefined.
+.SH "SEE ALSO"
+.I arcf, circ, circf, curve

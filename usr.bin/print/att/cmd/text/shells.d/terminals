@@ -1,0 +1,37 @@
+* terminal types for mm and man commands
+
+ -T1620	=> Diablo 1620 (same as DASI 450)
+ -T1620-12	=> Diablo 1620 (same as DASI 450) 12-pitch
+ -T2621	=> HP 2621 series (implies "-c")
+ -T2631	=> HP 2631 series line printer (implies "-c")
+ -T2631-e	=> HP 2631 series (expanded mode) (implies "-c")
+ -T2631-c	=> HP 2631 series (compressed mode) (implies "-c")
+ -T2640	=> HP 2640 series (implies "-c")
+ -T2645	=> HP 2645 series (implies "-c")
+ -T300	=> DASI (DTC, GSI) 300
+ -T300-12	=> DASI 300 at 12-pitch
+ -T300s	=> DASI 300s
+ -T300s-12	=> DASI 300s at 12-pitch
+ -T37	=> TTY 37
+ -T382	=> DTC 382
+ -T40/2	=> Teletype model 40/2 (implies "-c")
+ -T40/4	=> Teletype model 40/4 (implies "-c")
+ -T4000a	=> Trendata 4000a
+ -T4014	=> Tektronix 4014
+ -T43	=> TTY 43 (implies "-c" and 12-pitch)
+ -T450	=> DASI 450 (same as Diablo 1620)  DEFAULT
+ -T450-12	=> DASI 450 (same as Diablo 1620) 12-pitch
+ -T735	=> TI 735 (implies "-c")
+ -T745	=> TI 745 (implies "-c")
+ -T832	=> Anderson Jacobson 832 (implies "-c")
+ -T8510	=> C.Itoh printer (implies "-c")
+ -TX	=> Prepare output for EBCDIC lineprinter
+		(requires a local program to communicate with the printer).
+ -Tdumb	=> Terminal types with no special features (reverse line motion, etc.)
+      	   (implies "-c")
+ -Thp	=> HP 264n (implies "-c")
+ -Tlp	=> Line printer (implies "-c")
+ -Ttn300	=> TermiNet 300 (implies "-c")
+
+None of the above needed if $TERM set in environment.
+Any unknown terminal type given will be treated as a "dumb" terminal.

@@ -1,0 +1,183 @@
+'\"macro stdmacro
+.TH GETTY 1M
+.SH NAME
+getty  \- set terminal type, modes, speed, and line discipline
+.SH SYNOPSIS
+.B /etc/getty
+[
+.B \-h
+] [
+.B \-t
+timeout
+]
+line
+[
+speed
+[
+type
+[
+linedisc
+] ] ]
+.br
+.B /etc/getty \-c
+file
+.SH DESCRIPTION
+.I Getty
+is a program that is invoked by
+.IR init (1M).
+It is the second process in the series,
+.RI ( init-getty-login-shell )
+that ultimately connects a user with the \s-1UNIX\s0 System.
+Initially
+.I getty
+prints the login message field for the entry it is using from
+.BR /etc/gettydefs .
+.I Getty
+reads the user's login name and invokes the
+.IR login (1)
+command
+with the user's name as argument.
+While reading the name,
+.I getty
+attempts to adapt the system to the speed and type of terminal
+being used.
+.PP
+.I Line
+is the name of a tty line in \f3/dev\fP to which
+.I getty
+is to attach itself.
+.I Getty
+uses this string as the name of a file in the \f3/dev\fP directory
+to open for reading and writing.
+Unless
+.I getty
+is invoked with the
+.B \-h
+flag,
+.I getty
+will force a hangup on the line by setting the speed to zero
+before setting the speed to the default or specified speed.
+The
+.B \-t
+flag plus \f2timeout\fP in seconds, specifies that
+.I getty
+should exit if the open on the line succeeds and no
+one types anything in the specified number of seconds.
+The optional second argument,
+.IR speed ,
+is a label to a speed and tty definition in the file
+.BR /etc/gettydefs .
+This definition tells
+.I getty
+what speed to initially run at, what the login message should look
+like, what the initial tty settings are, and what speed to try next
+should the user indicate that the speed is inappropriate. (By typing a
+.I <break>
+character.)
+The default \f2speed\fP is 300 baud.
+The optional third argument,
+.IR type ,
+is a character string describing to
+.I getty
+what type of terminal is
+connected to the line in question.
+.I Getty
+understands the following types:
+.PP
+.RS
+.nf
+.ta \w'\f3vt100\f1\ \ \ 'u
+\f3none\f1	default
+\f3vt61\f1	\s-1DEC\s+1 vt61
+\f3vt100\f1	\s-1DEC\s+1 vt100
+\f3hp45\f1	Hewlett-Packard \s-1HP\s+145
+\f3c100\f1	Concept 100
+.fi
+.DT
+.RE
+.PP
+The default terminal is \f3none\fP; i.e.,
+any crt or normal terminal unknown to the system.
+Also, for terminal type to have any meaning, the virtual
+terminal handlers must be compiled into the operating system.
+They are available, but not compiled in the default condition.
+The optional fourth argument,
+.IR linedisc ,
+is a character string describing which line discipline to use
+in communicating with the terminal.
+There are two line disciplines.  
+.SM
+.BR LDISC0\*S
+is the familiar System V line discipline.
+.SM
+.B LSISC1
+is similar to the 4.3 BSD ``new 
+.I tty
+driver''.
+.PP
+When given no optional arguments,
+.I getty
+sets the \f2speed\fP of the interface to 300 baud,
+specifies that raw mode is to be used (awaken on every character),
+that echo is to be suppressed, 
+either parity allowed,
+newline characters will be converted to carriage return-line feed,
+and tab expansion performed on the standard output.
+It types the login message before reading
+the user's name a character at a time.
+If a null character (or framing error) 
+is received, it is assumed to be the result
+of the user pushing the ``break'' key.
+This will cause
+.I getty
+to attempt the next \f2speed\fP in the series.
+The series that
+.I getty
+tries is determined by what it finds in
+.BR /etc/gettydefs .
+.PP
+The user's name is terminated by a new-line or
+carriage-return character.
+The latter results in the system being set to
+treat carriage returns appropriately (see
+.IR ioctl (2)).
+.PP
+The user's name is scanned to see if
+it contains any lower-case alphabetic characters; if not,
+and if the name is non-empty, the
+system is told to map any future upper-case characters
+into the corresponding lower-case characters.
+.PP
+Finally,
+.I login
+is called with the user's name as an argument.
+Additional arguments may be typed after the login name.  These are
+passed to
+.IR login ,
+which will place them in the environment (see
+.IR login (1)).
+.PP
+A check option is provided.  When
+.I getty
+is invoked with the
+.B \-c
+option and \f2file\fP, it scans the file as if it were scanning
+.B /etc/gettydefs
+and prints out the results to the standard output.  If there
+are any unrecognized modes or improperly constructed entries, it
+reports these.  If the entries are correct, it prints out the
+values of the various flags.  See
+.IR ioctl (2)
+to interpret the
+values.  Note that some values are added to the flags automatically.
+.SH FILES
+/etc/gettydefs
+.SH "SEE ALSO"
+ct(1C),
+init(1M),
+login(1),
+ioctl(2),
+gettydefs(4),
+inittab(4),
+tty(7).
+.\"	@(#)getty.1m	5.1 of 10/17/83

@@ -1,0 +1,24 @@
+- So that wsiris can cleanly recover from GL errors which cause readhost()
+  to be SIGKILL-ed, make readhost() be a child process, too.  After the
+  parent forks it, it waits for any of its children to die and then calls
+  cleanup(0) to kill the rest.  Add -d 4 flag which inhibit this, i.e.
+  readhost() remains the parent. SCR #1514
+
+- Add setintrchar() to RGL.  This which will sent by wsiris when it is
+  killed by the window manager to interrupt the host process.  SCR #1093.
+
+- Have wsiris indicate that the keyboard is queued.  It could do this by
+  lighting lamp L1, say, when it receives qdevice(KEYBD), and extinguishing
+  when it receives unqdevice(KEYBD).  SCR #1515
+
+- Implement fastmode serial communications, at least in 4.2 and SYSTEM5
+  versions.  All that's required is to put the host into raw mode, but
+  with XON/XOFF enabled.  
+
+- Remove IBM stuff from irisio.c.  Peter E. says all current and future
+  IBM customers will use Geometry Link and never again serial.
+
+- wsiris.1c: move .wsirisrc explanation to separate paragraph after the
+  first one.  As it is now, -f references .wsirisrc before it is defined.
+
+- remove set monitor cmd (~%m<n>) and add set60hz, etc to host distribution.

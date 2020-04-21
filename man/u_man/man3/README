@@ -1,0 +1,49 @@
+1) deleted empty ".so" files
+
+2) copied in Greg Boyd's changes
+		atof.3c
+		bessel.3m
+		drand48.3c
+		ecvt.3c
+		erf.3m
+		exp.3m
+		floor.3m
+		fpsignal.3c	** Greg's new page
+		frexp.3c
+		gamma.3m
+		hypot.3m
+		printf.3s
+		regcmp.3x
+		scanf.3s
+		sinh.3m
+		trig.3m
+
+3) added:	curses.3x
+
+4) deleted:	matherr.3m
+		rhost.3
+
+5) eqn:		drand48.3c
+		erf.3m
+		gamma.3m
+
+6) tbl:		bessel.3m
+
+7) bob:		directory.3 * did not get in manual
+		getwd.3 * did not get in manual
+
+8) robinf:	November 2, 1985.  Created 2 new directories: gl1 and gl2
+		Put graphics library manual pages in these directories.
+		Also removed a directory called man3.gl2.del. The files
+		in this directory were moved to the iug directory in a
+		subdirectory called beta because I think these are the
+		beta release of the IUG (Version 2.0) manual pages. 
+
+		In the gl1 and gl2 subdirectories, I created RCS directories
+		and checked in all the files in these directories.  These
+		are the RCS directories that should be used for checking
+		the files in and out.
+
+		I also created a directory called tools.  This directory
+		contains two shell scripts that can be used for checking
+		files in and out.

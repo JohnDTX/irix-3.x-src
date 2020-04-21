@@ -1,0 +1,113 @@
+.TH SMT 1
+.SH NAME
+smt \- streaming magnetic tape manipulation program
+.SH SYNOPSIS
+.B smt
+[
+.B \-t
+.BI /dev/ tapename
+]
+.I command
+[
+.I count
+]
+.SH DESCRIPTION
+.I Smt\^
+is used to give commands to a Quarter Inch streaming magnetic tape drive.
+If a tape name is not specified, the default tape drive is used.
+.I Smt
+uses the tape device
+.BR /dev/rmt2 .
+.I Smt
+performs the requested operation once.  Operations
+may be performed multiple times by specifying
+.IR count .
+.PP
+The tape default device has the ioctl minor to facilitate the use of opening
+and reading the tape when either using a no rewind device or a standard
+rewind and write file mark on close of the tape device.
+.PP
+The available commands are listed below.  Only as many
+characters as are required to uniquely identify a command
+need be specified.
+.RS
+.TP
+.B eof
+Write 
+.I count
+end-of-file marks at the current position on the tape.
+.TP
+.B fsf
+Forward space
+.I count
+files.
+.TP
+.B fsr
+Forward space 
+.I count
+records.
+.TP
+.B rewind
+Rewind the tape
+.RI ( Count
+is ignored.)
+.TP
+.B status
+Print status information about the tape unit.
+.RI ( Count
+is ignored.)
+.TP
+.B retension
+Retension the tape cartridge installed in the drive.
+.RI ( Count
+is ignored.)
+.TP
+.B erase
+Erase the tape cartridge in the drive.
+.RI ( Count
+is ignored.)
+.TP
+.B help
+Print command usage information about the command.
+.RI ( Count
+is ignored.)
+.RE
+.PP
+.I Smt\^
+returns a 0 exit status when the operation(s) were successful,
+.I smt
+returns a 1 if the command was unrecognized,
+and 2 if an operation failed.
+.I Smt\^
+without any arguments prints the help command.
+.SH FILES
+.ta \w'/dev/rmtioctl\ \ 'u
+.in +\w'/dev/rmtioctl\ \ 'u
+.ti -\w'/dev/rmtioctl\ \ 'u
+/dev/rqic	raw magnetic quarter inch cartridge tape drive
+.ti -\w'/dev/rmtioctl\ \ 'u
+/dev/nrqic	no rewind quarter inch cartridge tape drive
+.ti -\w'/dev/rmtioctl\ \ 'u
+/dev/nrmt1	no rewind quarter inch cartridge tape drive
+.ti -\w'/dev/rmtioctl\ \ 'u
+/dev/rmt2	no rewind quarter inch cartridge tape drive
+.ti -\w'/dev/rmtioctl\ \ 'u
+/dev/rmt1	default raw magnetic quarter inch cartridge tape drive
+.in -\w'/dev/rmtioctl\ \ 'u
+.SH BUGS
+.I Smt\^
+sleeps when accessing the tape if tape is busy and awakes
+only after the tape is closed from a previous operation.
+.SH "SEE ALSO"
+smtio (7)
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/smt.1,v 1.1 89/03/27 16:41:35 root Exp $
+.\" $Log:	smt.1,v $
+Revision 1.1  89/03/27  16:41:35  root
+Initial check-in for 3.7
+
+.\" .Revision 1.2  85/05/02  18:21:14  robinf
+.\" .Updates from 2000 Series Workstation Guide
+.\" .
+.\" .Revision 1.1  84/12/15  14:12:38  bob
+.\" .Initial revision
+.\" .

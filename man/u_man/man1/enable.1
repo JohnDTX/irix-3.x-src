@@ -1,0 +1,81 @@
+'\"macro stdmacro
+.TH ENABLE 1
+.SH NAME
+enable, disable \- enable/disable \s-1LP\s+1 printers
+.SH SYNOPSIS
+.B enable
+.RB printers
+.br
+.B disable
+.RB [\| \-c \|]
+.RB [\| \-r [\|reason\|]\|]
+.RB printers
+.SH DESCRIPTION
+.I Enable\^
+activates the named
+.IR printers ,
+enabling them
+to print requests
+taken by
+.IR lp\^ (1).
+Use
+.IR lpstat\^ (1)
+to find the status of printers.
+.PP
+.I Disable\^
+deactivates the named
+.IR printers ,
+disabling them
+from printing requests
+taken by
+.IR lp\^ (1).
+By default,
+any requests
+that are currently printing
+on the designated printers
+will be reprinted
+in their entirety
+either on the same printer
+or on another member
+of the same class.
+Use
+.IR lpstat\^ (1)
+to find the status of printers.
+Options useful with
+.I disable\^
+are:
+.TP "\w'\-r\^[\|reason\|]\ \ \ 'u"
+.B \-c
+Cancel any requests
+that are currently printing
+on any of the designated printers.
+.TP
+.BR \-r\^ [\|\f2reason\fP\|]
+Associates a
+.I reason\^
+with the deactivation
+of the printers.
+This reason
+applies to all printers
+mentioned up to
+the next
+.B \-r
+option.
+If the
+.B \-r
+option is not present
+or the
+.B \-r
+option is given
+without a reason,
+then a default reason
+will be used.
+.I Reason\^
+is reported by
+.IR lpstat\^ (1).
+.SH FILES
+/usr/spool/lp/\(**
+.SH SEE ALSO
+lp(1),
+lpstat(1).
+.\"	@(#)enable.1	5.1 of 10/31/83

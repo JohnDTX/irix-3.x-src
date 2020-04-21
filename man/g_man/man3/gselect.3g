@@ -1,0 +1,66 @@
+.TH gselect 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gselect
+\- puts the system in selecting mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gselect(buffer, numnames) "
+.B "short buffer[];
+.B "long numnames;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gselect(buffer, numnam)"
+.B "integer*2 buffer(1)
+.B "integer*4 numnam"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gselect(var buffer: Short; numnames: 
+.br
+.B	longint);
+.SH DESCRIPTION
+.B gselect
+turns on selecting mode.  The current viewing matrix defines the
+selecting region
+when
+.B gselect
+executes.
+However, you can construct a viewing matrix after 
+selecting mode has begun.
+.B gselect
+and
+.B pick
+are identical except 
+.B gselect 
+allows you to create
+a viewing matrix in selection mode.
+.PP
+.I numnames
+specifies the maximum number of names the system saves.
+Names are 16-bit numbers, which you load on the name
+stack.
+Each drawing routine that intersects the selecting region
+causes the contents of the name stack to be stored in
+.I buffer.
+.SH "SEE ALSO"
+endpick, endselect, initnames, loadname, pick, picksize, 
+popname, pushname 
+.sp
+.I Programming Guide,
+Section 9.3, Selecting
+.SH NOTE
+This routine is available only in immediate mode.
+.SH BUGS
+When using a debugger, do not stop the graphics
+between 
+.B gselect
+and
+.B endselect
+because the graphics are frozen and results cannot appear
+on the screen.

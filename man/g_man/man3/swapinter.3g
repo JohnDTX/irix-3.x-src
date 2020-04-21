@@ -1,0 +1,42 @@
+.TH swapinterval 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B swapinterval
+\- defines a minimum time between buffer swaps
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "swapinterval(i) "
+.B "short i;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine swapin(i)"
+.B "integer*4 i"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure swapinterval(i: Short);"
+.SH DESCRIPTION
+.B swapinterval
+defines a minimum time between buffer swaps.
+For example, a swap interval of 5
+refreshes the screen at least
+five times between execution of successive
+\f3swapbuffers\fP.
+.B swapinterval
+changes frames at a steady rate if a new
+image can be created within one swap interval.  The default interval is 1.
+.B swapinterval
+is valid only in double buffer mode.
+It is ignored in single buffer mode or RGB mode.
+.SH "SEE ALSO"
+doublebuffer, gsync, swapbuffers 
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+.SH NOTE
+This routine is available only in immediate mode.

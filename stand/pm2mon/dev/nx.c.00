@@ -1,0 +1,576 @@
+# define QUIRK
+# define PROMSTATIC
+
+# ifndef QUIRK
+# define MAKEREADY(x)
+# define MAKENOTREADY(x)
+# endif  QUIRK
+
+# include "pmII.h"
+# define NBBY	8
+
+# include "nx.h"
+#include "Qglobals.h"
+#include "Qdevices.h"
+#include "Xns.h"	
+
+# define  DEBUG do_debug
+# include "dprintf.h"
+
+
+#define	NREADS	1		/* max buffers tied up waiting for input */
+#define NXMAXBUZZ 100000
+
+char nxpresent;			/* zero if interface not answering */
+char	*PortA,			/* Virtual Address of Controller A port */
+	*PortB;			/* Virtual Address of Controller B port */
+
+char		*readdatabuf;	/* nxread's data buffer for reading	*/
+char		*readreply;	/* nxread's reply message for reading	*/
+struct request readreqbuf;
+struct request *readrequest;
+char		*writedatabuf;	/* nxwrite's data buffer		*/
+
+long nxva;			/* virtual address of multibus area */
+long nxpa;			/* physical address of multibus area */
+long nxvseg;			/* upper 12 bits of nxva - used by HTOX */
+
+struct mqueues *nxmq;		/* points to message queues */
+struct msgbuf *lastrmp;		/* oldest read queue pointer */
+struct physnet myaddr;		/* my physical network addr */
+
+Xhost MyHostAddress;
+
+int loop;
+
+
+nxintr()
+{
+    register READ		rmp;
+    register struct request	*request;
+
+    *PortA = (char)1;				/* clear the interrupt     */
+
+    while( (rmp = (READ)lastrmp) ->status == HOST_IDLE )
+    {
+        request = (struct request *)rmp->id;	/* retrieve user's struct */
+
+	if( request->reply != 0 )
+	    bcopy(rmp,request->reply,sizeof (struct xmit_msg));
+	if( rmp->request == NET_READ )
+	    MAKEREADY(FROMENET);	/* indicate a packet was received */
+
+	rmp->length = MSGLEN;
+	rmp->id = 0;
+	rmp->status = NX_BUSY;		/* free this msg buffer */
+
+	lastrmp = ((MP)rmp)->next;
+	request->complete = 1;
+    }
+}
+
+/*
+ * InitEnet() is init function which interfaces to Quirk kernel.
+ * 	Return 0 if we fail to start the device for any reason
+ *	Return 1 if we succeed at everything
+ */
+short DidInitEnet;
+int
+InitEnet()
+{
+    if( DidInitEnet )
+	return 1;
+
+    if( nxinit() )
+    {
+	bcopy((char *)&myaddr,(char *)&MyHostAddress,6);
+	readenable();
+	MAKEREADY(TOENET);
+	MAKENOTREADY(FROMENET);
+	DidInitEnet++;
+    }
+
+    return DidInitEnet;
+}
+
+
+int
+nxinit()
+{
+# include "m68vectors.h"
+
+    extern int level2int();
+
+    if( !nxprobe() )
+	return 0;
+
+    *EVEC_LEVEL2 = (long)level2int;
+
+    /* Allocate space for msg buffers, read buffer and write buffer */
+    if( !nxmalloc() )
+    {
+	printf("nxfirst: nxmalloc failed\n");
+	return 0;
+    }
+
+    /* initialize the message queues and enable the controller */
+    if( !nxconfig() )
+	return 0;
+
+    if( nxmode(CONNECT_TO_NET) == 0 )
+	return 0;
+
+    if( getslot(253, &myaddr) == 0 )	/* read our address */
+	return 0;
+
+    nxpresent = 1;
+    return 1;
+}
+
+/*
+ * See if the board is presnet and record result in nxpresent.
+ * Set up interrupt vector.
+ */
+int
+nxprobe()
+{
+    register char *rp;
+
+    nxpresent = 0;
+
+    /*
+     * See if interface is present.
+     * Reading Port A resets the board (probebyte(adr) reads from adr).
+     */
+    rp = 0;
+    if( probe((char *)mbiotov(nx_ioaddr+PORTA_OFF),1) )
+	rp = (char *)mbiotov(nx_ioaddr);
+    else
+    if( probe((char *)mbiotov(nx_OLDioaddr+PORTA_OFF),1) )
+	rp = (char *)mbiotov(nx_OLDioaddr);
+    if( rp == 0 )
+    {
+	printf("No ethernet\n");
+	return 0;
+    }
+
+    PortA = rp+PORTA_OFF;
+    PortB = rp+PORTB_OFF;
+
+dprintf(("PortA = $%x B = $%x\n",PortA,PortB));
+    /*
+     * Test status after board reset. (probing PortA above did the reset)
+     * If the Nx101 fails to respond to the reset, indicate non-presence
+     * (we might want this to be a third category of response instead)
+     */
+    if( !buzzon(PortB,NX_ERROR_,0,400000L) )
+    {
+	printf("nxprobe failed\n");
+	return 0;
+    }
+
+    return 1;
+}
+
+/*
+ * Allocate multibus memory for operating the dma and message queues.
+ * Leave the virtual address and physical multibus address as side-effects
+ * in global variables nxva and nxpa.
+ */
+
+struct system_buffers {
+    char		readbuffer[MAXPACKET],
+    			writebuffer[MAXPACKET];
+    char		readreply[sizeof(struct xmit_msg)];
+    struct request	readrequest;
+};
+
+nxmalloc()
+{
+    extern char *gmalloc();
+
+    register struct system_buffers *sp;
+    register struct mqueues *mq;
+               
+    /* 
+     * allocate space for the system buffers on the multibus,
+     * then initialize the fixed global pointers into this area
+     */
+    if( readdatabuf == 0 )
+    {
+	sp = (struct system_buffers *)gmalloc(sizeof *sp);
+	if( sp == 0 )
+	    return 0;
+
+	readdatabuf = sp->readbuffer;
+	readreply   = sp->readreply;
+	readrequest = &sp->readrequest;
+	writedatabuf = sp->writebuffer;
+    }
+
+    /* 
+     * allocate space for the host-controller message queues
+     */
+    if( nxmq == 0 )
+    {
+	nxmq = (struct mqueues *)gmalloc(sizeof *nxmq);
+	if( nxmq == 0 )
+	    return 0;
+	nxva = (long)nxmq;
+	nxpa = vtop(nxva);
+	nxvseg = (long)nxva & (~0xffff);	/* used by HTOX() */
+
+	mq = nxmq;
+	mq->roffset = HTOX(mq->rbufs);
+	mq->woffset = HTOX(mq->wbufs);
+	lastrmp = mq->rbufs;
+	mq->rhead = mq->rbufs;
+	mq->whead = mq->wbufs;
+
+	linkbufs(mq->rbufs,NRBUFS,NX_BUSY);
+	linkbufs(mq->wbufs,NWBUFS,HOST_IDLE);
+    }
+
+    return 1;		
+}
+
+PROMSTATIC
+linkbufs(bp,n,status)
+    struct msgbuf *bp;
+    int n;
+    int status;
+{
+    register struct msgbuf *l,*p;
+
+    /*
+     * intialize the list of host-to-exos buffers message buffers
+     */
+    p = bp;
+    l = p+n-1;
+    while( --n >= 0 )
+    {
+	l->next = p;
+	l->msg.link = HTOX(p);
+	l->msg.length = MSGLEN;
+	l->msg.status = status;
+	l = p;
+	p++;
+    }
+}
+
+/*
+ * Set up the host/controller queues and netbuf array.
+ * Construct initialization message and send it.
+ */
+nxconfig()
+{
+    register struct init	*im;		/* a3 */
+    register		 	 i, x;		/* d7, d6, d5 */
+
+    struct testp		*testpat;
+    /*
+     * construct initialization (configuration) message.
+     */
+    im = (struct init *)readdatabuf;
+    bzero(im, sizeof *im);
+    im->res0 = 1;		/* indicate this is a v1.4 init message */
+    im->amode =3;
+    im->naddr = 0xff;
+    im->nproc = 0xff;
+    im->format[0] = 1;
+    im->format[1] = 1;
+    testpat = (struct testp *)im->mmap;
+    testpat->b0 = 1;
+    testpat->b1 = 3;
+    testpat->b2 = 7;
+    testpat->b3 = 0xf;
+    testpat->w0 = 0x103;
+    testpat->w1 = 0x70f;
+    testpat->l0 = 0x103070f;
+    im->nmbox = 0xff;
+    im->code = 0xff;
+    im->hxitype = im->xhitype = 3;	/* how to interrupt */
+    im->mvblk = -1L;
+    im->nhost = 1;
+    im->hxseg = vtop(nxvseg);
+    im->hxhead = ((int)&nxmq->woffset - nxvseg);
+    im->xhseg = vtop(nxvseg);
+    im->xhhead = ((int)&nxmq->roffset - nxvseg);
+# ifdef BUG1
+    im->res1[0] = 1;
+# endif BUG1
+    /*
+     * calculate the physical dma address of the initialization message
+     * and pass it to controller.
+     *
+     * Exos version 1.4 requires that a disallowed address be
+     * sent first for synchronization (0xffff0000).  Valid addresses
+     * must have high byte == 0 (24 bits is maximum phys address)
+     */
+    sendlong(0x0000FFFFL);
+    sendlong((long)vtop(im));
+
+    i = 0;
+    while (im->code == 0xff)	/* wait for exos to change 'code' */
+	if(i++ > 10000) {
+	    printf("nxconfig: timeout\n");
+	    return 0;
+	}
+    if (im->code) {
+	printf("Ethernet init error %x\n",im->code);
+	return 0;
+    }
+    return 1;
+}
+
+
+/* 
+ * nxmode - set the mode of the Execelan interface
+ */
+nxmode(newmode)
+{
+    register MODE modemsg;
+
+    modemsg = (MODE)getmsgbuf();	/* get a message buffer */
+
+    /* Fill in the message buffer */
+    modemsg->request = NET_MODE;
+    modemsg->reqmask = WRITEREQ;
+    modemsg->mode = newmode;
+
+    return nxwaitreq(modemsg,0);
+}
+
+/*
+ * getslot - read back the board's ethernet address
+ */
+getslot(slotno, a)
+struct physnet *a;
+{
+    register ADDRS adrmsg;
+    char reply[sizeof (NxMsg)];
+
+    adrmsg = (ADDRS) getmsgbuf();
+
+    adrmsg->request = NET_ADDRS;
+    adrmsg->reqmask = READREQ;
+    adrmsg->slot = slotno;
+
+    if( !nxwaitreq(adrmsg,reply) )
+    {
+	printf("getslot: timeout\n");
+	return 0;
+    }
+
+    bcopy(&((ADDRS)reply)->addr,a,sizeof *a);
+    return 1;
+}
+
+/*
+ * nxstats() - returns all the network statistics to the user's buffer.
+ * 		The stats are 8 longwords: 32 bytes.
+ */
+nxstats(usrbuf)
+char *usrbuf;
+{
+    register STATS		statmsg;
+
+    statmsg = (STATS) getmsgbuf();
+
+    statmsg->request = NET_STATS;
+    statmsg->reqmask = READREQ | WRITEREQ;	/* read and reset stats */
+    statmsg->nobj = 8;				/* read all stats */
+    statmsg->index = 0;				/* start at beginning */
+    statmsg->baddr = (long)vtop(readdatabuf);
+
+    if( !nxwaitreq(statmsg,0) ) {
+	printf("nxstats: timeout\n");
+	return 0;
+    }
+
+    bcopy(readdatabuf, usrbuf, 8 * sizeof(long));
+    return 1;
+}
+
+ResetExcelan() {
+	probe(PortA,1);
+}
+
+
+extern struct request	*readrequest;
+extern char		*readreply;
+extern char		*readdatabuf;
+int readenabled;
+
+readenable()
+{
+    READ	readmsg;
+
+    if(readenabled)
+	return;
+    readenabled++;
+    readmsg = (READ)getmsgbuf();
+    (READ)readrequest->msg = readmsg;
+    readrequest->reply = readreply;
+    readrequest-> complete = 0;
+
+    readmsg->request = NET_READ;
+    readmsg->nblocks = 1;
+    readmsg->block[0].len = MAXPACKET;
+    readmsg->block[0].addr = vtop(readdatabuf);
+    readmsg->id = (long)readrequest;
+    readmsg->status = NX_BUSY;
+    *PortB = 0;
+}
+
+ReadFromEnet()
+{
+    register READ	replymsg;
+
+    if (readrequest->complete) {
+	readenabled = 0;
+        replymsg = (READ)(readrequest->reply);
+	MAKENOTREADY(FROMENET);
+	return replymsg->block[0].len;
+    }
+    return 0;
+}
+
+WriteToEnet(buf, bytes)
+register char	*buf;
+register int	bytes;
+{
+extern char		*writedatabuf;
+    register XMIT writemsg;
+
+    writemsg = (XMIT)getmsgbuf();
+
+    bcopy(buf, writedatabuf, bytes);	/* copy user's data into system buf */
+
+    if (loop)
+        writemsg->request = NET_XMIT_LOOP;
+    else
+        writemsg->request = NET_XMIT;
+
+    writemsg->nblocks = 1;
+    writemsg->block[0].len = bytes;
+    writemsg->block[0].addr = (long)(vtop(writedatabuf));
+
+    return nxwaitreq(writemsg,0);
+}    
+
+/*
+ * Utility routines and initialization code
+ * for Excelan interface.
+ */
+/*
+ * Locate next host-to-exos msgbuf.
+ * Return 0 if none available.
+ * status byte interpretation:
+ *	3 - is busy and owned by exos
+ *	2 - is busy and owned by host
+ *	1 - is not busy but owned by exos
+ *	0 - is available
+ */
+MP igetmsgbuf()
+{
+register s, i;
+register MP mp;
+register int oldpri;
+
+    oldpri = spl7();;
+    mp = (MP)XTOH(nxmq->woffset);
+    for(i=0; i<NWBUFS; mp=mp->next)
+	if (mp->msg.status==0)
+	    goto gotone;
+    splx(oldpri);
+    return 0;
+gotone:
+    mp->msg.status = 2;
+    mp->msg.res = 0;
+    splx(oldpri);
+    bzero(&mp->msg.pad, MSGLEN);
+    return(mp);
+}
+
+
+
+/*
+ * Obtain a host-to-exos msgbuf.
+ * Wait if necessary to get one.
+ */
+MP getmsgbuf()
+{
+    register s;
+    register MP mp;
+    register timer;
+
+    timer = 50;		/* try 50 times then give up */
+    while (timer--) {
+	if (mp=igetmsgbuf())
+	    return(mp);
+    }
+    printf("panic: getmsgbuf failed\n");
+    exit(0);
+}
+
+
+sendlong(n)
+    long n;
+{
+    register int i;
+
+dprintf((" sendlong($%x)...",n));
+    for( i = sizeof (long); --i >= 0; )
+    {
+	while( *PortB & NX_READY_ )
+	    ;
+	*PortB = (char)n;
+	n >>= NBBY;
+    }
+dprintf(("...sendlong\n"));
+}
+
+PROMSTATIC int
+buzzon(cp,mask,val,n)
+    register unsigned char *cp;
+    int mask,val;
+    long n;
+{
+    while( --n != 0 )
+	if( (*cp&mask) != val )
+	    return 1;
+
+    return 0;
+}
+PROMSTATIC int
+nxwaitreq(nxp,reply)
+    register NxMsg *nxp;
+    char *reply;
+{
+    struct request R;
+
+    sendreq(&R,nxp,reply);
+
+    if( !buzzon(&R.complete,0xFF,0,100000L) )
+    {
+	printf("nxwaitreq: timeout\n");
+	return 0;
+    }
+
+    return 1;
+}
+PROMSTATIC
+sendreq(rp,nxp,reply)
+    register struct request *rp;
+    register NxMsg *nxp;
+    char *reply;
+{
+    rp->msg = nxp;
+    rp->reply = reply;
+    rp->complete = 0;
+
+    nxp->id = (long)rp;
+    nxp->status = NX_BUSY;
+    *PortB = 0;
+}

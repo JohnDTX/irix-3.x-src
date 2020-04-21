@@ -1,0 +1,25 @@
+.TH popviewport  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I popviewport
+- restore the viewport, screen mask, and \f2setdepth\f1 parameters
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popviewport()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popvie"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popviewport;"
+.sp
+.SH DESCRIPTION
+The \f2popviewport\f1 command pops the stack of viewports 
+and screen masks.
+The viewports on top of the stack are lost.  In addition, \f2popviewport\f1
+restores the \f2setdepth\f1 parameters.  
+.SH "SEE ALSO"
+.I getscrmask, pushviewport, setdepth, viewport

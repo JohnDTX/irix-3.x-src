@@ -1,0 +1,1193 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                              File: P.OPT.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               01-Aug-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+{**** Begin Debugging routines ****}
+
+function TorF(BValue: Boolean): char;
+begin
+if BValue then TorF := 'T' else TorF := 'F';
+end; {TorF}
+
+procedure printpn(fpn: pn);
+ var lname: idstring;
+begin
+with fpn^ do begin
+  makidstr(lname,name); write(lname);
+  case class of
+    VARS: begin
+          if vkind = DRCT then write(' ') else write('*');
+          write('VARS');
+          end;
+    FUNC: begin
+          write(' FUNC');
+          end;
+    PROC: begin
+          write(' PROC');
+          end;
+    otherwise: write('CLASS = ???');
+  end; {case}
+  write(' RB=',TorF(RefBelow),' RP=',TorF(RefParam),
+        ' IR=',TorF(InReg),' Cnt=',refcount);
+  end;
+end; {printpn}
+        
+procedure printcounts(fpn: pn);
+begin
+if fpn <> nil
+then
+  with fpn^ do
+    if node = IDENTNODE
+    then begin
+      printcounts(rlink);
+      if class = VARS
+      then begin printpn(fpn); writeln; end;
+      printcounts(llink);
+      end;
+end; {printcounts}
+
+{**** End Debugging routines ****}
+
+function ConstNode(fpn: pn; var fvalu: valu): Boolean;
+begin
+ConstNode := FALSE;
+with fpn^ do
+  case node of
+    IDENTNODE: if class = CONSTS
+               then begin ConstNode := TRUE; fvalu := valueof; end;
+    CSTNODE:   begin ConstNode := TRUE; fvalu := cstvalu; end;
+  end; {case}
+end; {ConstNode}
+
+function fold(fexpr: pn): pn;
+  var result: pn; avalu,bvalu: valu;
+  
+  procedure newcnode(spn: pn; var fpn: pn);
+  begin
+  new(fpn,CSTNODE); fpn^.node := CSTNODE;
+  fpn^.csttype := spn^.csttype; fpn^.cstvalu := spn^.cstvalu;
+  end; {newcnode}
+  
+begin {fold}
+result := fexpr;
+with fexpr^ do begin
+  case node of
+    IDENTNODE,
+    TRINODE,
+    INDEXNODE,
+    CSTNODE:   ;
+    UNNODE:
+        if unop in [48..50,74,75,110]
+        then begin
+             unarg := fold(unarg);
+             if ConstNode(unarg,avalu)
+             then case unop of
+                    48,  { INT12 }
+                    49,  { INT24 }
+                    50:  { INT14 }
+                         begin
+                         newcnode(unarg,result);
+                         result^.cstvalu.ivalu := avalu.ivalu;
+                         end;
+                    74,  { NEG2 }
+                    75:  { NEG4 }
+                         begin
+                         newcnode(unarg,result);
+                         result^.cstvalu.ivalu := - avalu.ivalu;
+                         end;
+                    110: { BOOLNOT }
+                         begin
+                         newcnode(unarg,result);
+                         result^.cstvalu.ivalu := 1 - avalu.ivalu;
+                         end;
+                  end; {case}
+             end;
+    BINNODE:
+        if binop = 178 {STDFUNC}
+        then begin
+             if leftarg^.key in [3{CHR},10{ORD},18{POINTER},32{ORD4}]
+             then result := fold(rightarg^.leftarg);
+             end
+        else
+        if binop in [64..69,80..85,92..103,104..109]
+        then begin
+             rightarg := fold(rightarg); leftarg := fold(leftarg);
+             if ConstNode(rightarg,bvalu) and ConstNode(leftarg,avalu)
+             then case binop of
+                    64,  { ADD2 }
+                    65:  { ADD4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu := avalu.ivalu + bvalu.ivalu;
+                         end;
+                    66,  { SUB2 }
+                    67:  { SUB4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu := avalu.ivalu - bvalu.ivalu;
+                         end;
+                    68,  { MUL2 }
+                    69:  { MUL4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu := avalu.ivalu * bvalu.ivalu;
+                         end;
+                    80,  { AND1 }
+                    81,  { AND2 }
+                    82:  { AND4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu := avalu.ivalu and bvalu.ivalu;
+                         end;
+                    83,  { OR1 }
+                    84,  { OR2 }
+                    85:  { OR4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu := avalu.ivalu or bvalu.ivalu;
+                         end;
+                    92,  { LT1 }
+                    93,  { LT2 }
+                    94:  { LT4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu :=
+                           ord(avalu.ivalu < bvalu.ivalu);
+                         end;
+                    95,  { GT1 }
+                    96,  { GT2 }
+                    97:  { GT4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu :=
+                           ord(avalu.ivalu > bvalu.ivalu);
+                         end;
+                    98,  { LE1 }
+                    99,  { LE2 }
+                    100: { LE4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu :=
+                           ord(avalu.ivalu <= bvalu.ivalu);
+                         end;
+                    101, { GE1 }
+                    102, { GE2 }
+                    103: { GE4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu :=
+                           ord(avalu.ivalu >= bvalu.ivalu);
+                         end;
+                    104, { EQ1 }
+                    105, { EQ2 }
+                    106: { EQ4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu :=
+                           ord(avalu.ivalu = bvalu.ivalu);
+                         end;
+                    107, { NE1 }
+                    108, { NE2 }
+                    109: { NE4 }
+                         begin
+                         newcnode(leftarg,result);
+                         result^.cstvalu.ivalu :=
+                           ord(avalu.ivalu <> bvalu.ivalu);
+                         end;
+                  end {case}
+             else if binop = 80 {AND1}
+                  then begin
+                       if ConstNode(rightarg,bvalu) and (bvalu.ivalu = 0)
+                       then begin
+                            newcnode(rightarg,result);
+                            result^.cstvalu.ivalu := 0;
+                            end
+                       else
+                       if ConstNode(leftarg,avalu) and (avalu.ivalu = 0)
+                       then begin
+                            newcnode(leftarg,result);
+                            result^.cstvalu.ivalu := 0;
+                            end;
+                       end
+             else if binop = 83 {OR1}
+                  then begin
+                       if ConstNode(rightarg,bvalu) and (bvalu.ivalu = 0)
+                       then result := leftarg
+                       else
+                       if ConstNode(leftarg,avalu) and (avalu.ivalu = 0)
+                       then result := rightarg;
+                       end;
+             end;
+  end; {case}
+  end;
+fold := result;
+end; {fold}
+
+function funtypen(fpt: pt): integer;
+  var i: integer;
+begin
+i := fullbytes(fpt);
+if (fpt = realptr) or (fpt = doubleptr)
+then i := i + 32;
+funtypen := i;
+end; {funtypen}
+
+procedure optimize(var fstmt: pstmt; optpn: pn);
+  
+  procedure funresult(var fstmt: pstmt; procn: pn);
+    var i: integer; lstmt,mstmt: pstmt;
+    
+    procedure walkfun(fstmt: pstmt; FLastStmt: Boolean);
+      var lpn: pn; i: integer; LLastStmt: Boolean;
+    begin
+    while fstmt <> nil do
+       with fstmt^ do begin
+            if FLastStmt
+            then if nextstmt <> nil
+                 then LLastStmt := FALSE
+                 else LLastStmt := TRUE
+            else LLastStmt := FALSE;
+            case stmtop of
+              BEGINST:
+                 walkfun(subst,LLastStmt);
+              ASSIGNST:
+                 begin
+                 if LLastStmt and (assvar = optpn)
+                 then begin
+                      assvar^.refcount := assvar^.refcount - 1;
+                      lpn := assexpr;
+                      stmtop := FUNRESST;
+                      funop := funtypen(optpn^.idtype);
+                      funval := lpn;
+                      end;
+                 end;
+              FORTOST,
+              FORDOWNST:
+                 walkfun(forst,FALSE);
+              IFST:
+                 begin
+                 walkfun(thenst,LLastStmt); walkfun(elsest,LLastStmt);
+                 end;
+              WITHST:
+                 walkfun(withbody,LLastStmt);
+              REPST,
+              WHILEST:
+                 walkfun(loopstmt,FALSE);
+              CALLST:
+                 ;
+              GOTOST:
+                 ;
+              CASEST:
+                 begin
+                 walkfun(cstmtlist,LLastStmt); walkfun(otherstmt,LLastStmt);
+                 end;
+              CSTMTST:
+                 walkfun(thiscase,LLastStmt);
+              LABEDST:
+                 walkfun(labstmt,LLastStmt);
+            end; {case}
+            fstmt := nextstmt;
+            end; {with}
+    end; {walkfun}
+    
+  begin {funresult}
+  walkfun(fstmt,TRUE);
+  end; {funresult}
+  
+  function SameVar(apn,bpn: pn): Boolean; forward;
+  
+  function SameExpr(apn,bpn: pn): Boolean;
+  begin
+  SameExpr := FALSE;
+  if apn^.node = bpn^.node
+  then case apn^.node of
+            IDENTNODE:
+               if apn = bpn
+               then SameExpr := apn^.class <> FUNC;
+            UNNODE:
+               if (apn^.unop = bpn^.unop) and (apn^.unsubop = bpn^.unsubop)
+               then if apn^.unop in [12 {^},15 {.}]
+                    then SameExpr := SameVar(apn,bpn)
+                    else if apn^.unop in [23 {NIL},31 {NULLSET},43 {WITHFLD}]
+                         then SameExpr := TRUE
+                         else SameExpr := SameExpr(apn^.unarg,bpn^.unarg);
+            BINNODE:
+               if (apn^.binop = bpn^.binop) and (apn^.binsubop = bpn^.binsubop)
+               then if apn^.binop in [46 {RNGCHK}, 47 {SRNGCHK}]
+                    then SameExpr := SameExpr(apn^.rightarg,bpn^.rightarg)
+                    else if SameExpr(apn^.leftarg,bpn^.leftarg)
+                         then SameExpr :=SameExpr(apn^.rightarg,bpn^.rightarg);
+            TRINODE,
+            INDEXNODE:
+               SameExpr := SameVar(apn,bpn);
+            CSTNODE:
+               if apn = bpn
+               then SameExpr := TRUE
+               else if CompTypes(apn^.csttype,bpn^.csttype)
+                    then case apn^.csttype^.form of
+                              SCALAR,
+                              SUBRANGE:
+                                 begin
+                                 if (apn^.csttype <> realptr) and
+                                    (apn^.csttype <> doubleptr)
+                                 then SameExpr := 
+                                      apn^.cstvalu.ivalu = bpn^.cstvalu.ivalu;
+                                 end;
+                         end; {case}
+       end; {case}
+  end; {SameExpr}
+  
+  function SameVar{apn,bpn: pn): Boolean};
+  begin
+  SameVar := FALSE;
+  if apn^.node = bpn^.node
+  then case apn^.node of
+            IDENTNODE:
+               if apn = bpn
+               then SameVar := (apn^.class = VARS) or (apn^.class = FIELD);
+            UNNODE:
+               if (apn^.unop = bpn^.unop) and (apn^.unsubop = bpn^.unsubop)
+               then if apn^.unop = 12 {^}
+                    then SameVar := SameVar(apn^.unarg,bpn^.unarg)
+                    else if apn^.unop = 43 {WITHFLD}
+                         then SameVar := TRUE;
+            BINNODE:
+               if apn^.binop = bpn^.binop
+               then if apn^.binop = 15 {.}
+                    then if SameVar(apn^.leftarg,bpn^.leftarg)
+                         then SameVar := SameVar(apn^.rightarg,bpn^.rightarg);
+            TRINODE:
+               if apn^.triop = bpn^.triop
+               then if apn^.triop = 16 {INDEX}
+                    then SameVar := SameVar(apn^.tri1,bpn^.tri1) and
+                                    SameExpr(apn^.tri2,bpn^.tri2);
+            INDEXNODE:
+               if apn^.indexop = bpn^.indexop
+               then case apn^.indexop of
+                      9: {IndexTop}
+                         SameVar := SameVar(apn^.inxaddr,bpn^.inxaddr) and
+                            SameExpr(apn^.inxexpr,bpn^.inxexpr);
+                     10: {SCALE}
+                         SameVar := SameVar(apn^.inxaddr,bpn^.inxaddr) and
+                            SameVar(apn^.inxexpr,bpn^.inxexpr);
+                     11: {ADJINDX}
+                         SameVar := SameExpr(apn^.inxexpr,bpn^.inxexpr);
+                    end; {case}
+            CSTNODE:
+               begin
+               end;
+       end; {case}
+  end; {SameVar}
+  
+  procedure walktree(fstmt: pstmt);
+    var lbinop,lsize: integer; FoundIt: Boolean; lpn: pn;
+        lpstmt: pstmt; avalu: valu;
+  begin
+  while fstmt <> nil do
+     with fstmt^ do begin
+          case stmtop of
+            BEGINST:
+               walktree(subst);
+            ASSIGNST:
+               begin
+               if assexpr^.node = BINNODE
+               then begin
+                    lbinop := assexpr^.binop; FoundIt := FALSE;
+                    if (CHIP = M68000) or (CHIP = M68020)
+                    then begin
+                         if (lbinop >= 64 {ADD2}) and (lbinop <= 67 {SUB4})
+                         then if SameVar(assvar,assexpr^.leftarg)
+                              then FoundIt := TRUE { V := V +/- <EXPR> }
+                              else if lbinop <= 65 {ADD4}
+                                   then if SameVar(assvar,assexpr^.rightarg)
+                                        then begin { V := <EXPR> + V }
+                                             lpn := assexpr^.rightarg;
+                                             assexpr^.rightarg :=
+                                                        assexpr^.leftarg;
+                                             assexpr^.leftarg := lpn;
+                                             FoundIt := TRUE;
+                                             end;
+                         end
+                    else begin {CHIP=N32000}
+                         if ((lbinop >= 64{ADD2}) and (lbinop <= 73{MOD4})) or
+                            ((lbinop >= 112{FADD4}) and (lbinop <= 119{DDIV8}))
+                         then if SameVar(assvar,assexpr^.leftarg)
+                              then FoundIt := TRUE { V := V +/- <EXPR> }
+                              else if lbinop in [64,65,68,69,112,113,116,117]
+                                   then if SameVar(assvar,assexpr^.rightarg)
+                                        then begin { V := <EXPR> + V }
+                                             lpn := assexpr^.rightarg;
+                                             assexpr^.rightarg :=
+                                                        assexpr^.leftarg;
+                                             assexpr^.leftarg := lpn;
+                                             FoundIt := TRUE;
+                                             end;
+                         end;
+                    if FoundIt and (not NoRMW)
+                    then begin
+                         assop := 41; {OPTO} asssubop := lbinop;
+                         assexpr := assexpr^.rightarg;
+                         end;
+                    end;
+               end;
+            FORTOST,
+            FORDOWNST:
+               walktree(forst);
+            IFST:
+               begin
+               walktree(thenst); walktree(elsest);
+               if ConstNode(ifexpr,avalu)
+               then begin
+                    if avalu.ivalu = 0
+                    then lpstmt := elsest
+                    else lpstmt := thenst;
+                    stmtop := BEGINST; subst := lpstmt;
+                    end;
+               end;
+            WITHST:
+               walktree(withbody);
+            REPST,
+            WHILEST:
+               walktree(loopstmt);
+            CALLST:
+               ;
+            GOTOST:
+               ;
+            CASEST:
+               begin
+               walktree(cstmtlist); walktree(otherstmt);
+               end;
+            CSTMTST:
+               walktree(thiscase);
+            LABEDST:
+               walktree(labstmt);
+          end; {case}
+          fstmt := nextstmt;
+          end; {with}
+  end; {walktree}
+  
+  procedure setregvars(var fstmt: pstmt);
+    var i,k,lop: integer; llab: plabrec; GlobalLabels: Boolean;
+        defstmt,lastdstmt,lstmt,undefstmt: pstmt;
+    
+    procedure tryareg(fcount: integer; fpn: pn; fbaselev: integer;
+                      FDoLoad,FDoLdAddr: Boolean);
+      var i,j: integer;
+    begin
+    if ADDRREGS <> 0
+    then begin
+         i := 1;
+         while i <= ADDRREGS do
+           with a[i] do
+             if count < fcount
+             then begin
+               for j := ADDRREGS downto i + 1 do a[j] := a[j - 1];
+               v := fpn; count := fcount; blev := fbaselev;
+               DoLoad := FDoLoad; DoLdAddr := FDoLdAddr;
+               i := ADDRREGS + 1;
+               end
+             else i := i + 1;
+         end;
+    end; {tryareg}
+    
+    procedure bestacounts(fpn: pn);
+      var lcount: integer; ARegOK,LoadAddr,NeedsLoad: Boolean;
+    begin
+    if ADDRREGS <> 0
+    then begin
+         if fpn <> nil
+         then
+           with fpn^ do
+             if node = IDENTNODE
+             then begin
+               bestacounts(rlink);
+               if class = VARS
+               then begin
+                 if idtype <> nil
+                 then begin
+                   ARegOk := FALSE; LoadAddr := FALSE;
+                   if vkind = INDRCT
+                   then begin ARegOk := TRUE; LoadAddr := TRUE; end
+                   else
+                     if (idtype^.form = ARRAYS) or
+                        (idtype^.form = FILES) or
+                        (idtype^.form = STRINGS)
+                     then begin
+                          if (abs(voff) > 120) or (idtype^.form = STRINGS) or
+                             ((vlev <> 1) and (vlev <> level))
+                          then begin ARegOk := TRUE; LoadAddr := TRUE; end;
+                          end
+                     else
+                       if not RefParam
+                       then
+                         if not RefBelow
+                         then
+                           if idtype^.form = POINTERS
+                           then
+                             if vlev = level
+                             then ARegOk := TRUE;
+                   if ARegOk
+                   then begin
+                     lcount := refcount;
+                     NeedsLoad := ((voff > 0) and (vlev > 1)) or LoadAddr;
+                     if NeedsLoad then lcount := lcount - 2;
+                     tryareg(lcount,fpn,0,NeedsLoad,LoadAddr);
+                     end;
+                   end;
+                 end
+               else
+                 if (class = PROC) and (pfdeclkind = DECLARED) and
+                    (pfdecl <> FORMAL)
+                 then tryareg(refcount - 2,fpn,0,TRUE,TRUE);
+               bestacounts(llink);
+               end;
+         end;
+    end; {bestacounts}
+    
+    procedure chkabase;
+      var i: integer;
+    begin
+    if ADDRREGS <> 0
+    then begin
+         for i := level - 1 downto 2 do
+           tryareg(uplevref[i]-1,nil,i,FALSE,FALSE);
+         end;
+    end; {chkabase}
+    
+    procedure chkwiths;
+      var bestone,bestcount,i,j,count: integer;
+    begin
+    if ADDRREGS <> 0
+    then begin
+         bestone := 0; bestcount := 0;
+         for i := 0 to ADDRREGS do begin
+           count := 0;
+           for j := 1 to i do count := count + a[j].count;
+           for j := 1 to ADDRREGS - i do count := count + acount[j];
+           if count > bestcount
+           then begin bestcount := count; bestone := i; end;
+           end;
+         for i := bestone + 1 to ADDRREGS do a[i].count := 0;
+         end;
+    end; {chkwiths}
+    
+    procedure trydreg(fcount: integer; fpn: pn; flev: integer;
+                      FDoLoad,FDoLdAddr: Boolean);
+      var i,j: integer;
+    begin
+    if DATAREGS <> 0
+    then begin
+         i := 1;
+         while i <= DATAREGS do
+           with d[i] do begin
+             if count < fcount
+             then begin
+               for j := DATAREGS downto i + 1 do d[j] := d[j - 1];
+               v := fpn; count := fcount; blev := flev;
+               DoLoad := FDoLoad; DoLdAddr := FDoLdAddr;
+               i := DATAREGS + 1;
+               end
+             else i := i + 1;
+             end;
+         end;
+    end; {trydreg}
+    
+    procedure bestdcounts(fpn: pn);
+      var lcount: integer; NeedsLoad: Boolean;
+    begin
+    if DATAREGS <> 0
+    then begin
+         if fpn <> nil
+         then
+           with fpn^ do
+             if node = IDENTNODE
+             then begin
+               bestdcounts(rlink);
+               if class = VARS
+               then
+                 if idtype <> nil
+                 then
+                   if (idtype^.form <= POINTERS) and (idtype <> doubleptr)
+                   then
+                     if not RefParam
+                     then
+                       if not RefBelow
+                       then
+                         if not InReg
+                         then begin
+                           lcount := refcount;
+                           NeedsLoad := (voff > 0) and (vlev > 1);
+                           if NeedsLoad then lcount := lcount - 2;
+                           trydreg(lcount,fpn,0,NeedsLoad,vkind=INDRCT);
+                           end;
+               bestdcounts(llink);
+               end;
+         end;
+    end; {bestdcounts}
+    
+    procedure chkdbase;
+      var i: integer;
+    begin
+    if DATAREGS <> 0
+    then begin
+         for i := level - 1 downto 2 do
+           if uplevloc[i] = 0 then trydreg(uplevref[i]-1,nil,i,FALSE,FALSE);
+         end;
+    end; {chkdbase}
+    
+    procedure tryrreg(fcount: integer; fpn: pn; flev: integer;
+                      FDoLoad,FDoLdAddr: Boolean);
+      var i,j: integer;
+    begin
+    if GENPREGS <> 0
+    then begin
+         i := 1;
+         while i <= GENPREGS do
+           with r[i] do begin
+             if count < fcount
+             then begin
+               for j := GENPREGS downto i + 1 do r[j] := r[j - 1];
+               v := fpn; count := fcount; blev := flev;
+               DoLoad := FDoLoad; DoLdAddr := FDoLdAddr;
+               i := GENPREGS + 1;
+               end
+             else i := i + 1;
+             end;
+         end;
+    end; {tryrreg}
+    
+    procedure tryfreg(fcount: integer; fpn: pn; FDoLoad: Boolean);
+      var i,j: integer;
+    begin
+    if FLOTREGS <> 0
+    then begin
+         i := 1;
+         while i <= FLOTREGS do
+           with f[i] do begin
+             if count < fcount
+             then begin
+               for j := FLOTREGS downto i + 1 do f[j] := f[j - 1];
+               v := fpn; count := fcount; blev := 0;
+               DoLoad := FDoLoad; DoLdAddr := FALSE;
+               i := FLOTREGS + 1;
+               end
+             else i := i + 1;
+             end;
+         end;
+    end; {tryfreg}
+    
+    procedure bestfcounts(fpn: pn);
+      var lcount: integer; NeedsLoad: Boolean;
+    begin
+    if FLOTREGS <> 0
+    then begin
+         if fpn <> nil
+         then
+           with fpn^ do
+             if node = IDENTNODE
+             then begin
+               if (class = VARS) and (vkind = DRCT)
+               then
+                 if idtype <> nil
+                 then
+                   if {::(idtype = doubleptr) or::} (idtype = realptr)
+                   then
+                     if not (RefParam or RefBelow or InReg)
+                     then begin
+                       lcount := refcount;
+                       if voff < -64
+                       then if voff < -8192
+                            then lcount := lcount*4
+                            else lcount := lcount*2;
+                       NeedsLoad := (voff > 0) and (vlev > 1);
+                       if NeedsLoad then lcount := lcount - 3;
+                       tryfreg(lcount,fpn,NeedsLoad);
+                       end;
+               bestfcounts(rlink); bestfcounts(llink);
+               end;
+         end;
+    end; {bestfcounts}
+    
+    procedure bestrcounts(fpn: pn);
+      var lcount: integer; NeedsLoad: Boolean;
+    begin
+    if GENPREGS <> 0
+    then begin
+         if fpn <> nil
+         then
+           with fpn^ do
+             if node = IDENTNODE
+             then begin
+               if (class = VARS) and (vkind = DRCT)
+               then
+                 if idtype <> nil
+                 then
+                   if (idtype^.form <= POINTERS) and (idtype <> doubleptr) and
+                      (idtype <> realptr)
+                   then
+                     if not (RefParam or RefBelow or InReg)
+                     then begin
+                       lcount := refcount;
+                       if voff < -64
+                       then if voff < -8192
+                            then lcount := lcount*4
+                            else lcount := lcount*2;
+                       NeedsLoad := (voff > 0) and (vlev > 1);
+                       if NeedsLoad then lcount := lcount - 3;
+                       tryrreg(lcount,fpn,0,NeedsLoad,FALSE);
+                       end;
+               bestrcounts(rlink); bestrcounts(llink);
+               end;
+         end;
+    end; {bestrcounts}
+    
+    procedure bestpcounts(fpn: pn);
+      var lcount,mult: integer; ARegOK,LoadAddr: Boolean;
+    begin
+    if GENPREGS <> 0
+    then begin
+         if fpn <> nil
+         then
+           with fpn^ do
+             if node = IDENTNODE
+             then begin
+               bestpcounts(rlink);
+               if class = VARS
+               then begin
+                 if idtype <> nil
+                 then begin
+                   if abs(voff) <= 64
+                   then mult := 1
+                   else if abs(voff) <= 8192
+                        then mult := 2
+                        else mult := 4;
+                   ARegOk := FALSE; LoadAddr := FALSE;
+                   if vkind = INDRCT
+                   then ARegOk := TRUE
+                   else
+                     if (idtype^.form = ARRAYS) or
+                        (idtype^.form = FILES) or
+                        (idtype^.form = STRINGS)
+                     then begin
+                          ARegOk := TRUE; LoadAddr := TRUE;
+                          if idtype^.form = ARRAYS then mult := mult - 1;
+                          end;
+                   if ARegOk
+                   then begin
+                     lcount := refcount;
+                     lcount := lcount*mult;
+                     if (voff > 0) or LoadAddr then lcount := lcount - 3;
+                     tryrreg(lcount,fpn,0,TRUE,TRUE);
+                     end;
+                   end;
+                 end
+               else
+                 if (class = PROC) and (pfdeclkind = DECLARED) and
+                    (pfdecl <> FORMAL) and not CALLCXP
+                 then tryrreg((refcount - 2)*3,fpn,0,TRUE,TRUE);
+               bestpcounts(llink);
+               end;
+         end;
+    end; {bestpcounts}
+    
+    procedure chkrwiths;
+      var bestone,bestcount,i,j,count: integer;
+    begin
+    if GENPREGS <> 0
+    then begin
+         bestone := 0; bestcount := 0;
+         for i := 0 to GENPREGS do begin
+           count := 0;
+           for j := 1 to i do count := count + r[j].count;
+           for j := 1 to GENPREGS - i do count := count + acount[j];
+           if count > bestcount
+           then begin bestcount := count; bestone := i; end;
+           end;
+         for i := bestone + 1 to GENPREGS do r[i].count := 0;
+         end;
+    end; {chkrwiths}
+    
+    procedure chkrbase;
+      var i,j: integer;
+    begin
+    if GENPREGS <> 0
+    then begin
+         for i := level - 1 downto 2 do begin
+           j := uplevref[i];
+           if i = level - 1
+           then j := j - 2
+           else j := 2*(j - 1);
+           tryrreg(j,nil,i,FALSE,FALSE);
+           end;
+         end;
+    end; {chkrbase}
+    
+  begin {setregvars}
+  defstmt := nil; undefstmt := nil;
+  GlobalLabels := FALSE;
+  llab := display[top].labels;
+  while llab <> nil do
+    with llab^ do begin
+      if globrefno >= 0 then GlobalLabels := TRUE;
+      llab := nextlabel;
+      end;
+  if not GlobalLabels
+  then begin
+    if (CHIP = M68000) or (CHIP = M68020)
+    then begin
+      for i := top downto 1 do bestacounts(display[i].nametree);
+      chkabase; chkwiths;
+      for i := 1 to ADDRREGS do
+        with a[i] do
+          if count > 0
+          then begin
+            new(lstmt,REGST);
+            with lstmt^ do begin
+              nextstmt := nil; stmtno := 0; stmtop := REGST;
+              regno := i + 31; regexpr := v;
+              DefReg := TRUE; LoadReg := FALSE; LdAddr := FALSE;
+              end;
+            if defstmt = nil
+            then defstmt := lstmt
+            else lastdstmt^.nextstmt := lstmt;
+            lastdstmt := lstmt;
+            new(lstmt,REGST);
+            with lstmt^ do begin
+              nextstmt := undefstmt; stmtno := 0; stmtop := REGST;
+              regno := i + 31; regexpr := nil;
+              DefReg := FALSE; LoadReg := FALSE; LdAddr := FALSE;
+              end;
+            undefstmt := lstmt;
+            if v <> nil
+            then begin
+                 v^.refcount := i + 31; v^.InReg := TRUE;
+                 if DoLoad
+                 then begin
+                      lastdstmt^.regop := 34; {ASS4}
+                      lastdstmt^.LoadReg := TRUE;
+                      lastdstmt^.LdAddr := DoLdAddr;
+                      end;
+                 end
+            else uplevloc[blev] := 32 + i;
+            end;
+      bestdcounts(display[top].nametree); chkdbase;
+      with optpn^ do
+        if class = FUNC
+        then
+          if not RefBelow
+          then
+            if idtype^.form <= POINTERS
+            then
+              if idtype <> doubleptr
+              then trydreg(refcount,optpn,0,FALSE,FALSE);
+      for i := 1 to DATAREGS do
+        with d[i] do
+          if count > 0
+          then begin
+            new(lstmt,REGST);
+            with lstmt^ do begin
+              nextstmt := nil; stmtno := 0; stmtop := REGST;
+              regno := i - 1; regexpr := v;
+              DefReg := TRUE; LoadReg := FALSE; LdAddr := FALSE;
+              end;
+            if defstmt = nil
+            then defstmt := lstmt
+            else lastdstmt^.nextstmt := lstmt;
+            lastdstmt := lstmt;
+            new(lstmt,REGST);
+            with lstmt^ do begin
+              nextstmt := undefstmt; stmtno := 0; stmtop := REGST;
+              regno := i - 1; regexpr := nil;
+              DefReg := FALSE; LoadReg := FALSE; LdAddr := FALSE;
+              end;
+            undefstmt := lstmt;
+            if v <> nil
+            then begin
+                 v^.refcount := i - 1; v^.InReg := TRUE;
+                 if DoLoad
+                 then begin
+                      lop := 34; {ASS4}
+                      if v^.vkind = DRCT
+                      then begin
+                           k := fullbytes(v^.idtype);
+                           if k = 2
+                           then lop := 33 {ASS2}
+                           else if k = 1
+                                then lop := 32; {ASS1}
+                           end;
+                      lastdstmt^.regop := lop;
+                      lastdstmt^.LoadReg := TRUE;
+                      lastdstmt^.LdAddr := DoLdAddr;
+                      end;
+                 end
+            else uplevloc[blev] := i;
+            end;
+      end
+    else
+      if CHIP = N32000
+      then begin
+        {<<<}
+        bestfcounts(display[top].nametree);
+        for i := 1 to FLOTREGS do
+          with f[i] do
+            if count > 0
+            then begin
+              new(lstmt,REGST);
+              with lstmt^ do begin
+                   nextstmt := nil; stmtno := 0; stmtop := REGST;
+                   regno := i + 31; regexpr := v;
+                   DefReg := TRUE; LoadReg := FALSE; LdAddr := FALSE;
+                   end;
+              if defstmt = nil
+              then defstmt := lstmt
+              else lastdstmt^.nextstmt := lstmt;
+              lastdstmt := lstmt;
+              new(lstmt,REGST);
+              with lstmt^ do begin
+                   nextstmt := undefstmt; stmtno := 0; stmtop := REGST;
+                   regno := i + 31; regexpr := nil;
+                   DefReg := FALSE; LoadReg := FALSE; LdAddr := FALSE;
+                   end;
+              undefstmt := lstmt;
+              v^.InReg := TRUE; v^.refcount := i + 31;
+              if DoLoad
+              then begin
+                   if v^.idtype = doubleptr
+                   then lastdstmt^.regop := 35 {ASS8}
+                   else lastdstmt^.regop := 34;{ASS4}
+                   lastdstmt^.LoadReg := TRUE;
+                   lastdstmt^.LdAddr := FALSE;
+                   end;
+              end;
+        {>>>}
+        bestrcounts(display[top].nametree);
+        for i := top downto 1 do bestpcounts(display[i].nametree);
+        with optpn^ do
+          if class = FUNC
+          then
+            if not RefBelow
+            then
+              if idtype^.form <= POINTERS
+              then
+                if (idtype <> doubleptr) and (idtype <> realptr)
+                then tryrreg(refcount,optpn,0,FALSE,FALSE);
+        chkrbase; chkrwiths;
+        for i := 1 to GENPREGS do
+          with r[i] do
+            if count > 0
+            then begin
+              new(lstmt,REGST);
+              with lstmt^ do begin
+                nextstmt := nil; stmtno := 0; stmtop := REGST;
+                regno := i - 1; regexpr := v;
+                DefReg := TRUE; LoadReg := FALSE; LdAddr := FALSE;
+                end;
+              if defstmt = nil
+              then defstmt := lstmt
+              else lastdstmt^.nextstmt := lstmt;
+              lastdstmt := lstmt;
+              new(lstmt,REGST);
+              with lstmt^ do begin
+                nextstmt := undefstmt; stmtno := 0; stmtop := REGST;
+                regno := i - 1; regexpr := nil;
+                DefReg := FALSE; LoadReg := FALSE; LdAddr := FALSE;
+                end;
+              undefstmt := lstmt;
+              if v <> nil
+              then begin
+                   v^.InReg := TRUE; v^.refcount := i - 1;
+                   if DoLoad
+                   then begin
+                        lop := 34; {ASS4}
+                        if (v^.vkind = DRCT) and not DoLdAddr
+                        then begin
+                             k := fullbytes(v^.idtype);
+                             if k = 2
+                             then lop := 33 {ASS2}
+                             else if k = 1
+                                  then lop := 32; {ASS1}
+                             end;
+                        lastdstmt^.regop := lop;
+                        lastdstmt^.LoadReg := TRUE;
+                        lastdstmt^.LdAddr := DoLdAddr;
+                        end;
+                   end
+              else uplevloc[blev] := i;
+              end;
+        end;
+    end;
+  new(lstmt,EPOINTST);
+  with lstmt^ do
+    begin nextstmt := nil; stmtno := 0; stmtop := EPOINTST; end;
+  if defstmt = nil
+  then defstmt := lstmt
+  else lastdstmt^.nextstmt := lstmt;
+  lastdstmt := lstmt;
+  new(lstmt,XPOINTST);
+  with lstmt^ do
+    begin nextstmt := undefstmt; stmtno := 0; stmtop := XPOINTST; end;
+  undefstmt := lstmt;
+  new(lstmt,BEGINST);
+  with lstmt^ do begin
+    nextstmt := undefstmt; stmtno := 0;
+    stmtop := BEGINST; subst := fstmt;
+    end;
+  lastdstmt^.nextstmt := lstmt;
+  fstmt := defstmt;
+  end; {setregvars}
+  
+  function MayBeUsed(fvar,ftree: pn): Boolean;
+  begin
+  MayBeUsed := TRUE;
+  with ftree^ do begin
+       case node of
+         IDENTNODE:
+           MayBeUsed := fvar = ftree;
+         UNNODE:
+           if unop in [12{PTR},48{INT12}..61{RND84},
+                       74{NEG2}..77{ABS4},110{BNOT}]
+           then MayBeUsed := MayBeUsed(fvar,unarg)
+           else MayBeUsed := TRUE;
+         BINNODE:
+           if binop in [64{ADD2}..73{MOD4},80{AND1}..88{XOR4},
+                        92{LT1}..109{NE4}]
+           then MayBeUsed := MayBeUsed(fvar,leftarg) or
+                             MayBeUsed(fvar,rightarg)
+           else MayBeUsed := TRUE;
+         TRINODE:
+           MayBeUsed := TRUE;
+         INDEXNODE:
+           MayBeUsed := TRUE;
+         CSTNODE:
+           MayBeUsed := FALSE;
+       otherwise: MayBeUsed := TRUE;
+       end; {case}
+       end;
+  end; {MayBeUsed}
+  
+  procedure walkass(fstmt: pstmt);
+    var lop: integer; DoIt,CantFlip: Boolean; lpn: pn; lstmt: pstmt;
+  begin
+  while fstmt <> nil do
+    with fstmt^ do begin
+      case stmtop of
+        BEGINST:
+          walkass(subst);
+        ASSIGNST:
+          begin
+          if (assexpr^.node = BINNODE) and (assvar^.node = IDENTNODE) and
+             (assop <> 41{OPTO})
+          then
+          if (assvar^.InReg) and (assvar^.refcount <= 7) and
+             (assvar^.class = VARS) and (assvar^.vkind = DRCT)
+          then begin
+               lop := assexpr^.binop;
+               if (CHIP = M68000) or (CHIP = M68020)
+               then begin
+                    CantFlip := lop in [66{SUB2}..67{SUB4}];
+                    DoIt := lop in [64{ADD2}..67{SUB4}];
+                    end
+               else begin {CHIP = N32000}
+                    CantFlip := lop in [66{SUB2}..67{SUB4},70{DIV2}..71{DIV4}];
+                    DoIt := lop in[64{ADD2}..71{DIV4}];
+                    end;
+               if DoIt
+               then if MayBeUsed(assvar,assexpr^.rightarg)
+                    then if CantFlip
+                         then DoIt := FALSE
+                         else if MayBeUsed(assvar,assexpr^.leftarg)
+                              then DoIt := FALSE
+                              else begin
+                                   lpn := assexpr^.leftarg;
+                                   assexpr^.leftarg := assexpr^.rightarg;
+                                   assexpr^.rightarg := lpn;
+                                   end;
+               if DoIt
+               then begin
+                    new(lstmt,ASSIGNST);
+                    with lstmt^ do begin
+                         nextstmt := fstmt^.nextstmt; stmtno := fstmt^.stmtno;
+                         stmtop := ASSIGNST; assop := 41; {OPTO}
+                         asssubop := lop; assvar := fstmt^.assvar;
+                         assexpr := fstmt^.assexpr^.rightarg;
+                         end;
+                    fstmt^.nextstmt := lstmt;
+                    fstmt^.assexpr := fstmt^.assexpr^.leftarg;
+                    end;
+               end;
+          end;
+        FORTOST,
+        FORDOWNST:
+          walkass(forst);
+        IFST:
+          begin walkass(thenst); walkass(elsest); end;
+        WITHST:
+          walkass(withbody);
+        REPST,
+        WHILEST:
+          walkass(loopstmt);
+        CALLST:
+          ;
+        GOTOST:
+          ;
+        CASEST:
+          begin walkass(cstmtlist); walkass(otherstmt); end;
+        CSTMTST:
+          walkass(thiscase);
+        LABEDST:
+          walkass(labstmt);
+      end; {case}
+      fstmt := nextstmt;
+      end; {with}
+  end; {walkass}
+  
+  procedure clrflags;
+    var i: integer;
+  begin
+  if ADDRREGS > 0
+  then
+    for i := 1 to ADDRREGS do
+      with a[i] do
+        if (count > 0) and (v <> nil)
+        then v^.InReg := FALSE;
+  if DATAREGS > 0
+  then
+    for i := 1 to DATAREGS do
+      with d[i] do
+        if (count > 0) and (v <> nil)
+        then v^.InReg := FALSE;
+  if GENPREGS > 0
+  then
+    for i := 1 to GENPREGS do
+      with r[i] do
+        if (count > 0) and (v <> nil)
+        then v^.InReg := FALSE;
+  if FLOTREGS > 0
+  then
+    for i := 1 to FLOTREGS do
+      with f[i] do
+        if (count > 0) and (v <> nil)
+        then v^.InReg := FALSE;
+  end; {clrflags}
+  
+begin {optimize}
+if optpn^.class = FUNC then funresult(fstmt,optpn);
+{!!! MUST DO THIS OR ELSE EPOINT/XPOINT NOT DEFINED!!!}
+(*
+if OptFlag
+then *) begin
+  walktree(fstmt);
+  setregvars(fstmt);
+  walkass(fstmt);
+  clrflags;
+  end;
+end; {optimize}
+
+                                                                                                                                                                                                                                

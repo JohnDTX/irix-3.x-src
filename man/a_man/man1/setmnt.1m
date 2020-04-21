@@ -1,0 +1,50 @@
+'\"macro stdmacro
+.TH SETMNT 1M
+.SH NAME
+setmnt \- establish mount table
+.SH SYNOPSIS
+\f1/\f3etc\f1/\f3setmnt \f1[\f3-f \f2file\f1]
+.SH DESCRIPTION
+.I Setmnt\^
+creates the
+.B /etc/mtab
+table (see
+.IR mtab (4)),
+which is needed for both the
+.IR mount (1M)
+and
+.I umount
+commands.
+.I Setmnt\^
+reads standard input
+and creates a
+.I mtab\^
+entry for each line.
+Input lines have the format:
+.PP
+.RS
+filesys node
+.RE
+.PP
+where
+.I filesys\^
+is the name of the file system's
+.I "special file\^"
+(e.g., ``rp??'')
+and
+.I node\^
+is the root name of that file system.
+The \f3-f\f1 option may be used to specify an output file 
+other than /\f3etc\f1/\f3mtab\f1.
+.SH EXAMPLE
+.IP
+/etc/devnm / | grep -vv swap | grep -v root | /etc/setmnt
+.PP
+will put an entry for the root file system and the device
+on which it is mounted into the file 
+.B /etc/mtab ,
+except if it is mounted on a device named "swap" or "root".
+.SH FILES
+/etc/mtab
+.SH SEE ALSO
+mtab(4).

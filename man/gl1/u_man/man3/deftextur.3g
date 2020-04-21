@@ -1,0 +1,39 @@
+.TH deftexture  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I deftexture
+- define a screen texture pattern
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "deftexture(n, tex) "
+.B "short n; "
+.B "Texture tex;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine deftex(n, tex)"
+.B "integer*2 n"
+.B "character tex(16)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure deftexture(n: Short; tex: Texture);"
+.sp
+.SH DESCRIPTION
+.I Deftexture
+allows the user to define arbitrary screen textures.  The arguments
+specify an index into a table of textures and an array of sixteen
+bytes that define an 8\&\(mu\&16 bitmap.
+The texture pattern controls which pixels within the array are write-enabled
+as filled objects are drawn.  The origin of the texture is the 
+lower left corner, so the
+bottom row is defined first.  Each row of the texture is specified as a
+byte.  By default, a solid pattern is defined as texture 0.
+There is no performance penalty for using non-solid textures.  
+To replace a texture, define the new one to have the same index
+as the old one.
+.SH "SEE ALSO"
+.I defcursor, defobjfont, defrasterfont, deflinestyle, gettexture, settexture
+.SH NOTE
+This command can only be used in immediate mode.

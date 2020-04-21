@@ -1,0 +1,22 @@
+
+1.0	Released 11/1/85
+	-- Sent to jake -- 11/16/85
+1.1	Clean up for Manufacturing:
+	-- 11/26/85 --
+	reads label without interaction of user
+	default with writelock off
+	added Fujitsu drive 2246
+	bugs cleaned up with saving of labels
+	found out addition of another jumper on the board (ST506 and ESDI)
+	-- Sent to jake --
+
+1.2
+
+1.3	Added set file system sizes to sifex.
+	-- More tape debugging and some other stuff for sifex.c
+
+1.4	-- 12/16/85 -- Changed tape copy routine from 2000 blks to 6000.
+	Darrah and the release group changed on jake....
+
+1.5	-- 1/2/86	Added and tested ST506 disks on the Storager 2.
+	-- Increased timeout on the Tape stuff to 5 minutes.

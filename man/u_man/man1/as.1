@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH AS 1
+.SH NAME
+as \- assembler
+.SH SYNOPSIS
+.B as
+.B \-o
+objfile [
+.B \-i
+]\ [
+.B \-j
+]\ [\ inputfile\ ]
+.br
+.B as10
+.B \-o
+objfile [
+.B \-j
+]\ [\ inputfile\ ]
+.br
+.B as20
+.B \-o
+objfile [
+.B \-i
+]\ [\ inputfile\ ]
+.SH DESCRIPTION
+.I as\^
+assembles the 68010 or 68020 assembly language file
+.I inputfile.
+If no file name is specified the standard input is used.
+.PP
+All undefined symbols in the assembly are treated as global.
+.PP
+The relocatable output of the assembly is put in the file
+.IR objfile ,
+which 
+must
+be specified.
+.PP
+The
+.B \-i
+option restricts 
+the instruction set of
+.I as
+to 68010 instructions.  This is the default on 68010-based machines.
+Invoking 
+.I as
+with the name
+.I as10
+has the same effect as specifying the
+.B \-i
+option.
+.PP
+The
+.B \-j
+option expands 
+the instruction set of
+.I as
+to include 68020 instructions and addressing modes.  
+This is the default on 68020-based machines.
+Invoking 
+.I as
+with the name
+.I as20
+has the same effect as specifying the
+.B \-j
+option.
+.SH EXAMPLE
+.IP
+as \-o file.o filea 
+.PP
+would assemble the 
+file ``filea'' and put the output
+of the assembly into ``file.o''.
+.IP
+/lib/ccom \-N file.c | as \-o file.o
+.PP
+would cause 
+.I as
+to assemble the output of 
+``/lib/ccom''
+and place the resultant object file in
+``file.o''.
+.SH "SEE ALSO"
+adb(1),
+ld(1),
+nm(1),
+a.out(4)
+.br
+.IR "U\s-2NIX\s+2 Programmer's Manual, Volume IIB,
+``as20 Reference Manual''
+.SH BUGS
+Certain instructions and addressing modes in \f2as\fP for the 68020
+processor may have not been fully tested.  Users are cautioned
+to suspect the more atypical members of this set.
+.\"	@(#)as.1	5.1 of 11/15/83

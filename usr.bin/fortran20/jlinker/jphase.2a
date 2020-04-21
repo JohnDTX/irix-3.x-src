@@ -1,0 +1,562 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: JPHASE.2A.TEXT                            *)
+(*                                                                           *)
+(*          (C) Copyright 1984, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               31-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+procedure assignsymtabnum(fsymbol: psymbol);
+begin {assignsymtabnum}
+if fsymbol <> nil
+then with fsymbol^ do begin
+          symtabnum := nxtstnum; nxtstnum := nxtstnum + 1;
+          assignsymtabnum(llink); assignsymtabnum(rlink);
+          end;
+end; {assignsymtabnum}
+
+procedure assigndatalocs(ftree: pcommon);
+  var lstr: string31;
+begin {assigndatalocs}
+if ftree <> nil
+then with ftree^ do begin
+          if size = -1 then size := 0; {"C" external}
+          symtabnum := nxtstnum; nxtstnum := nxtstnum + 1;
+          if initlist <> nil
+          then begin loc := nxtdaddr; nxtdaddr := nxtdaddr + size; end
+          else if datname.linkno >= 0
+               then begin loc := nxtbaddr; nxtbaddr := nxtbaddr + size; end
+               else loc := -1 {common};
+          assigndatalocs(llink); assigndatalocs(rlink);
+          end;
+end; {assigndatalocs}
+
+procedure header;
+  var i: integer;
+begin
+if (TARGETOS = UNISOFT) or (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+then begin
+     out($107,4);             { Magic number 0407 }
+     out(nxttaddr,4);         { number of bytes of text section }
+     out(nxtdaddr,4);         { number of bytes of data section }
+     out(nxtbaddr,4);         { number of bytes of bss section }
+     { Comments below for Hitachi: symtab, entry, textrel, datarel }
+     out(0,4);                { bytes of symtab - patch }
+     out(0,4);                { number of bytes of text relocation - patch }
+     out(0,4);                { number of bytes of data relocation - patch }
+     out(0,4);                { no entry point since not executable }
+     end
+else if TARGETOS = UNOS
+then begin
+     out($2E72656C,4);        { Magic number '.rel' }
+     out(64,4);               { Header size, 64 bytes }
+     out(nxttaddr,4);         { number of bytes of text section }
+     out(nxtdaddr,4);         { number of bytes of data section }
+     out(nxtbaddr,4);         { number of bytes of bss section }
+     out(60000,4);            { stack size, default 60000 bytes }
+     out(0,4);                { number of bytes of relocation - patch }
+     out(0,4);                { number of bytes of symtab - patch }
+     out(0,4);                { text base address }
+     out(nxttaddr,4);         { data base address }
+     out(nxttaddr+nxtdaddr,4);{ bss base address}
+     out(0,4);                { stackbase - must be zero }
+     out($067F06E5,4);        { create time - anything reasonable }
+     out(0,4); out(0,4); out(0,4);   { reserved space }
+     end
+else if (TARGETOS = CT) or (TARGETOS = ARETE) or (TARGETOS = PLEXUS) or
+        (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)
+then begin
+        {Filehdr}
+     if TARGETOS = CT
+     then begin
+          out($150,2);              { Magic number 150 }
+          out(3,2);                 { There are 3 sections }
+          out($196E76CA,4);         { Timedate, FOR NOW }
+          out(0,4);                 { File address of symtab - patch }
+          out(0,4);                 { Number of symbol table entries - patch }
+          out(0,2);                 { No optional header }
+          out($204,2);              { Flags: 68k, line numbers suppressed }
+          end
+     else begin {(TARGETOS = ARETE) or (TARGETOS = PLEXUS) or
+                 (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)}
+          if TARGETOS = ARETE
+          then out($17D,2)          { ARETE Magic number 17D }
+          else if TARGETOS = CT5_2
+          then out($152,2)          { CT5_2 Magic number }
+          else out($150,2);         { PLEXUS/SYS5_2 Magic number 150 }
+          out(3,2);                 { There are 3 sections }
+          out($1AF9505D,4);         { Timedate, FOR NOW }
+          out(0,4);                 { File address of symtab - patch }
+          out(0,4);                 { Number of symbol table entries - patch }
+          out(0,2);                 { No optional header }
+          if TARGETOS = CT5_2
+          then out($204,2)          { Flags }
+          else out($104,2);         { Flags }
+          end;
+        {Texthdr}
+     outname('.text   ');
+     out(0,4);                { Physical address }
+     out(0,4);                { Virtual address }
+     out(nxttaddr,4);         { Text section size }
+     out($8C,4);              { File ptr for section }
+     out($8C+nxttaddr+nxtdaddr,4); { File ptr to relocation }
+     out(0,4);                { File ptr to line numbers }
+     out(0,2);                { Number of relocation entries - patch }
+     out(0,2);                { Number of line number entries }
+     if (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)
+     then out($20,4)          { Flags, text only }
+     else out(0,4);           { CT, ARETE Flags }
+        {Datahdr}
+     outname('.data   ');
+     out(nxttaddr,4);         { Physical address }
+     out(nxttaddr,4);         { Virtual address }
+     out(nxtdaddr,4);         { Data section size }
+     out($8C+nxttaddr,4);     { File ptr for section }
+     out(0,4);                { File ptr to relocation - patch }
+     out(0,4);                { File ptr to line numbers }
+     out(0,2);                { Number of relocation entries - patch }
+     out(0,2);                { Number of line number entries }
+     if (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)
+     then out($40,4)          { Flags, data only }
+     else out(0,4);           { CT, ARETE Flags }
+        {Bsshdr}
+     outname('.bss    ');
+     out(nxttaddr+nxtdaddr,4);{ Physical address }
+     out(nxttaddr+nxtdaddr,4);{ Virtual address }
+     out(nxtbaddr,4);         { BSS Section size }
+     out(0,4);                { File ptr for section }
+     out(0,4);                { File ptr to relocation }
+     out(0,4);                { File ptr to line numbers }
+     out(0,2);                { Number of relocation entries }
+     out(0,2);                { Number of line number entries }
+     if (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)
+     then out($80,4)          { Flags, bss only }
+     else out(0,4);           { CT, ARETE Flags }
+     end
+else if (TARGETOS = TEK) or (TARGETOS = SEQ)
+then begin
+     if TARGETOS = TEK
+     then outl($107,4)        { Magic number 0407 }
+     else outl($ea,4);        { Magic number 00ea }
+     outl(nxttaddr,4);        { number of bytes of text section }
+     outl(nxtdaddr,4);        { number of bytes of data section }
+     outl(nxtbaddr,4);        { number of bytes of bss section }
+     outl(0,4);               { bytes of symtab - patch }
+     outl(0,4);               { no entry point since not executable }
+     outl(0,4);               { number of bytes of text relocation - patch }
+     outl(0,4);               { number of bytes of data relocation - patch }
+     if TARGETOS = SEQ
+     then for i := 1 to 96 do
+            outone(0);        { pad first 128 bytes }
+     end
+else if TARGETOS = OPUS
+then begin
+     outl($154,2);             { Magic number 154 }
+     outl(3,2);                { There are 3 sections }
+     outl($1AF9505D,4);        { Timedate, FOR NOW }
+     outl(0,4);                { File address of symtab - patch }
+     outl(0,4);                { Number of symbol table entries - patch }
+     outl(0,2);                { No optional header }
+     outl($104,2);             { Flags }
+        {Texthdr}
+     outname('.text   ');
+     outl(0,4);                { Physical address }
+     outl(0,4);                { Virtual address }
+     outl(nxttaddr,4);         { Text section size }
+     outl($A4,4);              { File ptr for section }
+     outl($A4+nxttaddr+nxtdaddr,4); { File ptr to relocation }
+     outl(0,4);                { File ptr to line numbers }
+     outl(0,2);                { Number of relocation entries - patch }
+     outl(0,2);                { Number of line number entries }
+     outl($20,4);              { Flags, text only }
+     outl(0,4);                { Space }
+     outl(0,4);                { Space }
+        {Datahdr}
+     outname('.data   ');
+     outl(nxttaddr,4);         { Physical address }
+     outl(nxttaddr,4);         { Virtual address }
+     outl(nxtdaddr,4);         { Data section size }
+     outl($A4+nxttaddr,4);     { File ptr for section }
+     outl(0,4);                { File ptr to relocation - patch }
+     outl(0,4);                { File ptr to line numbers }
+     outl(0,2);                { Number of relocation entries - patch }
+     outl(0,2);                { Number of line number entries }
+     outl($40,4);              { Flags, data only }
+     outl(0,4);                { Space }
+     outl(0,4);                { Space }
+        {Bsshdr}
+     outname('.bss    ');
+     outl(nxttaddr+nxtdaddr,4);{ Physical address }
+     outl(nxttaddr+nxtdaddr,4);{ Virtual address }
+     outl(nxtbaddr,4);         { BSS Section size }
+     outl(0,4);                { File ptr for section }
+     outl(0,4);                { File ptr to relocation }
+     outl(0,4);                { File ptr to line numbers }
+     outl(0,2);                { Number of relocation entries }
+     outl(0,2);                { Number of line number entries }
+     outl($80,4);              { Flags, bss only }
+     outl(0,4);                { Space }
+     outl(0,4);                { Space }
+     end;
+end; {header}
+
+{ Never call sortrefs with count = 0 }
+
+function sortrefs(freflist: preflist; count: longint): preflist;
+  var lref,curref: preflist; i: longint; li,lcount: integer;
+begin {sortrefs}
+if count < 3
+then if count = 2
+     then if freflist^.refloc > freflist^.nextref^.refloc
+          then begin
+               lref := freflist^.nextref; freflist^.nextref := nil;
+               lref^.nextref := freflist; sortrefs := lref; 
+               end
+          else begin
+               freflist^.nextref^.nextref := nil; sortrefs := freflist;
+               end
+     else begin { 1 } freflist^.nextref := nil; sortrefs := freflist; end
+else begin { 3 or more }
+     lref := freflist;
+     if count < 32760
+     then begin
+          lcount := count;
+          for li := 1 to lcount div 2 do
+              lref := lref^.nextref;
+          freflist := sortrefs(freflist,lcount div 2);
+          lref := sortrefs(lref,lcount - (lcount div 2));
+          end
+     else begin
+          for i := 1 to count div 2 do
+              lref := lref^.nextref;
+          freflist := sortrefs(freflist,count div 2);
+          lref := sortrefs(lref,count - (count div 2));
+          end;
+     if freflist^.refloc <= lref^.refloc
+     then begin curref := freflist; freflist := freflist^.nextref; end
+     else begin curref := lref; lref := lref^.nextref; end;
+     sortrefs := curref;
+     while (freflist <> nil) and (lref <> nil) do
+           if freflist^.refloc <= lref^.refloc
+           then begin
+                curref^.nextref := freflist; curref := freflist;
+                freflist := freflist^.nextref;
+                end
+           else begin
+                curref^.nextref := lref; curref := lref;
+                lref := lref^.nextref;
+                end;
+     if freflist = nil
+     then curref^.nextref := lref
+     else curref^.nextref := freflist;
+     end;
+end; {sortrefs}
+
+procedure textarea;
+  var lmodlist: pmodlist;
+
+  procedure outcode;
+    var i: integer; NegFlag, FlipDisp, DoneFlag: Boolean; blocksize: longint;
+    
+    { +----+ }
+    { | 85 | } { Self-relocating }
+    { +----+ }
+    
+    procedure code2block;
+      var blocksize,address,lastaddress: longint;
+    begin {code2block}
+    blocksize := next3bytes; address := next4bytes + moduleloc;
+    lastaddress := address + (blocksize - 8) - 1;
+    while address <= lastaddress do begin
+          if symrefhead <> nil
+          then if symrefhead^.refloc = address
+               then begin
+                    if (TARGETOS = TEK) or (TARGETOS = SEQ) or
+                       (TARGETOS = OPUS)
+                    then begin
+                         if symrefhead^.srefto^.Defined
+                         then begin
+                              relocval := symrefhead^.srefto^.loc - address;
+                              trickpos := 0;
+                              end
+                         else begin
+                              relocval := - address;
+                              trickpos := 0;
+                              if TARGETOS = SEQ then NegFlag := TRUE;
+                              if TARGETOS = OPUS then FlipDisp := TRUE;
+                              end;
+                         end
+                    else begin {not TEK, not SEQ, not OPUS}
+                         if symrefhead^.srefto^.Defined
+                         then begin
+                              relocval := symrefhead^.srefto^.loc;
+                              trickpos := 0;
+                              end;
+                         end;
+                    symrefhead := symrefhead^.nextref;
+                    end;
+          if comrefhead <> nil
+          then if comrefhead^.refloc = address
+               then begin
+                    if comrefhead^.crefto^.initlist <> nil
+                    then begin
+                         relocval := comrefhead^.crefto^.loc + nxttaddr;
+                         trickpos := 0;
+                         end
+                    else if comrefhead^.crefto^.datname.linkno >= 0
+                         then begin
+                              relocval :=
+                                comrefhead^.crefto^.loc + nxttaddr + nxtdaddr;
+                              trickpos := 0;
+                              end
+                         else if TARGETOS = SYS5_2
+                              then begin
+                                   relocval := comrefhead^.crefto^.size;
+                                   trickpos := 0;
+                                   end
+                              else if TARGETOS = OPUS
+                                   then begin { Force flip on common refs }
+                                        relocval := 0; trickpos := 0;
+                                        end;
+                    if TARGETOS = OPUS then FlipDisp := TRUE;
+                    comrefhead := comrefhead^.nextref;
+                    end;
+          if trickpos < 0
+          then outone(nextbyte)
+          else begin
+               if HOSTSEX = MALE
+               then trickrec.a[trickpos] := nextbyte
+               else trickrec.a[3 - trickpos] := nextbyte;
+               trickpos := trickpos + 1;
+               if trickpos = 4
+               then begin
+                    if CHIP = N32000
+                    then if FlipDisp
+                         then outl((trickrec.l+relocval) or $c0000000,4)
+                         else if NegFlag
+                              then out((-(trickrec.l+relocval)) or $c0000000,4)
+                              else out((trickrec.l+relocval) or $c0000000,4)
+                    else out(trickrec.l + relocval,4);
+                    trickpos := -1; NegFlag := FALSE; FlipDisp := FALSE;
+                    end;
+               end;
+          address := address + 1;
+          end;
+    end; {code2block}
+    
+  begin {outcode}
+  DoneFlag := False; NegFlag := FALSE; FlipDisp := FALSE; i := nextbyte;
+  while (i <> 0) and not DoneFlag do begin
+        case i of
+          $80, { headblock   }
+          $82, { entryblock  }
+          $83, { externblock }
+          $84, { startblock  }
+          $89, { externblock }
+          $8A, { ftndatadef  }
+          $8C, { fdrefblock  }
+          $B0, { entryblock  }
+          $B1, { externblock }
+          $B3, { fdfrelblock }
+          $B4, { ftndatadef  }
+          $B5, { ftndatainit }
+          $B6, { fdrefblock  }
+          $B7, { fdrelblock  }
+          $86, { relocblock  }
+          $A0, { vartypblock }
+          $A1: { bpointblock }
+               begin
+               blocksize := next3bytes;
+               if odd(blocksize) then blocksize := blocksize + 1;
+               skip(blocksize - 4);
+               end;
+          $81: { endblock    }
+               begin
+               blocksize := next3bytes; moduleloc := moduleloc + next4bytes;
+               DoneFlag := TRUE;
+               end;
+          $85: code2block;
+         otherwise: begin
+               writeln('*** Value = ',i:2 hex,' ***');
+               error('Bad block'); DoneFlag := TRUE;
+               end;
+        end; {case}
+        i := nextbyte;
+        end;
+  end; {outcode}
+
+begin {textarea}
+trickpos := -1; moduleloc := 0; lmodlist := modulelist;
+while lmodlist <> nil do begin
+      seekmodule(lmodlist); outcode; lmodlist := lmodlist^.nextmodule;
+      end;
+out(0,textpadding);
+end; {textarea}
+
+{ Obtain sorted relocs for common pointed to by ftree }
+
+procedure getrelocs(ftree: pcommon; var ffdfreloclist,ffdreloclist: pfdreloc);
+  var lfdreloclist, lfdfreloclist: pfdreloc;
+  
+  procedure insertreloc(insertel: pfdreloc; var inlist: pfdreloc);
+    var elcopy, thislistel, lastlistel: pfdreloc; ExitFlag: Boolean;
+  begin {insertreloc}
+  new(elcopy); elcopy^ := insertel^; elcopy^.next := nil;
+  if inlist = nil
+  then inlist := elcopy
+  else if elcopy^.daddr < inlist^.daddr
+       then begin elcopy^.next := inlist; inlist := elcopy; end
+       else begin
+            thislistel := inlist; ExitFlag := FALSE;
+            repeat lastlistel := thislistel;
+                   thislistel := thislistel^.next;
+                   if thislistel <> nil
+                   then ExitFlag := thislistel^.daddr > elcopy^.daddr
+                   else ExitFlag := TRUE;
+            until ExitFlag;
+            elcopy^.next := thislistel; lastlistel^.next := elcopy;
+            end;
+  end; {insertreloc}
+  
+begin {getrelocs}
+ffdfreloclist := nil; 
+lfdfreloclist := fdfreloclist; 
+while lfdfreloclist <> nil do begin
+      if lfdfreloclist^.dname = ftree
+      then insertreloc(lfdfreloclist,ffdfreloclist);
+      lfdfreloclist := lfdfreloclist^.next;
+      end;
+ffdreloclist := nil; 
+lfdreloclist := fdreloclist; 
+while lfdreloclist <> nil do begin
+      if lfdreloclist^.dname = ftree
+      then insertreloc(lfdreloclist,ffdreloclist);
+      lfdreloclist := lfdreloclist^.next;
+      end;
+end; {getrelocs}
+
+{ Considerably slower data area initialization when "C" constructs present }
+
+procedure cdataarea(ftree: pcommon);
+  var lstring: string63; linitlist: pdatainit; lcommon: pcommon;
+      llongint,ldataloc,i,lsize,addr: longint;
+      lfdreloclist, lfdfreloclist: pfdreloc; lsymbol: psymbol;
+begin {cdataarea}
+if ftree <> nil
+then begin
+     linitlist := ftree^.initlist;
+     if linitlist <> nil then getrelocs(ftree,lfdfreloclist,lfdreloclist);
+     while linitlist <> nil do 
+           with linitlist^ do begin
+                llongint := dataloc + ftree^.loc;
+                if dataic > llongint
+                then begin
+                     makelname(ftree^.datname,lstring);
+                     writeln('*** In data area named ',lstring);
+                     writeln('*** at offset ',dataloc:1,
+                             ' bytes into that data area');
+                     fatal_error('overlapping data initialization');
+                     end;
+                while dataic < llongint do begin
+                     outone(0); (***QQQ INLINE CANDIDATE QQQ***)
+                     dataic := dataic + 1;
+                     end;
+                ldataloc := dataloc; { ldataloc is common area relative }
+                seekmodule(datamodule); i := nextbyte;
+                lsize := next3bytes; readlinkid; addr := next4bytes;
+                lsize := lsize - 11 - glinkid.nmlen;
+                if not odd(glinkid.nmlen) then lsize := lsize - 1;
+                for i := 1 to lsize do begin
+                    if lfdfreloclist <> nil
+                    then if lfdfreloclist^.daddr = ldataloc
+                         then begin
+                              lsymbol := @lfdfreloclist^.rname^;
+                              if lsymbol^.Defined
+                              then begin
+                                   relocval := lsymbol^.loc; trickpos := 0;
+                                   end;
+                              lfdfreloclist := lfdfreloclist^.next;
+                              end;
+                    if lfdreloclist <> nil
+                    then if lfdreloclist^.daddr = ldataloc
+                         then begin
+                              lcommon := lfdreloclist^.rname;
+                              if lcommon^.initlist <> nil
+                              then begin { DATA }
+                                   relocval := lcommon^.loc + nxttaddr;
+                                   trickpos := 0;
+                                   end
+                              else if lcommon^.datname.linkno >= 0
+                                   then begin { BSS }
+                                        relocval := lcommon^.loc +
+                                                      nxttaddr + nxtdaddr;
+                                        trickpos := 0;
+                                        end
+                                   else if TARGETOS = SYS5_2
+                                        then begin
+                                             relocval := lcommon^.size;
+                                             trickpos := 0;
+                                             end;
+                              lfdreloclist := lfdreloclist^.next;
+                              end;
+                    if trickpos < 0
+                    then outone(nextbyte)
+                    else begin
+                         if HOSTSEX = MALE
+                         then trickrec.a[trickpos] := nextbyte
+                         else trickrec.a[3 - trickpos] := nextbyte;
+                         trickpos := trickpos + 1;
+                         if trickpos = 4
+                         then begin
+                              if CHIP = N32000
+                              then outl(trickrec.l + relocval,4)
+                              else out(trickrec.l + relocval,4);
+                              trickpos := -1;
+                              end;
+                         end;
+                    dataic := dataic + 1; ldataloc := ldataloc + 1;
+                    end;
+                linitlist := datanext;
+                end;
+     cdataarea(ftree^.llink); cdataarea(ftree^.rlink);
+     end;
+end; {cdataarea}
+
+procedure dataarea(ftree: pcommon);
+  var lstring: string63; linitlist: pdatainit;
+      llongint,i,lsize,addr: longint;
+begin {dataarea}
+if ftree <> nil
+then begin
+     linitlist := ftree^.initlist;
+     while linitlist <> nil do 
+           with linitlist^ do begin
+                llongint := dataloc + ftree^.loc;
+                if dataic > llongint
+                then begin
+                     makelname(ftree^.datname,lstring);
+                     writeln('*** In data area named ',lstring);
+                     writeln('*** at offset ',dataloc:1,
+                             ' bytes into that data area');
+                     fatal_error('overlapping data initialization');
+                     end;
+                while dataic < llongint do begin
+                     outone(0); (***QQQ INLINE CANDIDATE QQQ***)
+                     dataic := dataic + 1;
+                     end;
+                seekmodule(datamodule); i := nextbyte;
+                lsize := next3bytes; readlinkid; addr := next4bytes;
+                lsize := lsize - 11 - glinkid.nmlen;
+                if not odd(glinkid.nmlen) then lsize := lsize - 1;
+                for i := 1 to lsize do begin
+                    outone(nextbyte); (***QQQ DOUBLE INLINE QQQ***)
+                    dataic := dataic + 1;
+                    end;
+                linitlist := datanext;
+                end;
+     dataarea(ftree^.llink); dataarea(ftree^.rlink);
+     end;
+end; {dataarea}
+ 

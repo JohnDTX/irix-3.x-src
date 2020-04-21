@@ -1,0 +1,107 @@
+'\"macro stdmacro
+.TH GETDENTS 2
+.SH NAME
+getdents \- read directory entries and put in a file 
+system independent format
+.SH SYNOPSIS
+.nf
+.B #include <sys/dirent.h>
+.PP
+.B int getdents (fildes, buf, nbyte)
+.B int fildes;
+.B char \(**buf;
+.B unsigned nbyte;
+.SH DESCRIPTION
+.I Fildes\^
+is a
+file descriptor
+obtained from an
+.IR open (2)
+or
+.IR dup (2)
+system call.
+.PP
+.I getdents\^
+attempts to read
+.I nbyte\^
+bytes from the directory associated with
+.I fildes\^
+and to format them as file
+system independent directory entries
+in the buffer pointed to by
+.IR buf .
+Since the file system independent
+directory entries are of variable length,
+in most cases
+the actual number of bytes returned
+will be strictly
+less than
+.I nbyte\^.
+.PP
+The file system independent directory
+entry is specified by the
+.I dirent\^
+structure.
+For a description of this see
+.IR dirent (4).
+.PP
+.PP
+On devices capable of seeking,
+.I getdents\^
+starts at a position in the file given by the file pointer
+associated with
+.IR fildes .
+Upon return from
+.IR getdents,
+the file pointer is incremented
+to point to the next directory entry.
+.PP
+This system call was developed in order to
+implement the 
+.IR readdir (3C)
+routine
+[for a description see
+.IR directory (3C)],
+and should not be used for other purposes.
+.PP
+.I getdents\^
+will fail if one or more of the following are true:
+.TP 15
+\s-1[EBADF]\s+1
+.I Fildes\^
+is not a valid file descriptor open for reading.
+.TP
+\s-1[EFAULT]\s+1
+.I Buf\^
+points outside the allocated address space.
+.TP
+\s-1[EINVAL]\s+1
+.I nbyte\^
+is not large enough for one directory entry.
+.TP
+\s-1[ENOENT]\s+1
+The current file pointer for the directory
+is not located at a valid entry.
+.TP
+\s-1[ENOLINK]\s+1
+.I Fildes\^
+points to a remote machine and the link to that
+machine is no longer active.
+.TP
+\s-1[ENOTDIR]\s+1
+.I Fildes\^
+is not a directory.
+.TP
+\s-1[EIO]\s+1
+An I/O error occurred while accessing the file system.
+.SH "SEE ALSO"
+directory(3C), dirent(4).
+.SH "DIAGNOSTICS"
+Upon successful completion a non-negative integer is returned
+indicating the number of bytes actually read.
+A value of 0 indicates the end
+of the directory has been reached.
+If the system call failed,
+a \-1 is returned and
+.I errno\^
+is set to indicate the error.

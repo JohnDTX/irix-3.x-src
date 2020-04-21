@@ -1,0 +1,11 @@
+#ident	"@(#)sh::fix	1.13"
+for i do
+	$CC -O -S -c $i.c
+	ed - <<\! $i.s 
+	g/^[ 	]*\.data/s/data/text/
+	w
+	q
+!
+	$CC -c $i.s
+	rm $i.s
+done

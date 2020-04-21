@@ -1,0 +1,57 @@
+a.out(4) a.out: assembler and link editor output.
+acct(4) acct: per-process accounting file format.
+afm(4) afm: Adobe POSTSCRIPT font metrics file format.
+aliases(4) aliases: aliases file for sendmail.
+ar(4) ar: archive (library) file format.
+bellfs(4) Bell file system: format of Bell file system volume.
+bellinode(4) bellinode: format of a Bell file system inode.
+core(4) core: format of core image file.
+cpio(4) cpio: format of cpio archive.
+cshrc(4) cshrc: csh system-wide .login file.
+dir(4) dir: format of directories.
+dirent(4) dirent: file system independent directory entry.
+efs(4) Extent file system: layout of the Extent file system.
+efsinode(4) efsinode: format of an Extent file system inode.
+ethers(4) ethers: ethernet address to hostname database.
+exports(4) exports: NFS filesystems being exported.
+filehdr(4) filehdr: file header for common object files.
+font(4) font: description files for troff.
+fs(4) file system: format of system volumes.
+fspec(4) fspec: format specification in text files.
+gettydefs(4) gettydefs: speed and terminal settings used by getty.
+group(4) group: group file.
+holidays(4) holidays: holidays of the year.
+hosts(4) hosts: host name data base.
+hosts.equiv(4) hosts.equiv: list of trusted hosts.
+ibtab(4) ibtab: format of ibtab file.
+inittab(4) inittab: script for the init process.
+inode(4) inode: format of an inode.
+intro(4) intro: introduction to file formats.
+issue(4) issue: issue identification file.
+linenum(4) linenum: line number entries in a common object file.
+login(4) login, cshrc: setting up a C Shell environment.
+mntent(4) mntent, fstab: static information about filesystems.
+model(4) model: model identification.
+motd(4) motd: message of the day.
+mtab(4) /etc/mtab: mounted file system table.
+netgroup(4) netgroup: list of network groups.
+networks(4) networks: network name data base.
+passwd(4) passwd: password file.
+pnch(4) pnch: file format for card images.
+postscript(4) postscript: print file format.
+profile(4) profile: setting up a Bourne Shell environment at login time.
+protocols(4) protocols: protocol name data base.
+rcsfile(4) rcsfile: format of RCS file.
+rhosts(4) rhosts: list of trusted hosts and users.
+rmtab(4) rmtab: remotely mounted file system table.
+rpc(4) rpc: rpc program number data base.
+sccsfile(4) sccsfile: format of SCCS file.
+scnhdr(4) scnhdr: section header for a common object file.
+services(4) services: service name data base.
+stab(4) stab: symbol table types.
+sys_id(4) sys_id: system identification.
+termcap(4) termcap: terminal capability data base.
+ttytype(4) ttytype: data base of terminal types by port.
+tz(4) TZ: local time zone.
+utmp(4) utmp, wtmp: utmp and wtmp entry formats.
+ypfiles(4) ypfiles: the yellowpages database and directory structure.

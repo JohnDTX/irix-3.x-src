@@ -1,0 +1,456 @@
+
+
+			  Silicon Graphics Inc.
+
+      T	S O  /	 I R I S   D A T A   T R A N S F E R   C O M M A N D
+
+	    I N	S T A L	L A T I	O N   I	N S T R	U C T I	O N S
+
+    WARNING:	  The  intended	 target	 audience  for	the  installation
+ instructions which follow are MVS systems programmers.	 If you	are not	a
+ member	of the site systems programming	staff, it is  unlikely	that  you
+ have  enough  experience  /  systems  authority to correctly perform the
+ installation and checkout.   Please get experienced  help  to	assure	a
+ quick,	clean installation.
+
+    Accompanying  this	install	 letter	 is a tape mini	reel.  It is a no
+ label tape generated at 1600 BPI.  The	first dataset on the tape is  the
+ VM  installation  material.  The  second  dataset  is	a  single IEBCOPY
+ unloaded PDS.	Load the unloaded partitioned dataset to disk.	  JCL  to
+ perform the disk load will look somewhat like the sample below.
+
+ //SGIJOB   JOB	 site_data,'SGI	JOB',CLASS=A,MSGCLASS=A
+ //STEP1    EXEC PGM=IEBCOPY
+ //SYSPRINT DD	 SYSOUT=*
+ //TAPE	    DD	 UNIT=TAPE,VOL=SER=SGITAP,DISP=OLD,LABEL=(2,BLP),
+ //	    DSN=SGI.UNLOADED.COMMAND
+ //DISK	    DD	 UNIT=SYSDA,SPACE=(CYL,(5,1,15)),DISP=(,CATLG),
+ //	    DSN=SGI.TSO.COMMAND
+ //SYSIN    DD	 *
+  COPY OUTDD=DISK,INDD=TAPE
+ /*
+ //
+
+    The	 dataset  unloaded occupied five cylinders of 3380 DASD	space and
+ used five directory blocks.  The directory blocks in the sample JCL  are
+ set  to  allow	the 'STATS ON' option of SPF.  Reloading the dataset to	a
+ 3350 or 3330 will require a larger allocation number of cylinders.   Any
+ member	 of  the PDS which is not in the list below may	be deleted.  Some
+ of these deletable members are	tape preparation support, others  are  of
+ interest only to the VM installation process.
+
+    LINKxxx  Where  xxx	 is one	of CMD,	STAR, PP, SQRL or MAIN.	These are
+	     sample jobs to link the TSO file transfer command	(LINKCMD)
+	     and a number of installation checkout jobs	(all others).
+    LOADLIB  Sample JCL	which will create a checkout load library.
+    TEXTxxx  Or	 TXTxxx	 where	the x's	are any	value.	These members are
+	     object decks resulting from the the assembly or complilation
+	     of	source members in the library.
+    IFYxxx   Where the x's are any value.    These  members  are  FORTRAN
+	     support   routines	  required   to	  successfully	link  the
+	     installation check	routines.
+    NAMECMD  A module name card	for IEWL when linking the TSO command.
+
+				  - 1 -
+
+
+
+
+
+
+
+
+Sep 18 13:53 1986  new.install Page 2
+
+
+
+
+    COPYHELP Sample JCL	to copy	the HELP member	to SYS1.HELP.
+    HELP     TSO help for the command.
+    INSTALL  A copy of this letter.
+    SRCCMD   Either one	line 'source not shipped' or command source.
+    SCRIOD   Either one	line 'source not shipped' or I/O driver	source.
+    SQIRAL   (STAR, PP,	MAINTEST) are FORTRAN source code members.   They
+	     are  both	checkout  code and samples for how to use the I/O
+	     driver in TSO.
+    IO	     (LIB, TEST1, TEST2, ... TEST7) FORTRAN source code	 members.
+	     They are support code for the mainline tests.
+    FDEVICE  (FGET,  FGL,  FIO,	FRPC) are COPY source code members.  They
+	     are referenced in the FORTRAN source.
+
+	Link edit the command text into	SYS1.CMDLIB.	The  JCL  in  the
+ LINKCMD  member  may be used as a guide.  This	program	is not authorized
+ and does not need to reside in	an authorized library.	 Any PDS  in  the
+ STEPLIB  chain	 or LNKLIST member of PARMLIB will be satisfactory.  As	a
+ checkout expedient, the command text may be used from any  load  library
+ via the sequence:
+
+    TEST 'library.name(member)'	CP
+    IRSXFR command parameters
+    GO
+    END
+
+ The  command  cannot  be  used	 via  the CALL command,	as this	sets up	a
+ pseudo	batch environment with which the command is not	prepared to deal.
+
+    Modify the COMMANDS	member of the SYS1.HELP	dataset	to include a line
+ of information	about the IRSXFR command.
+
+    Copy the the HELP  member  of  the	SGI.TSO.COMMAND	 library  to  the
+ SYS1.HELP  dataset  as	 member	IRSXFR.	  Sample JCL for the copy step is
+ included in member COPYHELP.
+
+    Run	the LOADLIB job	to create a checkout load library.   (Note:   The
+ TSO  command  can  be	linkedited  to reside in this library for its own
+ checkout, but should be moved to a LNKLIST library for	production.)  Now
+ run the jobs LINKPP, LINKSTAR,	LINKSQRL and LINKMAIN.	These jobs create
+ the installation checkout programs MAINTEST, STAR, SQIRAL and PP in  the
+ 'SGI.TEST.LOAD' dataset.
+
+    At	this  point, the installation checkout programs	are ready, but we
+ do not	(may not) have the correct environment for them.  To prepare  the
+ mainframe environment,	enter the following:
+
+      ALLOC FI(FT06F001) DS(*)
+
+ This  provides	 a definition of an output file	that FORTRAN doesn't need
+ except	that he	insists	that it	be defined.  On	the IRIS side, make  sure
+
+				  - 2 -
+
+
+
+
+
+
+
+
+
+Sep 18 13:53 1986  new.install Page 3
+
+
+
+ that  you  are	in the INTERACTIVE GRAPHICS mode.  Now enter the commands
+ which were link edited	into your test library in the form:
+
+      CALL 'SGI.TEST.LOAD(XXX)'
+
+ Where xxx is, in turn,	PP, STAR, SQIRAL, and  MAINTEST.    The	 expected
+ results of each test is listed	below.	(Note:	Depending on the level of
+ MVS  and  TCAM	/ VTAM with which you are working, it may be necessary to
+ use the PA1 key to reset the full screen mode between each test.)
+
+    PP should produce a	blue backgound	and  the  words	 HELLO	WORLD  in
+ black.
+
+    SQIRAL  generates  several	repetitions  of	a blue SQuare spIRAL on	a
+ black backgound.
+
+    STAR results in a small, dim five pointed star which  starts  in  the
+ upper	right portion of the screen and	which becomes brighter and larger
+ as it moves to	the lower center screen	area.
+
+    MAINTEST is	a self documenting, interactive	graphics test.
+
+
+
+
+
+
+
+
+
+
+
+				  - 3 -
+
+
+
+		F I L E	  T R A	N S F E	R   C O	M M A N	D
+			  U S A	G E   N	O T E S
+
+    The	two data transfer modes	('TEXT'	and 'BINARY') are intended for	C
+ source	 files and program input data respectivly.  In text transfer, the
+ data is translated to/from ASCII/EBCDIC and a UNIX 'new_line'	character
+ (a  hexidecimal  '15')	 is created for	each MVS record	(to IRIS) or used
+ for record delineation	and (mostly) thrown away (to TSO).
+
+    The	'mostly' above is not 'always'	because	 UNIX  supports	 multiple
+ consecutive  X'15's.	 If  the  newline character were thrown	away, the
+ result	would be a zero	length record when the preceeding character was	a
+ newline.
+
+    This is not	a concept which	is supported by	MVS.  To avoid	the  zero
+ length	 record	 problem  and retain the capacity to re-create the source
+ file EXACTLY when it is transferred back to the IRIS,	the  TSO  command
+ will  use  the	 newline  byte	as  a  record  byte when the result would
+ otherwise have	a zero length.
+
+
+
+
+
+
+
+Sep 18 13:53 1986  new.install Page 4
+
+
+
+    This practice in turn can result in	an (apparent) problem.	The X'15'
+ character is not displayable and most text  editors  will  substitute	a
+ blank	when  the  record  is  diplayed	 during	an edit	session.   If the
+ displayed blank is overtyped by a real	blank, the difference in the file
+ is not	visible, but the file is not identical to its  original	 version.
+ Other	than  this  case, MVS and IRIS text files can be transferred back
+ and forth an unlimited	number of times	 and  each  version  will  always
+ compare equal to its source on	the same machine.  You might care to do	a
+ simple	test of	this by	use of the following command sequence:
+
+    IRSXFR   DSN('SGI.TSO.COMMAND(HELP)') IRISNAME tso.help
+
+    IRSXFR   DSN('SGI.TSO.COMMAND(test)') IRISNAME tso.help TO MVS
+
+ The 'HELP' and	'TEST' members of the installation PDS will compare equal
+ and   the   IRIS  dataset  tso.help,  while  radically	 different  in	a
+ hexidecimal sense will	appear to be the same as the MVS source	 in  edit
+ mode.
+
+    When  the  original	 version  of  a	 text  dataset	is  on	the  IRIS
+ workstation, the fixed	format and  eighty  byte  record  length  of  the
+ 'SGI.TSO.COMMAND'  dataset  is	unsuitable (and	won't work).  In general,
+ nothing edited	on the IRIS is going to	have fixed  length  records.	A
+ record	 format	 which	can  be	used on	both the IRIS and MVS is variable
+ blocked (VB).	The following TSO command sequence (or	a  variation  for
+ your  site)  will  set	 up a PDS which	can be used for	dataset	transfer,
+ editing and re-transfer.
+
+    ATTR     COMPAT BLKSIZE(4080) LRECL(255) RECFM(V B)	DSORG(PO)
+
+				  - 4 -
+
+
+
+    ALLOC    FI(IRISPDS) DSN(C.SOURCE) NEW CATALOG SPACE(1  1)	CYLINDERS
+	     USING(COMPAT) DIR(5) UNIT(SYSDA)
+    IRSXFR TO MVS DSN(C.SOURCE(EDITDATA)) IRISNAME existing.dataset
+    IRSXFR DSN C.SOURCE(EDITDATA)
+
+ The  result of	all this (assuming that	'existing.dataset' really exists)
+ is a dataset named 'tsoprefix.DATA' on	the IRIS which will compare equal
+ to 'existing.dataset' and an 'EDITDATA' member	 of  'tsoprefix.C.SOURCE'
+ which	is  quite  different from its parent, but looks	identical in edit
+ mode.
+
+    In contrast	to the text mode in which considerable	translation  goes
+ on to preserve	identical appearance, the binary mode translates nothing,
+ but  the  appearance  of the dataset is very different.  Moreover, it is
+ unlikely that a dataset transferred to	and from (or from and to) an IRIS
+ worksatation will compare equal.  All	the  data  that	 existed  in  the
+ original  version  of the dataset is always present in	subsequent copies
+ and that data will always compare equal to the	parent.
+
+    The	problem	arises because there  may  be  more  data  in  the  child
+ dataset.   In general,	the exact size of a dataset is known on	the IRIS.
+
+
+
+
+
+
+
+Sep 18 13:53 1986  new.install Page 5
+
+
+ When it is transferred	to MVS,	encoding problems may force 3 bytes  more
+ than  real amount of data to be transferred, but these	are not	placed in
+ the MVS dataset because we know exactly how much is valid.
+
+    In MVS, the	size of	a dataset is not known.	  We tell the  IRIS  that
+ the  dataset  we  are	sending	is X'FFFFFF' (16 mega) bytes long when we
+ start and just	cut it off  when  we're	 done.	  For  transfer	 protocol
+ reasons  up  to eleven	extra bytes can	be shipped when	the data is moved
+ to the	IRIS.  Any extra data is accepted as part of  the  'real'  length
+ because we didn't say how long	it was when we started.
+
+    As an exercise in binary transfer, you might try the following.  Note
+ that all the text that	was in the original is the same	in the copy which
+ comes back.
+
+    IRSXFR   DSN('SGI.TSO.COMMAND(HELP)') BINARY IRISNAME bintst.data
+    IRSXFR   DSN('SGI.TSO.COMMAND(BINBACK)')  BINARY IRISNAME bintst.data
+	     TO	MVS
+
+    The	binary data transfer mode  does	 not  address  data  presentation
+ differences  or  floating  point number representation	changes.  It just
+ moves the data	it has.
+
+
+
+
+				  - 5 -
+
+
+
+		 F A S T E R   D A T A	 T R A N S F E R
+
+    As shipped,	the file transfer command transfers 1500 bytes of data at
+ a time	to the IRIS and	resynchronizes every 8 transfers  (12000  bytes).
+ In  this  condition, data transfer rates should be higher than	8 K bytes
+ per second when the IRIS is channel attached to the mainframe.
+
+    These values were not chosen to maximize the speed of data	transfer,
+ but  to  insure  that	the  command  would  run in essentially	every TSO
+ environment.	Depending on whether the  TSO  telecommunications  access
+ method	is VTAM	or TCAM, what buffer sizes were	set as maximum,	how large
+ the  buffer  elements are, what LOGMODEs are available, etc, etc, larger
+ transfer  buffers  and	 less  frequent	 re-synchronization  will   (may)
+ increase  the	data  transfer	rate up	to the maximum that the	IRIS work
+ station can handle.
+
+    There are two command parameters which may be used at execution  time
+ to vary the data transfer buffer size (XBUFSIZE) and the number of bytes
+ transferred  between  re-synchronizing	waits (XSYNCSIZ).  For example,	a
+ less that perfect 56KB	remote link might use the command:
+
+    IRSXFR   TO	IRIS DATASET....... XB 1200 XS 0
+
+ Holding down the buffer size may reduce block retransmission due to line
+ errors	enough to justify the added overhead.  Setting the re-synchronize
+ value to zero effectively turns it off.  The maximum through  put  of	a
+
+
+
+
+
+
+
+Sep 18 13:53 1986  new.install Page 6
+
+
+ 56KB  line  cannot  possibly overrun the IRIS and so the synchronization
+ check is redundant.
+
+    On the other hand, the same	dataset	in the	local  environment  might
+ use  the  command values  'XB 8000' and 'XS 24000'.  Technically, any XS
+ value higher than 14000 (current implementation) *could* result in  data
+ overrun.    This  is  not, however, likely.   The values above	have been
+ successfully used where the TSO system	variables permitted them.
+
+    It is relatively easy to  change  the  defaults  or	 limits	 on  user
+ setting  for  XBufsize	 and  XSyncsiz.	  This should only be done on the
+ advice	  of   the    site    systems	 programmer    responsible    for
+ telecommunications, however.
+
+    An	AMBLIST	 of  the command will document four entry points at about
+ X'10F0' into the program.  These are:
+
+    LOBUFLIM The lowest	acceptable XB value in the command input.  Values
+	     lower than	this are overriden by the low limit  value.    No
+	     warning or	other comment is generated.
+    HIBUFLIM The  largest acceptable XB	value in the command input.  Must
+	     not be larger than	12200 for physical reasons.    XB  values
+	     higher than this are over ridden without comment.
+    XBUFSIZE The default buffer	size.  This should not be larger than the
+	     common 'max RU' value.
+
+				  - 6 -
+
+
+
+    XSNYCSIZ The  default  resynchronization number of bytes.  This value
+	     is	used in	such a way that	it appears to be the next  higher
+	     multiple of the buffer size if it is not given as a multiple
+	     of	that size.
+
+ These entry points are	fullword values	which may be changed by	IMASPZAP.
+
+    For	 zapping  the  text  deck  before install, or the program 'on the
+ fly', the entry points	are all	preceeded by eight byte	eye  catchers  in
+ the  text.  The eye catcher values are	the same as the	field names given
+ above.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sep 18 13:53 1986  new.install Page 7
+
+
+				  - 7 -
+/*
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

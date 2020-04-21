@@ -1,0 +1,47 @@
+The file malloc.c in this directory contains source to the memory
+allocator described in malloc(3C).
+
+Both kernel and user-level operation are supported.  The allocator
+assumes that memory is always added, initialized to zeros, to the end
+of the data segment, and never returned to the system.
+
+The following compile flags may be defined:
+
+	HEAP_ASSERT	Compile code to assert certain tautologies.
+
+	HEAP_DEBUG	IRIS 2000-3000 kernel version: if kswitch is
+			patched, switch consoles before printf;
+			User-level version: make stdout unbuffered.
+
+	HEAP_DUMP	Dump heap to console if depleted (kernel only)
+
+	HEAP_CHECK	Perform thorough consistency check on every
+			call; also do HEAP_DUMP-ing
+
+	HEAP_METER	Measure and collect raw statistics.
+
+If an application is corrupting malloc's heap, one may compile malloc.c
+with HEAP_ASSERT and possibly with HEAP_CHECK defined to "fence in" the
+
+By defining HEAP_METER, writing a function to compute and return
+interesting statistics from the malloc_meter structure, and compiling
+and linking with an application which calls the function, one may profile
+an application's dynamic memory usage.
+
+Note that the free space compaction heuristic is based on a parameter,
+heap_fragfact, which bounds the ratio of busy to free fragments in the
+arena.  An allocation attempted when the number of free fragments is more
+than the number busy divided by heap_fragfact, heap_alloc begins its
+search from the lowest free fragment in the arena.  Otherwise it searches
+from the last freed or last searched place.  Starting a search from the
+free low watermark tends to re-use existing free fragments rather than
+to create new ones.  Heap_fragfact has a default value of 4.
+
+The malloc, realloc, and free functions are layered on top of heap_alloc,
+heap_realloc, and heap_free functions, which operate on a heap structure.
+By splitting the malloc.c source into a header file and a C module, the
+declaration of this heap structure can be exported to client modules.
+These clients can manage several heaps, e.g. for variously sized objects.
+A heap must have a NULL base pointer to be properly initialized upon
+first allocation.
+

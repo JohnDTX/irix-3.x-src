@@ -1,0 +1,95 @@
+.TH pdr 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pdr
+\- polygon draw
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pdr(x, y, z)"
+.B "Coord x, y, z;"
+.IP
+.B "pdri(x, y, z)"
+.B "Icoord x, y, z;"
+.IP
+.B "pdrs(x, y, z)"
+.B "Scoord x, y, z;"
+.IP
+.B "pdr2(x, y)"
+.B "Coord x, y;"
+.IP
+.B "pdr2i(x, y)"
+.B "Icoord x, y;"
+.IP
+.B "pdr2s(x, y)"
+.B "Scoord x, y;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pdr(x, y, z)"
+.B "real x, y, z"
+.IP
+.B "subroutine pdri(x, y, z)"
+.B "integer*4 x, y, z"
+.IP
+.B "subroutine pdrs(x, y, z)"
+.B "integer*2 x, y, z"
+.IP
+.B "subroutine pdr2(x, y)"
+.B "real x, y"
+.IP
+.B "subroutine pdr2i(x, y)"
+.B "integer*4 x, y"
+.IP
+.B "subroutine pdr2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pdr(x, y, z: Coord);"
+.IP
+.B "procedure pdri(x, y, z: Icoord);"
+.IP
+.B "procedure pdrs(x, y, z: Scoord);"
+.IP
+.B "procedure pdr2(x, y: Coord);"
+.IP
+.B "procedure pdr21(x, y: Icoord);"
+.IP
+.B "procedure pdr2s(x, y: Scoord);"
+.SH DESCRIPTION
+.B pdr
+specifies the next point in a filled polygon.
+You draw a typical polygon with a 
+.B pmv,
+a sequence of 
+.B pdr
+and close it with a 
+\f3pclos\fP.
+For example, the following sequence draws a square:
+.sp
+.nf
+.in +0.5
+.ft 7
+.ps -2 
+pmv(0.0, 0.0, 0.0);
+pdr(1.0, 0.0, 0.0);
+pdr(1.0, 1.0, 0.0);
+pdr(0.0, 1.0, 0.0);
+pclos();\f1
+.fi
+.ft 1
+.fi
+.sp
+.in -0.5
+.PP
+All polygons must be convex.
+.SH "SEE ALSO"
+pclos, pmv, rpdr, rpmv
+.sp
+.I Programming Guide,
+Section 3.6, Polygons

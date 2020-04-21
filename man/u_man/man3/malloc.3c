@@ -1,0 +1,169 @@
+'\"macro stdmacro
+.TH MALLOC 3C 
+.SH NAME
+malloc, free, realloc, calloc, cfree, malloc_check \- main memory allocator
+.SH SYNOPSIS
+.nf
+.B char \(**malloc (size)
+.B unsigned size;
+.PP
+.B void free (ptr)
+.B char \(**ptr;
+.PP
+.B char \(**realloc (ptr, size)
+.B char \(**ptr;
+.B unsigned size;
+.PP
+.B char \(**calloc (nelem, elsize)
+.B unsigned nelem, elsize;
+.PP
+.B cfree (ptr, nelem, elsize)
+.br
+.B char *ptr;
+.br
+.B unsigned nelem, elsize;
+.PP
+.B malloc_check (ptr)
+.br
+.B char *ptr;
+.fi
+.SH DESCRIPTION
+.I Malloc\^
+and
+.I free\^
+provide a general-purpose memory allocation package.
+.I Malloc\^
+returns a pointer to a block of at least
+.I size\^
+bytes suitably aligned for any use.
+.PP
+The argument to
+.I free\^
+is a pointer to a block previously allocated by
+.IR malloc ;
+after
+.I free\^
+is performed this space is made available for further allocation,
+but its contents are left undisturbed.
+.PP
+Undefined results will occur if the space
+assigned by
+.I malloc\^
+is overrun or if some random number is handed to
+.IR free .
+.PP
+.I Malloc\^
+allocates the first big enough contiguous reach of
+free space
+found in a circular search from the last 
+block allocated or freed,
+coalescing adjacent free blocks as it searches.
+It calls
+.I sbrk\^
+(see
+.IR brk\^ (2))
+to get more memory from the system when there is no
+suitable space already free.
+.PP
+.I Realloc\^
+changes the size of the block pointed to by
+.I ptr\^
+to
+.I size\^
+bytes and returns a pointer to the (possibly moved)
+block.
+The contents will be unchanged up to the
+lesser of the new and old sizes.
+If no free block of
+.I size\^
+bytes is available in the storage arena, then
+.I realloc\^
+will ask
+.I malloc\^
+to enlarge the arena by
+.I size\^
+bytes and will then move the data to the new space.
+.PP
+.I Realloc\^
+also works if
+.I ptr\^
+points to a block freed since the last call of
+.IR malloc ,
+.IR realloc ,
+or
+.IR calloc ;
+thus sequences of
+.IR free ,
+.I malloc\^
+and
+.I realloc\^
+can exploit the search strategy of
+.I malloc\^
+to do storage compaction.
+Note that while previous versions of
+.I malloc\^
+tended to fragment the storage arena, the current
+version attempts to keep free space compact.
+Therefore using
+.I realloc\^
+on free space is deprecated.
+.PP
+.I Calloc\^
+allocates space for
+an array of
+.I nelem\^
+elements of size
+.IR elsize .
+The space is initialized to zeros.
+.PP
+The arguments to 
+.I cfree\^
+are the pointer to a block previously allocated by
+.I calloc\^
+plus the parameters to
+.IR calloc .
+.PP
+Each of the allocation routines returns a pointer
+to space suitably aligned (after possible pointer coercion)
+for storage of any type of object.
+.PP
+As an aid to debugging, the source for these routines is
+provided in
+.BR /usr/people/gifts/malloc/malloc.c .
+When compiled with the preprocessor symbol
+.B HEAP_CHECK
+defined, calls to
+.I malloc_check\^
+perform a thorough consistency check of the storage arena.
+This check is also done on each call to
+.IR malloc ,
+.IR realloc ,
+and
+.IR free .
+If the check detects corruption, it prints a message describing
+the corruption and terminates execution with
+.IR abort (3C).
+Without
+.B HEAP_CHECK ,
+no consistency checking is done.
+The standard C library version does no checking.
+.SH DIAGNOSTICS
+.IR Malloc ,
+.I realloc\^
+and
+.I calloc\^
+return a
+.SM NULL
+pointer if there is no available memory.
+When this happens
+the block
+pointed to by
+.I ptr\^
+may be destroyed.
+.SH FILES
+/usr/people/gifts/malloc/malloc.c	source for allocator
+.SH NOTES
+Release 3.6 introduced a rewritten version of these functions.
+To use the old version, link with
+.BR /usr/lib/liboldmalloc.a .
+.\"	@(#)malloc.3c	5.1 of 10/25/83

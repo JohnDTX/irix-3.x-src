@@ -1,0 +1,572 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: F.MISC.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               29-May-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure formatstmt;
+  label 666;
+  var llabrec: plabelrec; lch, uclch: char; lchval: chvaltype; 
+      llen,llenmodalfalen,lparencount: integer;
+  
+  procedure advancelch;
+  begin
+  if llenmodalfalen = 10
+  then begin
+    new(lchval^.next); lchval := lchval^.next; llenmodalfalen := 0;
+    end;
+  llenmodalfalen := llenmodalfalen + 1; 
+  lchval^.chpart[llenmodalfalen] := lch;
+  llen := llen + 1; lch := getchar;
+  if (lch >= 'a') and (lch <= 'z')
+  then uclch := chr(ord(lch) - 32)
+  else uclch := lch;
+  end; {advancelch}
+  
+  procedure advancetonextnonblank;
+  begin
+  repeat
+    advancelch;
+  until uclch <> ' ';
+  end; {advancetonextnonblank}
+  
+  procedure fmterror(BoolExp: Boolean);
+  begin
+  if BoolExp then begin error(293); goto 666; end;
+  end; {fmterror}
+  
+  procedure digits;
+  begin
+  fmterror(chclass[ord(uclch)] <> DIGITCL);
+  while chclass[ord(uclch)] = DIGITCL do
+    advancetonextnonblank;
+  end; {digits}
+  
+  procedure eateither(fch1, fch2: char);
+  begin
+  advancetonextnonblank;
+  if (uclch = fch1) or (uclch = fch2) then advancetonextnonblank;
+  end; {eateither}
+  
+  procedure fmtscanner;
+    var i, lint: integer; Repeated, Done: Boolean; edlet: char;
+  begin
+  Repeated := FALSE; lint := 0;
+  while chclass[ord(uclch)] = DIGITCL do begin
+    lint := lint * 10 - ord('0') + ord(uclch);
+    advancetonextnonblank; Repeated := TRUE;
+    end;
+  edlet := uclch;
+  if edlet in [' ','I','F','E','D','G','L','A','''','H','T','X','Z',
+               ',','+','-',':','/','\\','$','S','P','B','(',')']
+  then
+    case edlet of
+      ' ': advancetonextnonblank;
+      '(': begin advancetonextnonblank; lparencount := lparencount + 1; end;
+      ')': begin advancetonextnonblank; lparencount := lparencount - 1; end;
+      'I','F','E','D','G','L': begin { All take manditory W field }
+           advancetonextnonblank; digits;
+           if edlet <= 'G'
+           then begin { Manditory . D fields }
+             fmterror(uclch <> '.'); advancetonextnonblank; digits;
+             if ((edlet = 'E') or (edlet = 'G')) and (uclch = 'E') 
+             then begin advancetonextnonblank; digits; end;
+             end
+           else { 'I' or 'L' }
+             if (edlet = 'I') and (uclch = '.') 
+             then begin advancetonextnonblank; digits; end;
+           end;
+      'A','Z': begin
+           if edlet = 'Z' then notansi;
+           advancetonextnonblank;
+           if chclass[ord(uclch)] = DIGITCL then digits;
+           end;
+      '''':begin
+           fmterror(Repeated); Done := FALSE;
+           repeat
+             advancelch;
+             while (uclch <> '''') and (uclch <> EOLCH) do
+               advancelch;
+             fmterror(uclch = EOLCH);
+             advancelch;
+             if uclch <> '''' then Done := TRUE;
+           until Done;
+           end;
+      'H': begin
+           fmterror(not Repeated);
+           for i := 0 to lint do
+             advancelch;
+           end;
+      'T': begin fmterror(Repeated); eateither('L','R'); digits; end;
+      'P','X': begin fmterror(not Repeated); advancetonextnonblank; end;
+      ',','+','-',':','/': begin 
+           fmterror(Repeated); advancetonextnonblank;
+           end;
+      '\\','$': begin 
+           notansi; fmterror(Repeated); advancetonextnonblank;
+           end;
+      'S': begin fmterror(Repeated); eateither('P','S'); end;
+      'B': begin
+           advancetonextnonblank;
+           fmterror(Repeated or ((uclch <> 'N') and (uclch <> 'Z'))); 
+           advancetonextnonblank;
+           end;
+    end {case}
+  else fmterror(TRUE);
+  end; {fmtscanner}
+  
+begin {formatstmt}
+if InsideLogIf
+then error(133)
+else
+  if LabeledFlag 
+  then begin
+    llabrec := findlabel(labeledby,FORMATLAB);
+    with llabrec^ do begin
+      if labkind = EXECLAB then error(134);
+      if labkind = FORMATLAB
+      then begin
+        if FmtDefined then error(167);
+        end
+      else labkind := FORMATLAB;
+      FmtDefined := TRUE; fmtcstno := -1;
+      new(lchval); fmtstring := lchval;
+      llen := 0; llenmodalfalen := 0; lparencount := 0;
+      lch := getchar; uclch := lch;
+      if uclch = ' ' then advancetonextnonblank; fmterror(uclch <> '(');
+      while uclch <> EOLCH do
+        fmtscanner;
+      fmterror(lparencount <> 0);
+      666: fmtlen := llen;
+      end;
+    end
+  else error(135);
+token := EOLNSY;
+end; {formatstmt}
+
+procedure eparamlist(var farglist: pnlist; var fparambytes,faltrets: integer);
+  var ErrorFlag: Boolean; lpn: pn; newarg,lastarg: pnlist;
+      llabp: plabelrec;
+begin
+farglist := nil; fparambytes := 8; faltrets := 0;
+if token = LPARENSY
+then begin
+  fscan;
+  if token = RPARENSY
+  then fscan
+  else begin
+    repeat
+      ErrorFlag := FALSE;
+      if token = IDENTSY
+      then begin
+        lpn := lookupname(localtree,ident);
+        if lpn = nil
+        then begin
+          newn(lpn,UNKN,ident); entername(lpn,localtree);
+          end
+        else
+          if lpn^.nkind <> UNKN
+          then
+            if lpn^.nkind in [VARS,FUNCT,SUBR,EXTERN]
+            then begin
+              if not lpn^.Indirect then error(256);
+              end
+            else error(34);
+        xref(lpn); fscan;
+        end
+      else
+        if token = STARSY
+        then begin
+          if blockkind = FUNBLOCK then error(244);
+          faltrets := faltrets + 1; lpn := nil; fscan;
+          newn(lpn,LABL,ident); lpn^.idtype.typ := INTEGR;
+          new(llabp); lpn^.labp := llabp; llabp^.ilabno := faltrets;
+          end
+        else ErrorFlag := TRUE;
+      if not ErrorFlag
+      then begin
+        lpn^.Indirect := TRUE;
+        new(newarg); newarg^.next := nil; newarg^.nrec := lpn;
+        if farglist = nil
+        then farglist := newarg
+        else lastarg^.next := newarg;
+        lastarg := newarg;
+        fparambytes := fparambytes + 4;
+        if lpn^.idtype.typ = CHARACTER
+        then fparambytes := fparambytes + 2;
+        if token = COMMASY
+        then fscan
+        else ErrorFlag := token <> RPARENSY;
+        end;
+      if ErrorFlag
+      then begin error(243); skip([RPARENSY,IDENTSY,STARSY]); end;
+    until (token = RPARENSY) or (token = EOLNSY);
+    if token = RPARENSY then fscan else error(26);
+    end;
+  end;
+if faltrets > maxaltreturn then maxaltreturn := faltrets;
+end; {eparamlist}
+
+procedure entrystmt;
+  var larglist: pnlist; lpn,lpn2: pn;
+      fkind: idkind; lparambytes,i,laltrets: integer;
+begin
+needstate(IMPSTATE,EXECSTATE);
+if (blockkind <> SUBBLOCK) and (blockkind <> FUNBLOCK) then error(236);
+if ctrlstk <> nil then error(237);
+fscan; new(newstmt,ENTRYST);
+with newstmt^ do begin
+  nextstmt := nil; stmtop := ENTRYST;
+  entrycount := entrycount + 1; enum := entrycount;
+  end;
+if token = IDENTSY
+then begin
+  if blockkind = FUNBLOCK then fkind := FUNCT else fkind := SUBR;
+  lpn := lookupname(globaltree,ident);
+  if lpn = nil
+  then begin
+    lpn := lookupname(localtree,ident);
+    if lpn = nil
+    then begin
+      newn(lpn,fkind,ident);
+      lpn^.NDefined := TRUE;
+      entername(lpn,localtree); makeglobal(lpn);
+      end
+    else
+      with lpn^ do
+        if nkind = UNKN
+        then begin
+          nkind := fkind; rtnno := -1; rtnlev := 2;
+          NDefined := TRUE;
+          makeglobal(lpn);
+          end
+        else error(34);
+    end
+  else
+    if lpn^.nkind = COMMON
+    then begin
+      error(250); newn(lpn,fkind,ident);
+      end
+    else begin
+      if lpn^.nkind <> fkind then error(88);
+      lpn2 := lookupname(localtree,ident);
+      if lpn2 = nil
+      then begin
+        newn(lpn2,fkind,ident);
+        entername(lpn2,localtree);
+        end
+      else
+        if lpn2^.nkind = UNKN
+        then
+          with lpn2^ do begin
+            nkind := fkind; rtnno := -1; rtnlev := 2;
+            end
+        else error(34);
+      if lpn2^.nkind = FUNCT
+      then
+        if (lpn2^.idtype.typ <> lpn^.idtype.typ) or
+           ((lpn2^.idtype.siz <> lpn^.idtype.siz) and (lpn2^.idtype.siz <> 0))
+        then error(84);
+      if lpn^.NDefined then error(85) else makeglobal(lpn2);
+      lpn2^.NDefined := TRUE;
+      lpn := lpn2;
+      end;
+  lpn^.RtnLocal := TRUE; xref(lpn);
+  if blockkind = FUNBLOCK
+  then begin
+    if localtree^.idtype.typ = CHARACTER
+    then
+      if (lpn^.idtype.typ <> CHARACTER) or
+         (lpn^.idtype.siz <> localtree^.idtype.siz)
+      then error(253);
+    if lpn^.idtype.typ = CHARACTER
+    then i := 8
+    else i := lpn^.idtype.siz;
+    if maxfsize < i then maxfsize := i;
+    end;
+  fscan;
+  end
+else error(28);
+eparamlist(larglist,lparambytes,laltrets);
+lpn^.arglist := larglist; lpn^.parambytes := lparambytes;
+lpn^.numaltret := laltrets;
+newstmt^.entryname := lpn;
+end; {entrystmt}
+
+procedure datacode{*fdatalist: pdatarec; fvarblist: pvarbrec; DumpFlag: Boolean*};
+  const BSIZE = 127;
+  var dcount,dolev,llo,lhi: integer; dtype,vtype: ftntype;
+      DDone,VDone: Boolean; dvalu: valu; lvarblist: pvarbrec;
+      lpn: pn; lbound: pbound; lindex: pnlist; vcount,i: longint;
+      ivar: array[0..7] of
+              record val,step,limit: integer;
+                     vlist,midvlist: pvarbrec;
+              end;
+      ModuleFlag: Boolean; nextmaddr,basemaddr: addrrange; modulename: idstring;
+      mbuffer: array[0..BSIZE] of byte;
+      vaddress,s,l,elsize: addrrange;
+  
+  procedure initmodule(fname: idstring);
+  begin
+  ModuleFlag := TRUE; nextmaddr := 0; basemaddr := 0; modulename := fname;
+  end; {initmodule}
+  
+  procedure dumpbuffer;
+    var i: integer; lname: string31;
+  begin
+  if ModuleFlag and (basemaddr < nextmaddr)
+  then begin
+    out($FD {COPYBLK});
+    
+    { FORTRAN Data Area Initialization }
+    
+    if LONGNAMES
+    then begin
+         i := length(modulename) + 1;
+         if odd(i) then i := i + 1;
+         out($B5); out3(nextmaddr - basemaddr + i + 10);
+         out2(-1); outs(modulename);
+         if not odd(length(modulename)) then out(0);
+         end
+    else begin
+         out($8B); out3(nextmaddr - basemaddr + 16);
+         outs8(modulename);
+         end;
+    out4(basemaddr);
+    for i := 0 to nextmaddr - basemaddr - 1 do out(mbuffer[i]);
+    if odd(nextmaddr - basemaddr) then out(0);
+    end;
+  end; {dumpbuffer}
+  
+  procedure finishmodule;
+  begin
+  dumpbuffer;
+  ModuleFlag := FALSE;
+  end; {finishmodule}
+  
+  procedure dataout(fpcom: pn; faddress: addrrange; fvtype,fdtype: ftntype;
+                    fdvalu: valu);
+    var fname: idstring; i,start,length,dlength: integer; lchval: chvaltype;
+        trick: record case Boolean of
+                        FALSE: (v: valu);
+                        TRUE:  (d: array[0..7] of byte);
+               end;
+        lattr: attr; r: real;
+    
+    procedure dout(faddress: addrrange; fvalue: byte);
+    begin
+    if (nextmaddr <> faddress) or (nextmaddr - basemaddr >= BSIZE)
+    then begin dumpbuffer; nextmaddr := faddress; basemaddr := faddress; end;
+    mbuffer[nextmaddr - basemaddr] := fvalue;
+    nextmaddr := nextmaddr + 1;
+    end; {dout}
+    
+  begin {dataout}
+  fname := procname;
+  if fpcom <> nil
+  then
+    if fpcom^.nkind = COMMON
+    then begin
+      makidstr(fname,fpcom^.name); fname := concat('/',fname,'/');
+      end;
+  if ModuleFlag
+  then
+    if modulename <> fname
+    then finishmodule;
+  if not ModuleFlag
+  then initmodule(fname);
+  if (fdtype.typ <> fvtype.typ) and (fdtype.typ = CHARACTER)
+  then begin
+    lattr.atype := fdtype; new(lattr.treeptr,CSTNODE);
+    lattr.treeptr^.cstvalu := fdvalu;
+    cmakesnum(lattr,fvtype);
+    fdvalu := lattr.treeptr^.cstvalu;
+    end
+  else
+    if Numeric(fvtype.typ)
+    then
+      if (fdtype.typ <> fvtype.typ) or (fdtype.siz <> fvtype.siz)
+      then begin
+        lattr.atype := fdtype; new(lattr.treeptr,CSTNODE);
+        lattr.treeptr^.cstvalu := fdvalu;
+        cmakentype(lattr,fvtype);
+        fdvalu := lattr.treeptr^.cstvalu;
+        end;
+  trick.v := fdvalu;
+  case fvtype.typ of
+    INTEGR,
+    LOGICAL:   begin
+               length := fvtype.siz;
+               if HOSTSEX = FEMALE then start := 0 else start := 4 - length;
+               end;
+    REEL:      begin length := fvtype.siz; start := 0; end;
+    COMPLEX:   begin
+               if HOSTSEX <> TARGSEX
+               then begin
+                    r := trick.v.creal; trick.v.creal := trick.v.cimag;
+                    trick.v.cimag := r;
+                    end;
+               length := 8; start := 0;
+               end;
+    CHARACTER: begin dlength := fdvalu.clen; length := fvtype.siz; end;
+  end; {case}
+  if fvtype.typ = CHARACTER
+  then begin
+    lchval := fdvalu.cval; i := 0;
+    while length > 0 do begin
+      if dlength > 0
+      then begin
+        if i >= 10
+        then begin lchval := lchval^.next; i := 0; end;
+        i := i + 1; dlength := dlength - 1;
+        dout(faddress,ord(lchval^.chpart[i]));
+        end
+      else dout(faddress,ord(' '));
+      length := length - 1; faddress := faddress + 1;
+      end;
+    end
+  else
+    if HOSTSEX <> TARGSEX
+    then for i := start + length - 1 downto start do
+             begin dout(faddress,trick.d[i]); faddress := faddress + 1; end
+    else for i := start to start + length - 1 do
+             begin dout(faddress,trick.d[i]); faddress := faddress + 1; end;
+  end; {dataout}
+  
+  function eval(fpn: pn): integer;
+    var a,b: integer;
+  begin
+  if fpn = nil
+  then eval := 1
+  else 
+    with fpn^ do
+      case node of
+        IDENTNODE: if nkind = IMPDO
+                   then eval := ivar[implev].val
+                   else eval := pvalu.ival;
+        UNNODE:    { Integer Negate }
+                   eval := -eval(unarg);
+        BINNODE:   begin a := eval(leftarg); b := eval(rightarg);
+                   case binop of
+                     64,65: eval := a + b;
+                     66,67: eval := a - b;
+                     68,69: eval := a*b;
+                     70,71: if b <> 0
+                            then eval := a div b
+                            else error(230);
+                   end; {case}
+                   end;
+        CSTNODE:   eval := cstvalu.ival;
+      end; {case}
+  end; {eval}
+  
+begin {datacode}
+
+{ Follow variable list and data list checking type compatability. }
+
+if (fdatalist <> nil) and (fvarblist <> nil)
+then begin
+  dcount := 0; vcount := 0; dolev := 0; lvarblist := fvarblist;
+  DDone := FALSE; VDone := FALSE; ModuleFlag := FALSE;
+  with ivar[0] do
+    begin val := 0; step := 1; limit := 0; vlist := nil; end;
+  repeat
+    if dcount = 0
+    then
+      if fdatalist <> nil
+      then
+        with fdatalist^ do begin
+          dcount := drnumb; dtype := drtype;
+          dvalu := drvalu; fdatalist := drnext;
+          end
+      else DDone := TRUE;
+    if vcount = 0
+    then begin
+      while (lvarblist = nil) and not VDone do
+        with ivar[dolev] do begin
+          val := val + step;
+          if (val > limit) = (step > 0)
+          then begin
+            if dolev >= 1
+              then lvarblist := midvlist
+              else VDone := TRUE;
+            dolev := dolev - 1;
+            end
+          else lvarblist := vlist;
+          end;
+      if not VDone
+      then begin
+        while lvarblist^.vkind = DLOOP do begin
+          dolev := dolev + 1;
+          with ivar[dolev] do begin
+            val := eval(lvarblist^.loloop);
+            limit := eval(lvarblist^.hiloop);
+            step := eval(lvarblist^.steploop); {Returns 1 for nil}
+            midvlist := lvarblist^.vrnext;
+            lvarblist := lvarblist^.looplist;
+            vlist := lvarblist;
+            if (val > limit) = (step > 0) then error(242);
+            end;
+          end;
+        with lvarblist^ do begin
+          lpn := vrvarb; vtype := lpn^.idtype; vcount := 1;
+          lbound := lpn^.bounds; lindex := vrindex;
+          elsize := vtype.siz; s := elsize; vaddress := lpn^.addr;
+          if SubString
+          then begin
+            if hisub > vtype.siz then lhi := vtype.siz else lhi := hisub;
+            if losub < 1 then llo := 1 else llo := losub;
+            if llo <= lhi
+            then begin 
+              vtype.siz := lhi - llo + 1; vaddress := vaddress + llo - 1;
+              end
+            else vtype.siz := 0;
+            end;
+          if lbound <> nil
+          then
+            if lindex = nil
+            then vcount := lpn^.size div lpn^.idtype.siz
+            else
+              while (lindex <> nil) and (lbound <> nil) do begin
+                i := eval(lindex^.nrec);
+                if (i < lbound^.lo.i) or (i > lbound^.hi.i)
+                then error(75);
+                vaddress := vaddress + (i - lbound^.lo.i)*s;
+                s := s*(lbound^.hi.i - lbound^.lo.i + 1);
+                lindex := lindex^.next; lbound := lbound^.next;
+                end;
+          {!!! Don't forget about the SUBSTRINGS !!!}
+          lvarblist := vrnext;
+          end; {with}
+        end; {not VDone}
+      end; {vcount = 0}
+    if not (DDone or VDone)
+    then begin
+      if dtype.typ <> vtype.typ
+      then
+        if not(Numeric(dtype.typ) and Numeric(vtype.typ))
+        then
+          if (dtype.typ <> CHARACTER) or not CharEqu
+          then error(78);
+      if vcount > dcount then l := dcount else l := vcount;
+      vcount := vcount - l; dcount := dcount - l;
+      if DumpFlag
+      then
+        for i := 1 to l do begin
+          dataout(lpn^.incommon,vaddress,vtype,dtype,dvalu);
+          vaddress := vaddress + elsize;
+          end;
+      end;
+  until DDone or VDone;
+  if not (DDone and VDone) then error(79);
+  end;
+if ModuleFlag and DumpFlag then finishmodule;
+end; {datacode}
+
+
+                                                                                                                                                                                                                                                                                              

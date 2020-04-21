@@ -1,0 +1,60 @@
+'\"macro stdmacro
+.TH UMASK 2
+.SH NAME
+umask \- set and get file creation mask
+.SH SYNOPSIS
+.PP
+.B int umask (cmask)
+.br
+.B int cmask;
+.SH DESCRIPTION
+.I Umask\^
+sets the 
+process's file mode creation mask to
+.I cmask\^
+and returns the previous value of the mask.
+Only the low-order 9 bits of
+.I cmask\^
+and the file mode creation mask are used.
+.PP
+The file mode creation mask is used whenever
+a file is created by
+.IR creat (2),
+.IR mknod (2)
+or
+.IR open (2).
+The actual mode (see
+.IR chmod (2))
+of the newly-created file is the difference 
+between the given mode and 
+.IR cmask .
+In other words, 
+.I cmask 
+shows the bits to be turned off when a new file is created.
+.PP
+The previous value of 
+.I cmask
+is returned by the call.
+The value is initially 022, which is an octal `mask'
+number representing the complement of the
+desired mode.  `022' here means that no permissions are
+withheld from the owner, but write permission is forbidden to
+group and to others.  
+Its complement, the mode of the file, would be 755.
+The file mode creation mask is inherited by child processes.
+.SH "RETURN VALUE"
+The previous value of the file mode creation mask is returned.
+.SH SEE ALSO
+mkdir(1), sh(1), chmod(2), creat(2), mknod(2), open(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#60,D0
+.B movl	cmask,A0
+.B trap	#0
+.fi
+.PP
+The previous value of umask is returned to 
+.BR D0 .
+.DT
+.\"	@(#)umask.2	5.1 of 10/19/83

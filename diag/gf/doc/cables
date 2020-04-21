@@ -1,0 +1,53 @@
+			DEVELOPMENT SYSTEM  CABLES
+
+================================================================
+alpha FBC output to UCn input
+
+FBC (50)	sig name	BPC (34)
+------------------------------------------
+1..16		FBD 0..15	1..16
+
+17..20		FBC 0..3	17..20
+
+21		REVX		21
+
+22		GND		22
+
+23		(ENABMASK)	---
+
+24		ENABFONT	32
+
+41		GND		26
+
+42		FBCREQBPC	27
+
+43		GND		28
+
+44		BPCACKFBC	29
+
+45		GND		30
+
+46		BPCVERTINT\	34
+
+47		MBI.RDPIXEL\	33
+
+50		BPSTROBE\	24
+
+
+================================================================
+GF1 output (J1)  to  alpha FBC input
+
+GF1 (34)	sig name	FBC (50)
+--------------------------------------------
+1..16		GE 0..15	1..16
+
+26		GND		41
+
+27		GEREQFBC	42
+
+28		GND		43
+
+29		FBCACKGE	44
+
+30		GND		45
+

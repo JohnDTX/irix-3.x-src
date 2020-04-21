@@ -1,0 +1,71 @@
+/*	@(#)llib-lm	2.4	*/
+/*
+ * @(#)$Header: /d2/3.7/src/usr.bin/lint/RCS/llib-lm,v 1.1 89/03/27 18:04:05 root Exp $
+ * $Log:	llib-lm,v $
+# Revision 1.1  89/03/27  18:04:05  root
+# Initial check-in for 3.7
+# 
+# Revision 1.1  85/06/13  14:35:11  bob
+# Initial revision
+# 
+ * Revision 1.2  85/01/30  22:21:34  bob
+ * Made to work (based on System V.2)
+ * 
+ */
+/*LINTLIBRARY*/
+#include <math.h>
+
+/* BESSEL(3M) */
+long float	j0(x)		long float x; { return (x); }
+long float	j1(x)		long float x; { return (x); }
+long float	jn(n, x)	long float x; { return (x); }
+long float	y0(x)		long float x; { return (x); }
+long float	y1(x)		long float x; { return (x); }
+long float	yn(n, x)	long float x; { return (x); }
+
+/* ERF(3M) */
+long float	erf(x)		long float x; { return (x); }
+long float	erfc(x)		long float x; { return (x); }
+
+/* EXP(3M) */
+float		exp(x)		float x; { return (x); }
+float		log(x)		float x; { return (x); }
+float		log10(x)	float x; { return (x); }
+float		pow(x, y)	float x, y; { return (x); }
+float		sqrt(x)		float x; { return (x); }
+
+long float	_lexp(x)	long float x; { return (x); }
+long float	_llog(x)	long float x; { return (x); }
+long float	_llog10(x)	long float x; { return (x); }
+long float	_lpow(x, y)	long float x, y; { return (x); }
+long float	_lsqrt(x)	long float x; { return (x); }
+
+/* FLOOR(3M) */
+float		floor(x)	float x; { return (x); }
+float		ceil(x)		float x; { return (x); }
+float		fmod(x, y)	float x, y; { return (x); }
+float		fabs(x)		float x; { return (x); }
+
+/* GAMMA(3M) */
+long float	gamma(x)	long float x; { return (x); }
+int	signgam;
+
+/* HYPOT(3M) */
+long float	hypot(x, y)	long float x, y; { return (x); }
+
+/* MATHERR(3M) */
+int	matherr(p) struct exception *p; { return (0); }
+
+/* SINH(3M) */
+float		sinh(x)		float x; { return (x); }
+float		cosh(x)		float x; { return (x); }
+float		tanh(x)		float x; { return (x); }
+
+/* TRIG(3M) */
+float		sin(x)		float x; { return (x); }
+float		cos(x)		float x; { return (x); }
+float		tan(x)		float x; { return (x); }
+float		asin(x)		float x; { return (x); }
+float		acos(x)		float x; { return (x); }
+float		atan(x)		float x; { return (x); }
+float		atan2(x, y)		float x, y; { return (x); }

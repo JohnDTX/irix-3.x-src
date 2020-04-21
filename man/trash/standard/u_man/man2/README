@@ -1,0 +1,3 @@
+The file xnsioctl.2 was copied from a directory
+on called /oh5p/pubs/net/xns/man3.  Since ioctl(2) is
+in section 2, it seem a likely place for xnsioctl.

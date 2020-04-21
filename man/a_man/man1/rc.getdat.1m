@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH RC.GETDATE 1M
+.SH NAME
+rc.getdate \- user-configurable system date initialization 
+.SH SYNOPSIS
+.PP
+.B /etc/rc.getdate
+.SH DESCRIPTION
+A mechanism for setting the IRIS date automatically is provided.
+If 
+.I bcheckrc
+(see
+.IR (brc (1M))
+finds an executable file
+.BR /etc/rc.getdate ,
+the standard output of its execution is used as the argument
+to 
+.IR date (1),
+i.e.
+.sp
+.in +.5i
+date `/etc/rc.getdate`
+.in
+.sp
+A sample
+.I rc.getdate
+is provided as part of the release.
+It gets the date over the network from an IRIS designated to be a date
+server.
+To use it, simply edit in the hostname of the date server.
+.SH SEE ALSO
+brc(1M),
+date(1).
+.\" $Source: /d2/3.7/src/man/a_man/man1/RCS/rc.getdat.1m,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:21:21 $

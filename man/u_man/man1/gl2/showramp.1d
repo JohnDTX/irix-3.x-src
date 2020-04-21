@@ -1,0 +1,32 @@
+'\"macro stdmacro
+.TH SHOWRAMP 1D
+.SH NAME
+showramp \- interactive color ramp
+.SH SYNOPSIS
+.B /usr/people/mexdemos/showramp  
+.SH DESCRIPTION
+.PP
+.I showramp
+is an interactive window with three Gouraud-shaded rectangles.
+The rectangles are smoothly colored using adjacent 
+color indices which form a color ramp in the
+colormap.
+.PP
+Select the 
+.I showramp 
+window.
+Move the cursor to the lower color (usually on
+.IR showmap )
+press and release the left mouse button.
+Move the cursor to the high color and repeat.
+Move the cursor to
+.I showramp
+and press and release the middle mouse button.
+.I showramp
+now displays the range of colors in the three 
+rectangles.
+.SH "SEE ALSO"
+showmap(1W), cedit(1W), interp(1D)
+.SH AUTHOR
+Henry Moreton
+

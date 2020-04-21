@@ -1,0 +1,6 @@
+There is one directory maintained for each of the libraries.
+
+A MAKE of "all" or "install" will automatically make both the regular and
+the profiled libraries.
+
+This is currently implemented only for curses and termcap.

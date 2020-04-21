@@ -1,0 +1,158 @@
+'\"macro stdmacro
+.TH CTIME 3C
+.SH NAME
+ctime, localtime, gmtime, asctime, tzset \- convert date and time to string
+.SH SYNOPSIS
+.nf
+.B #include <time.h>
+.PP
+.B char \(**ctime (clock)
+.B long \(**clock;
+.PP
+.B struct tm \(**localtime (clock)
+.B long \(**clock;
+.PP
+.B struct tm \(**gmtime (clock)
+.B long \(**clock;
+.PP
+.B char \(**asctime (tm)
+.B struct tm \(**tm;
+.PP
+.B extern long timezone;
+.PP
+.B extern int daylight;
+.PP
+.B extern char \(**tzname[2];
+.PP
+.B void tzset ( )
+.SH DESCRIPTION
+.I Ctime\^
+converts a long integer, pointed to by
+.IR clock ,
+representing the time in seconds since
+00:00:00 GMT, January 1, 1970,
+and returns a pointer to a
+26-character string
+in the following form.
+All the fields have constant width.
+.PP
+.RS
+Sun Sep 16 01:03:52 1973\\n\\0
+.RE
+.PP
+.I Localtime\^
+and
+.I gmtime\^
+return pointers to ``tm'' structures, described below.
+.I Localtime\^
+corrects for the time zone and possible Daylight Savings Time;
+.I gmtime\^
+converts directly to Greenwich Mean Time (\s-1GMT\s0), which is the
+time the \s-1UNIX\s0 System uses.
+.PP
+.I Asctime\^
+converts a ``tm'' structure to a 26-character string,
+as shown in the above example,
+and returns a pointer
+to the string.
+.PP
+Declarations of all the functions and externals, and the ``tm'' structure,
+are in the
+.I <time.h>\^
+header file.
+The structure declaration is:
+.PP
+.RS .3i
+.nf
+.ta \w'struct\ 'u +\w'int tm_mday;\ \ \ 'u
+struct	tm {
+	int tm_sec;	/\(** seconds (0 - 59) \(**/
+	int tm_min;	/\(** minutes (0 - 59) \(**/
+	int tm_hour;	/\(** hours (0 - 23) \(**/
+	int tm_mday;	/\(** day of month (1 - 31) \(**/
+	int tm_mon;	/\(** month of year (0 - 11) \(**/
+	int tm_year;	/\(** year \- 1900 \(**/
+	int tm_wday;	/\(** day of week (Sunday = 0) \(**/
+	int tm_yday;	/\(** day of year (0 - 365) \(**/
+	int tm_isdst;
+};
+.fi
+.RE
+.PP
+.I Tm_isdst\^
+is non-zero if Daylight Savings Time is in effect.
+.PP
+The external
+.B long
+variable
+.I timezone\^
+contains the difference, in seconds, between \s-1GMT\s0 and local
+standard time (in \s-1EST\s0,
+.I timezone\^
+is 5\(**60\(**60);
+the external variable
+.I daylight\^
+is non-zero if and only if the standard
+.SM U.S.A.
+Daylight Savings Time conversion should be applied.
+The program knows about the peculiarities
+of this conversion in 1974 and 1975;
+if necessary,
+a table for these years can be extended.
+.PP
+If an environment variable named
+.SM
+.B TZ
+is present,
+.I asctime\^
+uses the contents of the variable to override the default time
+zone.
+The value of
+.SM
+.B TZ
+must be a three-letter time zone name, followed by a number
+representing the difference between local time and Greenwich Mean
+Time in hours, followed by an optional three-letter name for
+a daylight time zone.
+For example, the setting for New Jersey would be
+.SM
+.BR EST5EDT .
+The effects of setting
+.SM
+.B TZ
+are thus to change the values of the external variables
+.I timezone\^
+and
+.IR daylight ;
+in addition, the time zone names contained in the external variable
+.PP
+.B
+ 	char \(**tzname[2] = { "\s-1EST\s0", "\s-1EDT\s0" };
+.PP
+are set from the environment variable
+.SM
+.BR TZ .
+The function
+.I tzset\^
+sets these external variables from
+.SM
+.BR TZ ;
+.I tzset\^
+is called by
+.I asctime\^
+and may also be called explicitly by the user.
+.PP
+.PP
+Note that in most installations,
+.SM
+.B TZ
+is set by default when the user logs on,
+to a value in the local /etc/TZ file
+(see
+.IR profile\^ (4)).
+.SH "SEE ALSO"
+time(2), getenv(3C), profile(4), environ(5).
+.SH BUGS
+The return values point to static data
+whose content is overwritten by each call.
+.\"	@(#)ctime.3c	5.1 of 11/1/83

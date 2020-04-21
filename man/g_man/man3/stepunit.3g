@@ -1,0 +1,60 @@
+.TH stepunit 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B stepunit 
+\- specifies that a graphics window change size in discrete steps
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "stepunit(xunit, yunit)"
+.B "long xunit, yunit;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine stepun(xunit, yunit)"
+.B "integer*4 xunit, yunit"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure stepunit(xunit, yunit: longint);"
+.SH DESCRIPTION
+.B stepunit
+specifies that the size of a graphics window change in discrete steps of
+.I xunit
+in the \f2x\fP direction and
+.I yunit
+in the \f2y\fP direction.
+Call
+.B stepunit
+at the beginning of a graphics program; 
+it takes effect when
+.B winopen 
+is called.
+.B stepunit
+resizes graphics windows
+in units of a standard size (in pixels).
+When 
+.B stepunit
+is called, the dimensions of the graphics window are:
+.sp
+.nf
+.in +0.5i
+\f3width \s9=\s0 xunit\(**n
+height \s9=\s0 yunit\(**m
+.in -0.5i
+.fi
+.sp
+\f1If
+.B winopen 
+is not called, or if the system is not running the window manager,
+.B stepunit
+is ignored.
+.SH "SEE ALSO"
+fudge, winopen 
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,12 @@
+Steve Nelson, Unisoft, made the following changes to accounting:
+	(10/11/83)
+1. Changed runacct.sh to check if /usr is not
+	a separately mountable file system before checking if
+	there are not enough blocks to run accounting. If no mountable /usr,
+	then check for space in /.
+2. Same changes were made to ckpacct.sh
+3. In runacct.sh in two places where a bourne shell for construct
+	used a wild card * to expand to filenames, no check was
+	made for files not existing, in which case for loop runs
+	exactly once with parameter expanded to filename with literal "*"
+	in it.  A check is now made for a case of name with literal "*".

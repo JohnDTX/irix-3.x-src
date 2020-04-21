@@ -1,0 +1,100 @@
+'\"macro stdmacro
+.TH T3279 1C 
+.SH NAME
+t3279 \- IBM 3270 terminal emulator
+.SH SYNOPSIS
+\f3t3279 [ \f1\-dgiotvz\f3 ] [ \f1inputfile\f3 ]\f1
+.SH DESCRIPTION
+The \f2t3279\f1 program (1) presents a 24-item menu to allow the user to 
+(2) emulate a 3278/9 terminal, (3) execute mainframe program remote graphics,
+(4) send a binary file from mainframe to IRIS or IRIS to mainframe.
+The menu items (5) and (6) are used for Geometry Link hardware diagnosis.
+Items (7) and greater are useful for application development.  Item
+(19) is useful if the mainframe does not seem to respond to your
+keystrokes.  It emulates the ``test'' switch on a 3278 and causes a
+``Device End'' Interrupt on the channel.  CTRL-T emulates the ``test
+key'' on the 3278 keyboard.
+.sp
+.B OPTIONS
+.TP
+.B \-d 
+log the 3278 screen text in \f2pxlog\f1
+.TP
+.B \-g
+log the RGL annotations in \f2LOGFILE.x\f1
+.TP
+.B \-i
+RGL input is from \f2inputfile\f1, an \f2RDDATA\f1 type file
+.TP
+.B \-o
+create read/write logs \f2RDDATA.x\f1 and \f2WRDATA.x\f1 of the RGL
+.TP
+.B \-t
+use 3278 textport emulation rather than graphport
+.TP
+.B \-v
+use v50 emulation of 3278 textport rather than graphport
+.TP
+.B \-z
+interpret RGL \f2ginit\f1 commands as \f2gbegin\f1
+.sp
+.PP
+.sp
+.B APPLICATION DEVELOPMENT
+.TP
+Item (7) - hextype a file with selected conversion
+.TP
+.B \-a
+ascii
+.TP
+.B \-e
+ebcdic
+.TP
+.B \-o
+ASCII with RGL highlight (10 and 7e)
+.TP
+Item (8) - select 3278 type of emulation
+.TP
+.B \-g
+graphport 
+.TP
+.B \-t
+textport
+.TP
+.B \-v
+v50 textport keys
+.TP
+Item (11) - open logging option
+.TP
+.B \-d
+3278 text
+.TP
+.B \-g
+graphic LOGFILE
+.TP
+.B \-o
+RDDATA log
+.TP
+Item (12) - closes logging option
+.TP
+.B \-d
+close \f2pxlog\f1
+.TP
+.B \-g
+close \f2LOGFILE.x\f1
+.TP
+.B \-o
+close \f2RDATA.x\f1, \f2WRDATA.x\f1, \f2MSGDATA.x\f1
+.TP
+Item (17) - derive a text file for transfer from the input textfile.
+The new file has an uppercase name, and all tabs, linefeeds, and
+formfeeds are removed.
+.TP
+Item (33) - same as 3 (RGL), with keyboard L1 for read data
+.TP
+Item (34) - same as 4 (UDT), with keyboard L1 for read data
+.SH FILES
+.ta \w'/dev/pxd   'u
+/dev/pxd	Geometry Link device
+.SH SEE ALSO
+wsiris(1C)

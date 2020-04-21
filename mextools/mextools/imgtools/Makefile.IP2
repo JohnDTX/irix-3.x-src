@@ -1,0 +1,15 @@
+INCLUDES = -I../include -I/usr/include/gl2
+CFLAGS = -Zg -O -DUNIX -DIP2
+LIBS = ../imglib/libimage.a ../portlib/libport.a
+ALL = capture clip dither hist imged ipaste iset istat loadmap mapimg \
+	melt movie readimage rle savemap showci shrink snap tobw verbatim
+
+all: $(ALL)
+
+clean:
+	rm -f $(ALL) *.o
+
+install: all
+
+.c:
+	cc $(CFLAGS) $(INCLUDES) -o $@ $< $(LIBS)

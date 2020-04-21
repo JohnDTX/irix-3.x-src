@@ -1,0 +1,38 @@
+.TH getdepth 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getdepth
+\- returns the parameters of 
+.B setdepth
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getdepth(near, far)"
+.B "Screencoord *near, *far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getdep(near, far)"
+.B "integer*2 near, far"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getdepth(var near, far: Screencoord);"
+.SH DESCRIPTION
+.B getdepth
+returns the
+.I near
+and
+.I far
+parameters of
+\f3setdepth\fP.
+.SH "SEE ALSO"
+setdepth
+.sp
+.I Programming Guide,
+Section 12.1, Z-Buffer Mode
+.SH NOTE
+This routine is available only in immediate mode.

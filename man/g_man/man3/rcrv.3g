@@ -1,0 +1,40 @@
+.TH rcrv 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rcrv
+\- draws a curve
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rcrv(geom)"
+.B "Coord geom[4][4];"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rcrv(geom)"
+.B "real geom(4,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rcrv(var geom: Coord);"
+.IP
+.SH DESCRIPTION
+.B rcrv
+draws a rational 
+cubic spline curve segment using the current curve
+basis and precision. 
+.I geom
+specifies the four control points of the curve segment.
+.SH "SEE ALSO"
+crv,
+crvn,
+curvebasis, 
+curveprecision, 
+defbasis, 
+rcrvn
+.sp
+.I Programming Guide,
+Section 11.2, Drawing Curves

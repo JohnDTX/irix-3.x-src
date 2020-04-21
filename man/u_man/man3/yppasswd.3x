@@ -1,0 +1,59 @@
+'\"macro stdmacro
+.TH YPPASSWD 3X
+.SH NAME
+yppasswd \- update Yellow Pages user password
+.SH SYNOPSIS
+.nf
+.B #include <rpcsvc/yppasswd.h>
+.PP
+.B yppasswd(oldpass, newpw)
+.B char *oldpass;
+.B struct passwd *newpw;
+.fi
+.SH DESCRIPTION
+If
+.I oldpass
+is indeed the old user password,
+this routine replaces the password entry with
+.IR newpw .
+It returns 0 if successful.
+.SH RPC INFO
+.nf
+program number:
+	YPPASSWDPROG
+.PP
+xdr routines:
+	xdr_passwd(xdrs, yp)
+		XDR *xdrs;
+		struct yppasswd *yp;
+	xdr_yppasswd(xdrs, pw)
+		XDR *xdrs;
+		struct passwd *pw;
+procs:
+	YPPASSWDPROC_UPDATE
+		Takes \f2struct yppasswd\fP as argument, returns integer.
+		Same behavior as \f2yppasswd()\fP wrapper.
+		Uses UNIX authentication.
+versions:
+	YPPASSWDVERS_ORIG
+.PP
+structures:
+	struct yppasswd {
+		char *oldpass;	/* old (unencrypted) password */
+		struct passwd newpw;	/* new pw structure */
+	};
+.fi
+.SH FILES
+.ta \w'/usr/lib/librpcsvc.a\0\0\0'u
+/usr/lib/librpcsvc.a	RPC services library
+.br
+/usr/lib/libsun.a	RPC protocol library
+.SH SEE ALSO
+yppasswd(1), rpc.passwd(1M).
+.bp
+.SH NOTE
+To compile and link a program that calls any of these routines,
+use a compile command of the form:
+.RS
+\f3cc \-I/usr/include/sun \-I/usr/include/bsd \f2prog.c\f3 \-lrpcsvc \-lsun \-lbsd\f1
+.RE

@@ -1,0 +1,55 @@
+all:	ismex whichmex 
+	@echo "You should probably do a make clean before installation"
+	-rm -rf online workshop
+	-mkdir online 
+	-mkdir workshop
+	TUTOR=`pwd`; export TUTOR; ZF=''; export ZF; \
+		LANGUAGE='FORTRAN'; export LANGUAGE;cd src; make 
+	TUTOR=`pwd`; export TUTOR; ZF=''; export ZF; cd explore; make 
+	@echo "installation completed"
+
+install: ismex whichmex
+	@echo "You should probably do a make clean before installation"
+	-rm -rf online workshop
+	-mkdir online 
+	-mkdir workshop
+	TUTOR=`pwd`; export TUTOR; ZF=''; export ZF; \
+		LANGUAGE='FORTRAN'; export LANGUAGE;cd src; make install
+	TUTOR=`pwd`; export TUTOR; ZF=''; export ZF; cd explore; make install
+	@echo "installation completed"
+
+float:  ismex whichmex
+	@echo "Programs will be compiled using the floating point board"
+	@echo "You should probably do a make clean before installation"
+	-rm -rf online workshop
+	-mkdir online 
+	-mkdir workshop
+	TUTOR=`pwd`; export TUTOR; ZF='-Zf'; export ZF; \
+		LANGUAGE='FORTRAN'; export LANGUAGE;cd src; make install
+	TUTOR=`pwd`; export TUTOR; ZF='-Zf'; export ZF; cd explore; make install
+	@echo "installation completed"
+
+sales:  ismex whichmex
+	@echo "Make on line environments for salesperson demonstration"
+	-rm -rf online
+	-mkdir online
+	TUTOR=`pwd`; export TUTOR; LANGUAGE='FORTRAN'; export LANGUAGE; \
+		cd src; make sales
+	@echo "installation completed"
+
+clean:
+	rm -f whichmex ismex
+	cd src; make clean
+	cd explore; make clean
+	@echo "make clean completed"
+
+neat:
+	cd src; make neat
+	cd explore; make neat
+	@echo "make neat completed"
+
+whichmex:	whichmex.c 
+	cc -I. -I/usr/include whichmex.c -o whichmex -Zg
+
+ismex:	ismex.c
+	cc -I/usr/include/gl2 ismex.c -o ismex -Zg

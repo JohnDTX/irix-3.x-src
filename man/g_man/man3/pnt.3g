@@ -1,0 +1,76 @@
+.TH pnt 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pnt
+\- draws a point
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pnt(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "pnti(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "pnts(x, y, z) "
+.B "Scoord x, y, z;"
+.IP 
+.B "pnt2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "pnt2i(x, y) "
+.B "Icoord x, y;"
+.IP 
+.B "pnt2s(x, y) "
+.B "Scoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pnt(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine pnti(x, y, z)"
+.B "integer*4 x, y, z"
+.IP 
+.B "subroutine pnts(x, y, z)"
+.B "integer*2 x, y, z"
+.IP 
+.B "subroutine pnt2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine pnt2i(x, y)"
+.B "integer*4 x, y"
+.IP 
+.B "subroutine pnt2s(x, y)"
+.B "integer*2 x, y"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pnt(x, y, z: Coord);"
+.IP
+.B "procedure pnti(x, y, z: Icoord);"
+.IP
+.B "procedure pnts(x, y, z: Scoord);"
+.IP
+.B "procedure pnt2(x, y: Coord);"
+.IP
+.B "procedure pnt2i(x, y: Icoord);"
+.IP
+.B "procedure pnt2s(x, y: Scoord);"
+.SH DESCRIPTION
+.B pnt
+colors a point in world coordinates.  If the point is
+visible in the current viewport,
+it is shown as one pixel.  The pixel is drawn
+in the current color (if in depth-cue mode, the depth-cued
+color is used) using the current writemask.  \f3pnt\f1 updates the current
+graphics position after it executes.
+.SH "SEE ALSO"
+draw, move
+.sp
+.I Programming Guide,
+Section 3.3, Points

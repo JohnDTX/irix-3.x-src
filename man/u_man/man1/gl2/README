@@ -1,0 +1,8 @@
+The following man pages only work in gl2:
+	colordemos.1d
+	mex.1g
+	shuttle.1d
+	zshadecar.1d
+These files should be moved into the gl2
+directory before giving the release of on-line
+man pages to the release group.	

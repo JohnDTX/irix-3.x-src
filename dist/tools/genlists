@@ -1,0 +1,38 @@
+#! /bin/sh
+#
+# Generate lists.  This is done by passing the appropriate arguments to
+# the genlist script, which generates a single list.  The arguments select
+# the proper files out of the database, including exclusion of the "wrong"
+# files (e.g. exclude 2000 files when making lists for 3000).
+#
+# The genlist script normally plugs in "@", "-", and "+", based on the
+# after, config, and shared attributes (respectively).  The "-u" option
+# to genlist suppresses this, giving straight file names.
+
+update=" upd man games demos gltut gifts mail"
+
+options=" dist ftn pas nfs xns troff sys sysnfs "
+
+special=" root usr ftnpas "
+
+case $1 in
+iris)
+	flag="!@3000"
+	;;
+juniper)
+	flag="!@2000"
+	;;
+esac
+
+for f in $update $options
+do
+	echo $f
+	./genlist "$f && $flag" > list.$f
+done
+
+echo ftnpas
+./genlist "ftn && pas && $flag" > list.ftnpas
+echo root
+./genlist -u "root && $flag" > list.root
+echo usr
+./genlist -u "usr && $flag" > list.usr

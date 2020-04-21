@@ -1,0 +1,33 @@
+.TH transform 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I transform
+- transform floating point coordinates and return results
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "transform(n, pretrans, postrans) "
+.B "long n; "
+.B "Coord pretrans[][4], postrans[][4];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine transf(n, pretra, postra)"
+.B "integer n"
+.B "real pretra(4,n), postra(4,n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure transform(n: integer; var pretrans, postrans: Coord4array);"
+.sp
+.SH DESCRIPTION
+.I Transform
+is a special case of \f2clippnt\f1 with no clipping
+planes enabled.  Each point in \f3pretrans\f1 is multiplied by
+the current transformation matrix and returned in \f3postrans\f1.  Since no
+points are clipped, all entries in \f2postrans\f1 are valid transformed
+data.
+.SH "SEE ALSO"
+.I clipline, clippnt, clippoly
+.SH NOTE
+This command can only be used in immediate mode.

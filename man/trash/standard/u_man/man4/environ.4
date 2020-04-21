@@ -1,0 +1,99 @@
+.TH ENVIRON 4
+.SH NAME
+environ \- user environment
+.SH SYNOPSIS
+.B extern char **environ;
+.SH DESCRIPTION
+An array of strings called the ``environment'' is
+made available by
+.IR exec (2)
+when a process begins.
+By convention these strings have the form
+name \= value .
+The following names are used by various commands:
+.TP "\w'\s-1LOGNAME\s+1\ \ 'u"
+\s-1PATH\s+1
+The sequence of directory prefixes that
+.IR sh (1), 
+.IR time (1),
+.IR nice (1),
+etc.,
+apply in searching for a file known by an incomplete path name.
+The prefixes are separated by ':'.
+.br
+.IR login (1)
+sets :
+.PD 0
+.TP
+\&
+.RS 2.5i
+\s-1PATH\s+1=:/bin:/usr/bin
+.RE
+.PD
+.TP
+\s-1HOME\s+1
+A user's login directory, set by
+.IR login (1)
+from the password file
+.IR passwd (4).
+.TP
+\s-1TERM\s+1
+The kind of terminal for which output is to be prepared.
+This information is used by commands, such as
+.I nroff,
+.I more,
+or
+.I vi,
+which may exploit special terminal capabilities.
+See
+\f2termcap\fP(4) and \f2tset\fP(1)
+for a list of terminal types.
+.TP
+\s-1SHELL\s+1
+The file name of the user's login shell.
+.TP
+\s-1TERMCAP\s+1
+The string describing the terminal in \s-1TERM\s+1,
+or the name of the termcap file, see
+.IR termcap (4).
+.TP
+\s-1EXINIT\s+1
+A startup list of commands read by
+.IR ex (1),
+.IR edit,
+and
+.IR vi (1).
+.TP
+\s-1USER\s+1
+The login name of the user.
+.TP
+\s-1LOGNAME\s+1
+The login name of the user.
+.TP
+\s-1MAIL\s+1
+The user's mailbox.
+.TP
+\s-1TZ\s+1
+The user's time zone.
+.PP
+Further names may be placed in the environment by
+the
+.I export
+command and name\=value arguments in
+.IR sh (1),
+or by the
+.I setenv
+command if you use
+.IR csh (1).
+Arguments may also be placed in the environment at the point of an
+.IR exec (2).
+It is unwise to conflict with
+certain 
+.IR sh (1)
+variables that are frequently exported by
+``.profile'' files:
+\s-1MAIL, PS1, PS2, IFS\s+1.
+.SH SEE ALSO
+csh(1), ex(1), login(1), mail(1), sh(1), tset(1), exec(2),
+system(3S), TZ(4), termcap(4), tty(7).
+.\"	@(#)environ.4	5.1 of 10/23/83

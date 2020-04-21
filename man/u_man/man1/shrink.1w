@@ -1,0 +1,22 @@
+'\"macro stdmacro
+.TH SHRINK 1W
+.SH NAME
+shrink \- shrink an image
+.SH SYNOPSIS
+.B shrink 
+shrinkfactor imagein imageout
+.SH DESCRIPTION
+.I
+shrink
+uses pixel averaging to shrink the image in 
+.I imagein
+by a factor of
+.I shrinkfactor.
+.I shrinkfactor
+must be an integer value.  Since 
+.I shrink
+uses pixel averaging,
+shrinking screen or dithered images can produce
+peculiar results.
+
+

@@ -1,0 +1,28 @@
+#! /bin/sh
+echo $ROOT
+if test $# != 2
+then
+	echo usage: mktree destdir list
+	exit 1
+fi
+
+if test ! -d $1/ ; then mkdir $1 ; fi
+
+awk '{print $4}' $2 | ( cd $1 ; while read f; do if [ ! -d $f ];\
+ then mkdir $f; fi done) 
+
+for a in `awk '{print $1}' $2 | sort -u`
+do
+	awk "\$1 ~ /$a/ {print \$4}" $2 | (cd $1/ ; xargs -t chmod $a)
+done
+
+for a in `awk '{print $3}' $2 | sort -u`
+do
+	awk "\$3 ~ /^$a\$/ {print \$4}" $2 | (cd $1/; xargs -t chgrp $a)
+done
+
+for a in `awk '{print $2}' $2 | sort -u`
+do
+	awk "\$2 ~ /^$a\$/ {print \$4}" $2 | (cd $1/ ; xargs -t chown $a)
+done
+

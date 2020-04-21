@@ -1,0 +1,48 @@
+.TH prefsize 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B prefsize 
+\- specifies the preferred size of a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "prefsize(x, y)"
+.B "long x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine prefsi(x, y)"
+.B "integer*4 x, y"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure prefsize(x, y: longint);"
+.SH DESCRIPTION
+.B prefsize
+specifies the preferred size of a graphics window as
+.I x
+pixels by
+.I y
+pixels.
+Call 
+.B prefsize
+at the beginning of a graphics program that runs under the window manager.
+.PP
+Use
+.B prefsize
+with 
+.B winconstraints
+to modify the enforced window size after the window has been created.
+.B prefsize
+is ignored if
+.B winopen 
+is not called or if the window manager is not running.
+.SH "SEE ALSO"
+winconstraints, winopen
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

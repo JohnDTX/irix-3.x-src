@@ -1,0 +1,37 @@
+'\"#ident	"@(#)shells:pic.forms	1.4"
+.P
+The forms that \fIpic\fR provides are
+.sp 2
+.in +1i
+.PS
+circle "circle"; move; box "box"; move; arrow "arrow" above
+.PE
+.sp 2
+.PS
+ellipse "ellipse"; move; line "line" above; move; arc "arc"
+.PE
+.in -1i
+.P
+\fIpic\fR's language is intuitive, so making your own forms is not hard.  For instance,
+you can talk to \fIpic\fR as you would to someone drawing shapes with a pencil:
+.PS
+.in +0.3i
+ellipse; line right; arc; arc; arc; line down 1i; circle; arrow right; box dashed
+line right; line dotted right; arc; arrow dashed; box "There."
+.PE
+.in -0.3i
+Since you can store these instructions in special commands, you are able to compile a
+personal library of shapes, naming them whatever you like:
+.DS I
+input_output
+molecular_struct
+solar_system
+.DE
+And these you can even tailor later to suit your particular needs in any document.
+For instance, the following example might be used to demonstrate the concept of processing:
+.in +0.75i
+.sp 1
+.PS
+box "input"; arrow; ellipse "processing"; arrow; box "output"
+.PE
+.in -0.75i

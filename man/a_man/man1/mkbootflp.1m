@@ -1,0 +1,35 @@
+'\"macro stdmacro
+.TH MKBOOTFLP 1M
+.SH NAME
+mkbootflp \- create a bootable unix floppy disk
+.SH SYNOPSIS
+.B /etc/mkbootflp
+.SH DESCRIPTION
+.I Mkbootflp
+is used to create a floopy disk from which an IRIS can be booted.
+It first makes a filesystem on the floppy and mounts it.
+It then copies the kernel,
+.IR /vmunix ,
+and the other files needed to boot from the floppy.
+Finally, it patches the kernel on the floppy
+to expect the root filesystem to be on 
+.IR /dev/mf0a .
+.PP
+The floppy created by
+.I mkbootflp
+is used when building a UNIX on a hard disk from floppies.
+.PP
+This program can only be run by the super-user.
+The floppy must already have been formatted using
+.IR flp (1)
+before running
+.IR mkbootflp .
+.SH FILES
+.ta \w'/dev/mf0a   'u
+.nf
+/vmunix	kernel
+/dev/mf0a	floppy disk
+.fi
+.SH SEE ALSO
+adb(1), flp(1), flpuxfer(1M).
+

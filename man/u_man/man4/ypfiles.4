@@ -1,0 +1,101 @@
+'\"macro stdmacro
+.TH YPFILES 4
+.SH NAME
+ypfiles \- the yellowpages database and directory structure
+.SH DESCRIPTION
+The yellow pages (YP) network lookup service uses a database of
+.I dbm (3X)
+files in the directory hierarchy at
+.I /usr/etc/yp .
+A
+.I dbm
+database consists of two files, created by calls to the
+.IR dbm (3X)
+library package.  One has the filename extension
+.I .pag
+and the other has the filename extension
+.IR .dir .
+For instance, the database named
+.IR hosts.byname ,
+is implemented by the pair of files
+.I hosts.byname.pag
+and
+.IR hosts.byname.dir .
+A
+.I dbm
+database served by the YP is called a YP 
+.IR map .
+A YP
+.I domain
+is a named set of YP maps.  
+Each YP domain is implemented as a subdirectory of
+.I /usr/etc/yp 
+containing the map.
+Any number of YP domains can exist.  Each may contain any number of 
+maps.
+.LP
+No maps are required by the YP lookup service itself, although they may
+be required for the normal operation of other parts of the system.  There is
+no list of maps which YP serves - if the map exists in a given domain, and a
+client asks about it, the YP will serve it.  For a map to be
+accessible consistently, it must exist on all YP servers that serve the
+domain.  To provide data consistency between the replicated maps,
+an  entry to run 
+.I ypxfr
+periodically should be made in
+.I /usr/lib/crontab
+on each server.  More information on this topic is in \f2ypxfr\f1(1M).
+.LP
+YP maps should contain two distinguished key-value pairs.  The first is
+the key YP_LAST_MODIFIED, having as a value a ten-character 
+ASCII order number.  The order number should be the \s-2UNIX\s0 time 
+in seconds when the map was built.  The second key is YP_MASTER_NAME, 
+with the name of the YP master server as a value.  
+.IR makedbm 
+generates both key-value pairs automatically.
+A map that does not contain both key-value pairs can be served by 
+the YP, but the 
+.I ypserv 
+process will not be able to return values for "Get order
+number" or "Get master name" requests.  
+In addition, values of these two keys are used by
+.I ypxfr 
+when it transfers a map from a master YP server to a slave.  
+If 
+.I ypxfr 
+cannot figure out where to get the map, or if it is unable to
+determine whether the local copy is more 
+recent than the copy at the master, you must set extra command line 
+switches when you run it.
+.LP
+YP maps must be generated and modified only at the master server.  They
+are copied to the slaves using 
+.IR ypxfr (1M)
+to avoid potential byte-ordering problems among YP servers running on
+machines with different architectures, and to minimize the amount of disk
+space required for the dbm files.  The YP database can be initially
+set up for both masters and slaves by using
+.IR ypinit (1M).
+.LP
+After the server databases are set up, it is probable that the contents of
+some maps will change.  In general, some ASCII source version of the
+database exists on the master, and it is changed with a standard text
+editor.  The update is incorporated into the YP map and is propagated from
+the master to the slaves by running 
+.I /usr/etc/yp/Makefile .
+All NFS-supplied maps have entries in 
+.I /usr/etc/yp/Makefile ;
+if you add a YP map, edit the this file to support the new map.
+The makefile uses 
+.I makedbm 
+to generate the YP map on the master, and
+.I yppush 
+to propagate the changed map to the slaves.  
+.I yppush
+is a client of the map
+.I ypservers ,
+which lists all the YP servers.  
+For more information on this topic, see \f2yppush\f1(1M).
+.SH "SEE ALSO"
+makedbm(1M), ypinit(1M), ypmake(1M), ypxfr(1M), yppush(1M), yppoll(1M), 
+ypserv(1M), rpcinfo(1M)

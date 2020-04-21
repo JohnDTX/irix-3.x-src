@@ -1,0 +1,73 @@
+.TH winopen 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winopen
+\- creates a graphics window
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long winopen(name)"
+.B "char name[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function winope(name,length)"
+.B "character*(*) name"
+.B "integer*4 length
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function winopen(name: pstring128): longint;"
+.SH DESCRIPTION
+.B winopen
+creates a graphics window. 
+Before calling
+\f3winopen\fP,
+the characteristics 
+of the graphics window must be specified by
+\f3minsize\fP,
+\f3maxsize\fP, 
+\f3keepaspect\fP, 
+\f3prefsize\fP, 
+\f3prefposition\fP, 
+\f3stepunit\fP,
+\f3fudge\fP, 
+and
+\f3foreground\fP.
+This will initialize graphics the first time it is called in a
+program.
+.PP
+.B winopen
+returns a small integer value (\f2gid\f1) identifying the graphics
+window, or \-1 if no
+additional graphics windows are available.
+The new window inherits the state of the current graphics window, and
+replaces it as the current window.
+If no window characteristics are specified 
+or if the description is incomplete, 
+the window manager
+prompts you for the missing information.
+Use the cursor to show the size and location of the
+graphics window.
+.sp
+\f2name\fP specifies the window \f2.deskconfig\fP uses to
+refer to the window.
+.sp
+In FORTRAN, there is an extra argument,
+.I length,
+which is the number of characters in the name string.
+.sp
+.B winopen
+queues the pseudo devices INPUTCHANGE and REDRAW.
+.SH "SEE ALSO"
+foreground, fudge, keepaspect, maxsize, minsize, 
+noport, prefposition, prefsize, stepunit,
+winclose
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode under the window manager. 
+ 

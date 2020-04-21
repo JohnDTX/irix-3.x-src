@@ -1,0 +1,171 @@
+'\"macro stdmacro
+.TH SORT 1
+.SH NAME
+sort \- sort and/or merge files
+.SH SYNOPSIS
+.B sort
+.RB [ \-cmubdf\|inrt x]
+.RB [ + pos1
+.RB [ \- pos2]]
+.B \&.\|.\|.
+.RB [ \-o "\ output]"
+[names]
+.SH DESCRIPTION
+.I Sort\^
+sorts
+lines of all the named files together
+and writes the result on
+the standard output.
+The name
+.B \-
+means
+the standard input.
+If no input files are named, the standard input is sorted.
+.PP
+The default sort key is an entire line.
+Default ordering is
+lexicographic by bytes in machine
+collating sequence.
+The ordering is affected globally by the following options,
+one or more of which may appear.
+.TP "\w'\f3t\|\f2x\f1\ \ \ 'u"
+.B b
+Ignore leading blanks (spaces and tabs) in field comparisons.
+.TP
+.B d
+"Dictionary" order: only letters, digits and blanks
+are significant in comparisons.
+.TP
+.B f
+Fold upper case
+letters onto lower case.
+.TP
+.B i
+Ignore characters outside the
+.SM ASCII
+range 040-0176
+in non-numeric comparisons.
+.TP
+.B n
+An initial numeric string,
+consisting of optional blanks, optional minus sign,
+and zero or more digits with optional decimal point,
+is sorted by arithmetic value.
+Option
+.B n
+implies option
+.BR b .
+.TP
+.B r
+Reverse the sense of comparisons.
+.TP
+.BI t\| x\^
+"Tab character" separating fields is
+.IR x .
+.PP
+The notation
+.BI + "pos1 " \- pos2\^
+restricts a sort key to a field beginning at
+.I pos1\^
+and ending just before
+.IR pos2 .
+.I Pos1\^
+and
+.I pos2\^
+each have the form
+.IB m .\| n\^\f1,
+optionally followed by one or more of the flags
+.BR bdf\|inr ,
+where
+.I m\^
+tells a number of fields to skip from the beginning of the line and
+.I n\^
+tells a number of characters to skip further.
+If any flags are present they override all the global
+ordering options for this key.
+If the
+.B b
+option is in effect
+.I n\^
+is counted from the first non-blank in the field;
+.B b
+is attached independently to
+.IR pos2 .
+A missing
+.BI \&. n\^
+means
+.BR \&. 0;
+a missing
+.BI \- pos2\^
+means the end of the line.
+Under the
+.BI \-t\| x\^
+option, fields are strings separated by
+.IR x ;
+otherwise fields are
+non-empty non-blank strings separated by blanks.
+.PP
+When there are multiple sort keys, later keys
+are compared only after all earlier keys
+compare equally.
+Lines that otherwise compare equally are ordered
+with all bytes significant.
+.PP
+These option arguments are also understood:
+.TP "\w'\f3t\|\f2x\f1\ \ \ 'u"
+.B c
+Check that the input file is sorted according to the ordering rules;
+give no output unless the file is out of sort.
+.TP
+.B m
+Merge only, the input files are already sorted.
+.TP
+.B u
+Suppress all but one in each
+set of equal lines.
+Ignored bytes
+and bytes outside keys
+do not participate in
+this comparison.
+.TP
+.B o
+The next argument is the name of an output file
+to use instead of the standard output.
+This file may be the same as one of the inputs.
+.SH EXAMPLE
+.IP "" 5
+sort \|\-u \|+0f \|+0 \|list
+.PP
+prints in alphabetical order all the unique spellings
+in a list of words
+(capitalized words differ from uncapitalized).
+.IP
+sort \|\-t: \|+2n \|/etc/passwd
+.PP
+prints the password file
+.RI ( passwd\^ (4))
+sorted by user
+.SM ID
+(the third colon-separated field).
+.IP
+sort \|\-um \|+0 \|\-1 \|dates
+.PP
+print the first instance of each month in an already sorted file
+of (month-day) entries
+(the options
+.B \-um
+with just one input file make the choice of a
+unique representative from a set of equal lines predictable).
+.SH FILES
+/usr/tmp/stm???
+.SH SEE ALSO
+comm(1),
+join(1),
+uniq(1).
+.SH DIAGNOSTICS
+Comments and exits with non-zero status for various trouble
+conditions and for disorder discovered under option
+.BR \-c .
+.SH BUGS
+Very long lines are silently truncated.
+.\"	@(#)sort.1	5.1 of 11/18/83

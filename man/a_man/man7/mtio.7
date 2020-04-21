@@ -1,0 +1,138 @@
+'\"macro stdmacro
+.TH MTIO 7
+.SH NAME
+mtio \- magnetic tape interface
+.SH DESCRIPTION
+The special file
+.I /dev/rmt1
+refers to the
+streaming quarter inch cartridge magtape drive.
+The special file \f2/dev/rmt1\fP,
+is a 10000 fci, 45 to 60 MByte quarter inch tape streaming drive.
+The special file \f2/dev/rmt2\fP, is the no rewind version of the device.
+The special file \f2/dev/rmt3\fP,
+is a 1600/6250 bpi half-inch tape drive, and the special file
+.I "/dev/rmt4,
+is the no rewind version of the half-inch tape device.
+.PP
+Refer to
+.IR mt (1)
+for the specifications of ioctl commands to manipulate the tape drives.
+The special files \f2/dev/rmt1\fP and \f2/dev/rmt3\fP are closed by
+writing a file mark and rewinding when writing to the tape.
+The files \f2/dev/rmt2\fP and \f2/dev/rmt4\fP
+are not rewound when closed.
+.PP
+The standard quarter inch tape consists of a series of records
+terminated by an end-of-file, where each record is a multiple
+of 512 bytes.
+The system makes it possible to treat the tape like any other file.
+Seeks do not have their usual meaning and it is not possible
+to read or write a byte at a time.  Writing in very small blocks
+(less than 5120 bytes) is inadvisable because this tends to create large
+record gaps and causes the tape to stop streaming.
+.PP
+The half-inch tape drive is written in block sizes of up to 32 KBytes blocks.
+.PP
+The
+\f2mt\f1
+manipulation program discussed above is useful when it is desired to access
+the tape in a way compatible with ordinary files.
+When foreign tapes are to be dealt with, and especially when long records are
+to be read or written, the `raw' interface is appropriate.
+The associated files are named
+.I /dev/rmt1
+and
+.I /dev/rmt3.
+A number of ioctl operations are available on raw magnetic tape.
+Refer to
+\f2mt\f1(1)
+for additional information for use with
+.I /dev/rmt1
+and
+.I /dev/rmt3.
+.PP
+The following definitions are from
+.I /usr/include/sys/mtio.h :
+.PP
+.nf
+.ta 1i,+1i,+.5i;\ \ 'u,+1i,+.1i
+/*
+ * Structures and definitions for mag tape io control commands
+*/
+
+/* structure for MTIOCTOP - mag tape op command */
+struct	mtop	{
+	short	mt_op;		\s-1/* operations defined below */\s+1
+	daddr_t	mt_count;	\s-1/* how many of them */\s+1
+};
+
+/* operations */
+#define MTWEOF\0\00		\s-1/* write an end-of-file record */\s+1
+#define MTFSF	1		\s-1/* forward space file */\s+1
+#define MTBSF	2	\s-1/* backward space file */\s+1
+#define MTFSR	3	\s-1/* forward space record */\s+1
+#define MTBSR	4	\s-1/* backward space record */\s+1
+#define MTREW	5	\s-1/* rewind */\s+1
+#define MTOFFL	6	\s-1/* offline - not used */\s+1
+#define MTNOP	7	\s-1/* no operation, sets status only */\s+1
+#define MTERASE\0\08	\s-1/* Erase function */\s+1
+#define MTRET	9	\s-1/* Retention function */\s+1
+#define MTBLKSIZE 10	\s-1/* Return Default Block Size from ioctl */\s+1
+#define MTRESET 11	\s-1/* Reset the controller */\s+1
+
+/* structure for MTIOCGET - mag tape get status command */
+
+struct	mtget	{
+	short	mt_type;	\s-1/* type of magtape device */\s+1
+	short	mt_hard_error0;	\s-1/* drive/controller status register */\s+1
+	short	mt_hard_error1;	\s-1/* hard error register */\s+1
+	short	mt_soft_error0;	\s-1/* soft error register */\s+1
+	short	mt_at_bot;
+	int	mt_resid;	\s-1/* residual count (not done in prev I/O) */\s+1
+	daddr_t	mt_status;
+	daddr_t	mt_fileno;	\s-1/* file number of current position */\s+1
+	daddr_t	mt_blkno;	\s-1/* block number of current position */\s+1
+};
+
+/*
+ * flags for the drive status
+ */
+#define AT_BOT		0x01
+#define NO_TAPE	0x02
+#define WR_PROT	0x04
+#define HARD_ERROR	0x08
+#define SOFT_ERROR	0x10
+#define NOT_ONLINE	0x20
+
+/*
+ * Constants for mt_type byte
+ */
+#define MT_ISDSD	0x01		\s-1/* DSD and 1/4" tape drives */\s+1
+#define MT_ISTMT	0x02		\s-1/* Ciprico TM-1000 and 1/2" drives */\s+1
+#define MT_ISSTT	0x03		\s-1/* Storager and 1/4" tape drives */\s+1
+.bp
+/* mag tape io control commands */
+#define MTIOCTOP	(('m'<<8)|1)
+#define MTIOCGET	(('m'<<8)|2)
+.SH FILES
+.ta \w'/dev/nrmt1\ \ 'u
+/dev/rmt1	Cartridge tape
+.br
+/dev/rmt2	Cartridge tape \(em no rewind
+.br
+/dev/rmt3	Half-Inch tape
+.br
+/dev/rmt4	Half-Inch tape \(em no rewind
+.PP
+The minor device numbers for each of the above devices to build special files
+using
+.IR mknod (1M)
+is based on the standard default minor device number being 0x00.
+The minor device number for the
+.I /dev/rmt2
+and
+.I /dev/rmt4
+is 0x01.
+.SH "SEE ALSO"
+mt(1), tar(1), cpio(1)

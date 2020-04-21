@@ -1,0 +1,31 @@
+.TH isqueued 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B isqueued
+\- indicates if the specified device is queued
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean isqueued(dev) "
+.B "Device dev; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function isqueu(dev)"
+.B "integer*4 dev"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function isqueued(dev: Device): Boolean;"
+.SH DESCRIPTION
+.B isqueued
+returns TRUE(1)
+if the specified device is enabled for queueing, and FALSE(0)
+if it is not enabled.
+.SH "SEE ALSO"
+qdevice, qread, unqdevice, 
+.sp
+\f2Programming Guide\fP, Section 7.4, The Event Queue

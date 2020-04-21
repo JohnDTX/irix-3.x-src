@@ -1,0 +1,50 @@
+'\"macro stdmacro
+.TH GETPID 2
+.SH NAME
+getpid, getpgrp, getppid \- get process, process group, and parent process \s-1ID\s+1s
+.SH SYNOPSIS
+.B int getpid (\|)
+.PP
+.B int getpgrp (\|)
+.PP
+.B int getppid (\|)
+.SH DESCRIPTION
+.I Getpid\^
+returns the process
+.SM ID
+of the calling process.
+.PP
+.I Getpgrp\^
+returns the process group
+.SM ID
+of the calling process.
+.PP
+.I Getppid\^
+returns the parent process
+.SM ID
+of the calling process.
+.PP
+These system calls are useful for generating 
+uniquely-named temporary files.
+.SH "SEE ALSO"
+exec(2), fork(2), intro(2), setpgrp(2), signal(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#20,D0	|  getpid
+.B trap	#0
+.PP
+Process ID is returned in \f3D0\f1.
+.sp
+.B moveq	#39,D0	|  getpgrp
+.B movl	#0,A0
+.B trap	#0
+.PP
+Process ID is returned in \f3D0\f1.
+.sp
+.B moveq	#20,D0	|  getppid
+.B trap	#0
+.PP
+Parent process ID is returned in \f3D1\f1.
+.DT
+.\"	@(#)getpid.2	5.1 of 10/19/83

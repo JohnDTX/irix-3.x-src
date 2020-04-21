@@ -1,0 +1,164 @@
+'\"macro stdmacro
+.TH XX 1C
+.SH NAME
+xx, xlogin \- remote execution via XNS
+.SH SYNOPSIS
+.de dj
+.br
+.B \\$1
+[
+.B \-xt
+]
+..
+.dj xx
+host
+.dj xx
+host command [ args ... ]
+.dj xlogin
+host
+.SH DESCRIPTION
+.I "xlogin host"
+runs and connects to a login process on the specified
+.IR host .
+.I "xx host"
+runs and connects to a shell process on the specified
+.IR host .
+.I "xx host command ..."
+runs and connects to
+.I command
+on the specified
+.IR host .
+Connections are implemented
+using Silicon Graphics' enhanced XNS networking software.
+.I Host
+is the Silicon Graphics bounce protocol system name
+of the intended remote system.
+.PP
+Standard input
+is copied to the standard input of the remote process.
+Standard output
+is copied from
+the standard output and standard error output of the remote process.
+This continues until the remote process closes the connection.
+.PP
+The forms
+.I "xlogin host"
+and
+.I "xx host"
+put the local terminal in raw mode;
+consequently
+echoing,
+interrupt characters, flow control, etc.,
+are handled by the remote
+.IR host .
+.PP
+The forms
+.I "xx host"
+and
+.I "xx host command ..."
+try to connect to an account on the remote
+.IR host ,
+with the same name as on the local system.
+If this remote account does not exist,
+they try to use the remote
+.I guest
+account.
+The remote process is started with
+the shell and home directory taken from
+the remote account being used.
+There is no provision for specifying a different account name or a
+password(!).
+.PP
+Note that in the form
+.I "xx host command ..."
+any unquoted shell metacharacters in
+.IR command ,
+are expanded on the local system.
+.PP
+The environment that xx sets up on the remote machine
+may be determined by entering the command sequence "xx \f2host\f1
+printenv" on the local system.
+.PP
+FLAGS
+.IP \-x
+Causes flow control to be handled on the local terminal.
+By default it is handled by the remote
+.IR host
+(see the note on the ~x escape command, below).
+.IP \-t
+disables escape commands (see below).
+.PP
+ESCAPE COMMANDS
+.br
+The forms
+.I "xlogin host"
+and
+.I "xx host"
+(but not
+.IR "xx host command ..." )
+interpret any
+input line beginning with a ~ character
+as an escape command.
+Escape commands are handled locally
+and are not copied to the remote
+IR host .
+.IP ~.
+force the session to end.
+This may result in the remote process
+receiving a HANGUP signal.
+.IP ~~
+send a single ~ character to the remote
+.IR host .
+.IP ~!
+start up a local shell (taken from the
+.I SHELL
+environment variable if any;
+else
+.IR sh ).
+Standard input is diverted to this
+shell until it exits.
+.IP ~x
+toggle the locus of flow control
+(ie, local or remote).
+The delay times for remote flow control
+are sometimes unacceptably long.
+.SH EXAMPLE
+.sp
+.nf
+.in +0.5i
+xx bertha cat info > localfile
+.in
+.fi
+.sp
+copies the (remote) file
+.I info
+from host
+.I bertha
+to the local file
+.IR localfile .
+.sp
+.nf
+.in +0.5i
+xx bertha cat info '>' remotefile
+.in
+.fi
+.sp
+copies the (remote) file
+.I info
+from host
+.I bertha
+to another remote file,
+.IR remotefile .
+.SH SEE ALSO
+hostname(1), xcp(1C), xnsd(1M)
+.SH BUGS
+The form
+.I "xx host command ..."
+cannot properly run an interactive
+.IR command .
+.PP
+Remote standard error output should be copied to
+its local analogue,
+not standard output.
+.PP
+Exit status from the remote command is not returned.

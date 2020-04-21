@@ -1,0 +1,36 @@
+.TH winmove 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winmove
+\- moves the lower-left corner of the current graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winmove(orgx, orgy)"
+.B "long orgx, orgy;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winmov"
+.B "integer*4 orgx, orgy"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winmove(orgx, orgy: longint);"
+.SH DESCRIPTION
+.B winmove
+moves the origin of the current graphics window to the screen coordinates
+.I "orgx, orgy." 
+The origin of the current graphics window is the lower-left corner. 
+.PP
+.B winmove
+does not change the size and shape of the window.
+.SH "SEE ALSO"
+winposition
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode under the window manager. 

@@ -1,0 +1,19 @@
+INCLUDES = -I../include
+OBJS = 	close.o filbuf.o flsbuf.o memimg.o name.o open.o \
+	pix.o rdwr.o rle.o row.o scrsave.o
+CFLAGS = -O 
+
+all: libimage.a
+
+clean:
+	rm -f *.o
+	rm -f libimage.a
+
+install: all
+
+libimage.a: $(OBJS)
+	ar cr libimage.a $(OBJS)
+	ranlib libimage.a
+
+.c.o:
+	cc -c $(CFLAGS) $(INCLUDES) $<

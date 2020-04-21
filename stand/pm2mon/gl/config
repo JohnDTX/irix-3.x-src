@@ -1,0 +1,40 @@
+# include "pm2.1.h"
+
+# include "glx.h"
+
+/*
+   read the configuration prom bytes to get low/high modes of the 
+   current dc4 board.  These bytes are masked and combined in 
+   _commdat->dcconfig.  
+   The prom dc mode is LOW unless the environment is the MONITOR
+   environment and AUTOBOOT is set, in which case the mode is HIGH.
+   This mode determination is done by qrom.c when the switches
+   are examined.  It sets
+   the flag DC_HIGH in the common structure flags word if
+   the mode is HIGH.
+*/
+getconfig(dchigh)
+    char dchigh;
+{
+    register unsigned char temp,modes;
+
+    /* assume the default configuration */
+    modes = /* HIGH = NI */ ((PIPE4|PROM)>>7) |
+	    /* LOW = I */   0;
+
+    /* read the LOW configuration byte */
+    if( ((char *)ROM3)[0] == DC4_PROMVAL0
+     && ((char *)ROM3)[2] == DC4_PROMVAL1 )
+    {
+	/* shift to the low position */
+	temp = ((char *)ROM3)[4];
+	modes = (temp>>4)&0xf;
+	temp = ((char *)ROM3)[6];
+	modes |= (temp & 0xf0);
+    }
+
+    GLX.dcconfig = modes;
+
+    GLX.dchw = GLX.dcconfig << (dchigh ? 7 : 11);
+    GLX.dchw = (GLX.dchw&0x7800) | DCMULTIMAP;
+}

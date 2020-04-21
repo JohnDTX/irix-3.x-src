@@ -1,0 +1,19 @@
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM1 -c -DGF2 -DDC3 -DUC4 ../src/devload.c
+../include/gfdev.h: 1: PM1 redefined
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM1 -c -DGF2 -DDC3 -DUC4 ../src/devmacro.c
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM1 -c -DGF2 -DDC3 -DUC4 ../src/gl2testall.c
+../include/gfdev.h: 1: PM1 redefined
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM1 -c -DGF2 -DDC3 -DUC4 ../src/fbinitmac.c
+cc68 -c header.c
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM1 -c -DGF2 -DDC3 -DUC4 ../src/initall.c
+../include/gfdev.h: 1: PM1 redefined
+cc68 -I. -I../include -I$HDWR/include -I/oh4/hdwr/include -DPM1 -c -DGF2 -DDC3 -DUC4 ../src/gepa.c
+../include/gfdev.h: 1: PM1 redefined
+cd ../testga;make
+cd ../test2;make
+tests made.
+cc68 -s -r -o gf2ld char.b devload.b devcmd.b devcmdsb.b  devmacro.b betacode.b breakpt.b  gl2rams.b gl2testall.b gl2fifotest.b  testpass.b fbinit.b fbinitmac.b fbtext.b  header.b gl2draws.b gl2bustests.b  initall.b testvec.b bpctest.b gf2features.b  ge2cmd.b gedraw.b realdraw.b reset.b gepa.b  gfinit.b swizzletab.b inittables.b ../testga/headin0.b ../testga/headin1.b ../testga/headin2.b ../testga/headin3.b  ../testga/headin4.b ../testga/headin5.b ../testga/headin6.b ../testga/headin7.b  ../testga/headin8.b ../testga/headin9.b  ../testga/headout0.b ../testga/headout1.b ../testga/headout2.b ../testga/headout3.b  ../testga/headout4.b ../testga/headout5.b ../testga/headout6.b ../testga/headout7.b  ../testga/headout8.b ../testga/headout9.b  ../testga/tailin0.b ../testga/tailin1.b ../testga/tailin2.b ../testga/tailin3.b  ../testga/tailin4.b  ../testga/tailout0.b ../testga/tailout1.b ../testga/tailout2.b ../testga/tailout3.b  ../testga/tailout4.b ../test2/testmm1.b ../test2/testmm2.b ../test2/testmm3.b  ../test2/testmm4.b ../test2/testcl1.b ../test2/testcl2.b  ../test2/testcl3.b ../test2/testcl4.b ../test2/testcl5.b  ../test2/testcl6.b ../test2/testsc1.b ../test2/testgsi.b  ../test2/testgso.b ../test2/test10sc1.b  ../test2/test10gso.b /og3/paul/iolib/iolib.a
+Undefined:
+bpctest
+ld68: devcmd.b references bpctest
+cp gf2ld $BOOT/test/gf2ld

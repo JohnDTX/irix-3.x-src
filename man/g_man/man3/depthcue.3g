@@ -1,0 +1,52 @@
+.TH depthcue 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B depthcue
+\- turns depth-cue mode on and off
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "depthcue(mode)"
+.B "short mode;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine depthc(mode)"
+.B "logical mode"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure depthcue(mode: Boolean);"
+.SH DESCRIPTION
+.B depthcue
+sets the current depth-cue mode. If 
+.I mode
+is 
+TRUE(1)
+all lines, points, characters,
+and polygons that the system draws are depth cued. This means the
+z values and the range of color indices specified by \f3shaderange\f1
+or
+.B RGBrange
+determine the
+color of the lines, points, characters, or polygons.
+The z values, whose range is set by
+\f3setdepth\f1,
+are mapped linearly into the range of color indices.
+In this mode, lines that vary greatly in z value span the range of
+colors specified by
+\f3shaderange\fP.
+.PP
+For depth cueing to work properly, the color map locations
+.B shaderange 
+specifies must be loaded with a series of
+colors that gradually increase or decrease in intensity.
+.SH "SEE ALSO"
+setdepth,
+shaderange,
+.sp
+.I Programming Guide,
+Section 13.2, Depth-Cueing

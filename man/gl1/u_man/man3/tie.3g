@@ -1,0 +1,36 @@
+.TH tie 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I tie
+- tie two valuators to a button 
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "tie(b, v1, v2) "
+.B "Device b, v1, v2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine tie(b, v1, v2)"
+.B "integer*2 b, v1, v2"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure tie(b, v1, v2: Device);"
+.sp
+.SH DESCRIPTION
+.I Tie                                       
+takes three arguments, a button \f3b\f1 and two valuators 
+\f3v1\f1 and \f3v2\f1.
+Whenever the button is queued, the valuators are also queued.  If the button
+is queued, whenever the
+button changes state, three entries are made in the queue, recording the
+current state of the button and the current positions of each valuator.
+One valuator can be tied to a button by making \f3v2\f1=0.  A button can
+be untied by making both \f3v1\f1 and \f3v2\f1 zero.
+\f3v1\f1 will appear before \f3v2\f1 in the event queue;
+both are preceded by \f3b\f1.
+.SH "SEE ALSO"
+.I getbutton, qbutton
+.SH NOTE
+This command can only be used in immediate mode.

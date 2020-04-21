@@ -1,0 +1,23 @@
+getnode		(-a) N
+setnode		(-b) N addr flags
+SETNODE		(-B) N addr flags ppr TLCEI
+start		(-t) V
+getevent	(-r)
+setconn		(-e) N tslot lmap
+flush		(-f)
+listen		(-g)
+talk		(-h)
+passctl		(-l) N
+takectl		(-m)
+lock		(-n) V
+ppc		(-o) pmap
+ppd		(-c) pmap
+poll		(-p)
+ren		(-k) rmap
+gtl		(-j) lmap
+poke		(-u) F V
+peek		(-v) F
+srq		(-q) V
+init		(-w)
+debug		(-x) N
+intr		(-z)

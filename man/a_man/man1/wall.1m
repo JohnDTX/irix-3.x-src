@@ -1,0 +1,39 @@
+'\"macro stdmacro
+.TH WALL 1M
+.SH NAME
+wall \- write to all users
+.SH SYNOPSIS
+.B /etc/wall
+.SH DESCRIPTION
+.I Wall\^
+reads its standard input until an end-of-file.
+It then sends this message to all currently
+logged in users preceded by:
+.PP
+.RS
+Broadcast Message from \f3.\|.\|.\fP
+.RE
+.PP
+It is used to warn all users,
+typically prior to shutting down the system.
+.PP
+The sender must be super-user to override
+any protections the users may have invoked
+(see
+.IR mesg (1)).
+.SH EXAMPLE
+.IP
+wall
+.PP
+will broadcast the standard input to all users
+who are not protected against receiving messages by the
+.I mesg
+command. 
+.SH FILES
+/dev/tty\(**
+.SH "SEE ALSO"
+mesg(1), write(1).
+.SH DIAGNOSTICS
+``Cannot send to ...'' when the open on
+a user's tty file fails.
+.\"	@(#)wall.1m	5.1 of 10/17/83

@@ -1,0 +1,22 @@
+#	Makefile	4.2	83/07/27
+#
+DESTDIR= /usr/local/bin
+LFLAGS=
+CFLAGS= -g -I/usr/include/bsd
+YFLAGS= -v
+ALL= hyp
+
+
+hyp: hyp.o hyp_main.o
+	${CC} -g -o hyp hyp.o hyp_main.o -lbsd -ldbm
+
+all:	${ALL}
+
+install: all
+	install -s hyp ${DESTDIR}/hyp
+
+hyp.o:		hyp.y defs.h
+hyp_main.o:	hyp_main.c defs.h
+
+clean:
+	-rm -f hyp_main.o hyp.o y.output y.tab.o y.tab.c hyp

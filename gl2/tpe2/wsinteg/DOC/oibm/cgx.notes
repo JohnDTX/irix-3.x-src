@@ -1,0 +1,62 @@
+	Visit 18 Nov,1986
+
+	The 5080 Model 2 at $19k caused the demise of CGX. The material cost
+of their 5085 is about $10k, and it sells for $16k. Principal advantages are
+'T' connector interface, comm via 'T1' carrier. IBM offers 'point to point'
+daisy-chain and 'v35' modem links. Performance is slightly better than the
+5085 Model 2.
+	The NEC development contract is for new packaging of the current design
+(1400 sq.in.) onto three boards(300 sq.in.). They hope the three board set will
+give a $5000 cost per 5085, and allow adequate margins, however the design has
+no way to give a x2 or x4 performance. The contract is in three phases,
+phase 1 demonstrated at Autofact '86, phase two the new boards and three
+gate array chips, and a third phase not under contract. The second phase is
+due in June '87 to NEC. The third stage includes 5085 to ip/tcp interface in
+place of the 5088 coax link. This is a channel to tcp kind of configuration.
+CGX had hoped to use the boards to enter the workstation
+market, but cash is running out. They mentioned having to 'cashout' the
+company by 31 December.The (6 month) pres is former IBM sales manager with
+GM Detroit account. The (6 month) VP ENG Bob Peyser is from ITT Courier by way
+of two startups, still maintaining a houseold in San Diego. The 18 month
+VP MARKETING is from Computervision. Most of the rest of the staff is
+from DEC or Saunders or Adage. The main customers are GM in Detroit,
+Northrup, Hughes and others in L.A. They have 500 installed at GM, 250 in
+Northrup and Hughes out of 1100 total. EDS has 2300 5085s, of which 1200 are
+from IBM.
+	The '86 revenues are estimated to be		9mo to EDS (units)
+	IBM		330m (150m in hardware/service) ?
+	Spectragraphics	 10m				52
+	Adage		 10m				1
+	CGX		 8.5				300
+	VG Systems	  5m (includes Canaan CPU)	62
+
+The Apollo 508 Turbo is viewed as a CADAM seat( too slow for 3D), with the 
+Spectra supplied interface and buffer program board giving vectors for the
+580 software to draw.
+They have in the past done field upgrades from vector to raster, explaining 
+the rather large boards used. The founder/president quit in March, coinciding
+with the 5080 Model 2 announcement that had dried up the business.
+
+	Notes on the Engineering staff
+
+	H/W	Robert Allaire
+	S/W	Dick Rittenhouse
+	Sust	Peter Sheren
+
+	Digital Design - VLSI ECL TTL
+	Firmware Design - Bit slice, Channel
+	Software Design - Comm, 5080, 3270
+	Unix S/W - Drivers, servers, applications
+	Design/Compatibility - 5080, 3270, VM, MVS
+	Continuing Engineering - Design services, Product Support
+	
+	The new design continues the 2901 slice so no microcode is affected.
+	
+	The 5085 uses MTOS from Motorola, and C language
+
+	4 people 3 months video out
+	18 man/mo for NEC work
+	9k lines 80 bit microcode in 5085
+
+	1 year for 2D raster
+	2 years for 3D raster

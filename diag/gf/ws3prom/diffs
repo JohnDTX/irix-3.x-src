@@ -1,0 +1,46 @@
+16d15
+< #include "betacodes.h"
+182,213d180
+< 	hardinit();
+< 	GFdisabvert(GERESET3,RUNMODE);
+< 	if (GEfound) smartconfigure(ctab);
+< 	{
+< 	    register *LGE = (unsigned long *)&GEdata;
+< 	    register long dat;
+< 	    GEdata = 8;
+< 	    GEdata = FBCfeedback;
+< 	    for (dat=1; dat!=0; dat<<=1) {
+< 		*LGE = 0x108;
+< 		*LGE = dat;
+< 	    }
+< 	    GEdata = EOF1;
+< 	    GEdata = EOF2;
+< 	    GEdata = EOF3;
+< 	    buzz(1000);
+< 	    if (FBCflags & INTERRUPT_BIT_) {
+< 		printf("no feedback\n");
+< 		return(++errors);
+< 	    }
+< 	    for (dat=1; dat!=0; dat<<=1) {
+< 		FBCclrint;
+< 		i = dat;
+< 		FBCclrint;
+< 		i = dat;
+< 		if (FBCdata != dat) {
+< 		  printf("bad long data: wanted %08x got %08x\n",dat,FBCdata);
+< 		  ++errors;
+< 		}
+< 	    }
+< 	    hardinit();
+< 	}
+229,231d195
+< #ifdef PM3
+< 	n += n<<1;
+< #endif
+273,278d236
+< }
+< 
+< gesend(n)
+<     short (n);
+< {
+< 	GEdata = n;

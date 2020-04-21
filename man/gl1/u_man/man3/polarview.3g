@@ -1,0 +1,40 @@
+.TH polarview  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I polarview
+- define the viewer's position in polar coordinates
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "polarview(dist, azim, inc, twist) "
+.B "Coord dist;"
+.B "Angle azim, inc, twist;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine polarv(dist, azim, inc, twist)"
+.B "real dist"
+.B "integer*2 azim, inc, twist"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure polarview(dist: Coord; azim, inc, twist: Angle);"
+.sp
+.SH DESCRIPTION
+.I Polarview
+defines the viewer's position in polar coordinates.
+The first three
+parameters, \f3dist\f1, \f3azim\f1, and \f3inc\f1, 
+define a viewpoint.
+\f3Dist\f1 is the distance from 
+the viewpoint to the world space origin.
+\f3Azim\f1 is the
+angle in the \f3x-y\f1 plane, measured from the \f3y\f1 axis.
+\f3Inc\f1 is the angle in \f3y-z\f1 plane, measured from the \f3z\f1 axis.
+The line of sight extends from the viewpoint through the world space origin.
+\f3Twist\f1 rotates the viewpoint around
+the line of sight using the right-hand rule.
+All angles are specified in tenths of degrees and are integers.
+.PP
+.SH "SEE ALSO"
+.I lookat

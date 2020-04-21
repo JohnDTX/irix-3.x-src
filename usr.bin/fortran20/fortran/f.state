@@ -1,0 +1,1155 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: F.STATE.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               30-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure needstate{*minstate,maxstate: states*};
+
+  procedure initdone;
+    var ch: char;
+  begin
+  for ch := 'A' to 'Z' do
+    with implicit[ch] do
+      begin Defd := FALSE;
+      if (ch >= 'I') and (ch <= 'N')
+      then begin imptype.typ := INTEGR; imptype.siz := defisize; end
+      else imptype := realtype;
+      end;
+  commonlist := nil; localtree := nil; datalist := nil; equivlist := nil;
+  newglobals := nil; lastlabel := nil; ctrlstk := nil; stfunlist := nil;
+  lastctrlblk := 0; nextilabno := 0; entrycount := 0; maxfsize := 0;
+  blockkind := UNKWNBLOCK; 
+{ OSaveFlag set by +s command line option, changed for SGI by jim t }
+  if OSaveFlag then GSaveFlag := TRUE else GSaveFlag := FALSE;
+  exprkind := NORMEXPR; 
+  maxaltreturn := 0; numcharcalls := 0; PassLabels := FALSE;
+  mark(heapmark); adjszlst := nil;
+  end; {initdone}
+  
+  procedure headdone;
+  begin
+  if blockkind = UNKWNBLOCK
+  then
+    begin
+    blockkind := PROGBLOCK;
+    procname := 'NONAME';
+    newn(localtree,PROG,procname);
+    makeglobal(localtree);
+    end;
+  if blockkind = PROGBLOCK
+  then
+    begin
+    if MainProcFlag then error(70);
+    MainProcFlag := TRUE;
+    end;
+  end; {headdone}
+  
+  procedure impdone;
+    var lstmt: pstmt;
+    
+    procedure imptype(fpn: pn);
+      var lpnlist: pnlist; ch: char;
+    begin
+    
+    { Give function default type }
+    
+    ch := fpn^.name.a[1];
+    if (ch >= 'A') and (ch <= 'Z')
+    then
+      if not fpn^.ExpType
+      then fpn^.idtype := implicit[ch].imptype;
+    
+    { Follow parameter list and give each parameter its implicit type }
+    
+    lpnlist := fpn^.arglist;
+    while lpnlist <> nil do
+      with lpnlist^.nrec^ do
+        begin
+        ch := name.a[1];
+        if (ch >= 'A') and (ch <= 'Z')
+        then
+          if not ExpType
+          then idtype := implicit[ch].imptype;
+        lpnlist := lpnlist^.next;
+        end;
+    
+    end; {imptype}
+    
+  begin {impdone}
+  imptype(localtree);
+  lstmt := firststmt;
+  while lstmt <> nil do begin
+    if lstmt^.stmtop = ENTRYST then imptype(lstmt^.entryname);
+    lstmt := lstmt^.nextstmt;
+    end;
+  end; {impdone}
+  
+  procedure specdone;
+    var i: integer;
+
+    procedure assigncommonaddresses;
+      var lpc,lpn: pn; csize: addrrange;
+    begin
+    lpc := commonlist;
+    while lpc <> nil do
+      with lpc^ do begin
+        InReg := FALSE; refcount := 0; lpn := comellist; csize := 0;
+        if lpn <> nil
+        then
+          if lpn^.idtype.typ = CHARACTER
+          then cdatakind := CHARDATA
+          else cdatakind := NUMDATA;
+        while lpn <> nil do begin
+          if (cdatakind = CHARDATA) <> (lpn^.idtype.typ = CHARACTER)
+          then
+            if not CharEqu
+            then error(48);
+          if lpn^.idtype.typ <> CHARACTER
+          then
+            if lpn^.idtype.siz > 1
+            then
+              if odd(csize) then error(247);
+          lpn^.addr := csize;
+          csize := csize + lpn^.size;
+          lpn := lpn^.next;
+          end;
+        comsize := csize;
+        lpc := next;
+        end;
+    end; {assigncommonaddresses}
+    
+    procedure assignequivalenceaddresses;
+      var s,k,before,after,maxbefore,maxafter,fixpoint,addrdiff: addrrange;
+        lpe: pe; lpeqel: pequivel; eqgroup,lpn,lpn2,lpn2next: pn;
+        ldatakind: datatype; ldimen,elsize: integer; lpb: pbound;
+        ForceEven,ForceOdd,AnySaved: Boolean;
+    begin
+    lpe := equivlist;
+    while lpe <> nil do begin
+      lpeqel := lpe^.equivgroup; eqgroup := nil;
+      maxbefore := 0; maxafter := 0;
+      ForceEven := FALSE; ForceOdd := FALSE; AnySaved := FALSE;
+      
+      { Make first pass over EQUIVALENCEd items.  Determine:    }
+      {   1. Each item's relative position to the fixing cell,  }
+      {   2. The maximum size of the part of an item that       }
+      {      preceeds the fixing cell (maxbefore),              }
+      {   3. The maximum distance that an item extends beyond   }
+      {      the fixing cell (maxafter),                        }
+      {   4. What COMMON block is being referenced, if any, and }
+      {   5. Any byte allignment preference.                    }
+      {   6. If any variables in the equiv. class are SAVED     }
+      
+      while lpeqel <> nil do
+        with lpeqel^ do begin
+          
+          { Find the relative position to the fixing cell. }
+          
+          k := 0;
+          with varname^ do begin
+            s := idtype.siz;
+            if (s > 1) and (idtype.typ <> CHARACTER) then ForceEven := TRUE;
+            if SaveFlag then AnySaved := TRUE;
+            if lpeqel^.dimens > 0
+            then
+              if bounds = nil
+              then error(42)
+              else begin
+                ldimen := 0; elsize := 1; lpb := bounds;
+                while (ldimen < lpeqel^.dimens) and (lpb <> nil) do
+                  with lpb^ do begin
+                    ldimen := ldimen + 1;
+                    if (lo.bkind = CONSTBOUND) and (hi.bkind = CONSTBOUND)
+                    then begin
+                      if (inx[ldimen] > hi.i) or (inx[ldimen] < lo.i)
+                      then error(43)
+                      else k := k + (inx[ldimen] - lo.i)*elsize;
+                      elsize := elsize*(hi.i - lo.i + 1);
+                      end;
+                    lpb := next;
+                    end;
+                if (lpb <> nil) or (ldimen <> lpeqel^.dimens) then error(42);
+                end;
+            reladdr := k*s;
+            
+            { Process the substring specification, if present }
+            
+            if lpeqel^.SubStrFlag
+            then
+              if idtype.typ = CHARACTER
+              then
+                if (lpeqel^.lo <= idtype.siz) and (lpeqel^.hi <= idtype.siz)
+                then reladdr := reladdr + (lpeqel^.lo - 1)
+                else error(245)
+              else error(245);
+            
+            { See if any COMMON blocks are referenced. }
+            
+            if incommon <> nil
+            then
+              if incommon^.nkind = COMMON
+              then begin
+              
+                { COMMON block }
+                
+                before := addr + reladdr;
+                after := incommon^.comsize - before;
+                if (ForceEven and odd(before)) or (ForceOdd and not odd(before))
+                then error(246);
+                if eqgroup = nil
+                then begin eqgroup := incommon; fixpoint := before; end
+                else begin
+                  if eqgroup <> incommon then error(41);
+                  if fixpoint <> before then error(44);
+                  end;
+                end
+              else begin
+                
+                { Variable is in non-COMMON EQUIVALENCE group }
+                
+                before := addr + reladdr;
+                after := incommon^.eqsize - before;
+                if incommon^.EvenBias
+                then
+                  if odd(before)
+                  then ForceOdd := TRUE
+                  else ForceEven := TRUE;
+                end
+            else begin { incommon = nil --> variable is unrestricted }
+              before := reladdr;
+              after := size - before;
+              end;
+            if maxbefore < before then maxbefore := before;
+            if maxafter < after then maxafter := after;
+            end; { with varname^ }
+          lpeqel := next;
+          end;
+      if eqgroup <> nil { --> COMMON }
+      then begin
+        if maxbefore > fixpoint
+        then error(45); { Would extend before start of common }
+        eqgroup^.comsize := maxbefore + maxafter;
+        end
+      else begin { --> not COMMON }
+        if ForceEven and ForceOdd
+        then error(246)
+        else
+          if (ForceEven and odd(maxbefore)) or (ForceOdd and not odd(maxbefore))
+          then maxbefore := maxbefore + 1; { Must move it a byte }
+        newn(eqgroup,EQUIVALENCE,' ???? ');
+        eqgroup^.eqsize := maxbefore + maxafter;
+        eqgroup^.EvenBias := ForceEven or ForceOdd;
+        if AnySaved then eqgroup^.eqkind := SAVEDVAR;
+        end;
+      
+      { Make second pass over equivalenced items, merging them (and all }
+      { variables linked to them by a previous COMMON or EQUIVALENCE    }
+      { declaration) into a single entity.                              }
+      
+      lpeqel := lpe^.equivgroup;
+      while lpeqel <> nil do begin
+        lpn := lpeqel^.varname;
+        s := lpn^.idtype.siz;
+        if lpn^.incommon = nil
+        then begin
+        
+          { Single variable }
+          
+          lpn^.addr := maxbefore - lpeqel^.reladdr;
+          lpn^.incommon := eqgroup;
+          lpn^.next := eqgroup^.eqellist;
+          eqgroup^.eqellist := lpn;
+          if lpn^.idtype.typ = CHARACTER
+          then ldatakind := CHARDATA
+          else ldatakind := NUMDATA;
+          end
+        else begin
+          if lpn^.incommon^.nkind = COMMON
+          then
+          
+          { COMMON block }
+          
+            ldatakind := lpn^.incommon^.cdatakind
+          
+          else begin
+          
+          { Previuosly EQUIVALENCED list of variables }
+          
+            { See how far the previous EQUIVALENCE block relative      }
+            { addresses (stored in lpn^.addr) have to be relocated     }
+            { to account for any new growth in the negative direction. }
+            
+            addrdiff := maxbefore - (lpn^.addr + lpeqel^.reladdr);
+            lpn2 := lpn^.incommon^.eqellist;
+            ldatakind := lpn^.incommon^.eqdatakind;
+            while lpn2 <> nil do begin
+              lpn2next := lpn2^.next;
+              if lpn2^.incommon <> eqgroup
+              then begin
+                
+                { This variable hasn't been put into this new equivalence }
+                { list yet (i.e. by another variable in this equivalence  }
+                { set having been equivalenced to this variable).         }
+              
+                lpn2^.addr := addrdiff + lpn2^.addr;
+                lpn2^.incommon := eqgroup;
+                lpn2^.next := eqgroup^.eqellist;
+                eqgroup^.eqellist := lpn2;
+                end
+              else
+              
+                { This variable has already been included in this list.   }
+                { Make sure it is at the same address.                    }
+                
+                if addrdiff <> 0 then error(46);
+              
+              lpn2 := lpn2next;
+              end; { while lpn2 <> nil }
+            end;
+          end;
+        if eqgroup^.nkind = EQUIVALENCE
+        then begin
+          if eqgroup^.eqdatakind = NODATA
+          then eqgroup^.eqdatakind := ldatakind
+          else
+            if eqgroup^.eqdatakind <> ldatakind
+            then
+              if not CharEqu then error(49);
+          end
+        else begin {nkind = COMMON}
+          if eqgroup^.cdatakind = NODATA
+          then eqgroup^.cdatakind := ldatakind
+          else
+            if eqgroup^.cdatakind <> ldatakind
+            then
+              if not CharEqu then error(49);
+          end;
+        lpeqel := lpeqel^.next;
+        end;
+      lpe := lpe^.next;
+      end;
+    end; {assignequivalenceaddresses}
+    
+    procedure checkcommonaddresses;
+      var lpc,lpn: pn;
+    begin
+    lpc := commonlist;
+    while lpc <> nil do 
+      with lpc^ do begin
+        lpn := lookupid(globaltree,name);
+        if lpn <> nil
+        then
+          if lpn^.nkind = COMMON
+          then
+            if lpn^.comsize <> comsize
+            then
+              if OnlyAnsi then error(71) else warning(71);
+        lpc := next;
+        end;
+    end; {checkcommonaddresses}
+    
+  begin {specdone}
+  varsizes(localtree);
+  assigncommonaddresses;
+  assignequivalenceaddresses;
+  checkcommonaddresses;
+  if blockkind = FUNBLOCK
+  then begin
+    if localtree^.idtype.typ = CHARACTER
+    then i := 8
+    else if localtree^.idtype.siz < 4
+         then i := 4
+         else i := localtree^.idtype.siz;
+    if i > maxfsize then maxfsize := i;
+    end;
+  end; {specdone}
+  
+  procedure sfundone;
+    var memsize: longint;
+  begin
+  memsize := memavail;
+  if memsize < minspace then minspace := memsize;
+  if not (ListFlag or ListOpen or QuietFlag)
+  then begin
+       write(procname:8);
+       if (HOSTOS <> UNISOFT) and
+          (HOSTOS <> UNOS) and
+          (HOSTOS <> REGULUS) and
+          (HOSTOS <> ELITE) and
+          (HOSTOS <> GENIX) and
+          (HOSTOS <> TEK)
+       then write(' [',memsize:4,' bytes]');
+       writeln;
+       end;
+  end; {sfundone}
+  
+  procedure execdone;
+    var llabrec: plabelrec; llenmodalfalen,i,lic,pic: integer;
+        lchval: chvaltype; lstmt: pstmt;
+    
+    procedure declunkparm(fpn: pn);
+    begin
+    if fpn <> nil
+    then
+      with fpn^ do begin
+        declunkparm(rlink);
+        if Indirect
+        then if nkind = UNKN then declunkn(fpn);
+        declunkparm(llink);
+        end;
+    end; {declunkparm}
+    
+    procedure assparaddr(fpn: pn);
+      var lpb: pbound; lpadj: padjarrsz; laddr: longint;
+      
+      function findploc(fpn: pn): longint;
+        var k,l: longint; lstmt: pstmt;
+        
+        function fpl(fpn: pn; fpnlist: pnlist; k: longint): longint;
+          var CharFlag: Boolean;
+        begin
+        (*"" V2.4 ""*) if CALLCXP then k := k + 4;
+        while fpnlist <> nil do
+          with fpnlist^.nrec^ do begin
+            CharFlag := FALSE;
+            if nkind = VARS
+            then begin
+              k := k - 4;
+              if idtype.typ = CHARACTER then CharFlag := TRUE;
+              end
+            else
+              if nkind = LABL
+              then k := k - 4
+              else { idkind = EXTERN/SUBR/FUNCT } k := k - 8;
+            if fpnlist^.nrec = fpn
+            then begin fpl := k; exit(fpl); end;
+            if CharFlag then k := k - 4;
+            fpnlist := fpnlist^.next;
+            end;
+        fpl := 0;
+        end; {fpl}
+        
+      begin {findploc}
+      k := fpl(fpn,localtree^.arglist,localtree^.parambytes);
+      if entrycount <> 0
+      then begin
+        lstmt := proctree;
+        while lstmt <> nil do
+          with lstmt^ do begin
+            if stmtop = ENTRYST
+            then begin
+              l := fpl(fpn,entryname^.arglist,entryname^.parambytes);
+              if l <> 0
+              then
+                if k = 0
+                then k := l
+                else
+                  if l <> k then begin findploc := 0; exit(findploc); end;
+              end;
+            lstmt := nextstmt;
+            end;
+        end;
+      findploc := k;
+      end; {findploc}
+      
+      procedure ckadjbound(var fb: brec; LoFlag: Boolean);
+        
+        function AdjError(fn: pn): Boolean;
+          var lstmt: pstmt;
+          
+          function OnArgList(fargs: pnlist; fn: pn): Boolean;
+          begin
+          OnArgList := FALSE;
+          while fargs <> nil do
+            with fargs^ do begin
+              if nrec = fn then OnArgList := TRUE;
+              fargs := next;
+              end;
+          end; {OnArgList}
+          
+        begin {AdjError}
+        AdjError := FALSE;
+        if fn <> nil
+        then
+          with fn^ do
+            case node of
+              IDENTNODE:
+                if idtype.typ <> INTEGR
+                then AdjError := TRUE
+                else
+                  case nkind of
+                    VARS:
+                      if bounds <> nil
+                      then AdjError := TRUE
+                      else
+                        if incommon <> nil
+                        then AdjError := incommon^.nkind <> COMMON
+                        else
+                          if OnArgList(localtree^.arglist,fpn) and
+                             not OnArgList(localtree^.arglist,fn)
+                          then AdjError := TRUE
+                          else begin
+                            lstmt := firststmt;
+                            while lstmt <> nil do begin
+                              if lstmt^.stmtop = ENTRYST
+                              then
+                                if OnArgList(lstmt^.entryname^.arglist,fpn) and
+                                   not OnArgList(lstmt^.entryname^.arglist,fn)
+                                then AdjError := TRUE;
+                              lstmt := lstmt^.nextstmt;
+                              end;
+                            end;
+                    PARAMETER: ;
+                    otherwise: AdjError := TRUE;
+                  end; {case}
+              UNNODE:
+                AdjError := AdjError(unarg);
+              BINNODE:
+                AdjError := AdjError(leftarg) or AdjError(rightarg);
+              TRINODE:
+                AdjError := TRUE;
+              INDEXNODE:
+                AdjError := TRUE;
+              CSTNODE:
+                if csttype.typ <> INTEGR then AdjError := TRUE;
+            end; {case}
+        end; {AdjError}
+        
+      begin {ckadjbound}
+      with fb do
+        if bkind = ADJUSTBOUND
+        then begin
+          if LoFlag
+          then begin nextaddr := nextaddr - 4; adjboff := nextaddr; end;
+          if AdjError(adjexpr)
+          then begin makidstr(errname,fpn^.name); error(69); end;
+          end;
+      end; {ckadjbound}
+      
+    begin {assparaddr}
+    if fpn <> nil
+    then
+      with fpn^ do begin
+        assparaddr(rlink);
+        if Indirect
+        then begin { Indirect --> A parameter }
+          if nkind = VARS
+          then begin
+            laddr := findploc(fpn);
+            if laddr <> 0
+            then addr := laddr
+            else begin
+              nextaddr := nextaddr - 4; addr := nextaddr;
+              if idtype.typ = CHARACTER
+              then begin
+                   nextaddr := nextaddr - 4;
+                   if CHIP = N32000
+                   then if idtype.siz = 0 then nextaddr := nextaddr - 4;
+                   end;
+              end;
+            lpb := bounds;
+            while lpb <> nil do begin
+              ckadjbound(lpb^.lo,TRUE); ckadjbound(lpb^.hi,FALSE);
+              if (CHIP <> M68000) and (CHIP <> M68020)
+              then begin
+                if (lpb^.lo.bkind = ADJUSTBOUND) or
+                   (lpb^.hi.bkind = ADJUSTBOUND)
+                then begin
+                  nextaddr := nextaddr - 4; lpb^.sizoff := nextaddr;
+                  end;
+                end
+              else begin
+                if lpb^.esize = 0
+                then begin
+                  nextaddr := nextaddr - 4; lpb^.sizoff := nextaddr;
+                  end;
+                end;
+              lpb := lpb^.next;
+              end;
+            lpadj := onadjlst(fpn);
+            if lpadj <> nil
+            then begin nextaddr := nextaddr - 4; lpadj^.addr := nextaddr; end;
+            end
+          else
+            if nkind <> LABL
+            then begin { nkind = EXTERN/SUBR/FUNC }
+              laddr := findploc(fpn);
+              if laddr <> 0
+              then parambytes := laddr
+              else begin
+                nextaddr := nextaddr - 8; parambytes := nextaddr;
+                end;
+              end;
+          end;
+        assparaddr(llink);
+        end;
+    end; {assparaddr}
+    
+    procedure assdotemps(fstmt: pstmt);
+      var WorstCase: Boolean;
+      
+      procedure checkimpdo(fiolistel: piolistel);
+        var WorstCase: Boolean;
+      begin
+      while fiolistel <> nil do
+        with fiolistel^ do begin
+          if listtag = IOLIMPDOTAG
+          then begin
+            WorstCase := FALSE;
+            if impdovar = nil
+            then WorstCase := TRUE
+            else
+              if (impdotypecode = REEL4) or
+                 (impdotypecode = REEL8) or
+                 (impdoinc <> nil) or
+                 impdovar^.Indirect or
+                 F66DoFlag
+              then WorstCase := TRUE
+              else
+                if impdovar^.incommon <> nil
+                then
+                  if impdovar^.incommon^.nkind = COMMON
+                  then WorstCase := TRUE;
+            if WorstCase
+            then begin
+              nextaddr := nextaddr - 4;
+              if impdoinc <> nil
+              then
+                if impdotypecode <= REEL4
+                then nextaddr := nextaddr - 4
+                else nextaddr := nextaddr - 8;
+              end;
+            impdotemp := nextaddr;
+            checkimpdo(impdoiolist);
+            end;
+          fiolistel := nextiolistel;
+          end;
+      end; {checkimpdo}
+      
+    begin {assdotemps}
+    while fstmt <> nil do
+      with fstmt^ do begin
+        case stmtop of
+          IFST:    begin assdotemps(thenst); assdotemps(elsest); end;
+          DOST:    begin
+                   WorstCase := FALSE;
+                   if (dotypecode = REEL4) or
+                      (dotypecode = REEL8) or
+                      (doinc <> nil) or
+                      dovar^.Indirect or
+                      F66DoFlag
+                   then WorstCase := TRUE
+                   else
+                     if dovar^.incommon <> nil
+                     then
+                       if dovar^.incommon^.nkind = COMMON
+                       then WorstCase := TRUE;
+                   if WorstCase
+                   then begin
+                     nextaddr := nextaddr - 4;
+                     if doinc <> nil
+                     then
+                       if dotypecode <= REEL4
+                       then nextaddr := nextaddr - 4
+                       else nextaddr := nextaddr - 8;
+                     end;
+                   dotemp := nextaddr;
+                   assdotemps(dobody);
+                   end;
+          READST,
+          WRITEST,
+          PRINTST: checkimpdo(rwiolist);
+        end; {case}
+        fstmt := nextstmt;
+        end;
+    end; {assdotemps}
+    
+    procedure assvaraddr(fpn: pn);
+      var lbound: pbound;
+    begin
+    if fpn <> nil
+    then
+      with fpn^ do begin
+        assvaraddr(rlink);
+        if nkind = VARS
+        then
+          if not Indirect
+          then begin { not Indirect --> Not a parameter }
+            if incommon = nil
+            then begin
+              if (size >= lovarsize) and (size <= hivarsize)
+              then begin
+
+		{ dar:if we have overflowed local stack space}
+		{ then set flag: checked in f.exec.2:endexpr }
+		{ for recursive routines		     }
+
+		if ((size - nextaddr) > MAXLOCAL) and not SaveFlag and not GSaveFlag
+		then begin
+		     OverflowStack := true;
+	        end;
+	
+                if SaveFlag or GSaveFlag or ((size - nextaddr) > MAXLOCAL)
+                then begin
+                  if (size > 1) and (idtype.typ <> CHARACTER)
+                  then begin
+                    if odd(nextsaddr)
+                    then nextsaddr := nextsaddr + 1;
+                    if ALLIGN32
+                    then
+                      if size > 2
+                      then nextsaddr := (nextsaddr + 3) and $7ffffffc;
+                    end;
+                  addr := nextsaddr; nlev := SAVEDVAR;
+                  nextsaddr := nextsaddr + size;
+                  end
+                else begin
+                  nextaddr := nextaddr - size;
+                  if (size > 1) and (idtype.typ <> CHARACTER)
+                  then begin
+                    if odd(nextaddr)
+                    then nextaddr := nextaddr - 1;
+                    if ALLIGN32
+                    then
+                      if size > 2
+                      then nextaddr := nextaddr and $fffffffc;
+                    end;
+                  addr := nextaddr;
+                  end;
+                end;
+              end
+            else
+              with incommon^ do
+                if nkind = EQUIVALENCE
+                then begin
+                  if (eqsize >= lovarsize) and (eqsize <= hivarsize)
+                  then begin
+                    if not AddrFlag
+                    then begin
+                      AddrFlag := TRUE;
+
+                      if GSaveFlag or ((eqsize - nextaddr) > MAXLOCAL) or
+                         (eqkind = SAVEDVAR)
+                      then begin
+                        if odd(nextsaddr) then nextsaddr := nextsaddr + 1;
+                        eqaddr := nextsaddr; eqkind := SAVEDVAR;
+                        nextsaddr := nextsaddr + eqsize;
+                        end
+                      else begin
+                        nextaddr := nextaddr - eqsize;
+                        if odd(nextaddr) then nextaddr := nextaddr - 1;
+                        eqaddr := nextaddr; eqkind := LOCALVAR;
+                        end;
+                      end;
+                    fpn^.addr := eqaddr + fpn^.addr; fpn^.nlev := eqkind;
+                    end;
+                  end
+                else begin { nkind = COMMON }
+                  if fpn^.SaveFlag then error(203);
+                  fpn^.nlev := COMMONVAR;
+                  end;
+            lbound := bounds;
+            while lbound <> nil do
+              with lbound^ do begin
+                if (lo.bkind <> CONSTBOUND) or (hi.bkind <> CONSTBOUND)
+                then begin makidstr(errname,name); error(66); end;
+                lbound := next;
+                end;
+            end;
+        assvaraddr(llink);
+        end;
+    end; {assvaraddr}
+    
+    procedure asfparaddr(fpn: pn);
+      var lpnlist: pnlist; nextsfaddr: integer;
+    begin
+    lpnlist := fpn^.arglist; nextsfaddr := 0;
+    while lpnlist <> nil do
+      with lpnlist^.nrec^ do begin
+        if nkind = VARS
+        then begin
+          nextsfaddr := nextsfaddr - 4; addr := nextsfaddr;
+          if idtype.typ = CHARACTER then nextsfaddr := nextsfaddr - 4;
+          end
+        else begin nextsfaddr := nextsfaddr - 8; parambytes := nextsfaddr; end;
+        lpnlist := lpnlist^.next;
+        end;
+    lpnlist := fpn^.arglist;
+    while lpnlist <> nil do
+      with lpnlist^.nrec^ do begin
+        if nkind = VARS
+        then if CALLCXP
+             then addr := addr + (16 - nextsfaddr)
+             else addr := addr + (12 - nextsfaddr);
+        lpnlist := lpnlist^.next;
+        end;
+    fpn^.parambytes := 12 - nextsfaddr;
+    end; {asfparaddr}
+    
+    function countpbytes(fpnlist: pnlist): integer;
+      var k: integer;
+    begin
+    k := 0;
+    while fpnlist <> nil do begin
+      with fpnlist^.nrec^ do
+        if nkind = VARS
+        then begin
+          k := k + 4;
+          if idtype.typ = CHARACTER
+          then k := k + 4;
+          end
+        else
+          if nkind = LABL
+          then k := k + 4
+          else { idkind = EXTERN/SUBR/FUNCT } k := k + 8;
+      fpnlist := fpnlist^.next;
+      end;
+    countpbytes := k;
+    end; {countpbytes}
+    
+    (************************* The OLD way: ********************************
+    procedure copynewglobals;
+      type room = array[0..100] of integer;
+      var lpn,lpn2,nametree: pn; lpnlist,npnlist: pnlist; CopyFlag: Boolean;
+          proom: ^room;
+      
+      function copypn(fpn: pn; ArgName: Boolean): pn;
+        var lpn,npn: pn; lpnlist,fpnlist,lastpnlist: pnlist;
+            lstr: idstring;
+      begin
+      npn := lookupid(nametree,fpn^.name);
+      if npn = nil
+      then begin
+           makidstr(lstr,fpn^.name); newn(lpn,fpn^.nkind,lstr);
+           if ArgName then entername(lpn,nametree);
+           end
+      else begin
+           if ArgName
+           then lpn := npn
+           else begin
+                newn(lpn,fpn^.nkind,'?'); lpn^.name := npn^.name;
+                end;
+           end;
+      lpn^.idtype := fpn^.idtype;
+      case fpn^.nkind of
+        VARS:   ;
+        COMMON: begin
+                lpn^.comsize := fpn^.comsize;
+                lpn^.cdatakind := fpn^.cdatakind;
+                end;
+        EXTERN,
+        FUNCT,
+        SUBR,
+        PROG,
+        BLOCKD: begin
+                lpn^.rtnno := fpn^.rtnno;
+                lpn^.rtnlev := fpn^.rtnlev;
+                lpn^.NDefined := fpn^.NDefined;
+                lpn^.RtnLocal := FALSE;
+                lpn^.parambytes := fpn^.parambytes;
+                lpn^.numaltret := fpn^.numaltret;
+                lpn^.arglist := nil;
+                if lpn^.NDefined
+                then begin
+                  lastpnlist := nil; fpnlist := fpn^.arglist;
+                  while fpnlist <> nil do begin
+                    npn := copypn(fpnlist^.nrec,TRUE);
+                    new(lpnlist);
+                    lpnlist^.next := nil; lpnlist^.nrec := npn;
+                    if lastpnlist = nil
+                    then lpn^.arglist := lpnlist
+                    else lastpnlist^.next := lpnlist;
+                    lastpnlist := lpnlist;
+                    fpnlist := fpnlist^.next;
+                    end;
+                  end;
+                end;
+        LABL:   begin
+                lpn^.labp := nil;
+                end;
+      otherwise: begin
+                 writeln('Bad NKIND = ',ord(fpn^.nkind),' in COPYGLOBALS(''',
+                         lstr,''')');
+                 error(1103);
+                 end;
+      end; {case}
+      copypn := lpn;
+      end; {copypn}
+      
+    begin {copynewglobals}
+    
+    { 1. Make a duplicate copy of all new globals. }
+    
+    new(proom); lpnlist := newglobals; newglobals := nil; nametree := nil;
+    while lpnlist <> nil do begin
+      lpn := lpnlist^.nrec;
+      if lpn^.name.a <> '    '
+      then begin
+        lpn2 := lookupid(globaltree,lpn^.name);
+        CopyFlag := TRUE;
+        if lpn2 <> nil
+        then CopyFlag := (lpn2^.nkind in [FUNCT,SUBR]) and 
+                          lpn^.NDefined and not lpn2^.NDefined;
+        if CopyFlag
+        then begin
+          lpn2 := copypn(lpn,FALSE);
+          new(npnlist);
+          npnlist^.nrec := lpn2;
+          npnlist^.next := newglobals;
+          newglobals := npnlist;
+          end;
+        end;
+      lpnlist := lpnlist^.next;
+      end;
+    
+    { 2. Release the heap }
+    
+    release(heapmark);
+    
+    { 3. Copy new globals to a more compact location. }
+    
+    lpnlist := newglobals; nametree := nil;
+    while lpnlist <> nil do begin
+      lpn := copypn(lpnlist^.nrec,FALSE);
+      lpn2 := lookupid(globaltree,lpn^.name);
+      if lpn2 = nil
+      then entername(lpn,globaltree)
+      else begin
+        lpn2^.NDefined := TRUE; lpn2^.arglist := lpn^.arglist;
+        end;
+      lpnlist := lpnlist^.next;
+      end;
+    
+    end; {copynewglobals}
+    ************************* The OLD way: ********************************)
+    
+    procedure copynewglobals(fpnlist: pnlist);
+      const MAXN = 20;
+      var lpn,lpn2: pn; CopyFlag,DoIt: Boolean; i,k: integer;
+          a: array[1..MAXN] of record s: idstring; r: n; end;
+      
+      function copyargs(fpnlist,farglist: pnlist): pnlist;
+        var i,k: integer; lpnlist,mpnlist: pnlist; lpn: pn; DoIt: Boolean;
+            a: array[1..MAXN] of
+                 record s: idstring; t: ftntype; lkind: idkind; end;
+      begin
+      k := 0; lpnlist := nil; DoIt := TRUE;
+      while farglist <> nil do begin
+        if k < MAXN
+        then begin
+          k := k + 1;
+          with a[k],farglist^.nrec^ do begin
+            makidstr(s,name); t := idtype; lkind := nkind;
+            end;
+          farglist := farglist^.next;
+          end
+        else begin
+          lpnlist := copyargs(fpnlist,farglist);
+          farglist := nil; DoIt := FALSE;
+          end;
+        end;
+      if DoIt then copynewglobals(fpnlist);
+      for i := k downto 1 do
+        with a[i] do begin
+          newn(lpn,lkind,s); lpn^.idtype := t;
+          new(mpnlist); mpnlist^.next := lpnlist;
+          mpnlist^.nrec := lpn; lpnlist := mpnlist;
+          end;
+      copyargs := lpnlist;
+      end; {copyargs}
+      
+    begin {copynewglobals}
+    
+    { 1. Make a duplicate copy of all new globals. }
+    
+    DoIt := TRUE; k := 0;
+    while fpnlist <> nil do begin
+      lpn := fpnlist^.nrec;
+      if lpn^.name.a <> '    '
+      then begin
+        lpn2 := lookupid(globaltree,lpn^.name);
+        CopyFlag := TRUE;
+        if lpn2 <> nil
+        then CopyFlag := (lpn2^.nkind in [FUNCT,SUBR]) and
+                         lpn^.NDefined and not lpn2^.NDefined;
+        if CopyFlag
+        then
+          if k < MAXN
+          then begin
+            k := k + 1;
+            with a[k] do begin
+              makidstr(s,lpn^.name); r := lpn^;
+              if (r.nkind in [EXTERN,FUNCT,SUBR,PROG,BLOCKD]) and
+                 r.NDefined
+              then begin
+                r.arglist := copyargs(fpnlist^.next,r.arglist);
+                fpnlist := nil; DoIt := FALSE;
+                end;
+              end;
+            end
+          else begin
+            copynewglobals(fpnlist);
+            fpnlist := nil; DoIt := FALSE;
+            end;
+        end;
+      if fpnlist <> nil then fpnlist := fpnlist^.next;
+      end;
+    
+    { 2. Release the heap, if we are at the bottom }
+    
+    if DoIt then release(heapmark);
+    
+    { 3. Copy new globals to a more compact location. }
+    
+    for i := k downto 1 do
+      with a[i] do begin
+        newn(lpn,r.nkind,s);
+        lpn^.idtype := r.idtype;
+        case r.nkind of
+          VARS:   ;
+          COMMON: begin
+                  lpn^.comsize := r.comsize;
+                  lpn^.cdatakind := r.cdatakind;
+                  end;
+          EXTERN,
+          FUNCT,
+          SUBR,
+          PROG,
+          BLOCKD: begin
+                  lpn^.rtnno := r.rtnno;
+                  lpn^.rtnlev := r.rtnlev;
+                  lpn^.NDefined := r.NDefined;
+                  lpn^.RtnLocal := FALSE;
+                  lpn^.parambytes := r.parambytes;
+                  lpn^.numaltret := r.numaltret;
+                  if r.NDefined
+                  then lpn^.arglist := r.arglist
+                  else lpn^.arglist := nil;
+                  end;
+          LABL:   begin
+                  lpn^.labp := nil;
+                  end;
+        otherwise: begin
+                   writeln('Bad NKIND = ',ord(r.nkind),' in COPYGLOBALS(''',
+                           s,''')');
+                   error(1103);
+                   end;
+        end; {case}
+        lpn2 := lookupid(globaltree,lpn^.name);
+        if lpn2 = nil
+        then entername(lpn,globaltree)
+        else begin
+          lpn2^.NDefined := TRUE;
+          lpn2^.arglist := r.arglist;
+          end;
+        end;
+    end; {copynewglobals}
+    
+  begin {execdone}
+  if ctrlstk <> nil then error(132);
+  if odd(maxfsize) then maxfsize := maxfsize + 1;
+  nextaddr := -maxfsize; nextsaddr := 0;
+  declunkparm(localtree);
+  if maxaltreturn > 0
+  then begin
+    nextaddr := nextaddr - (maxaltreturn*4 + 4);
+    altrettable := nextaddr;
+    end;
+  localtree^.parambytes := countpbytes(localtree^.arglist) + 8;
+  if entrycount > 0
+  then begin
+    nextaddr := nextaddr - 2; entrynoloc := nextaddr;
+    lstmt := proctree;
+    while lstmt <> nil do
+      with lstmt^ do begin
+        if stmtop = ENTRYST
+        then entryname^.parambytes := countpbytes(entryname^.arglist) + 8;
+        lstmt := nextstmt;
+        end;
+    end;
+  assparaddr(localtree); assdotemps(proctree);
+  nextaddr := nextaddr - numcharcalls; chartmploc := nextaddr;
+  if odd(nextaddr) then nextaddr := nextaddr - 1;
+  lovarsize := 1; hivarsize := 8; assvaraddr(localtree);
+  lovarsize := 9; hivarsize := 100; assvaraddr(localtree);
+  lovarsize := 101; hivarsize := 2000000000; assvaraddr(localtree);
+  if odd(nextaddr) then nextaddr := nextaddr - 1;
+  if odd(nextsaddr) then nextsaddr := nextsaddr + 1;
+  
+  { Check for labels referenced but not defined }
+  
+  llabrec := lastlabel;
+  while llabrec <> nil do
+    with llabrec^ do begin
+      if labkind = FORMATLAB
+      then begin 
+        if not FmtDefined then error(163);
+        end
+      else
+        if (not Defined) and (labelval <> '      ')
+        then begin
+          for i := 1 to 6 do errname[i] := labelval[i];
+          errname[0] := chr(6); error(131);
+          end;
+      llabrec := nextlabel;
+      end;
+  
+  if errors = 0
+  then begin
+    {::} (*****) if TraceCounts then dumpntree(localtree);
+    optimize(proctree);
+    dump(proctree,localtree,FALSE);
+    level := STFUNVAR;
+    while stfunlist <> nil do
+      with stfunlist^ do begin
+        asfparaddr(funname);
+        dump(funstmt,funname,TRUE);
+        stfunlist := stfunlist^.nextstmt;
+        end;
+    level := LOCALVAR;
+    end;
+  
+  lastlabel := nil;
+  if ListFlag and ListOpen
+  then begin
+    writeln(listfile);
+    dumpntree(localtree);
+    page(listfile);
+    writeln(listfile);
+    end;
+  if not (ListFlag or ListOpen or QuietFlag)
+  then begin
+       if (HOSTOS <> UNISOFT) and
+          (HOSTOS <> UNOS) and
+          (HOSTOS <> REGULUS) and
+          (HOSTOS <> ELITE) and
+          (HOSTOS <> GENIX) and
+          (HOSTOS <> TEK)
+       then writeln('         {',memavail:4,' bytes}');
+       end;
+  copynewglobals(newglobals);
+  end; {execdone}
+  
+begin {needstate}
+while state < minstate do begin
+      case state of
+        INITSTATE: initdone;
+        HEADSTATE: headdone;
+        IMPSTATE:  impdone;
+        SPECSTATE: specdone;
+        STMTFUNSTATE: sfundone;
+        EXECSTATE:    execdone;
+        ENDSTATE:     ;
+      end; {case}
+      state := succ(state);
+      end;
+if state > maxstate then error(100);
+end; {needstate}
+
+

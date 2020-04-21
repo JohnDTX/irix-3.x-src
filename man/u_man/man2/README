@@ -1,0 +1,16 @@
+1) deleted empty ".so" files
+2) deleted:	accept.2
+		connect.2
+		lockf.2
+		receive.2
+		select.2
+		send.2
+		socket.2
+		socketaddr.2
+3) no eqn
+4) tbl:		signal.2
+5) The Trash directory contains man pages for programs/routines
+that are not currently supported by SGI.
+
+The directory tools contains a shell script for doing checkin and
+checkout for RCS.

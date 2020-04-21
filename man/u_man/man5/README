@@ -1,0 +1,17 @@
+1) deleted:	inet.5
+		ip.5
+		lo.5
+		net.5
+		tcp.5
+		udp.5
+2) added:	me.5
+		ms.5
+		rcsfile.5
+3) eqn and "eqnchar":	eqnchar.5
+4) tbl:		fcntl.5
+		stat.5
+5) SCR to add mptx
+
+November 2,1985.  Robinf.  I created a directory called tools.  This
+directory contains some shell scripts which can be used to check files
+in and out of the RCS directory.

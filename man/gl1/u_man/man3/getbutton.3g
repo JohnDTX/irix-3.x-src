@@ -1,0 +1,35 @@
+.TH getbutton 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getbutton
+- return the current state of a button
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getbutton(b) "
+.B "Device b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getbut(b)"
+.B "integer*2 b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getbutton(b: Device): Boolean;"
+.sp
+.SH DESCRIPTION
+.I Getbutton
+polls a button, returning its current state.
+A button device is supplied as the argument.  \f2Getbutton\f1
+returns either 
+.I TRUE
+or
+.I FALSE,
+where 
+.I TRUE
+means that the button is pressed.
+.SH "SEE ALSO"
+.I qbutton, setbutton, tie
+.SH NOTE
+This command can only be used in immediate mode.

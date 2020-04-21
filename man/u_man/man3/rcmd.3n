@@ -1,0 +1,66 @@
+'\"macro stdmacro
+.TH RCMD 3N 
+.SH NAME
+rcmd, rresvport, ruserok \- routines for returning a stream
+to a remote command
+.SH SYNOPSIS
+.nf
+.B int rcmd(ahost, inport, locuser, remuser, cmd, fd2p)
+.B char **ahost;
+.B int inport;
+.B char *locuser, *remuser, *cmd;
+.B int *fd2p;
+.PP
+.B int rresvport(options)
+.B int options;
+.PP
+.B int ruserok(rhost, ruser, luser)
+.B char *rhost;
+.B char *user, *luser;
+.SH DESCRIPTION
+\f2rcmd\f1 executes a command on a remote machine.  
+It uses an authentication scheme based on reserved port numbers.  
+Only the super user can use this command. 
+\f2rresvport\f1 returns a descriptor with an address in the 
+privileged port space to a socket.
+\f2ruserok\f1 authenticates clients requesting service with \f2rcmd\f1.
+All three functions are in the same file.
+\f2rshd\f1(1M) and other servers use these functions.
+.PP
+\f2rcmd\f1 looks up the host \f2*ahost\f1 using \f2gethostbyname\f1(3N).
+It returns \-1 if the host does not exist.
+Otherwise, \f2*ahost\f1 becomes the standard name of the host, and
+a connection is established to a server
+residing at the Internet port \f2inport\f1.
+.PP
+If the call succeeds, a SOCK_STREAM type socket is
+returned to the caller and then given to the remote command as 
+\f2stdin\f1 and \f2stdout\f1.
+This socket has the options specified in \f2socket\f1(2).  
+If \f2fd2p\f1 is nonzero, an auxiliary channel to a control process is 
+set up and a descriptor for it is placed in \f2*fd2p\f1.
+The control process returns diagnostic output from the command (unit 2) 
+and accepts bytes (as UNIX signal numbers)
+for forwarding to the command's process group on this channel.  
+If \f2fd2p\f1 is 0, the \f2stderr\f1
+(unit 2 of the remote command) becomes the \f2stdout\f1
+and arbitrary signals cannot be sent to the remote process.
+See \f2rshd\f1(1M) for more details.
+.PP
+\f2rresvport\f1 obtains a socket with a privileged address bound to it.
+\f2rcmd\f1 and other routines use this socket.
+Privileged addresses consist of a port in the range 0 to 1023.
+Only the super user can bind a privileged address to this socket.
+.PP
+\f2ruserok\f1 uses the remote host's name returned by the
+\f2gethostent\f1(3N) routine, and two user names.
+Then it checks the files \f2/etc/hosts.equiv \f1 and \f2.rhosts\f1 
+in the current working directory (the local user's 
+home directory) to see if the service request is allowed.
+It returns a 1 if the \f2hosts.equiv\f1
+file has the machine name and the local and remote user are
+the same (and the local user is not root) or if the \f2.rhosts\f1 
+file has the remote user name.  
+Otherwise, \f2ruserok\f1 returns a 0.
+.SH SEE ALSO
+rlogin(1C), rsh(1C), rlogind(1M), rshd(1M)

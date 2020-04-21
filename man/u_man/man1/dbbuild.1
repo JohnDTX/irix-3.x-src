@@ -1,0 +1,79 @@
+'\"macro stdmacro
+.TH DBBUILD 1
+.SH NAME
+dbbuild \- build a database from a script
+.SH SYNOPSIS
+.PP
+.B
+dbbuild
+.I
+database-shell-file
+.SH DESCRIPTION
+.PP
+.I
+dbbuild
+takes a shell command file, as produced by a 
+.I 
+dblist -p
+command, and makes the additions to the database as indicated by
+the 
+.I
+dbadd
+commands in the file.  The result is the same as if the
+shell command file were executed, but it is faster because the work
+is done directly rather than by invoking each 
+.I dbadd
+commmand.
+.PP
+.I
+dbbuild
+can handle multiple database references in the shell command file,
+which means that you can combine several files produced by 
+.I
+dblist -p
+commands, and execute them at one time.  Databases that do not
+exist will be created.  If desired, you can also add blank lines or shell
+comments between the entries in the command file; 
+.i
+dbbuild
+will check the format.  Execution terminates with an error 
+message if any other
+type of input occurs between the end of one entry and the next
+.I 
+dbadd 
+command.
+Execution also terminates
+if an EOF is found in what is supposed to be a database entry.  
+Entries in the command file that were added prior to the "bad"
+entry will remain in the database.
+.PP
+For information on the 
+Emacs
+database facility, see the following documents:
+.PP
+.RS 5
+.I
+Emacs Reference Manual
+.br
+.SH SEE ALSO
+.PP
+Several utilities, in addition to dbbuild,
+are provided for manipulating the Emacs databases outside of Emacs.
+.IP "dbcreate(1)" 17
+creates a database.
+.IP "dbadd(1)" 17
+adds an entry to a database.
+.IP "dblist(1)" 17
+lists the keys in the database.
+.IP "dbprint(1)" 17
+prints the contents of a database entry.
+.SH BUGS
+.B
+dbbuild
+can be confused by script files that weren't produced by
+.B
+dblist
+-p, even though they are otherwise legal shell scripts.  In particular, the
+key argument to the dbadd commands in the script must be enclosed in double
+quotes, even though the quotes are not strictly necessary in a shell
+script.

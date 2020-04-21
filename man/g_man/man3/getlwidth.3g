@@ -1,0 +1,30 @@
+.TH getlwidth 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getlwidth
+\- returns the current linewidth
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getlwidth()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getlwi()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlwidth: longint;"
+.SH DESCRIPTION
+.B getlwidth
+returns the current linewidth in pixels.
+.SH "SEE ALSO"
+linewidth
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles
+.SH NOTE
+This routine is available only in immediate mode.

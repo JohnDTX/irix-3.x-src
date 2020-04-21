@@ -1,0 +1,2 @@
+gmatch.c belongs in usr/src/lib/libgen. The IRIS tree should have a symbollic 
+link between the RCS's gmatch.c,v files in this directory and usr/src/lib/libgen/RCS directories. The function gmatch is not defined in IRIS libraries.

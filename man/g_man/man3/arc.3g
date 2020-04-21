@@ -1,0 +1,73 @@
+.TH arc 3G
+.rs
+.sp -0.28i
+.SH NAME
+.B arc
+\- draws a circular arc
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "arc(x, y, radius, startang, endang)"
+.B "Coord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.B "arci(x, y, radius, startang, endang)"
+.B "Icoord x, y, radius;"
+.B "Angle startang, endang;"
+.IP
+.B "arcs(x, y, radius, startang, endang)"
+.B "Scoord x, y, radius;"
+.B "Angle startang, endang;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine arc(x, y, radius, stang, endang)"
+.B "real x, y, radius"
+.B "integer*4 stang, endang"
+.IP 
+.B "subroutine arci(x, y, radius, stang, endang)"
+.B "integer*4 x, y, radius, stang, endang"
+.IP 
+.B "subroutine arcs(x, y, radius, stang, endang)"
+.B "integer*2 x, y, radius"
+.B "integer*4 stang, endang"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure arc(x, y, radius: Coord;" 
+.br
+.B	startang, endang: Angle);
+.IP
+.B "procedure arci(x, y, radius: Icoord;" 
+.br
+.B	startang, endang: Angle);
+.IP
+.B "procedure arcs(x, y, radius: Scoord;" 
+.br
+.B	startang, endang: Angle); 
+.SH DESCRIPTION
+.B arc
+draws a circular arc.  The parameters of an arc are the
+center point (\f2x,y\f1), radius (\f2radius\f1), starting angle
+(\f2startang\f1), and ending angle (\f2endang\f1).  The
+angle of the arc is measured from the positive \f2x\fP 
+axis and specified in 
+integral tenths of degrees (e.g., 90 degrees equal 900 tenths of degrees).
+Positive angles
+describe counterclockwise rotations.  Since an arc is
+a 2-D shape, these routines have only 2-D forms.
+The arc is drawn in the \f2x-y\fP
+plane, with \f2z\fP=0, and uses the current color, linestyle, linewidth, 
+and writemask.
+It is drawn counterclockwise from \f2startang\f1 to \f2endang\f1.
+For example, an arc from 10 degrees to 5 degrees
+(100 to 50 tenths of degrees) is almost a complete circle.  After 
+.B arc
+executes, the graphics position is undefined.
+.SH "SEE ALSO"
+arcf, circ, circf, crv
+.sp
+.I Programming Guide,
+Section 3.7, Circles and Arcs
+

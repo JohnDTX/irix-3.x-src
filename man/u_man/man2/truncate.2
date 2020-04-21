@@ -1,0 +1,116 @@
+'\"macro stdmacro
+.TH TRUNCATE 2
+.SH NAME
+truncate, ftruncate \- truncate a file to a specified length
+.SH SYNOPSIS
+.nf
+.B truncate (path, length)
+.B char *path;
+.B long length;
+.PP
+.B ftruncate (fd, length)
+.B int fd;
+.B long length;
+.fi
+.SH DESCRIPTION
+.I Truncate\^
+causes the file named by
+.I path\^
+or referenced by
+.I fd\^
+to be truncated to at most
+.I length\^
+bytes in size.  If the file previously
+was larger than this size, the extra data
+is lost.
+With
+.IR ftruncate ,
+the file must be open for writing.
+If
+.I length\^
+is negative, the file is truncated to zero.
+.PP
+.I Truncate\^
+succeeds unless:
+.RS .3i
+.PP
+The pathname was too long.
+.SM
+\%[ENOENT]
+.PP
+A component of the path prefix of 
+.I path\^
+is not a directory.
+.SM
+\%[ENOTDIR]
+.PP
+The named file does not exist.
+.SM
+\%[ENOENT]
+.PP
+A component of the
+.I path\^
+prefix denies search permission.
+.SM
+\%[EACCES]
+.PP
+The named file is a directory.
+.SM
+\%[EISDIR]
+.PP
+The named file resides on a read-only file system.
+.SM
+\%[EROFS]
+.PP
+The file is a pure procedure (shared text) file that is being executed.
+.SM
+\%[ETXTBSY]
+.PP
+.I Path
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.RE
+.PP
+.I Ftruncate\^
+succeeds unless:
+.RS .3i
+.PP
+The
+.I fd
+is not a valid descriptor.
+.SM
+\%[EBADF]
+.RE
+.SH "RETURN VALUE"
+A value of 0 is returned if the call succeeds.  If the call
+fails a \-1 is returned, and the global variable
+.I errno\^
+specifies the error.
+.SH "SEE ALSO"
+open(2)
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#31,D0	|  truncate
+.B movl	path,A0
+.B movl	length,D1
+.B trap	#0
+.PP
+Carry bit set on failure and cleared on success.
+.sp
+.B moveq	#32,D0	|  ftruncate
+.B movl	fd,A0
+.B movl	length,D1
+.B trap	#0
+.PP
+Carry bit set on failure and cleared on success.
+.fi
+.DT
+.SH BUGS
+Partial blocks discarded as the result of truncation
+are not zero filled; this can result in holes in files
+which do not read as zero.
+.PP
+These calls should be generalized to allow ranges
+of bytes in a file to be discarded.

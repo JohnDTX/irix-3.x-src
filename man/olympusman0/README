@@ -1,0 +1,107 @@
+1.   INCORRECTLY FORMATTED REFERENCES
+
+The program fixref searches all the man pages and fixes common errors
+in the formatting of man page references.  See fixref.sed for what
+things are fixed.  The fixed pages are put into a subdirectory `fixref'
+of each man[1-8] directory.  To run this program, execute:
+
+	rm -f fixref.out
+	make fixref.out
+
+Diffs of each man page changed are written to fixref.out.  This output
+should be reviewed before moving the pages from the fixref
+subdirectories.  When the fixref subdirectories are empty or only contain
+pages that are bogus, remove them.
+
+
+2.  MAN PAGE REFERENCES
+
+A list of all man pages referenced in other man pages can be created by
+executing:
+
+	rm -f manxref
+	make manxref
+
+When the make is done, the list will be in the file "manxref".
+Sometimes text appears to be a man page reference when it actually isn't.
+The final invocation of sed in mkmanxref is meant for filtering these out.
+
+
+3. BAD SUBSECTION REFERENCES
+
+A list of all lower case subsection references can be obtained by executing:
+	
+	rm -f badsubsect
+	make badsubsect
+
+When the make is done, the list will be in the file "badsubsect".
+
+
+4.  BAD CROSS REFERENCES
+
+A list of all references without man pages can be made by executing:
+
+	rm -f badxref
+	make badxref
+
+
+When the make is done, the list will be in the file "badxref".
+
+5.  BAD NAME SECTION
+
+The ptx tools require that the NAME section contain a list of comma 
+separated words (with a space after the comma) followed by a ``\-''.  
+A list of all man pages that don't have this can be obtained by executing:
+
+	rm -f badnamesec
+	make badnamesec
+
+When the make is done, the list will be in the file "badnamesec".
+
+
+6.  TABLE OF CONTENTS AND PERMUTED INDEX
+
+The important program here is "tocrc".  It generates a table of
+contents and a permuted index.  "tocrc" sorta works by default.  It
+doesn't take long, either.  To make the table of contents and permuted
+index, execute:
+
+	make toc.in ptx.in >& err
+
+When it's done, it leaves its results in this directory.  A list of any
+subsections which "tocrc" did not capitalize will be in "err".  There's
+a sed command at the top of "tocrc" which will need to be modified if
+any are reported.  The files "toc1, toc2 ...", contain "troff" macros
+for the table of contents.  They can be edited if the table of contents
+has entries that are too big for a line.  To generate a table of
+contents, "xroff" the file "toc.in".  This is a "troff" macro file for
+the table of contents.  It sources the "toc[1-8]" files.  The number
+register a is used to tell it which volume's table of contents to
+generate: 0 for Vol 1A and 1 for Vol 1B.  If page numbering is
+important, set the page number in this file with the ".pn" request.  A
+target in the makefile exists to do the xroff for each volume, saving
+the output in tocv1.out and tocv2.out:
+
+	make tocv1.out tocv2.out
+
+"tocrc" also generates a file called "ptxx" with "troff" macros for the
+permuted index.  To generate a permuted index, "xroff" the file
+"ptx.in".  There is a target in the makefile to do the xroff, saving the
+output in ptx.out:
+
+	make ptx.out
+
+This macro file sources "ptxx".  If page numbering is
+important, set the page number in this file with the ".pn" request.  
+This file will probably be too big to edit unless you use emacs.  It
+can be broken up with the "split" utility.
+
+	split ptxx
+
+creates the files "xaa, xab ...".  They can be reassembled with the
+"cat" utility.
+
+	cat xaa xab xac > ptxx
+
+There is a target in the makefile that sends all three .out files to the
+2700.  It is "print-all".

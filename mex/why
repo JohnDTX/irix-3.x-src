@@ -1,0 +1,2 @@
+fix cursor disapearing after a chancge into double buffer mode.
+Esspecially effected 12 bit plane systems and in particular CDC's order.

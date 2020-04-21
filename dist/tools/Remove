@@ -1,0 +1,51 @@
+#! /bin/sh
+#
+# Remove [ -r root ] names
+#
+# Remove files contained in specific lists.  For each name given, a file
+# called "list.<name>" is expected in the "dist" directory under root;
+# each file in the list is (recursively) removed.  For the ftn and pas
+# options, the shared files from list.ftnpas are retained for the time
+# being.  If upon completion of argument processing it appears that
+# neither fortran or pascal are present, the shared files from
+# list.ftnpas are removed.
+
+case $1 in
+-r)	shift ; root=$1 ; shift ;;
+*)	root=/ ;;
+esac
+
+cd $root
+
+for f in $*
+do
+	if test $f = upd -o $f = unix -o $f = root -o $f = usr
+	then echo "Can't remove $f.\n" ; continue ;
+	fi
+	if test -f dist/list.$f
+	then
+		add=`if test -f dist/list.$f+ ; then echo dist/list.$f+ ; fi`
+		case $f in
+		ftn|pas)	comm -23 dist/list.$f dist/list.ftnpas ;;
+		*)		sed '/[-+]$/{
+					p
+					s/[-+]$//
+				}' dist/list.$f $add ;;
+		esac | xargs rm -rf
+	else
+		echo "Can't find `pwd`dist/list.$f"
+	fi
+done
+
+if test ! -x dist/Have ; then exit 0 ; fi
+
+if dist/Have -s ftn || dist/Have -s pas
+then
+	:
+else
+	add=`if test -f dist/list.ftnpas+ ; then echo dist/list.ftnpas+ ; fi`
+	if test -f dist/list.ftnpas
+	then
+		cat dist/list.ftnpas $add | xargs rm -rf
+	fi
+fi

@@ -1,0 +1,43 @@
+.TH gconfig 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gconfig
+\- reconfigures the system
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gconfig()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gconfi"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gconfig;"
+.SH DESCRIPTION
+.B gconfig
+sets the modes that you request.
+You must call
+.B gconfig
+for
+\f3doublebuffer\f1,
+\f3multimap\f1,
+\f3onemap\f1,
+\f3RGBmode\f1,
+and
+\f3singlebuffer\f1
+to take effect.  After a \f3gconfig\f1
+call, writemask, color, cursor color,
+and cursor writemask are reset to their default values. 
+The contents of the color map do not change.
+.SH "SEE ALSO"
+doublebuffer, multimap, onemap, RGBmode, singlebuffer,
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+.SH NOTE
+This routine is available only in immediate mode.

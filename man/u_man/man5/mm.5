@@ -1,0 +1,75 @@
+'\"macro stdmacro
+.TH MM 5
+.SH NAME
+mm \- the \s-1MM\s+1 macro package for formatting documents
+.SH SYNOPSIS
+.B mm
+[ options ] [ files ]
+.PP
+.B "nroff \-mm"
+[ options ] [ files ]
+.PP
+.B "nroff \-cm"
+[ options ] [ files ]
+.sp 1v
+.B mmt
+[ options ] [ files ]
+.PP
+.B "troff \-mm"
+[ options ] [ files ]
+.PP
+.B "troff \-cm"
+[ options ] [ files ]
+.SH DESCRIPTION
+This package provides a formatting capability for a
+very wide variety of documents.
+It is the standard package used by the
+.SM BTL
+typing pools and
+documentation centers.
+The manner in which a document is typed in and edited
+is essentially independent of whether the document
+is to be eventually formatted at a terminal or is to be phototypeset.
+See the references below for further details.
+.PP
+The
+.B \-mm
+option causes
+.I nroff
+and
+.IR troff (1)
+to use the non-compacted version of the macro package,
+while the
+.B \-cm
+option
+results in the use of the compacted version, thus speeding up
+the process of loading the macro package.
+.SH FILES
+.PD 0
+.TP "\w'/usr/lib/macros/cmp.[nt].[dt].m   'u"
+/usr/lib/tmac/tmac.m
+pointer to the non-compacted version of the package
+.TP
+/usr/lib/macros/mm[nt]
+non-compacted version of the package
+.TP
+/usr/lib/macros/cmp.[nt].[dt].m
+compacted version of the package
+.TP
+/usr/lib/macros/ucmp.[nt].m
+initializers for the compacted version of the package
+.PD
+.SH SEE ALSO
+.tr ~
+.PD 0
+mm(1), mmt(1), nroff(1), troff(1).
+.PP
+.I "\s-1MM\s+1\-Memorandum Macros\^"
+by D.~W. Smith and J.~R. Mashey.
+.PP
+.I "Typing Documents with \s-1MM\s+1\^"
+by D.~W. Smith and E.~M. Piskorik.
+.PD
+.br
+.tr ~~
+.\"	@(#)mm.5	5.1 of 10/15/83

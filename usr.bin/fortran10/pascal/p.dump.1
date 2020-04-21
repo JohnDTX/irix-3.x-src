@@ -1,0 +1,693 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.DUMP.1.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               08-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure dumpsymbols(fpn: pn; firsttno,lasttno: integer;
+                      lnkname,prntname: idstring; procno,parentno: integer);
+  var iblock,ibyte: integer; l: longint;
+  
+  procedure xoutn(fid: identrec);
+    var i: integer; lstr: idstring;
+  begin
+  makidstr(lstr,fid);
+  for i := 0 to length(lstr) do out(ord(lstr[i]));
+  end; {xoutn}
+  
+  procedure dmptype(fpt: pt);
+    var lpn: pn; nbits: integer; hi,lo: longint;
+    
+    procedure dumpfields(fpn: pn);
+      var hi,lo: longint; nbits: integer;
+    begin
+    if fpn <> nil
+    then with fpn^ do begin
+              dumpfields(rlink);
+              xoutn(name);
+              out2(idtype^.typeno);
+              if foff > 32767
+              then out4(foff or $80000000)
+              else out2(foff);
+              if fpt^.PckdRec
+              then if PckdField
+                   then begin
+                        nbits := idtype^.bits + 8*idtype^.bytes;
+                        getbounds(idtype,lo,hi);
+                        if lo < 0 then nbits := nbits + 128;
+                        out(nbits); out(bitoff);
+                        end
+                   else out2(0);
+              dumpfields(llink);
+              end;
+    end; {dumpfields}
+    
+  begin {dmptype}
+  with fpt^ do
+       if not Marked
+       then begin
+            Marked := TRUE;
+            out2(typeno);
+            case form of
+              SCALAR:   begin
+                        out(0); out2(maxconst^.valueof.ivalu);
+                        end;
+              SUBRANGE: begin
+                        out(1); out2(rangeof^.typeno);
+                        out4(min); out4(max);
+                        end;
+              POINTERS: begin
+                        out(2); out2(pointerto^.typeno);
+                        end;
+              SETS:     begin
+                        out(3); out2(setof^.typeno);
+                        end;
+              ARRAYS:   begin
+                        out(4 + ord(BitPacked)*16);
+                        out2(indexedby^.typeno);
+                        out2(arrayof^.typeno);
+                        if BitPacked
+                        then begin
+                             nbits := bitsperel; getbounds(arrayof,lo,hi);
+                             if lo < 0 then nbits := nbits + 128;
+                             out(nbits);
+                             end;
+                        end;
+              RECORDS:  begin
+                        out(7 + ord(PckdRec)*16);
+                        out4(bytes);
+                        dumpfields(fields);
+                        out(0);
+                        end;
+              FILES:    begin
+                        out(6 + ord(PckdFile)*16);
+                        out2(fileof^.typeno);
+                        end;
+              STRINGS:  begin
+                        out(5); out(stringlen);
+                        end;
+              SCONST:   begin
+                        out(8); out(stringlen);
+                        end;
+            end; {case}
+            end;
+  end; {dmptype}
+  
+  procedure walktype(fpt: pt; procedure proc(fpt: pt));
+    var lpn: pn;
+    
+    procedure walkftypes(fpn: pn);
+    begin
+    if fpn <> nil
+    then with fpn^ do begin
+              walkftypes(rlink);
+              if idtype <> nil
+              then walktype(idtype,proc);
+              walkftypes(llink);
+              end;
+    end; {dumpftypes}
+    
+  begin {walktype}
+  if fpt <> nil
+  then
+    with fpt^ do begin
+       if (not Marked) and (typeno >= firsttno) and (typeno < lasttno)
+       then begin
+            case form of
+              SCALAR:   begin
+                        proc(fpt);
+                        end;
+              SUBRANGE: begin
+                        walktype(rangeof,proc);
+                        proc(fpt);
+                        end;
+              POINTERS: begin
+                        proc(fpt);
+                        walktype(pointerto,proc);
+                        end;
+              SETS:     begin
+                        proc(fpt);
+                        walktype(setof,proc);
+                        end;
+              ARRAYS:   begin
+                        walktype(arrayof,proc); walktype(indexedby,proc);
+                        proc(fpt);
+                        end;
+              RECORDS:  begin
+                        walkftypes(fields);
+                        proc(fpt);
+                        end;
+              TAGFIELD: begin
+                        end;
+              VARIANT:  begin
+                        end;
+              FILES:    begin
+                        walktype(fileof,proc);
+                        proc(fpt);
+                        end;
+              STRINGS:  begin
+                        proc(fpt);
+                        end;
+              SCONST:   begin
+                        proc(fpt);
+                        end;
+            end; {case}
+            end; {not Marked}
+       end; {with}
+  end; {walktype}
+  
+  procedure dmptypes(fpn: pn);
+  begin
+  if fpn <> nil
+  then with fpn^ do begin
+            dmptypes(llink);
+            walktype(idtype,dmptype);
+            dmptypes(rlink);
+            end;
+  end; {dmptypes}
+  
+  procedure dmpvars(fpn: pn);
+    var k: integer; lpn: pn; lstr: idstring;
+  begin
+  if fpn <> nil
+  then with fpn^ do begin
+            dmpvars(rlink);
+            if class = VARS
+            then begin
+                 xoutn(name); out2(idtype^.typeno);
+                 if InReg
+                 then begin
+                      if (CHIP = M68000) or (CHIP = M68020)
+                      then begin
+                           if vkind = DRCT
+                           then if refcount >= 32 {Address register}
+                                then if (idtype^.form = ARRAYS) or
+                                   (idtype^.form = FILES) or
+                                   (idtype^.form = STRINGS)
+                                     then k := 3
+                                     else k := 2
+                                else k := 2
+                           else k := 3;
+                           if refcount < 32
+                           then k := k + (7 - refcount)*16
+                           else k := k + (43 - refcount)*16;
+                           out(k);
+                           end
+                      else begin
+                           if vkind = DRCT
+                           then if (idtype^.form = ARRAYS) or
+                                   (idtype^.form = FILES) or
+                                   (idtype^.form = STRINGS)
+                                then k := 3
+                                else k := 2
+                           else k := 3;
+                           if refcount < 32
+                           then k := k + (7 - refcount)*16
+                           else k := k + (47 - refcount)*16;
+                           out(k);
+                           end;
+                      end
+                 else if vlev < 0
+                      then begin { Unit Global Variable }
+                           lpn := unitlist; lstr := '?';
+                           while lpn <> nil do
+                                 with lpn^ do
+                                      if ulev = fpn^.vlev
+                                      then begin
+                                           makidstr(lstr,name);
+                                           lstr := concat('/',lstr,'/');
+                                           lpn := nil;
+                                           end
+                                      else lpn := next;
+                           out(4); out2(-1); outs(lstr); out4(voff);
+                           end
+                      else if (vlev = 1) and GLOBSTATIC
+                           then begin
+                                out(4); out2(-1);
+                                outs('//GLOBALS//'); out4(voff);
+                                end
+                           else begin
+                                if vkind = DRCT then k := 0 else k := 1;
+                                if level = 1
+                                then k := k + 208
+                                else k := k + 224;
+                                if abs(voff) <= 32767
+                                then begin out(k); out2(voff); end
+                                else begin out(k + 6); out4(voff); end;
+                                end;
+                 end;
+            dmpvars(llink);
+            end;
+  end; {dmpvars}
+  
+begin {dumpsymbols}
+out($FD{LinkBlock}); out($A0{SymbBlock});
+iblock := blockno; ibyte := byteno; out(0); out2(0);
+{ Pascal Vn.m } out(0); out(VERSNO); out(VERSSUBNO);
+if level < 0 then out(0) else out(level);
+out2(procno); outs(lnkname);
+out2(parentno); outs(prntname);
+outs(lnkname);
+dmptypes(fpn); out2(0);
+dmpvars(fpn); out(0);
+l := ord4(blockno - iblock)*512 + byteno - ibyte + 1;
+patchicode(iblock,ibyte,l div 65536);
+patchicode(iblock,ibyte + 1,(l div 256) and 255);
+patchicode(iblock,ibyte + 2,l and 255);
+if odd(l) then out(0);
+end; {dumpsymbols}
+
+procedure dump(proctree: pstmt; procn,parentproc,bigvars: pn);
+  
+  type pextrec = ^extrec;
+       extrec = record next: pextrec;
+                       username: identrec;
+                       extno: integer;
+                end;
+
+  var i,labno,withlevel,llc,lsize,lstmtno,parentno: integer;
+      lnkname,prntname: idstring;
+      lpn: pn;
+      lplabel: plabrec;
+      
+      nextextno: integer;
+      extlist: pextrec;
+      
+      GlobalLabels: Boolean;
+      
+      unitset: set of 0..MAXUNITS;
+      
+  function nextlabel: integer;
+  begin
+  nextlabel := labno;
+  labno := labno + 1;
+  end; {nextlabel}
+  
+  function findext(fusername: identrec; rtnno,flev,flcbits: integer): pextrec;
+    var lext: pextrec; MatchFlag: Boolean;
+  
+    function newext: pextrec;
+      var lext: pextrec; lname: idstring;
+    begin
+    makidstr(lname,fusername);
+    if flcbits <> 0 then setcase(lname,flcbits);
+    
+    { External Reference }
+    
+    out($F1); out2(nextextno); out(flev); out2(rtnno); outs(lname);
+    
+    new(lext);
+    with lext^ do begin
+         next := nil; username := fusername; extno := nextextno;
+         end;
+    nextextno := nextextno + 1;
+    newext := lext;
+    end; {newext}
+    
+  begin {findext}
+  if extlist = nil
+  then begin lext := newext; extlist := lext; end
+  else begin
+       lext := extlist; MatchFlag := FALSE;
+       repeat
+              with lext^ do
+                   if idEQid(username,fusername)
+                   then MatchFlag := TRUE
+                   else begin
+                        if next = nil
+                        then begin next := newext; MatchFlag := TRUE; end;
+                        lext := next;
+                        end;
+       until MatchFlag;
+       end;
+  findext := lext;
+  end; {findext}
+  
+  procedure findunit(flev: integer);
+    var lpn: pn; i: integer; lname: idstring;
+  begin
+  if not (flev in unitset)
+  then begin
+       lpn := unitlist;
+       while lpn <> nil do
+             with lpn^ do
+                  if flev = -ulev
+                  then begin
+                       makidstr(lname,name);
+                       out($F7{FDATDEF}); out2(flev); out4(lpn^.ulc);
+                       out2(-1); outs(concat('/',lname,'/'));
+                       lpn := nil; unitset := unitset + [flev];
+                       end
+                  else lpn := next;
+       end;
+  end; {findunit}
+  
+  procedure dumpjsr(fop,flev,rtnno,flcbits: integer; fid: identrec);
+    var lext: pextrec;
+  begin
+  lext := findext(fid,rtnno,flev,flcbits);
+  lout(fop); lout2(lext^.extno);
+  end; {dumpjsr}
+  
+  procedure callproc(fname: alfa8);
+    var lid: identrec; i: integer;
+  begin
+  i := 8; while fname[i] = ' ' do i := i - 1;
+  lid.all := fname; lid.len := i;
+  dumpjsr(177{UPCALL},2,-1,0,lid);
+  end; {callproc}
+  
+  procedure outintcnst(fvalue: longint);
+    var lop,k,i: integer;
+        c: array[0..3] of -128..127;
+  begin
+  lop := 26{CNST4}; k := 0;
+  if (fvalue >= -32768) and (fvalue <= 32767)
+  then if (fvalue >= -128) and (fvalue <= 127)
+       then begin lop := 24{CNST1}; k := 3; end
+       else begin lop := 25{CNST2}; k := 2; end;
+  moveleft(fvalue,c,4);
+  lout(lop);
+  if HOSTSEX = MALE
+  then for i := k to 3 do lout(c[i])
+  else for i := 3 - k downto 0 do lout(c[i]);
+  end; {outintcnst}
+  
+  procedure outcnst(fvalu: valu; ftype: pt);
+    var i,j,len,k,bit,bits: integer; lstr: strvaltype; lset: setvaltype;
+        c: packed array[0..7] of char; r: real;
+  begin
+  case ftype^.form of
+       SCALAR,
+       SUBRANGE:
+         begin
+         if ftype = realptr
+         then begin
+              r := fvalu.dvalu;
+              moveleft(r,c,4);
+              lout(26{CNST4});
+              if HOSTSEX = MALE
+              then for i := 0 to 3 do lout(ord(c[i]))
+              else for i := 3 downto 0 do lout(ord(c[i]));
+              end
+         else if ftype = doubleptr
+              then begin
+                   moveleft(fvalu.dvalu,c,8);
+                   lout(27{CNST8});
+                   if HOSTSEX = MALE
+                   then for i := 0 to 7 do lout(ord(c[i]))
+                   else for i := 7 downto 0 do lout(ord(c[i]));
+                   end
+              else outintcnst(fvalu.ivalu);
+         end;
+       ARRAYS,
+       STRINGS,
+       SCONST:
+         begin
+         if ftype^.form = ARRAYS then lout(29{PAOCNST}) else lout(28{STRCNST});
+         len := fvalu.svalulen;
+         if (ftype^.form = ARRAYS) and (len > 127)
+         then lout2($8000 + len)
+         else lout(len);
+         j := 0; lstr := fvalu.svalu;
+         for i := 1 to len do
+           begin
+           if j = 8 then begin lstr := lstr^.next; j := 0; end;
+           j := j + 1; lout(ord(lstr^.strpart[j]));
+           end;
+         end;
+       SETS:
+         begin
+         lout(30{SETCNST}); len := (fvalu.maxsetel div 16 + 1)*2; lout(len);
+         j := 0; lset := fvalu.setvalu;
+         for i := 1 to len do
+           begin
+           if j = 32 then begin lset := lset^.nextset; j := 0; end;
+           bits := 0; bit := 1;
+           for k := j to j + 7 do begin
+               if k in lset^.setval then bits := bits + bit;
+               bit := bit + bit;
+               end;
+           j := j + 8; lout(bits);
+           end;
+         end;
+  end;
+  end; {outcnst}
+  
+  procedure expression(fexpr: pn); forward;
+  
+  procedure dumpucall(fproc,fargs: pn); forward;
+  
+  procedure dumpsfcall(fproc,pargs: pn); forward;
+  
+  procedure selector(fvarb: pn);
+    var op,llev: integer; lext: pextrec;
+        lo,hi,lsize,loffset: longint; Done: Boolean;
+    
+    procedure outscale(fpn: pn; fsize: longint);
+    begin
+    with fpn^ do
+         if (node = INDEXNODE) and (indexop = 10{SCALE})
+         then begin
+              if fsize <= 0 then fsize := 1;
+              lout(10{SCALE});
+              outscale(inxexpr,inxsz);
+              outintcnst(inxsz div fsize);
+              expression(inxaddr);
+              end
+         else expression(fpn);
+    end; {outscale}
+    
+  begin {selector}
+  with fvarb^ do
+    case node of
+         IDENTNODE:
+           case class of
+                CONSTS:
+                  outcnst(valueof,idtype);
+                FUNC, { For formal procedure and }
+                PROC, { function parameters only }
+                VARS:
+                  begin
+                  Done := FALSE;
+                  if class = VARS
+                  then begin
+                       loffset := voff; llev := vlev;
+                       if vkind = INDRCT then lout(12{UPARROW});
+                       if InReg
+                       then begin 
+                            case CHIP of
+                              M68000,
+                              M68020:
+                                begin
+                                if refcount >= 32 {Address register}
+                                then if vkind = DRCT
+                                     then if (idtype^.form = ARRAYS) or
+                                             (idtype^.form = FILES) or
+                                             (idtype^.form = STRINGS)
+                                          then lout(12{UPARROW});
+                                end;
+                              N32000:
+                                begin
+                                if vkind = DRCT
+                                then if (idtype^.form = ARRAYS) or
+                                        (idtype^.form = FILES) or
+                                        (idtype^.form = STRINGS)
+                                     then lout(12{UPARROW});
+                                end;
+                            end; {case}
+                            Done := TRUE; lout(7); {REFREG} lout(refcount);
+                            end;
+                       end
+                  else if pfdecl = FORMAL
+                       then begin
+                            loffset := pfoff; llev := pflev;
+                            end
+                       else begin
+                            loffset := floc; llev := pflev + 1;
+                            if InReg
+                            then begin
+                                 Done := TRUE;
+                                 lout(7); {REFREG} lout(refcount);
+                                 end
+                            end;
+                  if not Done
+                  then begin
+                       if llev < 0
+                       then begin {FCOMMON}
+                            op := -llev; findunit(op);
+                            lout(5); lout(op); lout3(loffset);
+                            end
+                       else if abs(loffset) >= 32767
+                            then begin
+                                 lout(4{BIGOFF}); lout(llev); lout3(loffset);
+                                 end
+                            else begin
+                                 if llev = 1
+                                 then lout(1{GLOBAL})
+                                 else if llev = level
+                                      then lout(2{LOCAL})
+                                      else begin
+                                           lout(3{INTERM}); lout(level-llev);
+                                           end;
+                                 lout2(loffset);
+                                 end;
+                       end;
+                  end;
+                FIELD:
+                  {Error!};
+           end; {case}
+         UNNODE:
+           begin
+           lout(unop);
+           if unop = 43 {WITHREC}
+           then lout(unsubop)
+           else if (unop = 62 {EXTUFLD}) or
+                   (unop = 63 {EXTSFLD})
+                then lout2(unsubop);
+           if unop = 22 {ADDRESS}
+           then if unsubop = 0
+                then selector(unarg)
+                else begin
+                     lext := findext(unarg^.name,unarg^.rtnno,
+                                     unarg^.pflev,unarg^.lcbits);
+                     lout(unsubop); lout2(lext^.extno);
+                     end
+           else if unop <> 43 {WITHREC} then selector(unarg);
+           end;
+         BINNODE:
+           begin
+           if binop = 15{FIELD}
+           then begin
+                if abs(rightarg^.foff) <= 32767
+                then begin lout(15{FIELD}); lout2(rightarg^.foff); end
+                else begin lout(8{BIGFLD}); lout3(rightarg^.foff); end;
+                selector(leftarg);
+                end;
+           end;
+         TRINODE:
+           begin
+           if triop = 16{INDEX}
+           then begin
+                if tript^.form = ARRAYS
+                then begin
+                     lsize := fullbytes(tript^.arrayof);
+                     getbounds(tript^.indexedby,lo,hi);
+                     if tript^.BigArray
+                     then begin
+                          lout(214{FINDEX});
+                          lout(ord(tript^.BigIndex)+ord(tript^.BigElement)*2);
+                          outintcnst(lsize); outintcnst(lo);
+                          end
+                     else begin
+                          if tript^.BitPacked then op := 21 else
+                          if lsize = 1 then op := 16 else
+                          if lsize = 2 then op := 17 else
+                          if lsize = 4 then op := 18 else
+                          if lsize = 8 then op := 19 else op := 20;
+                          lout(op);
+                          if op = 20 then lout2(lsize)
+                          else if op = 21
+                               then lout(tript^.bitsperel +
+                                         ord(tript^.SignedEl)*128);
+                          lout2(lo);
+                          end;
+                     end
+                else begin { form = STRINGS }
+                     lout(21); lout(8); lout2(0);
+                     end;
+                selector(tri1); expression(tri2);
+                end;
+           end;
+         INDEXNODE:
+           begin
+           case indexop of
+             9: {INDEX}
+                begin
+                lout(9); outscale(inxexpr,inxsz);
+                outintcnst(inxsz); expression(inxaddr);
+                end;
+            11: {ADJINX}
+                begin
+                lout(11); lout(ord(InxCkBnd)*8 + inxexpsz);
+                expression(inxexpr); outintcnst(inxsz);
+                if InxCkBnd then outintcnst(inxbound);
+                end;
+           end; {case}
+           end;
+         CSTNODE:
+           outcnst(cstvalu,csttype);
+    end; {case}
+  end; {selector}
+  
+  procedure expression{fexpr: pn};
+    var lo,hi: longint;
+  begin
+  with fexpr^ do
+    case node of
+         IDENTNODE:
+           selector(fexpr);
+         UNNODE:
+           if unop in [12..14 {Up Arrows}, 22 {ADDRESS}, 43 {WITHREC},
+                       62 {EXTUFLD}, 63 {EXTSFLD}]
+           then selector(fexpr)
+           else begin
+                lout(unop);
+                if (unop <> 23 {NIL}) and (unop <> 31 {NULLSET})
+                then begin
+                     if unop = 168 {SING}
+                     then lout(unsubop)
+                     else if unop = 170 {AJDSET}
+                          then lout2(unsubop);
+                     expression(unarg);
+                     end;
+                end;
+         BINNODE:
+           if binop in [15 {RFIELD}, 16..21 {Array Indexing}]
+           then selector(fexpr)
+           else if binop = 176 {UFCALL}
+                then dumpucall(leftarg,rightarg)
+                else if binop = 178 {SFCALL}
+                     then dumpsfcall(leftarg,rightarg)
+                     else begin
+                          lout(binop);
+                          if (binop >= 150{PAOCLT}) and (binop <= 155{PAOCNE})
+                          then begin lout(binsubop); lout(binsubop); end
+                          else if (binop >= 160 {UNION}) and
+                                  (binop <= 169 {SETRANGE})
+                               then lout(binsubop);
+                          if binop = 46{RNGCHK}
+                          then begin
+                               lout(binsubop);
+                               case binsubop of
+                                 0: {String}
+                                    lout(leftpt^.stringlen);
+                                 1,2: {2/4byte}
+                                    begin
+                                    getbounds(leftpt,lo,hi);
+                                    if binsubop = 1 {2byte}
+                                    then begin lout2(lo); lout2(hi); end
+                                    else begin lout4(lo); lout4(hi); end;
+                                    end;
+                                 3,4: {real/double}
+                                    ;
+                               end; {case}
+                               end
+                          else expression(leftarg);
+                          expression(rightarg);
+                          end;
+         TRINODE,
+         INDEXNODE:
+           selector(fexpr);
+         CSTNODE:
+           outcnst(cstvalu,csttype);
+    end; {case}
+  end; {expression}
+  
+
+                                                                                                                                                                                                                                                                                                

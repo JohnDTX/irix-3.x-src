@@ -1,0 +1,23 @@
+'\"macro stdmacro
+.TH DOMAINNAME 1
+.SH NAME
+domainname \- set or display name of current domain system
+.SH SYNOPSIS
+.B domainname
+[ \f2nameofdomain\f1 ]
+.SH DESCRIPTION
+.IX "domainname command"  ""  "\fLdomainname\fP \(em set/display domain name"
+.IX domain  "set or display current"
+.IX "current domain"  "set or display"
+.IX display  "current domain"
+.IX set  "current domain"
+Without an argument,
+.I domainname
+displays the name of the current domain.
+Only the super-user can set the domainname by giving an argument;
+this is usually done in the startup script
+.IR /etc/rc.nfs .
+Currently, domains are only used by the yellow pages, to refer
+collectively to a group of hosts.
+.SH SEE ALSO
+ypinit(1M)

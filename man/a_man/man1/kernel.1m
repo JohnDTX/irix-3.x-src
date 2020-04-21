@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH KERNEL 1M
+.SH NAME
+kernel \- install a default kernel
+.SH SYNOPSIS
+.B kernel
+[ type ]
+.SH DESCRIPTION
+.I Kernel\^
+installs a kernel as
+.I /defaultboot
+(for the prom monitor) and 
+.I /vmunix
+(for 
+\f2ps\f1(1),
+\f2w\f1(1),
+and other such commands).  The kernel is taken from the
+.I /kernels
+directory, and is referred to by its suffix (e.g.
+.I xns,
+.I tcp,
+.IR nfs ).
+It is linked to
+.I /vmunix
+and 
+.I /defaultboot.
+.PP
+When invoked with no arguments, the command will report which kernel is
+currently installed.
+.PP
+The kernel can be changed only by the superuser, and should be immediately
+followed by a system reboot to execute the new kernel.
+.PP
+Please note that copying a kernel from the
+.I kernels
+directory to either
+.I defaultboot
+or
+.I vmunix
+will overwrite the kernel that is currently linked to them.  Always use
+.I /etc/kernel
+to switch kernels.
+.SH FILES
+/kernels\ \ \ \ directory containing kernels
+.SH EXAMPLE
+.IP
+kernel xns
+.PP
+This command will install the XNS kernel as the default kernel.
+.IP
+kernel
+.PP
+This command will indicate which kernel is installed.

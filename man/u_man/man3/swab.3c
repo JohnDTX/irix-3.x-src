@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH SWAB 3C 
+.SH NAME
+swab \- swap bytes
+.SH SYNOPSIS
+.B void swab (from, to, nbytes)
+.br
+.B char \(**from, \(**to;
+.br
+.B int nbytes;
+.SH DESCRIPTION
+.I Swab\^
+copies
+.I nbytes\^
+bytes pointed to by
+.I from\^
+to the array pointed to by
+.IR to ,
+exchanging adjacent even and odd bytes.
+It is useful for carrying binary data between
+.SM PDP\*S-11s
+and other machines.
+.I Nbytes\^
+should be even and non-negative.
+If
+.I nbytes\^
+is odd and positive
+.I swab\^
+uses
+.IR nbytes \-1
+instead. If
+.I nbytes\^
+is negative
+.I swab\^
+does nothing.
+.\"	@(#)swab.3c	5.1 of 10/21/83

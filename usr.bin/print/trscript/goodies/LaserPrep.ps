@@ -1,0 +1,645 @@
+% Apple Macintosh LaserWriter header file
+% UPLOADED DIRECT FROM FROM THE RESOURCE FILE - DO NOT USE AS IS!!!!!!!
+
+%-0000000
+%{appledict version #12
+%serverdict begin exitserver
+%systemdict /statusdict known{statusdict begin 9 0 3 setsccinteractive end}if
+/md 200 dict def md begin
+/av 12 def
+/mtx matrix currentmatrix def
+/s30 30 string def
+/s1 ( ) def
+/pys 1 def
+/pxs 1 def
+/pyt 760 def
+/pxt 29.5 def
+/por true def
+/xl{translate}def
+/fp{pnsh 0 ne pnsv 0 ne and}def
+/vrb [
+{fp{gsave 1 setlinewidth pnsh pnsv scale stroke grestore}if newpath}
+{eofill}
+dup
+{newpath}
+2 index
+dup
+{initclip eoclip newpath}
+{}
+dup
+2 copy
+] def
+/xdf{exch def}def
+currentscreen /spf xdf /rot xdf /freq xdf
+/doop {vrb exch get exec} def
+/psu{2 index .72 mul exch div /pys xdf div .72 mul /pxs xdf /pyt xdf /pxt xdf /por xdf}def
+/txpose{dup 1680 eq userdict /note known{{legal}{note}ifelse}{pop}ifelse
+dup 1212 eq{54 32.4 xl}if 1321 eq{8.64 -.6 xl}if
+pxs pys scale pxt pyt xl por not{270 rotate}if 1 -1 scale}def
+/obl {{0.212557 mul}{pop 0} ifelse} def
+/sfd {[ps 0 ps 6 -1 roll obl ps neg 0 0] makefont dup setfont} def
+/fnt{findfont sfd}def
+/bt{1 index and 0 ne exch}def
+/sa 6 array def
+/fs{1 bt
+    2 bt
+    4 bt
+    8 bt
+   16 bt
+   sa astore pop
+}def
+/mx1 matrix def
+/mx2 matrix def
+/gf{currentfont}def
+/tc{32768 div add 3 1 roll 32768 div add 2t astore pop}def
+/3a [0 0 0] def
+/2t 2 array def
+/tp{3a astore pop}def
+/ee{}def
+/tt{gsave currentpoint 2 copy 2t aload pop qa 2 copy xl 3a aload pop exch dup 0 eq
+{pop}{1 eq{-1 1}{1 -1}ifelse scale}ifelse rotate pop neg exch neg exch xl moveto}def
+/te{currentpoint currentfont grestore setfont moveto}def
+/tb{/tg currentgray def 3 -1 roll 3 eq{1 setgray}if /ml 0 def /al 0 def}def
+/am{ml add /ml xdf}def
+/aa{[currentgray /setgray cvx]cvx exch dup wi pop dup al add /al xdf exch}def
+/th{3 -1 roll div 3 1 roll exch div 2 copy mx1 scale pop scale /scaleflag true def}def
+/tu{1 1 mx1 itransform scale /scaleflag false def}def
+/ts{1 1 mx1 transform scale /scaleflag true def}def
+/fz{/ps xdf}def
+/fx{dup exec}def
+/st{show pop pop}def
+/tm{
+      {
+      dup type dup /integertype eq exch /realtype eq or
+         {
+         dup ml mul
+         }
+         {
+         dup type /stringtype eq
+            {
+            rs
+            }
+            {
+            dup type /dicttype eq
+               {
+               setfont
+               }
+               {
+               dup type /arraytype eq
+                  {
+                  exec
+                  }
+                  {
+                  pop
+                  }ifelse
+               }ifelse
+            }ifelse
+         }ifelse
+      }forall
+   }def
+/es{3 -1 roll dup sa 5 get dup type /nulltype eq
+{pop4 pop}
+{
+sa 1 get {/ml ml .2 ps mul sub def}if  %Italic Hack Hack Hack
+   ne{fs}{pop}ifelse exch
+   dup 1 eq
+   {pop
+      al ml gt{/tv{ll}/ml ml al dup 0 ne{div}{pop}ifelse def}{/tv{st}/ml 1 def}ifelse def
+      tm
+   }
+   {
+   dup 3 eq
+   {pop
+   al ml gt{/tv{ll}/ml ml al dup 0 ne{div}{pop}ifelse def}{ml al sub 0 rmoveto /tv{st}/ml 1 def}ifelse def
+      tm
+   }
+   {
+   2 eq
+   {
+   al ml gt{/tv{ll}/ml ml al dup 0 ne{div}{pop}ifelse def}{ml al sub 2 div 0 rmoveto /tv{st}/ml 1 def}ifelse def
+      tm
+   }
+   {
+   /tv{ll}def
+   /ml ml al dup 0 ne{div}{pop}ifelse def
+      tm
+   }ifelse}ifelse}ifelse
+   }ifelse
+tg setgray
+}def
+/pop4 {pop pop pop pop} def
+/gm{scaleflag{mx1 itransform}if moveto}def
+/ly{exch pop currentpoint exch pop sub 0 exch rmoveto}def
+/page{1 add /#copies xdf showpage}def
+/sk{systemdict /statusdict known}def
+/jn{sk{statusdict /jobname 3 -1 roll put}{pop}ifelse}def
+/pen {/pnsv xdf /pnsh xdf pnsh setlinewidth} def
+/dlin{currentpoint newpath moveto lineto currentpoint stroke grestore moveto}def
+/lin {currentpoint /pnlv xdf /pnlh xdf gsave newpath /@y xdf /@x xdf fp{pnlh @x lt {pnlv @y ge
+{pnlh pnlv moveto @x @y lineto pnsh 0 rlineto
+0 pnsv rlineto pnlh pnsh add pnlv pnsv add lineto pnsh neg 0 rlineto}
+{pnlh pnlv moveto pnsh 0 rlineto @x pnsh add @y lineto 0 pnsv rlineto
+pnsh neg 0 rlineto pnlh pnlv pnsv add lineto} ifelse} {pnlv @y gt
+{@x @y moveto pnsh 0 rlineto pnlh pnsh add pnlv lineto 0 pnsv rlineto
+pnsh neg 0 rlineto @x @y pnsv add lineto} {pnlh pnlv moveto pnsh 0 rlineto
+0 pnsv rlineto @x pnsh add @y pnsv add lineto pnsh neg 0 rlineto
+0 pnsv neg rlineto} ifelse} ifelse
+closepath fill}if @x @y grestore moveto} def
+/barc {/@f xdf /@op xdf /@e xdf /@s xdf /@r xdf
+/@b xdf /@l xdf /@t xdf gsave
+@r @l add 2 div @b @t add 2 div xl 0 0 moveto
+@r @l sub @b @t sub mtx currentmatrix pop scale @f {newpath} if
+0 0 0.5 @s @e arc
+mtx setmatrix @op doop grestore} def
+/doarc {dup 0 eq barc} def
+/doval {0 exch 360 exch true barc} def
+/dorect {/@op xdf currentpoint 6 2 roll newpath 4 copy
+4 2 roll exch moveto 6 -1 roll lineto lineto lineto closepath
+@op doop moveto} def
+/dorrect {/@op xdf 2. div /@h xdf 2. div /@w xdf
+/@r xdf /@b xdf /@l xdf /@t xdf
+@t @b eq @l @r eq or{@t @l @b @r @op dorect}
+   {
+   @r @l sub 2. div dup @w lt{/@w xdf}{pop}ifelse
+   @b @t sub 2. div dup @w lt{/@w xdf}{pop}ifelse
+   @op 0 eq{/@w @w pnsh 2 div sub def}if    %this helps solve overlap gap for wide line widths
+   currentpoint
+   newpath
+   @r @l add 2. div @t moveto
+   @r @t @r @b @w arcto pop4
+   @r @b @l @b @w arcto pop4
+   @l @b @l @t @w arcto pop4
+   @l @t @r @t @w arcto pop4
+   closepath @op doop
+   moveto
+   }ifelse
+} def
+/pr{gsave newpath /pl{moveto /pl{lineto}def}def}def
+/pl{lineto}def
+/ep{dup 0 eq
+   {
+   {moveto}{lin}{}{}pathforall  %nothing but movetos and linetos should be called
+   pop grestore
+   }
+   {
+   doop grestore
+   }ifelse
+}def
+/bs 8 string def
+/bd{/bs xdf}def
+/bit {bs exch get exch 7 sub bitshift 1 and} def
+/bix {1 add 4 mul cvi} def
+/pp{exch bix exch bix bit}def
+/grlevel {64. div setgray} def
+/setpat {/bs xdf 9.375 0{pp}setscreen grlevel} def
+/setgry {freq rot {spf} setscreen grlevel} def
+/x4 {2 bitshift} def
+/d4 {-2 bitshift} def
+/xf {.96 mul exch 2 sub .96 mul exch} def
+/dobits
+{
+/bmode xdf
+save 9 1 roll
+   {
+   x4 /@dy xdf 2 sub x4 /@dx xdf /@idx xdf
+   .96 mul exch 2 sub exch xl 0 0 moveto xf
+   0 2 2 index 4 index 1.759 add 10 dorect clip newpath 0 0 moveto scale
+   bmode 0 eq bmode 4 eq or{1 setgray 1 @dy div 1 @dx div 1 1 2 dorect}if
+   bmode 3 eq bmode 7 eq or{1}{0}ifelse setgray
+   @idx 5 bitshift @dy bmode 4 eq bmode 5 eq bmode 7 eq or or [@dx 0 0 @dy 0 0]
+     {(%stdin)(r) file @dy d4 4 add @idx mul string readhexstring pop
+     dup length @idx x4 sub 4 bitshift string
+     dup 3 1 roll @dx 8 add d4 smooth} imagemask
+   }
+   {
+   /@dy xdf 2 sub /@dx xdf /@idx xdf
+   /@xs @idx string def
+   /@f (%stdin)(r) file def
+   /@p{@f @xs readhexstring pop}def
+   .96 mul xl 0 0 moveto xf scale
+   0 0 1 1 10 dorect clip newpath 0 0 moveto
+   bmode 0 eq bmode 4 eq or{1 setgray .25 @dy div .25 @dx div 1 1 2 dorect}if
+   bmode 3 eq bmode 7 eq or{1}{0}ifelse setgray
+   @p @p
+   @idx 3 bitshift @dy bmode 0 eq bmode 1 eq bmode 3 eq or or [@dx 0 0 @dy 0 0]
+   {@p} imagemask
+   @p @p pop4
+   }ifelse
+restore
+} bind def
+/mfont 14 dict def
+/wd 14 dict def
+/mdef {mfont wcheck not{/mfont 14 dict def}if mfont begin xdf end} def
+/dc {transform round .5 sub exch round .5 sub exch itransform} def
+/cf{{1 index /FID ne {tmp 3 1 roll put}{pop pop}ifelse}forall}def
+/mv{tmp /Encoding macvec put}def
+/bf{
+mfont begin
+/FontType 3 def
+/FontMatrix [1 0 0 1 0 0] def
+/FontBBox [0 0 1 1] def
+/Encoding macvec def
+/BuildChar
+  {
+  wd begin
+    /cr xdf
+    /fd xdf
+    fd /low get cr get 2 get -1 ne
+    {
+    fd begin
+      low cr get aload pop
+      sd
+      low cr 1 add get 0 get
+      sh
+      sw
+    end
+    /sw xdf
+    /sh xdf
+    sw div /clocn xdf
+    dup 0 ne {0 exch sh div neg dc xl}{pop}ifelse
+    exch sw div /coff xdf
+    exch sw div /cloc xdf
+    /bitw clocn cloc sub def
+    sw sh div 1 scale
+    sw div 0 coff 0 bitw coff add 1 setcachedevice
+    coff cloc sub 0 dc xl
+    cloc .5 sw div add 0 dc newpath moveto
+    bitw 0 ne
+      {0 1 rlineto bitw .5 sw div sub 0 rlineto 0 -1 rlineto
+        closepath clip
+      sw sh false [sw 0 0 sh neg 0 sh]{fd /hm get}imagemask}if
+    } if
+  end
+  } def
+end
+mfont definefont pop
+} def
+/wi{save exch /show{pop}def
+stringwidth 3 -1 roll restore}def
+/aps {0 get 124 eq}def
+/apn {s30 cvs aps} def
+/xc{s30 cvs dup}def
+/xp{put cvn}def
+/scs{xc 3 67 put dup 0 95 xp}def
+/sos{xc 3 79 xp}def
+/sbs{xc 1 66 xp}def
+/sis{xc 2 73 xp}def
+/sob{xc 2 79 xp}def
+/sss{xc 4 83 xp}def
+/dd{exch 1 index add 3 1 roll add exch} def
+/smc{moveto dup show} def
+/kwn{dup FontDirectory exch known{findfont exch pop}}def
+/fb{/ps ps 1 add def}def
+/mb
+{dup sbs kwn
+   {
+   exch{pop}{bbc}{} mm
+   }ifelse
+sfd
+}def
+/mo
+{dup sos kwn
+   {
+   exch{pop}{boc}{} mm
+   }ifelse
+sfd
+}def
+/ms
+{dup sss kwn
+   {
+   exch{pop}{bsc}{} mm
+   }ifelse
+sfd
+}def
+/ao
+{dup sos kwn
+   {
+   exch dup ac pop
+   {scs findfont /df2 xdf}{aoc}{} mm
+   }ifelse
+sfd
+}def
+/as
+{dup sss kwn
+   {
+   exch dup ac pop
+   {scs findfont /df2 xdf}{asc}{} mm
+   }ifelse
+sfd
+}def
+/ac
+   {
+   dup scs kwn
+      {exch /ofd exch findfont def
+      /tmp ofd maxlength 1 add dict def
+      ofd cf mv
+      tmp /PaintType 1 put
+      tmp definefont}ifelse
+   }def
+/mm{
+/mfont 10 dict def
+mfont begin
+/FontMatrix [1 0 0 1 0 0] def
+/FontType 3 def
+/Encoding macvec def
+/df 4 index findfont def
+/FontBBox [0 0 1 1] def
+/xda xdf
+/mbc xdf
+/BuildChar { wd begin
+  /cr xdf
+  /fd xdf
+  /cs s1 dup 0 cr put def
+  fd /mbc get exec
+  end
+} def
+exec
+end
+mfont definefont} def
+/bbc
+{
+  /da .03 def
+  fd /df get setfont
+  gsave
+    cs wi exch da add exch
+  grestore
+  setcharwidth
+  cs 0  0 smc
+    da  0 smc
+    da da smc
+     0 da moveto show
+} def
+/boc
+{
+  /da 1 ps div def
+  fd /df get setfont
+  gsave
+    cs wi
+    exch da add exch
+  grestore
+  setcharwidth
+  cs 0  0 smc
+    da  0 smc
+    da da smc
+     0 da smc
+  1 setgray
+     da 2. div dup moveto show
+} def
+/bsc
+{
+  /da 1 ps div def
+  /ds .05 def %da dup .03 lt {pop .03}if def
+  /da2 da 2. div def
+  fd /df get setfont
+  gsave
+    cs wi
+    exch ds add da2 add exch
+  grestore
+  setcharwidth
+  cs ds da2 add .01 add 0 smc
+      0 ds da2 sub xl
+      0  0 smc
+     da  0 smc
+     da da smc
+      0 da smc
+  1 setgray
+      da 2. div dup moveto show
+} def
+/aoc
+{
+  fd /df get setfont
+  gsave
+    cs wi
+  grestore
+  setcharwidth
+  1 setgray
+  cs 0 0 smc
+  fd /df2 get setfont
+  0 setgray
+  0 0 moveto show
+}def
+/asc
+{
+  /da .05 def
+  fd /df get setfont
+  gsave
+    cs wi
+    exch da add exch
+  grestore
+  setcharwidth
+  cs da .01 add 0 smc
+      0 da xl
+  1 setgray
+      0 0 smc
+  0 setgray
+  fd /df2 get setfont
+      0 0 moveto show
+}def
+/mf{gsave
+32 760 xl 1 -1 scale
+1 1 pen
+128 152 moveto
+27.5 27.5 693.5 522.5 0 dorect
+6 6 pen
+63. 63. 657. 486. 0 dorect
+48 fz F /|B---1Times fnt pop
+(Manual Feed)show
+118 275 moveto
+14 fz F /|----1Times fnt pop
+(document: )show
+sk{statusdict /jobname get dup null ne{show}{pop}ifelse}if
+118 362 moveto
+(Manual Feed Instructions)show
+127 398 moveto
+(1.  Wait until the yellow light on the front of your)show
+145 416 moveto
+(LaserWriter comes on steadily \(not flashing\).)show
+127 458 moveto
+(2.  Insert your paper or envelope in the manual feed)show
+145 478 moveto
+(guide on the right side of the LaserWriter.)show
+127 517 moveto
+(3.  Repeat steps 1 and 2 until your document is)show
+145 537 moveto
+(completed.)show
+0 page
+sk{statusdict /manualfeed true put 5 dly}if
+grestore}def
+/dly{
+usertime exch 1000 mul add
+   {
+   dup usertime le{exit}if
+   }loop
+pop
+}def
+/lsf {FontDirectory {pop dup apn{= flush}{pop}ifelse}forall /* = flush}def
+/dl{gsave 0 setlinewidth 0 setgray}def
+/T true def
+/F false def
+/6a 6 array def
+/2a 2 array def
+/5a 5 array def
+/qs{3 -1 roll sub exch 3 -1 roll sub exch}def
+/qa{3 -1 roll add exch 3 -1 roll add exch}def
+%multiply point: pt factor qm newpt
+/qm{3 -1 roll 1 index mul 3 1 roll mul}def
+/qn{6a exch get mul}def
+/qA .166667 def /qB .833333 def /qC .5 def
+/qx{
+   6a astore pop
+   qA 0 qn qB 2 qn add   qA 1 qn qB 3 qn add
+   qB 2 qn qA 4 qn add   qB 3 qn qA 5 qn add
+   qC 2 qn qC 4 qn add   qC 3 qn qC 5 qn add
+}def
+/qp{6 copy 12 -2 roll pop pop}def
+/qc{qp qx curveto}def
+/qi{{4 copy 2a astore aload pop qa .5 qm newpath moveto}{2 copy 6 -2 roll 2 qm qs 4 2 roll}ifelse}def
+/qq{{qc 2a aload pop qx curveto}{4 copy qs qa qx curveto}ifelse}def
+/pt{gsave currentpoint newpath moveto}def
+/qf{gsave eofill grestore}def
+/tr{currentgray currentscreen bs 5a astore pop /fillflag 1 def}def
+/bc{/fillflag 0 def}def
+/ec{
+   1 and 0 ne
+   {currentgray currentscreen bs 5a aload pop bd setscreen setgray 0 doop bd setscreen setgray}
+   {newpath}ifelse
+}def
+/bp{currentpoint newpath 2 copy moveto currentgray currentscreen bs 5a astore pop}def
+/eu{
+   fillflag 0 ne
+   {
+   gsave currentgray currentscreen bs
+   5a aload pop bd setscreen setgray
+   4 ep
+   bd setscreen setgray
+   }if
+   fp{0 ep}{grestore newpath}ifelse
+}def
+/sm
+{
+dup 0 exch
+{32 eq{1 add}if}forall
+}
+def
+/ll
+{
+3 1 roll exch dup .0001 lt 1 index -.0001 gt and
+{pop pop pop}
+{sub dup 0 eq
+   {
+   pop show
+   }
+   {
+   1 index sm dup 0 eq 3 index 0 le or
+      {
+      pop length div
+      0 3 -1 roll ashow
+      }
+      {
+      10 mul exch length add div
+      dup 10 mul 0 32 4 -1 roll 0 6 -1 roll awidthshow
+      }ifelse
+   }ifelse
+}ifelse
+}def
+/ss
+{  /pft currentfont def sa aload pop pop /|----2Symbol 4 1 roll
+   {pop{as}}
+   {{{ao}}{{fnt}}ifelse}ifelse
+   exch pop exec exch pop
+}def
+/pf{pft dup setfont}def
+/rs
+{
+   sa 2 get
+   {
+   gsave
+   1 index 0
+   currentfont
+   dup /FontInfo known
+      {
+      /FontInfo get
+      dup /UnderlinePosition known
+         {
+         dup /UnderlinePosition get 1000 div ps mul
+         }
+         {
+         ps 10 div neg   %15 makes line closer to text
+         }ifelse
+      exch
+      dup /UnderlineThickness known
+         {
+         /UnderlineThickness get 1000 div ps mul
+         }
+         {
+         pop
+         ps 15 div       %20 makes slightly narrower line
+         }ifelse
+      }
+      {
+      pop
+      ps 10 div neg   %15 makes line closer to text
+      ps 15 div       %20 makes slightly narrower line
+      }ifelse
+   setlinewidth
+   0 setgray
+   currentpoint 3 -1 roll sub moveto
+   sa 4 get{gsave currentlinewidth 2. div dup rmoveto currentpoint xl 2 copy rlineto
+   stroke grestore}if
+   sa 3 get sa 4 get or 3 1 roll 2 index{gsave 1 setgray 2 copy rlineto stroke grestore}if
+   rlineto{strokepath 0 setlinewidth}if stroke
+   grestore
+   }if
+   tv
+}
+def
+/macvec 256 array def
+macvec 0
+/Times-Roman findfont /Encoding get
+0 128 getinterval putinterval macvec 39 /quotesingle put
+ /dotlessi /grave /circumflex /tilde /cedilla /registerserif /copyrightserif /trademarkserif
+macvec 0 8 getinterval astore pop
+ /Adieresis /Aring /Ccedilla /Eacute /Ntilde /Odieresis /Udieresis /aacute
+ /agrave /acircumflex /adieresis /atilde /aring /ccedilla /eacute /egrave
+ /ecircumflex /edieresis /iacute /igrave /icircumflex /idieresis /ntilde /oacute
+ /ograve /ocircumflex /odieresis /otilde /uacute /ugrave /ucircumflex /udieresis
+ /dagger /ring /cent /sterling /section /bullet /paragraph /germandbls
+ /registersans /copyrightsans /trademarksans /acute /dieresis /notequal /AE /Oslash
+ /infinity /plusminus /lessequal /greaterequal /yen /mu /partialdiff /summation
+ /product /pi /integral /ordfeminine /ordmasculine /Omega /ae /oslash
+ /questiondown /exclamdown /logicalnot /radical /florin /approxequal /Delta /guillemotleft
+ /guillemotright /ellipsis /space /Agrave /Atilde /Otilde /OE /oe
+ /endash /emdash /quotedblleft /quotedblright /quoteleft /quoteright /divide /lozenge
+ /ydieresis /Ydieresis /fraction /currency /guilsinglleft /guilsinglright /fi /fl
+ /daggerdbl /periodcentered /quotesinglbase /quotedblbase /perthousand /Acircumflex /Ecircumflex /Aacute
+ /Edieresis /Egrave /Iacute /Icircumflex /Idieresis /Igrave /Oacute /Ocircumflex
+ /apple /Ograve /Uacute /Ucircumflex /Ugrave /dotlessi /asciicircum /asciitilde
+ /macron /breve /dotaccent /ring /cedilla /hungarumlaut /ogonek /caron
+macvec 128 128 getinterval astore pop
+FontDirectory
+{exch dup s30 cvs /@s xdf @s aps
+   {pop pop}
+   {exch dup length dict /tmp xdf
+      cf
+      /Symbol ne {mv} if
+      /@i false def /@o false def /@b false def
+      mark @s (Italic) search {/@i true def} if (Oblique) search {/@o true def} if
+      (Bold) search {/@b true def} if (Roman) search pop (-) search pop /@s xdf cleartomark
+      @s cvn dup /Symbol eq{pop 50}{/Courier eq{51}{49}ifelse}ifelse
+      s30 0 @s length 6 add getinterval dup 6 @s putinterval dup 0 (|-----) putinterval
+      @b {dup 1 66 put} if @i @o or {dup 2 73 put} if % @o {dup 2 79 put} if
+      dup 5 4 -1 roll put
+      cvn tmp definefont pop
+   }ifelse
+}forall
+/_--C-2Symbol /Symbol findfont /tmp 1 index maxlength 1 add dict def cf tmp /PaintType 1 put tmp definefont
+/|----4Seattle /Helvetica findfont dup length 1 add dict /tmp xdf cf mv
+/mxv [/zero /one /two /three /four /five /six /seven /eight /nine /comma /period /dollar /numbersign
+/percent /plus /hyphen /E /parenleft /parenright /space] def
+tmp /Metrics 21 dict dup begin mxv{600 def}forall end put
+tmp begin /FontBBox FontBBox [0 0 0 0] astore def end
+tmp definefont pop
+/od{txpose 10 fz 0 fs F /|----3Courier fnt pop}def
+/op{/scaleflag false def /pm save def}def
+/cp{pm restore}def
+end

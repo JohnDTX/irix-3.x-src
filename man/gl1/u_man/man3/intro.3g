@@ -1,0 +1,152 @@
+.TH intro 3 "R1c" "Silicon Graphics"
+.SH NAME
+.B introduction
+\- description of the routines in the IRIS Graphics Library
+.PP
+The \f2IRIS Reference Manual\f1 contains detailed descriptions
+of the commands in the Graphics Library.  Each command begins on a new page.
+The pages are arranged in alphabetical order with both a page number and the
+command name in the upper outside corner of the page.
+.PP
+Each command description defines the number, order, and types of all arguments
+to the commands.  C, FORTRAN, and Pascal descriptions are provided
+under the heading \f3Synopsis\f1.
+A detailed description of the command, including function, side effect,
+and potential errors is given in the section called \f3Description\f1;
+related commands are listed under \f3See Also\f1.
+.PP
+Some of the commands come in several flavors, depending on the number
+and type of the arguments.  Coordinate data can be 2D or 3D, and can be
+floating point numbers or integers.  The default is 3D floating point data.
+Integer data and 2D points are specified with suffixes: "i" for integer
+and "2" for 2D.  All four forms are shown for
+each language.
+.SH TEXT STRINGS
+We have adopted the C convention of strings that end with a null
+character (ASCII 0) in Pascal.  FORTRAN has a \f3character\f1 
+data type that includes the length of the string.
+.SH POINTERS
+Many of the Graphics Library commands return several values to the caller.
+The arguments to these commands are \f2pointers\f1: addresses of memory
+locations.  In C, they are declared as pointer variables by prefixing the
+variable name with an asterisk in the declaration.  FORTRAN passes all
+parameters by reference, so no special declaration is necessary.  Pascal
+uses the 
+.I var
+keyword to distinguish between value parameters and
+pointer arguments. 
+.SH PASCAL ARRAYS
+Pascal normally copies all arguments to a subroutine,
+including arrays.  In the interest of efficiency, we have declared
+all array arguments to be reference parameters: an address to the data
+will be passed to the subroutine, rather than the data itself.
+.PP
+Furthermore, the Pascal language forces the size of the array to be part
+of the type of the array.  Many Graphics Library commands 
+accept variable-length arrays.  Therefore, we have defined oversized
+arrays with 
+.I MAXARRAY
+entries.  The user can use some part of the
+array, or redefine 
+.I MAXARRAY
+to a more realistic value.
+.SH BOOLEANS
+Many of the commands have boolean arguments or return boolean vlues.
+These are declared as type 
+.I Boolean
+in C and Pascal, and
+as 
+.I logical
+in FORTRAN.  We assume that 
+.I FALSE
+is zero, and that 
+.I TRUE
+\(!=
+.I FALSE.
+.SH TYPE DECLARATIONS
+We have constructed type declarations for C and Pascal
+wherever they add to the readability
+of the code.  Here are the type definitions:
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+#define FALSE 0
+#define TRUE !FALSE
+
+typedef unsigned char Byte;
+typedef Byte Boolean;
+typedef short Angle;
+typedef unsigned short Screen;
+typedef long Icoord;
+typedef float Coord;
+typedef char *String;
+typedef float Matrix[4][4];
+
+typedef unsigned short Device;
+
+typedef unsigned short Colorindex;
+typedef unsigned short RGBvalue;
+
+typedef unsigned short Linestyle;
+typedef Byte Texture[16];
+typedef unsigned short Cursor[16];
+typedef struct {
+	unsigned short offset;	/* 2 bytes */
+	Byte w,h;		/* 2 bytes */
+	char xoff,yoff;		/* 2 bytes */
+	short width;		/* 2 bytes */
+} Fontchar;
+
+typedef long Object;
+typedef long Tag;
+typedef long Offset;
+
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+const	MAXARRAY = 1023;
+	MAXRASTER = 4095;
+
+type	Byte = 0..255;
+	Short = -32768..32767;
+	UnsignedShort = Short;
+	Angle = integer;
+	Screencoord = -2048..2047;
+	Icoord = integer;
+	Coord = real;
+	String = packed array [0..127] of char;
+	Matrix = array [0..3, 0..3] of real;
+
+	Device = Short;
+
+	Colorindex = Short;
+	RGBvalue = 0..255;
+
+	Linestyle = Short;
+	Texture = array [0..15] of Byte;
+	Cursor = array [0..15] of Short;
+	Fontchar = record 
+			offst: Short;	
+			w, h: Byte;
+			xoff, yoff: -128..127;
+	 		xinc: Short;
+		end;
+
+	Object = integer;
+	Tag = integer;
+	Offset = integer;
+
+	Coord4array = array [0..MAXARRAY, 0..3] of Coord;
+	Coord3array = array [0..MAXARRAY, 0..2] of Coord;
+	Coord2array = array [0..MAXARRAY, 0..1] of Coord;
+	Icoord3array = array [0..MAXARRAY, 0..2] of Icoord;
+	Icoord2array = array [0..MAXARRAY, 0..1] of Icoord;
+	Screenarray = array [0..MAXARRAY, 0..2] of Screencoord;
+
+	Boolarray = array [0..MAXARRAY] of Boolean;
+	Colorarray = array [0..MAXARRAY] of Colorindex;
+	RGBarray = array [0..MAXARRAY] of RGBvalue;
+
+	Objarray = array [0..127] of Object;
+	Fntchrarray = array [0..127] of Fontchar;
+	Fontraster = array [0..MAXRASTER] of Byte;

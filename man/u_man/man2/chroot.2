@@ -1,0 +1,77 @@
+'\"macro stdmacro
+.TH CHROOT 2
+.SH NAME
+chroot \- change root directory
+.SH SYNOPSIS
+.B int chroot (path)
+.br
+.B char \(**path;
+.PP
+.SH DESCRIPTION
+.I Path\^
+points to a
+path name
+naming a directory.
+.I Chroot\^
+causes the named directory to become the root directory,
+the starting point for path searches for
+path names
+beginning with
+.BR / .
+.PP
+The effective user
+.SM ID
+of the process must be super-user
+to change the root directory.
+.PP
+The
+.B ..
+entry in the root directory is interpreted to mean the root directory
+itself.
+Thus,
+.B ..
+can not be used to access files outside the subtree rooted at the root
+directory.
+.PP
+.I Chroot\^
+will fail and the root directory will remain unchanged if
+one or more of the following are true:
+.IP "" .3i
+Any component of the
+path name
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+The named directory does not exist.
+.SM
+\%[ENOENT]
+.IP
+The effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+chdir(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#61,D0
+.B movl	path,A0	
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)chroot.2	5.1 of 10/19/83

@@ -1,0 +1,26 @@
+.TH loadmatrix  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I loadmatrix
+- load a transformation matrix
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "loadmatrix(m) "
+.B "Matrix m;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine loadma(m)"
+.B "real m(4,4)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure loadmatrix(m: Matrix);"
+.sp
+.SH DESCRIPTION
+.I Loadmatrix
+loads a 4\&\(mu\&4 floating point matrix onto the matrix stack,
+replacing the current top of the stack.
+.SH "SEE ALSO"
+.I multmatrix, popmatrix, pushmatrix

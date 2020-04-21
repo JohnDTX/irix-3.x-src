@@ -1,0 +1,33 @@
+.TH window  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I window
+- define a perspective projection transformation
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "window(left, right, bottom, top, near, far) "
+.B "Coord left, right, bottom, top, near, far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine window(left, right, bottom, top, near, far)"
+.B "real left, right, bottom, top, near, far"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure window(left, right, bottom, top, near, far: Coord);"
+.sp
+.SH DESCRIPTION
+.I Window
+specifies the position and size of a rectangular viewing frustum in terms
+of the distance to the surface closest
+to the eye (in the near clipping plane), the boundaries
+of a rectangular region, and
+the distance to the far clipping
+plane.  The image will be projected with perspective onto the screen.
+.PP
+.I Window
+loads a matrix onto the transformation stack, overwriting whatever was there.
+.SH "SEE ALSO"
+.I ortho, perspective

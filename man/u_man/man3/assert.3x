@@ -1,0 +1,48 @@
+'\"macro stdmacro
+.TH ASSERT 3X
+.SH NAME
+assert \- verify program assertion
+.SH SYNOPSIS
+.B #include <assert.h>
+.PP
+.B assert (expression)
+.br
+.B int expression;
+.SH DESCRIPTION
+.PP
+This macro is useful for putting diagnostics into programs.
+When it is executed, if
+.I expression\^
+is false (zero),
+.I assert\^
+prints
+.PP
+.RS
+``Assertion failed: \f2expression\fP, file \f2xyz\fP, line \f2nnn\fP''
+.RE
+.PP
+on the standard error output and aborts.
+In the error message,
+.I xyz\^
+is the name of the source file and
+.I nnn\^
+the source line number
+of the
+.I assert\^
+statement.
+.PP
+Compiling with the preprocessor option
+.SM
+.B \-DNDEBUG
+(see
+.IR cpp\^ (1)),
+or with the preprocessor control statement
+``#define
+.SM
+NDEBUG''
+ahead of the ``#include <assert.h>'' statement,
+will stop assertions from
+being compiled into the program.
+.SH "SEE ALSO"
+cpp(1), abort(3C).
+.\"	@(#)assert.3x	5.1 of 10/19/83

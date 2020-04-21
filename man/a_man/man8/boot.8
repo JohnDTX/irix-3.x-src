@@ -1,0 +1,140 @@
+'\" t
+'\"macro stdmacro
+.TH BOOT 8
+.SH NAME
+boot \- startup procedures
+.SH DESCRIPTION
+The IRIS Workstation
+.SM UNIX 
+is started with
+a two-stage process.
+The first stage is a primary bootstrap
+and the second stage loads the UNIX kernel.
+The primary bootstrap
+sets up memory management
+and starts the PROM Monitor.
+This is a simple command interpreter
+through which each IRIS Workstation boot environment
+may be accessed.
+.PP
+In the second stage,
+a device is specified to the PROM Monitor
+(see the table below)
+followed by an optional pathname.
+If no pathname is given,
+a file named \f2defaultboot\fP
+is searched for on the given device.
+The PROM Monitor finds the file on the given device,
+loads that file into the proper memory location,
+and then transfers control of the program. 
+Normal line editing characters may be used.
+.PP
+Here is a complete list of PROM Monitor commands.
+.PP
+.RS
+.TS
+center;
+lw(1.5i) lw(3.0i).
+h	T{
+.fi
+Display a list of
+PROM Monitor commands.
+T}
+.sp 0.25
+t	T{
+.fi
+Serial interface to host.
+T}
+.sp 0.25
+n \f2[file]\f1	T{
+.fi
+Boot the IRIS Workstation
+over a network.
+T}
+.sp 0.25
+d \f2[file]\f1	T{
+.fi
+Boot the IRIS Workstation
+from a disk.
+T}
+.sp 0.25
+d \f2[pathname]/*\f1	T{
+.fi
+List the contents
+of directory \f2pathname\f1.
+T}
+.sp 0.25
+tb \f2[file]\f1	T{
+.fi
+Boot the IRIS Workstation
+from a tape drive.
+The file must be in
+\f2cpio\f1 format.
+T}
+.sp 0.25
+tb *	T{
+.fi
+List the contents
+of a tape
+in \f2cpio\f1 format.
+T}
+.sp 0.25
+r	T{
+.fi
+Restart the
+PROM Monitor.
+T}
+.TE
+.RE
+.PP
+For example,
+when the PROM Monitor prompt \f2iris>\fP is given,
+type
+.PP
+.RS
+iris> d
+.RE
+.PP
+After UNIX has been booted,
+it will be in single-user mode
+and display a ``#'' prompt.
+The file system should then be checked with
+.IR fsck (1M).
+Multi-user mode can be started
+with the \f2multi\fP command
+in response to the ``#'' prompt.
+This will mount the \f2/usr\fP file system
+and start certain daemons.
+.SS "Device Specifications"
+A device specification has the following form:
+.PP
+.RS
+device(unit,offset)
+.RE
+.LP
+where
+.I device
+is the type of the device to be searched,
+.I unit
+is the unit number of the device,
+and 
+.I offset
+is the block offset of the file system on the device.
+.PP
+For example, the specification
+.PP
+.RS
+md(0,119)
+.RE
+.LP
+indicates unit 0,
+and the file system found
+starting at block 119.
+.SH FILES
+/defaultboot \- system code
+.SH SEE ALSO
+\f2IRIS Workstation Guide\fP
+.br
+date(1),
+fsck(1M),
+multi(1M).

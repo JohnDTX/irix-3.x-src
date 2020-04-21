@@ -1,0 +1,39 @@
+.TH pupmode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B pupmode 
+\- provides access to the pop-up menu bitplanes
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pupmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "suboutine pupmod"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pupmode;"
+.SH DESCRIPTION
+.B pupmode
+enables the two highest-order bitplanes for writing. 
+The window manager uses these bitplanes
+to display pop-up menus. An application
+process can access these bitplanes 
+and retain the input focus without conflicting with other processes.
+Although processes can write in these
+bitplanes at any time, it is recommended they write to them
+when they have the 
+input focus.
+Carefully consider exceptions to this rule.
+.SH "SEE ALSO"
+endfullscrn, endpupmode, fullscrn, pupcolor
+.sp
+.I Using mex ,
+Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode under the window manager.

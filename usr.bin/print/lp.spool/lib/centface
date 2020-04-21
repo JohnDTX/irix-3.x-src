@@ -1,0 +1,90 @@
+
+# System V line printer spooler model for Silicon Graphics-supported
+# centronics color printers.
+# Copyright (c) 1986 Silicon Graphics
+
+
+#	argv[0] is interface/PRINTERNAME
+#	cwd is the spooler directory (/usr/spool/lp)
+
+prog=$0
+pr=`basename $prog`
+printer=/dev/$pr
+cwd=`pwd`
+ptime=`date`
+log=XLOGX
+if [ ! -w "$log" ] ; then
+	disable -r"can't access log file $log" $pr 1>/dev/console 2>&1
+	exit 1
+fi
+
+send=XSENDX
+
+# parse command line options (cannonical)
+seqid=$1
+name=$2
+title="$3"
+copies=$4
+options="$5"
+shift; shift; shift; shift; shift
+files="$*"
+if [ -z "$title" ] ; then
+	title=`basename $1`
+fi
+
+for j in $options
+do	case $j in
+	erase)	erase=$j;;
+	r)	erase=$j;;
+	*)	opts="$opts $j";;
+	esac
+done
+
+# set up to send the job
+if [ ! -x $send ] ; then
+	disable -r"can't execute $send filter" $pr
+	exit 1
+fi
+
+echo $pr: $seqid $name "$title" start - $ptime
+
+
+# now process the print files
+flist=
+curmap=
+for f in $files
+do
+   set `dd bs=1 count=4 skip=104 if=$f 2>/dev/null | od -b`
+   case $5 in
+	003) curmap=$f ;;
+	*) flist="$flist $f" ;;
+   esac
+done
+
+# now print the files
+for f in $flist
+do
+
+    echo $pr: $seqid `basename $f` - `date`
+    cop=$copies
+#   check for magic number: see if it is an image file
+    set `dd bs=1 count=2 < $f 2> /dev/null | od -h`
+    if [ $2 = "01DA" -o $2 = "DA01" -o $2 = "01da" -o $2 = "da01" ] ; then
+	while [ $cop -ge 1 ] 
+	do   $send $opts $f $curmap 1>$printer 2>>$log
+	     cop=`expr $cop - 1`
+	done
+
+    else
+	echo $pr: $seqid bad magic number: $2
+	exit 1
+    fi
+done
+
+
+if [ -n "$erase" ] ; then
+    rm -f $files
+fi
+
+
+echo $pr: $seqid end - `date`

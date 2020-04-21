@@ -1,0 +1,2371 @@
+'\"macro stdmacro
+.TH CSH 1
+.SH NAME
+csh \- a shell (command interpreter) with C-like syntax
+.SH SYNOPSIS
+.B csh
+[
+.B \-cef\^instvVxX
+] [
+arg ...
+]
+.SH DESCRIPTION
+.I csh\^
+is a command language interpreter
+incorporating a history mechanism (see
+History substitutions)
+and a C-like syntax.
+.de sh
+.br
+.ne 5
+.PP
+\f3\\$1\f1
+.PP
+..
+.if t .tr *\(**
+.PP
+An instance of
+.I csh\^
+begins by executing commands from the file 
+.B \&.cshrc
+in the home directory of the invoker.
+If this is a login shell, then it also executes commands from the file
+.B \&.login 
+there.
+It is typical for users on 
+.SM CRT\*Ss 
+to invoke
+.IR tset\^ (1)
+there.
+.PP
+In the normal case, the shell will then begin reading commands from the
+terminal, prompting with %.
+Processing of arguments and the use of the shell to process files
+containing command scripts will be described later.
+.PP
+The shell then repeatedly performs the following actions:
+a line of command input is read and broken into words.
+This sequence of words is placed on the command history list and then parsed.
+Finally each command in the current line is executed.
+.PP
+When a login shell terminates, it executes commands from the file 
+.I \&.logout
+in the user's home directory.
+.SS Lexical Structure
+The shell splits input lines into words at blanks and tabs with the
+following exceptions.
+The characters
+&, \^|\^, ;, <, >, (, ),
+form separate words.
+If doubled in &&, \^|\|\||\^, << or >>, these pairs form single words.
+These parser metacharacters may be made part of other words, or their
+special meaning may be prevented, by preceding them with a 
+backslash (\^\e\^).
+A newline preceded by a \^\e\^ is equivalent to a blank.
+It is usually necessary to use the backslash to 
+escape the parser metacharacters when you want to use them literally rather
+than as metacharacters.
+.PP
+Strings enclosed in matched pairs of single-quotes
+.RB (\| ' \|),
+double-quotes (\|\f3"\f1\|),
+or backquotes
+.RB (\| ` \|),
+form parts of a word. 
+Metacharacters in these strings, including blanks
+and tabs, do not form separate words.
+Such quotations have semantics to be described subsequently.
+.PP
+Within pairs of backquote or double-quote characters, a newline (carriage
+return) preceded by a \^\e\^ gives a true newline character.  This is
+used to set up a file of strings separated by newlines, as for
+.IR fgrep\^.
+.PP
+When the shell's input is not a terminal,
+the character \^#\^ introduces a comment which continues to the end of the
+input line.
+It is prevented from having this special meaning when preceded by \^\e\^
+or if bracketed by a pair of single or double quotation marks.
+.SS Commands
+A simple command is a sequence of words, the first of which
+specifies the command to be executed.
+.PP
+A simple command or
+a sequence of simple commands separated by \||\| characters
+forms a pipeline.
+The output of each command in a pipeline is connected to the input of the next.
+.PP
+Sequences of pipelines may be separated by \^;\^, and are then executed
+sequentially.
+A sequence of pipelines may be executed without immediately 
+waiting for it to terminate by following it with an
+\^&\^,
+which means to run it in background.
+.PP
+Parentheses \^(\^ and \^)\^ around a pipeline or sequence of 
+pipelines cause the whole
+series to be treated as a simple command, which may in turn be
+a component of a pipeline, etc.
+It is also possible to separate pipelines with \^|\|\||\^ or \^&&\^ indicating,
+as in the C language,
+that the second is to be executed only if the first fails or succeeds,
+respectively. (See Expressions.)
+.SS Process ID Numbers
+When a process is run in background with \^&\^,
+the shell prints a line which looks
+like:
+.IP
+1234
+.PP
+This line indicates 
+that the process which was started asynchronously was number
+1234.
+.SS Status Reporting
+This shell learns immediately whenever a process changes state.
+It normally informs you whenever a job becomes blocked so that
+no further progress is possible, but only just before it prints
+a prompt.  This is done so that it does not otherwise disturb your work.
+.PP
+To check on the status of a process, use the
+.IR ps\^ (1)
+command.
+.SS Substitutions
+We now describe the various transformations the shell performs on the
+input in the order in which they occur.
+.sh "History substitutions"
+History substitutions place words from previous command input as portions
+of new commands, making it easy to repeat commands, repeat arguments
+of a previous command in the current command, or fix spelling mistakes
+in the previous command with little typing and a high degree of confidence.
+.PP
+History substitutions begin with the character \^^\^ and may begin
+anywhere in the input stream (with the proviso that they
+do not nest.)
+.PP
+This \^!\^ may be preceded by a \^\e\^ to turn off its special meaning;
+for
+convenience, a \^!\^ is also passed unchanged when it is followed by a blank,
+tab, newline, \^=\^ or \^(\^.
+.PP
+Therefore, 
+do not put a space after the \^!\^ and the command reference 
+when you are invoking the shell's history
+mechanism.
+(History substitutions also occur when an input line begins with ^.
+This special abbreviation will be described later.)
+.PP
+An input line which invokes history substitution is echoed on the terminal
+before it is executed, as it would look if typed out in full.
+.PP
+The shell's history list, which may be seen by typing the 
+.I history\^
+command, contains all commands input from the terminal which consist
+of one or more words.
+History substitutions reintroduce sequences of words from these
+saved commands into the input stream.
+The
+.I history\^
+variable controls the size of the input stream.
+The previous command is always retained, regardless of its value.
+Commands are numbered sequentially from 1.
+.PP
+Consider the following output from the
+.I history\^
+command:
+.IP
+\09  write michael
+.br
+10  ex write.c
+.br
+11  cat oldwrite.c
+.br
+12  diff \(**write.c
+.PP
+The commands are shown with their event numbers.
+It is not usually necessary to use event numbers, but the current event
+number can be made part of the
+.I prompt\^
+by placing an \^!\^ in the prompt string.  This is done by 
+.SM setting prompt = !\^
+and the prompt character
+of your choice.
+.PP
+For example, if the current event is number 13, we
+can call up the command recorded as event 11 in several ways:
+.B "!\-2" 
+(i.e., 13-2);
+by the first letter of one of its command words, such as 
+.B !c
+referring to the c in
+.IR cat ;
+or 
+.B !wri 
+for event 9,
+or by a string contained in
+a word in the command as in 
+.B !?mic? 
+also referring to event 9.
+.PP
+These forms, without further modification, simply reintroduce the words
+of the specified events, each separated by a single blank.
+As a special case 
+.B \^!!\^ 
+refers to the previous command; thus 
+.B \^!!\^ 
+alone is essentially a
+.IR redo .
+.PP
+Words are selected from a command event and acted upon according
+to the following formula:
+.IP
+event:position:action
+.PP
+The 
+.I event\^
+is the command you wish to retrieve.  As mentioned above,
+it may be summoned up by event number and in several other ways.
+All that the 
+.I event\^
+notation does is to tell the shell 
+which command you have in mind. 
+.PP
+.I Position\^
+picks out the words from the command event on which you want
+the 
+.I action\^
+to take place.  The 
+.I position\^
+notation can do
+anything from altering the command completely to making some
+very minor substitution, depending on which words from the command event
+you specify with the 
+.I position\^
+notation.
+.PP
+To select words from a command event, follow the event specification
+with
+a \^:\^ and a designator (by position) for the desired words.
+.PP
+The words of a command event are picked out by their position in the
+input line.
+Positions are numbered from 0,
+the first word (usually command) being position 0, the second
+word having position 1, and so forth.
+If you designate a word from the command event by stating its
+position, means you want to include it in your revised command.
+All the words that you want to include in a revised command
+must be designated by position notation in order to be included.
+.PP
+The basic position designators are:
+.PP
+.RS .3i
+.PD 0
+.TP "\w'\f2x\f1\-\f2y\f1\|\ \ 'u"
+0
+first (command) word
+.TP
+.I n
+\f2n\f1\^th argument
+.TP
+^
+first argument, i.e., 1
+.TP
+\&$
+last argument
+.TP
+\&%
+matches the word of an 
+.B ?s? 
+search which immediately
+precedes it; used to strip one word out of a command
+event for use in another command.
+Example: 
+.B !?four?:%:p 
+prints
+.BR four .
+.TP
+\f2x\f1\^\-\f2y\f1
+range of words (e.g., 1-3 means from position 
+1 to position 3).
+.TP
+\-\f2y\f1
+abbreviates 0\-\f2y\f1
+.TP
+\(**
+stands for ^\-$, or indicates position 1 if only one 
+word in event.  
+.TP
+\f2x\f1\|\(**
+abbreviates \f2x\f1\^\-$ where 
+.I x\^ 
+is a position number.
+.TP
+\f2x\f1\^\-
+like \f2x\f1\^\(** but omitting last word $
+.PD
+.RE
+.PP
+The \^:\^ separating the event specification from the word designator
+can be omitted if the argument selector begins with a ^, \^$\^, 
+\^\(**\^, \^\-\^ or \^%\^.
+.PP
+Modifiers, each preceded by a \^:\^, may be used to
+act on the designated words in the specified command event.
+The following modifiers are defined:
+.RS .3i
+.TP "\w's/\f2old\^\f1/\f2new\^/\f1\|\ \ 'u"
+h
+Remove a trailing pathname component, leaving the head.
+.PD 0
+.TP
+r
+Remove a trailing .xxx component, leaving the root name.
+.TP
+e
+Remove all but the extension .xxx part.
+.TP
+s/\f2old\f1\^/\f2new\f1\^/
+Substitute \f2new\^\f1 for \f2old\^\f1
+.TP
+t
+Remove all leading pathname components, leaving the tail.
+.TP
+\&&
+Repeat the previous substitution.
+.TP
+g
+Apply the change globally, prefixing the above, e.g., g&.
+.TP
+p
+Print the new command but do not execute it.
+.TP
+q
+Quote the substituted words, preventing further substitutions.
+.TP
+x
+Like q, but break into words at blanks, tabs and newlines.
+.PD
+.RE
+.PP
+Unless preceded by a g, the modification is applied only to the first
+modifiable word.  With substitutions it is an error for no word to be
+applicable.
+.PP
+The left hand side of substitutions are not regular expressions in the sense
+of the editors, but rather strings.
+Any character may be used as the delimiter in place of \^/\^;
+a \^\e\^ quotes the delimiter into the
+.I l\^
+and
+.I r\^
+strings.
+The character \^&\^ in the right hand side is replaced by the text from
+the left.
+A \^\e\^ quotes \^&\^ also.
+A null
+.I l\^
+uses the previous string either from a
+.I l\^
+or from a
+contextual scan string
+.I s\^
+in 
+.BR !?\f2s\f1\|? .
+The trailing delimiter in the substitution may be omitted if (but only if)
+a newline
+follows immediately as may the trailing \^?\^ in a contextual scan.
+.PP
+A history reference may be given without an event specification, 
+e.g., 
+.BR !$ .
+In this case the reference is to the previous command.  If a previous
+history reference occurred on the same line, this form repeats
+the previous reference.
+Thus 
+.B !?foo?^\0!$
+gives the first and last arguments
+from the command matching 
+.BR ?foo? .
+.PP
+You can quickly make substitutions to the previous command line by
+using the ^ character as the first
+non-blank character of an input line.
+This is equivalent to 
+.B !:s^
+providing a convenient shorthand for substitutions
+on the text of the previous line.
+Thus 
+.B ^lb^lib
+fixes the spelling of 
+lib
+in the previous command.
+Finally, a history substitution may be surrounded with \^{\^ and \^}\^
+if necessary to insulate it from the characters which follow.
+Thus, after 
+.B "ls\ \-ld\ ~paul" 
+we might do 
+.B !{l}a
+to do 
+.BR "ls\ \-ld\ ~paula" ,
+while 
+.B !la
+would look for a command starting 
+.BR la .
+.tr ~"
+.sh "Quotations with \^'\^ and \^~"
+.tr ~~
+The quotation of strings by \^'\^ and \^"\^ can be used
+to prevent all or some of the remaining substitutions
+which would otherwise take place if these characters were interpreted
+as metacharacters or wild card matching characters.
+Strings enclosed in single quotes, \^'\^ are prevented any
+further interpretation or expansion.
+Strings enclosed in \^"\^ may still be variable and command expanded
+as described below.
+.PP
+In both cases the resulting text becomes (all or part of) a single word;
+only in one special case (see
+Command Substitution
+below) does a \^"\^ quoted string yield parts of more than one word;
+\^'\^ quoted strings never do.
+.sh "Alias substitution"
+The shell maintains a list of aliases which can be established, displayed
+and modified by the
+.I alias\^
+and
+.I unalias\^
+commands.
+After a command line is scanned, it is parsed into distinct commands and
+the first word of each command, left-to-right, is checked to see if it
+has an alias.
+If it does, then the text which is the alias for that command is reread
+with the history mechanism available
+as though that command were the previous input line.
+The resulting words replace the
+command and argument list.
+If no reference is made to the history list, then the argument list is
+left unchanged.
+.PP
+Thus if the alias for 
+.B ls
+is 
+.B ``ls\ \-l''
+the command 
+.B ls\ /usr
+would map to
+.BR ls\ \-l\ /usr ,
+the argument list here being undisturbed.
+Similarly if the alias for 
+.B lookup
+is 
+.BR ``grep\ !^\ /etc/passwd'' ,
+then
+.B lookup bill
+would map to 
+.BR grep\ bill\ /etc/passwd .
+.PP
+If an alias is found, the word transformation of the input text
+is performed and the aliasing process begins again on the reformed input line.
+Looping is prevented if the first word of the new text is the same as the old
+by flagging it to prevent further aliasing.
+Other loops are detected and cause an error.
+.PP
+Note that the mechanism allows aliases to introduce parser metasyntax.
+Thus we can 
+.B alias\ print\ 'pr\ \e\^!\(**\ |\ lp'
+to make a command which
+.IR pr\^ s
+its arguments to the line printer.
+.sh "Variable substitution"
+The shell maintains a set of variables, each of which has as value a list
+of zero or more words.
+Some of these variables are set by the shell or referred to by it.
+For instance, the
+.I argv\^
+variable is an image of the shell's argument list, and words of this
+variable's value are referred to in special ways.
+.PP
+The values of variables may be displayed and changed by using the
+.I set\^
+and
+.I unset\^
+commands.
+Of the variables referred to by the shell a number are toggles;
+the shell does not care what their value is,
+only whether they are set or not.
+For instance, the
+.I verbose\^
+variable is a toggle which causes command input to be echoed.
+The setting of this variable results from the
+.B \-v
+command line option.
+.PP
+Other operations treat variables numerically.
+The 
+.B @
+command permits numeric calculations to be performed and the result
+assigned to a variable.
+Variable values are, however, always represented as (zero or more) strings.
+For the purposes of numeric operations, the null string is considered to be
+zero, and the second and subsequent words of multiword values are ignored.
+.PP
+After the input line is aliased and parsed, and before each command
+is executed, variable substitution
+is performed keyed by \^$\^ characters.
+This expansion can be prevented by preceding the \^$\^ with a \^\e\^ except
+within double quotes (\^"\^) where it
+always occurs, and within single quotes (\^'\^) where it
+never occurs.
+Strings quoted by \^`\^ are interpreted later (see
+Command substitution
+below) so \^$\^ substitution does not occur there until later, if at all.
+A \^$\^ is passed unchanged if followed by a blank, tab, or end-of-line.
+.PP
+Input/output redirections are recognized before variable expansion,
+and are variable expanded separately.
+Otherwise, the command name and entire argument list are expanded together.
+It is thus possible for the first (command) word to this point to generate
+more than one word, the first of which becomes the command name,
+and the rest of which become arguments.
+.PP
+Unless enclosed in double quotes or given the 
+.I \^:q\^ 
+modifier,
+the results of variable
+substitution may eventually be command and filename substituted.
+Within double quotes, 
+a variable whose value consists of multiple words expands to a
+(portion of) a single word, with the words of the variables value
+separated by blanks.
+When the 
+.I \^:q\^ 
+modifier is applied to a substitution,
+the variable will expand to multiple words with each word separated
+by a blank and quoted to prevent later command or filename substitution.
+.sh "Metasequences for variable substitution"
+The following metasequences are provided for introducing variable values into
+the shell input.
+Except as noted, it is an error to reference a variable which is not set.
+.TP .3i
+\&$name
+.ns
+.TP
+\&${name}
+Are replaced by the words of the value of variable
+.IR name ,
+each separated by a blank.
+Braces insulate
+.I name\^
+from following characters which would otherwise be part of it.
+Shell variables have names consisting of up to 20 letters and digits
+starting with a letter.  The underscore character is considered a letter.
+.TP
+\&
+If
+.I name\^
+is not a shell variable, but is set in the environment, then
+that value is returned (but \f3:\f1 modifiers and the other forms
+given below are not available in this case).
+.TP
+$name[selector]
+.ns
+.TP
+${name[selector]}
+May be used to select only some of the words from the value of
+.IR name .
+The selector is subjected to \^$\^ substitution and may consist of a single
+number or two numbers separated by a \^\-\^.
+The first word of a variables value is numbered 1.
+If the first number of a range is omitted it defaults to 1.
+If the last member of a range is omitted it defaults to $#name.
+The selector \^\(**\^ selects all words.
+It is not an error for a range to be empty if the second argument is omitted
+or in range.
+There cannot be any whitespace between the brackets and the selector.
+.TP
+$#name
+.ns
+.TP
+${#name}
+.br
+Gives the number of words in the variable.
+This is useful for later use in a 
+.RI [ selector ].
+.TP
+$0
+.br
+Substitutes the name of the file from which command input is being read.
+An error occurs if the name is not known.
+.TP
+$number
+.br
+.ns
+.TP
+${number}
+.br
+Equivalent to $argv [number].
+.TP
+\&$\(**
+.br
+Equivalent to $argv [\(**]".
+.PP
+The modifiers :h, :t, :r, :q and :x may be applied to
+the substitutions above as may :gh, :gt and :gr.
+If braces \^{\^ \^}\^ appear in the command form, then the modifiers
+must appear within the braces.
+The current implementation allows only one \^:\^ modifier on 
+each \^$\^ expansion.
+.PP
+The following substitutions may not be modified with \^:\^ modifiers.
+.TP .3i
+$?name
+.br
+.ns
+.TP
+${?name}
+.br
+Substitutes the string 1 if name is set, 0 if it is not.
+.TP
+$?0
+.br
+Substitutes 1 if the current input filename is known, 0 if it is not.
+.TP
+$$
+.br
+Substitute the (decimal) process number of the (parent) shell.
+.TP
+$<
+.br
+Substitutes a line from the standard
+input, with no further interpretation thereafter.  It can be used
+to read from the keyboard in a shell script.
+.sh "Command and filename substitution"
+The remaining substitutions, command and filename substitution,
+are applied selectively to the arguments of built-in commands.
+This means that portions of expressions which are not evaluated are
+not subjected to these expansions.
+For commands which are not internal to the shell, the command
+name is substituted separately from the argument list.
+This occurs very late,
+after input-output redirection is performed, and in a child
+of the main shell.
+.sh "Command substitution"
+Command substitution is indicated by a command enclosed in \^`\^.
+The output from such a command is normally broken into separate words
+at blanks, tabs and newlines, with null words being discarded,
+this text then replacing the original string.
+Within double quotes (\^"\^), 
+only newlines force new words; blanks and tabs are preserved.
+.PP
+In any case, the single final newline does not force a new word.
+Note that it is thus possible for a command substitution to yield
+only part of a word, even if the command outputs a complete line.
+.sh "Filename substitution"
+If a word contains any of the characters \(**\^, \^?\^, \^[\^ or \^{\^
+or begins with the character \^~\^, then that word is a candidate for
+filename substitution, also known as ``globbing''.
+This word is then regarded as a pattern, and replaced with an alphabetically
+sorted list of file names which match the pattern.
+In a list of words specifying filename substitution it is an error for
+no pattern to match an existing file name, but it is not required
+for each pattern to match.
+Only the metacharacters \(**\^, \^?\^ and \^[\^ imply pattern matching,
+the characters \^~\^ and \^{\^ being more akin to abbreviations.
+.PP
+In matching filenames, the character \f3\^.\^\f1 at the beginning of a filename
+or immediately following a \^/\^, as well as the character \^/\^ must
+be matched explicitly.
+The character \^\(**\^ matches any string of characters, including the null
+string.
+The character \^?\^ matches any single character.
+The sequence \^[...]\^ matches any one of the characters enclosed.
+Within \^[...]\^,
+a pair of characters separated by \^\-\^ matches any character lexically between
+the two.
+.PP
+The character \^~\^ at the beginning of a filename is used to refer to home
+directories.
+Standing alone, 
+i.e., \^~\^ it expands to the invokers home directory as reflected
+in the value of the variable
+.IR home .
+When followed by a name consisting of letters, digits and \^\-\^ characters,
+the shell searches for a user with that name and substitutes their
+home directory;  thus 
+.B ~ken
+might expand to 
+.B /usr/ken
+and 
+.B ~ken/chmach
+to 
+.BR /usr/ken/chmach .
+If the character \^~\^ is followed by a character other than a letter or \^/\^
+or appears not at the beginning of a word,
+it is left undisturbed.
+.PP
+The metanotation 
+.B a{b,c,d}e
+is a shorthand for 
+.BR abe " " ace " " ade .
+Left to right order is preserved, with results of matches being sorted
+separately at a low level to preserve this order.
+This construct may be nested.
+Thus 
+.B ~source/s1/{oldls,ls}.c
+expands to
+.B /usr/source/s1/oldls.c /usr/source/s1/ls.c
+whether or not these files exist without any chance of error
+if the home directory for 
+.B source
+is 
+.BR /usr/source .
+Similarly 
+.B \&../{memo,\(**box}
+might expand to 
+.BR "\&../memo ../box ../mbox" .
+(Note that memo was not sorted with the results of matching \(**box.)
+As a special case \^{\^, \^}\^ and \^{\^}\^ are passed undisturbed.
+.sh Input/output
+The standard input and standard output of a command may be redirected
+with the following syntax:
+.TP
+\f3<\f1 name
+.br
+Open file
+.I name\^
+(which is first variable, command and filename expanded) as the standard
+input.
+.TP
+\f3<<\f1 word
+.br
+Read the shell input up to a line which is identical to
+.IR word .
+.I word\^
+is not subjected to variable, filename or command substitution,
+and each input line is compared to
+.I word\^
+before any substitutions are done on this input line.
+Unless a quoting \^\e\^, \^"\^, \^'\^ or \^`\^ appears in
+.IR word ,
+variable and command substitution is performed on the intervening lines,
+allowing \^\e\^ to quote \^$\^, \^\e\^ and \^`\^.
+Commands which are substituted have all blanks, tabs, and newlines
+preserved, except for the final newline which is dropped.
+The resultant text is placed in an anonymous temporary file which
+is given to the command as standard input.
+.TP
+\f3>\f1 name
+.br
+.ns
+.TP
+\f3>!\f1 name
+.br
+.ns
+.TP
+\f3>&\f1 name
+.br
+.ns
+.TP
+\f3>&!\f1 name
+.br
+The file
+.I name\^
+is used as standard output.
+If the file does not exist then it is created;
+if the file exists, it is truncated, its previous contents being lost.
+.IP
+If the variable
+.I noclobber\^
+is set, then the file must not exist or be a character special file 
+(e.g., a terminal or 
+.BR /dev/null )
+or an error results.
+This helps prevent accidental destruction of files.
+In this case the \^!\^ forms can be used and suppress this check.
+.IP
+The forms involving \^&\^, route the diagnostic output into the specified
+file as well as the standard output.
+.I Name\^
+is expanded in the same way as \^<\^ input filenames are.
+.TP
+\f3>>\f1 name
+.br
+.ns
+.TP
+\f3>>&\f1 name
+.br
+.ns
+.TP
+\f3>>!\f1 name
+.br
+.ns
+.TP
+\f3>>&!\f1 name
+.br
+Uses file
+.I name\^
+as standard output like \^>\^ but places output at the end of the file.
+If the variable
+.I noclobber\^
+is set, then
+it is an error for the file not to exist unless
+one of the \^!\^ forms is given.
+Otherwise similar to \^>\^.
+.PP
+A command receives the environment in which the shell was
+invoked as modified by the input-output parameters and
+the presence of the command in a pipeline.
+Thus, unlike some previous shells, commands run from a file of shell commands
+have no access to the text of the commands by default; rather
+they receive the original standard input of the shell.
+The \^<<\^ mechanism should be used to present inline data.
+This permits shell command scripts to function as components of pipelines
+and allows the shell to block read its input.
+.PP
+Diagnostic output may be directed through a pipe with the standard output.
+Simply use the form \||\|&\^ rather than just \||\^.
+To redirect standard output and standard error to separate files, use
+(cmd > file1) >& file2; 
+.B /dev/tty 
+may be used to redirect
+input or output to or from your terminal.
+.sh Expressions
+A number of the built-in commands (to be described subsequently)
+take expressions, in which the operators are similar to those of C, with
+the same precedence.
+These expressions appear in the @,
+.IR exit ,
+.IR if ,
+and
+.I while\^
+commands.
+The following operators are available:
+.IP "" .3i
+|\|\||  &&  |  ^  &  ==  !=  =~  !~  <=  >=  <  >  <<  >>  +  \-  *  /  %  !  ~  (  )
+.PP
+Here the precedence increases to the right,
+\^==\^, \^!=\^, \^=~\^ and \^!~\^; \^<=\^, \^>=\^, \^<\^ and \^>\^;
+\^<<\^ and \^>>\^; \^+\^ and \^\-\^;
+\^\(**\^, \^/\^ and \^%\^ being, in groups, at the same level.
+The \^==\^, \^!=\^, \^=~\^ and \^!~\^ operators 
+compare their arguments as strings;
+all others operate on numbers.
+The operators \^=~\^ and \^!~\^ are like \^!=\^ and \^==\^ 
+except that the right
+hand side is a
+.I pattern\^
+(which may contain \(**, ? and instances of \^[...]\^)
+against which the left hand operand is matched.  This reduces the
+need for use of the
+.I switch\^
+statement in shell scripts when all that is really needed is pattern matching.
+.PP
+Strings which begin with 0 are considered octal numbers.
+Null or missing arguments are considered 0.
+The result of all expressions are strings,
+which represent decimal numbers.
+It is important to note that no two components of an expression can appear
+in the same word; except when adjacent to components of expressions which
+are syntactically significant to the parser 
+(\^&\^ \^|\^ \^<\^ \^>\^ \^(\^ \^)\^)
+they should be surrounded by spaces.
+.PP
+Command executions can be used as primitive operands 
+in expressions.  When used in an
+expression, the command is enclosed in \^{\^ and \^}\^, e.g., (\^command\^}.
+Command executions succeed, returning true, i.e., 1,
+if the command exits with status 0, otherwise they fail, returning
+false, i.e., 0.
+If more detailed status information is required, then the command
+should be executed outside of an expression and the variable
+.I status\^
+examined.
+.PP
+File enquiries can also be used as primitive operands 
+in expressions.  They should be of the form 
+.I "\-l name"
+where
+.I l
+is one of:
+.RS
+.TP "\w'w\ \ \ 'u"
+r
+read access
+.PD 0
+.TP
+w
+write access
+.TP
+x
+execute access
+.TP
+e
+existence
+.TP
+o
+ownership
+.TP
+z
+zero size
+.TP
+f
+plain file
+.TP
+d
+directory
+.TP
+c
+character special file
+.TP
+b
+block special file
+.TP
+p
+named pipe (fifo)
+.TP
+u
+set-user-\c
+.SM ID
+bit is set
+.TP
+g
+set-group-\c
+.SM ID
+bit is set
+.TP
+k
+sticky bit is set
+.TP
+s
+size greater than zero
+.TP
+t
+open file descriptor for
+terminal device
+.RE
+.PD
+.PP
+The specified name is command and filename expanded and then tested
+to see if it has the specified relationship to the real user.
+If the file does not exist or is inaccessible, then all enquiries return
+false, i.e., 0.
+Words within expressions that are not meant as file enquiries but match 
+one of the
+.I \-l
+forms listed about must be quoted.  For example, the shell will complain
+about \f3if\ ($1\ ==\ \-r)\ then\fP.
+It must be written as \f3if\ ("$1"\ ==\ "\-r")\ then\fP.
+.SS Control Flow
+The shell contains a number of commands which can be used to regulate the
+flow of control in command files (shell scripts) and
+(in limited but useful ways) from terminal input.
+These commands all operate by forcing the shell to reread or skip in its
+input and, due to the implementation, restrict the placement of some
+of the commands.
+.PP
+The
+.IR foreach ,
+.IR switch ,
+and
+.I while\^
+statements, as well as the
+.I if\-then\-else\^
+form of the
+.I if\^
+statement require that the major keywords appear in a single simple command
+on an input line as shown below.
+.PP
+If the shell's input is not seekable,
+the shell buffers up input whenever a loop is being read
+and performs seeks in this internal buffer to accomplish the rereading
+implied by the loop.
+(To the extent that this allows, backward 
+.IR goto\^ s 
+will succeed on
+non-seekable inputs.)
+.SS Built-in Commands
+Built-in commands are executed within the shell.
+If a built-in command occurs as any component of a pipeline
+except the last, then it is executed in a subshell.
+.TP .3i
+.B alias
+.br
+.ns
+.TP
+.BR alias\0 name
+.br
+.ns
+.TP
+.BR alias " name wordlist"
+.br
+The first form prints all aliases.
+The second form prints the alias for name.
+The final form assigns the specified
+.I wordlist\^
+as the alias of 
+.IR name ;
+.I wordlist\^
+is command and filename substituted.
+.I name\^
+is not allowed to be
+.I alias\^
+or
+.IR unalias .
+.TP
+.B break
+.br
+Causes execution to resume after the
+.I end\^
+of the nearest enclosing
+.I foreach\^
+or
+.IR while .
+The remaining commands on the current line are executed.
+Multi-level breaks are thus possible by writing them all on one line.
+.TP
+.B breaksw
+.br
+Causes a break from a
+.IR switch ,
+resuming after the
+.IR endsw .
+.TP
+.BR case " label:"
+.br
+A label in a
+.I switch\^
+statement as discussed below.
+.TP
+.B cd
+.br
+.ns
+.TP
+.BR cd " name"
+.br
+.ns
+.TP
+.B chdir
+.br
+.ns
+.TP
+.BR chdir " name"
+.br
+Change the shell's working directory to directory
+.IR name .
+If no argument is given, then change to the home directory of the user.
+.TP
+\&
+If
+.I name\^
+is not found as a subdirectory of the current directory (and does not begin
+with \^/\^, \^./\^ or \^../\^), then each
+component of the variable
+.I cdpath\^
+is checked to see if it has a subdirectory
+.IR name .
+Finally, if all else fails but
+.I name\^
+is a shell variable whose value begins with \^/\^, then this
+is tried to see if it is a directory.
+.TP
+.B continue
+.br
+Continue execution of the nearest enclosing
+.I while\^
+or
+.IR foreach .
+The rest of the commands on the current line are executed.
+.TP
+.B default:
+.br
+Labels the default case in a
+.I switch\^
+statement.
+The default should come after all
+.I case\^
+labels.
+.TP
+.BR "dirs"
+.br
+.ns
+.TP"
+.BR "dirs \-l
+.br
+Prints the directory stack; the top of the stack is at the left,
+the first directory in the stack being the current directory.
+In the first form the user's home directory is represented by ~.
+.TP
+.BR echo " wordlist"
+.br
+.ns
+.TP
+.BR "echo \-n" " wordlist"
+.br
+The specified words are written to the shell's standard output, separated
+by spaces, and terminated with a newline unless the
+.B \-n
+option or the
+.B \ec
+escape is specified.
+The following C-like escape sequences are available:
+.sp \n(PDu
+.in +5m
+.ta +2m
+\f3\eb\f1	backspace
+.br
+\f3\ec\f1	print line without new-line
+.br
+\f3\ef\f1	form-feed
+.br
+\f3\en\f1	new-line
+.br
+\f3\er\f1	carriage return
+.br
+\f3\et\f1	tab
+.br
+\f3\e\^\e\f1	backslash
+.in -5m
+.in +7m
+.ti -2m
+\f3\e\f1\f2n\f1	the character whose \s-1ASCII\s0 code is
+the 1-, 2- or 3-digit octal number
+.IR n .
+.in -7m
+.TP
+.B else
+.br
+.ns
+.TP
+.B end
+.br
+.ns
+.TP
+.B endif
+.br
+.ns
+.TP
+.B endsw
+.br
+See the description of the
+.IR foreach ,
+.IR if ,
+.IR switch ,
+and
+.I while\^
+statements below.
+.TP
+.BR eval " arg ..."
+.br
+The arguments are read as input to the shell and the resulting
+command(s) executed in the context of the current shell.
+This is usually used to execute commands
+generated as the result of command or variable substitution, since
+parsing occurs before these substitutions.  See
+.IR tset (1)
+for an example of using
+.IR eval .
+.TP
+.BR exec " command"
+.br
+The specified command is executed in place of the current shell.
+.TP
+.B exit
+.br
+.ns
+.TP
+.BR exit (expr)
+.br
+The shell exits either with the value of the
+.I status\^
+variable (first form) or with the value of the specified
+.I expr\^
+(second form).
+.TP
+.BR foreach " name (wordlist)"
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+.B end
+.br
+The variable
+.I name\^
+is successively set to each member of
+.I wordlist\^
+and the sequence of commands between this command and the matching
+.I end\^
+are executed.
+(Both
+.I foreach\^
+and
+.I end\^
+must appear alone on separate lines.)
+.TP
+\&
+The built-in command
+.I continue\^
+may be used to continue the loop prematurely and the built-in
+command
+.I break\^
+to terminate it prematurely.
+When this command is read from the terminal, the loop is read up once
+prompting with \^?\^ before any statements in the loop are executed.
+If you make a mistake typing in a loop at the terminal, you can rub it out.
+.TP
+.BR glob " wordlist"
+.br
+Like
+.I echo\^
+but no \^\e\^ escapes are recognized and words are delimited
+by null characters in the output.
+Useful for programs which wish to use the shell to filename expand a list
+of words.
+.TP
+.BR goto " word"
+.br
+The specified
+.I word\^
+is filename and command expanded to yield a string of the form label.
+The shell rewinds its input as much as possible
+and searches for a line of the form label:
+possibly preceded by blanks or tabs.
+Execution continues after the specified line.
+.TP
+.B  history
+.br
+.ns
+.TP
+.BI history " n"
+.br
+.ns
+.TP
+.BI "history \-r" " n"
+.br
+.ns
+.TP
+.BI "history \-h" " n"
+.br
+Displays the history event list; if \f2n\f1 is given only the
+.I n
+most recent events are printed.
+The
+.B \-r
+option reverses the order of printout to be most recent first
+rather than oldest first.
+The
+.B \-h
+option causes the history list to be printed without leading numbers.
+This is used to produce files suitable for
+.IR source\^ ing
+using the 
+.B \-h
+option to
+.IR source .
+.TP
+.BR if " (expr) command"
+.br
+If the specified expression evaluates true, then the single
+.I command\^
+with arguments is executed.
+Variable substitution on
+.I command\^
+happens early, at the same
+time it does for the rest of the
+.I if\^
+command.
+.I Command\^
+must be a simple command, not
+a pipeline, a command list, or a parenthesized command list.
+Input/output redirection occurs even if
+.I expr\^
+is false, when command is
+.B not\^
+executed (this is a bug).
+.TP
+.BR if " (expr) " "then"
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+.BR else " " "if\f1 (expr2) \f3then"
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+.B  else
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+.B  endif
+.br
+If the specified
+.I expr\^
+is true, then the commands to the first
+.I else\^
+are executed; else if
+.I expr2\^
+is true, then the commands to the
+second else are executed, etc.
+Any number of
+.I else-if\^
+pairs are possible; only one
+.I endif\^
+is needed.
+The
+.I else\^
+part is likewise optional.
+(The words
+.I else\^
+and
+.I endif\^
+must appear at the beginning of input lines;
+the
+.I if\^
+must appear alone on its input line or after an
+.IR else .)
+.TP
+\f3kill\f1\ pid
+.br
+.ns
+.TP
+\f3kill\ \-\f1sig\ pid\ ...
+.br
+Sends either the 
+.SM TERM
+(terminate) signal or the
+specified signal to the specified processes.
+Signals are either given by number or by names (as given in
+.BR <sys/signal.h> ,
+stripped of the prefix 
+.SM SIG\*S).
+There is no default, saying just "kill" does not
+send a signal to the current process.
+.TP
+.B login
+.br
+Terminate a login shell, replacing it with an instance of
+.BR /bin/login .
+This is one way to log off, included for compatibility with
+.IR sh\^ (1).
+.TP
+.B logout
+.br
+Terminate a login shell.
+Especially useful if
+.I ignoreeof\^
+is set.
+.TP
+.B nice
+.br
+.ns
+.TP
+.BR nice " \+number"
+.br
+.ns
+.TP
+.BR nice " command"
+.br
+.ns
+.TP
+.BR nice " \+number command"
+.br
+The first form sets the
+.I nice\^
+for this shell to 4.
+The second form sets the
+.I nice\^
+to the given number.
+The final two forms run command at priority 4 and
+.I number\^
+respectively.
+The super-user may specify negative niceness by using 
+.BR "nice \-\f2number\fP ...\|" .
+Command is always executed in a sub-shell, and the restrictions
+place on commands in simple
+.I if\^
+statements apply.
+.TP
+.B nohup
+.br
+.ns
+.TP
+.BR "nohup" " command"
+.br
+The first form can be used in shell scripts to cause hangups to be
+ignored for the remainder of the script.
+The second form causes the specified command to be run with hangups
+ignored.
+All processes detached with \^&\^ are effectively
+.IR nohup\^ ed.
+.TP
+.B onintr
+.br
+.ns
+.TP
+.BR onintr "  \-"
+.br
+.ns
+.TP
+.BR onintr "  label"
+.br
+Control the action of the shell on interrupts.
+The first form restores the default action of the shell on interrupts
+which is to terminate shell scripts or to return to the terminal command
+input level.
+The second form 
+.B onintr \-
+causes all interrupts to be ignored.
+The final form causes the shell to execute a 
+.B goto label
+when
+an interrupt is received or a child process terminates because
+it was interrupted.
+.TP
+\&
+In any case, if the shell is running detached and interrupts are
+being ignored, all forms of
+.I onintr\^
+have no meaning and interrupts
+continue to be ignored by the shell and all invoked commands.
+.TP
+.BR "popd"
+.br
+.ns
+.TP
+.BR "popd" " +n"
+.br
+Pops the directory stack, returning to the new top directory.
+With an argument `+\f2n\f1' discards the \f2n\f1\|th
+entry in the stack.
+The elements of the directory stack are numbered from 0 starting at the top.
+.TP
+.BR "pushd"
+.br
+.ns
+.TP
+.BR "pushd" " name"
+.br
+.ns
+.TP
+.BR "pushd" " +n"
+.br
+With no arguments,
+.I pushd
+exchanges the top two elements of the directory stack.
+Given a
+.I name
+argument,
+.I pushd
+changes to the new directory (ala
+.I cd)
+and pushes the old current working directory
+onto the directory stack.
+With a numeric argument, rotates the \f2n\f1\|th argument of the directory
+stack around to be the top element and changes to it.  The members
+of the directory stack are numbered from the top starting at 0.
+.TP
+.BR rehash
+.br
+Causes the internal hash table of the contents of the directories in
+the
+.I path\^
+variable to be recomputed.  This is needed if new commands are added
+to directories in the
+.I path\^
+while you are logged in.  This should only be necessary if you add
+commands to one of your own directories, or if a systems programmer
+changes the contents of one of the system directories.
+.TP
+.BR repeat " count command"
+.br
+The specified 
+.I command\^
+which is subject to the same restrictions
+as the
+.I command\^
+in the one line
+.I if\^
+statement above,
+is executed
+.I count\^
+times.
+I/O redirections occur exactly once, even if
+.I count\^
+is 0.
+.TP
+.B set
+.br
+.ns
+.TP
+.BR set " name"
+.br
+.ns
+.TP
+.BR set " name=word"
+.br
+.ns
+.TP
+.BR set " name[index]=word"
+.br
+.ns
+.TP
+.BR set " name=(wordlist)"
+.br
+The first form of the command shows the value of all shell variables.
+Variables which have other than a single word as value print as a parenthesized
+word list.
+The second form sets
+.I name\^
+to the null string.
+The third form sets
+.I name\^
+to the single
+.IR word .
+The fourth form sets
+the
+.IR index\^ th
+component of name to word;
+this component must already exist.
+The final form sets
+.I name\^
+to the list of words in
+.IR wordlist .
+In all cases the value is command and filename expanded.
+.TP
+\&
+These arguments may be repeated to set multiple values in a single set command.
+Note, however, that variable expansion happens for all arguments before any
+setting occurs.
+.TP
+.BR setenv " name value"
+.br
+Sets the value of environment variable
+.I name\^
+to be
+.IR value ,
+a single string.
+The variables
+.SM PATH ,
+.SM USER ,
+.SM LOGNAME ,
+.SM HOME ,
+and
+.SM TERM
+are automatically imported to and exported from the
+.I csh\^
+variables
+.IR path ,
+.IR user ,
+.IR logname ,
+.IR home ,
+and
+.IR term ,
+respectively; there is no need to use
+.I setenv\^
+for these.
+.TP
+.B shift
+.br
+.ns
+.TP
+.BR shift " variable"
+.br
+The members of
+.I argv\^
+are shifted to the left, discarding
+.IR argv [1].
+It is an error for
+.I argv\^
+not to be set or to have less than one word as value.
+The second form performs the same function on the specified variable.
+.TP
+.BR source " name"
+.br
+.ns
+.TP
+.BR "source \-h" " name"
+.br
+The shell reads commands from
+.I name.
+.I Source
+commands may be nested; if they are nested too deeply the shell may
+run out of file descriptors.
+An error in a
+.I source
+at any level terminates all nested
+.I source
+commands.
+Normally input during 
+.I source
+commands is not placed on the history list; the 
+.B \-h 
+option causes the commands to be placed in the
+history list without being executed.
+.TP
+.BR switch " (string)"
+.br
+.ns
+.TP
+.BR case " str1" :
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+\   
+.B  breaksw
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+.B default:
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+\   
+.B  breaksw
+.br
+.ns
+.TP
+.B  endsw
+.br
+Each case label is successively matched against the specified
+.I string\^
+which is first command and filename expanded.
+The file metacharacters \^\(**\^, \^?\^ and \^[...]\^
+may be used in the case labels,
+which are variable expanded.
+If none of the labels match before a default label is found, then
+the execution begins after the default label.
+Each case label and the default label must appear at the beginning of a line.
+The command 
+.I breaksw\^
+causes execution to continue after the
+.IR endsw .
+Otherwise control may fall through case labels and default labels as in C.
+If no label matches and there is no default, execution continues after
+the
+.IR endsw .
+.TP
+.B  time
+.br
+.ns
+.TP
+.BR time " command"
+.br
+With no argument, a summary of time used by this shell and its children
+is printed.
+If arguments are given,
+the specified simple command is timed and a time summary
+as described under the
+.I time\^
+variable is printed.
+If necessary, an extra shell is created to print the time
+statistic when the command completes.
+.TP
+.B umask
+.br
+.ns
+.TP
+.BR umask " value"
+.br
+The file creation mask is displayed (first form) or set to the specified
+value (second form).  The mask is given in octal.  Common values for
+the mask are 002 giving all access to the group and read and execute
+access to others or 022 giving all access except no write access for
+users in the group or others.
+.TP
+.BR unalias " pattern"
+.br
+All aliases whose names match the specified pattern are discarded.
+Thus all aliases are removed by 
+.BR unalias\0 \(**\^.
+It is not an error for nothing to be
+.IR unaliased .
+.TP
+.BR unhash
+.br
+Use of the internal hash table to speed location of executed programs
+is disabled.
+.TP
+.BR unset " pattern"
+.br
+All variables whose names match the specified pattern are removed.
+Thus all variables are removed by 
+.BR unset\0 \(**\^; 
+this has noticeably
+distasteful side-effects.
+It is not an error for nothing to be
+.IR unset .
+.TP
+.BR unsetenv " pattern"
+.br
+Removes all variables whose name match the specified pattern from the
+environment.  See also the
+.I setenv
+command above and
+.IR env (1).
+.TP
+.B  wait
+.br
+All background jobs are waited for.
+If the shell is interactive, then an interrupt can disrupt the wait,
+at which time the shell prints names and job numbers of all jobs
+known to be outstanding.
+.TP
+.BR while " (expr)"
+.br
+.ns
+.TP
+\    ...
+.br
+.ns
+.TP
+.B  end
+.br
+While the specified expression evaluates non-zero, the commands between
+the
+.I while\^
+and the matching end are evaluated.
+.I Break\^
+and
+.I continue\^
+may be used to terminate or continue the loop prematurely.
+(The
+.I while\^
+and
+.I end\^
+must appear alone on their input lines.)
+Prompting occurs here the first time through the loop as for the
+.I foreach\^
+statement if the input is a terminal.
+.br
+.ns
+.TP
+\f3%\f1
+.br
+.ns
+.TP
+\f3% \f1user
+.br
+The first form toggles the user
+.SM ID
+and group
+.SM ID
+between that of
+.I root
+and
+.I user
+for all executed commands (except built-ins).
+The prompt is automatically toggled between # and #%.
+The second form specifies a user name, listed in
+.BR /etc/passwd ,
+that should be toggled to and from.
+.br
+.ns
+.TP
+\f3@\f1
+.br
+.ns
+.TP
+\f3@ \f1name = expr
+.br
+.ns
+.TP
+\f3@\f1 name[index] = expr
+.br
+The first form prints the values of all the shell variables.
+The second form sets the specified
+.I name\^
+to the value of
+.IR expr .
+If the expression contains \^<\^, \^>\^, \^&\^ or \||\|, then at least
+this part of the expression must be placed within \^(\^ \^)\^.
+The third form assigns the value of
+.I expr\^
+to the
+.IR index\^ th
+argument of
+.IR name .
+Both 
+.I name\^
+and its
+.IR index\^ th
+component must already exist.
+.TP
+\&
+The operators \^\(**=\^, \^+=\^, etc., are available as in C.
+The space separating the name from the assignment operator is optional.
+Spaces are, however, mandatory in separating components of
+.I expr\^
+which would otherwise be single words.
+.TP
+\&
+Special postfix \^++\^ and \^\-\^\-\^ operators increment and decrement
+.I name\^
+respectively, i.e., \f3@  i++\^\f1.
+.SS Pre-defined and Environment Variables
+The following variables have special meaning to the shell.
+Of these,
+.IR argv ,
+.IR cwd ,
+.IR home ,
+.IR path ,
+.IR prompt ,
+.I shell\^
+and
+.I status\^
+are always set by the shell.
+Except for
+.IR cwd
+and
+.IR status ,
+this setting occurs only at initialization;
+these variables will not then be modified unless this is done
+explicitly by the user.
+.PP
+This shell copies the environment variable 
+.SM HOME
+into
+.IR home ,
+and copies it back into the environment whenever the normal
+shell variables are reset.
+The environment variable 
+.SM PATH
+is likewise handled; it is not
+necessary to worry about its setting other than in the file
+.B \&.cshrc
+as inferior
+.I csh\^
+processes will import the definition of
+.I path\^
+from the environment, and re-export it if you then change it.
+.TP "\w'\f3nonomatch\f1\|\ \ 'u"
+.B argv
+Set to the arguments to the shell, it is from this variable that
+positional parameters are substituted, i.e., $1 is replaced by
+$argv[1], etc.
+.TP
+.B cdpath
+Gives a list of alternate directories searched to find subdirectories
+in
+.I chdir\^
+commands.
+.TP
+.B cwd
+The full pathname of the current directory.
+.TP
+.B echo
+Set when the
+.B \-x
+command line option is given.
+Causes each command and its arguments
+to be echoed just before it is executed.
+For non-built-in commands all expansions occur before echoing.
+Built-in commands are echoed before command and filename substitution,
+since these substitutions are then done selectively.
+.TP
+.B histchars
+Can be given a string value to change the characters used in history
+substitution.  The first character of its value is used as the
+history substitution character, replacing the default character !.
+The second character of its value replaces the character \(ua in
+quick substitutions.
+.TP
+.B history
+Can be given a numeric value to control the size of the history list.
+Any command which has been referenced in this many events will not be
+discarded.
+Too large values of
+.I history\^
+may run the shell out of memory.
+The last executed command is always saved on the history list.
+.TP
+.B home
+The home directory of the invoker, initialized from the environment.
+The filename expansion of 
+.B ~ 
+refers to this variable.
+.TP
+.B ignoreeof
+If set the shell ignores
+end-of-file from input devices which are terminals.
+This prevents shells from accidentally being killed by 
+\s-2CTRL-d\s0s.
+.TP
+.B mail
+The files where the shell checks for mail.
+This is done after each command completion which will result in a prompt,
+if a specified interval has elapsed.
+If the file exists with an access time not greater than its modify time, 
+the shell says ``You have new mail.''.
+.TP
+\&
+If the first word of the value of
+.I mail\^
+is numeric, it specifies a different mail checking interval, in seconds,
+than the default, which is 10 minutes.
+.TP
+\&
+If multiple mail files are specified, then the shell says
+``New mail in
+.IR name ''
+when there is mail in the file
+.IR name .
+.TP
+.B noclobber
+As described in the section on
+Input/output,
+restrictions are placed on output redirection to insure that
+files are not accidentally destroyed, and that \^>>\^ redirections
+refer to existing files.
+.TP
+.B noglob
+If set, filename expansion is inhibited.
+This is most useful in shell scripts which are not dealing with filenames,
+or after a list of filenames has been obtained and further expansions
+are not desirable.
+.TP
+.B nonomatch
+If set, it is not an error for a filename expansion to not match any
+existing files; rather the primitive pattern is returned.
+It is still an error for the primitive pattern to be malformed, i.e.,
+echo [ still gives an error.
+.TP
+.B path
+Each word of the path variable specifies a directory in which
+commands are to be sought for execution.
+A null word specifies the current directory.
+If there is no
+.I path\^
+variable, then only full path names will execute.
+The usual search path is 
+.BR \&.\^ , 
+.B /bin
+and 
+.BR /usr/bin , 
+but this
+may vary from system to system.
+For the super-user the default search path is 
+.BR /etc ,
+.BR /bin ,
+.BR /usr/bin .
+A shell which is given neither the
+.B \-c
+nor the
+.B \-t
+option will normally hash the contents of the directories in the
+.I path\^
+variable after reading
+.BR \&.cshrc ,
+and each time the
+.I path\^
+variable is reset.  If new commands are added to these directories
+while the shell is active, it may be necessary to give the
+.I rehash\^
+or the commands may not be found.
+.TP
+.B prompt
+The string which is printed before each command is read from
+an interactive terminal input.
+If a \^!\^ appears in the string,
+it will be replaced by the current event number
+unless a preceding \^\e\^ is given.
+The sequence \^\e\e\^ is replaced with a single \e\^.
+The prompt should only be set by the user if it is already defined so that
+it will not be printed when processing shell scripts by using the statement
+.br
+.sp \n(PDu
+.in +5m
+if ( $?prompt ) set prompt='\e!% '
+.in -5m
+.IP
+If the sequence \^\e\^@\f3x\f1\^ appears,
+where \f3x\f1 is one of the characters listed below,
+then it will be replaced by the current time and date in the
+indicated format.
+.br
+.sp \n(PDu
+.in +10m
+.ti -5m
+R	time as \s-1HH:MM AM/PM\s0, e.g. 8:40PM
+.ti -5m
+r	time as \s-1HH:MM:SS AM/PM\s0, e.g. 08:40:25 PM
+.ti -5m
+m	month of year \- 01 to 12
+.ti -5m
+d	day of month \- 01 to 31
+.ti -5m
+y	last 2 digits of year \- 00 to 99
+.ti -5m
+D	date as mm/dd/yy
+.ti -5m
+H	hour \- 00 to 23
+.ti -5m
+M	minute \- 00 to 59
+.ti -5m
+S	second \- 00 to 59
+.ti -5m
+T	time as \s-1HH:MM:SS\s+1
+.ti -5m
+j	day of year \- 001 to 366
+.ti -5m
+w	day of week \- Sunday = 0
+.ti -5m
+a	abbreviated weekday \- Sun to Sat
+.ti -5m
+h	abbreviated month \- Jan to Dec
+.ti -5m
+n	insert a new-line character
+.ti -5m
+t	insert a tab character
+.in -10m
+.IP
+The default prompt is \^%\^, or \^#\^ for the super-user.
+.TP
+.B savehist
+\c
+is given a numeric value to control the number of entries of the
+history list that are saved in 
+.B ~/.history 
+when the user logs out.
+Any command which has been referenced in this many events will be saved.
+During start up the shell sources 
+.B ~/.history 
+into the history list
+enabling history to be saved across logins.
+Too large values of
+.I savehist
+will slow down the shell during start up.
+.TP
+.B shell
+The file in which the shell resides.
+This is used in forking shells to interpret files which have execute
+bits set, but which are not executable by the system.
+(See the description of
+Non-built-in Command Execution
+below.)
+Initialized to the (system-dependent) home of the shell.
+.TP
+.B status
+The status returned by the last command.
+If it terminated abnormally, then 0200 is added to the status.
+Built-in commands which fail return exit status 1,
+all other built-in commands set status 0.
+.TP
+.B time
+Controls automatic timing of commands.
+If set, then any command which takes more than this many cpu seconds
+will cause a line giving user, system, and real times and a utilization
+percentage which is the ratio of user plus system times to real time
+to be printed when it terminates.
+.TP
+.B verbose
+Set by the
+.B \-v
+command line option, causes the words of each command to be printed
+after history substitution.
+.SS Non-built-in Command Execution
+When a command to be executed is found not to be a built-in command,
+the shell attempts to execute the command via
+.IR exec\^ (2).
+Each word in the variable
+.I path\^
+names a directory from which the shell will attempt to execute the command.
+If it is given neither a
+.B \-c
+nor a
+.B \-t
+option, the shell will hash the names in these directories into an internal
+table so that it will only try an
+.I exec\^
+in a directory if there is a possibility that the command resides there.
+This greatly speeds command location when a large number of directories
+are present in the search path.
+If this mechanism has been turned off (via
+.IR unhash ),
+or if the shell was given a
+.B \-c
+or
+.B \-t
+argument, and in any case for each directory component of
+.I path\^
+which does not begin with a \^/\^,
+the shell concatenates with the given command name to form a path name
+of a file which it then attempts to execute.
+.PP
+Parenthesized commands are always executed in a subshell.
+Thus 
+.B (cd ; pwd) ; pwd
+prints the
+.I home\^
+directory; leaving you where you were (printing this after the home directory),
+while 
+.B cd ; pwd
+leaves you in the
+.I home\^
+directory.
+Parenthesized commands are most often used to prevent
+.I chdir\^
+from affecting the current shell.
+.PP
+If the file has execute permissions but is not an
+executable binary to the system, then it is assumed to be a
+file containing shell commands an a new shell is spawned to read it.
+.PP
+If there is an
+.I alias\^
+for
+.IR shell ,
+then the words of the alias will be prepended to the argument list to form
+the shell command.
+The first word of the
+.I alias\^
+should be the full path name of the shell
+(e.g., "$shell").
+Note that this is a special, late occurring, case of
+.I alias\^
+substitution,
+and only allows words to be prepended to the argument list without modification.
+.SS Argument List Processing
+If argument 0 to the shell is \^\-\^, then this
+is a login shell.
+The flag arguments are interpreted as follows:
+.TP "w'\f3\-X\f1\ \ 'u"
+.B  \-c
+Commands are read from the (single) following argument which must
+be present.
+Any remaining arguments are placed in
+.IR argv .
+.TP
+.B \-e
+The shell exits if any invoked command terminates abnormally
+or yields a non-zero exit status.
+.TP
+.B  \-f
+The shell will start faster, because it will neither search for nor
+execute commands from the file
+.B \&.cshrc 
+in the invokers home directory.
+.TP
+.B  \-i
+The shell is interactive and prompts for its top-level input,
+even if it appears to not be a terminal.
+Shells are interactive without this option if their inputs
+and outputs are terminals.
+.TP
+.B  \-n
+Commands are parsed, but not executed.
+This may aid in syntactic checking of shell scripts.
+.TP
+.B  \-s
+Command input is taken from the standard input.
+.TP
+.B  \-t
+A single line of input is read and executed.
+A \^\e\^ may be used to escape the newline at the end of this
+line and continue onto another line.
+.TP
+.B  \-v
+Causes the
+.I verbose\^
+variable to be set, with the effect
+that command input is echoed after history substitution.
+.TP
+.B  \-x
+Causes the 
+.I echo\^
+variable to be set, so that commands are echoed immediately before execution.
+.TP
+.B \-V
+Causes the
+.I verbose\^
+variable to be set even before 
+.B \&.cshrc 
+is executed.
+.TP
+.B \-X
+Is to
+.B \-x
+as
+.B \-V
+is to
+.B \-v.
+.PP
+After processing of flag arguments, if arguments remain but none of the
+.BR \-c ,
+.BR \-i ,
+.BR \-s ,
+or
+.B \-t
+options was given, the first argument is taken as the name of a file of
+commands to be executed.
+The shell opens this file, and saves its name for possible resubstitution
+by $0.
+Remaining arguments initialize the variable
+.IR argv .
+.I csh 
+scripts should always start with
+.IP
+#! /bin/csh \-f
+.PP
+which causes the kernel to fork off \f3/bin/csh\f1 to process them even if invoked
+by a Bourne shell user and inhibits processing of the 
+.B \&.cshrc 
+file to prevent
+interference by the user's differing aliases.
+.SS Signal Handling
+The shell normally ignores
+.I quit\^
+signals.
+Processes running in background (by \^&\^)
+are immune to signals generated from the keyboard, namely, 
+\f2interrupt\f1 and \f2quit,\f1 and to
+hangups.
+Other signals have the values which the shell inherited from its parent.
+The handling of interrupts and terminate signals
+in shell scripts can be controlled by
+.IR onintr .
+Login shells catch the
+.I terminate\^
+signal; otherwise this signal is passed on to children from the state in the
+shell's parent.
+In no case are interrupts allowed when a login shell is reading the file
+\f3\&~/.logout\f1.
+.SH EXAMPLE
+.IP
+csh
+.PP
+creates a new C shell which will accept shell commands.
+.SH FILES
+.ta \w'/etc/passwd\ \ \ \ 'u
+.nf
+/etc/cshrc	Read at beginning of execution by each shell.
+\&~/.cshrc	Read by login shell, after \f3/etc/cshrc\f1 at login.
+\&~/.login	Read by login shell, after \f3\&~/.cshrc\f1 at login.
+\&~/.history	Sourced into history list at login.
+\&~/.logout	Read by login shell, at logout.
+/bin/sh	Bourne shell, for shell scripts not starting with a \^#\^.
+/tmp/sh\(**	Temporary file for \^<<\^.
+/etc/passwd	Source of home directories for ~\f2name\f1.
+.fi
+.DT
+.SH LIMITATIONS
+Words can be no longer than 1024 characters.
+The system limits argument lists to 5120 characters.
+The number of arguments to a command which involves filename expansion
+is limited to 1/6\^th the number of characters allowed in an argument list.
+Command substitutions may substitute no more characters than are
+allowed in an argument list.
+To detect looping, the shell restricts the number of
+.I alias\^
+substitutions on a single line to 20.
+.SH "SEE ALSO"
+.na
+sh(1), access(2), exec(2), fork(2), pipe(2), signal(2),
+umask(2), wait(2), a.out(4), environ(5).
+.ad
+.br
+.IR "An Introduction to the C Shell" ,
+by William Joy.
+.SH BUGS
+It suffices to place the sequence of commands in parenthesis to force it to
+a subshell, i.e., ( a ; b ; c ).
+.PP
+Control over tty output after processes are started is primitive;
+perhaps this will inspire someone to work on a good virtual
+terminal interface.  In a virtual terminal interface much more
+interesting things could be done with output control.
+.PP
+Alias substitution is most often used to clumsily simulate shell procedures;
+shell procedures should be provided rather than aliases.
+.PP
+Control structures should be parsed rather than being recognized as built-in
+commands.  This would allow control commands to be placed anywhere,
+to be combined with \||\|, and to be used with \^&\^ and \^;\^ metasyntax.
+.PP
+It should be possible to use the \^:\^ modifiers on the output of command
+substitutions.
+All and more than one \^:\^ modifier should be allowed on \^$\^ substitutions.
+.PP
+Bourne shell scripts which start with # will be executed by \f2csh\f1
+unless they use the #! facility, e.g.
+.IP
+#! /bin/sh
+.PP
+.SH AUTHOR
+William Joy.
+.if t .tr **
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/csh.1,v 1.1 89/03/27 16:44:44 root Exp $
+.\" $Log:	csh.1,v $
+Revision 1.1  89/03/27  16:44:44  root
+Initial check-in for 3.7
+
+.\" Revision 1.18  86/10/03  12:04:18  oz
+.\" *** empty log message ***
+.\" 
+.\" Revision 1.17  86/09/23  16:29:55  oz
+.\" *** empty log message ***
+.\" 
+.\" Revision 1.16  86/09/08  10:01:24  oz
+.\" *** empty log message ***
+.\" 
+.\" Revision 1.15  86/09/08  08:45:26  oz
+.\" *** empty log message ***
+.\" 
+.\" Revision 1.14  86/09/05  12:16:53  oz
+.\" l
+.\" 
+.\" Revision 1.13  86/04/16  10:36:42  celia
+.\" fixed ref.
+.\" 
+.\" Revision 1.12  86/04/11  09:14:31  celia
+.\" fixed ref.
+.\" 
+.\" Revision 1.11  86/03/19  14:50:15  celia
+.\" herb's edit
+.\" 
+.\" Revision 1.10  86/02/13  14:29:00  celia
+.\" cosmetic changes
+.\" 
+.\" Revision 1.9  86/02/12  16:00:31  lori
+.\" v1.3-3000 for 3.3.1 release
+.\" 
+.\" Revision 1.8  85/11/06  10:04:19  lori
+.\" under setenv added variables of path,user,log-name,home, term
+.\" 
+.\" Revision 1.7  85/09/25  14:54:46  robinf
+.\" Changed for SCR 701
+.\" 
+.\" Revision 1.6  85/08/30  11:42:53  robinf
+.\" fixed SCR  896
+.\" 
+.\" Revision 1.5  85/02/25  15:59:17  bob
+.\" Changed to reflect that the bug about "commands prompted for by ? are not
+.\" placed in the history" has been fixed.
+.\" 
+.\" Revision 1.4  85/01/08  11:02:17  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

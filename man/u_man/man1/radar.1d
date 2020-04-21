@@ -1,0 +1,86 @@
+'\"macro stdmacro
+.TH RADAR 1D
+.SH NAME
+radar \- flight controller's view of the Ethernet dogfight
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/radar
+[
+.B \-i
+infile]
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+The 
+.I radar 
+demo allows passive observation of the
+\f2dog\f1(1D)
+environment.
+The 
+.I radar
+operator sees a simulated radar screen showing the location, aircraft type,
+speed, direction, and altitude of each aircraft in the game.
+A message facility allows the 
+.I radar
+operator to send messages to the pilots.
+.PP
+The program asks your name and broadcasts it to the 
+.I dog
+world.
+The initial display is a help menu.
+Any key starts the program.
+At any time when using the demo, the
+.I h
+key
+brings back the help page.
+.PP
+The 
+.I z
+and 
+.I x
+keys increase and decrease the field of view.
+The
+.I arrow
+keys move the point of view one square in the indicated direction.
+.PP
+The right mouse button allows the mouse valuators to drag the image.
+Press the left or middle mouse button for a prompt to send a
+message to the plane nearest the cursor or the whole world respectively.
+.SH Display
+The display shows a stylized view of the 
+.I dog
+runway environment.
+Each aircraft's position is represented by an isosceles triangle pointed
+in the direction of the plane's heading.
+The vector from the front of the triangle shows its course and speed.
+The trail of dots shows where the plane has been for the past 16
+seconds.
+Each plane has an ID block including the name of the pilot, the type of
+aircraft, the airspeed in knots, the sign of the rate of climb, and the
+altitude in hundreds of feet.
+Sidewinders are shown as red blobs.
+Rockets are orange, cannon shells yellow.
+.SH Airshow Option
+The
+.B \-i
+option
+reads the aircraft positions from 
+.IR infile .
+.I infile
+should be created by 
+using
+the
+.BR \-o 
+option to 
+.IR dog\^ (1D).
+This allows passive observation of the ``airshow'' recorded in 
+.IR infile .
+Broadcast messages are not of much use in this mode.
+.SH SEE ALSO
+dog(1D), flight(1D), shadow(1D)
+.SH AUTHOR
+.PP
+Gary Tarolli

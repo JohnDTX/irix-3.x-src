@@ -1,0 +1,82 @@
+'\"macro stdmacro
+.TH BCAT 1
+.UC 4
+.SH NAME
+bcat \- catenate and print (Berkeley cat)
+.SH SYNOPSIS
+.B bcat
+[
+.B \-u
+] [
+.B \-n
+] [
+.B \-s
+] [
+.B \-v
+]
+file ...
+.br
+.SH DESCRIPTION
+.I Bcat
+reads each
+.I file
+in sequence and displays it on the standard output.  Thus
+.PP
+.ti +15n
+bcat file
+.PP
+displays the file on the standard output, and
+.PP
+.ti +15n
+bcat file1 file2 >file3
+.PP
+concatenates the first two files and places the result on the third.
+.PP
+If no input file is given, or if the argument `\-' is encountered,
+.I bcat
+reads from the standard input file.
+Output is buffered in 1024-byte blocks unless the standard
+output is a terminal, in which case it is line buffered.  The
+.B \-u
+option makes the output completely unbuffered.
+.PP
+The
+.B \-n
+option displays the output lines preceded by line numbers, numbered
+sequentially from 1.  Specifying the 
+.B \-b
+option with the
+.B \-n
+option omits the line numbers from blank lines.
+.PP
+The
+.B \-s
+option crushes out multiple adjacent empty lines so that the
+output is displayed single spaced.
+.PP
+The
+.B \-v
+option displays non-printing characters so that they are visible.
+Control characters print like ^X for control-x; the delete character
+(octal 0177) prints as ^?.
+Non-ascii characters (with the high bit set) are printed as M-
+(for meta) followed by the character of the low 7 bits.  A
+.B \-e
+option may be given with the
+.B \-v
+option, which displays a `$' character at the end of each line.
+Specifying the 
+.B \-t
+option with the
+.B \-v
+option displays tab characters as ^I.
+.PP
+.I Bcat
+is the 4.2bsd version of
+.I cat
+which has different flags and capabilities than the System V version.
+.SH "SEE ALSO"
+cat(1), cp(1), vi(1), more(1), pr(1), tail(1)
+.SH BUGS
+Beware of `bcat a b >a' and `bcat a b >b', which destroy
+the input files before reading them.

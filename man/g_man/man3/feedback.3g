@@ -1,0 +1,43 @@
+.TH feedback 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B feedback
+\- turns on feedback mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "feedback(buffer, size)"
+.B "short buffer[];"
+.B "long size;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine feedba(buffer, size)"
+.B "integer*2 buffer(*)"
+.B "integer*4 size"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure feedback(var buffer: Short; size: longint);"
+.SH DESCRIPTION
+.B feedback
+puts the system in feedback mode.
+In feedback mode, \f2buffer\f1 stores
+the output of the Geometry Pipeline
+rather than sending it to the raster display system.
+.I size 
+specifies the maximum number of values that
+.I buffer
+can store.
+The system does not draw on the
+screen in feedback mode.
+.SH "SEE ALSO"
+endfeedback
+.sp
+.I Programming Guide,
+Section 10.2, Feedback Mode
+.SH NOTE
+This routine is available only in immediate mode.

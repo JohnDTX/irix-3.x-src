@@ -1,0 +1,31 @@
+.TH getlsbackup  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getlsbackup
+- return the status of the linestyle backup mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getlsbackup()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getlsb()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlsbackup: Boolean;"
+.sp
+.SH DESCRIPTION
+.I Getlsbackup
+returns the current value of the linestyle backup flag.  
+.I TRUE
+means that the last three pixels of a line will be colored regardless of
+the linestyle pattern; 
+.I FALSE
+means that the pattern will 
+determine the state of all the pixels in the line.
+.SH "SEE ALSO"
+.I lsbackup
+.SH NOTE
+This command can only be used in immediate mode.

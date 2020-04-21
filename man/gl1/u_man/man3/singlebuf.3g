@@ -1,0 +1,30 @@
+.TH singlebuffer  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I singlebuffer
+- write and display all the bitplanes
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "singlebuffer()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine single"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure singlebuffer;"
+.sp
+.SH DESCRIPTION
+The IRIS has three display modes: single buffer, double buffer,
+and RGB.  In single buffer mode, all of the available bitplanes 
+are simultaneously updated and displayed.  Incomplete
+or changing pictures appear on the screen.  The 
+\f2singlebuffer\f1 command
+invokes this buffer mode.  It does not take effect until 
+\f2gconfig\f1 is called.
+.SH "SEE ALSO"
+.I doublebuffer, gconfig, getdisplaymode, RGBmode, sync
+.SH NOTE
+This command can only be used in immediate mode.

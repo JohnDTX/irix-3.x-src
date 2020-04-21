@@ -1,0 +1,56 @@
+	Keyboard mapping with t3279
+	Peter Ecclesine	16 July 1987
+
+	The t3279 program has internal tables used to map operator keystrokes
+into '3270' keystrokes. The process has three distinct levels, and the
+program allows changes to each level.
+	The keyboard interface can be 'graphic', using the 'buttons' of the
+keyboard, or use a /dev/tty serial interface suitable for tcp connections and
+local ASCII terminals. The serial interface supports the vt100 type 'alternate
+keypad mode' with ESC > and ESC = to enable and disable the alternate mode.
+	The display interface can be 'graphic', using graphics library commands
+to perform the display, or use a /dev/tty serial interface suitable for tcp
+connections and local ASCII terminals. The ANSI X3-64 cursor positioning is
+used, so remote IRISs, and ASCII VT-100 compatible terminals are supported.
+
+	The lowest level maps graphic 'buttons' into unique 8 bit values for
+each button in each of five modes - normal, shifted, control, caps, and
+shifted caps. The graphics keyboard queues the 83 keyboard keys (and 3 mouse
+buttons), and accepts keystrokes with the qtest/qread graphics commands. The
+strokes are mapped using the current states of CONTROL, CAPS LOCK, and SHIFT
+into unique 8 bit values. The values for the CTRL, CAPS LOCK, and the two
+SHIFT keys cannot be remapped, nor can the mouse buttons. The unique 8 bit
+values resemble ASCII wherever possible. The mouse values are left - xfc,
+center - xfb, right - xfa. This graphic button mapping level is not used
+for /dev/tty type keyboard interfaces. An example is the pad key ENTER, which
+is mapped into 0x8d.
+
+	The second level maps one to four keystroke sequences into 'metakeys'.
+The unique 8 bit values from the lowest level, or ASCII key codes from a
+/dev/tty type terminal are assigned 'metakey' values. An example is the 3270
+'clear' key, which is metakey 6. A graphic keyboard uses the value 0x8d to
+map to the metakey 'clear', while a /dev/tty terminal maps ESC,'?','M' into
+it.
+	The highest level uses the metakey to select one or two 3270
+keyboard codes to be sent to the 3270 controller. The controller maintains its
+own SHIFT, ALT, CAPS, (and KANA) states to decode the key codes. The controller
+is customized to expect one of four keyboard mappings on each coax connection.
+The 3278 87 key typewriter keyboard is the default IRIS keycode mapping. In
+this 3278 mapping in the 3270 controller, the 'clear' function is the ALT
+of 'key 0x21'. The 3178 87 key typewriter maps the 'clear' function to the
+NORMAL of 'key 0x21'. The t3279 program sends the keycodes 'ALT', 0x21 to 
+impliment the 'clear metakey' to a controller expecting a 3278 keyboard.
+The right hand pad on a 3278 keyboard is keys 0x40 to 0x4b, and the number
+row is 0x20 to 0x31.
+
+	The decoding in the 3270 controller is similar to the lowest level
+in the IRIS, however the IRIS must map the metakey into 'ALT', SHIFT', 'CAPS'
+make/break and a keycode to cause the correct decoding by the 3270 controller.
+Appendix F of GA23-0214 3174 Subsystem Control Unit Customizing Guide covers
+the customization of the control unit to accept different keyboards. The
+t3279 menu entry 8 performs the same function in the IRIS. The default
+mappings are based on the csh variable $TERM, with wsiris, rwsiris, vt100
+and ansi entries. The menu entry can create modified tables in a '.t3279rc'
+file in the $HOME directory. When started, t3279 attempts reading '.t3279rc'
+in the current directory, then the $HOME directory. If found, the default values
+are replaced.

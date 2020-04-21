@@ -1,0 +1,42 @@
+Here is a description of the macros from the top down:
+
+ROOT (name)
+	declares the 3d and 2d, float and integer routines using
+	ROOT_3F, ROOT_3I, ROOT_2F, ROOT_2I
+
+ROOT_0 (name)
+	defines the stub with no parameters using the immediate mode macro and
+	BEGINCOMPILE/ENDCOMPILE
+ROOT_[1234][SIF] (name)
+	defines the stub with either 1, 2, 3, or 4 parameters of type short,
+	integer (long), or float, using the immediate mode macro and
+	BEGINCOMPILE/ENDCOMPILE
+
+ROOT_MATRIX (name)
+	defines the matrix stub using the immediate mode macro and
+	BEGINCOMPILE/ENDCOMPILE,  eg. loadmatrix, multmatrix
+
+BEGINCOMPILE (size)
+	sets up a local register pointer and saves size for ENDCOMPILE,
+	if you use BEGINCOMPILE without beginpicmandef you should call
+	gl_checkspace to make sure reserve room at the inn
+
+ENDCOMPILE
+	checks BEGINCOMPILE size against how much you actually compiled
+
+beginpicmandef (size)
+	if immediate mode it sets up gl_currentpos = &gl_temporary_object
+	else calls gl_checkspace(size) and returns if it fails
+
+endpicmandef
+	if immediate mode it calls interpret on gl_temporary_object
+	use beginpicmandef/endpicmandef around BEGINCOMPILE/ENDCOMPILE
+	when immediate mode macros are not used in the stub
+
+INTERP_NAMES(name)
+	declares the names of the 3d and 2d, float and integer routines using
+	INTERP_NAME
+
+INTERP_NAME(name)
+	declares the name of a routine by generating a static character array
+	called name_n which contains the characters in name

@@ -1,0 +1,470 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.DECL.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               10-May-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+    procedure simpletype(fsys: setofsys; var fpt: pt);
+      var lvalu: valu; lpt: pt; lpn,lpn2: pn; n,oldtop: integer;
+          lname: identtype;
+    begin
+    fpt := nil;
+    if not (token in simptypebegsys)
+    then skip(21,fsys + simptypebegsys);
+    if token in simptypebegsys
+    then begin
+      if token = LPARENSY
+      then begin
+        lpn := nil; n := 0;
+        new(fpt,SCALAR,DECLARED);
+        with fpt^ do begin
+          typeno := 0; Marked := FALSE;
+          Ftype := FALSE; form := SCALAR; scalkind := DECLARED;
+          end;
+        oldtop := top;
+        while display[top].occur = REC do top := top - 1;
+        repeat
+          scan;
+          if token = IDENTSY
+          then begin
+            new(lpn2,IDENTNODE,CONSTS);
+            with lpn2^ do begin
+              refcount := 0; RefBelow := FALSE;
+              RefParam := FALSE; InReg := FALSE;
+              copyident(lpn2); next := lpn; idtype := fpt;
+              class := CONSTS; valueof.ivalu := n;
+              node := IDENTNODE;
+              end;
+            lpn := lpn2; enterid(lpn); n := n + 1; scan;
+            end
+          else error(29);
+          if not (token in fsys + [COMMASY,RPARENSY])
+          then skip(20,fsys + [COMMASY,RPARENSY]);
+        until token <> COMMASY;
+        top := oldtop;
+        fpt^.maxconst := lpn;
+        calcsize(fpt);
+        if token = RPARENSY then scan else error(32);
+        end
+      else if token = IDENTSY
+        then begin
+          lname := ident; scan;
+          if token = COLONSY
+          then begin
+            lpn := searchall([CONSTS]);
+            with lpn^ do
+              if idtype <> nil
+              then
+                if idtype^.form > SUBRANGE
+                then error(143)
+                else
+                  if (idtype = realptr) or (idtype = doubleptr)
+                  then error(108);
+            scan;
+            constant(fsys,lvalu,lpt);
+            if lpt <> nil
+            then
+              if lpt^.form > SUBRANGE
+              then error(143)
+              else
+                if (lpt = realptr) or (lpt = doubleptr)
+                then error(108);
+            if not CompTypes(lpt,lpn^.idtype) then error(106);
+            new(fpt,SUBRANGE);
+            with fpt^ do begin
+              typeno := 0; Marked := FALSE;
+              Ftype := FALSE; form := SUBRANGE; rangeof := lpt;
+              min := lpn^.valueof.ivalu; max := lvalu.ivalu;
+              if min > max then error(105);
+              end;
+            calcsize(fpt);
+            end
+          else begin
+            ident := lname; lpn := searchall([TYPES]);
+            fpt := lpn^.idtype;
+            end;
+          end
+        else begin
+          new(fpt,SUBRANGE);
+          with fpt^ do begin
+            typeno := 0; Marked := FALSE; Ftype := FALSE; form := SUBRANGE;
+            end;
+          constant(fsys + [COLONSY],lvalu,lpt);
+          fpt^.min := lvalu.ivalu; fpt^.rangeof := lpt;
+          if lpt <> nil
+          then
+            if lpt^.form > SUBRANGE
+            then error(143)
+            else
+              if (lpt = realptr) or (lpt = doubleptr)
+              then error(108);
+          if token = COLONSY then scan else error(35);
+          constant(fsys,lvalu,lpt);
+          with fpt^ do begin
+            max := lvalu.ivalu;
+            if max < min then error(105);
+            if not CompTypes(rangeof,lpt) then error(106);
+            end;
+          if lpt <> nil
+          then
+            if lpt^.form > SUBRANGE
+            then error(143)
+            else
+              if (lpt = realptr) or (lpt = doubleptr)
+              then error(108);
+          calcsize(fpt);
+          end;
+      if not (token in fsys) then skip(20,fsys);
+      end;
+    if fpt <> nil
+    then
+      if fpt^.typeno = 0
+      then begin fpt^.typeno := nexttypeno; nexttypeno := nexttypeno + 1; end;
+    end; {simpletype}
+    
+    procedure fieldlist(fsys: setofsys; var ffldlist:pn; var ftagfld: pt);
+      var ExitFlag,Exit2Flag: Boolean; lvalu: valu; ilist,ilist2: pintlist;
+        lpt,tagpt,varpt,varpt2,tagtypept,varlist: pt;
+        lpn,lastpn,grouppn,tagnamepn: pn; lname: identtype;
+    begin
+    ftagfld := nil; ffldlist := nil; grouppn := nil;
+    if not (token in fsys + [IDENTSY,CASESY])
+    then skip(26,fsys + [IDENTSY,CASESY]);
+    while token = IDENTSY do
+      begin
+      ExitFlag := FALSE;
+      repeat
+        if token = IDENTSY
+        then begin
+          new(lpn,IDENTNODE,FIELD);
+          if ffldlist = nil then ffldlist := lpn else lastpn^.next := lpn;
+          if grouppn = nil then grouppn := lpn;
+          lastpn := lpn;
+          with lpn^ do begin
+            copyident(lpn); next := nil; class := FIELD; node := IDENTNODE;
+            refcount := 0; RefBelow := FALSE; RefParam := FALSE;
+            InReg := FALSE;
+            end;
+          enterid(lpn); scan;
+          end
+        else error(29);
+        if (token <> COMMASY) AND (token <> COLONSY)
+        then skip(20,fsys + [COMMASY,COLONSY,SEMISY,CASESY]);
+        if token = COMMASY
+        then scan
+        else ExitFlag := TRUE;
+      until ExitFlag;
+      if token = COLONSY
+      then scan
+      else error(35);
+      typ(fsys + [CASESY,SEMISY],lpt);
+      while grouppn <> nil do
+        with grouppn^ do
+          begin idtype := lpt; grouppn := next; end;
+      if lpt <> nil then FileFlag := FileFlag or lpt^.Ftype;
+      if token = SEMISY
+      then begin
+        scan;
+        if not (token in fsys + [IDENTSY,CASESY])
+        then skip(26,fsys + [IDENTSY,CASESY]);
+        end;
+      end;
+    if token = CASESY
+    then begin
+      scan; new(tagnamepn,IDENTNODE,FIELD); new(tagpt,TAGFIELD);
+      with tagnamepn^ do begin
+        name.all := '        '; name.len := 8;
+        next := nil; llink := nil; rlink := nil;
+        class := FIELD; idtype := nil; PckdField := FALSE; refcount := 0;
+        RefBelow := FALSE; RefParam := FALSE; InReg := FALSE;
+        node := IDENTNODE;
+        end;
+      with tagpt^ do begin
+        typeno := 0; Marked := FALSE; Ftype := FALSE; form := TAGFIELD;
+        tagname := tagnamepn; variants := nil;
+        end;
+      ftagfld := tagpt;
+      if token = IDENTSY
+      then begin
+        lname := ident; scan;
+        if token = COLONSY
+        then begin
+          scan;
+          if token = IDENTSY
+          then begin
+            lpn := searchall([TYPES]); tagtypept := lpn^.idtype;
+            ident := lname;
+            with tagnamepn^ do
+              begin idtype := tagtypept; copyident(tagnamepn); end;
+            if ffldlist = nil 
+            then ffldlist := tagnamepn 
+            else lastpn^.next := tagnamepn;
+            enterid(tagnamepn);
+            scan;
+            end
+          else skip(29,fsys + [OFSY,LPARENSY]);
+          end
+        else begin
+          ident := lname; lpn := searchall([TYPES]);
+          tagtypept := lpn^.idtype; tagnamepn^.idtype := tagtypept;
+          end;
+        end
+      else skip(29,fsys + [OFSY,LPARENSY]);
+      if tagtypept <> nil
+      then begin
+        if tagtypept^.form > SUBRANGE
+        then error(109)
+        else
+          if (realptr = tagtypept) or (tagtypept = doubleptr)
+          then error(108);
+        FileFlag := FileFlag or tagtypept^.Ftype;
+        end;
+      if token = OFSY then scan else error(42);
+      ExitFlag := FALSE; varlist := nil;
+      repeat
+        if not (token in fsys + [SEMISY] - [IDENTSY])
+        then begin
+          Exit2Flag := FALSE; ilist := nil;
+          repeat
+            constant(fsys + [COMMASY,COLONSY,LPARENSY],lvalu,lpt);
+            if not CompTypes(tagtypept,lpt)
+            then error(110)
+            else begin
+              new(ilist2);
+              with ilist2^ do begin
+                nextint := ilist; intval := lvalu.ivalu;
+                end;
+              ilist := ilist2;
+              ilist2 := ilist^.nextint;
+              while ilist2 <> nil do begin
+                if lvalu.ivalu = ilist2^.intval then error(160);
+                ilist2 := ilist2^.nextint;
+                end;
+              varpt := varlist;
+              while varpt <> nil do begin
+                ilist2 := varpt^.varvalus;
+                while ilist2 <> nil do begin
+                  if lvalu.ivalu = ilist2^.intval then error(160);
+                  ilist2 := ilist2^.nextint;
+                  end;
+                varpt := varpt^.nextvar;
+                end;
+              end;
+            if token = COMMASY then scan else Exit2Flag := TRUE;
+          until Exit2Flag;
+          if token = COLONSY then scan else error(35);
+          if token = LPARENSY then scan else error(31);
+          fieldlist(fsys + [RPARENSY,SEMISY],lpn,varpt2);
+          new(varpt,VARIANT);
+          with varpt^ do begin
+            typeno := 0; Marked := FALSE;
+            Ftype := FALSE; form := VARIANT; varfldlst := lpn;
+            subvar := varpt2; varvalus := ilist; nextvar := varlist;
+            end;
+          varlist := varpt;
+          if token = RPARENSY
+          then begin
+            scan;
+            if not (token in fsys + [SEMISY])
+            then skip(20,fsys + [SEMISY]);
+            end
+          else error(32);
+        end;
+        if token = SEMISY then scan else ExitFlag := TRUE;
+      until ExitFlag;
+      tagpt^.variants := varlist;
+      end;
+    end; {fieldlist}
+    
+  begin {typ}
+  fpt := nil;
+  if not (token in typebegsys)
+  then skip(25,fsys + typebegsys);
+  if token in typebegsys
+  then begin
+    if token in simptypebegsys
+    then simpletype(fsys,fpt)
+    else if token = UPARROWSY
+      then begin
+        scan;
+        if token = IDENTSY
+          then begin
+            new(fpt,POINTERS);
+            with fpt^ do begin
+              typeno := 0; Marked := FALSE;
+              form := POINTERS; pointerto := nil; Ftype := FALSE;
+              end;
+            PrintErrors := FALSE;
+            lpn := searchall([TYPES]);
+            PrintErrors := TRUE;
+            if lpn = nil
+            then begin
+              new(lpn,IDENTNODE,TYPES);
+              with lpn^ do begin
+                copyident(lpn); idtype := fpt; class := TYPES;
+                next := forwplist; node := IDENTNODE; refcount := 0;
+                RefBelow := FALSE; RefParam := FALSE; InReg := FALSE;
+                end;
+              forwplist := lpn;
+              end
+            else
+              fpt^.pointerto := lpn^.idtype;
+            calcsize(fpt);
+            scan;
+            end
+          else error(29);
+        end
+      else begin
+        PackedFlag := token = PACKEDSY;
+        if PackedFlag then scan;
+        if token = ARRAYSY
+        then begin
+          scan;
+          new(fpt,ARRAYS);
+          with fpt^ do begin
+            typeno := 0; Marked := FALSE;
+            form := ARRAYS; arrayof := nil;
+            BigArray := FALSE; BigIndex := FALSE; BigElement := FALSE;
+            PckdArr := PackedFlag; BitPacked := FALSE; SignedEl := FALSE;
+            end;
+          lpt := fpt;
+          if token = LBRACKSY then scan else error(33);
+          ExitFlag := FALSE;
+          repeat
+            simpletype(fsys + [COMMASY,RBRACKSY,OFSY],lpt2);
+            if lpt2 <> nil
+            then
+              if lpt2^.form > SUBRANGE
+              then error(112)
+              else
+                if (lpt2 = realptr) or (lpt2 = doubleptr)
+                then error(111)
+                else
+                  if lpt2 = intptr
+                  then error(113);
+            lpt^.indexedby := lpt2;
+            if token = COMMASY
+            then begin
+              new(lpt3,ARRAYS); lpt3^.arrayof := lpt; lpt := lpt3;
+              with lpt^ do begin
+                typeno := nexttypeno; nexttypeno := nexttypeno + 1;
+                Marked := FALSE;
+                form := ARRAYS; PckdArr := PackedFlag; BitPacked := FALSE;
+                BigArray := FALSE; BigIndex := FALSE; BigElement := FALSE;
+                SignedEl := FALSE;
+                end;
+              scan;
+              end
+            else ExitFlag := TRUE;
+          until ExitFlag;
+          if token = RBRACKSY then scan else error(34);
+          if token = OFSY then scan else error(42);
+          typ(fsys,lpt2); 
+          repeat
+            lpt3 := lpt^.arrayof; lpt^.arrayof := lpt2; 
+            if lpt2 <> nil then lpt^.Ftype := lpt2^.Ftype; 
+            lpt2 := lpt; lpt := lpt3;
+            calcsize(lpt2);
+          until lpt = nil;
+          end
+        else if token = FILESY
+          then begin
+            scan;
+            if token in fsys
+            then fpt := fileptr
+            else begin
+              new(fpt,FILES);
+              with fpt^ do begin
+                typeno := 0; Marked := FALSE;
+                Ftype := TRUE; form := FILES; PckdFile := PackedFlag;
+                end;
+              if token = OFSY then scan else error(42);
+              typ(fsys,lpt); fpt^.fileof := lpt;
+              calcsize(fpt);
+              end;
+            end
+          else if token = RECORDSY
+            then begin
+              oldtop := top;
+              if top < MAXDISPLAY
+              then begin
+                top := top + 1;
+                with display[top] do
+                  begin nametree := nil; occur := REC; end;
+                end
+              else error(300);
+              scan; FileFlag := FALSE;
+              fieldlist(fsys - [SEMISY] + [ENDSY],lpn,lpt2);
+              new(fpt,RECORDS);
+              with fpt^ do begin
+                typeno := 0; Marked := FALSE;
+                form := RECORDS; Ftype := FileFlag; PckdRec := PackedFlag;
+                fields := display[top].nametree; varpart := lpt2;
+                fstfield := lpn; 
+                end;
+              top := oldtop;
+              if token = ENDSY then scan else error(44);
+              calcsize(fpt);
+              end
+            else if token = SETSY
+              then begin
+                scan;
+                if token = OFSY then scan else error(42);
+                simpletype(fsys,lpt);
+                new(fpt,SETS);
+                with fpt^ do begin
+                  typeno := 0; Marked := FALSE;
+                  form := SETS; Ftype := FALSE; setof := lpt;
+                  end;
+                if lpt <> nil
+                then
+                  if lpt^.form > SUBRANGE
+                  then error(109)
+                  else
+                    if (lpt = realptr) or (lpt = doubleptr)
+                    then error(108)
+                    else
+                      begin
+                      getbounds(lpt,min,max);
+                      if (min < 0) or (max > 2031)
+                      then error(301);
+                      end;
+                calcsize(fpt);
+                end
+              else if token = STRINGSY
+                then begin
+                  scan;
+                  if token = LBRACKSY then scan else error(33);
+                  constant(fsys + [RBRACKSY],lvalu,lpt);
+                  if lpt <> intptr
+                  then error(107)
+                  else
+                    if (lvalu.ivalu <= 0) or (lvalu.ivalu > 255)
+                    then error(302);
+                  new(fpt,STRINGS);
+                  with fpt^ do begin
+                    typeno := 0; Marked := FALSE;
+                    Ftype := FALSE; form := STRINGS;
+                    stringlen := lvalu.ivalu;
+                    end;
+                  if token = RBRACKSY then scan else error(34);
+                  calcsize(fpt);
+                  end
+                else begin skip(25,fsys); fpt := nil; end;
+        end;
+    if not (token in fsys)
+    then skip(20,fsys);
+    if fpt <> nil
+    then
+      if fpt^.typeno = 0
+      then begin fpt^.typeno := nexttypeno; nexttypeno := nexttypeno + 1; end;
+    end;
+  end; {typ}
+  
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH CMP 1
+.SH NAME
+cmp \- compare two files
+.SH SYNOPSIS
+.B cmp
+[
+.B \-l
+] [
+.B \-s
+]
+file1 file2
+.SH DESCRIPTION
+The two files are
+compared.
+(If
+.I file1\^
+is
+.BR \- ,
+the standard input is used.)
+Under default options,
+.I cmp\^
+makes no comment if the files are the same;
+if they differ, it announces the byte and line number
+at which the difference occurred.
+If one file is an initial subsequence
+of the other, that fact is noted.
+.PP
+Options:
+.TP \w'\f3\-s\fP\ \ \ 'u
+.B  \-l
+Print the byte number (decimal) and the
+differing bytes (octal) for each difference.
+.TP
+.B  \-s
+Print nothing for differing files;
+return codes only.
+.dt
+.SH EXAMPLE
+.IP
+cmp alpha beta
+.PP
+will report if the files are different and at what point they differ,
+such as: 
+.IP
+alpha beta differ: char 33, line 2
+.SH "SEE ALSO"
+comm(1), diff(1).
+.SH DIAGNOSTICS
+Exit code 0 is returned for identical
+files, 1 for different files, and 2 for an
+inaccessible or missing argument.
+.\"	@(#)cmp.1	5.1 of 10/27/83

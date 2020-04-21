@@ -1,0 +1,53 @@
+'\" t
+.TH popattributes 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B popattributes
+\- pops the attribute stack
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popattributes()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popatt"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popattributes;"
+.SH DESCRIPTION
+.B popattributes
+restores the most recently saved values (those that were pushed by 
+.B pushattributes)
+of the global state
+attributes:
+.sp
+.TS
+center, box;
+cB s
+l l.
+Attributes
+_
+backbuffer	pattern	
+color	raster font		
+frontbuffer	resetlinestyle	
+linestyle	RGB color
+linestyle backup	RGB writemask 
+linewidth	writemask pattern 
+lsrepeat
+.TE
+.sp
+.PP
+If you attempt to pop an empty attribute stack, 
+an error message appears.
+.SH "SEE ALSO"
+backbuffer, color, defcursor, frontbuffer,
+linewidth, lsbackup, lsrepeat, pushattributes, 
+RGBcolor, RGBwritemask, setlinestyle, setpattern,  writemask
+.sp
+.I Programming Guide,
+Section 2.2, Saving Global State Attributes

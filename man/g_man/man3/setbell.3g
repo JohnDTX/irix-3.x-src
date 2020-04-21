@@ -1,0 +1,44 @@
+'\" t
+.TH setbell 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B setbell
+\- sets the duration of the keyboard bell
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setbell(mode)"
+.B "char mode;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setbel(mode)"
+.B "integer*4 mode"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setbell(mode: Byte);"
+.SH DESCRIPTION
+.B setbell
+sets the duration of the beep of the keyboard bell.
+.sp
+.TS
+center, box;
+cB | cB
+n | l.
+Mode	Meaning
+_
+0	off
+1	short beep
+2	long beep
+.TE
+.SH "SEE ALSO"
+clkoff, clkon, lampoff, lampon, ringbell
+.sp 
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

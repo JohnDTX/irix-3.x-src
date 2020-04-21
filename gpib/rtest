@@ -1,0 +1,10 @@
+# ren test
+# watch for changes in the ISR2 reg
+@ iii = 0
+while ( $iii < 4 )
+    t0 gtl 02
+    t1 peek isr2
+    t0 ren 02
+    t1 peek isr2
+    @ iii ++
+end

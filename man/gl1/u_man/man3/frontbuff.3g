@@ -1,0 +1,38 @@
+.TH frontbuffer  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I frontbuffer
+- enable updating in the front buffer
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "frontbuffer(b)"
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine frontb(b)"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure frontbuffer(b: Boolean);"
+.sp
+.SH DESCRIPTION
+.I Frontbuffer
+enables updating in the front buffer.  If b=
+.I FALSE,
+the default, 
+the front buffer is not enabled; 
+.I TRUE
+means it is enabled.  This
+command is useful only in
+double buffer mode and is ignored otherwise.
+.PP
+.I Frontbuffer
+is set to 
+.I FALSE
+by 
+.I gconfig.
+.SH "SEE ALSO"
+.I backbuffer, doublebuffer, getbuffer

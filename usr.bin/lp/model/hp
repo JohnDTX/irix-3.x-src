@@ -1,0 +1,105 @@
+
+# lp interface for hp2631a line printer
+#
+#	All output is passed through the /usr/lib/hp2631a filter
+#  If this filter is not executable, then this interface will disable
+#  the lp printer which it was called to service.
+#
+# Options recognized:
+#	e | -e		expanded print mode
+#	c | -c		compressed print mode
+#
+# Default: normal print mode
+#
+#	SCCS @(#)hp	1.1
+# @(#)$Header: /d2/3.7/src/usr.bin/lp/model/RCS/hp,v 1.1 89/03/27 18:05:15 root Exp $
+# $Log:	hp,v $
+# Revision 1.1  89/03/27  18:05:15  root
+# Initial check-in for 3.7
+# 
+# Revision 1.2  85/03/15  15:20:03  bob
+# Added initial blank line (for csh) and what
+# 
+
+x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+printer=`basename $0`
+if [ ! -x /usr/lib/hp2631a ]
+then
+	disable -r"can't execute /usr/lib/hp2631a filter" $printer
+	exit 1
+fi
+(
+echo "$x\n$x\n$x\n$x\n"
+banner "$2"
+echo "\n"
+user=`grep "^$2:" /etc/passwd | line | cut -d: -f5`
+if [ -n "$user" ]
+then
+	echo "User: $user\n"
+else
+	echo "\n"
+fi
+echo "Request id: $1    Printer: `basename $0`\n"
+date
+echo "\n"
+if [ -n "$3" ]
+then
+	banner $3
+fi
+copies=$4
+echo "\014\c"
+opt=
+for i in $5
+do
+	case "$i" in
+	-c | c) # compressed print
+		opt=-c
+		;;
+	-e | e) # expanded print
+		opt=-e;
+	esac
+done
+if [ X$opt = X-e ]
+then
+	echo "\033&k1S\c"
+elif [ X$opt = X-c ]
+then
+	echo "\033&k2S\c"
+fi
+shift; shift; shift; shift; shift
+files="$*"
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "\014\c"
+	done
+	i=`expr $i + 1`
+done
+echo "\033&k0S\c"	# reset from compressed or expanded to normal
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n$x\n$x\n$x\n$x"
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "$x\n$x\n$x\n$x\n$x\n$x\n$x\n$x\n"
+) | /usr/lib/hp2631a -b2400
+
+ret=$?
+case $ret in
+0)
+	exit 0
+	;;
+1)
+	reason="device is not a terminal"
+	;;
+2)
+	reason="can't read from device"
+	;;
+*)
+	reason=
+	;;
+esac
+disable -r"$reason" $printer
+exit 1

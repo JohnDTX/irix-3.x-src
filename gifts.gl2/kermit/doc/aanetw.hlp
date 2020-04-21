@@ -1,0 +1,264 @@
+AANETW.HLP                                                      (5 Dec 85)
+
+                Accessing Kermit Files Via Computer Network
+
+
+This file describes how to get Kermit files over computer networks,
+including BITNET, CCNET (a DECnet network), the Internet (Arpanet and the
+networks connected to it), plus various dialup accesses including UUCP.  You
+should also read AAFILES.HLP if you need more complete descriptions of the
+Kermit files themselves.
+
+
+* BITNET from the Columbia University CUVMA System:
+
+BITNET is a network of IBM mainframes, mostly at universities, connected
+with leased phone lines, using IBM RSCS protocols (VAX VMS and Unix systems
+and other systems that can imitate these protocols are also on BITNET).
+BITNET covers North America and Europe.  Information about joining BITNET
+may be obtained from EDUCOM Networking Activities, P.O. Box 364, Princeton,
+NJ (USA) 08540, Phone 609-734-1878.
+
+KERMSRV at CUVMA is a file server for the BITNET user community which
+accepts commands via messages or spool files, and sends the requested KERMIT
+files over the network.  Most spool file formats are accepted including
+those used by SENDFILE, NOTE, PUNCH, PRINT, CARD DUMP, or DISK DUMP
+commands.
+
+To learn how obtain Kermit files from the Columbia IBM mainframes via BITNET,
+type the following command to your BITNET host:
+
+	SMSG RSCS MSG CUVMA KERMSRV HELP
+
+This is VM/CMS format -- TSO, J-NET, UREP, or other BITNET systems will
+probably have different formats; consult your system support people for
+details.  VAX/VMS J-Net uses syntax something like this:
+
+  $ SEN/REM CUVMA KERMSRV HELP
+
+The Kermit files available from BITNET may be some days or weeks behind the
+announcements that appear in Info-Kermit (see below).
+
+Here is a brief summary of KERMSRV operation; see the HELP message for
+greater detail:
+
+The following file request commands are accepted: SEND, PUNCH, PRINT, DISK,
+and CARD.  These commands expect a file name or "DIR" or "?" as an operand.
+The DIR operand accepts an optional file name also.  File names may contain
+* or % wildcard characters, but the filename portion may not consist of
+those characters only.
+
+Note that KERMSRV will always respond with some message; if you get a
+response please do not resubmit your request.  If your request was received
+as a spool file, error messages are sent in a spool file, also.
+
+The NEWS command returns news about latest features and changes in KERMSRV.
+
+
+* BITNET from the University of Toledo VAX/VMS system UOFT02:
+
+The Kermit file server KERMSRV is not the same one as the one running at
+Columbia -- this is a VAX, and CUVMA is an IBM mainframe.  The collection
+is maintained by Brian Nelson, author of PDP-11 Kermit, mail to BRIAN@UOFT02
+on BITNET.
+
+from VM/CMS:    CP SMSG RSCS MSG UOFT02 KERMSRV DIR
+                CP SMSG RSCS MSG UOFT02 KERMSRV SEND K11*.*
+
+from VMS Jnet:  $ SEN/REM UOFT02 KERMSRV SEND K11*.*
+
+
+* Internet from the Columbia University CU20B System:
+
+"Internet" means the Arpanet and any network connected to it using TCP/IP
+protocols, including parts of CSnet, many campus local networks, etc.
+Access to the Columbia Internet Kermit distribution is through FTP, the
+Internet File Transfer Program; consult the FTP manual for your own system
+in order to learn how to use your FTP program.
+
+To get Kermit files via the Internet, use FTP (not TELNET), connect to host
+CU20B (Internet Host number [128.59.32.128]), login as user ANONYMOUS,
+password KERMIT, and use the GET or MULTIPLE GET commands to retrieve the
+desired files from the area KER:, e.g. "GET KER:AAAREAD.ME", "MULTIPLE GET
+KER:CK*.*".  Network users may consult the file KER:AAVNEW.HLP from time to
+time to see what new versions of Kermit have been installed recently.  Sites
+whose FTP programs do not support the DIRECTORY or MULTIPLE GET commands may
+GET the file AAFILES.DIR from the desired Kermit area (see below) to obtain
+an up-to-date directory listing.
+
+After logging in anonymously, you may also attempt to set your default path
+to the desired Kermit directory, KER: or K2: (see below), using FTP's CWD or
+CD command.  If you are prompted for a password, provide a null one; if a
+message advises you to send a password, ignore the message.  Since our
+network software is in a state of transition, this operation may or may not
+work.  The following discussion assumes it does not work; if it does, you
+can follow the same instructions, but leave off the prefix KER: or K2: from
+any file specifications.
+
+Internet access to CU20B is currently unrestricted, but if sufficiently large
+numbers of anonymous FTP logins occur regularly during prime (eastern) time
+hours to interfere with our own user community, some restrictions on anonymous
+logins will have to be imposed.
+
+Those accessing CU20B via network should note the existence of several Kermit
+file areas:
+
+  KER:  - Microcomputer, PC, workstation Kermit implementations, plus
+            Kermit documentation of a general nature.
+  K2:   - Mainframe and minicomputer Kermit implementations.
+  KB:   - True binary (executable) files for selected implementations.
+  KT:   - Tools -- cross assemblers and linkers, etc.
+  KE:   - "Extra", old, redundant, or esoteric Kermit implementations.
+
+KER: corresponds to Tape A, K2: corresponds to tape B.
+
+These areas are "logical device names", which should be used rather than
+physical DEC-20 DEVICE:<DIRECTORY> names, which may change from time to time as
+our systems are rearranged.  The logical name KER: includes all the others
+(K2:, KB:, etc) in its search path, so to obtain a single file you should
+prefix its name by KER:.
+
+When getting either single or multiple files, and your own system is a DEC-20,
+then it is also sufficient to prefix the file specification by KER:.
+
+When getting multiple files from CU20B's FTP server from non-DEC-20 systems,
+you should first change working directory (CWD or CD) to the area containing
+the files you want to get, either KER: or K2:.  If you don't, then each file
+will be sent back to you with its fully qualified name which in some cases
+may be longer than the longest permissible filename on your system, which in
+turn can cause files whose names differ only in the last few characters to
+overwrite each other as they arrive.
+
+Alphabetic case is insignificant in DEC-20 file names (lowercase is mapped to
+upper).  The dot separating the file name and file type is significant; the
+name and type are separate fields.
+
+File groups may be specified in MULTIPLE GET commands using the following
+"wildcard" notation:
+
+ *  matches any string of 0 or more characters in the current field
+ %  matches any single character in the current position
+
+For instance, KER:CK*.* matches all files whose names start with CK.
+KER:CK*.% matches all files whose names start with CK and whose types are
+exactly one character long (like KER:CKUCMD.C).
+
+Each implementation of Kermit has a prefix.  All files relating to that
+implementation have names that start with that prefix.  Since the dot is
+significant in DEC-20 file names, the way to refer to all the files in a
+specific implementation is "KER:xx*.*", where xx is the prefix.
+
+A few cautionary words about DEC-20 logical names: the search path is followed
+only so long as files are not found that match the given file specification.
+This can cause some confusion; for instance, the command "DIRECTORY KER:"
+will only list the files in the primary (Tape A) Kermit directory, because
+when no file specification is given, "*.*" is assumed, and all files in the
+primary directory match "*.*", so subsequent directories are not searched.
+Similarly, "KER:C*.*" will not search subsequent directories if the primary
+directory contains any files that start with "C".  Note that "KER:*.DOC"
+(whose intention might be to refer to all the Kermit documentation files)
+would only find .DOC files in the primary Kermit directory.
+
+Care has been taken to ensure that files are arranged so that if they are
+referred to by prefix, they will be found in the KER: search path.  For
+instance, the C-Kermit files, having the prefix "CK" will be found if
+referred to as "KER:CK*.*", even though they are really in K2:.  However,
+this principle applies only to the two principal directories, KER: and K2:.
+It does not apply to KB:, which is used to separate binary files from
+"printable" files.  Therefore, KER:MS*.* will find all of the printable
+MS-DOS Kermit files, but will not find the .EXE files, which are in KB:, and
+must be referred to separately as KB:MS*.*.
+
+Before you attempt to get binary files from the KB: or KT: directories with
+FTP, you should know something about the way the DEC-20 stores these files:
+
+. Native DEC-10 or DEC-20 programs are stored in 36-bit binary format, and
+  will be transferred correctly to other DEC-10 or -20 systems without doing
+  anything special.  They probably can't be transferred to other kinds of
+  systems.
+
+. "Foreign" 8-bit binary files are stored 4 8-bit bytes left justified within
+  the 36-bit word.  You can get these files from another DEC-10 or -20 without
+  doing anything special, but to get them from some other kind of system, you
+  have to give FTP the command "TYPE L 8" or "TENEX" first.
+
+If you are originating your FTP requests from a DEC-20 or TENEX system, no
+special precautions are necessary regarding file types or name conversion.
+If you are coming from another kind of system, you will probably find that the
+files you obtain are stored with names contrary to your system's naming
+conventions.  For instance, if you tell Unix FTP to "mget ck*.*", you may
+find the files stored in your directory with names like
+
+	PS:<KERMIT>CKAAAA.HLP.2
+
+when you really want stored with names like
+
+	ckaaaa.hlp
+
+A special program is available to Unix sites for doing the appropriate file
+name conversions, called xxu.c ("get ker:xxu.c").  The recommended procedure
+for FTP'ing files to a Unix system is to make a new directory for them, cd
+to it, then get the files, including ker:xxu.c, then build xxu.c (it should
+run under any version of Unix), then do "xxu *" to convert the names.  See
+the xxu.c source comments for details.
+
+
+* CCnet:
+
+CCnet is a DECnet network of cooperating universities.  Kermit files may be
+accessed using NFT to CU20B::KER:xxx, where xxx is the name of the file or
+file group you want to get.  Some sites (regarded as "secure") may specify
+/USER:ANONYMOUS, but most sites will have to supply a valid CU20B user ID and
+password.  If your system is on CCnet and you cannot get anonymous NFT access
+to CU20B, you'll have to ask your system manager to get the files for you.
+Read the Internet section above about device, directory, and wildcard
+conventions.
+
+
+* Mail:
+
+There is a network mailing list for Kermit information; it is available to
+users of BITNET and the Internet and most networks that are connected to them,
+inclusing CSnet, Usenet, Mailnet, CCnet, and others.  To get on the mailing
+list, send mail to
+
+	Info-Kermit-Request@CU20B
+
+CU20B is a mail host on both Internet and BITNET, and is reachable from
+CSnet, Mailnet, Usenet, the DEC Engineering network, and other networks via
+explicit host routing, e.g.
+
+	Info-Kermit-Request%CU20B.ARPA@CSnet-Relay  (CSnet)
+        Info-Kermit-Request%CU20B.ARPA@WISCVM       (BITnet)
+
+The domain-style address for CU20B is CU20B.COLUMBIA.EDU.
+
+If your system won't let you use long names or names with dashes in mail
+addresses, then just mail to KERMIT@CU20B (or %CU20B.whatever).
+
+* Dialup:
+
+Several dialup Kermit collections are available.
+
+1. Digital Equipment Corporation, Marlboro, MA.
+   Dial 617-467-7437 or -1120.  It's a DEC-20.
+   To login, type "LOGIN LCG.KERMIT KERMIT"
+   The Kermit files are in the area KERMIT:, e.g. KERMIT:AAAREAD.ME.
+   Just type "kermit" to run the Kermit program.
+
+2. The University of Toledo allows limited dialup access to its UOFT02
+   VAX/VMS system:
+
+        (419) 537-4411
+        Service class  VX785A
+        User: KERMIT
+        Password: KERMIT
+
+        Source and hex files are in KER:, binaries are in KERBIN:
+
+3. Oklahoma State University:
+
+UUCP and Kermit access to the complete Kermit distribution is available from
+the Department of Computing and Information Sciences, Oklahoma State 
+University, Stillwater, Oklahoma.  The procedures are somewhat complicated,
+and are described in a separate file, OKSTATE.TXT.

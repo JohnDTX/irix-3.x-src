@@ -1,0 +1,37 @@
+'\"macro stdmacro
+.TH DOGSCORE 1D
+.SH NAME
+dogscore \- displays the dogfight score board
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/dogscore 
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+The 
+.I dogscore 
+program displays the score board for the dogfight and then exits.
+.I Dogscore
+does not require graphics and therefore can be run on any terminal.  It
+reads the network for about half a second and then displays the score
+board for the dogfight game.
+.PP
+The score board is similar to the
+.IR dog (1D)
+score board.  It includes the name of the player, the type of plane he is
+flying, number of wins, number of losses, and total score (wins \- losses).
+A pilot scores a ``win'' when a projectile fired by his plane destroys another
+aircraft.  A pilot scores a ``loss'' when his aircraft is destroyed by a
+projectile or crashes.
+.SH AUTHOR
+.PP
+Gary Tarolli
+.SH BUGS
+.PP
+If a plane does not transmit an Ethernet dogfight packet during the
+half second that
+.I dogscore
+reads the network, then that plane's score will not be displayed.

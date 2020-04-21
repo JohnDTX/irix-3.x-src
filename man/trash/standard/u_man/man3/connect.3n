@@ -1,0 +1,24 @@
+.TH CONNECT 3N 
+.SH NAME
+connect \- initiate a connection on a socket
+.SH SYNOPSIS
+\f3#include <sys/socket.h>
+.sp
+connect(s, addr)
+.br
+int s;
+.br
+struct sockaddr *addr;\f1
+.SH DESCRIPTION
+\f2connect\f1 initiates a connection request to the entity at
+\f2addr\f1 using the underlying protocol of the socket \f2s\f1.
+When the connection is established, a zero value is returned.
+.PP
+If the socket is already connected, a value of \-1 is returned and
+errno is set to EISCONN.  Failure to connect frequently  
+results in ETIMEDOUT or EREFUSED errors.
+.SH SEE ALSO
+accept(3N), socket(3N), tcp(7P)
+.SH BUGS
+The socket's state is not restored properly if this call fails.
+The work-around is to \f2close\f1 the socket and then recreate it.

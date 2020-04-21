@@ -1,0 +1,31 @@
+.TH color 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I color 
+- set the color attribute
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "color(c) "
+.B "Colorindex c;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine color(c)"
+.B "integer*2 c"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure color(c: Colorindex);"
+.sp
+.SH DESCRIPTION
+.I Color
+sets the color.  It is used until another
+\f2color\f1 command changes it.  The current color is an index into
+a color map.  In onemap mode, the color can be in the range 0..4095.
+In multimap mode, it is used in conjunction with a color map number
+and should be between 0 and 255.  The color is also bounded 
+by the number of available planes.  If an illegal color is
+specified, it is replaced by the maximum legal color. 
+.SH "SEE ALSO"
+.I getcolor, RGBcolor, RGBwritemask, texture, writemask

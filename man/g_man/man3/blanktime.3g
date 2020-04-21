@@ -1,0 +1,54 @@
+.TH blanktime 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B blanktime
+\- sets the screen blanking timeout
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "blanktime(nframes) "
+.B "long nframes; "
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine blankt(nframes)"
+.B "integer*4 nframes"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure blanktime(nframes: longint);"
+.SH DESCRIPTION
+The screen blanks (turns black) after the system 
+receives no input for about 15 minutes.  This protects
+the color display.
+.B blanktime
+changes the amount of time the system waits before blanking the screen.
+It can also
+disable the screen blanking feature.
+.PP
+.I nframes
+specifies the screen blanking timeout in frame times based
+on the standard 60-Hz monitor.
+For software compatibility, the factor of 60 is used, regardless
+of the monitor type.
+When calculating the value of 
+\f2nframes\fP,
+simply multiply the desired blanking latency period (in seconds)
+by 60.  For example, when
+.I nframes
+is 1800, the blanking latency period is 5 minutes. 
+If there are 60 frames per second,
+.I nframes
+is 60 times
+the number of seconds that the system waits before 
+blanking the screen.
+When
+.I nframes
+is zero, screen blanking is disabled.
+.SH "SEE ALSO"
+blanktime(1G)
+.sp
+\f2Programming Guide\fP, Section 2.1, Initialization 

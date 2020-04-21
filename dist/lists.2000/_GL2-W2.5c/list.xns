@@ -1,0 +1,7 @@
+Versions/004-0394-021
+bin/xlogin+
+bin/xx+
+etc/rc.xns
+etc/xnsd+
+kernels/2000.xns
+usr/lib/libxns.a

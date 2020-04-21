@@ -1,0 +1,40 @@
+.TH UTMP 3X
+.SH NAME
+mkutmp \- make
+.I /etc/utmp
+entry
+.br
+rmutmp \- remove
+.I /etc/utmp
+entry
+.SH SYNOPSIS
+.nf
+.B "mkutmp(name, line, host)"
+.B "char *name, *line, *host;"
+.PP
+.B "rmutmp(slot)"
+.B "int slot;"
+.fi
+.SH DESCRIPTION
+.I mkutmp
+makes an entry in
+.I /etc/utmp
+for the login
+.B name
+on special file
+.B line
+from host
+.B host.
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xlogin(1C),
+xnsd(1M),
+xx(1C),
+xcmd(3X),
+xconnect(3X),
+xnsfile(3X),
+xnsioctl(2),
+xnslib(3X),
+xnswrite(3X)

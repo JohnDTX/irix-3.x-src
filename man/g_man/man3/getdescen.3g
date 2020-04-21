@@ -1,0 +1,40 @@
+.TH getdescender 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getdescender 
+\- returns the character characteristics
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getdescender();"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getdes()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getdescender(); longint;"
+.SH DESCRIPTION
+.B getdescender 
+returns the value of the descender of the character in the current
+font that has the longest descender.  The value returned
+is the number of pixels that the descender extends
+below the character's baseline.
+.PP
+Each character in a font is defined using a bitmap that is displayed
+relative to the current character position.  Vertical placement of
+each character is done using the current character position as the
+baseline or the line on the page.  The portion of a character that 
+extends below the baseline is called a descender.  The lowercase
+characters g and p typically have descenders.
+.SH SEE ALSO
+getfont, getheight, strwidth
+.sp
+.I Programming Guide,
+Section 5.3, Fonts
+.SH NOTE
+This routine is available only in immediate mode.

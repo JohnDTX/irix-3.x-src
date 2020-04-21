@@ -1,0 +1,12 @@
+.login
+.cshrc
+etc/bcheckrc
+etc/brc
+etc/hosts
+etc/hosts.equiv
+etc/ibtab
+etc/inittab
+etc/rc
+etc/rc.488
+etc/rc.fs
+etc/rc.tcp

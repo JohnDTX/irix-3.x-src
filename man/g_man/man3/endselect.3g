@@ -1,0 +1,56 @@
+.TH endselect 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B endselect
+\- turns off selecting mode 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long endselect(buffer)"
+.B "short buffer[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function endsel(buffer)"
+.B "integer*2 buffer(*)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function endselect(var buffer: Short): longint;"
+.SH DESCRIPTION
+.B endselect
+turns off selecting mode.
+The buffer stores any hits drawing 
+routines generate between 
+.B gselect
+and 
+\f3endselect\fP.
+Every hit that occurs causes the entire
+contents of the name stack to be recorded in the buffer, preceded by the 
+number of names in the stack.  
+Thus, if the name stack contains 5, 9, 17 when a hit occurs,
+the numbers 3, 5, 9, 17 are added to the buffer.  The magnitude of the
+value returned by 
+.B endselect
+is the number of such name lists in the buffer.
+If the value returned is positive, then all hits are recorded
+in the name lists;
+if it is negative,
+the buffer is not large enough to hold all the hits that occurred.
+.SH "SEE ALSO"
+clearhitcode, gethitcode, gselect, initnames, loadname
+.sp .5v
+.I Programming Guide,
+Section 9.3, Selecting
+.SH NOTE
+This routine is available only in immediate mode.
+.SH BUGS
+When using a debugger, do not stop the graphics between
+.B gselect
+and
+.B endselect
+because the graphics are frozen and the results cannot
+appear on the screen.

@@ -1,0 +1,159 @@
+Class	lpstat.c	?^Class(argc, argv)$?
+Maccept	accept.c	?^main(argc, argv)$?
+Mcancel	cancel.c	?^main(argc, argv)$?
+Mdisable	disable.c	?^main(argc, argv)$?
+Menable	enable.c	?^main(argc, argv)$?
+Mlp	lp.c	?^main(argc, argv)$?
+Mlpadmin	lpadmin.c	?^main(argc, argv)$?
+Mlpmove	lpmove.c	?^main(argc, argv)$?
+Mlpsched	lpsched.c	?^main(argc, argv)$?
+Mlpshut	lpshut.c	?^main(argc, argv)$?
+Mlpstat	lpstat.c	?^main(argc, argv)$?
+Mreject	reject.c	?^main(argc, argv)$?
+accept	lpstat.c	?^accept(argc, argv)$?
+addoent	outputq.c	?^addoent(o)$?
+addpent	pstatus.c	?^addpent(p)$?
+addqent	qstatus.c	?^addqent(q)$?
+addtoclass	lpadmin.c	?^addtoclass()$?
+all	lpstat.c	?^all()$?
+buildcmd	lpsched.c	?^buildcmd()$?
+cancel	cancel.c	?^cancel(dest, seqno)$?
+catch	accept.c	?^catch()$?
+chkopts	lpadmin.c	?^chkopts(argc, argv)$?
+chkreq	lpadmin.c	?^chkreq()$?
+cinit	lpsched.c	?^cinit()$?
+cleanfiles	lpsched.c	?^cleanfiles()$?
+cleanoutq	lpsched.c	?^cleanoutq()$?
+cleanup	accept.c	?^cleanup()$?
+closereq	lp.c	?^closereq()$?
+config	lpstat.c	?^config()$?
+copy	lpadmin.c	?^copy(name1, name2)$?
+copyfile	lp.c	?^copyfile(stream, name)$?
+date	date.c	?^date(t)$?
+def	lpstat.c	?^def()$?
+defaults	lp.c	?^defaults()$?
+deleteo	outlist.c	?^deleteo(o)$?
+device	lpstat.c	?^device(argc, argv)$?
+disable	disable.c	?^disable(pr, reason, cancel)$?
+dolist	lpstat.c	?^dolist(list, func)$?
+dump	dest.c	?^dump()$?
+eaccess	eaccess.c	?^eaccess(name, mode)$?
+endoent	outputq.c	?^endoent()$?
+endpent	pstatus.c	?^endpent()$?
+endqent	qstatus.c	?^endqent()$?
+enqueue	fifo.c	?^enqueue(cmd, args)$?
+enter	enter.c	?^enter(name, array, size, max)$?
+fatal	fatal.c	?^fatal(msg, code)$?
+files	lp.c	?^files(argc, argv)$?
+findprinter	lpsched.c	?^findprinter(d)$?
+findtty	findtty.c	?^findtty(user)$?
+fromclass	lpadmin.c	?^fromclass()$?
+fullpath	fullpath.c	?^fullpath(name, curdir)$?
+getcl	dest.c	?^getcl(name)$?
+getd	dest.c	?^getd(name)$?
+getdflt	lpadmin.c	?^getdflt()$?
+getline	lpadmin.c	?^getline(str, max, file)$?
+getname	getname.c	?^getname(name)$?
+geto	outlist.c	?^geto(d, seqno)$?
+getodest	outputq.c	?^getodest(o, dest)$?
+getoent	outputq.c	?^getoent(o)$?
+getoid	outputq.c	?^getoid(o, dest, seqno)$?
+getp	dest.c	?^getp(name)$?
+getpdest	pstatus.c	?^getpdest(p, dest)$?
+getpent	pstatus.c	?^getpent(p)$?
+getqdest	qstatus.c	?^getqdest(q, dest)$?
+getqent	qstatus.c	?^getqent(q)$?
+getrent	request.c	?^getrent(request, text, file)$?
+getseq	lp.c	?^getseq(snum)$?
+gwd	gwd.c	?^gwd(wkdir)$?
+insert	dest.c	?^insert(list, item)$?
+insertl	destlist.c	?^insertl(d1, d2)$?
+inserto	outlist.c	?^inserto(d, seqno, name)$?
+isclass	isclass.c	?^isclass(name)$?
+isdest	isdest.c	?^isdest(name)$?
+ismodel	lpadmin.c	?^ismodel(name)$?
+isnumber	sendmail.c	?^isnumber(s)$?
+isprinter	isprinter.c	?^isprinter(name)$?
+isrequest	isrequest.c	?^isrequest(s, dest, seqno)$?
+killchild	lpsched.c	?^killchild()$?
+killit	cancel.c	?^killit(p)$?
+legaldest	lpadmin.c	?^legaldest(d)$?
+lock	lock.c	?^lock(file, atime)$?
+ltouch	lock.c	?^ltouch(name)$?
+mail	disable.c	?^mail(logname, dest, seqno)$?
+makebusy	lpsched.c	?^makebusy(p)$?
+memberfile	lpadmin.c	?^memberfile()$?
+mkrequest	lpadmin.c	?^mkrequest(name)$?
+moveall	lpmove.c	?^moveall(d1, d2)$?
+movit	lpmove.c	?^movit(dest, seqno, newdest)$?
+newdest	dest.c	?^newdest(name)$?
+newdev	lpsched.c	?^newdev(p, d)$?
+newdflt	lpadmin.c	?^newdflt(name)$?
+newdl	destlist.c	?^newdl()$?
+newinter	lpadmin.c	?^newinter()$?
+newmem	dest.c	?^newmem(c, p)$?
+newmode	lpadmin.c	?^newmode()$?
+newname	lp.c	?^newname()$?
+newol	outlist.c	?^newol()$?
+newprinter	lpadmin.c	?^newprinter()$?
+newq	lpadmin.c	?^newq(name)$?
+nextreq	lpsched.c	?^nextreq(p)$?
+onelock	lock.c	?^onelock(pid, tempfile, name)$?
+opendev	lpsched.c	?^opendev()$?
+openfifo	lpsched.c	?^openfifo()$?
+openreq	lp.c	?^openreq()$?
+options	lp.c	?^options(argc, argv)$?
+output	lpstat.c	?^output(argc, argv)$?
+pinit	lpsched.c	?^pinit()$?
+postprint	lpsched.c	?^postprint(status)$?
+preprint	lpsched.c	?^preprint()$?
+printer	lpadmin.c	?^printer()$?
+psetup	lpsched.c	?^psetup()$?
+putcline	lpstat.c	?^putcline(c)$?
+putdline	lpstat.c	?^putdline(p)$?
+putoent	outputq.c	?^putoent(o)$?
+putoline	lpstat.c	?^putoline(o)$?
+putpent	pstatus.c	?^putpent(p)$?
+putpline	lpstat.c	?^putpline(p)$?
+putqent	qstatus.c	?^putqent(q)$?
+putqline	lpstat.c	?^putqline(q)$?
+putrent	request.c	?^putrent(request, text, file)$?
+qmesg	lp.c	?^qmesg()$?
+reject	lpmove.c	?^reject(d1, d2)$?
+reset	cancel.c	?^reset()$?
+resetstatus	lpsched.c	?^resetstatus(oflag, pflag)$?
+restart	cancel.c	?^restart(printer)$?
+rmclass	lpadmin.c	?^rmclass()$?
+rmdest	lpadmin.c	?^rmdest()$?
+rmpent	lpadmin.c	?^rmpent(name)$?
+rmprinter	lpadmin.c	?^rmprinter()$?
+rmqent	lpadmin.c	?^rmqent(name)$?
+rmreq	request.c	?^rmreq(dest, seqno)$?
+rmreqdir	lpadmin.c	?^rmreqdir(name)$?
+running	lpstat.c	?^running()$?
+saveint	cancel.c	?^saveint()$?
+savestd	lp.c	?^savestd()$?
+schedule	lpsched.c	?^schedule()$?
+sendmail	sendmail.c	?^sendmail(user, msg)$?
+setoent	outputq.c	?^setoent()$?
+setpent	pstatus.c	?^setpent()$?
+setqent	qstatus.c	?^setqent()$?
+setsigs	cancel.c	?^setsigs()$?
+setstatus	lpsched.c	?^setstatus()$?
+sig14	fifo.c	?^sig14()$?
+sig15	lpsched.c	?^sig15()$?
+sigalrm	wrtmsg.c	?^sigalrm()$?
+startup	accept.c	?^startup(name)$?
+summary	lpadmin.c	?^summary()$?
+trim	trim.c	?^trim(s)$?
+trylock	lock.c	?^trylock(file, atime, tries, stime)$?
+tunlock	lock.c	?^tunlock()$?
+unlock	lock.c	?^unlock(name)$?
+usage	lpadmin.c	?^usage()$?
+user	lpstat.c	?^user(argc, argv)$?
+waitfor	lpsched.c	?^waitfor(p)$?
+wrtmail	lpsched.c	?^wrtmail(user, msg)$?
+wrtmsg	wrtmsg.c	?^wrtmsg(user, msg)$?
+wrtoent	outputq.c	?^wrtoent(o, stream)$?
+wrtpent	pstatus.c	?^wrtpent(p, stream)$?
+wrtqent	qstatus.c	?^wrtqent(q, stream)$?

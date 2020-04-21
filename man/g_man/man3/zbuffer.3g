@@ -1,0 +1,67 @@
+.TH zbuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B zbuffer
+\- starts or ends z-buffer mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "zbuffer(bool)"
+.B "Boolean bool;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine zbuffe(bool)"
+.B "logical bool"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure zbuffer(bool: Boolean);"
+.SH DESCRIPTION
+.B zbuffer
+starts 
+.I bool 
+= TRUE
+or ends 
+.I bool 
+= FALSE
+z-buffer mode.
+In z-buffer mode, each pixel has an associated z value.
+To draw a pixel, the system compares the new z value
+with the z value already associated with it.
+If the new z value is 
+less than or equal to the existing value (i.e., closer
+to the viewer), then a new color and z value are stored
+in the bitplanes; otherwise, the
+color and z value for the pixel are left unchanged.
+.PP
+All obscured surfaces in objects drawn in this
+mode are not displayed.
+z values range from 0xC000 to 0x3FFF on a 32-bitplane system,
+and 0x0 to 0xFFF on a 28-bitplane system.
+.B setdepth
+sets this range.
+.PP
+z-buffering does not work for lines greater than 1.
+.PP
+z-buffering is not effective on systems with less than 28 bitplanes.
+Because memory bandwidth is reduced on 60Hz monitors,
+you can improve performance by using
+.B blankscreen
+to blank the screen during z-buffer drawing.
+
+.ne 20 
+.SH "SEE ALSO"
+blankscreen,
+getzbuffer,
+setdepth,
+zclear
+.sp
+.I Programming Guide,
+Section 12.1, Z-Buffer Mode
+.SH "BUGS"
+A bug exists in the line and point code.  Lines and points are not
+drawn if the z values are exactly the same as the existing value.

@@ -1,0 +1,12 @@
+########################################################################
+# devices common to 3000's
+
+# Adaptec M 1530 SCSI adapter
+#device		ad0	at mb0 csr 0x7080	priority 5 vector adintr
+
+# Central Data 8-channel Serial I/O
+device		cd0	at mb0 csr 0x7070	priority 5 vector cdintr
+device		cd1	at mb0 csr 0x7071	priority 5 vector cdintr
+device		cd2	at mb0 csr 0x7072	priority 5 vector cdintr
+device		cd3	at mb0 csr 0x7073	priority 5 vector cdintr
+

@@ -1,0 +1,44 @@
+'\"macro stdmacro
+.TH TOUCH 1
+.SH NAME
+touch \- update access and modification times of a file
+.SH SYNOPSIS
+.B touch
+[
+.B \-amc
+] [ mmddhhmm\|[yy] ] files
+.SH DESCRIPTION
+.I Touch\^
+causes the access and modification times of each
+argument to be updated.
+If no time is specified (see
+.IR date\^ (1))
+the current time is used.
+The
+.B \-a
+and
+.B \-m
+options cause touch to update only the access or modification
+times respectively (default is
+.BR \-am ).
+The
+.B \-c
+option silently prevents
+.I touch\^
+from creating the file if it did not
+previously exist.
+.PP
+The return code from
+.I touch\^
+is the number of files for which the times could not
+be successfully modified
+(including files that did not exist and were not created).
+.SH EXAMPLE
+.IP
+touch filea fileb
+.PP
+sets the "date last modified" of the two files
+to the current date.
+.SH SEE ALSO
+date(1), utime(2).
+.\"	@(#)touch.1	5.1 of 11/10/83

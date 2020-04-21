@@ -1,0 +1,44 @@
+.TH linewidth 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B linewidth
+\- specifies the linewidth
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "linewidth(n) "
+.B "short n;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine linewi(n)"
+.B "integer*4 n"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure linewidth(n: longint);"
+.SH DESCRIPTION
+.B linewidth
+specifies the width of a line.  
+The width is the number of pixels in the \f2y\fP direction
+if the line is less than 45 degrees and in the \f2x\fP direction
+if it is greater than 45 degrees.
+A wide line is centered
+(as far as possible)
+around the true line.
+If
+.B linewidth
+is set to 
+.I n
+\(!=1,
+.B resetls
+must be 
+TRUE. 
+.SH "SEE ALSO"
+lsbackup, resetls, setlinestyle
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles

@@ -1,0 +1,62 @@
+'\"macro stdmacro
+.TH CXREF 1
+.SH NAME
+cxref \- generate C program cross reference
+.SH SYNOPSIS
+.B cxref
+\&[ options ]
+files
+.SH DESCRIPTION
+.I Cxref\^
+analyzes a collection of C files
+and attempts to build a cross reference table.
+.I Cxref\^
+utilizes a special version of
+.I cpp\^
+to include
+.BR #define 'd
+information in its symbol table.
+It produces a listing on standard output of all symbols (auto, static,
+and global) in each file separately, or with the
+.B \-c
+option, in combination.
+Each symbol 
+contains an asterisk (\(**) before the declaring reference.
+.PP
+In addition to the
+.BR \-D \*S,
+.B \-I
+and
+.B \-U
+options (which are identical to their interpretation by
+.IR cc\^ (1)),
+the following \f2options\fP are interpreted by
+.IR cxref\^ :
+.TP "\w'\f3\-o \f2file\f1\ \ 'u"
+.B \-c
+Print a combined cross-reference of all input files.
+.TP
+.BI \-w num
+Width option which formats output no wider than 
+.I num (decimal) columns.
+This option will default to 80 if 
+.I num is not specified or is less than 51.
+.TP
+.BI \-o " file"
+Direct output to named \f2file\fP.
+.TP
+.B \-s
+Operate silently; does not print input file names.
+.TP
+.BR \-t
+Format listing for 80-column width.
+.SH FILES
+.TP \w'/usr/lib/xcpp\ \ \ \ 'u
+/usr/lib/xcpp
+special version of C-preprocessor.
+.SH SEE ALSO
+cc(1).
+.SH DIAGNOSTICS
+Error messages are unusually cryptic, but usually mean
+that you can't compile these files, anyway.
+.\"	@(#)cxref.1	5.1 of 10/27/83

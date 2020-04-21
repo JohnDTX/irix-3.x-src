@@ -1,0 +1,63 @@
+'\"macro stdmacro
+'\" ct
+.if n .tr%\&
+.CD -l% -r%
+.de CW
+.PP
+.RS
+.nf
+.ps -1
+.vs -1p
+.ta 16m/3u 32m/3u 48m/3u 64m/3u 80m/3u 96m/3u 112m/3u
+..
+.de CN
+.DT
+.vs
+.ps
+.fi
+.RE
+.PP
+..
+.TH CHECKCW 1
+.SH NAME
+checkcw \- verifies constant-width text prepared by \f2cw\fP(1) for troff
+.SH SYNOPSIS
+.B checkcw
+[
+.BR -l xx
+] [
+.BR -r xx
+] files
+.SH DESCRIPTION
+.I Checkcw\^
+checks that left and right delimiters, as well as the %.CW%\|/%.CN% pairs, 
+used by
+.IR cw (1)
+to prepare constant-width text for troff, are properly balanced.
+It prints out all offending lines.
+.PP
+The options are:
+.TP
+.BI -l xx\^
+The one- or two-character string
+.I xx\^
+becomes the left delimiter;
+if
+.I xx\^
+is omitted,
+the left delimiter becomes undefined,
+which it is initially.
+.TP
+.BI -r xx\^
+Same for the right delimiter.
+The left and right delimiters may (but need not) be different.
+.SH EXAMPLE
+.IP
+checkcw file
+.PP
+expects the file named "file" to be written in 
+.IR troff (1)
+format.  A list of all unbalanced left and right delimiters
+and .CW/.CN pairs is output.
+.SH SEE ALSO
+cw(1).

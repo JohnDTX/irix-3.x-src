@@ -1,0 +1,58 @@
+2/4   cc not recognized as condition contol reg (only ccr recognized) -
+	    	fixed and installed 2/4
+
+2/6   .globl only recognized first symbol in list.  
+		fixed and installed 2/6
+
+2/12  as20 screwed up the data addresses if it had to split a zeroed 
+		block on write.  Fixed and installed 2/12
+
+3/13  in piped mode, with something else going on, as20 gets screwed up
+		when trying to parse a stabs directive with a very long
+		string.  It seems to get confused when the block ends
+		suddenly.  (newc/error.c)
+
+5/3   in piped mode, when a stab string spans more than one end-of-block, 
+		problems occur.  Only one end-of-block was allowed before
+		an error was reported.  Scan.c was changed to allow a
+		line to take up the entire (0x2000 chars) input buffer
+		before dying.
+
+5/8   the following program causes problems:
+		main:
+			movl	#10$,d0
+		foo:
+		10$:	movl	#1,d1
+
+	It is an error, as 10$ is not visible from line 2, but the
+	assembler attempts to relocate it anyway, and gets the relocation
+	info screwed up.  OUTSTANDING.
+
+5/25  several problems found while documenting as20:
+		did not allow relocatables as the single undefined in
+		the expression of absolutes.  Fixed (about 2 hrs.) to
+		do this and to allow dot.
+
+		allowed relocatables but did NOT put out the relocation
+		information for them.  OUTSTANDING.
+
+		did not allow negate as the first symbol in the expression
+		of direct assignments. OUTSTANDING.
+
+		if condensation was necessary on the data segment, everything
+		got screwed up.  FIXED.
+
+		wouldn't work with multiple files, as scan() wasn't getting
+		re-initialized correctly.  FIXED.
+
+		.ascii was putting data into the code array, limiting it
+		to about 30 bytes.  FIXED.
+
+		jsr is never changed to the short form.  OUTSTANDING.
+
+******** 1987 *************
+
+5/15  memory-addressible single-bit rotates had size spec of long,
+	when word was needed.  Added word versions.  Introduced
+	x_umsg stuff to warn about outdated instruction mneumonics.
+	Altered: BUGLIST Makefile addrmodes.h instparse.c template.tab

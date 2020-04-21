@@ -1,0 +1,37 @@
+.TH winposition 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winposition
+\- changes the size and position of the current graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winposition(x1, x2, y1, y2)"
+.B "long x1, x2, y1, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winpos(x1, x2, y1, y2)"
+.B "integer*4 x1, x2, y1, y2;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winposition(x1, x2, y1, y2: Short);"
+.SH DESCRIPTION
+.B winposition
+moves and reshapes the current graphics window to match the screen coordinates
+.I "x1, x2, y1, y2."
+This differs from
+.B prefposition
+because the reshaped window is not fixed in size and shape, and can be
+reshaped interactively under the window manager. 
+.SH "SEE ALSO"
+prefposition, prefsize, winmove
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode under the window manager. 
+

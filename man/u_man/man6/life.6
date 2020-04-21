@@ -1,0 +1,188 @@
+'\"macro stdmacro
+.TH LIFE 6 
+.SH NAME
+life \- play the game of life
+.SH SYNOPSIS
+.B life
+[-r]
+.SH DESCRIPTION
+.B Life
+is a pattern generating game
+set up for interactive use
+on a video terminal.
+The way it operates is:
+You use a series of commands
+to set up a pattern
+on the screen
+then let it generate further patterns from that pattern.
+.PP
+The algorithm used is:
+For each square in the matrix,
+look at it and its eight adjacent neighbors.
+If the present square is not occupied
+and exactly three of its neighbor squares are occupied,
+then that square will be occupied
+in the next pattern.
+If the present square is occupied
+and two or three of its neighbor squares are occupied,
+then that square will be occupied
+in the next pattern.
+Otherwise, the present square
+will not be occupied
+in the next pattern.
+.PP
+The edges of the screen
+are normally treated
+as an unoccupied void.
+If you specify the
+.I \-r
+option
+on the command line,
+the screen is treated as a sphere;
+that is,
+the top and bottom lines are considered adjacent
+and the left and right columns are considered adjacent.
+.PP
+The pattern generation number
+and the number of occupied squares
+are displayed in the lower left hand corner.
+.PP
+Below is a list of commands available to the user.
+A # stands for any number.
+A ^ followed by a capital letter represents a control character.
+.TP 10
+.B #,#a
+Add a block of elements.
+The first number specifies the horizontal width.
+The second number specifies the vertical width.
+If a number is not specified, the default is 1.
+.TP 10
+.B #c
+Step through the next # patterns.
+If no number is specified,
+step forever.
+The operation can be aborted by
+typing rubout (delete).
+.TP 10
+.B #,#d
+Delete a block of elements.
+The first number specifies the horizontal width.
+The second number specifies the vertical width.
+If a number is not specified, the default is 1.
+.TP 10
+.B #f
+Generate a little flier at the present location.
+The number (modulo 8) determines the direction.
+.TP 10
+.B #,#g
+Move to absolute screen location.
+The first number specifies the horizontal location.
+The second number specifies the vertical location.
+If a number is not specified, the default is 0.
+.TP 10
+.B #h
+Move left # steps.
+If no number is specified,
+the default is 1.
+.TP 10
+.B #j
+Move down # steps.
+The default is 1.
+.TP 10
+.B #k
+Move up # steps.
+The default is 1.
+.TP 10
+.B #l
+Move right # steps.
+The default is 1.
+.TP 10
+.B #n
+Step through the next # patterns.
+If no number is specified,
+generate the next pattern.
+The operation can be aborted by
+typing rubout (delete).
+.TP 10
+.B p
+Put the last yanked or deleted block
+at the present location.
+.TP 10
+.B q
+Quit.
+.TP 10
+.B #,#y
+Yank a block of elements.
+The first number specifies the horizontal width.
+The second number specifies the vertical width.
+If a number is not specified, the default is 1.
+.TP 10
+.B C
+Clear the pattern.
+.TP 10
+.B #F
+Generate a big flier at the present location.
+The number (modulo 8) determines the direction.
+.TP 10
+.B #H
+Move to the left margin.
+.TP 10
+.B #J
+Move to the bottom margin.
+.TP 10
+.B #K
+Move to the top margin.
+.TP 10
+.B #L
+Move to the right margin.
+.TP 10
+.B #^H
+Move left # steps.
+If no number is specified,
+the default is 1.
+.TP 10
+.B #^J
+Move down # steps.
+The default is 1.
+.TP 10
+.B #^K
+Move up # steps.
+The default is 1.
+.TP 10
+.B #^L
+Move right # steps.
+The default is 1.
+.TP 10
+.B ^R
+Redraw the screen.
+This is used for those occasions when
+the terminal screws up.
+.TP 10
+.B .
+Repeat the last add (a) or delete (d) operation.
+.TP 10
+.B ;
+Repeat the last move (h, j, k, l) operation.
+.SH BUGS
+The following features are planned but not implemented:
+.TP 10
+.B #,#S
+Save the selected area in a file.
+.TP 10
+.B R
+Restore from a file.
+.TP 10
+.B m
+Generate a macro command.
+.TP 10
+.B !
+Shell escape.
+.TP 10
+.B e
+Edit a file.
+.TP 10
+.B i
+Input commands from a file.
+.SH AUTHOR
+Asa Romberger
+.\"	@(#)life.6	5.1 of 10/18/83

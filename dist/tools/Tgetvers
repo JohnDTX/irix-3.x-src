@@ -1,0 +1,5 @@
+#! /bin/sh
+
+versions=../lists/Tversions
+
+awk "/^$1/ {print \"Versions/\" \$2}" $versions

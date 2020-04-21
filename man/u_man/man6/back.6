@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH BACK 6
+.SH NAME
+back \- the game of backgammon
+.SH SYNOPSIS
+.B /usr/games/back
+.SH DESCRIPTION
+.I Back\^
+is a program which provides a partner
+for the game
+of backgammon.
+It is designed to play at three different
+levels of skill, one of which you must select.
+In addition to selecting the opponent's level,
+you may also indicate that you would like to roll your
+own dice during your turns (for the superstitious players).
+You will also be given the opportunity to move first.
+The practice of each player rolling one die for the first
+move is not incorporated.
+.PP
+The points are numbered 1\-24, with 1 being white's
+extreme inner table, 24 being brown's inner table,
+0 being the bar for removed white pieces and 25 the bar
+for brown.
+For details on how moves are expressed, type
+.B y
+when
+.I back\^
+asks ``Instructions?''
+at the beginning of the game.
+When
+.I back\^
+first asks ``Move?'', type
+.B ?
+to see a list of move options other than
+entering your numerical move.
+.PP
+When the game is finished,
+.I back\^
+will ask you if you want the log.
+If you respond with
+.BR y ,
+.I back\^
+will attempt to append to or create a file
+.B back.log
+in the current directory.
+.SH FILES
+.ta \w'/usr/games/lib/backrules \ \ \ 'u
+/usr/games/lib/backrules	rules file
+.br
+/tmp/b\(**	log temp file
+.br
+back.log	log file
+.SH BUGS
+The only level really worth playing is
+``expert'', and it only plays the forward game.
+.PP
+.I Back\^
+will complain loudly if you attempt
+to make too
+.I many\^
+moves in a turn,
+but will become very silent if you
+make too
+.IR few .
+.PP
+Doubling is not implemented.
+.\"	@(#)back.6	5.1 of 10/18/83

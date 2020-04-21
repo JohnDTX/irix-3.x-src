@@ -1,0 +1,62 @@
+'\"macro stdmacro
+.TH CHDIR 2 
+.SH NAME
+chdir \- change working directory
+.SH SYNOPSIS
+.B int chdir (path)
+.br
+.B char \(**path;
+.PP
+.SH DESCRIPTION
+.I Path\^
+points to the
+path name
+of a directory.
+.I Chdir\^
+causes the named directory to become the current working directory,
+the starting point for path searches for
+path names
+not beginning with
+.BR / .
+.PP
+.I Chdir\^
+will fail and the current working directory will be unchanged if
+one or more of the following are true:
+.IP "" .3i
+A component of the
+path name
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+The named directory does not exist.
+.SM
+\%[ENOENT]
+.IP
+Search permission is denied for any component of the
+path name.
+.SM
+\%[EACCES]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+chroot(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#12,D0
+.B movl	path,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)chdir.2	5.1 of 10/19/83

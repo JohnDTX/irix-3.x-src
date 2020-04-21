@@ -1,0 +1,34 @@
+'\"macro stdmacro
+.TH ISET 1W
+.SH NAME
+iset \- change the type field of an image file
+.SH SYNOPSIS
+.B iset 
+newtype imagefiles
+.SH DESCRIPTION
+.I iset
+sets the type field in
+an image file.
+Programs like
+.I ipaste
+use the type field to display the image using the correct part of the
+default color map.
+.I newtype
+may be 
+.I normal,
+.I dithered,
+or
+.I screen.
+.I normal
+means the image is displayed in black and white;
+.I dithered
+means it is displayed using the colors in the dithered color map;
+.I screen
+means the image file represents screen pixels.
+In the last case, 
+.I ipaste
+does no translation.
+See
+\f2/usr/people/gifts/mextools/images\f1 for example image files.
+.SH SEE ALSO
+ipaste(1W)

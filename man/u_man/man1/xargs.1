@@ -1,0 +1,248 @@
+'\"macro stdmacro
+.TH XARGS 1
+.SH NAME
+xargs \- construct argument list(s) and execute command 
+.SH SYNOPSIS
+.B xargs
+[\|flags\|] [ command [\|initial-arguments\|] ]
+.SH DESCRIPTION
+.I Xargs\^
+combines the fixed
+.I initial-arguments\^
+with arguments read from standard input to execute the specified
+.I command\^
+one or more times.
+The number of arguments read for each
+.I command\^
+invocation
+and the manner in which they are combined
+are determined by the flags specified.
+.PP
+.IR Command ,
+which may be a shell file,
+is searched for, using one's \f3\s-1$PATH\s+1\fP.
+If
+.I command\^
+is omitted,
+.B /bin/echo
+is used.
+.PP
+Arguments read in from standard input are defined to be contiguous
+strings of characters delimited by one or more blanks, tabs, or new-lines;
+empty lines are always discarded.
+Blanks and tabs may be embedded as part of an argument if escaped or quoted:
+Characters enclosed in quotes (single or double) are taken literally,
+and the delimiting quotes are removed.
+Outside of quoted strings a backslash
+.RB (\| \e \|)
+will escape the next character.
+.PP
+Each argument list is constructed starting with the
+.IR initial-arguments ,
+followed by some number of
+arguments read from standard input
+(Exception: see
+.B \-i
+flag).
+Flags
+.BR \-i ,
+.BR \-l ,
+and
+.BR \-n
+determine how arguments are selected for each command invocation.
+When none of these flags are coded,
+the
+.I initial-arguments\^
+are followed by arguments read continuously 
+from standard input until an internal buffer is full,
+and then
+.I command\^
+is executed with the accumulated args.
+This process is repeated
+until there are no more args.
+When there are flag conflicts (e.g.,
+.B \-l
+vs.
+.BR \-n "),"
+the last flag has precedence.
+.I Flag\^
+values are:
+.TP "\w'\f3\-n\f2number\f1\ \ \ \ 'u"
+.BI \-l number\^
+.I Command\^
+is executed for each non-empty
+.I number\^
+lines of arguments from standard input.
+The last invocation of
+.I command\^
+will be with fewer lines of arguments if fewer than
+.I number\^
+remain.
+A line is considered to end with the first new-line
+.I unless\^
+the last character of the line is a blank or a tab;
+a trailing blank/tab signals continuation through the next non-empty line.
+If
+.I number\^
+is omitted, 1 is assumed.
+Option
+.B \-x
+is forced.
+.TP
+.BI \-i replstr\^
+Insert mode:
+.I command\^
+is executed for each line from standard input,
+taking the entire line as a single arg, inserting it in
+.I initial-arguments\^
+for each occurrence of
+.IR replstr .
+A maximum of 5 arguments in
+.I initial-arguments\^
+may each contain one or more instances of
+.IR replstr .
+Blanks and tabs at the beginning of each line are thrown away.
+Constructed arguments may not grow larger than 255 characters, and option
+.B \-x
+is also forced.
+.B "{\^}"
+is assumed for
+.I replstr\^
+if not specified.
+.TP
+.BI \-n number\^
+Execute
+.I command\^
+using as many standard input arguments as possible, up to
+.I number\^
+arguments maximum.
+Fewer arguments will be used if their total size is greater than
+.I size\^
+characters, and for the last invocation if there are fewer than
+.I number\^
+arguments remaining.
+If option
+.B \-x
+is also coded, each
+.I number\^
+arguments must fit in the
+.I size\^
+limitation, else
+.I xargs\^
+terminates execution.
+.TP
+.B \-t
+Trace mode: The
+.I command\^
+and each constructed argument list are echoed to file descriptor 2
+just prior to their execution.
+.TP
+.B \-p
+Prompt mode: The user is asked whether to execute
+.I command\^
+each invocation. Trace mode
+.RB ( \-t )
+is turned on to print the command instance to be executed,
+followed by a \f3?.\|.\|.\fP prompt.
+A reply of
+.B y
+(optionally followed by anything) 
+will execute the command; anything else, including
+just a carriage return, skips that particular invocation of
+.IR command .
+.TP
+.B \-x
+Causes
+.I xargs\^
+to terminate if any argument list would be greater than
+.I size\^
+characters;
+.B \-x
+is forced by the options
+.B \-i
+and
+.BR \-l .
+When neither of the options
+.BR \-i ,
+.BR \-l ,
+or
+.B \-n
+are coded, the total length of all arguments must be within the
+.I size\^
+limit.
+.TP
+.BI \-s size\^
+The maximum total size of each argument list is set to
+.I size\^
+characters;
+.I size\^
+must be a positive integer less than or equal to 470. If
+.B \-s
+is not coded, 470 is taken as the default.
+Note that the character count for
+.I size\^
+includes one extra character for each argument
+and the count of characters in the command name.
+.TP
+.BI \-e eofstr
+.I Eofstr\^
+is taken as the logical end-of-file string.
+Underbar (\|_\|) is assumed for
+the logical \f3\s-1EOF\s+1\fP string
+if \f3\-e\fP is not coded.
+\f3\-e\fP with no
+.I eofstr\^
+coded turns off the logical \f3\s-1EOF\s+1\fP string capability
+(underbar is taken literally).
+.I Xargs\^
+reads standard input until either end-of-file or the 
+logical \f3\s-1EOF\s+1\fP string is encountered.
+.PP
+.I Xargs\^
+will terminate if either it receives a return code of
+.B \-1
+from,
+or if it cannot execute,
+.IR command .
+When
+.I command\^
+is a shell program,
+it should explicitly
+.I exit\^
+(see
+.IR sh\^ (1))
+with an appropriate value to avoid accidentally returning with
+.BR \-1 .
+.SH EXAMPLE
+.IP "" 5
+ls \|$1 \|| \|xargs \|\-i \|\-t \|mv \|$1/{\|} \|$2/{\|}
+.PP
+will move all files from directory 
+.B $1 
+to directory 
+.BR $2 ,
+and echo each move command just before doing it.
+.IP
+(logname; \|date; \|echo \|$0 \|$\(**) \|| \|xargs \|>>log
+.PP
+will combine the output of the parenthesized commands onto one line,
+which is then echoed to the end of file "log".
+.IP
+ls \|| \|xargs \|\-p \|\-l \|ar \|r \|arch
+.br
+ls \|| \|xargs \|\-p \|\-l \|| \|xargs \|ar \|r \|arch
+.PP
+causes the user to be asked which files in the current directory
+are to be archived and archives them into "arch" one at a time
+in the first instance, or 
+as in the second instance, many at a time.
+.IP
+echo \|$\(** \|| \|xargs \|\-n2 \|diff
+.PP
+will execute
+.IR diff\^ (1)
+with successive
+pairs of arguments originally typed as shell arguments.
+.SH DIAGNOSTICS
+Self explanatory.
+.\"	@(#)xargs.1	5.1 of 11/15/83

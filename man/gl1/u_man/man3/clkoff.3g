@@ -1,0 +1,19 @@
+.TH clkoff 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2clkoff\fP - turn off the keyboard click
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clkoff()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clkoff"
+.sp
+.SH DESCRIPTION
+\f2Clkoff\fP turns off the keyboard click.
+.SH "SEE ALSO"
+.I clkon, lampoff, lampon, ringbell, setbell
+.SH NOTE
+This command can only be used in immediate mode.

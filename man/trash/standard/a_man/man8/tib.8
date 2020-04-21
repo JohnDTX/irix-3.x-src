@@ -1,0 +1,58 @@
+.TH TIB 8
+.SH NAME
+tib \- trace ib driver printouts
+.SH SYNOPSIS
+tib [ -l ] [ -n unix ]
+.SH DESCRIPTION
+.I Tib
+is an aid for debugging the ib driver
+(see
+.IR ib (4)).
+It
+prints out trace information from the ib driver,
+essentially a history of print statements.
+Only the
+300
+most recent print statements
+are available.
+The -l flag shows each printed item on a separate line.
+The -n flag uses a different kernel namelist
+(default is
+.IR /nunix ).
+.PP
+Printouts and/or tracing are enabled/disabled by patchable
+kernel variables.
+_ib_debug,
+_ib_dbg_debug,
+and
+_ib_tlc_debug,
+should be patched to non-0 values if debugging is desired.
+_ib_print_debug
+should be patched to non-0 for debugging printouts to the console.
+_ib_trc_debug
+should be patched to non-0 for debugging printouts to the
+trace buffer used by
+.IR tib .
+All should be patched to 0 for maximum throughput.
+.PP
+Good luck.
+.SH EXAMPLE
+.nf
+	#! /bin/csh
+	# script to turn off console printouts from ib driver
+	adb -w /nunix /dev/kmem << 'EOF'
+	_ib_print_debug/W 0
+	$q
+	'EOF'
+.br
+.fi
+.SH FILES
+/dev/kmem
+.br
+/nunix
+.SH "SEE ALSO"
+cib(8), dib(8), ib(4), iib(1).
+.SH BUGS
+Phase errors are possible.
+The driver's throughput is reduced by ~40-50%
+when debugging is enabled.

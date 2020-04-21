@@ -1,0 +1,103 @@
+'\"macro stdmacro
+.TH CTAGS 1
+.SH NAME
+ctags \- maintain a tags file for a C program
+.SH SYNOPSIS
+.B ctags
+[ 
+.B \-a
+] [
+.B \-u
+] [
+.B \-w
+] [
+.B \-x
+]
+name ...
+.SH DESCRIPTION
+.I Ctags\^
+makes a tags file for
+.IR ex\^ (1)
+and
+.IR vi\^ (1)
+from the specified C, Fortran, and Pascal sources.
+.PP
+A tags file gives the locations of specified objects (in this case
+functions) in a group of files.
+Each line of the tags file contains the function name,
+the file in which it is defined, and a scanning pattern used to find
+the function definition.  These are given in separate fields on the line,
+separated by blanks or tabs.
+Using the
+.I tags\^
+file,
+.I ex\^
+can quickly find these function definitions.
+.SS Options
+.PP
+The
+.B \-a
+option causes the output to be appended to the tags file
+instead of rewriting it.
+.PP
+The
+.B \-u
+option causes the specified files to be
+.I updated\^
+in tags, that is, all references to them are deleted,
+and the new values are appended to the file.
+This option implies the
+.B \-a
+option.
+(Beware:  this option is implemented in a way which is rather slow;
+it is usually faster to simply rebuild the
+.I tags\^
+file.)
+.PP
+The
+.B \-w
+option suppresses warning diagnostics.
+.PP
+If the
+.B \-x
+flag is given, 
+.I ctags\^
+produces a list of function names, the line number and file
+name on which each is defined, as well as the text of that line
+and prints this on the standard output.  
+.PP
+Files whose name ends in 
+"\&.c"
+or
+"\&.h"
+are assumed to be C source files and are searched for C routine and
+macro definitions.
+.PP
+The tag
+.I main\^
+is treated specially in C programs.
+The tag formed is created by prepending
+"M"
+to the name of the file, with a trailing ".c" removed, if
+any, and leading pathname components also removed.
+This makes use of
+.IR ctags ,
+practical in directories with more than one program.
+.SH EXAMPLE
+.IP
+ctags \(**.c \(**.h 
+.PP 
+puts the tags from
+all the ".c" and ".h"
+files into 
+the tagsfile
+"tags".
+.SH FILES
+.ta \w'tags\ \ \ \ \ 'u
+tags	output tags file
+.DT
+.SH SEE ALSO
+ex(1), vi(1).
+.SH AUTHOR
+Ken Arnold
+.\"	@(#)ctags.1	5.1 of 11/16/83

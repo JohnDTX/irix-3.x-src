@@ -1,0 +1,48 @@
+.TH rpatch 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rpatch
+\- draws a rational surface patch
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rpatch(geomx, geomy, geomz, geomw)"
+.B "Matrix geomx, geomy, geomz, geomw;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rpatch(geomx, geomy, geomz, geomw)"
+.B "real geomx(4,4), geomy(4,4), geomz(4,4), geomw(4,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rpatch(var geomx, geomy, geomz, 
+.br
+.B	geomw: Matrix);
+.SH DESCRIPTION
+.B rpatch
+draws a rational surface patch using the current
+\f3patchbasis\fP,
+\f3patchprecision\fP,
+and
+\f3patchcurves\fP.
+The control points
+.I geomx ,
+.I geomy ,
+.I geomz
+determine the shape of the patch.
+.I geomw
+specifies the rational component of the patch to
+\f3rpatch\fP.
+.SH "SEE ALSO"
+defbasis,
+patch,
+patchbasis,
+patchcurves,
+patchprecision,
+.sp
+.I Programming Guide,
+Section 11.3, Drawing Surfaces

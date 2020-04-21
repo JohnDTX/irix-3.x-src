@@ -1,0 +1,30 @@
+.TH getplanes 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getplanes
+\- returns the number of available bitplanes
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getplanes()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getpla()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getplanes: longint;"
+.SH DESCRIPTION
+.B getplanes
+returns the number of bitplanes that are available in the system. 
+.SH "SEE ALSO"
+doublebuffer, multimap, onemap, RGBmode, singlebuffer
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 
+.SH NOTE
+This routine is available only in immediate mode.

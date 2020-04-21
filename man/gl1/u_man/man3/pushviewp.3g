@@ -1,0 +1,27 @@
+.TH pushviewport  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I pushviewport
+- save the current viewport, screen mask, and \f2setdepth\f1 parameters
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushviewport()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushvi"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushviewport;"
+.sp
+.SH DESCRIPTION
+The current viewport is the top element in a stack of viewports.  The
+\f2pushviewport\f1 command duplicates the current viewport and pushes 
+it on the stack.  After \f2pushviewport\f1, there are two copies of the 
+current viewport in the stack; the top one can be changed without 
+losing the old one.  In addition, it saves the screen mask and the 
+parameters specified using the  \f2setdepth\f1 command.  
+.SH "SEE ALSO"
+.I getscrmask, popviewport, setdepth, viewport 

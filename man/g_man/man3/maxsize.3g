@@ -1,0 +1,53 @@
+.TH maxsize 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B maxsize
+\- specifies the maximum size of a graphics window  
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "maxsize(x, y)"
+.B "long x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine maxsiz(x, y)"
+.B "integer*4 x, y"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure maxsize(x, y: longint);"
+.SH DESCRIPTION
+.B maxsize
+specifies the maximum size of a graphics window under the window manager.
+Call it at the beginning of a graphics program before \f3winopen\f1.  
+.B maxsize
+takes effect when
+.B winopen 
+is called.
+.PP
+You can also call
+.B maxsize
+in conjunction with 
+.B winconstraints
+to modify the enforced maximum size after the window has been created.
+The default maximum size is 1024 pixels wide and 768 pixels high.
+You can reshape the graphics window, but the window manager 
+does not allow it to become larger
+than the specified maximum size.
+.PP
+If 
+.B maxsize
+is called without 
+\f3winopen\fP,
+or if the system is not running the window manager, the routine
+is ignored.
+.SH "SEE ALSO"
+minsize, winopen  
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

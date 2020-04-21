@@ -1,0 +1,29 @@
+'\"macro stdmacro
+.TH WHODO 1M
+.SH NAME
+whodo \- who is doing what
+.SH SYNOPSIS
+.B /etc/whodo
+.SH DESCRIPTION
+.I Whodo\^
+produces merged, reformatted, and dated output from the
+.IR who (1)
+and
+.IR ps (1)
+commands.
+.SH EXAMPLE
+.IP
+/etc/whodo
+.PP
+will return something like the following:
+.IP
+.nf
+UNIX
+co  root     13:52
+co     60   0:01  sh
+co     61   0:01  ps
+co     62   0:00  sh
+.fi
+.SH SEE ALSO
+ps(1), who(1).
+.\"	@(#)whodo.1m	5.1 of 10/17/83

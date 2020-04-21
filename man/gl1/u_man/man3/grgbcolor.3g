@@ -1,0 +1,32 @@
+.TH gRGBcolor 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gRGBcolor
+- return the current RGB value
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gRGBcolor(red,green,blue)"
+.B "RGBvalue *red, *green, *blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gRGBco(red, green, blue)"
+.B "integer*2 red, green, blue"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gRGBcolor (var red, green, blue: RGBvalue);"
+.sp
+.SH DESCRIPTION
+The
+.I gRGBcolor
+command returns the current RGB color values.  The
+arguments are addresses of three locations that will be
+filled with the red, green, and blue values.
+The system must be in RGB mode
+when this command is executed; otherwise, it is ignored.
+.SH "SEE ALSO"
+.I RGBcolor, RGBmode
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,20 @@
+'\"macro stdmacro
+.TH ABS 3C 
+.SH NAME
+abs \- return integer absolute value
+.SH SYNOPSIS
+.B int abs (i)
+.br
+.B int i;
+.SH DESCRIPTION
+.I Abs\^
+returns
+the absolute value of its integer operand.
+.SH BUGS
+In two's-complement representation,
+the absolute value of the negative integer with largest magnitude is undefined.
+Some implementations trap this error,
+but others simply ignore it.
+.SH SEE ALSO
+floor(3M).
+.\"	@(#)abs.3c	5.1 of 10/19/83

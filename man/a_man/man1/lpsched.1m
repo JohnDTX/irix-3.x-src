@@ -1,0 +1,85 @@
+'\"macro stdmacro
+.TH LPSCHED 1M
+.SH NAME
+lpsched, lpshut, lpmove \- start/stop the \s-1LP\s+1 request scheduler and move requests
+.SH SYNOPSIS
+.B /usr/lib/lpsched
+.br
+.B /usr/lib/lpshut
+.br
+.B /usr/lib/lpmove
+requests\|\ \|dest
+.br
+.B /usr/lib/lpmove
+dest1\|\ \|dest2
+.SH DESCRIPTION
+.I Lpsched
+schedules requests
+taken by
+.IR lp (1)
+for printing
+on line printers.
+.PP
+.I Lpshut
+shuts down the line printer scheduler.
+All printers
+that are printing
+at the time
+.I lpshut
+is invoked
+will stop printing.
+Requests that were printing at the time
+a printer was shut down will be reprinted
+in their entirety
+after
+.I lpsched
+is started again.
+All
+.SM LP
+commands perform their functions even
+when
+.I lpsched
+is not running.
+.PP
+.I Lpmove
+moves requests that were queued by
+.IR lp (1)
+between
+.SM LP
+destinations.
+This command may be used only when
+.I lpsched
+is not running.
+.PP
+The first form of the command moves the named
+.I requests
+to the \s-1LP\s+1 destination,
+.IR dest .
+.I Requests
+are request ids
+as returned by
+.IR lp .
+The second form moves all requests for destination
+.I dest1
+to destination
+.IR dest2 .
+As a side effect,
+.I lp
+will reject requests for
+.IR dest1 .
+.PP
+Note that
+.I lpmove
+never checks the acceptance status
+(see
+.IR accept (1M))
+for the new destination when moving requests.
+.SH FILES
+/usr/spool/lp/\(**
+.SH SEE ALSO
+accept(1M),
+enable(1),
+lp(1),
+lpadmin(1M),
+lpstat(1).
+.\"	@(#)lpsched.1m	5.1 of 10/17/83

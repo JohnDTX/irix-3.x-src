@@ -1,0 +1,40 @@
+.TH ginit 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B ginit
+\- initializes the system
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "ginit()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine ginit"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure ginit;"
+.SH DESCRIPTION
+.B ginit
+initializes the hardware, allocates memory for symbol tables
+and display lists, and sets up default values
+for global state attributes (as \f3greset\f1 does).
+It has no arguments.  
+\f3winopen\fP
+performs the same function as 
+.B ginit
+under the window manager.
+.PP
+Call \f3ginit\f1 once,
+before any other Graphics Library routine.
+.SH "SEE ALSO"
+gbegin, gexit, greset, winopen
+.sp
+.I Programming Guide,
+Section 2.1, Initialization
+.SH NOTE
+This routine is available only in immediate mode.

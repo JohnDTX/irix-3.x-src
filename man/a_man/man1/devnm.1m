@@ -1,0 +1,41 @@
+'\"macro stdmacro
+.TH DEVNM 1M
+.SH NAME
+devnm \- device name
+.SH SYNOPSIS
+.B /etc/devnm
+[\|names\|]
+.SH DESCRIPTION
+.I Devnm\^
+identifies the special file
+associated with the mounted file system
+where the argument \f2name\fP resides
+(as a special case,
+both the block device name and the swap device name are printed for
+the argument name
+.B /
+if swapping is done on the same disk section as the
+.B root
+file system).
+Argument names must be full path names.
+.PP
+This command is most commonly used 
+during booting
+to construct a mount table entry for the
+.B root
+device.
+.SH EXAMPLE
+.IP
+/etc/devnm /usr
+.PP
+produces
+.IP
+si0f /usr
+.PP
+if
+.B /usr
+is mounted on
+.BR /dev/si0f .
+.SH SEE ALSO
+setmnt(1M).
+.\"	@(#)devnm.1m	5.1 of 10/17/83

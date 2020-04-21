@@ -1,0 +1,46 @@
+.fp 1 MR
+.fp 2 MI
+.fp 3 MB
+.fp 8 SQ
+.ll 4.25i
+.nr LL 4.25i
+.LP
+.rs
+.sp 1.0i
+\l'4.25i'
+.nf
+\f3Documentation Staff:\fP
+.sp .5
+Daniel Sears
+Marcia Allen
+Peter Bourne
+Robin Bristow
+Jeff Scheel
+Diane Wilford
+Glen Williams
+.sp
+Special thanks to:
+.sp .5
+Chase Bailey
+Bruce Borden
+Greg Boyd
+Kipp Hickman
+Herb Kuta
+Bob Toxen
+.sp .7i
+Copyright \(co 1984 Silicon Graphics, Inc.
+.sp
+UNIX is a trademark of Bell Laboratories.
+.sp 2
+Portions of this material have been previously copyrighted by:
+.sp .5
+Bell Telephone Laboratories, Incorporated, \(co 1980
+.sp .5
+Western Electric Company, Incorporated, \(co 1983
+.sp .5
+Regents of the University of California, \(co 1979, 1980, 1981, 1983
+.sp 2
+Holders of a UNIX software license are permitted to copy this 
+document, or any portion of it, as necessary for licensed use of 
+the software, provided this copyright notice and statement 
+of permission are included.

@@ -1,0 +1,109 @@
+.TH MKTAPE 1M
+.SH NAME
+mktape \- make a generic ``bootable'' tape for system restoration
+.SH SYNOPSIS
+.B /etc/mktape
+[ rootdir ]
+.SH DESCRIPTION
+.I Mktape
+creates a ``bootable'' tape suitable for installing a UNIX system on disk
+without regard to the contents of the disk.  This is useful for new, blank
+disks, or for completely upgrading a disk to the new system.
+.PP
+The tape contains three files.  The first is a cpio-format archive containing
+necessary standalone programs; these can be booted from directly from tape.
+The second file is a ``dd'' image of a special UNIX root file system that
+runs completely in the usual swap area of the disk (e.g. 
+.B md0b or 
+.BR ip0b ).
+This special system is used only temporarily during the bootstrap process;
+the root file system is contained in the lower portion of the swap area, and
+the upper portion is used for swapping.  This leaves the normal root and 
+user partitions completely free.
+The third file is a ``cpio'' image of the new UNIX system.
+.PP
+The optional
+.I rootdir
+argument specifies the path name of an alternate root directory to be
+used for the new UNIX system cpio images.  The default is ``/''.
+.PP
+The command assumes the existance of a
+.I /stand
+directory containing the
+.IR mdfex,
+.IR ipfex,
+and
+.I stfex
+programs, and the
+.I swapfs_dd
+file, which is the image of the special swap-area UNIX system.
+.PP
+To use the tape to restore a system, the standalone program 
+.I mdfex
+(or
+.IR ipfex
+for model 1500 and 2500 systems) 
+is booted from the first file on the tape, and used to copy the special
+swap-area UNIX system to the ``b'' partition of the disk.  The kernel from
+this partition is then booted, providing a basic UNIX system with which
+to perform the remaining tasks.  New file systems are created on the root
+and user partitions, these are mounted, and then the remaining tape
+file is is read onto these empty file systems.  Once the new system
+is read in, the normal kernel can be booted to bring the new system up.
+.SH EXAMPLE
+To create a tape containing a copy of the current UNIX system:
+.RS
+.nf
+mktape
+.RE
+.PP
+To restore the system onto a disk, insert the the boot tape into the tape
+drive, and enter these commands:
+.RS
+.nf
+.ta 2.5i
+tb mdfex	boot the standalone disk program
+t	tape-to-disk option
+return	default tape file
+return	default file system
+return	default disk
+.RE
+.fi
+(At this point,
+.I mdfex
+will position the tape and read the swap-area UNIX system onto the disk.)
+.RS
+.nf
+q	quit mdfex
+y	confirm quit
+.RE
+Now boot the special UNIX system:
+.RS
+.nf
+b md0b:swapunix_md	boot special kernel
+newfs md0a	make new root file system
+y	confirm new file system
+newfs md0c	make new user file system
+y	confirm new file system
+labelit rmd0a root IRIS	label new root partition
+labelit rmd0c usr IRIS	label new user partition
+mount /dev/md0a /mnt	mount new root partition
+mkdir /mnt/usr	create /usr
+mount /dev/md0c /mnt/usr	mount new user partition
+cd /mnt	change to root of new system
+smt rewind	position to beginning of tape
+smt fsf 2	position to new UNIX system
+cpio -ivhmud2	read in new UNIX system
+.RE
+At this point, the new system is installed on the disk.  Reboot the system
+and bring it up as usual.  The swap-area UNIX system will be immediately
+overwritten.
+.SH SEE ALSO
+cpio(1), labelit(1M), mkboot(1M), mkdir(1), mount(1M),
+newfs(1M), smt(1).
+.PP
+.I
+Mdfex Formatter and Exerciser
+.PP
+.I 
+Ipfex Interphase Formatter and Exerciser

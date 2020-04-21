@@ -1,0 +1,51 @@
+'\"macro stdmacro
+.TH SPLIT 1 
+.SH NAME
+split \- split a file into pieces
+.SH SYNOPSIS
+.B split
+[
+.B \-\f2n
+]
+[ file [ name ] ]
+.SH DESCRIPTION
+.I Split\^
+reads
+.I file\^
+and writes
+it in
+.IR n\| -line
+pieces
+(default 1000 lines)
+onto
+a set of output files.  The name of the first output
+file is
+.I name\^
+with
+.B aa
+appended, and so on
+lexicographically,
+up to
+.B zz
+(a maximum of 676 files).
+.I Name\^
+cannot be longer than 12 characters.
+If no output name is given,
+.B x
+is default.
+.PP
+If no input file is given, or
+if
+.B \-
+is given in its stead,
+then the standard input file is used.
+.SH EXAMPLE
+.IP
+split -100 filea newfile
+.PP
+would split "filea" into 100-line pieces and put them
+in "newfileaa", "newfilebb", and so forth until
+the end of filea.
+.SH SEE ALSO
+bfs(1), csplit(1).
+.\"	@(#)split.1	5.1 of 11/10/83

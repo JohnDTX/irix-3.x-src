@@ -1,0 +1,194 @@
+.ds P UNIX
+.TH SAR 1 
+.SH NAME
+sar \- system activity reporter
+.SH SYNOPSIS
+.B sar
+.RB [\| \-ubdycwaqvmA\| ]
+.RB [\| \-o\0 file\|]
+t [ n ]
+.PP
+.B sar
+.RB [\| \-ubdycwaqvmA\| ]
+.RB [\| \-s\0 time\|]
+.RB [\| \-e\0 time\|]
+.RB [\| \-i\0 sec\|]
+.RB [\| \-f\0 file\|]
+.SH DESCRIPTION
+.IR Sar ,
+in the first instance,
+samples cumulative activity counters in the operating system
+at
+.I n\^
+intervals of
+.I t\^
+seconds.
+If the
+.B \-o
+option is specified, it saves
+the samples in
+.I file\^
+in binary format.
+The default value of
+.I n\^
+is 1.
+In the second instance, with no sampling interval specified,
+.I sar\^
+extracts data from a previously
+recorded
+.IR file ,
+either the one specified
+by
+.B \-f
+option
+or, by default,
+the standard system activity daily data file
+.BI /usr/adm/sa/sa\| dd\^
+for the current day
+.IR dd .
+The starting and ending times of the report
+can be bounded via the
+.B \-s
+and
+.B \-e
+.I time\^
+arguments of the form
+.IR hh [:\| mm [:\| ss ]].\^
+The
+.B \-i
+option selects records at
+.I sec\^
+second intervals.
+Otherwise, all intervals found in the data file are reported.
+.PP
+In either case,
+subsets of data to be printed are specified by option:
+.PP
+.PD 0
+.TP "\w'\f3\-m\f1\ \ 'u"
+.B \-u
+Report
+.SM CPU
+utilization (the default):
+.br
+%usr, %sys, %wio, %idle \- portion of time running in user mode,
+running in system mode, idle with some process waiting for block 
+.SM I/O\*S,
+and otherwise idle.
+.TP
+.B \-b
+Report buffer activity:
+.br
+bread/s, bwrit/s \- transfers per second of data between system buffers
+and disk or other block devices;
+.br
+lread/s, lwrit/s \- accesses of system buffers;
+.br
+%rcache, %wcache \- cache hit ratios, e.g., 1 \- bread/lread;
+.br
+pread/s, pwrit/s \- transfers via raw (physical) device mechanism.
+.TP
+.B \-d
+Report activity for each block device, e.g., disk or tape drive:
+.br
+%busy, avque \- portion of time device was busy servicing a transfer request,
+average number of requests outstanding during that time;
+.br
+r+w/s, blks/s \- number of data transfers from or to device,
+number of bytes transferred in 512 byte units;
+.br
+avwait, avserv \- average time in ms. 
+that transfer requests wait idly on queue,
+and average time to be serviced 
+(which for disks includes 
+seek, rotational latency and data transfer times).
+.TP
+.B \-y
+Report 
+.SM TTY
+device activity:
+.br
+rawch/s, canch/s, outch/s \- input character rate,
+input character rate processed by canon,
+output character rate;
+.br
+rcvin/s, xmtin/s, mdmin/s \- receive, transmit and modem interrupt rates.
+.TP
+.B \-c
+Report system calls:
+.br
+scall/s \- system calls of all types;
+.br
+sread/s, swrit/s, fork/s, exec/s \- specific system calls;
+.br
+rchar/s, wchar/s \- characters transferred by read and write
+system calls.
+.TP
+.B \-w
+Report system swapping and switching activity:
+.br
+swpin/s, swpot/s, bswin/s, bswot/s \- number of transfers
+and number of 512 byte units transferred for swapins
+(including initial loading of some programs)
+and swapouts;
+.br
+pswch/s \- process switches.
+.TP
+.B \-a
+Report use of file access system routines:
+.br
+iget/s, namei/s, dirblk/s.
+.TP
+.B \-q
+Report average queue length while occupied, and % of time occupied:
+.br
+runq-sz, %runocc \- run queue of processes in memory and runnable;
+.br
+swpq-sz, %swpocc \- swap queue of processes swapped out but ready to run.
+.TP
+.B \-v
+Report status of text, process, inode and file tables:
+.br
+text-sz, proc-sz, inod-sz, file-sz \- entries/size
+for each table, evaluated once at sampling point;
+.br
+text-ov, proc-ov, inod-ov, file-ov \- overflows occurring between sampling 
+points.
+.TP
+.B \-m
+Report message and semaphore activities:
+.br
+msg/s, sema/s \- primitives per second.
+.TP
+.B \-A
+Report all data.  Equivalent to
+.BR \-udqbwcayvm .
+.PD
+.SH EXAMPLE
+.IP
+sar
+.PP
+shows today's
+.SM CPU
+activity so far.
+.IP
+sar \|\-o temp 60 10
+.PP
+watches
+.SM CPU
+activity evolve for 10 minutes and saves data.
+.IP
+sar \|\-d \|\-f temp
+.PP
+later reviews disk and tape activity from that period.
+.SH FILES
+.TP "\w'/usr/adm/sa/sa\f2dd\f1\ \ \ 'u"
+.RI /usr/adm/sa/sa\| dd
+daily data file, where
+.I dd\^
+are digits representing the day of the month.
+.SH SEE ALSO
+sag(1G).
+.br
+sar(1M)
+.\"	@(#)sar.1	5.1 of 11/10/83

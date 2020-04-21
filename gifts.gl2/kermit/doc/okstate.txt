@@ -1,0 +1,252 @@
+OKLAHOMA STATE UNIVERSITY KERMIT DIALUP ACCESS
+
+
+UUCP and Kermit access to the complete Kermit distribution is available from
+the Department of Computing and Information Sciences, Oklahoma State 
+University, Stillwater, Oklahoma.
+
+The files from TAPE A are in /usr/spool/uucppublic/kermit-a/*
+
+The files from TAPE B are in /usr/spool/uucppublic/kermit-b/*
+
+
+ -- UUCP --
+
+You need to set up "okstate" as a site in your "L.sys" UUCP dialing file
+using the information listed below.  You can then issue the following 
+commands on your system:
+
+   uucp okstate!~uucp/kermit-a/aaaread.me /usr/spool/uucppublic
+
+   (this example will retrieve a general information file about the entire
+    Kermit Distribution.  DO THIS FIRST!)
+
+   uucp okstate!~uucp/kermit-b/ck\* /usr/spool/uucppublic
+
+   (this example will retrieve the current version of C-Kermit)
+
+"/usr/spool/uucppublic" was chosen as the destination on your system since
+the destination must be WIDE OPEN (drwxrwxrwx) to everyone.  You should not
+remove files from your uucppublic until the entire transfer is complete
+including any redials that are necessary.  If you do remove some files, our
+system may retransmit them, resulting in a higher phone bill for you.
+
+There are 2 files available that contain information about the entire
+distribution.  We recommend that you retrieve these files first.  They are
+"aaaread.me" which explains the file name conventions used, and "aafiles.dir"
+which is a complete listing (by name) of all files in the in each kermit
+directory.  These files will enable you to choose the right files the first
+time to save those high dollar phone bills.
+
+ ----- UUCP Login information -----
+
+Site Name    : okstate
+Phone number : (405) 624-6953  (one line only)
+Login name   : uucpker
+Password     : thefrog
+Hours        : 24 hours per day, 7 days a week
+Problem      : okstate!uucp-support                          (UUCP)
+  reports    : uucp-support@A.OKSTATE.CS.EDU                 (ARPA)
+             : uucp-support%okstate.csnet@csnet-relay.arpa   (Obsolete)
+
+The phone number is for 300/1200 baud (bell compatible).
+
+The following is a sample L.sys line (\r is a carriage return).  You might
+want to put a time restriction on "Any", such as Any0000-0800 to save on
+your phone bills.
+
+okstate Any ACU 1200 405-624-6953 "" \r ogin: uucpker word: thefrog
+
+Just a few notes on how to best retrieve parts of the Kermit distribution
+using UUCP...
+
+  -  Install the proper L.sys entry and test it using the debugging option
+     of UUCICO (-x).  Repeat this step until you successfully complete a
+     "no work" connection, this will verify that your L.sys entry is correct
+     and will minimize frazzled nerves.
+
+  -  Retrieve the files `aaaread.me' and `aafiles.dir' with the following
+     commands:
+
+uucp -c -d okstate!~uucp/kermit-a/aaaread.me  /usr/spool/uucppublic
+uucp -c -d okstate!~uucp/kermit-a/aafiles.dir /usr/spool/uucppublic/files.dir.a
+uucp -c -d okstate!~uucp/kermit-b/aafiles.dir /usr/spool/uucppublic/files.dir.b
+
+     You will have to escape the exclamation point and the tilde if you are
+     using the C shell (i.e. ...okstate\!\~uucp/kermit-a...).
+
+  -  Choose the versions of Kermit that you wish to transfer and issue the
+     proper UUCP command.  Some systems don't seem to like wildcards, but
+     in any case the wildcards will have to be escaped from your shell. The
+     following command would retrieve the files relating to C-Kermit:
+
+uucp -c -d okstate!~uucp/kermit-b/ck\* /usr/spool/uucppublic
+
+     PLEASE NOTE THE USE OF /usr/spool/uucppublic!  Unless you *really* 
+     understand how UUCP's protections work you should not change this!  A
+     number of people have queued >100 files and had their systems refuse
+     to store them in out of the way places.  This results in wasted phone
+     time!
+
+
+
+KERMIT SERVER ACCESS TO THE KERMIT DISTRIBUTION AREA.
+
+Okstate also provides access to the KERMIT distribution via a KERMIT Server.
+The number is the same as above for the uucpker login, so the line may be busy
+quite a bit.  This server is a specialized server with controlled access.  At
+present, the server is only allowed access to the KERMIT directories on our
+machine.  
+
+                      Path names for the C-KERMIT server:
+
+          1.   The server does not allow  relative  paths.   You  must
+               fully  qualify  the directory and filename.  If you are
+               in the directory of a file you wish to access, then the
+               directory name is not needed.
+
+          2.   No password is needed for the directory  change.   Just
+               specify  the  proper path (selected from the list shown
+               when the server starts up).  Again, relative paths  are
+               not allowed.
+
+          3.   When you use the  REMOTE  DIRECTORY  command,  remember
+               that  there are a great number of files in the 2 direc-
+               tories currently accessible by the server.  This  means
+               that  it  will  take  a little while for the listing to
+               come back to you.
+
+          4.   All filenames are case sensitive,  and  currently,  all
+               lower case.  This means that
+
+                    /USR/SPOOL/UUCPPUBLIC/KERMIT-A/AA*
+
+               is an INVALID file name to the server, while
+
+                    /usr/spool/uucppublic/kermit-a/aa*
+
+               IS a valid file name that the server will recognize.
+
+          5.   The messages returned by the server in the acknowledge-
+               ment, and error packets are very helpful.  If a partic-
+               ular KERMIT does not print the messages, then  it  will
+               be difficult to know what is really going wrong.
+
+          6.   Wildcarding is allowed.  At this time,  only  '*',  and
+               '?'  are  recognized  as  wildcard characters.  As with
+               most Unix wildcarding, '*' represents zero or  more  of
+               any  character,  including  '.', and '?' represents any
+               single character, also including '.'.  Thus,  ck*.*  is
+               equivalent  to  ck* for all filenames containing a '.',
+               and ck?*  is  not  equivelent  to  ck*  Since  the  '?'
+               requires that a character be present.
+
+
+                         What the startup information means:
+
+               When the server starts up, several pieces  of  informa-
+          tion are printed out.  Below is a sample:
+
+               Server capabilities:
+
+               GET      DIR      TYPE     CWD      JOURNAL
+
+               max-on-time = `-2'
+               max-idle   = `600'
+
+               Home directory: `/usr/spool/uucppublic/kermit-a'
+               Alternate path: `/usr/spool/uucppublic/kermit-a: r'
+               Alternate path: `/usr/spool/uucppublic/kermit-b: r'
+
+               The information given above,  describes  the  types  of
+          functions the server can perform, the time limits associated
+          with the server, and the paths that you may  use  to  access
+          the   KERMIT   distribution.    The   value  of  max-on-time
+          represents the maximum length of a session.  In  this  case,
+          the  value  `-2'  means  infinite.   The  value  of max-idle
+          represents the maximum time that can elapse between transac-
+          tions  before the session terminates.  The value given is in
+          seconds, so 10 minutes is the  limit.   If  max-on-time  was
+          enforced, its value would also be in seconds.
+
+               The "Home directory" path is  the  directory  that  the
+          server starts the session in.  Since it is also an alternate
+          path, it is listed as one.  The letters appearing after  the
+          ':'  in  the Alternate path names, represent the permissions
+          applicable in that directory.  'r' is for READ.   The  other
+          possibilities  are 'w' - WRITE, 'd' - DELETE, and 'x' - EXE-
+          CUTE.
+
+
+                             Transaction journaling
+
+
+               A complete list of the transactions that  each  session
+          makes  is  maintained.  You may retrieve a copy of the tran-
+          saction by using the REMOTE commands associated  with  jour-
+          nals.   The information within the journal represents all of
+          the data and information associated  with  the  transactions
+          carried out for the session.
+
+               The server supports all of the journal functions listed
+          in  the  KERMIT  protocol  manual,  .../kermit-a/kproto.doc.
+          Transaction files can be named, if an argument is  given  to
+          the  REMOTE  START-LOG  command.   Only the base name of the
+          file name will be used.  An example series of command to the
+          server might be:
+
+               KERMIT> remote start-log files
+               KERMIT> remote cwd /usr/spool/uucppublic/kermit-b
+               KERMIT> get ck*
+               KERMIT> get hp*
+               KERMIT> remote cwd /usr/spool/uucppublic/kermit-a
+               KERMIT> get ms*
+               KERMIT> remote send-log
+
+               The resulting log would contain information about which
+          file  were  transferred  and  the  times associated with the
+          transfer.  The final command, remote send-log, would  result
+          in the file "files" being sent to the users' host.  It could
+          then be reviewed at a later date to  verify  what  had  been
+          transferred.
+
+You need the following information in order to access the server.
+
+KERMIT login   :   kermsrv
+Password       :   piggy
+Parity         :   even
+Data path      :   7 bit
+Available      :   24 hours/day, 7 days a week
+
+When the login is completed, the server will start, and you should escape
+back to your local KERMIT to issue further commands.  If the server remains
+idle for a period of time around 10 minutes, it will be stopped.  While the
+server is receiving data other than NAK packets, it will continue to run.
+
+The best place to start after logging on is "REMOTE HELP", followed closely by
+the desired "REMOTE DIR" commands.  If you don't include an argument to REMOTE
+DIR, you should be prepared for more than 600 lines of output.  It is usually
+better to read the 'aaaread.me' file (using REMOTE TYPE perhaps) and then do
+the DIR with some kind of wildcard (like "REMOTE DIR ck*").
+
+Remember that if your KERMIT does not support remote commands, then you can
+get files from either directory by preceding the file name with the proper
+path, as in:
+
+	get /usr/spool/uucp/kermit-b/ck*
+
+  -  If you are having problems connecting to our system PLEASE send mail
+     to {cbosgd, ea, ihnp4, isucs1, mcvax, uokvax}!okstate!uucp-support
+
+  -  Kind words also make my day!
+
+Thanks,
+
+Mark Vasoll
+Department of Computing and Information Sciences
+Oklahoma State University
+
+Internet:   vasoll@a.cs.okstate.edu
+Obsolete:   vasoll%okstate.csnet@csnet-relay.arpa
+
+UUCP:  {cbosgd, ea, ihnp4, isucs1, mcvax, pesnta, uokvax}!okstate!vasoll

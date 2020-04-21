@@ -1,0 +1,67 @@
+.TH bbox2 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B bbox2
+\- specifies bounding box and minimum pixel radius
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "bbox2(xmin, ymin, x1, y1, x2, y2) "
+.B "Screencoord xmin, ymin;"
+.B "Coord x1, y1, x2, y2;"
+.IP 
+.B "bbox2i(xmin, ymin, x1, y1, x2, y2) "
+.B "Screencoord xmin, ymin;"
+.B "Icoord x1, y1, x2, y2;"
+.IP 
+.B "bbox2s(xmin, ymin, x1, y1, x2, y2) "
+.B "Screencoord xmin, ymin;"
+.B "Scoord x1, y1, x2, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine bbox2(xmin, ymin, x1, y1, x2, y2)"
+.B "integer*4 xmin, ymin"
+.B "real x1, y1, x2, y2"
+.IP 
+.B "subroutine bbox2i(xmin, ymin, x1, y1, x2, y2)"
+.B "integer*4 xmin, ymin, x1, y1, x2, y2"
+.IP 
+.B "subroutine bbox2s(xmin, ymin, x1, y1, x2, y2)"
+.B "integer*4 xmin, ymin"
+.B "integer*2 x1, y1, x2, y2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure bbox2(xmin, ymin: Screencoord;" 
+.br
+.B	x1, y1, x2, y2: Coord);
+.IP
+.B "procedure bbox2i(xmin, ymin: Screencoord;" 
+.br
+.B	x1, y1, x2, y2: Icoord);
+.IP
+.B "procedure bbox2s(xmin, ymin: Screencoord;" 
+.br
+.B	z1, y1, x2, y2: Scoord); 
+.SH DESCRIPTION 
+\f3bbox2\f1 controls the execution of routines in a Graphics Library object.
+Its arguments
+are the coordinates of a bounding box in object space and 
+minimum horizontal and vertical
+feature sizes in pixels.  \f3bbox2\f1 transforms the bounding box
+to screen coordinates and compares it with the viewport.
+If the bounding box is completely outside the viewport, the system ignores
+routines between \f3bbox2\f1 and the end of the object.
+Otherwise, the system compares the
+transformed bounding box with the
+minimum feature size.  If the bounding box is too small in both
+the \f2x\fP and \f2y\fP dimensions, the rest of the
+routines in the object are ignored.  Otherwise, interpretation of the
+object continues.
+.SH "SEE ALSO"
+.I Programming Guide,
+Section 8.2, Using Objects

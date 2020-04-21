@@ -1,0 +1,32 @@
+.TH lookat  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I lookat
+- define a viewing transformation
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lookat(vx, vy, vz, px, py, pz, twist) "
+.B "Coord vx, vy, vz, px, py, pz; "
+.B "Angle twist;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lookat(vx, vy, vz, px, py, pz, twist)"
+.B "real vx, vy, vz, px, py, pz"
+.B "integer*2 twist"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lookat(vx, vy, vz, px, py, pz: Coord; twist: Angle);"
+.sp
+.SH DESCRIPTION
+.I Lookat
+defines the viewpoint and a reference point on the line of sight
+in world coordinates.
+The viewpoint is at \f3(vx, vy, vz)\f1.  The viewpoint and \f3(px, py, pz)\f1
+define the line of sight.  \f3Twist\f1 
+measures right-handed rotation about the \f3z\f1-axis in the 
+eye coordinate system.
+.SH "SEE ALSO"
+.I polarview

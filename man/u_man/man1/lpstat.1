@@ -1,0 +1,133 @@
+'\"macro stdmacro
+.TH LPSTAT 1
+.SH NAME
+lpstat \- print \s-1LP\s+1 status information
+.SH SYNOPSIS
+.B lpstat
+[\|options\|]
+.SH DESCRIPTION
+.I Lpstat\^
+prints information
+about the current status
+of the
+.SM LP
+line printer system.
+.PP
+If no
+.I options\^
+are given,
+then
+.I lpstat\^
+prints the status
+of all requests
+made to
+.IR lp\^ (1)
+by the user.
+Any arguments that are not
+.I options\^
+are assumed to be request
+.I ids\^
+(as returned by
+.IR lp\^ ).
+.I Lpstat\^
+prints the status
+of such requests.
+.I Options\^
+may appear in any order
+and may be repeated and intermixed
+with other arguments.
+Some of the keyletters below
+may be followed
+by an optional
+.I list\^
+that can be in one of two forms:
+a list of items separated from one another by a comma,
+or a list of items enclosed in double quotes
+and separated from one another by a comma and/or
+one or more spaces.
+For example:
+.IP
+\-u"user1, user2, user3"
+.PP
+The omission of a
+.I list\^
+following such keyletters
+causes all information
+relevant to the keyletter
+to be printed, for example:
+.IP
+lpstat \-o
+.PP
+prints the status of all output requests.
+.TP "\w'\f3\-a\f1[\f2\|list\|\f1]\ \ 'u"
+\f3\-a\f1[\f2\|list\|\f1]
+Print acceptance status
+(with respect to
+.IR lp\^ )
+of destinations for requests.
+.I List\^
+is a list of intermixed
+printer names
+and
+class names.
+.TP
+\f3\-c\f1[\f2\|list\|\f1]
+Print class names and their members.
+.I List\^
+is a list of class names.
+.TP
+.B \-d
+Print the system default destination for
+.IR lp .
+.TP
+\f3\-o\f1[\f2\|list\|\f1]
+Print the status of output requests.
+.I List\^
+is a list of intermixed
+printer names,
+class names,
+and request
+.IR ids .
+.TP
+\f3\-p\f1[\f2\|list\|\f1]
+Print the status of printers.
+.I List\^
+is a list of printer names.
+.TP
+.B \-r
+Print the status of
+the 
+.SM LP 
+request scheduler.
+.TP
+.B \-s
+Print
+a status summary,
+including
+the status of the line printer scheduler,
+the system default destination,
+a list of class names
+and their members,
+and a list of printers
+and their associated devices.
+.TP
+.B \-t
+Print all status information.
+.TP
+\f3\-u\f1[\f2\|list\|\f1]
+Print status of output requests for users.
+.I List\^
+is a list of login names.
+.TP
+\f3\-v\f1[\f2\|list\|\f1]
+Print the names of printers
+and the pathnames of the devices
+associated with them.
+.I List\^
+is a list of printer names.
+.SH FILES
+/usr/spool/lp/\(**
+.SH SEE ALSO
+enable(1),
+lp(1).
+.\"	@(#)lpstat.1	5.1 of 11/17/83

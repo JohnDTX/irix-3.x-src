@@ -1,0 +1,87 @@
+
+# lp interface for printronix line printer
+#
+#	All output is passed through the /usr/lib/prx filter
+#  If this filter is not executable, then this interface will disable
+#  the lp printer which it was called to service.
+#
+#	SCCS @(#)prx	1.1
+# @(#)$Header: /d2/3.7/src/usr.bin/lp/model/RCS/prx,v 1.1 89/03/27 18:05:18 root Exp $
+# $Log:	prx,v $
+# Revision 1.1  89/03/27  18:05:18  root
+# Initial check-in for 3.7
+# 
+# Revision 1.2  85/03/15  15:20:07  bob
+# Added initial blank line (for csh) and what
+# 
+
+x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+if [ ! -x /usr/lib/prx ]
+then
+	disable -r"can't execute /usr/lib/prx filter" `basename $0`
+	exit 1
+fi
+(
+echo "\014\c"
+echo "$x\n$x\n$x\n$x\n"
+banner "$2"
+echo "\n"
+user=`grep "^$2:" /etc/passwd | line | cut -d: -f5`
+if [ -n "$user" ]
+then
+	echo "User: $user\n"
+else
+	echo "\n"
+fi
+echo "Request id: $1    Printer: `basename $0`\n"
+date
+echo "\n"
+if [ -n "$3" ]
+then
+	banner $3
+fi
+bname=$0
+reqid=$1
+usrid=$2
+title=$3
+copies=$4
+echo "\014\c"
+shift; shift; shift; shift; shift
+files="$*"
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "\014\c"
+	done
+	i=`expr $i + 1`
+done
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n$x\n$x\n$x\n$x"
+echo "$x\n$x\n$x\n$x\n\n\n\n"
+# If job info & title are not desired on the trailing page, replace
+# lines from 'banner "$usrid"' to the second 'fi' by 25 line-feeds
+# as follows:  echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+banner "$usrid"
+echo "\n"
+if [ -n "$user" ]
+then
+	echo "User: $user\n"
+else
+	echo "\n"
+fi
+echo "Request id: $reqid    Printer: `basename $bname`\n"
+date
+echo "\n"
+if [ -n "title" ]
+then
+	banner $title
+else
+	echo "\n\n\n\n\n\n\n"
+fi
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "$x\n$x\n$x\n$x\n$x\n$x\n$x\n$x\n"
+) | /usr/lib/prx 4800
+exit $?

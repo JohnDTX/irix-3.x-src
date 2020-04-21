@@ -1,0 +1,26 @@
+.TH pushmatrix  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I pushmatrix
+- push down the transformation matrix stack
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushmatrix()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushma"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushmatrix;"
+.sp
+.SH DESCRIPTION
+.I Pushmatrix
+pushes down the transformation matrix stack, duplicating the current matrix;
+i.e., if the stack contains one matrix, \f2M\fP, after a \f2pushmatrix\f1
+command it will contain two copies of \f2M\fP.  The top copy can be
+modified.  The stack is eight levels deep.
+.SH "SEE ALSO"
+.I loadmatrix, multmatrix, popmatrix

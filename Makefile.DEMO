@@ -1,0 +1,31 @@
+
+#
+# This is a demonstation of a makefile that can be used to build the 
+# IRIS 3.6 release. As you can see it's fairly simple....
+#
+
+# SRCROOT  -> 	the directory where all of the source is located to do a
+#	     	build.
+# TOOLROOT ->	Where the root of mv,cp,ln,cc,make, and assorted other 
+#		utilities used to build the system
+# ROOT     ->   The target root directory... where the completed objects go
+# TROOT    -> 	a temporary root used by the installation tools to build
+#		various cpio images.
+# DIST     ->  	Where the final cpio images go
+# BOOT     ->   Bootable Image Partition
+
+# the default for this build is :
+#	build tlink and install the wrapper (Mk.sh) into the current directory
+#	keep a log file in logs/curlog 
+#	build and install the full tree into $ROOT
+#	create cpio images.
+
+setenv TOOLROOT /
+setenv SRCROOT  /d0/3.7/Build/src
+setenv TROOT    /d0/3.7/Tmproot
+setenv DIST     /d0/3.7/Dist
+setenv BOOT     /d0/3.7/Boot
+setenv ROOT	/d0/3.7/Root
+cd $SRCROOT/swtools; make install
+cd $SRCROOT
+$SRCROOT/Mk.sh log install images booti

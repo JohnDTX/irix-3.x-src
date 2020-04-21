@@ -1,0 +1,63 @@
+#! /bin/sh 
+#
+# Initialize the tcp software.
+#
+# $Header: /d2/3.7/src/etc/RCS/rc.tcp,v 1.1 89/03/27 15:38:35 root Exp $
+
+HNAME=`hostname`
+# Check for existence of tcp.
+if test -x /etc/havetcp && /etc/havetcp ; then
+    
+	/etc/ifconfig ex0 inet $HNAME
+
+# change and install the following line for gatewaying
+#	/etc/ifconfig ex1 inet gate-$HNAME
+
+	/etc/ifconfig lo0 localhost
+
+	hostid $HNAME
+
+# Hyperchannel initialization
+#	if test -x /usr/etc/hyroute -a -r /usr/etc/hyroute.tab ; then
+#		if /etc/ifconfig hy0 inet ${HNAME}-hy ; then
+#			echo Initializing hyperchannel routes.
+#			/usr/etc/hyroute hy0 -s /usr/etc/hyroute.tab
+#		fi
+#	fi
+
+	echo "Internet daemons:\c"
+
+	if test -x /usr/etc/routed ; then
+		/usr/etc/routed;			echo " routed\c"
+	fi
+# Add static routing commands here, such as the following:
+#	route add destination gateway 1
+# (see also the gateways file)
+
+
+	if test -x /usr/etc/portmap ; then
+		/usr/etc/portmap > /dev/console 2>&1 & echo " portmap\c"
+	fi
+
+	if test -x /usr/etc/inetd ; then
+		/usr/etc/inetd;				echo " inetd\c"
+	fi
+
+# timed can be given arguements of the form '-F host1 host2 ...' to make
+# it free-run except for host1, host2, ...
+#	if test -x /usr/etc/timed ; then
+#		/usr/etc/timed -M;		echo " timed\c"
+#	fi
+
+# Small networks can use rwho.  However, large sites, with > 20 rwho machines
+# can saturate the network.  In small networks, uncomment out the following
+# 6 lines.
+#	if test -x /usr/etc/rwhod; then
+#		if test ! -d /usr/spool/rwho; then
+#			mkdir /usr/spool/rwho
+#		fi
+#		/usr/etc/rwhod;			echo " rwhod\c"
+#	fi
+
+	echo "."
+fi

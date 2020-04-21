@@ -1,0 +1,26 @@
+.fp 1 MR
+.fp 2 MI
+.fp 3 MB
+.fp 4 TT
+.fp 5 S
+.nf
+.pl 11.5i
+.po 1.0i
+.ll 6.125i
+.rs
+.sp 2.0i
+.ps 24
+.vs 26
+.ce 100
+\s+4\f3UNIX Programmer's Manual\fP\s0
+.sp 2.35
+Volume IA: Commands 
+.sp 1.25i
+Version 1.0
+.sp .5
+June 1984
+.sp 1.5i
+Silicon Graphics, Inc.
+Mountain View
+California 94043
+.ce

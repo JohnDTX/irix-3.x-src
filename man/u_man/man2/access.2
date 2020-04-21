@@ -1,0 +1,121 @@
+'\"macro stdmacro
+.TH ACCESS 2 
+.SH NAME
+access \- determine accessibility of a file
+.SH SYNOPSIS
+.B int access (path, amode)
+.br
+.B char \(**path;
+.br
+.B int amode;
+.SH DESCRIPTION
+.I Path\^
+points to a
+path name
+naming a file.
+.I Access\^
+checks the named file
+for accessibility according to the bit pattern contained in
+.IR amode ,
+using the real user
+.SM ID
+in place of the effective user
+.SM ID
+and 
+the real group
+.SM ID
+in place of the effective group
+.SM ID\*S.
+The bit pattern contained in
+.I amode\^
+is constructed as follows:
+.PP
+.RS
+04	read
+.br
+02	write
+.br
+01	execute (search)
+.br
+00	check existence of file
+.RE
+.PP
+Access to the file is denied if one or more of the following are true:
+.IP "" .3i
+A component of the
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+Read, write, or execute
+(search)
+permission is requested for a null
+path name.
+.SM
+\%[ENOENT]
+.IP
+The named file does not exist.
+.SM
+\%[ENOENT]
+.IP
+Search permission is denied on a component of the
+path prefix.
+.SM
+\%[EACCES]
+.IP
+Write access is requested for a file on a read-only file system.
+.SM
+\%[EROFS]
+.IP
+Write access is requested for a pure procedure (shared text)
+file that is being executed.
+.SM
+\%[ETXTBSY]
+.IP
+Permission bits of the file mode do not permit
+the requested access.
+.SM
+\%[EACCES]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.PP
+The owner of a file has permission checked with respect to
+the ``owner'' read, write, and execute mode bits, members of the file's
+group other than the owner have permissions checked with respect to the
+``group'' mode bits, and all others have permissions checked with respect
+to the ``other'' mode bits.
+.PP
+Notice that it is only access bits that are checked.
+A directory may be announced as writable by
+.IR access ,
+but an attempt to open it for writing will fail
+because it is not allowed to write into the
+directory structure itself,
+although files may be created there.
+A file may look executable, but
+.I exec
+will fail unless it is in proper format.
+.SH "RETURN VALUE"
+.PP
+If the requested access is permitted, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+chmod(2), stat(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#33,D0
+.B movl	path,A0
+.B movl	amode,D1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)access.2	5.1 of 10/19/83

@@ -1,0 +1,29 @@
+.TH unqkeyboard  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I unqkeyboard
+- unqueue the keyboard
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "unqkeyboard()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine unqkey"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure unqkeyboard;"
+.sp
+.SH DESCRIPTION
+The keyboard can be queued like other input devices.  When the keyboard is 
+queued, each character typed is added to the queue as an event.  Each
+event is a device number, KEYBOARD, and the ASCII
+character that was typed.
+\f2Unqkeyboard\f1 unqueues the keyboard.  Characters typed on the 
+keyboard will no longer be entered in the event queue.
+.SH "SEE ALSO"
+.I keyboard, qkeyboard
+.SH NOTE
+This command can only be used in immediate mode.

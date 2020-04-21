@@ -1,0 +1,67 @@
+'\"macro stdmacro
+.TH GROUP 4
+.SH NAME
+group \- group file
+.SH SYNOPSIS
+.B /etc/group
+.SH DESCRIPTION
+.I Group
+contains for each group the following information:
+.IP \(bu 2
+group name
+.IP \(bu 2
+encrypted password
+.IP \(bu 2
+numerical group ID
+.IP \(bu 2
+a comma separated list of all users allowed in the group
+.LP
+This is an
+.SM ASCII
+file.  The fields are separated by colons;
+each group is separated from the next by a new-line.
+If the password field is null, no password is demanded.
+.LP
+This file resides in the
+.I /etc
+directory.  Because of the encrypted passwords,
+it can and does have general read permission and can be
+used, for example, to map numerical group ID's to names.
+.PP
+A group file can have a line beginning with a plus (+),
+which means to incorporate entries from the yellow pages.
+There are two styles of + entries:
+All by itself, + means to insert the entire contents
+of the yellow pages group file at that point;
+.I +name
+means to insert the entry (if any) for
+.I name
+from the yellow pages at that point.
+If a + entry has a non-null password or group member field,
+the contents of that field will overide
+what is contained in the yellow pages.
+The numerical group ID field cannot be overridden.
+.SH EXAMPLE
+.PP
+.nf
++myproject:::bill, steve
++:
+.fi
+.PP
+If these entries appear at the end of a group file, then the group
+.I myproject
+will have members
+.IR bill and steve ,
+and the password and group ID of the yellow pages entry for the group
+.IR myproject .
+All the groups listed in the yellow pages
+will be pulled in and placed after the entry for
+.IR myproject .
+.SH FILES
+/etc/group
+.SH "SEE ALSO"
+passwd(1), passwd(4)
+.SH BUGS
+The
+.IR passwd (1)
+command won't change group passwords.

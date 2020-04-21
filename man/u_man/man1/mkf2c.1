@@ -1,0 +1,167 @@
+'\"macro stdmacro
+.TH MKF2C 1
+.SH NAME
+mkf2c, mkc2f \- generate C-FORTRAN interface routines
+.SH SYNOPSIS
+.B mkf2c
+\[ \f3\-l\f1 \]
+\[ \f2cprog\f1.fc \[ \f2cprog\f1.s\ ] \]
+.br
+.B mkc2f
+\[ \f3\-l\f1 \]
+\[ \f2dummyfortran\f1.cf \[ \f2dummyfortran\f1.s \] \]
+.SH DESCRIPTION
+.I mkf2c
+and 
+.I mkc2f
+are used to generate assembly-language routines to
+interface C functions to FORTRAN routines.  
+.I mkc2f
+generates an interface for C functions to call FORTRAN routines.
+.I mkf2c
+generates an interface for FORTRAN routines to call C functions.
+Both programs, by default, truncate external FORTRAN names to six characters.
+The \f2\-l\fP switch may be used to override this default, allowing
+full 31 character external names for FORTRAN as well as for C.
+.PP
+Both programs accept as input a set of C functions, and
+produce an assembly-language interface routine in the output file.
+If the input and output files are not specified, \f2mkf2c\f1 (or \f2mkc2f\f1)
+reads from \f2stdin\f1 and writes to \f2stdout\f1.
+In the case of 
+\f2mkf2c\fP,
+the input may be a copy of the actual C file being interfaced,  
+perhaps filtered by the program
+.IR extcentry (1).
+In the case of 
+\f2mkc2f\fP,
+the FORTRAN routines must have their parameter lists coded in C for input
+to the program.
+(This must be done manually.  Refer to 
+``The C/FORTRAN Interface''
+in the 
+\f2FORTRAN Reference Manual, Appendix E\f1.)
+In all cases, 
+.I mkf2c
+and
+.I mkc2f
+generate a 
+.I .s
+file that must be assembled with
+\f2as\f1(1),
+and loaded with the FORTRAN and C routines that are to be interfaced.
+.PP
+.I mkc2f
+and 
+.I mkf2c
+use the parameter declarations in the C function headers to
+transform each parameter of the calling language to 
+that of the receiving language.  
+The standard
+basic C types attached to the parameters 
+are used 
+to determine the object each parameter represents \- i.e., whether it
+is a value or pointer, its size, whether it is unsigned, etc.  
+(Character strings are handled specially \- the reader is referred to 
+Appendix E of the \f2FORTRAN Reference Manual\f1.)
+Only the opening
+and closing brace of the function body must be present.  
+Information in the body of the function is ignored.  
+.I mkf2c
+and 
+.I mkc2f
+expect their input to consist solely of the functions they are to
+interface, comments, and lines which begin with the preprocessor
+control character (#).  They are able to match braces, enabling them
+to bound function bodies.  They cannot, however, understand other
+C constructs normally occurring at the global level (typedefs, structure
+declarations, data declarations, etc.).
+Such unrecognized constructs 
+must be eliminated from the input (this is the purpose of
+\f2extcentry\fP).
+.PP
+Both
+.I mkf2c
+and 
+.I mkc2f
+will ignore functions of storage class 
+.I static .
+.PP
+\f2make\f1(1) contains default rules for generating object files which
+have been \f2wrapped\fP.  The details of this are discussed in the
+\f2FORTRAN Reference Manual,\fP section E.4.
+.SH EXAMPLE
+A sample C function given to the programs as input might be
+.sp 2
+.nf
+.in +0.5i
+test(i,s,c,ptr1,ptr2,ar1,f,d,d1,struct1,string1,string2,u)
+short s;
+unsigned char c;
+int *ptr1;
+char *ptr2[];
+short ar1[];
+float f;
+long float d,*d1;
+struct test_s *struct1;
+char string1[],string2[30];
+sometype u;
+{	
+	/*
+	The C function body may go here.  Nothing except
+	the opening and closing braces are necessary.
+	*/
+}
+.in
+.fi
+.sp 2
+A complaint will be given about not understanding the type of
+parameter
+\f2u\fP.
+It will be assumed to be a simple pointer.
+.SH "SEE ALSO"
+.I "U\s-2NIX\s+2 Programmer's Guide, Volume II",
+``IRIS Floating Point''
+.br
+.I "FORTRAN Reference Manual, Appendix E, Section 4",
+``The C/FORTRAN Interface''
+.br
+extcentry(1),
+cc(1)
+.SH DIAGNOSTICS
+.I mkf2c
+and 
+.I mkc2f
+are very simple-minded about diagnosing syntax errors.  They can
+detect such things as a formal parameter having its type declared when it
+is not in the formal parameter list.  A few such cases give intelligable
+error messages.  The programs will complain about types they do not understand.
+The default type assigned in such cases is
+.I "simple pointer."
+.I mkf2c
+and 
+.I mkc2f
+will also delete characters from FORTRAN entry names which are 
+illegal (e.g., underscores).  The user will be warned in such instances.
+Most errors that the programs detect are indicated only by the source line
+number.  
+.PP
+If 
+.I mkf2c
+or
+.I mkc2f
+encounter an error which they cannot remedy, they will abort, giving the line
+number on which the error occurred.
+The resultant 
+.I .s
+file will be removed, and an error exit will be taken.
+.PP
+Because of their limited error diagnostic ability, it is advisable
+to use
+.I cc (1)
+to determine whether the input syntax is correct before passing it
+to 
+.I mkc2f
+or
+.I mkf2c.
+

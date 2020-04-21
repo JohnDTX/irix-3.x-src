@@ -1,0 +1,309 @@
+'\"macro stdmacro
+.TH FSDB 1M
+.SH NAME
+fsdb \- Bell file system debugger
+.SH SYNOPSIS
+.B /etc/fsdb
+special
+.RB [ " \- " ]
+.SH DESCRIPTION
+.I fsdb\^
+can be used
+to patch up 
+a damaged file system
+after a crash.
+It has conversions
+to translate block and i-numbers
+into their corresponding disk addresses.
+Also included are mnemonic offsets
+to access different parts
+of an i-node.
+These greatly simplify the process
+of correcting control block entries
+or descending the file system tree.
+.PP
+.I fsdb\^
+contains several error checking routines
+to verify i-node and block addresses.
+These can be disabled if necessary 
+by invoking 
+.I fsdb\^
+with the optional
+.B \-
+argument
+or by the use of the
+\f3O\fP
+symbol.
+(\c
+.I fsdb\^
+reads the i-size and f-size entries
+from the superblock of the file system
+as the basis for these checks.)
+.PP
+Numbers are considered decimal by default.
+Octal numbers must be prefixed
+with a zero.
+During any assignment operation,
+numbers are checked 
+for a possible truncation error
+due to a size mismatch
+between source and destination.
+.PP
+.I fsdb\^
+reads a block at a time
+and will therefore work with raw as well as block
+I/O. 
+A buffer management routine 
+is used to retain commonly used
+blocks of data
+in order to reduce the number of read system calls.
+All assignment operations result
+in an immediate write-through
+of the corresponding block.
+.PP
+The symbols recognized by
+.I fsdb\^
+are:
+.RS
+.PD 0
+.TP 13
+.B #
+absolute address
+.TP 13
+.B i
+convert from i-number to i-node address
+.TP 13
+.B b
+convert to block address
+.TP 13
+.B d 
+directory slot offset
+.TP 13
+.BR + , \-
+address arithmetic
+.TP 13
+.B q
+quit
+.TP 13
+.BR > , <
+save, restore an address
+.TP 13
+.B =
+numerical assignment
+.TP 13
+.B =+
+incremental assignment
+.TP 13
+.B =\-
+decremental assignment
+.TP 13
+.B ="
+character string assignment
+.TP 13
+.B O
+error checking flip flop
+.TP 13
+.B p
+general print facilities
+.TP 13
+.B f
+file print facility
+.TP 13
+.B B
+byte mode
+.TP 13
+.B W
+word mode
+.TP 13
+.B D
+double word mode
+.TP 13
+.B !
+escape to shell
+.PD
+.RE
+.PP
+The print facilities generate a formatted output
+in various styles.
+The current address is normalized 
+to an appropriate boundary before printing begins.
+It advances with the printing
+and is left at the address of the last item printed.
+The output can be terminated at any time
+by typing the delete character.
+If a number follows the \f3p\fP symbol,
+that many entries are printed.
+A check is made to detect block boundary overflows
+since logically sequential blocks are generally not physically
+sequential.
+If a count of zero is used, all entries to the end of the
+current block are printed.
+The print options available are:
+.RS
+.PD 0
+.TP 13
+.B i
+print as i-nodes
+.TP 13
+.B d
+print as directories
+.TP 13
+.B o
+print as octal words
+.TP 13
+.B e
+print as decimal words
+.TP 13
+.B c
+print as characters
+.TP 13
+.B b
+print as octal bytes
+.PD
+.RE
+.PP
+The
+\f3f\fP
+symbol is  used
+to print data blocks
+associated with the current i-node.
+If followed by a number,
+that block of the file is printed.
+(Blocks are numbered from zero.)
+The desired print option letter 
+follows the block number,
+if present,
+or the 
+\f3f\fP
+symbol.
+This print facility works
+for small as well as large files.
+It checks for special devices
+and that
+the block pointers
+used to find the data
+are not zero.
+.PP
+Dots, tabs and spaces may be used
+as function delimiters but are not necessary.
+A line with just a new-line character
+will increment the current address
+by the size of the data type last printed.
+That is,
+the address is set to the next byte,
+word, double word, directory entry or i-node,
+allowing the user
+to step through a region of a file system.
+Information is printed
+in a format appropriate to the data type.
+Bytes, words and double words
+are displayed with the octal address
+followed by the value in octal and decimal.
+A \f3.B\fP or \f3.D\fP
+is appended to the address
+for byte and double word values, respectively.
+Directories are printed as a
+directory slot offset
+followed by the decimal
+i-number and the character representation
+of the entry name.
+Inodes are printed
+with labeled fields
+describing each element.
+.PP
+The following mnemonics
+are used for i-node examination
+and refer to the current working i-node:
+.RS
+.PD 0
+.TP 13
+.B md
+mode
+.TP 13
+.B ln
+link count
+.TP 13
+.B uid
+user
+.SM ID
+number
+.TP 13
+.B gid
+group
+.SM ID
+number
+.TP 13
+.B sz
+file size
+.TP 13
+.BI a #
+data block numbers (0 \-\| 12)
+.TP 13
+.B at
+access time
+.TP 13
+.B mt
+modification time
+.TP 13
+.B maj
+major device number
+.TP 13
+.B min
+minor device number
+.PD
+.RE
+.SH EXAMPLES
+.TP
+386i
+prints i-number 386 in an i-node format.
+This now becomes the current working i-node.
+.TP
+ln=4
+changes the link count for the 
+working i-node to 4.
+.TP
+ln=+1
+increments the link count by 1.
+.TP
+fc
+prints, in \s-1ASCII\s0,
+block zero of the file associated
+with the working i-node.
+.TP
+2i.fd
+prints the first 32 directory
+entries for the root i-node of this file system.
+.TP
+d5i.fc
+changes the current i-node to that
+associated with the 5th directory entry
+(numbered from zero)
+found from the above command.
+The first logical block of the file
+is then printed in \s-1ASCII\s0.
+.TP
+512B.p0o
+prints the superblock of this file system
+in octal.
+.TP
+2i.a0b.d7=3
+changes the i-number for the 
+seventh directory slot in the root directory to 3.
+This example also shows how several 
+operations can be combined on one command line.
+.TP
+d7.nm="name"
+changes the name field
+in the directory slot to the given string.
+Quotes are optional
+when used with \f3nm\fP
+if the first character is alphabetic.
+.TP
+a2b.p0d
+prints the third block of the current inode as directory entries.
+.SH NOTE
+.I fsdb
+can only be used with Bell file systems.
+.SH SEE ALSO
+fsck(1M), dir(4), fs(4).
+.\"	@(#)fsdb.1m	5.1 of 10/17/83

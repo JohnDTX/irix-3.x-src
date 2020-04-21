@@ -1,0 +1,28 @@
+#include "ib.h"
+
+#include "../h/param.h"
+#include "../h/types.h"
+
+#include "../h/buf.h"
+#include "../h/tty.h"
+
+#include "../gpib/ib_ieee.h"
+#include "../gpib/ib_reg.h"
+#include "../gpib/ib_ioctl.h"
+#include "../gpib/ib.defs"
+
+struct flagsym
+{
+    int fmask; int fval;
+    char *fname;
+};
+
+extern struct flagsym bqflags[];
+extern struct flagsym nflags[];
+extern struct flagsym connflags[];
+extern struct flagsym uflags[];
+extern struct flagsym ibflags[];
+extern struct flagsym Cflags[];
+extern struct flagsym csrflags[];
+extern struct flagsym fields[];
+extern struct flagsym iocodes[];

@@ -1,0 +1,38 @@
+.TH BSTAT 1 
+.SH NAME 
+bstat \- board statistics
+.SH SYNOPSIS
+.B bstat
+[
+.BR \-r
+] [
+.BR \-v
+]
+.SH DESCRIPTION
+.I bstat
+gets statistics from the Excelan front-end processor boards.
+The statistics indicate the number of packets transmitted and
+received over the Ethernet network.  
+Statistics are also compiled for error conditions  
+resulting from the following:
+.IP \(bu 3 
+Packets received with an alignment error \- the packets 
+were not in 8-bit multiples
+.IP \(bu 3 
+Packets received with a CRC error
+.IP \(bu 3 
+Packets lost because no receive buffers were available
+.IP \(bu 3 
+Packets aborted because of heartbeat failure (from EXOS Series
+200 boards only)
+.IP \(bu 3
+Transmissions failed with DMA underrun (from EXOS Series 200
+boards only)
+.PP
+\f2bstat\f1 only prints statistics with nonzero values.     
+.SH OPTIONS
+.B \-r
+resets the board statistics.  
+.PP
+.B \-v
+displays the software, firmware, and hardware revision levels.

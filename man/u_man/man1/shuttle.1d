@@ -1,0 +1,65 @@
+'\"macro stdmacro
+.TH SHUTTLE 1D
+.SH NAME
+shuttle \- depthcued wireframe model of the space shuttle
+.SH SYNOPSIS
+.nf
+.B /usr/people/demos/shuttle  
+.PP
+.B /usr/people/mexdemos/shuttle
+.fi
+.SH DESCRIPTION
+.PP
+.I Shuttle 
+is a PATRAN model of NASA's space shuttle.
+The main body (white) is composed of 625 quadrilaterals and 66 triangles.
+The doors (red) are drawn with 96 vectors each.
+.sp
+The shuttle is intensity depth cued.  32 different intensities of red 
+and white are used to shade both the standalone and window manager versions
+of the model.  
+.sp
+The mouse buttons 
+control rotation about the x, y and z axes, viewer distance, and z-clipping.
+Unless otherwise noted, only the x-movement of the mouse is a significant
+valuator when holding down a mouse button.  
+Any key toggles opening & closing motion of the bay doors on the shuttle.
+The space bar is a good key to use to open and close the doors.
+.sp
+.nf
+	Mouse buttons		Function
+.sp
+	left			rotation about x-axis through mouse x-motion
+.br
+	middle			rotation about y-axis through mouse x-motion
+.br
+	right 			rotation about z-axis through mouse x-motion
+.br
+	left & middle 		translate object through mouse x & y motion 
+.br
+	left & right 		translate back
+.br
+     	middle & right		translate forward
+.br
+    	all			move near z-clipping plane via mouse x-motion
+.sp
+.fi
+The operator also uses some keyboard keys to control the shuttle.
+.sp
+.sp
+.nf
+	Keyboard		Function
+.sp
+	space bar		start or stop movement of doors
+.br
+	ENTER			turn depthcueing on and off
+.br
+	ESC			quit the program
+.sp
+.fi
+.sp
+.SH "WINDOW MANAGER"
+.PP
+There is a window manager version of shuttle.
+The cargo bay doors do \f3not\f1 stay in motion when
+the window is detached.

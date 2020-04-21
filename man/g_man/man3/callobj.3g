@@ -1,0 +1,42 @@
+.TH callobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B callobj
+\- draws an instance of an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "callobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine callob(obj)"
+.B "integer*4 obj"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure callobj(obj: Object);"
+.SH DESCRIPTION
+.B callobj
+draws an instance of a previously defined object.  
+\f2obj\f1 is the 
+object identifier.
+If
+.B callobj
+specifies an undefined object, the system ignores the routine.
+.PP
+Global state attributes are not saved before a call to \f3callobj\f1.  
+For example, if
+you change a
+variable within an object, such as color, the change can
+affect the caller as well.  Use \f3pushattributes\f1 and \f3popattributes\f1
+to preserve global state attributes across \f3callobj\f1 calls.
+.SH "SEE ALSO"
+makeobj, popattributes, pushattributes
+.sp
+.I Programming Guide,
+Section 8.2, Using Objects

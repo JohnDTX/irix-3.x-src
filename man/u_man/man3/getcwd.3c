@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH GETCWD 3C 
+.SH NAME
+getcwd \- get pathname of current working directory
+.SH SYNOPSIS
+.nf
+.B char \(**getcwd (buf, size)
+.B char \(**buf;
+.B int size;
+.fi
+.SH DESCRIPTION
+.I Getcwd\^
+returns a pointer to
+the current directory pathname.
+The value of
+.I size\^
+must be at least two greater than the length of the
+pathname to be returned.
+.PP
+If
+.I buf\^
+is a
+.SM NULL
+pointer,
+.I getcwd\^
+will obtain
+.I size\^
+bytes of space using
+.IR malloc\^ (3C).
+In this case, the pointer returned by
+.I getcwd\^
+may be used as the argument in a subsequent call to
+.IR free .
+.PP
+The function is implemented by using
+.IR popen\^ (3S)
+to pipe the output of the
+.IR pwd\^ (1)
+command into the specified string space.
+.SH EXAMPLE
+.RS
+.nf
+char \(**cwd, \(**getcwd();
+\&.
+\&.
+\&.
+if ((cwd = getcwd((char \(**)NULL, 64)) == NULL) {
+.RS
+perror(``pwd'');
+exit(1);
+.RE
+}
+printf(``%s\en'', cwd);
+.fi
+.RE
+.SH "SEE ALSO"
+pwd(1), malloc(3C), popen(3S).
+.SH DIAGNOSTICS
+Returns
+.SM
+.B NULL
+with
+.I errno\^
+set if
+.I size\^
+is not large enough, or if an error occurrs
+in a lower-level function.
+.\"	@(#)getcwd.3c	5.1 of 11/16/83

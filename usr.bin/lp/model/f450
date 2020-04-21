@@ -1,0 +1,114 @@
+
+# lp interface for DASI 450 terminal
+#
+#	All output is passed through the /usr/bin/450 filter
+#  or the /usr/lib/etx filter (if processed already by 450 driving
+#  table or filter)
+#  If the filter is not executable, then this interface will disable
+#  the lp printer which it was called to service.
+#
+#	SCCS @(#)f450	1.1
+# @(#)$Header: /d2/3.7/src/usr.bin/lp/model/RCS/f450,v 1.1 89/03/27 18:05:14 root Exp $
+# $Log:	f450,v $
+# Revision 1.1  89/03/27  18:05:14  root
+# Initial check-in for 3.7
+# 
+# Revision 1.2  85/03/15  15:20:01  bob
+# Added initial blank line (for csh) and what
+# 
+
+x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+if [ ! -x /usr/bin/450 ]
+then
+	disable -r"can't execute /usr/bin/450 filter" `basename $0`
+	exit 1
+fi
+if [ ! -x /usr/lib/etx ]
+then
+	disable -r"can't execute /usr/lib/etx filter" `basename $0`
+	exit 1
+fi
+optf=""
+optp=""
+for i in $5
+do
+	case "$i" in
+	-12 | 12) # use 12 pitch
+		optp=-12
+		;;
+	-e | e) # use etx filter
+		optf=-e;
+	esac
+done
+if [ X$optf = X-e ]
+then
+	filter="/usr/lib/etx"
+else
+	filter="/usr/bin/450 -f"
+fi
+(
+if [ X$optp = X-12 ]
+then
+	echo "\00334\033\037\013"
+else
+	echo "\00334\033\037\015"
+fi
+tabs -T450
+) | /usr/lib/etx
+(
+echo "\014\c"
+echo "$x\n$x\n$x\n$x\n"
+banner "$2"
+echo "\n"
+user=`grep "^$2:" /etc/passwd | line | cut -d: -f5`
+if [ -n "$user" ]
+then
+	echo "User: $user\n"
+else
+	echo "\n"
+fi
+echo "Request id: $1    Printer: `basename $0`\n"
+date
+echo "\n"
+if [ -n "$3" ]
+then
+	banner $3
+fi
+echo "\014\c"
+) | /usr/bin/450 -f
+errcode=$?
+if [ $errcode -ne 0 ]
+then
+	disable -r"error code $errcode from etx or 450 filter" `basename $0`
+fi
+(
+copies=$4
+shift; shift; shift; shift; shift
+files="$*"
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "\014\c"
+	done
+	i=`expr $i + 1`
+done
+) | $filter
+errcode=$?
+if [ $errcode -ne 0 ]
+then
+	disable -r"error code $errcode from etx or 450 filter" `basename $0`
+fi
+(
+echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n$x\n$x\n$x\n$x"
+echo "$x\n$x\n$x\n$x\n"
+) | /usr/bin/450 -f
+errcode=$?
+if [ $errcode -ne 0 ]
+then
+	disable -r"error code $errcode from etx or 450 filter" `basename $0`
+fi
+exit 0

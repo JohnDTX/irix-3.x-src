@@ -1,0 +1,82 @@
+'\"macro stdmacro
+.TH ETHERS 3R
+.SH NAME
+ethers: ether_ntoa, ether_aton, ether_ntohost, ether_hostton, ether_line \- ethernet address mapping operations
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <net/if.h>
+.B #include <netinet/in.h>
+.B #include <netinet/if_ether.h>
+.PP
+.B char *ether_ntoa(e)
+.B struct ether_addr *e;
+.PP
+.B struct ether_addr *ether_aton(s)
+.B char *s;
+.PP
+.B ether_ntohost(hostname, e)
+.B char *hostname;
+.B struct ether_addr *e;
+.PP
+.B ether_hostton(hostname, e)
+.B char *hostname;
+.B struct ether_addr *e;
+.PP
+.B ether_line(l, e, hostname)
+.B char *l;
+.B struct ether_addr *e;
+.B char *hostname;
+.fi
+.SH DESCRIPTION
+.LP
+These routines are useful for mapping 48 bit ethernet numbers to their
+ASCII representations or their corresponding host names, and vice versa.
+.LP
+The function
+.I ether_ntoa
+converts a 48 bit ethernet number pointed to by
+.I e
+to its standard ACSII representation;
+it returns a pointer to the ASCII string.
+The representation is of the form: ``x:x:x:x:x:x'' where
+.I x
+is a hexadecimal number between 0 and ff.
+The function
+.I ether_aton
+converts an ASCII string in the standard representation back
+to a 48 bit ethernet number;  the function returns NULL if the string
+cannot be scanned successfully.
+.LP
+The function 
+.I ether_ntohost
+maps an ethernet number (pointed to by
+.IR e )
+to its associated hostname.  The string pointed to by
+.I hostname
+must be long enough to hold the hostname and a null character.
+The function returns zero upon success and non-zero upon failure.
+Inversely, the function
+.I ether_hostton
+maps a hostname string to its corresponding ethernet number;
+the function modifies the ethernet number pointed to by
+.IR e .
+The function also returns zero upon success and non-zero upon failure.
+.LP
+The function
+.I ether_line
+scans a line (pointed to by
+.IR l )
+and sets the hostname and the ethernet number (pointed to by
+.IR e ).
+The string pointed to by
+.I hostname
+must be long enough to hold the hostname and a null character.
+The function returns zero upon success and non-zero upon failure.
+.\"The format of the scanned line is described by
+.\".IR ethers (5).
+.\".SH FILES
+.\"/etc/ethers	(or the yellowpages' maps ethers.byaddr and ethers.byname)
+.SH "SEE ALSO"
+ethers(4)

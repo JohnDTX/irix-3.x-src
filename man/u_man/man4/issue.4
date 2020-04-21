@@ -1,0 +1,22 @@
+'\"macro stdmacro
+.TH ISSUE 4
+.SH NAME
+issue \- issue identification file
+.SH DESCRIPTION
+The file
+.B /etc/issue
+contains the
+.I issue
+or project identification
+to be printed as a login prompt.  This is an
+\s-1ASCII\s+1 file which is read by program
+.I getty
+and then written to any terminal spawned or respawned 
+from the
+.I lines
+file.
+.SH FILES
+/etc/issue
+.SH "SEE ALSO"
+login(1).
+.\"	@(#)issue.4	5.2 of 5/18/82

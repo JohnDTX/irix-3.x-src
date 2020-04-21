@@ -1,0 +1,55 @@
+.TH FLOAD 1M
+.SH NAME
+fload \- initialize the Sky floating point processor
+.SH SYNOPSIS
+.B /etc/fload
+.SH DESCRIPTION
+.PP
+.I Fload
+is run when the IRIS workstation is booted.  It probes for the Sky 
+floating point processor.  If the processor is found, it
+is initialized and its microcode loaded from the file 
+.I "/lib/skyffp.fas" .
+.PP
+The program can be run by the superuser under normal operating conditions.
+Since 
+.I fload
+does not access the board through the normal kernel utilities, any users
+of the board may be aborted when the program is run.
+.PP
+The Sky floating point processor is the optional floating point unit
+for the IRIS series.  
+.SH DIAGNOSTICS
+If 
+.I fload
+is run by a user who is not the superuser, the message
+.RS
+.B "          fload: phys call failed"
+.br
+.RE
+will be given.
+.PP
+If 
+.I fload 
+cannot access its microcode file (\f2/lib/skyffp.fas\fP), it will 
+complain.
+.PP
+If the Sky board is not visible in the system, i.e., either it has
+not been installed or is installed incorrectly, the message
+.RS
+.B "          fload: skyffp not installed"
+.br
+.RE
+will be displayed.
+.PP
+.I Fload
+does some cursory testing of the board.  If one of these tests fails,
+one of the messages
+.RS
+.nf
+.B "          fload: error initializing skyffp"
+.B "          fload: board test failure"
+.B "          fload: board function test failure"
+.fi
+.RE
+will be displayed.  In either of these cases, the board should be replaced.

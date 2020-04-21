@@ -1,0 +1,51 @@
+.TH pupcolor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pupcolor  
+\- specifies the current pop-up drawing color 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pupcolor(c)"
+.B "long c;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pupcol(c)"
+.B "integer*4 c
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pupcolor(c: longint);"
+.SH DESCRIPTION
+.B pupcolor
+specifies the current color for drawing into the pop-up bitplanes.
+The colors specified in the file 
+.I .mexrc
+range from 1 to 3.  In 
+.I .mexrc ,
+the commands 
+bindcolor cursor 255 0 0,
+bindcolor menu 20 20 20, 
+bindcolor menuback 220 220 220,
+associate pupcolors 1, 2, and 3 to the specified RGB values.
+.PP
+In 
+\f2gl.h\f1,
+.B PUP_CURSOR 
+is the cursor color, 
+.B PUP_BLACK
+is the menu color, and
+.B PUP_WHITE
+is the menu background color.
+.SH "SEE ALSO"
+endfullscrn, fullscrn, endpupmode, pupmode 
+.sp
+.I Using mex ,
+Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode under the window
+manager.

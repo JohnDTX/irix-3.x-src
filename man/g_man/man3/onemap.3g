@@ -1,0 +1,41 @@
+.TH onemap 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B onemap
+\- organizes the color map as one large map
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "onemap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine onemap"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure onemap;"
+.SH DESCRIPTION
+.B onemap
+organizes the color map as a single map
+with a maximum of 4096 RGB entries.
+The number of entries is 2\u\s-2p\s0\d,
+where 
+.I p
+is the number of available bitplanes.
+You must call \f3gconfig\f1 for
+.B onemap
+to take effect.
+The system is initially in
+.B onemap
+mode.
+.SH "SEE ALSO"
+gconfig, getcmmode, multimap, setmap
+.sp
+.I Programming Guide,
+Section 6.2, Color Maps 
+.SH NOTE
+This routine is available only in immediate mode.

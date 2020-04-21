@@ -1,0 +1,39 @@
+.TH replace  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I replace
+- overwrite existing display list commands with new ones
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "replace(t, offst) "
+.B "Tag t; "
+.B "Offset offst;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine replac(t, offst)"
+.B "integer t, offst"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure replace(t: Tag; offst: Offset);"
+.sp
+.SH DESCRIPTION
+.I Replace
+combines the functions of
+\f2insert\f1 and \f2delete\f1.
+It takes two arguments, a tag \f3t\f1 and an offset \f3offst\f1.
+Graphics commands that follow \f2replace\f1
+overwrite existing commands until a \f2closeobj\f1, 
+\f2insert\f1, \f2delete\f1,
+or \f2replace\f1 command terminates the replacement. \f2Replace\f1
+requires the new command to be the same length as the one it replaces,
+which makes replacement operations fast.  More general
+replacement can be done with the \f2delete\f1 and \f2insert\f1 commands.
+\f2Replace\f1 is meant as a quick means of replacing a command with
+a version of itself containing different arguments.
+.SH "SEE ALSO"
+.I closeobj, delete, editobj, insert
+.SH NOTE
+This command can only be used in immediate mode.

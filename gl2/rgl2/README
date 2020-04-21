@@ -1,0 +1,24 @@
+~/host/c
+
+This directory is set up for making the remote c library and associated
+files.  It needs $GLROOT/lib/$GLHDWR/lib.prim 
+(the same lib.prim used for remote c and
+Fortran).
+Everything else needed is here.  I just ran the Makefile, and it
+works on olympus with everything where it is.
+
+lib.c, io.c, and rgl.h should be useable for most any host running UNIX System
+V or bsd4.2.  Note the compiler switches described in the comments at the 
+beginning of io.c.
+
+'mandefs.cr' is a new innovation which as much as possible mimics the function
+call definitions in the gl2 manual.  It is very useful for checking the manual
+against to keep it correct and up to date, as it is automatically generated
+whenever a new graphics library is compiled.  I suggest regularly sending a
+copy to the documentation department.  'mandefs.fr' is available for Fortran,
+too.
+
+As much as possible, intelligence was taken out of the awk script and put into
+lib.prim.  'trybad' is used to try frlibgen.awk with a lib.prim with many
+errors in it, thereby trying many of the error conditions and messages in the
+awk script.

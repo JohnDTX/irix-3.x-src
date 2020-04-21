@@ -1,0 +1,182 @@
+.TH VOLCOPY 1M
+.SH NAME
+volcopy, labelit \- copy file systems with label checking
+.SH SYNOPSIS
+.B /etc/volcopy
+[\ options\ ] fsname special1 volname1 special2 volname2
+.PP
+.B /etc/labelit
+special [\ fsname volume [\ \f3\-n\fP\ ]\ ]
+.SH DESCRIPTION
+.I volcopy\^
+makes a literal copy of the file system
+using
+a blocksize matched to the device to which or from which it is copying.
+Bell file systems and Extent file systems are both supported
+(see
+.IR fs (4)).
+The file system type (Bell file system vs. Extent file system)
+is preserved.
+.I options
+are:
+.PD 0
+.RS .3i
+.TP
+.B \-a
+Invoke a verification sequence
+requiring a positive operator response.
+.TP
+.B \-s
+(default) Inhibit the
+verification sequence.
+.PD
+.RE
+.PP
+Other \f2options\fP are used only with tapes:
+.PD 0
+.RS .3i
+.TP \w'\f3\-bpi\fPdensity\ \ 'u
+.BI \-bpi density
+Bits-per-inch (i.e., 800/1600/6250).
+.TP
+.BI \-feet size
+Size of reel in feet (i.e., 1200/2400).
+.TP
+.BI \-reel num
+Beginning reel number for a restarted copy.
+.TP
+.B \-buf
+Use double buffered I/O.
+.PD
+.RE
+.PP
+The program requests length and density
+information if it is not given on the
+command line or is not recorded on an input tape label.
+If the file system is too large to fit on one reel,
+.I volcopy\^
+will prompt for additional reels.
+Labels of all reels are checked.
+Tapes may  be mounted alternately on two or more drives.
+.PP
+The
+.I fsname\^
+argument represents the mounted name (
+.IR root ,
+.IR u1 ,
+etc.)
+of the file system being copied.
+.PP
+The
+.I special\^
+device name should be the physical disk section or tape
+(\f2/dev/rmd1a, /dev/rmt1,\f1 etc.).
+.PP
+The
+.I volname\^
+argument is the physical volume name (e.g.:
+.IR pk3 ,
+.IR t0122 ,
+etc.)
+and should match the external label sticker.
+Such label names are limited to six or fewer characters.
+.I volname
+may be
+.B \-
+to use the existing volume name.
+.PP
+.I special1\^
+and
+.I volname1\^
+are the device and volume from which the copy of the file system is
+being extracted.
+.I special2\^
+and
+.I volname2\^
+are the destination device and volume.
+.PP
+.I fsname\^
+and
+.I volname\^
+are recorded in the last 12 characters
+of the superblock (\f2char fsname[6], volname[6];\fP).
+.PP
+.I labelit\^
+can be used to provide initial labels for unmounted disk
+or tape file systems.
+Bell file systems and Extent file systems are both supported
+(see
+.IR fs (4)).
+With the optional arguments omitted,
+.I labelit\^
+prints current label values.
+The
+.B \-n
+option provides for initial labeling of new tapes and
+destroys the previous contents of the tape.
+.SH EXAMPLE
+.IP
+volcopy newsys /dev/rmd0a 1 /dev/rmt1 1
+.PP
+copies volume 1 of the file system labeled 
+.I newsys 
+mounted on 
+.I /dev/rmd0a
+onto volume 1 of 
+.IR /dev/rmt1 .
+.IP
+labelit /dev/rmt1 oldsys save
+.PP
+relabels the file system mounted on 
+.I /dev/rmt1
+with a new 
+.I fsname 
+of 
+.I oldsys 
+and a new 
+.I volname 
+of save.
+.SH FILES
+.ta \w'/etc/log/filesave.log\ \ \ 'u
+/etc/log/filesave.log	a record of file systems/volumes copied
+.DT
+.SH "SEE ALSO"
+fs(4)
+.SH BUGS
+You can copy from tape to disk,
+from disk to disk,
+from disk to tape,
+but not from tape to tape.
+Only device names beginning
+.I /dev/rmt
+are treated as tapes.
+Tape record sizes are determined both by density and by
+drive type.
+Records are 5,120 bytes long at 800 and 1600
+bits-per-inch, and 25,600 bytes long at 6250 bits-per-inch.
+.\"	@(#)volcopy.1m	5.1 of 10/17/83
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/a_man/man1/RCS/volcopy.1m,v 1.1 89/03/27 16:40:52 root Exp $
+.\" $Log:	volcopy.1m,v $
+Revision 1.1  89/03/27  16:40:52  root
+Initial check-in for 3.7
+
+.\" Revision 1.5  85/09/25  13:43:26  robinf
+.\" Final version for Turbo Option
+.\" 
+.\" Revision 1.4  85/08/15  12:29:24  robinf
+.\" Updates after 1st review for Turbo option
+.\" 
+.\" Revision 1.3  85/07/26  11:10:41  locke
+.\" cosmetic changes
+.\" 
+.\" Revision 1.2  85/07/12  17:20:17  robinf
+.\" Update for IRIS 3400
+.\" 
+.\" Revision 1.1  85/05/01  17:02:15  robinf
+.\" Updates from 2000 Series workstation guide, Version 1.0
+
+.\" Revision 1.2  85/03/12  01:13:10  bob
+.\" Changed to reflect that there is no longer "hit DEL to abort" or the
+.\" sleep(10).
+.\" Changed device names to SGI standards.
+.\" 

@@ -1,0 +1,87 @@
+'\"macro stdmacro
+.TH ACCTPRC 1M
+.SH NAME
+acctprc1, acctprc2 \- process accounting
+.SH SYNOPSIS
+.B /usr/lib/acct/acctprc1
+[\^\f3ctmp\fP\^]
+.PP
+.B /usr/lib/acct/acctprc2
+.SH DESCRIPTION
+.I Acctprc1\^
+reads input in the form described by
+.IR acct (4),
+adds login names corresponding to user
+.SM ID\*Ss,
+then writes for each process an
+.SM ASCII
+line giving
+user
+.SM ID\*S,
+login name,
+prime
+.SM CPU
+time (tics),
+non-prime
+.SM CPU
+time (tics),
+and mean memory size (in 64-byte units).
+If
+.B ctmp
+is given,
+it is expected to contain a list of login sessions,
+in the form described in
+.IR acctcon (1M),
+sorted by user
+.SM ID
+and login name.
+If this file is not supplied,
+it obtains login names from the password file.
+The information in
+.B ctmp
+helps it distinguish among different login names that share the same user
+.SM ID\*S.
+.PP
+.I Acctprc2\^
+reads records in the form written by
+.IR acctprc1 ,
+summarizes them by user
+.SM ID
+and name,
+then writes the sorted summaries to the standard output
+as total accounting records.
+.SH EXAMPLE
+.PP
+These commands are typically used as shown below:
+.PP
+.RS
+acctprc1 \|ctmp \|</usr/adm/pacct \|\(bv \|acctprc2 \|>ptacct
+.RE
+.SH FILES
+/etc/passwd
+.SH SEE ALSO
+acct(1M),
+acctcms(1M),
+acctcom(1),
+acctcon(1M),
+acctmerg(1M),
+acctsh(1M),
+fwtmp(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.SH BUGS
+Although it is possible to distinguish among login names
+that share user
+.SM ID\*Ss
+for commands run normally,
+it is difficult to do this for those commands run from
+.IR cron (1M),
+for example.
+More precise conversion can be done by faking login sessions
+on the console via the
+.I acctwtmp\^
+program in
+.IR acct (1M).
+.\"	@(#)acctprc.1m	5.1 of 10/17/83

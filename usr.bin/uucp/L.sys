@@ -1,0 +1,9 @@
+# ACU dialing with Ventel modem by hand (don't supply getty for ttyd3)
+ventel  Any ttyd3 1200 ttyd3 "" \r\d\r\c $-q\r\d\r\c-$-q\r\d\r\c-$-q\r\d\r\c-$ K\c DIAL: 5\d5\d5\d1\d2\d1\d2\d\r\c ONLINE! \r\c ogin:-\r\c-ogin:-\r\c-ogin:--ogin:-EOT-ogin:-BREAK3-ogin: uucp assword: censored
+
+# generic xns ethernet connection
+works2   Any xns  xns  xns  "" \r\c ogin:--ogin: uucpco assword: secret
+
+# use either of two Hayes modems on ttym6 or ttym7
+#	Lines like this appear in the SGI uucp gateway.
+hayes	Any ACU 2400 1 "" \rATS2=128\r\c OK atdt415-555-1212\r 2400-\c-2400 \r ogin:-\b\d-ogin: @uucp ssword: secret

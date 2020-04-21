@@ -1,0 +1,63 @@
+'\"macro stdmacro
+.TH ZSHADECAR 1D
+.SH NAME
+zshadecar, zshadeabstract, zshadeegg, zshadejet \- shading and z-buffering demo
+.SH SYNOPSIS
+.B /usr/people/mexdemos/zshadecar
+.br
+.B /usr/people/mexdemos/zshadeabstract
+.br
+.B /usr/people/mexdemos/zshadeegg
+.br
+.B /usr/people/mexdemos/zshadejet
+.SH DESCRIPTION
+.PP
+These programs demonstrate advanced graphics features of the  
+IRIS:  
+cubic patches, depth cuing, z-buffering and Gouraud shading.  The objects
+are formed of bi-cubic patches.
+.PP
+The first image to appear is a grey scale chart, representing the gamma
+corrected color map.  
+The next image is of lines connecting the basis points of the object.
+From these basis points a cubic patch is derived, 
+first shown as an array of points.
+.PP
+.sp
+Menu selections for invoking the various display modes are made by pressing one
+of the following keys:
+.ta \w'Key\ \ \ 'u
+.in +.5i
+.nf
+.na
+Key	Function
+d	turn on depth cuing
+p	draw point display
+s	draw as splines
+w	original wireframe
+z	z-buffer and Gouraud shaded version
+.in -.5i
+.PP
+To rotate the image, move the mouse in the X direction only. The mouse
+buttons select the axis of rotation:
+
+	LEFT mouse button rotates the car in X
+	MIDDLE mouse button rotates the car in Y
+	RIGHT mouse button rotates the car in Z
+.fi
+.ad
+.PP
+The usual way to operate the 
+program
+is to rotate the wire frame or point
+surface interactively to the desired position and then smooth shade and
+z-buffer it. 
+.PP
+.sp 2
+.SH HARDWARE CONFIGURATION
+A minimum configuration of 32 bitplanes, 1.5 Megabytes of memory, and
+Z-clipping is required.
+.SH SEE ALSO
+surfcar(1D)
+.SH AUTHOR
+Henry Moreton

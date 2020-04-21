@@ -1,0 +1,16 @@
+'\"macro stdmacro
+.TH TEXBACK 1W
+.SH NAME
+texback \- generate a textured background texture
+.SH SYNOPSIS
+.B texback 
+number
+.SH DESCRIPTION
+.I texback 
+generates a textured background for the window manager.
+.I number 
+is an integer from 1 to 16 which selects a texture 
+pattern; larger numbers
+produce unpredictable results.
+.SH SEE ALSO
+startup(1W)

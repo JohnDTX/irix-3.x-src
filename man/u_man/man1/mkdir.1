@@ -1,0 +1,45 @@
+'\"macro stdmacro
+.TH MKDIR 1 
+.SH NAME
+mkdir \- make a directory
+.SH SYNOPSIS
+.B mkdir
+dirname ...
+.SH DESCRIPTION
+.I Mkdir\^
+creates specified directories
+in mode 777 (possibly altered by
+.IR umask\^ (1)).
+Standard entries,
+.BR . ,
+for the directory itself,
+and 
+.BR .. ,
+for its parent, are made automatically.
+These and other directories beginning with
+.B .
+are not visible in listings unless you use
+the
+.B -a
+option to
+.IR ls .
+.PP
+.I Mkdir\^
+requires write permission in the parent directory.
+.SH EXAMPLE
+.IP
+mkdir letters
+.PP
+creates a directory 
+.B letters
+as a subdirectory of the
+directory you are in at the time you employ the command.
+.SH "SEE ALSO"
+rm(1),
+sh(1),
+umask(1).
+.SH DIAGNOSTICS
+.I Mkdir\^
+returns exit code 0 if all directories were successfully made;
+otherwise, it prints a diagnostic and returns non-zero.
+.\"	@(#)mkdir.1	5.1 of 11/8/83

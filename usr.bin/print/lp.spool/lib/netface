@@ -1,0 +1,116 @@
+#! /bin/sh
+# lp interface for network printing. This is configured by `mknetprinter'
+# 
+#
+#
+# 
+
+host=XHOSTX
+
+tcpuser="-l lp"
+
+#find out if we're TCP or XNS
+rcmd="rsh"
+rcpy="rcp"
+if test -x /etc/havetcp \
+    && /etc/havetcp ; then
+   rmhost="lp@$host"
+else
+   rcmd="xx"
+   rcpy="xcp"
+   tcpuser=
+   rmhost="$host"
+fi
+
+log=XLOGX
+tries=5
+LocalPrinter=`basename $0`
+printer=XPRINTERX
+seqid=$1
+name=$2
+title="$3"
+copies=$4
+options=$5
+
+echo "Start $seqid - `date`" >>  $log
+
+shift; shift; shift; shift; shift
+firstfile=$1
+
+files="$*"
+
+for opt in $options
+    do
+        case $opt in
+	    erase)	erase=$j;;
+	    *)	    opts="$opts -o$opt" ;;
+        esac
+    done
+
+remtitle="$name@`hostname`:"
+if [ -z "$title" ] ; then
+	remtitle="$remtitle `basename $firstfile`"
+else
+	remtitle="$remtitle $title"
+fi
+
+#see if the remote host is up
+
+response=`$rcmd $host $tcpuser hostname`
+if [ -z "$response" ] ; then
+	disable -r"Host \"$host\" does not respond" $LocalPrinter
+	exit 1
+fi
+
+if [ $host != $response ] ; then
+err="$printer's machine, \"$host\", responds: \"$response\" "
+	disable -r"$err" $LocalPrinter
+	exit 1
+fi
+
+
+i=0
+j=0
+fsent=
+
+for file in $files
+    do
+	thisfile="$$.$j-`hostname`"
+	j=`expr $j + 1`
+	fsent="$fsent $thisfile"    
+
+	until $rcpy $file $rmhost:/usr/tmp/$thisfile
+	do
+	    sleep 10
+	    i=`expr $i + 1`
+	    if [ $i < $tries ] ; then
+		    err="$printer's machine, \"$host\", doesn't take transfer"
+#		    disable -r"$err" $LocalPrinter
+		    exit 1
+		fi
+	    done
+    done
+
+printit="(cd /usr/tmp ; lp -d$printer -oerase -t\"$remtitle\" -n$copies \
+$opts $fsent )"
+
+until $rcmd "$host" "$printit"
+    do	sleep 10
+	i=`expr $i + 1`
+	if [ $i < $tries ] ; then
+	    err="$printer's machine, \"$host\", doesn't execute lp"
+#	    disable -r"$err" $LocalPrinter
+	    exit 1
+	fi
+    done
+
+if [ -n "$erase" ] ; then
+    rm -f $files
+fi
+
+
+echo "Sent $remtitle to $printer on $host" >>  $log
+echo "End $seqid - `date`" >>  $log
+exit 0
+
+

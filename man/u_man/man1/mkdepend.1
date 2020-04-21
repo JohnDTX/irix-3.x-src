@@ -1,0 +1,39 @@
+'\"macro stdmacro
+.TH MKDEPEND 1
+.SH NAME
+mkdepend \- compute header file dependencies
+.SH SYNOPSIS
+.B mkdepend
+[-c compilehow] [-e sedprog] [-f force] [-i] makefile file ...
+.SH DESCRIPTION
+.I Mkdepend
+infers make dependencies from source containing C #include
+directives.  Given a shell command compilehow which consists of cc
+followed by options, mkdepend processes its file arguments and edits
+the generated dependency information into makefile.
+.PP
+The -e flag passes an immediate program to sed, which is applied to
+raw dependency information of the following form:
+.sp	    
+	target: dependent
+.PP
+Thus one may substitute pathname prefixes with envariable parameters,
+for example.
+.PP
+The -f flag causes mkdepend to add a dependent named force to each
+target file's dependency list.  Using -f '$(FRC)' and setting FRC=FRC
+in a make's environment, one may rebuild certain objects without first
+removing them.
+.PP
+Normally, old dependencies are deleted from the makefile.  The -i
+option causes mkdepend to preserve old dependencies.  When invoked
+from a makefile, the following rule enables incremental updates to
+the dependency database:
+.sp
+.nf
+.na
+	incdepend: $(SRCS)
+		mkdepend -c "$(CC) $(CFLAGS)" -i Makefile $?
+		touch incdepend
+.fi
+.ad

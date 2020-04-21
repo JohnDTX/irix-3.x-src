@@ -1,0 +1,41 @@
+.TH pushmatrix 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B pushmatrix
+\- pushes down the transformation matrix stack
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushmatrix()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushma"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushmatrix;"
+.SH DESCRIPTION
+.B pushmatrix
+pushes down the transformation matrix stack,
+duplicating the current matrix.
+For example, if the stack contains one matrix,
+.I M,
+after a call to 
+\f3pushmatrix\f1,
+the matrix contains two copies of
+.I M.
+The top copy can be modified.
+.PP
+The transformation matrix stack is 8 levels 
+in hardware and is 32 levels in
+software.
+.SH "SEE ALSO"
+loadmatrix, multmatrix, popmatrix
+.sp
+.I Programming Guide,
+Section 4.5, User-Defined Transformations
+

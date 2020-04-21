@@ -1,0 +1,657 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: U.PHASE2.4.TEXT                           *)
+(*                                                                           *)
+(*          (C) Copyright 1982, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               16-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+  
+  procedure outrefs(ftree: psymbol; var freloclist: pintlist;
+                                    var fpatchlist: ppatchlist;
+                                    var fjtpatchlist: ppatchlist;
+                                    var frelpatchlist: ppatchlist);
+    var lreloclist: pintlist; 
+        lpatchlist,ljtpatchlist,lrelpatchlist: ppatchlist;
+        lpref: preflist;
+  begin
+  freloclist := nil;
+  fpatchlist := nil;
+  fjtpatchlist := nil;
+  frelpatchlist := nil;
+  if ftree <> nil
+  then with ftree^ do
+         begin
+         outrefs(rlink,freloclist,fpatchlist,fjtpatchlist,frelpatchlist);
+         if Defined and (seg = thisseg)
+         then begin
+              lreloclist := nil;
+              lpatchlist := nil;
+              lrelpatchlist := nil;
+              lpref := sreflist;
+              while lpref <> nil do
+                    begin
+                    if lpref^.refseg = thisseg^.segnum
+                    then if lpref^.ShortRef
+                         then insertpatch(lrelpatchlist,
+                                  loc - lpref^.refloc,lpref^.refloc)
+                         else begin
+                              insertint(lreloclist,lpref^.refloc);
+                              insertpatch(lpatchlist,loc,lpref^.refloc);
+                              end;
+                    lpref := lpref^.nextref;
+                    end;
+              freloclist := mergeintlists(freloclist,lreloclist);
+              fpatchlist := mergepatchlists(fpatchlist,lpatchlist);
+              frelpatchlist := mergepatchlists(frelpatchlist,
+                                               lrelpatchlist);
+              end
+         else begin { (Not Defined) or (seg <> thisseg) }
+              lpatchlist := nil;
+              ljtpatchlist := nil;
+              lpref := sreflist;
+              while lpref <> nil do
+                    begin
+                    if lpref^.refseg = thisseg^.segnum
+                    then if lpref^.ShortRef
+                         then insertpatch(ljtpatchlist,jtloc,lpref^.refloc)
+                         else fatal_error('Must not use long intersegment calls');
+                    lpref := lpref^.nextref;
+                    end;
+              fpatchlist := mergepatchlists(fpatchlist,lpatchlist);
+              fjtpatchlist := mergepatchlists(fjtpatchlist,ljtpatchlist);
+              end;
+         outrefs(llink,lreloclist,lpatchlist,ljtpatchlist,lrelpatchlist);
+         freloclist := mergeintlists(freloclist,lreloclist);
+         fpatchlist := mergepatchlists(fpatchlist,lpatchlist);
+         fjtpatchlist := mergepatchlists(fjtpatchlist,ljtpatchlist);
+         frelpatchlist := mergepatchlists(frelpatchlist,lrelpatchlist);
+         end;
+  end; {outrefs}
+  
+  procedure outcode;
+    var i,codesize: integer; DoneFlag: Boolean; blocksize: longint;
+    
+    { +----+ }
+    { | 85 | } { Self-relocating }
+    { +----+ }
+    
+    procedure code2block;
+      var address,i: integer; blocksize: longint;
+          longtemp: record
+                      case Boolean of
+                        TRUE:  (li: longint);
+                        FALSE: (ia: array[0..1] of integer);
+                    end;
+          Relocatable: Boolean;
+          trick: record
+                   case Boolean of
+                     FALSE: (c: array[0..1] of bite);
+                     TRUE:  (k: integer);
+                 end;
+    begin
+    blocksize := next3bytes;
+    address := next4bytes + baseloc;
+    for i := 1 to (blocksize - 8) div 2 do
+        begin
+        if ENVIRONMENT = ADVENTURE then Relocatable := FALSE;
+        
+        { INLINE trick.k := nextword; }
+        if inword > lastinword
+        then begin
+             inword := 0; inblock := nextinblock;
+             readinfile('infile');
+             end;
+        trick.k := inbuff[inword];
+        inword := inword + 1;
+        
+        if headpatchlist <> nil
+        then begin
+             if address - headpatchlist^.patchloc >= 0
+             then case address - headpatchlist^.patchloc of
+                    0: trick.k := 0;
+                    2: begin
+                       trick.k := trick.k + headpatchlist^.patchval;
+                       headpatchlist := headpatchlist^.nextpatch;
+                       end;
+                  end;
+             end;
+        if headjtpatchlist <> nil
+        then begin
+             if address - headjtpatchlist^.patchloc >= -2
+             then case address - headjtpatchlist^.patchloc of
+                   -2: trick.k := (trick.k div 64)*64 + 44;  { xxxx(A4) }
+                    0: begin
+                       trick.k := trick.k + headjtpatchlist^.patchval;
+                       headjtpatchlist := headjtpatchlist^.nextpatch;
+                       end;
+                  end;
+             end;
+        if headrelpatchlist <> nil
+        then begin
+             if address - headrelpatchlist^.patchloc >= -2
+             then case address - headrelpatchlist^.patchloc of
+                   -2: trick.k := (trick.k div 64)*64 + 58;  { PC+xxxx }
+                    0: begin
+                       trick.k := trick.k + headrelpatchlist^.patchval;
+                       headrelpatchlist := headrelpatchlist^.nextpatch;
+                       end;
+                  end;
+             end;
+        if ENVIRONMENT = UNOS {performance only}
+        then
+          if ftextpatchlist <> nil
+          then begin
+               if address = ftextpatchlist^.patchloc
+               then begin
+                 longtemp.ia[0] := trick.k; longtemp.ia[1] := nextword;
+                 i := i + 1; address := address + 2;
+                 longtemp.li := longtemp.li + ftextpatchlist^.patchval;
+                 iout(longtemp.ia[0],2); trick.k := longtemp.ia[1];
+                 ftextpatchlist := ftextpatchlist^.nextpatch;
+                 if ENVIRONMENT = ADVENTURE then Relocatable := TRUE;
+                 end;
+               end;
+        if fdatapatchlist <> nil
+        then begin
+             if address = fdatapatchlist^.patchloc
+             then begin
+               longtemp.ia[0] := trick.k; longtemp.ia[1] := nextword;
+               i := i + 1; address := address + 2;
+               if (ENVIRONMENT = ALTOS) or 
+                  (ENVIRONMENT = REGULUS) or 
+                  (ENVIRONMENT = CPM)
+               then longtemp.li := longtemp.li + fdatapatchlist^.patchval
+               else longtemp.li := longtemp.li + fdatapatchlist^.patchval + 
+                                   totalcodesize;
+               iout(longtemp.ia[0],2); trick.k := longtemp.ia[1];
+               fdatapatchlist := fdatapatchlist^.nextpatch;
+               if ENVIRONMENT = ADVENTURE then Relocatable := TRUE;
+               end;
+             end;
+        if fbsspatchlist <> nil
+        then begin
+             if address = fbsspatchlist^.patchloc
+             then begin
+               longtemp.ia[0] := trick.k; longtemp.ia[1] := nextword;
+               i := i + 1; address := address + 2;
+               if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+               then longtemp.li := longtemp.li + fbsspatchlist^.patchval
+               else
+                 if ENVIRONMENT = ALTOS
+                 then longtemp.li := longtemp.li + fbsspatchlist^.patchval + 
+                                     datasize
+                 else longtemp.li := longtemp.li + fbsspatchlist^.patchval + 
+                                     totalcodesize + datasize;
+               iout(longtemp.ia[0],2); trick.k := longtemp.ia[1];
+               fbsspatchlist := fbsspatchlist^.nextpatch;
+               if ENVIRONMENT = ADVENTURE then Relocatable := TRUE;
+               end;
+             end;
+        
+        { INLINE iout(trick.k,2); }
+        if ENVIRONMENT = ADVENTURE
+        then begin
+          ioutone(hex[trick.c[0] and $00F0]);
+          ioutone(hex[trick.c[0] and $000F]);
+          ioutone(hex[trick.c[1] and $00F0]);
+          ioutone(hex[trick.c[1] and $000F]);
+          end
+        else begin {ENVIRONMENT <> ADVENTURE}
+          { INLINE ioutone(trick.c[0]); }
+          if ioutbyte > MAXOUTBYTE
+          then begin
+               flushiout; ioutbyte := 0;
+               end;
+          ioutbuffer[ioutbyte] := trick.c[0];
+          ioutbyte := ioutbyte + 1;
+          { INLINE ioutone(trick.c[1]); }
+          if ioutbyte > MAXOUTBYTE
+          then begin
+               flushiout; ioutbyte := 0;
+               end;
+          ioutbuffer[ioutbyte] := trick.c[1];
+          ioutbyte := ioutbyte + 1;
+          end;
+        
+        if ENVIRONMENT = ADVENTURE 
+        then 
+          if Relocatable then ioutone(ord('R'));
+        address := address + 2;
+        end;
+    end; {code2block}
+    
+  begin {outcode}
+  HalfFlag := FALSE; DoneFlag := False; i := nextbyte;
+  while (i <> 0) and not DoneFlag do
+        begin
+        i := i - 128;
+        case i of
+             0, { headblock   }
+             2, { entryblock  }
+             3, { lngextblock }
+             4, { startblock  }
+             6, { relocblock  }
+             7, { fdfrelblock }
+             9, { shtextblock }
+            10, { ftndatadef  }
+            11, { ftndatainit }
+            12, { fdrefblock }
+            13, { ftndatarel  }
+            32, { vartypblock }
+            33: { bpointblock }
+                begin
+                blocksize := next3bytes;
+                if odd(blocksize) then blocksize := blocksize + 1;
+                skip(blocksize - 4);
+                end;
+             1: { endblock    }
+                begin
+                blocksize := next3bytes;
+                codesize := next4bytes;
+                baseloc := baseloc + codesize;
+                DoneFlag := TRUE;
+                end;
+             5: code2block;
+             otherwise: begin
+                        error('Bad block'); write('*** Value = ');
+                        printhex(output,i + 128,2); writeln(' ***');
+                        DoneFlag := TRUE;
+                        end;
+        end; (* case *)
+        i := nextbyte;
+        end;
+  end; {outcode}
+
+begin {phase2}
+if CConstructs and DataInText
+then fatal_error('Must not have text resident data areas with ''C''.');
+if ENVIRONMENT <> UNOS
+then
+  if DataInText
+  then fatal_error('Text relative data areas only supported under UNOS');
+
+thisfile := nil; 
+countundefrefs;
+ioutheaderandjumptable;
+
+thisseg := seglist;
+while thisseg <> nil do
+      begin
+      if ListOpen
+      then begin
+        writeln(listfile,'Linking segment ''',thisseg^.segname,
+                         ''' (',thisseg^.codesize:1,')');
+        if (ENVIRONMENT = IDRIS) or 
+           (ENVIRONMENT = ADVENTURE)
+        then writeln(listfile,'  Initial memavail = ',memavail:5);
+        end;
+      if (thisseg^.codesize < 0) or (thisseg^.codesize > 32767)
+      then begin
+        writeln('*** Linking segment ''',thisseg^.segname,'''');
+        error('Code segment size > 32767 bytes');
+        end;
+      mark(heapmark);
+      ftextpatchlist := nil; fdatapatchlist := nil; fbsspatchlist := nil;
+      walkfcommon(ftndatatree);
+      baseloc := 0;
+      headpatchlist := nil;
+      headjtpatchlist := nil;
+      headrelpatchlist := nil;
+      reloclist := thisseg^.segreloclist;
+      
+      { Never output a definition of $_START.  That   }
+      { is implied by the existance of a start block. }
+      
+      outrefs(nametree^.rlink,locreloclist,locpatchlist,
+                              locjtpatchlist,locrelpatchlist);
+      reloclist := mergeintlists(reloclist,locreloclist);
+      headpatchlist := mergepatchlists(headpatchlist,locpatchlist);
+      headjtpatchlist := mergepatchlists(headjtpatchlist,locjtpatchlist);
+      headrelpatchlist := mergepatchlists(headrelpatchlist,locrelpatchlist);
+      
+      outrefs(nametree^.llink,locreloclist,locpatchlist,
+                              locjtpatchlist,locrelpatchlist);
+      reloclist := mergeintlists(reloclist,locreloclist);
+      headpatchlist := mergepatchlists(headpatchlist,locpatchlist);
+      headjtpatchlist := mergepatchlists(headjtpatchlist,locjtpatchlist);
+      headrelpatchlist := mergepatchlists(headrelpatchlist,locrelpatchlist);
+      
+      { Self-Relocating Code Block: }
+      
+      { !!! Doesn't handle ORG or RES in assembler yet !!! }
+      
+      lmodlist := thisseg^.modlist;
+      while lmodlist <> nil do
+            begin
+            seekmodule(lmodlist);
+            outcode;
+            lmodlist := lmodlist^.nextmodule;
+            end;
+      
+      { Relocation Block: }
+      
+      if reloclist <> nil
+      then begin
+           fatal_error('!!! relocation list not nil !!!');
+           i := 0; lpint := reloclist;
+           while lpint <> nil do
+                 begin i := i + 1; lpint := lpint^.nextint; end;
+           (***iout(-122,1); iout((i+1)*4,3); ***)
+           lpint := reloclist;
+           while lpint <> nil do begin
+                 (***iout(lpint^.intval,4); ***) lpint := lpint^.nextint;
+                 end;
+           end;
+      
+      if ListOpen and 
+         ((ENVIRONMENT = IDRIS) or 
+          (ENVIRONMENT = ADVENTURE))
+      then writeln(listfile,'  Final memavail = ',memavail:7);
+      release(heapmark);
+      thisseg := thisseg^.nextseg;
+      end;
+
+if TextRounded then iout(0,2); {Make text section correspond to size}
+
+idataarea;
+
+if (ENVIRONMENT = UNOS) or (ENVIRONMENT = ALTOS) or
+   (ENVIRONMENT = QU68000) or (ENVIRONMENT = CT) or
+   (ENVIRONMENT = LANDL) or (ENVIRONMENT = NCR) or
+   (ENVIRONMENT = ARETE) or (ENVIRONMENT = BERKELEY) or
+   (ENVIRONMENT = NBI) or (ENVIRONMENT = PLEXUS) or
+   (ENVIRONMENT = MULTI)
+then irelocation;
+
+if ENVIRONMENT = IDRIS
+then begin
+  isymtab(nametree);
+  isymtab2(nametree);
+  { Symbol table entry for _main }
+  iout(0,4);  { symbol value text relative addr of _main }
+  iout(13,1); { global text relative }
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  iout(0,4); iout(0,2); { Null pad }
+  end
+else if ENVIRONMENT = UNISOFT
+then begin
+  usymtab(nametree);
+  usymtab2(nametree);
+  { Symbol table entry for _main or main }
+  iout(34,1); {defined external}
+  if ALIGNMENT = DOUBLEWORD
+  then iout(0,3)   {alignment characters}
+  else iout(0,1);  {alignment character }
+  iout(0,4);       { symbol value text relative addr of _main or main }
+  if UNDERSCORE
+  then begin
+    lname := '_main   '; 
+    for i := 1 to 5 do iout(ord(lname[i]),1);
+    end
+  else begin
+    lname := 'main    '; 
+    for i := 1 to 4 do iout(ord(lname[i]),1);
+    end;
+  iout(0,1);
+  end
+else if ENVIRONMENT = SANTACRUZ
+then begin
+  usymtab(nametree);
+  usymtab2(nametree);
+  { Symbol table entry for _main or main }
+  iout(34,2); {defined external}
+  iout(0,2);  {padding}
+  iout(0,4);  { symbol value text relative addr of _main or main }
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  iout(0,1);
+  end
+else if ENVIRONMENT = ALTOS
+then begin
+  stringpos := 1;
+  { Symbol Table }
+  lsymtab(nametree);
+  lsymtab2(nametree);
+  { Symbol table entry for _main or main }
+  iout(stringpos,4); {position of name in string table}
+  iout(0,4); {symbol value text relative addr of _main}
+  iout(11,1); { text external }
+  iout(0,3); iout(0,4); { filler for supplemenary info }
+  { String Table }
+  iout(0,1); { string table begins with a zero byte}
+  lstrtab(nametree);  {String table}
+  lstrtab2(nametree); {String table}
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  iout(0,1);
+  end
+else if ENVIRONMENT = UNOS
+then begin
+  csymtab(nametree);
+  csymtab2(nametree);
+  { Symbol table entry for _main }
+  iout(18,2); {global defined external}
+  iout(0,4);  { symbol value text relative addr of _main }
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  for i := 6 to 16 do iout(0,1);
+  end
+else if ENVIRONMENT = ADVENTURE
+then asymtab2(nametree)
+else if (ENVIRONMENT = QU68000) or (ENVIRONMENT = MULTI)
+then begin
+  qusymtab(nametree);
+  qusymtab2(nametree);
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  iout(0,3);
+  if ENVIRONMENT = QU68000
+  then begin
+    iout(0,4); iout(0,4); { Null pad }
+    { Symbol table entry for _main }
+    iout(34,2); { global text relative }
+    end
+  else begin iout(34,1); iout(0,1); end;
+  iout(0,4);  { symbol value text relative addr of _main }
+  end
+else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+then begin
+  rsymtab(nametree);
+  rsymtab2(nametree);
+  { Symbol table entry for _main }
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  iout(0,3); { Null pad }
+  iout(-24064,2); {global defined text rel}
+  iout(0,4);  { symbol value text relative addr of _main }
+  end
+else if (ENVIRONMENT = CT) or (ENVIRONMENT = NCR) or (ENVIRONMENT = ARETE) or
+        (ENVIRONMENT = PLEXUS)
+then begin
+  tsymtab(nametree);
+  tsymtab2(nametree);
+  if UNDERSCORE
+  then ioutname('_main   ')
+  else ioutname('main    ');
+  iout(0,4);       { symbol value text relative addr of _main or main }
+  iout(1,2);       { section number }
+  iout(0,2);       { type }
+  iout(2,1);       { storage class external }
+  iout(0,1);       { no aux entries }
+  if (ENVIRONMENT = CT) or (ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)
+  then begin
+    ioutname('.text   ');
+    iout(0,4);       { symbol value }
+    iout(1,2);       { section number }
+    iout(0,2);       { type }
+    iout(3,1);       { storage class static }
+    if ENVIRONMENT = CT
+    then iout(0,1)   { no aux entries }
+    else begin {(ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)}
+      iout(1,1);     { one aux entries }
+        {Aux entry}
+      iout(totalcodesize,4);
+      iout(totalbytesrelocationinfo div 10,2);
+      iout(0,4); iout(0,4); iout(0,4); 
+      end;
+    ioutname('.data   ');
+    iout(totalcodesize,4); { symbol value }
+    iout(2,2);       { section number }
+    iout(0,2);       { type }
+    iout(3,1);       { storage class static }
+    if ENVIRONMENT = CT
+    then iout(0,1)   { no aux entries }
+    else begin {(ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)}
+      iout(1,1);     { one aux entries }
+        {Aux entry}
+      iout(datasize,4);
+      iout(totalbytesdatarelocationinfo div 10,2);
+      iout(0,4); iout(0,4); iout(0,4); 
+      end;
+    ioutname('.bss    ');
+    iout(totalcodesize+datasize,4); { symbol value }
+    iout(3,2);       { section number }
+    iout(0,2);       { type }
+    iout(3,1);       { storage class static }
+    if ENVIRONMENT = CT
+    then iout(0,1)   { no aux entries }
+    else begin {(ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)}
+      iout(1,1);     { one aux entries }
+        {Aux entry}
+      iout(bsssize,4);
+      iout(0,2);
+      iout(0,4); iout(0,4); iout(0,4); 
+      end;
+    end;
+  end
+else if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY) or
+        (ENVIRONMENT = NBI)
+then begin
+  stringpos := 4;
+  { Symbol Table }
+  llsymtab(nametree);
+  if (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = NBI) {for now} 
+  then llsymtab2(nametree);
+  { Symbol table entry for _main }
+  iout(stringpos,4); {position of name in string table}
+  iout(5,1); { ntype 5, text external }
+  iout(0,1); { unused }
+  iout(0,2); { descriptor }
+  iout(0,4); {symbol value text relative addr of _main}
+  { String Table }
+  iout(stringpos+6,4); { string table length }
+  lstrtab(nametree);  {String table}
+  if (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = NBI) {for now} 
+  then lstrtab2(nametree);
+  lname := '_main   '; 
+  for i := 1 to 5 do iout(ord(lname[i]),1);
+  iout(0,1);
+  end;
+
+if (ENVIRONMENT <> UNOS) and (ENVIRONMENT <> ALTOS) and
+   (ENVIRONMENT <> ADVENTURE) and (ENVIRONMENT <> QU68000) and
+   (ENVIRONMENT <> CT) and (ENVIRONMENT <> LANDL) and
+   (ENVIRONMENT <> NCR) and (ENVIRONMENT <> ARETE) and
+   (ENVIRONMENT <> BERKELEY) and (ENVIRONMENT <> NBI) and
+   (ENVIRONMENT <> PLEXUS) and (ENVIRONMENT <> MULTI)
+then irelocation;
+
+iout(0,4); {Four bytes of zeros makes System 5.2 happy and can't hurt}
+
+while (ioutbyte mod 512) <> 0 do
+  ioutone(0);
+if ioutbyte <> 0 then flushiout;
+
+if (ENVIRONMENT <> ADVENTURE) and 
+   (ENVIRONMENT <> QU68000) and
+   (ENVIRONMENT <> REGULUS) and
+   (ENVIRONMENT <> CPM)
+then begin { Patch header information back into code file }
+  thisfile := nil; {Messing up inbuff}
+  if blockread(ioutfile,inbuff,1,0) <> 1
+  then fatal_error('Can''t reread link file');
+  if ENVIRONMENT = IDRIS
+  then begin
+    inbuff[12] := totalcodesize div 65536; {Data bias}
+    inbuff[13] := totalcodesize mod 65536;
+    end
+  else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = MULTI)
+  then begin
+    inbuff[10] := totalbytesrelocationinfo div 65536;
+    inbuff[11] := totalbytesrelocationinfo mod 65536;
+    inbuff[12] := totalbytesdatarelocationinfo div 65536;
+    inbuff[13] := totalbytesdatarelocationinfo mod 65536;
+    end
+  else if ENVIRONMENT = SANTACRUZ
+  then begin
+    inbuff[10] := (totalbytesrelocationinfo + 
+                     totalbytesdatarelocationinfo) div 65536;
+    inbuff[11] := (totalbytesrelocationinfo +
+                     totalbytesdatarelocationinfo) mod 65536;
+    inbuff[16] := totalbytesrelocationinfo div 65536;
+    inbuff[17] := totalbytesrelocationinfo mod 65536;
+    inbuff[18] := totalbytesdatarelocationinfo div 65536;
+    inbuff[19] := totalbytesdatarelocationinfo mod 65536;
+    end
+  else if ENVIRONMENT = ALTOS
+  then begin
+    inbuff[22] := totalbytesrelocationinfo div 65536;
+    inbuff[23] := totalbytesrelocationinfo mod 65536;
+    end
+  else if ENVIRONMENT = UNOS
+  then begin
+    inbuff[12] := totalbytesrelocationinfo div 65536;
+    inbuff[13] := totalbytesrelocationinfo mod 65536;
+    inbuff[18] := inbuff[4]; inbuff[19] := inbuff[5]; {Data base}
+    inbuff[20] := (totalcodesize + datasize) div 65536;
+    inbuff[21] := (totalcodesize + datasize) mod 65536;
+    end
+  else if (ENVIRONMENT = CT) or (ENVIRONMENT = NCR) or (ENVIRONMENT = ARETE) or
+          (ENVIRONMENT = PLEXUS)
+  then begin
+    {File pointer to symbol table}
+    inbuff[4] := (140 + totalcodesize + datasize + totalbytesrelocationinfo + 
+                  totalbytesdatarelocationinfo) div 65536;
+    inbuff[5] := (140 + totalcodesize + datasize + totalbytesrelocationinfo + 
+                  totalbytesdatarelocationinfo) mod 65536;
+    {Relocation entries for text section}
+    inbuff[26] := totalbytesrelocationinfo div 10;
+    {File pointer to data relocation}
+    inbuff[42] := (140 + totalcodesize + datasize + 
+                   totalbytesrelocationinfo) div 65536;
+    inbuff[43] := (140 + totalcodesize + datasize + 
+                   totalbytesrelocationinfo) mod 65536;
+    {Relocation entries for data section}
+    inbuff[46] := totalbytesdatarelocationinfo div 10;
+    end
+  else if ENVIRONMENT = LANDL
+  then begin
+    inbuff[12] := totalbytesrelocationinfo div 65536;
+    inbuff[13] := totalbytesrelocationinfo mod 65536;
+    inbuff[14] := totalbytesdatarelocationinfo div 65536;
+    inbuff[15] := totalbytesdatarelocationinfo mod 65536;
+    end
+  else if ENVIRONMENT = BERKELEY
+  then begin
+    inbuff[10] := totalbytesrelocationinfo div 65536;
+    inbuff[11] := totalbytesrelocationinfo mod 65536;
+    inbuff[12] := totalbytesdatarelocationinfo div 65536;
+    inbuff[13] := totalbytesdatarelocationinfo mod 65536;
+    end
+  else if ENVIRONMENT = NBI
+  then begin
+    inbuff[ 8] := totalbytesrelocationinfo div 65536;
+    inbuff[ 9] := totalbytesrelocationinfo mod 65536;
+    inbuff[10] := totalbytesdatarelocationinfo div 65536;
+    inbuff[11] := totalbytesdatarelocationinfo mod 65536;
+    end;
+  if blockwrite(ioutfile,inbuff,1,0) <> 1
+  then fatal_error('Can''t rewrite link file');
+  end;
+end; {phase2}
+  
+

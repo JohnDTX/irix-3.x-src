@@ -1,0 +1,23 @@
+.TH lampoff 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2lampoff\fP - turn off display lights on the keyboard
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lampoff(lamps)"
+.B "char lamps;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lampof(lamps)"
+.B "character lamps"
+.sp
+.SH DESCRIPTION
+\f2Lampoff\fP turns off any combination of the four user-controllable
+lamps on the IRIS keyboard.  The four low order bits of the argument
+\f2lamps\fP control lamps 1 through 4.
+.SH "SEE ALSO"
+.I clkoff, clkon, lampon, ringbell, setbell
+.SH NOTE
+This command can only be used in immediate mode.

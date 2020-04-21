@@ -1,0 +1,49 @@
+.TH scale 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B scale
+\- scales and mirrors objects
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "scale(x, y, z) "
+.B "float x, y, z;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine scale(x, y, z)"
+.B "real x, y, z"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure scale(x, y, z: real);"
+.SH DESCRIPTION
+.B scale
+shrinks, expands, and mirrors objects.
+\f2x\f1, \f2y\f1, \f2z\f1 specify scaling
+in each of the three coordinate directions.
+Values with a magnitude greater than 1 expand the object;
+values with a magnitude less than 1 shrink it.
+Negative values mirror the object.
+.PP
+.B scale
+is a modeling routine;
+it changes the current transformation matrix.
+All objects drawn after
+.B scale
+executes are affected.
+.PP
+Use
+.B pushmatrix
+and
+.B popmatrix
+to limit the scope of
+\f3scale\fP.
+.SH "SEE ALSO"
+popmatrix, pushmatrix, rot, rotate, translate
+.sp
+.I Programming Guide, 
+Section 4.1, Modeling Transformations

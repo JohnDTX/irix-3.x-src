@@ -1,0 +1,40 @@
+.TH isobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B isobj
+\- indicates whether a given object number identifies an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long isobj(obj)"
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function isobj(obj)"
+.B "integer*4 obj"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function isobj(obj: Object): Boolean;"
+.SH DESCRIPTION
+.B isobj
+returns 
+TRUE(1)
+if \f2obj\f1 is an object number and 
+FALSE(0)
+if it 
+is not.  After a \f3makeobj\f1 call for the object,
+.B isobj
+returns
+TRUE(1).
+.SH "SEE ALSO"
+genobj, istag, makeobj
+.sp
+.I Programming Guide, 
+Section 8.1, Defining An Object
+.SH NOTE
+This routine is available only in immediate mode.

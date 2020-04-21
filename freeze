@@ -1,0 +1,59 @@
+#! /bin/csh -fe
+
+set PREFIX=ice
+# put log info here
+set CWD=`pwd`
+set NMARK=$PREFIX.mark.new
+set NLOG=$PREFIX.log.new
+
+# previous log/marker file
+set OMARK=$CWD/$PREFIX.mark.old
+
+# root the find/tar/cpio here
+cd /clone/att/usr/src
+
+# put the snap shot here
+set TARFILE=$PREFIX.tar.new
+
+# skip files in these directories
+set sedskip=(-e '/\/[-a-z.0-9]*\.skip\//d' \
+	-e '/\/[-a-z.0-9]*\.ENGR\//d' \
+	-e '/\/old\//d' \
+	-e '/^.\/alpha/d' \
+	-e '/^.\/freeze/d')
+
+# skip these files
+set findskip=(! -name $PREFIX'.*' ! -name '*.skip' \
+		! -name '*,v' ! -name '.*,v' \
+		! -name '.emacs*' ! -name '.B*' ! -name '.C*' \
+		! -name '*.CKP' ! -name '*.BAK' ! -name core)
+set tarfind=(! -type d ! -name RCS -print)
+
+if (-f $OMARK) then
+	set MTEST="-newer $OMARK"
+else
+	set MTEST=""
+endif
+
+
+# see that everything is checked out
+#	temporary hack XXX--fix this
+find . -type d -name RCS $findskip:q -print \
+	| sed $sedskip:q \
+	| xargs rsync -v
+
+# make the marker file for the next time
+rm -f $CWD/$NMARK; touch $CWD/$NMARK; chmod a-w $CWD/$NMARK
+
+# decide which files to snapshot
+rm -f $CWD/$NLOG
+echo $CWD/$NMARK > $CWD/$NLOG
+find . $MTEST $findskip:q $tarfind:q | sed $sedskip:q >> $CWD/$NLOG
+chmod a-w $CWD/$NLOG
+
+# snapshot all of the source
+rm -f $CWD/$TARFILE 
+tar -cf $CWD/$TARFILE - < $CWD/$NLOG 
+chmod a-w $CWD/$TARFILE
+
+echo "done"

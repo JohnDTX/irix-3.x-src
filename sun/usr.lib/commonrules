@@ -1,0 +1,27 @@
+# common rules for libsun.a
+# "$Header: /d2/3.7/src/sun/usr.lib/RCS/commonrules,v 1.1 89/03/27 17:24:03 root Exp $"
+
+POBJECTS= ${CFILES:.c=.pf} ${ASFILES:.s=.pf}
+TARGETS= lib_mark plib_mark
+
+default: ${TARGETS} 
+
+include ${ROOT}/usr/include/make/commonrules
+
+lib_mark: ${OBJECTS}
+	${AR} r ${LIBNAME} $?
+	ranlib -t ${LIBNAME}
+	date > $@
+
+plib_mark: ${POBJECTS}
+	${AR} r ${PLIBNAME} $?
+	date > $@
+
+.c.pf:
+	${CCF} -p $< -c -o $@
+.s.pf:
+	${CCF} -p $< -c -o $@
+.s.o:
+	${CCF} $< -c
+
+.SUFFIXES: .pf

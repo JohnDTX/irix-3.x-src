@@ -1,0 +1,33 @@
+.TH objfont 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I objfont
+- select an object font to display text
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "objfont(fntnum)"
+.B "short fntnum;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine objfon(fntnum)"
+.B "integer*2 fntnum"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure objfont(fntnum: Short);"
+.sp
+.SH DESCRIPTION
+.I Objfont
+chooses an object font that will be used
+whenever an \f2objstr\f1 command draws a text string.  The argument is an
+index into the font table built with \f2defobjfont\f1
+commands.  This font remains in effect until another \f2objfont\f1 command is
+executed.  By default, the object font is undefined.
+.PP
+If
+.I objfont
+specifies an undefine font number, the command is ignored.
+.SH "SEE ALSO"
+.I defobjfont

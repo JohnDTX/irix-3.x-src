@@ -1,0 +1,57 @@
+'\"macro stdmacro
+.TH CTERMID 3S
+.SH NAME
+ctermid \- generate file name for terminal
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B char \(**ctermid(s)
+.br
+.B char \(**s;
+.SH DESCRIPTION
+.I Ctermid\^
+generates the path name of the controlling
+terminal for the current process, and stores it in a 
+string.
+.PP
+If
+.I s\^
+is a
+.SM NULL
+pointer, the string is stored in an internal static area,
+the contents of which are overwritten at the next call to
+.IR ctermid ,
+and the address of which is returned.
+Otherwise,
+.I s\^
+is assumed to point to a character array of at least
+.B L_ctermid
+elements; the path name is placed in this array and the value of
+.I s\^
+is returned.
+The constant
+.B L_ctermid
+is defined in the
+.I <stdio.h>
+header file.
+.SH NOTES
+The difference between
+.I ctermid\^
+and
+.IR ttyname (3C)
+is that
+.I ttyname\^
+must be handed a file descriptor and returns the actual name of
+the terminal associated with that file descriptor, while
+.I ctermid\^
+returns a string
+.RB ( /dev/tty )
+that will refer to the
+terminal if used as a file name.
+Thus
+.I ttyname\^
+is useful only if the process already has at least one file open
+to a terminal.
+.SH SEE ALSO
+ttyname(3C).
+.\"	@(#)ctermid.3s	5.1 of 10/19/83

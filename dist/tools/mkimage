@@ -1,0 +1,87 @@
+#! /bin/sh
+#
+# mkimage - create images from a compiled source tree.
+#
+# This script uses idbdist to create entries, lists, and partial nsizes in
+# a distribution directory.
+#
+# envariables used:
+#
+#	sbase		- the root of the build source tree
+#	idb		- the pathname of the idb
+#	dist		- the distribution directory
+#	machine		- machine type (2000 or 3000)
+#
+# options:
+#
+#	-s <sbase>	- set sbase value
+#	-i <idb>	- set idb value
+#	-d <dest>	- set dest value
+#	-m <machine>	- set machine value
+#	-v		- verbose
+#
+# remaining arguments:
+#	
+#	<foo> ...	- set list of entries to be created
+
+PATH=$PATH:$TOOLROOT/usr/sbin
+
+entries="
+upd
+nfs
+usr
+root
+sys
+sysnfs
+games
+demos
+gltut
+gifts
+mail
+ftn
+pas
+troff
+xns
+man
+squish
+"
+
+set -- `getopt "s:i:d:m:vV" $*`
+
+vflag=
+
+while test $# -gt 0
+do
+	case $1 in
+	-s) shift ; sbase=$1 ; export sbase ;;
+	-i) shift ; idb=$1 ; export idb ;;
+	-d) shift ; dist=$1 ;;
+	-m) shift ; machine=$1 ;;
+	-v) vflag=-v ;;
+	-V) vflag="$vflag -V" ;;
+	--) shift ; break ;;
+	*) break;
+	esac
+	shift
+done
+
+dist=${dist-dist}
+machine=${machine-3000}
+
+case "$machine" in
+2000|iris) other=3000 ;;
+3000|juniper) other=2000 ;;
+*) echo "setenv machine or use '-m' option'" ; exit 1 ;;
+esac
+
+if test $# -eq 0 ; then set $entries ; fi
+
+for e in $*
+do
+	case $e in
+	root|usr|squish) uflag= ;;
+	*) uflag=-u ;;
+	esac
+	echo Creating $e
+	$ROOT/usr/sbin/idbdist -e $e -d $dist $uflag $vflag -S "!@$other && !noship && @$e"
+done

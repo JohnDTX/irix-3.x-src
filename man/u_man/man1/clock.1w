@@ -1,0 +1,8 @@
+'\"macro stdmacro
+.TH CLOCK 1W
+.SH NAME
+clock \- display the current time of day 
+.SH SYNOPSIS
+.B clock
+.SH DESCRIPTION
+clock displays a simple graphical (analog) clock in a window.

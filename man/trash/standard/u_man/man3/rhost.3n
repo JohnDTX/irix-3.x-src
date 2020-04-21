@@ -1,0 +1,31 @@
+.TH RHOST 3N 
+.SH NAME
+rhost, raddr \- look up internet hosts by name or address
+.SH SYNOPSIS
+\f3iaddr = rhost(aname);
+.br
+long iaddr;
+.br
+char **aname;
+.sp
+name = raddr(iaddr);
+.br
+long iaddr;\f1
+.SH DESCRIPTION
+\f2rhost\f1 uses the pointer to an Internet host name \f2(aname)\f1
+and returns the 32-bit Internet address in network byte order.
+This is used as the \f2sockaddr_in \f1 Internet address as
+\f2sockaddr_in.sin_addr.s_addr\f1.  
+If the host name is unknown, \f2rhost\f1 returns \-1.
+If the host name is known, \f2*aname \f1
+points to the standard name of the specified host (the first
+name in its entry in \f2/etc/hosts\f1).
+The return value is saved with \f2malloc\f1 and is not destroyed
+on subsequent calls.
+.PP
+\f2raddr\f1
+works similarly, looking up the name for an Internet address.
+.SH FILES
+/etc/hosts
+.SH SEE ALSO
+rsh(1C), rlogin(1C), socket(3N)

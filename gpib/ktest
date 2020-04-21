@@ -1,0 +1,7 @@
+# kill test
+xib -t 1024 -f /dev/ib01 &
+set tpid = $child
+xib -l 1024 -f /dev/ib11 &
+set lpid = $child
+sleep 3
+kill $lpid $tpid

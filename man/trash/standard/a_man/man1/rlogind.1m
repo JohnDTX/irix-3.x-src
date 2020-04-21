@@ -1,0 +1,22 @@
+.TH RLOGIND 1M 
+.SH NAME
+rlogind \- remote login server
+.SH DESCRIPTION
+The EXOS 8000 TCP/IP protocol module implements a
+remote login server on the EXOS front-end processor board
+(instead of on the host system).
+It is functionally identical to the EXOS on-board TELNET
+server described in \f2telnetd(1M)\f1 except for those differences
+described below.
+.PP
+The rlogin server listens for \f2rlogin(1C)\f1 clients connecting on
+the Internet TCP login port (513).
+When a rlogin session starts, it waits to receive a NULL byte from
+the client and then returns a NULL byte.
+The server then parses out, and throws away, three NULL-terminated
+strings normally intended to implement autologin.
+Subsequently, it passes data in both directions without interpretation.
+.SH FILES
+/dev/ttyT[0-7]	xty device nodes
+.SH SEE ALSO
+telnetd(1M), rlogin(1C), xty(7)

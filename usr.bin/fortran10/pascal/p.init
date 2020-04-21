@@ -1,0 +1,751 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: P.INIT.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               08-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure initialize;
+  var lfname,efname,tfname,rootname: string63;
+      pstring,arrpstr,indexptr: pt; { Used for ARGV }
+      SourceFlag,ArgOK: Boolean; i,l: integer; lch: char;
+  
+  procedure initscanner;
+  var
+    i: integer; lch: char;
+      
+    procedure initrw1;
+    begin
+      
+    { Length sorted names used in reserved word lookup }
+    
+    rwnames[ 1] := 'IF      ';  rwnames[ 2] := 'OR      ';  
+    rwnames[ 3] := 'DO      ';  rwnames[ 4] := 'OF      ';  
+    rwnames[ 5] := 'TO      ';  rwnames[ 6] := 'IN      ';  
+    rwnames[ 7] := 'END     ';  rwnames[ 8] := 'NIL     ';  
+    rwnames[ 9] := 'FOR     ';  rwnames[10] := 'NOT     ';  
+    rwnames[11] := 'DIV     ';  rwnames[12] := 'MOD     ';  
+    rwnames[13] := 'AND     ';  rwnames[14] := 'SET     ';  
+    rwnames[15] := 'VAR     ';  rwnames[16] := 'THEN    ';  
+    rwnames[17] := 'CASE    ';  rwnames[18] := 'WITH    ';  
+    rwnames[19] := 'TYPE    ';  rwnames[20] := 'FILE    ';  
+    rwnames[21] := 'GOTO    ';  rwnames[22] := 'ELSE    ';  
+    rwnames[23] := 'USES    ';  rwnames[24] := 'UNIT    ';  
+    rwnames[25] := 'BEGIN   ';  rwnames[26] := 'LABEL   ';  
+    rwnames[27] := 'WHILE   ';  rwnames[28] := 'UNTIL   ';  
+    rwnames[29] := 'CONST   ';  rwnames[30] := 'ARRAY   ';  
+    rwnames[31] := 'DOWNTO  ';  rwnames[32] := 'MODULE  ';
+    rwnames[33] := 'PACKED  ';  rwnames[34] := 'RECORD  ';  
+    rwnames[35] := 'REPEAT  ';  rwnames[36] := 'STRING  ';  
+    rwnames[37] := 'PROGRAM ';  rwnames[38] := 'FUNCTION';  
+  { rwnames[39] := 'PROCEDUR';  rwnames[40] := 'INTERFAC';  
+    rwnames[41] := 'IMPLEMEN';  rwnames[42] := 'OTHERWIS'; }
+    end; {initrw1}
+      
+    procedure initrw2;
+    begin
+    
+    { Length of reserved word index into rwnames }
+    
+    lrwnames[0] := 0;  lrwnames[1] := 0;  lrwnames[2] := 6;
+    lrwnames[3] := 15; lrwnames[4] := 24; lrwnames[5] := 30;
+    lrwnames[6] := 36; lrwnames[7] := 37; lrwnames[8] := 38;
+    
+    { Parsing symbols corresponding to each reserved word }
+    
+    rwsymbol[ 1] := IFSY;       rwsymbol[ 2] := ORSY;       
+    rwsymbol[ 3] := DOSY;       rwsymbol[ 4] := OFSY;       
+    rwsymbol[ 5] := TOSY;       rwsymbol[ 6] := INSY;       
+    rwsymbol[ 7] := ENDSY;      rwsymbol[ 8] := NILSY;      
+    rwsymbol[ 9] := FORSY;      rwsymbol[10] := NOTSY;      
+    rwsymbol[11] := DIVSY;      rwsymbol[12] := MODSY;      
+    rwsymbol[13] := ANDSY;      rwsymbol[14] := SETSY;      
+    rwsymbol[15] := VARSY;      rwsymbol[16] := THENSY;     
+    rwsymbol[17] := CASESY;     rwsymbol[18] := WITHSY;     
+    rwsymbol[19] := TYPESY;     rwsymbol[20] := FILESY;     
+    rwsymbol[21] := GOTOSY;     rwsymbol[22] := ELSESY;     
+    rwsymbol[23] := USESSY;     rwsymbol[24] := UNITSY;    
+    rwsymbol[25] := BEGINSY;    rwsymbol[26] := LABELSY;    
+    rwsymbol[27] := WHILESY;    rwsymbol[28] := UNTILSY;    
+    rwsymbol[29] := CONSTSY;    rwsymbol[30] := ARRAYSY;    
+    rwsymbol[31] := DOWNTOSY;   rwsymbol[32] := MODULESY;
+    rwsymbol[33] := PACKEDSY;   rwsymbol[34] := RECORDSY;   
+    rwsymbol[35] := REPEATSY;   rwsymbol[36] := STRINGSY;   
+    rwsymbol[37] := PROGRAMSY;  rwsymbol[38] := FUNCTSY;    
+    rwsymbol[39] := PROCSY;     rwsymbol[40] := INTERSY;    
+    rwsymbol[41] := IMPLESY;    rwsymbol[42] := OTHERSY;
+    end; {initrw2}
+    
+  begin {initscanner}
+  ch := ' ';                  { Look ahead character }
+  pcurline := 1; pprevline := 1;
+  curline[1] := ' '; prevline[1] := ' ';
+  initrw1; initrw2;
+  for i := 0 to 127 do chclass[i] := ERRSY;
+  for lch := '0' to '9' do chclass[ord(lch)] := DIGITCL;
+  for lch := 'a' to 'z' do chclass[ord(lch)] := LETCL;
+  for lch := 'A' to 'Z' do chclass[ord(lch)] := LETCL;
+  chclass[ord('_')] := LETCL;
+  chclass[3] := EOFSY; { Endfile }
+  chclass[9] := BLANKCL;  { Tab }
+  chclass[12]  := BLANKCL;  { Formfeed }
+  chclass[ord(')')] := RPARENSY;  chclass[ord(',')] := COMMASY;
+  chclass[ord(';')] := SEMISY;    chclass[ord('^')] := UPARROWSY;
+  chclass[ord('[')] := LBRACKSY;  chclass[ord(']')] := RBRACKSY;
+  chclass[ord('*')] := STARSY;    chclass[ord('+')] := PLUSSY; 
+  chclass[ord('-')] := MINUSSY;   chclass[ord('/')] := SLASHSY;
+  chclass[ord(' ')] := BLANKCL;   chclass[ord('=')] := EQSY;      
+  chclass[ord('(')] := LPARENSY;  chclass[ord('<')] := LTSY;
+  chclass[ord('>')] := GTSY;      chclass[ord('.')] := PERIODSY;
+  chclass[ord(':')] := COLONSY;   chclass[ord('@')] := ATSIGNSY;  
+  chclass[ord('{')] := LBRACECL;  chclass[ord('''')] := SCONSTSY;
+  chclass[ord('$')] := DOLLARSY;
+  end; {initscanner}
+  
+  procedure initsets;
+  begin
+  blockbegsys := [LABELSY,CONSTSY,TYPESY,VARSY,PROCSY,FUNCTSY,BEGINSY];
+  constbegsys := [PLUSSY,MINUSSY,ICONSTSY,RCONSTSY,DCONSTSY,SCONSTSY,
+                  CCONSTSY,IDENTSY];
+  simptypebegsys := [LPARENSY] + CONSTBEGSYS - [SCONSTSY];
+  typedels    := [ARRAYSY,FILESY,RECORDSY,SETSY,STRINGSY];
+  typebegsys  := [UPARROWSY,PACKEDSY] + TYPEDELS + SIMPTYPEBEGSYS;
+  selectsys   := [UPARROWSY,PERIODSY,LBRACKSY];
+  facbegsys   := [ICONSTSY,RCONSTSY,DCONSTSY,SCONSTSY,CCONSTSY,IDENTSY,
+                  LPARENSY,LBRACKSY,NOTSY,NILSY,ATSIGNSY];
+  statbegsys  := [BEGINSY,GOTOSY,IFSY,WHILESY,REPEATSY,FORSY,WITHSY,CASESY];
+  end; {initsets}
+  
+  procedure initstdtypes;
+    var strarvptr: pt;
+  begin
+  new(lintptr,SCALAR,STANDARD);
+  with lintptr^ do begin
+    typeno := -3;
+    Ftype := FALSE; form := SCALAR; scalkind := STANDARD; 
+    bytes := 4; bits := 0;
+    end;
+  new(intptr,SUBRANGE);
+  with intptr^ do begin
+    typeno := -2;
+    Ftype := FALSE; form := SUBRANGE; rangeof := lintptr;
+    min := -32767 - 1; max := 32767;
+    bytes := 2; bits := 0;
+    end;
+  new(sintptr,SUBRANGE);
+  with sintptr^ do begin
+    typeno := -1;
+    Ftype := FALSE; form := SUBRANGE; rangeof := lintptr;
+    min := -128; max := 127;
+    bytes := 1; bits := 0;
+    end;
+  new(realptr,SCALAR,STANDARD);
+  with realptr^ do begin
+    typeno := -9;
+    Ftype := FALSE; form := SCALAR; scalkind := STANDARD;
+    bytes := 4; bits := 0;
+    end;
+  new(doubleptr,SCALAR,STANDARD);
+  with doubleptr^ do begin
+    typeno := -10;
+    Ftype := FALSE; form := SCALAR; scalkind := STANDARD;
+    bytes := 8; bits := 0;
+    end;
+  new(charptr,SCALAR,STANDARD);
+  with charptr^ do begin
+    typeno := -8;
+    Ftype := FALSE; form := SCALAR; scalkind := STANDARD;
+    bytes := 1; bits := 0;
+    end;
+  new(boolptr,SCALAR,DECLARED);
+  with boolptr^ do begin
+    typeno := -11;
+    Ftype := FALSE; form := SCALAR; scalkind := DECLARED;
+    bytes := 0; bits := 1;
+    end;
+  new(textptr,FILES);
+  with textptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := TRUE; form := FILES; fileof := charptr; PckdFile := TRUE;
+    bytes := FIBSIZE + 514; bits := 0;
+    end;
+  new(interptr,FILES);
+  with interptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := TRUE; form := FILES; fileof := charptr; PckdFile := TRUE;
+    bytes := FIBSIZE + 514; bits := 0;
+    end;
+  new(nilptr,POINTERS);
+  with nilptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := POINTERS; pointerto := nil;
+    bytes := 4; bits := 0;
+    end;
+  new(str0ptr,SCONST);
+  with str0ptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := SCONST; stringlen := 0;
+    bytes := 1; bits := 0;
+    end;
+  new(str1ptr,SCONST);
+  with str1ptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := SCONST; stringlen := 1;
+    bytes := 2; bits := 0;
+    end;
+  new(strarvptr,STRINGS);
+  with strarvptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := STRINGS; stringlen := 1;
+    bytes := 2; bits := 0;
+    end;
+  new(pstring,POINTERS);
+  with pstring^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := POINTERS; pointerto := strarvptr;
+    bits := 0; bytes := 4;
+    end;
+  new(indexptr,SUBRANGE);
+  with indexptr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := SUBRANGE;
+    rangeof := lintptr; min := 1; max := 1000;
+    bits := 0; bytes := 2;
+    end;
+  new(arrpstr,ARRAYS);
+  with arrpstr^ do begin
+    typeno := 0; Marked := FALSE;
+    Ftype := FALSE; form := ARRAYS; arrayof := pstring; indexedby := indexptr;
+    Pckdarr := FALSE; BitPacked := FALSE;
+    BigArray := FALSE; BigIndex := FALSE; BigElement := FALSE;
+    bits := 0; bytes := 4; { Not really meaningful }
+    end;
+  new(fileptr,FILES);
+  with fileptr^ do begin
+    typeno := -14;
+    Ftype := TRUE; form := FILES; fileof := nil; PckdFile := FALSE; bits := 0;
+    if TARGETOS = ADVENTURE
+    then bytes := fibsize + 512
+    else bytes := FIBSIZE;
+    end;
+  end; {initstdtypes}
+  
+  procedure notice(s: string31);
+    var i: integer;
+  begin
+  errors := errors - ord(s[3]);
+  for i := 1 to length(s) do s[i] := chr(ord(s[i]) - i div 2);
+  write(s);
+  end; {notice}
+  
+  procedure initstdnames;
+    var ln,ln1: pn; llevel: integer;
+  begin
+  if CALLCXP or GLOBSTATIC
+  then begin
+    new(ln);
+    with ln^ do begin
+      node := IDENTNODE; makname(ln,'Global'); next := nil; idtype := nil;
+      class := UNITS; ulev := -1; ulc := 52;
+      end;
+    unitlist := ln; numunits := 1; llevel := -1;
+    end
+  else llevel := 1;
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'INTEGER'); idtype := intptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'LONGINT'); idtype := lintptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'REAL'); idtype := realptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'DOUBLE'); idtype := doubleptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'CHAR'); idtype := charptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'BOOLEAN'); idtype := boolptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,CONSTS);
+  with ln^ do begin
+    makname(ln,'FALSE'); idtype := boolptr; next := nil;
+    class := CONSTS; valueof.ivalu := 0;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln1,IDENTNODE,CONSTS);
+  with ln1^ do begin
+    makname(ln1,'TRUE'); idtype := boolptr; next := ln;
+    class := CONSTS; valueof.ivalu := 1;
+    node := IDENTNODE;
+    end;
+  enterid(ln1);
+  boolptr^.maxconst := ln1;
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'TEXT'); idtype := textptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(inputptr,IDENTNODE,VARS);
+  with inputptr^ do begin
+    makname(inputptr,'INPUT'); idtype := textptr; next := nil;
+    class := VARS; vkind := INDRCT; vlev := llevel; voff := 8;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE;
+    end;
+  enterid(inputptr);
+  new(outputptr,IDENTNODE,VARS);
+  with outputptr^ do begin
+    makname(outputptr,'OUTPUT'); idtype := textptr; next := nil;
+    class := VARS; vkind := INDRCT; vlev := llevel; voff := 12;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE;
+    end;
+  enterid(outputptr);
+  new(stderrptr,IDENTNODE,VARS);
+  with stderrptr^ do begin
+    makname(stderrptr,'STDERR'); idtype := textptr; next := nil;
+    class := VARS; vkind := INDRCT; vlev := llevel; voff := 22;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE;
+    end;
+  enterid(stderrptr);
+  new(ln,IDENTNODE,CONSTS);
+  with ln^ do begin
+    makname(ln,'MAXINT'); idtype := intptr; next := nil;
+    class := CONSTS; valueof.ivalu := 32767;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(ln,IDENTNODE,VARS);
+  with ln^ do begin
+    makname(ln,'ARGC'); idtype := intptr; next := nil;
+    class := VARS; vkind := DRCT; vlev := llevel; voff := 20;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  new(argvpn,IDENTNODE,VARS);
+  with argvpn^ do begin
+    makname(argvpn,'ARGV'); idtype := arrpstr; next := nil;
+    class := VARS; vkind := INDRCT; vlev := llevel; voff := 16;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE;
+    end;
+  enterid(argvpn);
+  new(ln,IDENTNODE,TYPES);
+  with ln^ do begin
+    makname(ln,'INTERACTIVE');
+    idtype := interptr; next := nil; class := TYPES;
+    node := IDENTNODE;
+    end;
+  enterid(ln);
+  end; {initstdnames}
+  
+  procedure initstdprocs;
+    const MAXPROCS = 29;
+    var n: array[1..MAXPROCS] of string[11];
+        ln: array[1..MAXPROCS] of alfa8;
+        i,j: integer; lpn: pn;
+  begin
+  n[ 1] := 'NEW';        ln[ 1] := '%_NEW4  ';
+  n[ 2] := 'MARK';       ln[ 2] := '%_MARK  ';
+  n[ 3] := 'RELEASE';    ln[ 3] := '%_RELSE ';
+  n[ 4] := 'GET';        ln[ 4] := '%_GET   ';
+  n[ 5] := 'PUT';        ln[ 5] := '%_PUT   ';
+  n[ 6] := 'RESET';      ln[ 6] := '%_RESET ';
+  n[ 7] := 'REWRITE';    ln[ 7] := '%_REWRT ';
+  n[ 8] := 'READ';
+  n[ 9] := 'READLN';
+  n[10] := 'WRITE';
+  n[11] := 'WRITELN';
+  n[12] := 'PAGE';       ln[12] := '%_PAGE  ';
+  n[13] := '*PACK';
+  n[14] := '*UNPACK';
+  n[15] := 'CLOSE';      ln[15] := '%_CLOSE ';
+  n[16] := 'DELETE';     ln[16] := '%_DEL   ';
+  n[17] := 'INSERT';     ln[17] := '%_INS   ';
+  n[18] := 'UNITREAD';   ln[18] := '%_UREAD ';
+  n[19] := 'UNITWRITE';  ln[19] := '%_UWRIT ';
+  n[20] := 'SEEK';       ln[20] := '%_SEEK  ';
+  n[21] := 'HALT';       ln[21] := '%_HALT  ';
+  n[22] := 'MOVELEFT';   ln[22] := '%_MOVEL ';
+  n[23] := 'MOVERIGHT';  ln[23] := '%_MOVER ';
+  n[24] := 'FILLCHAR';   ln[24] := '%_FILLC ';
+  n[25] := 'UNITCLEAR';  ln[25] := '%_UCLR  ';
+  n[26] := 'GOTOXY';     ln[26] := '%_GOTOXY';
+  n[27] := 'DISPOSE';    ln[27] := '%_DISP4 ';
+  n[28] := 'UNITSTATUS'; ln[28] := '%_UNITST';
+  n[29] := 'EXIT';
+  for i := 1 to MAXPROCS do
+    if n[i][1] <> '*'
+    then begin
+      new(lpn,IDENTNODE,PROC,STANDARD);
+      with lpn^ do begin
+        makname(lpn,n[i]);
+        idtype := nil; next := nil; class := PROC; pfdeclkind := STANDARD;
+        key := i; node := IDENTNODE;
+        iname.all := ln[i]; j := 8;
+        while iname.all[j] = ' ' do j := j - 1;
+        iname.len := j;
+        end;
+      enterid(lpn);
+      end;
+  end; {initstdprocs}
+  
+  procedure initstdfuncs;
+    const MAXFUNCS = 37;
+    var n: array[1..MAXFUNCS] of string[11];
+        ln: array[1..MAXFUNCS] of alfa8;
+        i,j: integer; lpn: pn;
+  begin
+  n[ 1] := 'ABS';
+  n[ 2] := 'ARCTAN';   {**  ln[ 2] := '%_ATAN  '; **}
+  n[ 3] := 'CHR';
+  n[ 4] := 'COS';      {**  ln[ 4] := '%_COS   '; **}
+  n[ 5] := 'EOF';        ln[ 5] := '%_EOF   ';
+  n[ 6] := 'EOLN';       ln[ 6] := '%_EOLN  ';
+  n[ 7] := 'EXP';      {**  ln[ 7] := '%_EXP   '; **}
+  n[ 8] := 'LN';       {**  ln[ 8] := '%_LN    '; **}
+  n[ 9] := 'ODD';
+  n[10] := 'ORD';
+  n[11] := 'PRED';
+  n[12] := 'ROUND';      ln[12] := '%_ROUND ';
+  n[13] := 'SIN';      {**  ln[13] := '%_SIN   '; **}
+  n[14] := 'SQR';
+  n[15] := 'SQRT';     {**  ln[15] := '%_SQRT  '; **}
+  n[16] := 'SUCC';
+  n[17] := 'TRUNC';
+  n[18] := 'POINTER';
+  n[19] := 'LENGTH';
+  n[20] := 'POS';        ln[20] := '%_POS   ';
+  n[21] := 'CONCAT';     ln[21] := '%_CAT   ';
+  n[22] := 'COPY';       ln[22] := '%_COPY  ';
+  n[23] := 'BLOCKREAD';  ln[23] := '%_BLKRD ';
+  n[24] := 'BLOCKWRITE'; ln[24] := '%_BLKWR ';
+  n[25] := 'IORESULT';   ln[25] := '%_IORES ';
+  n[26] := 'SIZEOF';
+  n[27] := 'PWROFTEN';   ln[27] := '%_PWR10 ';
+  n[28] := 'SCANEQ';     ln[28] := '%_SCANE ';
+  n[29] := 'SCANNE';     ln[29] := '%_SCANN ';
+  n[30] := 'UNITBUSY';   ln[30] := '%_UBUSY ';
+  n[31] := 'MEMAVAIL';   ln[31] := '%_MEMAV ';
+  n[32] := 'ORD4';
+  n[33] := 'CALL';       ln[33] := '%_CALL  ';
+  n[34] := 'CHAIN';      ln[34] := '%_CHAIN ';
+  n[35] := 'ISNAN';      ln[35] := '%_ISNAN ';
+  n[36] := 'ISNUM';      ln[36] := '%_ISNUM ';
+  n[37] := 'ISINF';      ln[37] := '%_ISINF ';
+  for i := 1 to MAXFUNCS do
+    if n[i][1] <> '*'
+    then begin
+      new(lpn,IDENTNODE,FUNC,STANDARD);
+      with lpn^ do begin
+        makname(lpn,n[i]);
+        idtype := nil; next := nil; class := FUNC; pfdeclkind := STANDARD;
+        key := i; node := IDENTNODE;
+        iname.all := ln[i]; j := 8;
+        while iname.all[j] = ' ' do j := j - 1;
+        iname.len := j;
+        RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+        end;
+      enterid(lpn);
+      end;
+  end; {initstdfuncs}
+  
+  procedure initundecl;
+  begin
+  new(ucstptr,IDENTNODE,CONSTS);
+  with ucstptr^ do begin
+    name.all := '        '; name.len := 0; idtype := nil; class := CONSTS;
+    llink := nil; rlink := nil; next := nil;
+    valueof.ivalu := 0;
+    node := IDENTNODE;
+    end;
+  new(utypptr,IDENTNODE,TYPES);
+  with utypptr^ do begin
+    name.all := '        '; name.len := 0; idtype := nil; class := TYPES;
+    llink := nil; rlink := nil; next := nil;
+    node := IDENTNODE;
+    end;
+  new(uvarptr,IDENTNODE,VARS);
+  with uvarptr^ do begin
+    name.all := '        '; name.len := 0; idtype := nil; class := VARS;
+    llink := nil; rlink := nil; next := nil;
+    vkind := DRCT; vlev := 0; voff := 0;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE;
+    end;
+  new(ufldptr,IDENTNODE,FIELD);
+  with ufldptr^ do begin
+    name.all := '        '; name.len := 0; idtype := nil; class := FIELD;
+    llink := nil; rlink := nil; next := nil;
+    PckdField := FALSE; foff := 0; bitoff := 0;
+    node := IDENTNODE;
+    end;
+  new(uprcptr,IDENTNODE,PROC);
+  with uprcptr^ do begin
+    name.all := '        '; name.len := 0; idtype := nil; class := PROC;
+    llink := nil; rlink := nil; next := nil; pfdeclkind := DECLARED;
+    pflev := 0; pfdecl := DECL; lc := 0; rtnno := -1; lcbits := 0;
+    node := IDENTNODE; CCall := FALSE;
+    end;
+  new(ufctptr,IDENTNODE,FUNC);
+  with ufctptr^ do begin
+    name.all := '        '; name.len := 0; idtype := nil; class := FUNC;
+    llink := nil; rlink := nil; next := nil; pfdeclkind := DECLARED;
+    pflev := 0; pfdecl := DECL; lc := 0; rtnno := -1; lcbits := 0;
+    RefBelow := FALSE; RefParam := FALSE; InReg := FALSE; refcount := 0;
+    node := IDENTNODE; CCall := FALSE;
+    end;
+  end; {initundecl}
+  
+  procedure lowercase(var fname: string63);
+    var i: integer; lch: char;
+  begin
+  if (HOSTOS = MERLIN) or 
+     (HOSTOS = ADVENTURE) or
+     (HOSTOS = CPM) or
+     (HOSTOS = ELITE)
+  then
+    for i := 1 to length(fname) do begin
+      lch := fname[i];
+      if (lch >= 'A') and (lch <= 'Z')
+      then fname[i] := chr(ord(lch) + 32);
+      end;
+  end; {lowercase}
+  
+  procedure suffix(var fname: string63; suf: string31);
+  begin
+  if (length(fname) <= length(suf)) or
+     (pos(suf,fname) <> length(fname) - length(suf) + 1)
+  then fname := concat(fname,suf);
+  end; {suffix}
+  
+begin {initialize}
+lfname := CHECKSUM;
+ErrFileOpen := FALSE; ListFlag := FALSE; DebugFlag := FALSE;
+ListOpen := FALSE; CodeOpened := FALSE; SourceFlag := FALSE;
+SourceOpen := FALSE;
+errors := 0; linenumber := 1; curlineinfile := 1; curfile := '';
+new(initheap);
+CCallFlag := FALSE; NoRMW := FALSE; RefValues := FALSE;
+if CHIP = M68020
+then FPHardware := TRUE
+else FPHardware := FALSE;
+
+if (HOSTOS = MERLIN) or (HOSTOS = CPM) or (HOSTOS = ELITE) or
+   (HOSTOS = ADVENTURE)
+then begin
+     PromptFlag := TRUE; QuietFlag := FALSE;
+     end
+else if (HOSTOS = IDRIS) or (HOSTOS = GENIX) or (HOSTOS = UNISOFT) or
+        (HOSTOS = UNOS) or (HOSTOS = CROMIX) or (HOSTOS = REGULUS) or
+        (HOSTOS = TEK)
+     then begin
+          PromptFlag := FALSE; QuietFlag := TRUE;
+          end
+     else begin writeln('*** Unknown environment ***'); halt; end;
+efname := ''; lfname := ''; ifname := ''; cfname := ''; sfname := '';
+rootname := '';
+for i := ARGCBASE + 1 to argc do begin
+  ArgOK := TRUE; l := length(argv[i]^);
+  moveleft(argv[i]^,tfname,l+1);
+  if (HOSTOS = MERLIN) or 
+     (HOSTOS = ADVENTURE) or 
+     (HOSTOS = CPM) or
+     (HOSTOS = ELITE)
+  then lowercase(tfname);
+  if tfname = '+q' then QuietFlag := TRUE
+  else if tfname = '-q' then QuietFlag := FALSE
+  else if tfname = '+p' then PromptFlag := TRUE
+  else if tfname = '-p' then PromptFlag := FALSE
+  else if tfname = '+f' then FPHardWare := TRUE
+  else if tfname = '-f' then FPHardWare := FALSE
+  else if tfname = '+d' then DebugFlag := TRUE
+  else if tfname = '-e' then CCallFlag := TRUE
+  else if tfname = '+e' then CCallFlag := FALSE
+  else if tfname = '+F' then SWDivinHW := TRUE
+  else
+    if tfname[1] = '-'
+    then begin
+      if l >= 3
+      then begin
+        lch := tfname[2];
+        delete(tfname,1,2);
+        case lch of
+          'o': cfname := tfname;
+          'e': efname := tfname;
+          'i': ifname := tfname;
+          'l': lfname := tfname;
+        otherwise: ArgOK := FALSE;
+        end; {case}
+        end
+      else ArgOK := FALSE;
+      if not ArgOK
+      then begin
+        writeln('*** Bad option ''',argv[i]^,''' ***');
+        errors := errors + 1;
+        end;
+      end
+    else begin
+      sfname := tfname;
+      suffix(tfname,SRCSUFFIX);
+      if (HOSTOS = MERLIN) or (HOSTOS = CROMIX) or
+         (HOSTOS = ADVENTURE) or (HOSTOS = CPM) or
+         (HOSTOS = ELITE)
+      then sfname := tfname;
+      rootname := copy(tfname,1,length(tfname)-length(SRCSUFFIX));
+      if SourceFlag
+      then begin
+        errors := errors + 1;
+        writeln('*** Multiple source files ***');
+        end;
+      SourceFlag := TRUE;
+      end;
+  end;
+
+if SourceFlag
+then begin
+  reset(sourcefile,sfname);
+  if ioresult = 0
+  then begin
+    SourceOpen := TRUE;
+    with filestack[1] do begin
+      fname := sfname;
+      lastrelblkread := -2;
+      nextchtoread := 0;
+      lineinfile :=  1;
+      end;
+    topoffilestack := 1;
+    curfile := sfname;
+    curlineinfile := 1;
+    inbuf[1024] := 0;
+    fillinbuf;
+    if HOSTOS <> ADVENTURE
+    then if inbuf[0] <= 1 then fillinbuf;
+    EOLSource := TRUE;
+    linestate := INLINE;
+    end
+  else begin
+    writeln('Can''t open source file');
+    errors := errors + 1;
+    end;
+  end
+else begin
+  writeln('*** No source file ***');
+  errors := errors + 1;
+  ifname := '?';
+  end;
+
+if lfname <> ''
+then begin
+  rewrite(listfile,lfname,BUFFERED);
+  if ioresult = 0
+  then begin ListOpen := TRUE; ListFlag := TRUE; end
+  else begin
+    writeln('Can''t open list file');
+    errors := errors + 1;
+    end;
+  end;
+
+if ifname = ''
+then if HOSTOS = ELITE
+     then ifname := concat(rootname,'#i')
+     else ifname := concat(rootname,'.i');
+if (HOSTOS = MERLIN) or 
+   (HOSTOS = ADVENTURE) or 
+   (HOSTOS = CPM)
+then suffix(ifname,'.i')
+else if HOSTOS = ELITE
+     then suffix(ifname,'#i');
+rewrite(icodefile,ifname);
+if ioresult = 0
+then CodeOpened := TRUE
+else begin
+  writeln('Can''t open i-code file');
+  errors := errors + 1;
+  end;
+
+if cfname = '' then cfname := rootname;
+if HOSTOS = ELITE
+then suffix(cfname,'#obj')
+else suffix(cfname,'.obj');
+
+if efname <> ''
+then begin
+  rewrite(errfile,efname);
+  if ioresult = 0
+  then ErrFileOpen := TRUE
+  else begin
+    writeln('Can''t open error file');
+    errors := errors + 1;
+    end;
+  end;
+if errors > 0 then goto 999;
+
+{  '(C) Copyrigh'  't 1980, 1985 Silicon Va'  'lley Software, Inc.'  }
+(* '(D*"Ers}vnln'  't!2;:3/$5>=;&Zptqlxx*al'  'lmf{"Vrjx|fxk3'Qvl7' *)
+
+if ListFlag and ListOpen
+then begin
+     writeln(listfile,TITLE,'  ',VERSION,' ':16,DATE);
+     writeln(listfile,COPYRIGHT);
+     end;
+writeln(TITLE,'  ',VERSION,' ':16,DATE);
+errors := 144;
+notice('(D*"Ers}vnln');
+tfname := 't!2;:3/$5>=;&Zptqlxx*al';
+level := 0; top := 0;
+with display[errors - 102] do
+  begin
+  nametree := nil; occur := BLK;
+  labels := nil; rootlink := nil;
+  ftypeno := 0; ltypeno := 0;
+  end;
+for i := 1 to length(tfname) do tfname[i] := chr(ord(tfname[i]) - i div 2);
+write(tfname);
+numunits := 0; unitlist := nil;
+initsets; initstdtypes; initstdnames;
+notice('lmf{"Vrjx|fxk3''Qvl7');
+initstdprocs; initstdfuncs; initundecl; initscanner;
+level := 1; top := 1;
+PrintErrors:= TRUE; IOFlag := TRUE; RangeFlag := TRUE; CodeFlag := TRUE;
+byteno := 0; blockno := 0; locprocno := 0;
+InUnit := FALSE; InterFlag := FALSE;
+ufname := ''; segname := '        ';
+SwapFlag := FALSE; Using := FALSE; OptFlag := TRUE; FltCheck := FALSE;
+LeftHandSide := FALSE;
+if HOSTOS = CROMIX then MemCheck := TRUE else MemCheck := FALSE;
+writeln; writeln;
+out(251{VERSION}); out(0{PASCAL}); out(VERSNO); out(VERSSUBNO);
+nexttypeno := 1; stmtnumb := 0; frststno := 0;
+end; {initialize}
+
+

@@ -1,0 +1,45 @@
+.TH RGBmode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B RGBmode
+\- sets a display mode that bypasses the color map
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "RGBmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine RGBmod"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure RGBmode;"
+.SH DESCRIPTION
+There are three display modes: single buffer, double buffer, and RGB.
+In RGB mode, the IRIS simultaneously writes and displays
+all bitplanes.
+The system writes 8-bit values of
+red, green, and blue into the bitplanes; these values directly
+control the intensity of the color
+displayed on the monitor.  
+RGB mode is most useful  
+when the system has 24 bitplanes; otherwise, in systems
+with fewer bitplanes, the 
+first 16 are shared equally between red and green, and the last 8
+define the blue component.  A 12-bitplane system provides one-fourth
+the maximum intensity in red and green, and no blue at all. 
+.PP
+You must call \f3gconfig\f1 for \f3RGBmode\f1 to execute.
+.SH "SEE ALSO"
+doublebuffer, gconfig, getdisplaymode, singlebuffer
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes
+.SH NOTE
+This routine is available only in immediate mode.
+.PP
+Do not use this routine while running the window manager.

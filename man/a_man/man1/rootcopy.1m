@@ -1,0 +1,44 @@
+'\"macro stdmacro
+.TH ROOTCOPY 1M
+.SH NAME
+rootcopy \- IRIS terminal root partition copy
+.SH SYNOPSIS
+.B /etc/rootcopy
+[
+.B ok
+]
+.SH DESCRIPTION
+.I rootcopy
+copies to or from the entire root partition of an IRIS terminal.
+If run when the system has been booted from the backup partition, it uses
+.IR dd (1)
+to copy the entire backup partition to the root partition.
+If the copy is successful, the system is rebooted using
+.I reboot (1M).
+If run when the system has been booted from
+the root partition,
+.I rootcopy
+without an argument does nothing; however, giving it an argument 
+.B ok
+causes it to copy the root partition to the backup partition.
+.PP
+.I rootcopy
+is used during the IRIS terminal's boot failure recovery sequence.
+It can only be run by the super-user and
+will do nothing if run on anything other than an IRIS terminal.
+.SH EXAMPLE
+.IP
+rr::sysinit:/etc/rootcopy >/dev/console 2>&1
+.PP
+is the line in a IRIS terminal's
+.I /etc/inittab
+which invokes 
+.IR rootcopy .
+.SH FILES
+.ta \w'/dev/md0a   'u
+.nf
+/dev/md0a	root partition
+/dev/md0c	backup partition
+.fi
+.SH SEE ALSO
+dd(1), reboot(1M).

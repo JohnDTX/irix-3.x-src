@@ -1,0 +1,30 @@
+.TH RGBwritemask  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I RGBwritemask
+- grant write access to a subset of the available bitplanes
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "RGBwritemask(red, green, blue) "
+.B "RGBvalue red, green, blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine RGBwri(red, green, blue)"
+.B "integer*2 red, green, blue"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure RGBwritemask(red, green, blue: RGBvalue);"
+.sp
+.SH DESCRIPTION
+.I RGBwritemask
+shields bitplanes reserved for special uses from ordinary drawing commands.
+The three arguments are masks for each of the three sets of eight planes.
+Wherever there are one's in the writemask, the corresponding bits
+in the RGB color will be written into the bitplanes.
+Zeros in the writemask mark bitplanes as read-only.  These planes
+will not be changed, regardless of the bits in the RGB color.
+.SH "SEE ALSO"
+.I gRGBmask, RGBcolor, writemask

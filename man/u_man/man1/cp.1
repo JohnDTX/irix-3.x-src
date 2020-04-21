@@ -1,0 +1,182 @@
+'\"macro stdmacro
+.TH CP 1
+.SH NAME
+cp, ln, mv \- copy, link or move files
+.SH SYNOPSIS
+.B cp
+[
+.B \-ir
+] file1 ... target
+.br
+.B ln
+[ 
+.B \-sf 
+] file1 [ file2 ...] target
+.br
+.B mv
+[
+.B \-if
+] file1 [ file2 ...] target
+.SH DESCRIPTION
+.I file1\^
+is copied (linked, moved) to
+.IR target .
+Under no circumstance can
+.I file1\^
+and
+.I target\^
+be the same (take care when using
+.IR sh\^ (1)
+metacharacters).
+If
+.I target\^
+is a directory, then one or more
+files are copied (linked, moved) to that directory.
+.PP
+If the
+.B \-i
+option is specified with
+.I cp\^
+or
+.I mv 
+and
+.I target\^
+exists, the user is prompted with the message:
+.sp
+	overwrite \f2target\f1? 
+.sp
+If the user answers with a line starting with `y', the move or copy
+continues.  Any other reply prevents the command from completing.
+.PP
+If the
+.B \-r
+option is specified with
+.I cp\^
+and any of the source files are directories,
+.I cp\^
+copies each subtree rooted at that name; in this case
+the target must be a directory.
+.PP
+If
+.I mv\^
+determines that the mode of
+.I target\^
+forbids writing, it will
+print the mode (see
+.IR chmod\^ (2))
+and read the standard input for one line
+(if the standard input is a terminal).
+If the line begins with
+.BR y ,
+the move takes place; if not,
+.I mv\^
+exits.
+.PP
+Both
+.I mv\^
+and 
+.I ln\^
+will allow
+.I file1\^
+to be a directory. With 
+.IR mv\^ ,
+the directory rename
+will occur only if the two directories
+have the same parent.
+With
+.IR ln\^ ,
+.I file1\^ 
+can be a directory when using the
+.B \-s
+option (see below).
+.PP
+.@@
+A link is a directory entry referring to a file;
+one file
+(together with its size, all its protection
+information, etc.)
+may have several links to it.
+There are two kinds of links:  hard links and symbolic links.
+.PP
+By default
+.I ln
+makes hard links.
+A hard link to a file is indistinguishable
+from the original directory entry;
+any changes to a file are effectively
+independent of the name used to reference
+the file.  Hard links may not span file systems and may 
+not refer to directories.
+.PP
+With the
+.B \-s
+option
+.I ln
+creates symbolic links. 
+A symbolic link is a special kind of file whose contents are
+the name of another file
+(see
+.IR symlink (2)).
+A symbolic link contains the name of the file to which it is linked.
+Most system calls,
+including
+.IR open (2),
+.IR stat (2),
+and
+.IR access (2),
+substitute these contents
+when the name of a symbolic link occurs in a pathname.
+This process is known as ``following'' symbolic links.
+.IR stat (2),
+.IR readlink (2),
+.IR symlink (2),
+and
+.IR unlink (2)
+also do this substitution,
+except on the last component of the pathname.
+Thus, they are said to ``not follow'' symbolic links.
+Symbolic links may span file systems and may refer to directories.
+Note that
+.I cp
+``follows'' symbolic links,
+while
+.I mv
+and
+.I ln
+do ``not follow'' symbolic links.
+.PP
+When the
+.B \-f
+option is specified with
+.I ln
+or
+.I mv
+this stands for force.
+This option overrides any mode restrictions or the
+.B \-i
+switch.
+.SH EXAMPLE
+.IP
+cp alpha beta gamma /d
+.PP
+places copies of the three files in the directory
+.BR /d .
+.SH SEE ALSO
+cpio(1),
+ls(1),
+rm(1),
+chmod(2),
+symlink(2).
+.SH BUGS
+If
+.I file1\^
+and
+.I target\^
+lie on different file systems,
+.I mv\^
+must copy the file and delete the original.
+In this case the owner name becomes
+that of the copying process and any
+linking relationship with other files
+is lost.
+.\"	@(#)cp.1	5.1 of 10/27/83

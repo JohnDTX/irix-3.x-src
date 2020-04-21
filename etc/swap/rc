@@ -1,0 +1,62 @@
+#! /bin/sh
+# @(#)rc.sh	1.7
+# $Source: /d2/3.7/src/etc/swap/RCS/rc,v $
+# @(#)$Revision: 1.1 $
+# $Date: 89/03/27 15:39:46 $
+TZ=`cat /etc/TZ`
+PATH=':/usr/local/bin:/usr/bin:/bin:/etc'
+export PATH
+export TZ
+if [ ! -f /etc/mnttab ]
+then
+	> /etc/mnttab
+	/etc/devnm / | grep -v swap | grep -v root | /etc/setmnt
+fi
+set `who -r`
+case $7 in
+2|3)
+					echo "Mounting:\c"
+	sh /etc/rc.fs
+# First ST-506 Disk -- VERTEX V185 --
+#	mount /dev/md0d /usr;		echo " usr\c"
+#	mount /dev/md0e /staff;		echo " staff\c"
+# Second ST-506 Disk -- MAXTOR 1085 --
+#	mount /dev/md1e /src;		echo " src\c"
+#	mount /dev/md1d /ws;		echo " ws\c"
+#	mount /dev/md1a /usr/mroot;	echo " mroot\c"
+# Second ST-506 Disk -- Tandon TM252 --
+#	mount /dev/md1a /troot;		echo " troot\c"
+#	mount /dev/md1c /tusr;		echo " tusr\c"
+# Second SMD Disk
+#	mount /dev/ip1a /usr/iroot;	echo " iroot\c"
+#	mount /dev/ip1c /src;		echo " src\c"
+# First SMD Disk
+#	mount /dev/ip0a /eroot;		echo " eroot\c"
+#	mount /dev/ip0c /eusr;		echo " eusr\c"
+#	mount /dev/ip0e /ws;		echo " ws\c"
+#	mount /dev/ip0f /u;		echo " u\c"
+
+	echo " "
+
+	/usr/lib/ex3.7preserve -;	echo "Preserved editor files"
+	rm -f /tmp/* /tmp/.??*;	echo "Cleared /tmp"
+					echo "Resetting locks and logs"
+	rm -f /usr/spool/lpd/lock
+	rm -f /usr/adm/acct/nite/lock*
+	cd /usr/adm; chmod go-rwx sulog cronlog OLDsulog OLDcronlog
+	cd /usr/adm; cp sulog OLDsulog;		cp /dev/null sulog
+	cd /usr/adm; cp cronlog OLDcronlog;	cp /dev/null cronlog
+	rm -f /usr/spool/uucp/LCK* /usr/spool/uucp/ST* /usr/spool/uucp/TM*
+					echo "Hostname: \c"
+	hostname `cat /etc/sys_id`; hostname
+					echo "Daemons:\c"
+	/etc/update;			echo " update\c"
+	/etc/cron;			echo " cron\c"
+	sh /etc/rc.xns
+	sh /etc/rc.tcp
+	sh /etc/rc.gpib
+#	/usr/lib/lpd;
+#	echo " lpd\c"
+	echo "."
+	;;
+esac

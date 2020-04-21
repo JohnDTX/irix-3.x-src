@@ -1,0 +1,33 @@
+.TH writemask  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I writemask
+- grant write permission to available bitplanes
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "writemask(wtm) "
+.B "Colorindex wtm;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine writem(wtm)"
+.B "integer*2 wtm"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure writemask(wtm: Colorindex);"
+.sp
+.SH DESCRIPTION
+.I Writemask
+shields bitplanes reserved for special uses from ordinary drawing commands.
+Its argument is a mask with one bit per available bitplane.  
+Wherever there are one's in the writemask, the corresponding
+bits in the color will be written into the bitplanes.
+Zeros in the writemask mark bitplanes as read-only.  These planes
+will not be changed, regardless of the bits in the color.
+.PP
+If an invalid writemask is specified, it is replaced with the maximum
+color map index.
+.SH "SEE ALSO"
+.I RGBwritemask

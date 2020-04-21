@@ -1,0 +1,35 @@
+.TH winattach 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winattach
+\- attaches the input focus to the current graphics window and call process
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long winattach()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function winatt()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function winattach: longint;"
+.SH DESCRIPTION
+.B winattach
+attaches the input focus to the current graphics window and calling process.
+.B winattach
+returns the identifier
+of the window that lost the input focus.
+In a multiple window environment, input focus refers to the process
+that receives events from various input devices, such as
+the keyboard, mouse, dials, and buttons.
+.SH "SEE ALSO"
+qread, qtest, qdevice, winopen 
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

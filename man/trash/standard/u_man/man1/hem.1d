@@ -1,0 +1,57 @@
+'\" t
+.TH HEM 1D
+.SH NAME
+hem \- three dimensional display of the Cytochrome P450 protein molecule
+.SH SYNOPSIS
+.B /usr/people/demos/hem
+.SH DESCRIPTION
+.PP
+Dr. Tom Poulos and Prof. Joseph Kraut of the University of California at
+San Diego have constructed a computer model of
+the Cytochrome P450 molecule to aid in their research into the structure
+of this enzyme. Computer graphics help in
+comparing electron density maps to the proposed protein structure by
+moving the hypothetical structure into regions of high electron density.
+Proximity of atoms provides information regarding chemical
+interaction.
+.PP
+.B Hem
+displays the Cytochrome protein with control of viewing transformations
+via pop-up menu selections. Also, display of various parts of the protein
+molecule can be toggled on and off.
+.PP
+Pop the menu up by holding down the right mouse button. Menu selections are
+are toggled by placing the cursor atop the menu selection and pressing the
+left mouse button. The menu disappears when the right mouse button is released.
+.sp .5v
+.TS
+doublebox center;
+cB s
+lI | lI
+l | l.
+Commands
+_
+Item	Function
+=
+1	The hem group, the sub-unit which accepts and donates electrons
+2	Van der Waal surface of the hem group
+3	Electron density contour around the iron atom
+4	Backbone of P450, connecting alpha-carbons of amino acid subunits
+5	Amino acids that interact with the hem group
+.sp .1v
+.TE
+.SH "HARDWARE REQUIREMENTS"
+A minimum configuration of 8 bitplanes and 1.5 Megabytes of memory is required
+to run
+.IR hem .
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/u_man/man1/RCS/hem.1d,v 1.1 89/03/27 16:41:19 root Exp $
+.\" $Log:	hem.1d,v $
+Revision 1.1  89/03/27  16:41:19  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  84/12/13  17:06:12  bob
+.\" 
+.\" 
+.\" Revision 1.1  84/12/11  13:36:33  bob
+.\" Initial revision
+.\" 

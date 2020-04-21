@@ -1,0 +1,35 @@
+.TH curvebasis 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B curvebasis
+\- selects a basis matrix used to draw curves
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curvebasis(basisid)"
+.B "short basisid;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curveb(basisid)"
+.B "integer*4 basisid"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curvebasis(basisid: Short);"
+.SH DESCRIPTION
+.B curvebasis
+selects a basis matrix (defined by
+\f3defbasis\f1)
+as the current basis matrix to draw curve segments.
+.SH "SEE ALSO"
+crv,
+crvn,
+curveprecision,
+defbasis
+.sp
+.I Programming Guide,
+Section 11.2, Drawing Curves

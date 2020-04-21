@@ -1,0 +1,45 @@
+.TH scrmask 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I scrmask 
+- define a clipping mask for the screen
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "scrmask(left, right, bottom, top)"
+.B "Screencoord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine scrmas(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure scrmask(left, right, bottom, top: Screencoord);"
+.sp
+.SH DESCRIPTION
+.I Scrmask
+makes it possible to do fine character clipping.  
+A call to \f2viewport\f1 sets both the viewport and the screen mask
+to the same area, which is defined by the left, right, bottom, and top
+boundaries.  A call to \f2scrmask\f1 sets only the screen mask, 
+which should be
+placed entirely within the viewport.  
+Strings that begin outside the viewport will be clipped out; this
+is \f2gross clipping\f1.
+Strings which
+begin inside the
+viewport but outside the screen mask
+will be clipped to the pixel boundaries
+of the screen mask.  This is called \f2fine clipping\f1.
+All drawing commands are also clipped to this viewport,
+but it is only useful
+for characters; gross clipping is sufficient
+for all other primitives.
+For
+an illustration of clipping, see Figure 3.5 of the \f2IRIS Graphics
+Library\f1.
+.SH "SEE ALSO"
+.I getscrmask, viewport
+

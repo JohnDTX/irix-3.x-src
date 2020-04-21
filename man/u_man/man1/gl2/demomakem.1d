@@ -1,0 +1,30 @@
+'\"macro stdmacro
+.TH DEMOMAKEMAP 1D
+.SH NAME
+demomakemap \- loads colors for mex demonstration programs
+.SH SYNOPSIS
+.B /usr/people/mexdemos/demomakemap
+.SH DESCRIPTION
+.PP
+The frame buffer on the IRIS contains values which are translated into
+RGB values by a color map.  The default map is created by 
+.I demomakemap 
+for use by the mex demonstration programs.
+.I demomakemap 
+maps the lowest eight colors in the color map to the default
+eight colors in the Graphics Library.  It then reads color mapping
+commands from a file in you home directory called
+.IR ~/desktop .  
+Color mapping commands contain the numbers of colors to be mapped
+and red, green, and blue values. 
+.PP
+When you are logged in as 
+.IR mexdemos ,
+.I makemap
+is aliased as
+.IR demomakemap .
+.SH HARDWARE CONFIGURATION
+A minimum configuration of 24 bitplanes
+is required.
+.SH SEE ALSO
+loadmap(1W), randmap(1W), showmap(1W), startup(1W), savedesktop(1W), makemap(1W)

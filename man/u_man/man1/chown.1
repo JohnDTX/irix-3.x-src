@@ -1,0 +1,42 @@
+'\"macro stdmacro
+.TH CHOWN 1
+.SH NAME
+chown, chgrp \- change owner or group
+.SH SYNOPSIS
+.B chown
+owner file ...
+.PP
+.B chgrp
+group file ...
+.SH DESCRIPTION
+.I Chown\^
+changes the owner of the
+.I files\^
+to
+.IR owner .
+The owner may be either a decimal user \s-1ID\s+1 or
+a login name found in the password file.
+.PP
+.I Chgrp\^
+changes the group
+.SM ID
+of the
+.I files\^
+to
+.IR group .
+The group may be either a decimal group \s-1ID\s+1 or
+a group name found in the group
+file.
+.SH EXAMPLE
+.IP
+chown diane filea fileb filec
+.PP
+would make "diane" the owner of the three files.
+.SH FILES
+/etc/passwd
+.br
+/etc/group
+.SH "SEE ALSO"
+chown(2),
+group(4), passwd(4).
+.\"	@(#)chown.1	5.1 of 10/27/83

@@ -1,0 +1,132 @@
+Mterm	term.c	?^main(argc, argv)$?
+NULLP	term.h	?^#define NULLP(type)	((type *)0)$?
+allocBa	hostio.h	?^#define allocBa(n)	(char *)alloca(n+3)$?
+allocFa	hostio.h	?^#define allocFa(n)	(float *)alloca((n)<<2)$?
+allocLa	hostio.h	?^#define allocLa(n)	(long *)alloca((n)<<2)$?
+allocSa	hostio.h	?^#define allocSa(n)	(short *)alloca((n+1)<<1)$?
+alloca	irisio.c	?^alloca(nbytes)$?
+alphamode4010	tklib.c	?^alphamode4010(chr)$?
+basename	ftp.c	?^#define basename(bn,file)   \\$?
+bellring	util.c	?^bellring()$?
+bogus	special.c	?^void bogus()$?
+cleanup	term.c	?^cleanup(sig)$?
+clearall	tklib.c	?^clearall()$?
+closecom	hostio.c	?^closecom()$?
+concat	util.c	?^concat(s1, s2)$?
+condline	hostio.c	?^condline()$?
+configopen	rstcmap.c	?^static FILE *configopen(name, mode)$?
+convspeed	util.c	?^convspeed(speed)$?
+crosshair	tklib.c	?^char crosshair()$?
+doBS	tklib.c	?^doBS()$?
+doCR	tklib.c	?^doCR()$?
+doLF	tklib.c	?^doLF()$?
+doVT	tklib.c	?^doVT()$?
+doprimitive	readhost.c	?^static $?
+dosync	irisio.c	?^#define dosync(i)	( ((i)&7) == 0 )$?
+drawcrosshair	tklib.c	?^drawcrosshair()$?
+endrecv	ftp.c	?^endrecv()$?
+endsend	ftp.c	?^endsend()$?
+erasecrosshair	tklib.c	?^erasecrosshair()$?
+errorm	errorm.c	?^int $?
+escape	writehost.c	?^escape(c)$?
+escape4010	writehost.c	?^escape4010(c)$?
+fillhostbuffer	hostio.c	?^fillhostbuffer()$?
+flushhost	hostio.c	?^flushhost()$?
+flushscreen	term.h	?^#define flushscreen()	 fflush(stdout)$?
+frecl	irisio.c	?^frecl(ptr)$?
+freearrays	irisio.c	?^freearrays()$?
+getcmdname	dispatch.c	?^getcmdname(cmd)$?
+getdefaultspeed	util.c	?^int getdefaultspeed()$?
+gethostchar	hostio.h	?^#define gethostchar() 	(--rc >= 0 ? *rp++ : fillho?
+goodipaddr	util.c	?^int goodipaddr(s)$?
+graphmode4010	tklib.c	?^graphmode4010()$?
+gversion	irisio.c	?^gversion()$?
+homeAlphCurs	tklib.c	?^homeAlphCurs()$?
+hostconnect	hostio.c	?^hostconnect(hostname)$?
+hwrite	writehost.c	?^hwrite(buf, count)$?
+i488input	readhost.c	?^i488input()$?
+if	readhost.c	?^    if (count < 0)$?
+iftpread	ftp.c	?^iftpread(last,buf)$?
+iftpse	ftp.c	?^iftpse(file, len, mode)$?
+iftpsetup	ftp.c	?^iftpsetup(remfile, mode)$?
+iftpwrite	ftp.c	?^iftpwrite(buf, nbytes)$?
+init	term.c	?^init()$?
+init4010	tklib.c	?^init4010()$?
+initcom	hostio.c	?^initcom()$?
+initcommon	special.c	?^static void initcommon()$?
+irisinit	readhost.c	?^static $?
+isconsoleshell	term.c	?^#define isconsoleshell()    (getppid() == 1)$?
+isystem	ftp.c	?^isystem(s)$?
+kblamp	util.c	?^kblamp(which, state)$?
+killwritehost	term.c	?^killwritehost()$?
+logrecv	irisio.c	?^logrecv(f, arg)$?
+logsend	irisio.c	?^logsend(fmt)$?
+mapplanes	tklib.c	?^mapplanes(code, umask, r, g, b)$?
+netinput	readhost.c	?^netinput()$?
+percentesc	writehost.c	?^percentesc()$?
+pipesetup	term.c	?^pipesetup()$?
+procALesc	tklib.c	?^procALesc()$?
+procGSbyte	tklib.c	?^static procGSbyte(ch)$?
+procGSesc	tklib.c	?^static procGSesc(ch)$?
+processSUB	tklib.c	?^processSUB()$?
+processflags	term.c	?^processflags(argc, argv)$?
+putexpc	util.c	?^putexpc(c, lf)$?
+puthostchar	hostio.h	?^#define puthostchar(c)  { *wp++ = (c); if (++wc >=?
+putscreenchar	term.h	?^#define putscreenchar(c) putc(c, stdout)$?
+rawmode	ttymodes.c	?^rawmode(fd)$?
+readhost	readhost.c	?^readhost()$?
+rec6	irisio.c	?^rec6()$?
+rec8	irisio.c	?^#define rec8()		gethostchar()$?
+reca	irisio.c	?^char   *reca()$?
+recb	irisio.c	?^char recb()$?
+recbs	hostio.h	?^#define recbs()	(char *)reca()$?
+receivef	irisio.c	?^receivef(f, arg)$?
+recfs	hostio.h	?^#define recfs()	(float *)reca()$?
+recgcmd	irisio.c	?^recgcmd()$?
+recl	irisio.c	?^long    recl()$?
+recls	hostio.h	?^#define recls()	(long *)reca()$?
+recs	irisio.c	?^short recs()$?
+recss	hostio.h	?^#define recss()	(short *)reca()$?
+recvpipecmd	pipecmd.c	?^recvpipecmd(fd)$?
+redrawviscurs	tklib.c	?^redrawviscurs()$?
+restoremode	ttymodes.c	?^restoremode(fd)$?
+restoresig	util.c	?^restoresig(signo)$?
+rstcmap	rstcmap.c	?^rstcmap()$?
+savesig	util.c	?^savesig(signo, action)$?
+send2L	ftp.c	?^send2L(l1, l2)$?
+send6	irisio.c	?^#define send6(n)	puthostchar( ((n)&077) + ' ' )$?
+sendB	irisio.c	?^sendB(val)$?
+sendBs	irisio.c	?^sendBs(array, n)$?
+sendFs	irisio.c	?^sendFs(array, n)$?
+sendL	irisio.c	?^sendL(val)$?
+sendLs	irisio.c	?^sendLs(array, n)$?
+sendS	irisio.c	?^sendS(val)$?
+sendSs	irisio.c	?^sendSs(array, n)$?
+senda	irisio.c	?^senda(buffer, nlongs)$?
+sendbreakchar	hostio.c	?^sendbreakchar()$?
+sendcoords	tklib.c	?^sendcoords(X,Y)$?
+senddata	irisio.c	?^senddata(f)$?
+senderrno	ftp.c	?^senderrno()$?
+sendpipecmd	pipecmd.c	?^sendpipecmd(fd, cmd, data)$?
+sendstatus	tklib.c	?^sendstatus(X,Y,mode)$?
+setAlphCurs	tklib.c	?^setAlphCurs(x, y)$?
+setpipeready	pipecmd.c	?^setpipeready()$?
+shell	writehost.c	?^shell()$?
+sum	ftp.c	?^sum(buf, nbytes)$?
+switchtographics	readhost.c	?^switchtographics()$?
+switchtotext	readhost.c	?^switchtotext()$?
+tadelay	irisio.c	?^tadelay(d)$?
+tcpconnect	hostio.c	?^tcpconnect(hostName)$?
+turndelay	irisio.c	?^turndelay()$?
+writehost	writehost.c	?^writehost()$?
+wsgexit	special.c	?^wsgexit(prterrcnt)$?
+xgbegin	special.c	?^xgbegin()$?
+xgetpor	special.c	?^xgetpor(name, len)$?
+xgetport	special.c	?^xgetport(name)$?
+xgexit	special.c	?^xgexit()$?
+xginit	special.c	?^xginit()$?
+xgreset	special.c	?^xgreset()$?
+xsetfastcom	irisio.c	?^void xsetfastcom()$?
+xsetslowcom	irisio.c	?^void xsetslowcom()$?
+xtpoff	special.c	?^xtpoff()$?
+xtpon	special.c	?^xtpon()$?

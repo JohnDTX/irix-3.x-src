@@ -1,0 +1,56 @@
+'\"macro stdmacro
+.TH MKNETPR 1M
+.SH NAME
+mknetpr \- provide access to a remote printer
+.SH SYNOPSIS
+/usr/spool/lp/etc/util/mknetpr printer host netprinter
+.SH DESCRIPTION
+.I mknetpr
+creates a filter program that accesses a real printer over the network and
+registers the ``printer'' with the \s-1LP\s0 system.
+A log file is also created.
+.IR printer
+is the name you give the printer (see
+.I lpadmin (1M)).
+.I host
+is the name of an IRIS that has a real printer attached to it.
+.I netprinter
+is the name of the real printer on the remote machine.
+If the remote printer is a LaserWriter and you want to print
+.I troff (1)
+files, you need to duplicate much of the software that is on the host
+machine in order to generate a PostScript file that can be transmitted
+to the remote printer.
+Many of the filters
+that prepare data for the LaserWriter default their output to a printer
+or class of printers called PostScript.  Therefore, it is a good idea
+to use the name PostScript for the printer.  You can override such action
+using the ``destination'' switch in the various programs.
+.PP
+After running this program, you might consider making this printer the
+default printer using
+.IR lpadmin (1M) .
+Run this program as superuser from directory
+.IR /usr/spool/lp/etc/util .
+.PP
+This program installs a printer filter program that appears to
+the \s-1LP\s0 system as
+a real printer filter.  The data passed to the filter is transmitted to
+the host machine, then submitted to the remote printer's queue using lp.
+The filter uses TCP/IP or XNS protocols, depending on what sort of kernel
+is running.
+.SH FILES
+/usr/spool/lp/etc/log/\f2printer\f1-log
+.br
+/usr/spool/lp/interface/\f2printer\f1
+.SH SEE ALSO
+.na
+accept(1M),
+addclient(1M),
+enable(1),
+lp(1),
+lpadmin(1M),
+lpsched(1M),
+lpshut(1M),
+lpstat(1),
+rmprinter(1M).

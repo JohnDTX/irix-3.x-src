@@ -1,0 +1,51 @@
+'\"macro stdmacro
+.TH NICE 2 
+.SH NAME
+nice \- change priority of a process
+.SH SYNOPSIS
+.B int nice (incr)
+.br
+.B int incr;
+.SH DESCRIPTION
+.I Nice\^
+adds the value of 
+.I incr\^
+to the nice value of the calling process.
+A process's
+.I nice value\^
+is a positive number for which a more positive value
+results in lower
+.SM CPU
+priority.
+.PP
+A maximum nice value of 39 and a minimum nice value of 0
+are imposed by the system.
+Requests for values above or below these limits result in the nice value
+being set to the corresponding limit.
+.PP
+.I Nice\^
+will fail and not change the nice value if
+.I incr\^
+is negative and the effective user
+.SM ID
+of the calling process is not super-user.
+.SM
+\%[EPERM]
+.SH RETURN VALUE
+Upon successful completion,
+.I nice\^
+returns the new nice value minus 20.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+nice(1), exec(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#34,D0
+.B movl	incr,A0
+.B trap	#0
+.fi
+.DT
+.\"	@(#)nice.2	5.1 of 10/19/83

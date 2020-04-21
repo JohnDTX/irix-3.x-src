@@ -1,0 +1,44 @@
+.TH getcmmode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getcmmode
+\- returns the current color map mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getcmmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getcmm()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getcmmode: Boolean;"
+.SH DESCRIPTION
+.B getcmmode
+returns the current color map mode.
+0
+indicates multimap mode;
+1 
+indicates onemap mode.
+.sp
+.TS
+center, box;
+cB | cB | cB 
+n l.
+Value	Color Map Mode	Symbolic Name
+_
+0	multimap	CMAPMULTI 
+1	onemap  	CMAPONE 
+.TE
+.SH "SEE ALSO"
+multimap, onemap
+.sp
+.I Programming Guide,
+Section 6.2, Color Maps
+.SH NOTE
+This routine is available only in immediate mode.

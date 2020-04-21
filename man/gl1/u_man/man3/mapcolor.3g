@@ -1,0 +1,34 @@
+.TH mapcolor  3 "R1c" "Silicon Graphics"
+.SH NAME 
+.I mapcolor
+- change a color map entry
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "mapcolor(color, red, green, blue) "
+.B "Colorindex color; "
+.B "RGBvalue red, green, blue;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine mapcol(color, red, green, blue)"
+.B "integer*2 color, red, green, blue"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure mapcolor(color: Colorindex; red, green, blue: RGBvalue);"
+.sp
+.SH DESCRIPTION
+\f2Mapcolor\f1 changes a single color map entry to the specified RGB value.
+Its arguments are a color map index and eight bits each of red, green, and blue
+intensities.  Pixels written with color \f3color\f1 will be displayed
+with the specified RGB intensities.  Color map entries which remain
+accessible are invariant with respect to display and color map mode changes.
+.PP
+In multimap mode only the currently selected color map can be updated
+with \f2mapcolor\f1.  Invalid indices are ignored.
+.SH "SEE ALSO"
+.I multimap, onemap, setmap, setplanes
+.SH NOTE
+This command can only be used in immediate mode.

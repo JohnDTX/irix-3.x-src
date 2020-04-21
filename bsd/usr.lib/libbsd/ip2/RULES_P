@@ -1,0 +1,15 @@
+#
+# Libbsd_p rule expansion text
+#
+# $Source: /d2/3.7/src/bsd/usr.lib/libbsd/ip2/RCS/RULES_P,v $
+# $Revision: 1.1 $
+# $Date: 89/03/27 15:01:46 $
+#
+ALL=M4= m4 \
+\
+all: ${TARGETS}
+
+CC_OPTS=CC_OPTS%T= -p -O %o
+
+AS=%s.o: %f \
+	/lib/cpp -P %f | ${M4} -DPROF | ${AS} ${AS_FLGS%T} -o %s.o

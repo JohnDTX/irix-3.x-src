@@ -1,0 +1,37 @@
+.TH setfastcom 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B setfastcom 
+\- sends data in 8 bits per byte.
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean setfastcom()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function setfas"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function setfastcom: Boolean;"
+.SH DESCRIPTION
+.B setslowcom 
+sends data in 8 bits per byte, as required by certain connections, 
+e.g., some ethernet protocalls.  You use
+.B setfastcom 
+on an IRIS terminal.  It has no
+effect on a workstation. 
+.PP
+.B setfastcom
+is listed here for compatibility with the remote Graphics Library.
+.SH SEE ALSO
+gflush, setslowcom
+.sp
+\f2Programming Guide\fP, Section 2.1, Initialization 
+.SH NOTES
+.B setfastcom
+has no effect if it is run locally.

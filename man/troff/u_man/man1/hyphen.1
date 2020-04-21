@@ -1,0 +1,41 @@
+'\"macro stdmacro
+.TH HYPHEN 1
+.SH NAME
+hyphen \- find hyphenated words
+.SH SYNOPSIS
+.B hyphen
+[ files ]
+.SH DESCRIPTION
+.I hyphen\^
+finds all the hyphenated words
+ending lines in
+.I files\^
+and prints them on the standard output.
+If no arguments are given, or if
+.I hyphen
+encounters \-, it uses the standard input.
+Thus,
+.I hyphen\^
+may be used as a filter.
+.SH EXAMPLE
+You would use the following command-line to proofread
+\f2nroff\f1's hyphenation in
+.BR textfile :
+.PP
+.RS
+mm [ \f2options\f1 ] textfile \||\| hyphen
+.RE
+.SH "SEE ALSO"
+mm(1),
+troff(1).
+.SH BUGS
+.I hyphen\^
+can't cope with hyphenated
+italic
+(or underlined) words;
+it frequently will either miss them altogether or mishandle them.
+.I hyphen
+occasionally
+gets confused but with no ill effects other than
+spurious extra output.
+.\"	%W% of %G%

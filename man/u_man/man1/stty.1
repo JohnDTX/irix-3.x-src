@@ -1,0 +1,330 @@
+'\"macro stdmacro
+.TH STTY 1
+.SH NAME
+stty \- set the options for a terminal
+.SH SYNOPSIS
+.B stty
+[
+.B \-a
+]
+[
+.B \-g
+] [ options ]
+.SH DESCRIPTION
+.I Stty\^
+sets certain terminal \s-1I/O\s+1 options for the device that is
+the current standard input;
+without arguments, it reports the settings of certain options;
+with the
+.B \-a
+option, it reports all of the option settings;
+with the
+.B \-g
+option, it reports current settings in a form that can be used as an argument
+to another
+.I stty\^
+command.
+Detailed information about the modes listed in the first five groups below
+may be found in
+.IR termio (7)
+for asynchronous lines.
+'\" or in
+'\" .IR stermio (7)
+'\" for synchronous lines in the
+'\" .I "U\s-1NIX\s+1 System Administrator's Manual" .
+Options in the last group are implemented using options in the previous
+groups.
+Note that many combinations of options make no sense, but no sanity
+checking is performed.
+The options are
+selected from the following:
+.sp 1
+.PD 1u
+.SS Control Modes
+.TP 10m
+.BR parenb " (" \-parenb )
+enable (disable) parity generation and detection.
+.TP
+.BR parodd " (" \-parodd )
+select odd (even) parity.
+.TP
+.B "cs5 cs6 cs7 cs8"
+select character size (see
+.IR termio (7)).
+.TP
+.B 0
+hang up phone line immediately.
+.TP
+.B "75 110 134 150 300 600 1200 2400 4800 9600 19200"
+Set terminal baud rate to the number given.
+.TP
+.BR hupcl " (" \-hupcl )
+hang up (do not hang up) a
+.SM DATA-PHONE\*S\*R
+data set connection on last close.
+.TP
+.BR hup " (" \-hup )
+same as
+.BR hupcl " (" \-hupcl ).
+.TP
+.BR cstopb " (" \-cstopb )
+use two (one) stop bits per character.
+.TP
+.BR cread " (" \-cread )
+enable (disable) the receiver.
+.TP
+.BR clocal " (" \-clocal )
+assume a line without (with) modem control.
+.SS Input Modes
+.TP 10m
+.BR ignbrk " (" \-ignbrk )
+ignore (do not ignore) break on input.
+.TP
+.BR brkint " (" \-brkint )
+signal (do not signal) \s-1INTR\s+1 on break.
+.TP
+.BR ignpar " (" \-ignpar )
+ignore (do not ignore) parity errors.
+.TP
+.BR parmrk " (" \-parmrk )
+mark (do not mark) parity errors (see
+.IR termio (7)).
+.TP
+.BR inpck " (" \-inpck )
+enable (disable) input parity checking.
+.TP
+.BR istrip " (" \-istrip )
+strip (do not strip) input characters to seven bits.
+.TP
+.BR inlcr " (" \-inlcr )
+map (do not map) \s-1NL\s+1 to \s-1CR\s+1 on input.
+.TP
+.BR igncr " (" \-igncr )
+ignore (do not ignore) \s-1CR\s+1 on input.
+.TP
+.BR icrnl " (" \-icrnl )
+map (do not map) \s-1CR\s+1 to \s-1NL\s+1 on input.
+.TP
+.BR iuclc " (" \-iuclc )
+map (do not map) upper-case alphabetics to lower case on input.
+.TP
+.BR ixon " (" \-ixon )
+enable (disable) \s-1START\s+1/\s-1STOP\s+1
+output control.  Output is stopped by sending
+an \s-1ASCII DC3\s+1 and started by sending an \s-1ASCII DC1\s+1.
+.TP
+.BR ixany " (" \-ixany )
+allow any character (only \s-1DC1\s+1) to restart output.
+.TP
+.BR ixoff " (" \-ixoff )
+request that the system send (not send) \s-1START/STOP\s+1 characters
+when the input queue is nearly empty/full.
+.SS Output Modes
+.TP 10m
+.BR opost " (" \-opost )
+post-process output (do not post-process output; ignore all other output modes).
+.TP
+.BR olcuc " (" \-olcuc )
+map (do not map) lower-case alphabetics to upper case on output.
+.TP
+.BR onlcr " (" \-onlcr )
+map (do not map) \s-1NL\s+1 to \s-1CR-NL\s+1 on output.
+.TP
+.BR ocrnl " (" \-ocrnl )
+map (do not map) \s-1CR\s+1 to \s-1NL\s+1 on output.
+.TP
+.BR onocr " (" \-onocr )
+do not (do) output \s-1CR\s+1s at column zero.
+.TP
+.BR onlret " (" \-onlret )
+on the terminal \s-1NL\s+1 performs (does not perform) the \s-1CR\s+1 function.
+.TP
+.BR ofill " (" \-ofill )
+use fill characters (use timing) for delays.
+.TP
+.BR ofdel " (" \-ofdel )
+fill characters are \s-1DEL\s+1s (\s-1NUL\s+1s).
+.TP
+.B "cr0 cr1 cr2 cr3"
+select style of delay for carriage returns (see
+.IR termio (7)).
+.TP
+.B "nl0 nl1"
+select style of delay for line-feeds (see
+.IR termio (7)).
+.TP
+.B "tab0 tab1 tab2 tab3"
+select style of delay for horizontal tabs (see
+.IR termio (7)).
+.\" or
+.\" .IR stermio (7)).
+.TP
+.B "bs0 bs1"
+select style of delay for backspaces (see
+.IR termio (7)).
+.TP
+.B "ff0 ff1"
+select style of delay for form-feeds (see
+.IR termio (7)).
+.TP
+.B "vt0 vt1"
+select style of delay for vertical tabs (see
+.IR termio (7)).
+.SS Local Modes
+.TP 10m
+.BR isig " (" \-isig )
+enable (disable) the checking of characters against the special control
+characters \s-1INTR\s+1 and \s-1QUIT\s+1.
+.TP
+.BR icanon " (" \-icanon )
+enable (disable) canonical input (\s-1ERASE\s+1 and \s-1KILL\s+1 processing).
+.TP
+.BR xcase " (" \-xcase )
+canonical (unprocessed) upper/lower-case presentation.
+.TP
+.BR echo " (" \-echo )
+echo back (do not echo back) every character typed.
+.TP
+.BR echoe " (" \-echoe )
+echo (do not echo) \s-1ERASE\s+1 character as
+a backspace-space-backspace string.  Note: this mode will erase the
+\s-1ERASE\s+1ed character on many \s-1CRT\s+1 terminals;
+however, it does
+.I not\^
+keep track of column position and, as a result, may be confusing
+on escaped characters, tabs, and backspaces.
+.TP
+.BR echok " (" \-echok )
+echo (do not echo) \s-1NL\s+1 after \s-1KILL\s+1 character.
+.TP
+.BR lfkc " (" \-lfkc )
+the same as
+.BR echok " (" \-echok );
+obsolete.
+.TP
+.BR echonl " (" \-echonl )
+echo (do not echo) \s-1NL\s+1.
+.TP
+.BR noflsh " (" \-noflsh )
+disable (enable) flush after \s-1INTR\s+1 or \s-1QUIT\s+1.
+.\" .TP
+.\" .BR stwrap " (" \-stwrap )
+.\" disable (enable) truncation of lines longer than 79 characters on a synchronous
+.\" line.
+.\" .TP
+.\" .BR stflush " (" \-stflush )
+.\" enable (disable) flush on a synchronous line after every
+.\" .IR write (2).
+.\" .TP
+.\" .BR stappl " (" \-stappl )
+.\" use application mode (use line mode) on a synchronous line.
+.SS Control Assignments
+.TP 10m
+.I "control-character c\^"
+set
+.I control-character\^
+to
+.IR c ,
+where
+.I control-character\^
+is
+.BR erase ", " kill ", " intr ,
+.BR quit ", " eof ", " eol ,
+.\" .BR ctab ", "
+.BR min ", or " time
+.\" .RB ( ctab
+.\" is used with
+.\" .BR \-stappl "; see"
+.\" .IR stermio (7)),
+.RB ( min " and " time
+are used with
+.BR \-icanon "; see"
+.IR termio (7)).
+If
+.I c\^
+is preceded by an (escaped from the shell) caret
+.RB ( ^ ),
+then the value used is the corresponding \s-1CTRL\s+1 character
+(e.g.,
+.RB `` ^d ''
+is a
+.BR \s-1CTRL\s+1-d );
+.RB `` ^? ''
+is interpreted as \s-1DEL\s+1 and
+.RB `` ^\- ''
+is interpreted as undefined.
+.TP
+.BI line " i\^"
+set line discipline to
+.I i\^
+(0 <
+.I i\^
+< 127
+).
+.SS Combination Modes
+.TP 10m
+.BR evenp " or " parity
+enable
+.BR parenb " and " cs7 .
+.TP
+.B oddp
+enable
+.BR parenb ", " cs7 ", and " parodd .
+.TP
+.BR \-parity ", " \-evenp ", or " \-oddp
+disable
+.BR parenb ,
+and set
+.BR cs8 .
+.TP
+.BR raw " (" \-raw " or " cooked )
+enable (disable) raw input and output
+(no \s-1ERASE\s+1, \s-1KILL\s+1, \s-1INTR\s+1, \s-1QUIT\s+1,
+\s-1EOT\s+1, or output post processing).
+.TP
+.BR nl " (" \-nl )
+unset (set)
+.BR icrnl ", " onlcr .
+In addition
+.B \-nl
+unsets
+.BR inlcr ", " igncr ", "
+.BR ocrnl ", and " onlret .
+.TP
+.BR lcase " (" \-lcase )
+set (unset)
+.BR xcase ", " iuclc ", and " olcuc .
+.TP
+.BR \s-1LCASE\s+1 " (" \-\s-1LCASE\s+1 )
+same as
+.BR lcase " (" \-lcase ).
+.TP
+.BR tabs " (" \-tabs " or " tab3 )
+preserve (expand to spaces) tabs when printing.
+.TP
+.B ek
+reset \s-1ERASE\s+1 and \s-1KILL\s+1 characters back to normal
+.B "^H"
+and
+.BR @ .
+.TP
+.B sane
+resets all modes to some reasonable values.
+.TP
+.I term\^
+set all modes suitable for the
+terminal type
+.IR term ,
+where
+.I term\^
+is one of
+.BR tty33 ", " tty37 ", " vt05 ", "
+.BR tn300 ", " ti700 ", or " tek .
+.SH "SEE ALSO"
+tabs(1), ioctl(2),
+.\" stermio(7),
+termio(7).
+.\"	@(#)stty.1	5.2 of 5/18/82
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/stty.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:50:31 $

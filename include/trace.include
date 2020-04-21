@@ -1,0 +1,81 @@
+if test "" = juniper ;\
+then make install_3000 ;\
+else make install_2000 ;\
+fi
+rm -rf /usr/include
+mkdir /usr/include
+cp *.h /usr/include
+chmod 444 /usr/include/*.h
+chgrp sys /usr/include/*.h
+chown root /usr/include/*.h
+cd ../sys; make Include
+rm -rf /usr/include/pmII
+mkdir /usr/include/pmII
+cp pmII/*.h /usr/include/pmII
+chmod 444 /usr/include/pmII/*.h
+chgrp sys /usr/include/pmII/*.h
+chown root /usr/include/pmII/*.h
+rm -rf /usr/include/ipII
+mkdir /usr/include/ipII
+cp ipII/*.h /usr/include/ipII
+chmod 444 /usr/include/ipII/*.h
+chgrp sys /usr/include/ipII/*.h
+chown root /usr/include/ipII/*.h
+rm -rf /usr/include/machine
+rm -rf /usr/include/sys
+mkdir /usr/include/sys
+cp h/*.h /usr/include/sys
+chmod 444 /usr/include/sys/*.h
+chgrp sys /usr/include/sys/*.h
+chown root /usr/include/sys/*.h
+rm -rf /usr/include/multibus
+mkdir /usr/include/multibus
+cp multibus/*.h /usr/include/multibus
+chmod 444 /usr/include/multibus/*.h
+chgrp sys /usr/include/multibus/*.h
+chown root /usr/include/multibus/*.h
+rm -rf /usr/include/xns
+mkdir /usr/include/xns
+cp xns/*.h /usr/include/xns
+chmod 444 /usr/include/xns/*.h
+chgrp sys /usr/include/xns/*.h
+chown root /usr/include/xns/*.h
+rm -rf /usr/include/gpib
+mkdir /usr/include/gpib
+cp gpib/*.h gpib/ib.defs /usr/include/gpib
+chmod 444 /usr/include/gpib/*
+chgrp sys /usr/include/gpib/*
+chown root /usr/include/gpib/*
+rm -rf /usr/include/gl1
+mkdir /usr/include/gl1
+cp gl1/*.h /usr/include/gl1
+chmod 444 /usr/include/gl1/*.h
+chgrp sys /usr/include/gl1/*.h
+chown root /usr/include/gl1/*.h
+cd EXOS ; make Include
+cd include/EXOS; make Include CC=cc AS=as LD=ld AR=ar  SYSTEM=sgi VERSION=SYSTEM5 MACHINE=68000 SWAP=SUN PORT=unisoft BUS=MULTIBUS VCTR=96   RANLIB="ranlib"  SELECT=SELECT HOST_DEFINES="-Dmc68000 -DMACHINE=68000 -Dsgi -Dindex=strchr -Drindex=strrchr -DUUX="\\\"/bin/uux\\\""  -DREALUUX="\\\"/bin/uux.real\\\"" -I/EXOS" KERN_DEFINES="-DKERNEL -OS -DpmII -I" INCL="/EXOS/include/EXOS" LIB=/usr/lib BINDIR=/usr/bin NET=/etc/net ETC=/etc
+rm -f sys/swap.h
+cp sys/mdep/swapSUN.h sys/swap.h
+rm -rf /usr/include/EXOS
+mkdir /usr/include/EXOS
+mkdir /usr/include/EXOS/sys
+mkdir /usr/include/EXOS/net
+cp *.h /usr/include/EXOS
+cp sys/*.h /usr/include/EXOS/sys
+cp net/*.h /usr/include/EXOS/net
+chmod 444 /usr/include/EXOS/*.h
+chmod 444 /usr/include/EXOS/sys/*.h
+chmod 444 /usr/include/EXOS/net/*.h
+cd ../gl2/gl2/include; make Include
+if test ! -d /usr/include/gl2 ; \
+	then mkdir /usr/include/gl2 ; \
+    	fi
+cp gf2init.c   TheMacro.h  addrs.h  curvmac.h  dcdev.h  device.h  dials.h  get.h  gf2.h  gl.h  gl2cmds.h  glerror.h  glipc.h  globals.h  gltypes.h  gr.h  grioctl.h  imattrib.h  imdraw.h  immatrix.h  immed.h  imsetup.h  interp.h  kb.h  kfont.h  mouse.h  printf.h  rpc.h  shmem.h  splinegl.h  window.h  uc4.h   /usr/include/gl2
+cd /usr/include/gl2 ;\
+	chmod 444 *; chgrp sys *; chown root *
+cd /usr/include ; rm -f device.h get.h gl.h ; \
+	ln gl2/device.h gl2/get.h gl2/gl.h .
+chmod 755 /usr/include/gl2
+chgrp sys /usr/include/gl2
+chown root /usr/include/gl2
+ln -s pmII /usr/include/machine

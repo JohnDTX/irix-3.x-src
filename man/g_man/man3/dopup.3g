@@ -1,0 +1,52 @@
+.TH dopup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B dopup 
+\- displays the specified pop-up menu
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long dopup(pup)"
+.B "long pup;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function dopup(pup)"
+.B "integer*4 pup"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure dopup(pup: longint): longint;"
+.SH DESCRIPTION
+.B dopup
+displays the specified pop-up menu until the user makes a
+selection. If the calling program has 
+the input focus, the menu is displayed and 
+.B dopup
+returns the value resulting from the item selection. The value can be
+returned by a submenu, a function, or a number bound directly to 
+an item.
+If no selection is made,
+.B dopup 
+returns \-1.
+.sp
+Item selection is performed by
+either selecting or rolling off the side of a menu item. 
+When the menu is defined, 
+.B defpup
+or
+.B addtopup
+specify the list of menu entries and their corresponding actions.
+See 
+.B defpup
+for details.
+.SH "SEE ALSO"
+addtopup, defpup, freepup, newpup
+.sp
+.I Using mex ,
+Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode under the window manager.

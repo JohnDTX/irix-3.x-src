@@ -1,0 +1,184 @@
+'\"macro stdmacro
+.TH EMACS 1
+.SH NAME
+EMACS \- display editor
+.SH SYNOPSIS
+.PP
+.B
+EMACS
+filename
+.SH DESCRIPTION
+.PP
+EMACS
+is a display editor used primarily for writing and modifying documents,
+programs, or any other type of text.  
+To interact with the user, EMACS uses a display 
+which provides an accurate
+representation of the text as it is being changed.
+EMACS differs from other text editors in that the user
+can dynamically change 
+it to suit his own needs. 
+.PP
+EMACS divides a screen into several areas called
+.I
+windows,
+thus allowing more than one file to be edited at one time.  
+At the bottom of the terminal screen is a one-line area used for messages and
+questions from EMACS.
+.PP
+EMACS commands usually consist of a combination of characters,
+prefaced either by the
+.B
+control key
+(^)
+or the
+.B
+escape key
+(ESC).
+Each command has a long name that is bound to a
+particular key.  For example, 
+.I
+forward-character
+may be bound to the keys 
+.B
+control-F
+.R
+(^F).
+.PP
+To get help when using
+EMACS,
+the user can type the 
+keys
+.B
+control 
+and 
+.B
+underscore 
+(^_),
+which will cause 
+EMACS 
+to list the available help options.
+These include a list of all functions and variables
+that include a given key word (much like the Unix
+command
+.B 
+apropos ),
+a list of the available key bindings,
+and detailed descriptions of EMACS features.
+.PP
+EMACS also has a tutorial for beginning users.
+To run this tutorial, start EMACS as shown below,
+and then type the help character (^_) followed by `t'.
+.PP
+For detailed information on how to use 
+EMACS
+and for the complete list of available commands, see the
+following documents:
+.PP
+.RS 5
+.I
+EMACS User's Guide
+.br
+.I
+EMACS Reference Manual
+.RE
+.SH OPTIONS
+.LP
+EMACS recognizes the following command line options.
+Switches and file names can be intermixed on the command line, 
+so to avoid ambiguity no spaces are allowed between switches 
+and their arguments.  
+.IP "-t<ttyname>" 17
+causes EMACS to do its IO to the named tty.  <ttyname> is given
+without the "/dev" prefix.
+.IP "-e<funcname>" 17
+causes EMACS to execute the named function when it starts up.
+.IP "-l<filename>"
+causes EMACS to load the named file when it starts up (this
+is done before the processing for -e).  Such files are loaded even if the
+-f switch is given.
+.IP "-f" 17
+fast start.  Inhibits loading of all default startup files.
+Files explicitly specified with -l switch are still loaded.
+.IP "-R" 17
+all files are read-only.
+.IP "-Lnnn" 17
+specify the number of screen lines EMACS should use.  Useful if you are on
+a slow dialup.  This overrides all other ideas EMACS may have had about how
+big your screen is, except under some window managers (e.g., Suntools)
+where Emacs automatically sizes its own windows to fit the window in which
+it is running.
+.IP "-Cnnn" 17
+specify the number of screen columns EMACS should use.  This overrides
+all other ideas EMACS may have had about how big your screen is, except
+under some window managers (e.g., Suntools) where Emacs automatically sizes
+its own windows to fit the window in which it is running.
+.IP "-h[<1|0>]" 17
+Turns the EMACS variable
+.B
+tty-mode-rare
+on or off.  Omitting the number turns it on.  If
+.B
+tty-mode-rare
+is on, EMACS will use a terminal input mode (loosely called "rare" mode)
+that allows it to recognize an interrupt character (^G), and can
+potentially use ^S/^Q for flow control if the terminal needs it (see the -x
+option).
+Flow control will actually be used only if the EMACS variable
+.B
+xon/xoff-flow-control
+is turned on in some initialization file, e.g. .emacs_init, or by the -x
+option.
+The interrupt character allows you to interrupt long operations, such as
+searches through large files, and to halt runaway MLisp code.
+If
+.B
+tty-mode-rare
+is zero, EMACS will use a "raw" input mode, in which neither the interrupt
+character nor the flow control characters ^S and ^Q are treated specially.
+.B
+NOTE:
+On 4.2bsd systems, "rare" mode uses the CBREAK mode of the terminal
+driver.  This implies that the eighth bit (the "meta" bit) is stripped off
+all input characters.  System V does not have this problem; all eight bits
+are available in both raw and rare modes.  In rare mode, some systems
+interpret BREAK as an additional interrupt character, which may make it
+impossible to type ^@ (NUL) at EMACS (^@ is normally bound to push-mark).
+.IP "-x[<1|0>]" 17
+Turns both
+.B
+tty-mode-rare
+and
+.B
+xon/xoff-flow-control
+on or off.  Omitting the number turns them on.
+Thus, the -x option implies the -h option (because flow control will work
+only in "rare" mode).
+If EMACS behaves as if you have typed ^S at it when you have done no such
+thing (usually it displays "Search for:" in the minibuffer) then your
+terminal or local net is probably typing ^S for you; try invoking EMACS
+with the -x option.
+This causes EMACS to instruct the terminal driver to use
+XON/XOFF flow control, so that typing ^S suspends output until ^Q is typed.
+(Normally, you wouldn't type those characters yourself; your terminal sends
+them automatically when it needs time to catch up with the output.  Many
+local networks also use this method of flow control.)
+In this mode, ^S and ^Q are not available as EMACS commands, since the
+terminal driver never lets them get through to EMACS.  
+Even if the -x option is given, an initialization file may still disable
+the use of flow control by explicitly turning off
+.B
+xon/xoff-flow-control.
+.IP "+nnn" 17
+start editing at line nnn.
+.IP "+/pattern" 17
+look for string (RE if full Emacs).
+.SH SEE ALSO
+Several "helper" utilities are provided with EMACS.  Some are intended to
+be invoked directly by users to manipulate EMACS databases.  Others are
+intended to be invoked by EMACS, invisibly to the user.  
+.IP "loadst(1)" 17
+time, load statistics, new mail indication.  Used by clock.ml package.
+.IP "emacsedit(1)" 17
+editor for use by programs run under EMACS shell windows.  Used by
+process.ml package.

@@ -1,0 +1,65 @@
+.TH CIB 8
+.SH NAME
+cib \- ib driver control program
+.SH SYNOPSIS
+cib [ function [ parameter ... ] ] ... < /dev/ib00
+.SH DESCRIPTION
+.I Cib
+presents most of the special i/o control functions of the
+.IR ib (4)
+driver in a useable (symbolic) form.
+The argument list is a series of function names
+and parameters,
+evaluated left-to-right.
+If the argument list is empty,
+.I cib
+reads and prints out the GPIB-796 registers.
+.PP
+The functions and their arguments are described below.
+Some are available only to the super-user
+(see
+.IR ib (4)).
+.IP init
+.br
+executes the IBIOINIT ioctl.
+.IP "setnode nodeno tag flags"
+.br
+executes the IBIOSETNODE ioctl.
+Only the tag and flags fields are changed.
+.IP "getnode nodeno"
+.br
+executes the IBIOGETNODE ioctl
+and prints the structure in a readable form.
+.IP start
+.br
+executes the IBIOSTART ioctl.
+.IP "ppc mask"
+.br
+executes the IBIOPPC ioctl.
+.IP "poll"
+.br
+executes the IBIOPOLL ioctl.
+.IP "srq value"
+.br
+executes the IBIOSRQ ioctl.
+.IP "takectl"
+.br
+executes the IBIOTAKECTL ioctl.
+.IP "passctl nodeno"
+.br
+executes the IBIOPASSCTL ioctl.
+.IP "cutoff"
+.br
+executes the IBIOCUTOFF ioctl.
+.SH EXAMPLE
+.nf
+cib < /dev/ib00 \e
+	init \e
+	setnode 0 5 SWAB|PPE|SRQ\e
+	setnode 1 6 SWAB|PPE|SRQ\e
+	start
+.br
+.fi
+.SH FILES
+.SH "SEE ALSO"
+dib(8), ib(4), iib(1), tib(8).

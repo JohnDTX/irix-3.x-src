@@ -1,0 +1,43 @@
+.TH gethitcode  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gethitcode
+- return the current system hitcode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short gethitcode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function gethit()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function gethitcode: Short;"
+.sp
+.SH DESCRIPTION
+.I Gethitcode
+returns the global variable 
+.B hitcode,
+which keeps a cumulative 
+record of clipping plane hits.  It does not change the hitcode value in any way.
+.PP
+The hitcode is a six-bit number, as shown below, with one bit 
+for each clipping plane.  (Systems configured without near-far clipping
+always return 0's for the near and far clipping planes.)
+.sp
+.TS
+center ;
+cp10 cp10 cp10 cp10 cp10 cp10 
+| ce | ce | ce | ce | ce | ce |.
+5	4	3	2	1	0
+_
+far	near	top	bottom	right	left
+_
+.TE
+.sp
+.SH "SEE ALSO"
+.I clearhitcode, pick, select
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,20 @@
+#define _X_ADDRESS		0
+#define _START_COLOR_HI 	6
+#define _START_COLOR_LO 	7
+#define _START_Z_HI 		8
+#define _START_Z_LO		9
+#define _DEL_COLOR_HI		10
+#define _DEL_COLOR_LO		11
+#define _DEL_Z_HI		12
+#define _DEL_Z_LO		13
+#define _X_NOT_LOADED		14
+#define _COUNT			14
+#define _INIT_HI		9
+#define _INIT_LO		10
+#define _Y_ADDRESS		1
+#define _SAV_X_ADDRESS		2
+#define _SAV_START_COLOR_HI	3
+#define _SAV_START_COLOR_LO	4
+#define _SAV_START_Z_HI		5
+#define _SAV_START_Z_LO		15
+

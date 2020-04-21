@@ -1,0 +1,26 @@
+.TH qkeyboard 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I qkeyboard
+- queue keyboard characters
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qkeyboard()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qkeybo"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qkeyboard;"
+.sp
+.SH DESCRIPTION
+.I Qkeyboard
+makes each character typed on the keyboard an event;
+the character is added to the queue as an event of type KEYBOARD.
+.SH "SEE ALSO"
+.I keyboard, qbutton, qvaluator, unqkeyboard
+.SH NOTE
+This command can only be used in immediate mode.

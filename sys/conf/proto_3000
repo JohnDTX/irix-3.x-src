@@ -1,0 +1,27 @@
+#
+# Configuration for 30X0 system
+#
+machine		"ip2"
+cpu		"IP2"
+timezone	8 dst
+maxusers	4
+
+config		vmunix	root on dsd
+
+controller	mb0	at nexus ?
+
+pseudo-device	fpa
+
+# GL2 support
+options		"GL2"
+library		"${ROOT}/usr/lib/gl2/ucode.o"
+library		"${ROOT}/usr/lib/libkgl3.a"
+pseudo-device	gltwo
+
+# Filesystem support
+pseudo-device	efs
+pseudo-device	bfs
+
+# Psuedo TTY's
+pseudo-device	pty
+

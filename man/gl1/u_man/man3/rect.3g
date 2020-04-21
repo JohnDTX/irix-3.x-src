@@ -1,0 +1,40 @@
+.TH rect  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I rect
+- outline a rectangular region
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rect(x1, y1, x2, y2) "
+.B "Coord x1, y1, x2, y2;"
+.IP 
+.B "recti(x1, y1, x2, y2)  "
+.B "Icoord x1, y1, x2, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rect(x1, y1, x2, y2)"
+.B "real x1, y1, x2, y2"
+.IP 
+.B "subroutine recti(x1, y1, x2, y2)"
+.B "integer x1, y1, x2, y2"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rect(x1, y1, x2, y2: Coord);"
+.IP 
+.B "procedure recti(x1, y1, x2, y2: Icoord);"
+.sp
+.SH DESCRIPTION
+A rectangle is determined by two points specifying opposite corners.
+The sides of the rectangle are parallel to the \f3x\f1 and \f3y\f1 axes of
+the object space coordinate system.
+The \f3z\f1 coordinate is set
+to zero.  \f2Rect\f1 takes four arguments:
+\f3x1\f1, \f3y1\f1, \f3x2\f1, and \f3y2\f1.
+A rectangle is 
+outlined with four line segments,  
+using the current linestyle, linewidth, color, and writemask.
+.SH "SEE ALSO"
+.I poly, rectf

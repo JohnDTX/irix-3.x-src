@@ -1,0 +1,136 @@
+#! /bin/sh
+
+case "`/etc/devnm /usr`" in
+*0a*)	echo WARNING: /usr apparently not mounted. ;;
+esac
+
+root=/
+fname=/dev/rmt2
+whence=
+reader='< $fname'
+v=
+cd=cd
+patterns='*'
+cmd='cpio -ihud$v'
+
+if test -x /bin/smt ; then mt=smt ; else mt=mt ; fi
+
+while test $# -gt 0
+do
+	case $1 in
+	-r)	shift
+		if test ! -d "$1" 
+		then
+			echo $1: bad directory ; exit 1 
+		fi
+		root=$1
+		;;
+	-f)	shift
+		fname=$1
+		;;
+	-x)	shift
+		whence="xx $1 "
+		if $whence true 
+		then
+			:
+		else
+			echo "Can't connect to $1" ; exit 1
+		fi
+		reader='$whence dd if=$fname bs=250k count=$3 |'
+		;;
+	-t)	shift
+		whence="rsh $1 -l guest "
+		if $whence true
+		then
+			:
+		else
+			echo "Can't connect to $1" ; exit 1
+		fi
+		reader='$whence dd if=$fname bs=250k count=$3 |'
+		;;
+	-v)	v=v
+		;;
+	-p)	shift
+		patterns="$1"
+		;;
+	-l)	cmd='dd bs=250k of=entry.$e count=$3'
+		cd=true
+		;;
+	-*)	echo $0: unrecognized flag $1 ; exit 1
+		;;
+	*)	break
+	esac
+	shift
+done
+
+$cd $root
+
+if test ! -d $root/dist
+then
+	echo no $root/dist directory ; exit 1 
+fi
+
+if test -f dist/fluff.pre
+then
+	xargs rm -rf < dist/fluff.pre
+fi
+
+case "`$whence ls -ld $fname`" in
+b*|c*)	dir= ;;
+d*)	dir=$fname mt=true ;;
+*)	echo $fname: no such device or directory. ; exit 1 ;;
+esac
+
+if test $# -eq 0
+then
+	set -- `awk '{ print $1 }' dist/toc` 
+else
+	set -- `for e in $*
+		do
+			none=true
+			if grep -s "^$e	" dist/toc 
+			then echo $e ; none=false 
+			fi
+			if grep -s "^$e%	" dist/toc
+			then echo $e% ; none=false
+			fi
+			if $none 
+			then
+				echo "entry $e not found; ignored" 1>&2
+			fi
+		done
+	`
+fi
+
+$whence $mt rewind ; current=0
+
+for e in $*
+do
+	if test -n "$dir"
+	then
+		fname="`$whence ls $dir/entry.$e`"
+		case `expr "$fname" : ".* not found"` in
+		0)	: ;;
+		*)	echo "entry $e not found; ignored." ; continue
+		esac
+		set count=0
+	else
+		set -- `awk "/^$e	/ {print NR,\\$1,int(\\$2/250)}" dist/toc | sed 's:\.[0-9]*::g'`
+		if test $# -lt 3 
+		then
+			echo $e: entry not found in toc ; continue 
+		fi
+		if test $1 -lt $current 
+		then
+			$whence $mt rewind ; current=0
+		fi
+		while test $1 -gt $current
+		do
+			$whence $mt fsf
+			current=`expr $current + 1`
+		done
+	fi
+	echo Reading $e.
+	eval $reader $cmd
+	current=`expr $current + 1`
+done

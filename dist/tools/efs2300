@@ -1,0 +1,50 @@
+#! /bin/sh
+# NAME
+#	efs2300
+# SYNOPSIS
+#	efs2300 [-r root] [-d dist]
+# DESCRIPTION
+#	Ad hoc dist/tools script to make a bootable 2.4 floppy and another
+#	floppy containing the EFS upgrade junk.  2300 analogue of newboot.
+#
+#	Need the following:
+#		upgrade, mdpatch
+#		/bin/{expr,grep,sed,sgilabel}
+#		/etc/mkfs (for efs)
+#		/etc/{umount,labelit}
+#		/stand/{hiqprom.r,rhqprom.r}
+root=/
+dist=.
+
+while test $# -gt 0
+do
+	case $1 in
+	-r)	shift ; root=$1 ;;
+	-d)	shift ; dist=$1 ;;
+	*)	break ;;
+	esac
+done
+
+echo "Insert a new floppy for the bootable system, then press RETURN."
+read x
+cp $dist/2300.profile $root/root.profile
+cp $dist/isbell $root
+/etc/mkbootflp $root
+rm $root/root.profile $root/isbell
+
+list="
+	$dist/upgrade
+	$dist/mdpatch
+	$root/bin/expr
+	$root/bin/grep
+	$root/bin/sed
+	$root/bin/sgilabel
+	$root/etc/mkfs
+	$root/etc/umount
+	$root/etc/labelit
+	$root/stand/hiqprom.r
+	$root/stand/rhqprom.r
+"
+echo "Insert a new floppy for EFS upgrade miscellany, then press RETURN."
+read x
+tar cvf /dev/rmf0a $list

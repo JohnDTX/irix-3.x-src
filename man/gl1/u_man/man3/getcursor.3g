@@ -1,0 +1,41 @@
+.TH getcursor 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getcursor
+- return the cursor characteristics
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getcursor(index, color, wtm, b)"
+.B "short *index;"
+.B "Colorindex *color, *wtm;"
+.B "Boolean *b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getcur(index, color, wtm, b)"
+.B "integer*2 index, color, wtm"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getcursor (var index: Short; "
+.B "	var color, wtm: Colorindex; var b: Boolean);"
+.sp
+.SH DESCRIPTION
+.I Getcursor
+returns the index of the cursor glyph, the
+color and the writemask associated with the cursor, and a 
+boolean indicating whether the cursor is automatically displayed
+and updated by the system.
+The arguments to the command are addresses of four locations
+where the four
+cursor attributes are to be returned.  The default is the glyph at location
+0 in the cursor table, displayed with the color 1, drawn in the 
+first available plane,
+and automatically updated and displayed
+on each vertical retrace.  This command is undefined in RGB mode.
+.SH "SEE ALSO"
+.I defcursor, setcursor
+.SH NOTE
+This command can only be used in immediate mode.

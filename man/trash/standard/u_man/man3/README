@@ -1,0 +1,15 @@
+The xns manual pages in this trash directory
+were copied from the directory /oh5/pubs/net/xns/man3.
+
+This includes:
+intro.3x
+list
+xcmd.3x
+xconnect.3x
+xns.3x
+xnslib.3x
+xnswrite.3x
+utmp.3x
+
+I believe they may apply to future documentation
+for system V xns.

@@ -1,0 +1,429 @@
+'\"macro stdmacro
+.TH INIT 1M
+.SH NAME
+init, telinit \- process control initialization
+.SH SYNOPSIS
+.B /etc/init
+.RB [\| 0123456SsQq \|]
+.PP
+.B /etc/telinit
+.RB [\| 0123456sSQqabc \|]
+.SH DESCRIPTION
+.I Init
+is a general process spawner. Its primary role is to create
+processes from a script stored in the file
+\f2/etc/inittab\fP
+(see
+.IR inittab (4)).
+This file usually has
+.I init
+spawn
+.IR getty 's
+on each line that a user may log in on.  It also controls
+autonomous processes required by any particular system.
+.PP
+.I Init
+considers the system to be in a 
+.I run-level\^
+at any given time.
+A
+.I run-level\^
+can be viewed as a software configuration of the system
+where each configuration allows only a selected group of 
+processes to exist.
+The processes spawned by
+.I init
+for each of these 
+.I run-levels\^
+is defined 
+in the
+.I inittab
+file.
+.I Init
+can be in one of eight \f2run-levels\fP,
+.B 0\-6
+and
+.B S 
+or
+.BR s .
+The
+.I run-level\^
+is changed by having a privileged user run
+\f2/etc/init\f1
+(which is linked to
+.IR /etc/telinit ).
+This user spawned
+.I init
+sends appropriate signals to the orginal
+.I init
+spawned by the operating system when the system was
+rebooted, telling it which \f2run-level\^\fP to change to.
+.PP
+.I Init
+is invoked inside the \s-1UNIX\s0 System as the last step in the boot procedure.
+The first thing
+.I init
+does is to look for
+\f2/etc/inittab\fP
+and see if there is an entry of the type
+.I initdefault
+(see
+.IR inittab (4)).
+If there is,
+.I init
+uses the \f2run-level\^\fP specified in that entry as the initial
+.I run-level\^
+to enter.  If this entry is not in
+.I inittab
+or
+.I inittab
+is not found,
+.I init
+requests that the user enter a \f2run-level\^\fP from the
+virtual system console,
+\f2/dev/syscon\fP.
+If an
+.B S
+.RB ( s )
+is entered,
+.I init
+goes into the
+.SM
+.I "SINGLE USER"
+level.
+This is the only \f2run-level\^\fP that doesn't require the existence of
+a properly formatted
+.I inittab
+file.  If
+\f2/etc/inittab\f1
+doesn't exist, then by default the only legal \f2run-level\^\fP that
+.I init
+can enter is the
+.SM
+.I "SINGLE USER"
+level.
+In the
+.SM
+.I "SINGLE USER"
+level
+the virtual console terminal
+\f2/dev/syscon\f1
+is opened for reading
+and writing and the command
+\f2/bin/su\f1
+is invoked immediately.
+To exit from the
+.SM
+.I "SINGLE USER"
+.I run-level\^
+one of two options can
+be elected. First, if the shell is terminated (via an end-of-file),
+.I init
+will reprompt for a new \f2run-level\fP.
+Second, the
+.I init
+or
+.I telinit
+command can signal
+.I init
+and force it to change the 
+.I run-level\^ 
+of the system.
+.PP
+When attempting to boot the system, failure of
+.I init
+to prompt for a new \f2run-level\^\fP may be due to the
+fact that the device
+\f2/dev/syscon\f1
+is linked to a device other than the physical system teletype
+.RB ( /dev/systty ).
+If this occurs,
+.I init
+can be forced to relink
+\f2/dev/syscon\f1
+by typing a delete on the system teletype which is co-located with the
+processor.
+.PP
+When
+.I init
+prompts for the new \f2run-level\fP, the operator may only enter one of the
+digits
+.B 0
+through
+.B 6
+or the letters
+.B S
+or
+.BR s .
+If
+.B S
+is entered
+.I init
+operates as previously described in
+.SM
+.I "SINGLE USER"
+mode with the additional result that
+\f2/dev/syscon\f1
+is linked to the user's terminal line, thus
+making it the virtual system console.  A
+message is generated on
+the physical console,
+\f2/dev/systty\f1,
+saying where the virtual terminal has been relocated.
+.PP
+When
+.I init
+comes up initially and whenever it switches out of
+.SM
+.I "SINGLE USER"
+state to normal run states, it sets the
+.IR ioctl (2)
+states of the virtual console,
+\f2/dev/syscon\f1,
+to those modes saved in the file
+\f2/etc/ioctl.syscon\f1.
+This file is written by
+.I init
+whenever
+.SM
+.I "SINGLE USER"
+mode is entered.
+If this file doesn't exist when
+.I init
+wants to read it, a warning is printed and
+default settings are assumed.
+.PP
+If a
+.B 0
+through
+.B 6
+is entered
+.I init
+enters the corresponding
+.IR "run-level" .
+Any other input will be rejected and the user will be re-prompted.
+If this is the first time
+.I init
+has entered a
+.I run-level\^
+other than
+.SM
+.IR "SINGLE USER" ,
+.I init
+first scans
+.I inittab
+for special entries of the type
+.I boot
+and
+.IR bootwait .
+These entries are performed, providing the \f2run-level\^\fP entered matches
+that of the entry before any normal processing of
+.I inittab
+takes place.  In this way any special initialization of the
+operating system, such as mounting
+file systems, can take place before users are allowed onto
+the system.
+The
+.I inittab
+file is scanned
+to find all entries that are to be processed for that
+.IR "run-level" .
+.PP
+.I Run-level\^
+.B 2
+is usually defined by the user to contain all
+of the terminal processes and daemons that
+are spawned in the multi-user environment.
+.PP
+In a multi-user environment, the
+.I inittab
+file is usually set up so that
+.I init
+will create a process for each terminal on the system.
+.PP
+For terminal processes,
+ultimately the shell will terminate because of an end-of-file
+either typed explicitly or generated as the result
+of hanging up.
+When
+.I init
+receives a child death signal, telling it that a
+process it spawned has died, it records the fact
+and the reason it died
+in
+\f2/etc/utmp\f1
+and
+\f2/etc/wtmp\f1
+if it exists (see
+.IR who (1)).
+A history of the processes spawned is kept in 
+\f2/etc/wtmp\f1
+if such a file exists.
+.PP
+To spawn each process in the
+.I inittab
+file,
+.I init
+reads each entry and for each entry which should be
+respawned, it forks a child process.
+After it has spawned all of the processes specified by the
+.I inittab
+file, 
+.I init
+waits for one of its descendant processes to die,
+a powerfail signal,
+or until
+.I init
+is signaled by 
+.I init
+or
+.I telinit
+to change the system's \f2run-level\fP.
+When one of the above three conditions occurs,
+.I init
+re-examines the
+.I inittab
+file.
+New entries can be added to the 
+.I inittab
+file at any time; however,
+.I init
+still waits for one of the above three conditions to occur.
+To provide for an instantaneous response the
+\f2init Q\fP
+or
+\f2init q\fP
+command
+can wake
+.I init
+to re-examine the
+.I inittab 
+file.
+.PP
+If
+.I init
+receives a
+.I powerfail
+signal
+.RI ( \s-1SIGPWR\s+1 )
+and is not in
+.SM
+.I "SINGLE USER"
+mode, it scans
+.I inittab
+for special powerfail entries.  These entries are
+invoked (if the \f2run-levels\^\fP permit) before any further processing
+takes place.  In this way
+.I init
+can perform various cleanup and recording functions whenever
+the operating system experiences a power failure.
+It is important to note that the powerfail entries should
+not use devices that must first be initialized
+(e.g. dzb lines) after a power failure has occurred.
+.PP
+When
+.I init
+is requested to change \f2run-levels\^\fP (via \f2telinit\f1),
+.I init
+sends the warning signal (\f3\s-1SIGTERM\s+1\fP) to all processes that are
+undefined in the target 
+.IR "run-level" .
+.I Init
+waits 20 seconds before forcibly terminating these processes via
+the kill signal (\f3\s-1SIGKILL\s+1\fP).
+.nf
+.sp
+.B Telinit
+.fi
+.IR Telinit ,
+which is linked to
+.IR /etc/init ,
+is used to direct the actions of
+.IR init .
+It takes a one character argument and signals 
+.I init
+via the kill system call to perform the appropriate action.
+The following arguments serve as directives to 
+.IR init .
+.PP
+.RS .3i
+.TP "\w'\f30-6\f1\ \ \ 'u"
+.B 0\-6
+tells
+.I init
+to place the system in one of the \f2run-levels\^\fP
+.BR 0\-6 .
+.TP
+.BR a , b , c
+tells
+.I init
+to process only those
+\f2/etc/inittab\f1
+file
+entries having the
+.BR a ,
+.B b
+or
+.B c
+.I run-level\^
+set.
+.TP
+.BR Q , q
+tells
+.I init
+to re-examine the
+\f2/etc/inittab\f1
+file.
+.TP
+.BR s , S
+tells
+.I init
+to enter the single user environment.
+When this level change is effected, the virtual system teletype,
+\f2/dev/syscon\f1,
+is changed to the terminal from which the command was executed.
+.RE
+.PP
+.I Telinit
+can only be run by someone who is super-user or a member of group \f2sys\fP.
+.SH FILES
+/etc/inittab
+.br
+/etc/utmp
+.br
+/etc/wtmp
+.br
+/etc/ioctl.syscon
+.br
+/dev/syscon
+.br
+/dev/systty
+.SH "SEE ALSO"
+getty(1M),
+login(1),
+sh(1),
+who(1),
+kill(2),
+inittab(4),
+utmp(4).
+.SH DIAGNOSTICS
+If
+.I init
+finds that it is continuously respawning an entry from
+\f2/etc/inittab\f1
+more than 10 times in 2 minutes, it will assume that
+there is an error in the command string,
+and generate an error message on the system
+console, and refuse to respawn this entry until either
+5 minutes has elapsed or it receives a signal from
+a user
+.I init
+.RI ( telinit ).
+This prevents
+.I init
+from eating up system resources when someone makes a
+typographical error in the
+.I inittab
+file or a program is removed that is referenced in the
+.I inittab.
+.\"	@(#)init.1m	5.1 of 11/1/83

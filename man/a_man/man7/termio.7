@@ -1,0 +1,1112 @@
+'\"macro stdmacro
+.\".if t .ds ' \h@.05m@\s+4\v@.333m@\'\v@-.333m@\s-4\h@.05m@
+.if t .ds ' '
+.if n .ds ' '
+.\".if t .ds ` \h@.05m@\s+4\v@.333m@\`\v@-.333m@\s-4\h@.05m@
+.if t .ds ` `
+.if n .ds ` `
+.TH TERMIO 7
+.SH NAME
+termio \- general terminal interface
+.SH DESCRIPTION
+.PP
+This section describes both a particular special file
+and the general nature of the terminal interface.
+.PP
+The file
+.B /dev/tty
+is, in each process, a synonym
+for the control terminal associated with the process group of that process,
+if any.
+It is useful for programs or shell sequences that wish to
+be sure of writing messages on the terminal
+no matter how output has been redirected.
+It can also be used for programs that demand the name of a file
+for output, when typed output is desired
+and it is tiresome to find out what terminal
+is currently in use.
+.PP
+All of the asynchronous
+communications ports use the
+same general interface, no matter what
+hardware is involved.
+The remainder of this section discusses
+the common features of this interface.
+.PP
+When a terminal file is opened,
+it normally causes
+the process to wait until a connection is established.
+In practice, users' programs seldom open these
+files; they are opened by
+.I getty
+and become a user's
+standard input, output, and error files.
+The very first terminal file opened
+by the process group leader of a terminal
+file not already associated with a process group
+becomes the
+.I "control terminal\^"
+for that process group.
+The control terminal plays a special
+role in handling quit and interrupt signals, as discussed
+below.
+The control terminal is inherited by a child process during a
+.IR fork (2).
+A process can break this association by changing its
+process group using
+.IR setpgrp (2).
+.PP
+A terminal associated with one of these files ordinarily
+operates in full-duplex mode.
+Characters may be typed at any time,
+even while output is occurring, and are only lost when the
+system's character input buffers become completely
+full, which is rare,
+or when the user has accumulated the maximum allowed number of
+input characters that have not yet been read by some program.
+Currently, this limit is 256 characters.
+When the input limit is reached, all the
+saved characters are thrown away without notice.
+.PP
+Normally, terminal input is processed in units of lines.
+A line is delimited by a new-line (\s-1ASCII\s+1
+.SM LF\*S)
+character, an end-of-file (\s-1ASCII\s+1
+.SM EOT\*S)
+character,
+or an end-of-line character.
+This means that a program attempting
+to read will be suspended until an entire line has been
+typed.
+Also, no matter how many characters are requested
+in the read call, at most one line will be returned.
+It is not, however, necessary to read a whole line at
+once; any number of characters may be
+requested in a read, even one, without losing information.
+.PP
+During input, erase and kill processing is normally
+done.
+By default, the character
+.B #
+erases the
+last character typed, except that it will not erase
+beyond the beginning of the line.
+By default, the character
+\f3\@\f1
+kills (deletes) the entire input line,
+and optionally outputs a new-line character.
+Both these
+characters operate on a key-stroke basis, independently
+of any backspacing or tabbing that may have been done.
+Both the erase and kill characters
+may be entered literally by preceding them with
+the escape character
+.RB ( \e ).
+In this case the escape character is not read.
+The erase and kill characters may be changed.
+.PP
+Certain characters have special functions on input.
+These functions and their default character values
+are summarized as follows:
+.TP "\w'START\ \ \ 'u"
+.SM INTR
+(Rubout or
+.SM ASCII
+.SM DEL\*S)
+generates an
+.I interrupt\^
+signal which is sent to all processes
+with the associated control terminal.
+Normally, each such process is forced to terminate,
+but arrangements may be made either to
+ignore the signal or to receive a
+trap to an agreed-upon location;
+see
+.IR signal (2).
+.TP
+.SM QUIT
+(Control-\(bv or
+.SM ASCII
+.SM FS\*S)
+generates a
+.I quit\^
+signal.
+Its treatment is identical to the interrupt signal
+except that, unless a receiving process has
+made other arrangements, it will not only be terminated
+but a core image file
+(called
+.BR core )
+will be created in the current working directory.
+.TP
+.SM ERASE
+(#) erases the preceding character.
+It will not erase beyond the start of a line,
+as delimited by a
+.SM NL\*S,
+.SM EOF\*S,
+.SM EOL\*S,
+or
+.SM EOL2
+character.
+.TP
+.SM KILL
+(@) deletes the entire line,
+as delimited by a
+.SM NL\*S,
+.SM EOF\*S,
+.SM EOL\*S,
+or
+.SM EOL2
+character.
+.TP
+.SM EOF
+(Control-d or
+.SM ASCII
+.SM EOT\*S)
+may be used to generate an end-of-file
+from a terminal.
+When received, all the characters
+waiting to be read are immediately passed to
+the program, without waiting for a new-line,
+and the
+.SM EOF
+is discarded.
+Thus, if there are no characters waiting, which
+is to say the
+.SM EOF
+occurred at the beginning of a line,
+zero characters will be passed back,
+which is the standard end-of-file indication.
+.TP
+.SM NL
+(\s-1ASCII\s+1
+.SM LF\*S)
+is the normal line delimiter.
+It can not be changed or escaped.
+.TP
+.SM EOL
+(\s-1ASCII\s+1
+.SM NUL\*S)
+is an additional line delimiter, like
+.SM NL\*S.
+It is not normally used.
+.TP
+.SM EOL2
+(disabled)
+is an additional line delimiter, like
+.SM EOL\*S.
+It is not normally used.
+.TP
+.SM STOP
+(Control-s or
+.SM ASCII
+.SM DC3\*S)
+can be used to temporarily suspend output.
+It is useful with
+.SM CRT
+terminals to prevent output from
+disappearing before it can be read.
+While output is suspended,
+.SM STOP
+characters are ignored and not read.
+.TP
+.SM START
+(Control-q or
+.SM ASCII
+.SM DC1\*S)
+is used to resume output which has been suspended by a
+.SM STOP
+character.
+While output is not suspended,
+.SM START
+characters are ignored and not read.
+The start/stop characters
+can not be changed or escaped.
+.PP
+The character values for
+.SM INTR\*S,
+.SM QUIT\*S,
+.SM ERASE\*S,
+.SM KILL\*S,
+.SM EOF\*S,
+.SM EOL\*S,
+and
+.SM EOL2
+may be changed to suit individual tastes.
+The
+.SM ERASE\*S,
+.SM KILL\*S,
+and
+.SM EOF
+characters may be escaped
+by a preceding
+.B \e
+character,
+in which case no special function is done.
+.PP
+When the carrier signal from the data-set drops, a
+.I hangup\^
+signal is sent to all processes
+that have this terminal
+as the control terminal.
+Unless other arrangements have been made,
+this signal causes the processes to terminate.
+If the hangup signal is ignored, any subsequent read
+returns with an end-of-file indication.
+Thus programs that read a terminal and test for
+end-of-file can terminate appropriately when
+hung up on.
+.PP
+When one or more
+characters are written, they are transmitted
+to the terminal as soon as previously-written characters
+have finished typing.
+Input characters are echoed by putting them in the output queue
+as they arrive.
+If a process produces characters more rapidly than they can be typed,
+it will be suspended when its output queue exceeds some limit.
+When the queue has drained down to some threshold,
+the program is resumed.
+.PP
+Several
+.IR ioctl (2)
+system calls apply to terminal files.
+The primary calls use the following structure,
+defined in
+.BR <termio.h> :
+.PP
+.ta .6i 1.3i 1.8i 2.6i 3.5i
+.RS .3i
+.nf
+#define	\s-1NCC\s+1	8
+struct	termio {
+	unsigned	short	c_iflag;	/\(** input modes \(**/
+	unsigned	short	c_oflag;	/\(** output modes \(**/
+	unsigned	short	c_cflag;	/\(** control modes \(**/
+	unsigned	short	c_lflag;	/\(** local modes \(**/
+	char			c_line;		/\(** line discipline \(**/
+	unsigned	char	c_cc[\s-1NCC\s+1];	/\(** control chars \(**/
+};
+.fi
+.RE
+.PP
+The special control characters are defined by the array
+.IR c_cc .
+The relative positions and initial values
+for each function are as follows:
+.RS .3i
+.ta 4n 13n
+.nf
+0	\s-1INTR\s+1	\s-1DEL\s+1
+1	\s-1QUIT\s+1	\s-1FS\s+1
+2	\s-1ERASE\s+1	\f3#\fP
+3	\s-1KILL\s+1	\f3@\fP
+4	\s-1EOF\s+1	\s-1EOT\s+1
+5	\s-1EOL\s+1	\s-1NUL\s+1
+6	\s-1EOL2\s+1	disabled
+7	reserved
+.fi
+.RE
+.PP
+The
+.I c_iflag\^
+field describes the basic terminal input control:
+.PP
+.ta \w'MAXMAX\ \ 'u +\w'0100000\ \ 'u
+.RS .3i
+.nf
+\s-1IGNBRK\s+1	0000001	Ignore break condition.
+\s-1BRKINT\s+1	0000002	Signal interrupt on break.
+\s-1IGNPAR\s+1	0000004	Ignore characters with parity errors.
+\s-1PARMRK\s+1	0000010	Mark parity errors.
+\s-1INPCK\s+1	0000020	Enable input parity check.
+\s-1ISTRIP\s+1	0000040	Strip character.
+\s-1INLCR\s+1	0000100	Map \s-1NL\s+1 to \s-1CR\s+1 on input.
+\s-1IGNCR\s+1	0000200	Ignore \s-1CR\s+1.
+\s-1ICRNL\s+1	0000400	Map \s-1CR\s+1 to \s-1NL\s+1 on input.
+\s-1IUCLC\s+1	0001000	Map upper-case to lower-case on input.
+\s-1IXON\s+1	0002000	Enable start/stop output control.
+\s-1IXANY\s+1	0004000	Enable any character to restart output.
+\s-1IXOFF\s+1	0010000	Enable start/stop input control.
+.fi
+.RE
+.PP
+If
+.SM IGNBRK
+is set, the break condition
+(a character framing error with data all zeros)
+is ignored, that is, not put on the input queue
+and therefore not read by any process.
+Otherwise if
+.SM BRKINT
+is set,
+the break condition will generate an
+interrupt signal
+and flush both the input and output queues.
+If
+.SM IGNPAR
+is set,
+characters with other framing and parity errors are ignored.
+.PP
+If
+.SM PARMRK
+is set,
+a character with
+a framing or parity error which is not ignored
+is read as the three character sequence:
+0377, 0, X,
+where X is the data of the character received in error.
+To avoid ambiguity in this case,
+if
+.SM ISTRIP
+is not set,
+a valid character of 0377 is read as 0377, 0377.
+If
+.SM PARMRK
+is not set,
+a framing or parity error which is not ignored
+is read as the character \s-1NUL\s+1 (0).
+.PP
+If
+.SM INPCK
+is set,
+input parity checking is enabled.
+If
+.SM INPCK
+is not set,
+input parity checking is disabled.
+This allows output parity generation without
+input parity errors.
+.PP
+If
+.SM ISTRIP
+is set,
+valid input characters are first stripped to
+7-bits,
+otherwise all 8-bits are processed.
+.PP
+If
+.SM INLCR
+is set,
+a received
+.SM NL
+character is translated into a
+.SM CR
+character.
+If
+.SM IGNCR
+is set,
+a received
+.SM CR
+character is ignored (not read).
+Otherwise if
+.SM ICRNL
+is set,
+a received
+.SM CR
+character is translated into a
+.SM NL
+character.
+.PP
+If
+.SM IUCLC
+is set,
+a received upper-case alphabetic character is translated
+into the corresponding lower-case character.
+.PP
+If
+.SM IXON
+is set,
+start/stop output control is enabled.
+A received
+.SM STOP
+character will suspend output
+and a received
+.SM START
+character will restart output.
+All start/stop characters are ignored and not read.
+If
+.SM IXANY
+is set,
+any input character
+will restart output
+which has been suspended.
+.PP
+If
+.SM IXOFF
+is set,
+the system will transmit
+.SM START/STOP
+characters when the input queue is
+nearly empty/full.
+.PP
+The initial input control value is
+all bits clear.
+.PP
+The
+.I c_oflag\^
+field specifies the system treatment of output:
+.PP
+.ta \w'MAXMAX\ \ 'u +\w'0100000\ \ 'u
+.RS .3i
+.nf
+\s-1OPOST\s+1	0000001	Postprocess output.
+\s-1OLCUC\s+1	0000002	Map lower case to upper on output.
+\s-1ONLCR\s+1	0000004	Map \s-1NL\s+1 to \s-1CR-NL\s+1 on output.
+\s-1OCRNL\s+1	0000010	Map \s-1CR\s+1 to \s-1NL\s+1 on output.
+\s-1ONOCR\s+1	0000020	No \s-1CR\s+1 output at column 0.
+\s-1ONLRET\s+1	0000040	\s-1NL\s+1 performs \s-1CR\s+1 function.
+\s-1OFILL\s+1	0000100	Use fill characters for delay.
+\s-1OFDEL\s+1	0000200	Fill is \s-1DEL\s+1, else \s-1NUL\s+1.
+\s-1NLDLY\s+1	0000400	Select new-line delays:
+\s-1NL0\s+1	0
+\s-1NL1\s+1	0000400
+\s-1CRDLY\s+1	0003000	Select carriage-return delays:
+\s-1CR0\s+1	0
+\s-1CR1\s+1	0001000
+\s-1CR2\s+1	0002000
+\s-1CR3\s+1	0003000
+\s-1TABDLY\s+1	0014000	Select horizontal-tab delays:
+\s-1TAB0\s+1	0
+\s-1TAB1\s+1	0004000
+\s-1TAB2\s+1	0010000
+\s-1TAB3\s+1	0014000	Expand tabs to spaces.
+\s-1BSDLY\s+1	0020000	Select backspace delays:
+\s-1BS0\s+1	0
+\s-1BS1\s+1	0020000
+\s-1VTDLY\s+1	0040000	Select vertical-tab delays:
+\s-1VT0\s+1	0
+\s-1VT1\s+1	0040000
+\s-1FFDLY\s+1	0100000	Select form-feed delays:
+\s-1FF0\s+1	0
+\s-1FF1\s+1	0100000
+.DT
+.fi
+.RE
+.PP
+If
+.SM OPOST
+is set,
+output characters are post-processed
+as indicated by the remaining flags,
+otherwise characters are transmitted without change.
+.PP
+If
+.SM OLCUC
+is set,
+a lower-case alphabetic character is transmitted as
+the corresponding upper-case character.
+This function is often used in conjunction with
+.SM IUCLC\*S.
+.PP
+If
+.SM ONLCR
+is set,
+the
+.SM NL
+character is transmitted as the
+.SM CR-NL
+character pair.
+If
+.SM OCRNL
+is set,
+the
+.SM CR
+character is transmitted as the
+.SM NL
+character.
+If
+.SM ONOCR
+is set,
+no
+.SM CR
+character is transmitted when at column 0 (first position).
+If
+.SM ONLRET
+is set,
+the
+.SM NL
+character is assumed to do the carriage-return function;
+the column pointer will be set to 0 and the delays specified
+for
+.SM CR
+will be used.
+Otherwise the
+.SM NL
+character is assumed
+to do just the line-feed function;
+the column pointer will remain unchanged.
+The column pointer is also set to 0 if the
+.SM CR
+character is actually transmitted.
+.PP
+The delay bits specify how long
+transmission stops to allow for mechanical or other movement
+when certain characters are sent to the terminal.
+In all cases a value of 0 indicates no delay.
+If
+.SM OFILL
+is set,
+fill characters will be transmitted
+for delay instead of a timed delay.
+This is useful for high baud rate terminals
+which need only a minimal delay.
+If
+.SM OFDEL
+is set,
+the fill character is
+.SM DEL\*S,
+otherwise
+.SM NUL\*S.
+.PP
+If a form-feed or vertical-tab delay is specified,
+it lasts for about 2 seconds.
+.PP
+New-line delay lasts about 0.10 seconds.
+If
+.SM ONLRET
+is set, the carriage-return delays are
+used instead of the new-line delays.
+If
+.SM OFILL
+is set,
+two fill characters will be transmitted.
+.PP
+Carriage-return delay type 1 is dependent on the current column
+position,
+type 2 is about 0.10 seconds,
+and type 3 is about 0.15 seconds.
+If
+.SM OFILL
+is set,
+delay type 1 transmits two fill characters,
+and type 2 four fill characters.
+.PP
+Horizontal-tab delay type 1 is dependent on the current
+column position.
+Type 2 is about 0.10 seconds.
+Type 3 specifies that tabs are to be expanded into spaces.
+If
+.SM OFILL
+is set,
+two fill characters will be transmitted for any delay.
+.PP
+Backspace delay lasts about 0.05 seconds.
+If
+.SM OFILL
+is set,
+one fill character will be transmitted.
+.PP
+The actual delays depend on line speed and system load.
+.PP
+The initial output control value is
+all bits clear.
+.PP
+The
+.I c_cflag\^
+field describes the hardware control of the terminal:
+.PP
+.ta \w'MAXMAX\ \ 'u +\w'0100000\ \ 'u
+.RS .3i
+.nf
+\s-1CBAUD\s+1	0000017	Baud rate:
+B0	0	Hang up
+B50	0000001	50 baud
+B75	0000002	75 baud
+B110	0000003	110 baud
+B134	0000004	134.5 baud
+B150	0000005	150 baud
+B200	0000006	200 baud*
+B300	0000007	300 baud
+B600	0000010	600 baud
+B1200	0000011	1200 baud
+B1800	0000012	1800 baud*
+B2400	0000013	2400 baud
+B4800	0000014	4800 baud
+B9600	0000015	9600 baud
+\s-1EXTA\s+1	0000016	19,200 baud
+\s-1EXTB\s+1	0000017	External B*
+\s-1CSIZE\s+1	0000060	Character size:
+CS5	0	5 bits
+CS6	0000020	6 bits
+CS7	0000040	7 bits
+CS8	0000060	8 bits
+\s-1CSTOPB\s+1	0000100	Send two stop bits, else one.
+\s-1CREAD\s+1	0000200	Enable receiver.
+\s-1PARENB\s+1	0000400	Parity enable.
+\s-1PARODD\s+1	0001000	Odd parity, else even.
+\s-1HUPCL\s+1	0002000	Hang up on last close.
+\s-1CLOCAL\s+1	0004000	Local line, else dial-up.
+.sp
+* These rates are not supported on the IRIS workstation.
+.sp
+.fi
+.RE
+.PP
+The
+.SM CBAUD
+bits specify the baud rate.
+The zero baud rate, B0, is used to hang up the connection.
+If B0 is specified, the data-terminal-ready signal will not
+be asserted.
+Normally, this will disconnect the line.
+For any particular hardware, impossible speed changes
+are ignored.
+.PP
+The
+.SM CSIZE
+bits specify the character size in bits
+for both transmission and reception.
+This size does not include the parity bit, if any.
+If
+.SM CSTOPB
+is set,
+two stop bits are used,
+otherwise one stop bit.
+For example, at 110 baud, two stop bits are required.
+.PP
+If
+.SM PARENB
+is set,
+parity generation and detection is enabled
+and a parity bit is added to each character.
+If parity is enabled,
+the
+.SM PARODD
+flag specifies odd parity if set,
+otherwise even parity is used.
+.PP
+If
+.SM CREAD
+is set,
+the receiver is enabled.
+Otherwise no characters will be received.
+.PP
+If
+.SM HUPCL
+is set,
+the line will be disconnected
+when the last process with the line open closes it or terminates.
+That is, the data-terminal-ready signal will not be asserted.
+.PP
+If
+.SM CLOCAL
+is set,
+the line is assumed to be a local, direct connection
+with no modem control.
+Otherwise modem control is assumed.
+.PP
+The initial hardware control value after open is
+B300, CS8,
+.SM CREAD\*S,
+.SM HUPCL\*S.
+.PP
+The
+.I c_lflag\^
+field of the argument structure
+is used by the line discipline to control terminal functions.
+The basic line discipline (0) provides the following:
+.PP
+.ta \w'MAXMAX\ \ 'u +\w'0100000\ \ 'u
+.RS .3i
+.nf
+\s-1ISIG\s+1	0000001	Enable signals.
+\s-1ICANON\s+1	0000002	Canonical input (erase and kill processing).
+\s-1XCASE\s+1	0000004	Canonical upper/lower presentation.
+\s-1ECHO\s+1	0000010	Enable echo.
+\s-1ECHOE\s+1	0000020	Echo erase character as \s-1BS-SP-BS\s+1.
+\s-1ECHOK\s+1	0000040	Echo \s-1NL\s+1 after kill character.
+\s-1ECHONL\s+1	0000100	Echo \s-1NL\s+1.
+\s-1NOFLSH\s+1	0000200	Disable flush after interrupt or quit.
+.DT
+.fi
+.RE
+.PP
+If
+.SM ISIG
+is set,
+each input character is checked against the special
+control characters
+.SM INTR
+and
+.SM QUIT\*S.
+If an input character matches one of these control characters,
+the function associated with that character is performed.
+If
+.SM ISIG
+is not set,
+no checking is done.
+Thus these special input functions
+are possible only if
+.SM ISIG
+is set.
+These functions may be disabled individually by changing
+the value of the control character to
+an unlikely or impossible value (e.g. 0377).
+.PP
+If
+.SM ICANON
+is set,
+canonical processing is enabled.
+This enables the erase and kill edit functions,
+and the assembly of input characters into lines delimited by
+.SM NL\*S,
+.SM EOF\*S,
+.SM EOL\*S,
+and
+.SM EOL2\*S.
+If
+.SM ICANON
+is not set,
+read requests are satisfied directly
+from the input queue.
+A read will not be satisfied
+until at least
+.SM MIN
+characters have been received or
+the timeout value
+.SM TIME
+has expired.
+This allows fast bursts of input to be read
+efficiently while still allowing single
+character input.
+The
+.SM MIN
+and
+.SM TIME
+values are stored in the
+position for the
+.SM EOF
+and
+.SM EOL
+characters respectively.
+The time value represents tenths of seconds.
+.PP
+If
+.SM XCASE
+is set,
+and if
+.SM ICANON
+is set,
+an upper-case letter is accepted on input by preceding
+it with a
+.B \e
+character,
+and is output preceded by a
+.B \e
+character.
+In this mode, the following escape sequences are generated
+on output and accepted on input:
+.br
+.ne 7
+.RS
+.nf
+.TP
+for:	use:
+\*`	\e\*'
+\(bv	\e!
+~	\e^
+{	\e(
+}	\e)
+\e	\e\e
+.RE
+.fi
+.PP
+For example,
+.B A
+is input as
+.BR \ea ,
+.B \en
+as
+.BR \e\en ,
+and
+.B \eN
+as
+.BR \e\e\en .
+.PP
+If
+.SM ECHO
+is set,
+characters are echoed as received.
+.PP
+When
+.SM ICANON
+is set,
+the following echo functions are possible.
+If
+.SM ECHO
+and
+.SM ECHOE
+are set,
+the erase character is echoed as
+.SM ASCII
+.SM BS SP BS\*S,
+which will clear the last character from a
+.SM CRT
+screen.
+If
+.SM ECHOE
+is set and
+.SM ECHO
+is not set,
+the erase character is echoed as
+.SM ASCII
+.SM SP BS\*S.
+If
+.SM ECHOK
+is set,
+the
+.SM NL
+character will be echoed after the
+kill character to emphasize that the line
+will be deleted.
+Note that an escape character preceding
+the erase or kill character removes any special function.
+If
+.SM ECHONL
+is set,
+the
+.SM NL
+character will be echoed even if
+.SM ECHO
+is not set.
+This is useful for terminals
+set to local echo (so-called half duplex).
+Unless  escaped, the
+.SM EOF
+character  is not 
+.bp
+echoed.
+Because
+.SM EOT
+is the default
+.SM EOF
+character,
+this prevents terminals that respond to
+.SM EOT
+from hanging up.
+.PP
+If
+.SM NOFLSH
+is set,
+the normal flush of the input and output queues
+associated with the quit and interrupt characters
+will not be done.
+.PP
+The initial line-discipline control value is
+all bits clear.
+.PP
+The primary
+.IR ioctl (2)
+system calls have the form:
+.PP
+.RS .3i
+ioctl \|(fildes, \|command, \|arg)
+.br
+struct \|termio \|\(**arg;
+.RE
+.PP
+The commands using this form are:
+.RS .3i
+.TP "\w'TCSETAWX\ \ \ 'u"
+.SM TCGETA
+Get the parameters associated with the terminal
+and store in the
+.I termio\^
+structure referenced by
+.BR arg .
+.TP
+.SM TCSETA
+Set the parameters associated with the terminal
+from the structure referenced by
+.BR arg .
+The change is immediate.
+.TP
+.SM TCSETAW
+Wait for the output to drain before
+setting the new parameters.
+This form should be used when changing parameters
+that will affect output.
+.TP
+.SM TCSETAF
+Wait for the output to drain,
+then flush the input queue and
+set the new parameters.
+.RE
+.PP
+Other
+.IR ioctl (2)
+calls have the form:
+.PP
+.RS .3i
+ioctl \|(fildes, \|command, \|arg)
+.br
+int \|arg;
+.RE
+.PP
+The commands using this form are:
+.RS .3i
+.TP "\w'TCSETAWX\ \ \ 'u"
+.SM TCSBRK
+Wait for the output to drain.
+If
+.I arg\^
+is 0,
+then send a break (zero bits for 0.25 seconds).
+.TP
+.SM TCXONC
+Start/stop control.
+If
+.I arg\^
+is 0, suspend output;
+if 1, restart suspended output.
+.TP
+.SM TCFLSH
+If
+.I arg\^
+is 0, flush the input queue;
+if 1, flush the output queue;
+if 2, flush both the input and output queues.
+.TP
+.SM FIONREAD
+Return the number of characters
+currently in a terminal's input buffer
+into the integer pointer \*arg.
+.SM ICANON
+mode must be set for this option to work.
+.TP
+.SM TCBLKMD
+Enable block mode, bypassing all line processing.  Currently implemented only
+on serial line devices /dev/ttyd\(**.  When in block mode,
+.IR read (2)
+must be called with a 1024 byte buffer. This mode is
+useful for efficient serial line communications at high baud rates.
+.TP
+.SM TIOCNOTTY
+Disconnects from controlling tty, with the same effect as
+\f2setpgrp\f1(2).  Works only on pty's and tty's.
+.TP
+.SM TIOCSTI
+Simulates tty input.  \f2arg\f1 is the address of the character which
+the system pretends the user typed at the terminal.  Works only on
+pty's and tty's.
+.RE
+.PP
+Additional
+calls have the form:
+.PP
+.RS .3i
+ioctl \|(fildes, \|command, \|arg)
+.br
+int \|\(**arg;
+.RE
+.PP
+The commands using this form are:
+.RS .3i
+.TP "\w'TCSETAWX\ \ \ 'u"
+.SM TIOCPKT
+Enable/disable \f2packet\f1 mode.  Packet mode is enabled by
+specifying (by reference) a nonzero parameter and disabled by
+specifying (by reference) a zero parameter.  When applied to the
+master side of a pseudo-terminal, each subsequent \f2read\f1 from
+the terminal will return data written on the slave part of the
+the pseudo-terminal preceded by a zero byte (symbolically defined
+as TIOCPKT_DATA), or a single byte reflecting control status
+information.  In the latter case, the byte is an inclusive-or of zero
+or more of the bits:
+.RS 1.1i
+.TP 
+.SM TIOCPKT_FLUSHREAD
+whenever the read queue for the terminal is flushed.
+.TP
+.SM TIOCPKT_FLUSHWRITE
+whenever the write queue for the terminal is flushed.
+.TP
+.SM TIOCPKT_STOP
+whenever the output to the terminal is stopped (as with CTRL-S).
+.TP
+.SM TIOCPKT_START
+whenever output to the terminal is restarted.
+.TP
+.SM TIOCPKT_DOSTOP
+whenever \f2t_stopc\f1 is CTRL-S and \f2t_startc\f1 is CTRL-Q.
+.TP
+.SM TIOCPKT_NOSTOP
+whenever the start and stop chararcters are not CTRL-S or CTRL-Q.
+.PP
+While this mode is in use, the presence of control status information
+to be read from the master side may be detected by a \f2select\f1 for
+exceptional condtions.
+.PP
+This mode is used by \f2rlogin\f1(1C) to implement a remote-echoed,
+locally CTRL-S/CTRL-Q flow-controlled remote login with proper
+back-flushing of output and can be used by other similar programs.
+.RE
+.TP
+.SM FIONBIO
+Turns on non-blocking I/O on pty's, tty's, and sockets.
+.TP
+.SM FIOASYNC
+Turns on or off only 'asychronous I/O' sockets.
+.TP
+.SM FIOSETOWN
+Sets 'owner' of a socket (for SIGURG).
+.TP
+.SM FIOGETOWN
+Gets 'owner' of a socket.
+.RE
+.PP
+Additional
+calls have the form:
+.PP
+.RS .3i
+ioctl \|(fildes, \|command, \|arg)
+.br
+struct winsize \|\(**arg;
+.RE
+.PP
+The commands using this form are:
+.RS .3i
+.TP "\w'TIOCSWINSZ\ \ \ 'u"
+.SM TIOCSWINSZ
+Updates the \f2struct winsize\f1 state of a pseudo-tty.  The process tree
+using the pseudo-tty is automatically sent the SIGWINCH signal.
+This ioctl is used to inform programs using the tty end of a pseudo-tty
+that their window has changed size.
+This call will return an error on anything other than pseudo-ttys.
+.TP
+.SM TIOCGWINSZ
+Returns the current value of the \f2struct winsize\f1 structure.
+Used by terminal programs to determine the size of their terminal.
+This call will return an error on anything other than pseudo-ttys.
+.RE
+.SH FILES
+/dev/tty
+.br
+/dev/tty\(**
+.br
+/dev/console
+.SH SEE ALSO
+stty(1), ioctl(2).
+.\"	@(#)termio.7	5.1 of 10/15/83
+.\"  @(#)$Header: /d2/3.7/src/man/a_man/man7/RCS/termio.7,v 1.1 89/03/27 16:23:16 root Exp $
+.\"  $Log:	termio.7,v $
+Revision 1.1  89/03/27  16:23:16  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  85/06/17  14:01:39  robinf
+.\" Changes according to Herb Kuta
+.\" 
+.\" Revision 1.1  85/06/12  09:39:03  robinf
+.\" Update for GL2-W2.3
+.\" 
+.\" Revision 1.0  85/05/02  11:18:37  robinf
+.\" Initial Revision for Documentation/on 2/25/85 
+.\" Bob Toxen documented EOL2 character as per SCR584
+
+.\" Revision 1.2  85/02/25  16:41:42  bob
+.\" Documented EOL2 character as per SCR 584.
+.\" 
+
+

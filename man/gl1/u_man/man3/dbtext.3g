@@ -1,0 +1,26 @@
+.TH dbtext "" "Beta Release" "Silicon Graphics"
+.SH NAME
+.I dbtext
+- set the dial and switch box text
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "dbtext(str)"
+.B "char str[8];"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine dbtext(str)"
+.B "character*(8) str"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure dbtext(str: pstring);
+.sp
+.SH DESCRIPTION
+.B dbtext
+places up to eight characters of text into the text window on the 
+dial and switch box.  Digits, spaces, and upper-case letters are allowed.
+.SH NOTE
+This command can be used only in immediate mode.

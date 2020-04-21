@@ -1,0 +1,71 @@
+iris pm2 prom and standalone library code
+
+version 3.1 November 14, 1984 -
+	introducing the "b" command.
+	bugs in various drivers.
+version 3.2 December 10, 1984 -
+	medium-independent boot command.
+	bugs fixed in various drivers.
+version 3.3 January 4, 1985 -
+	can handle the ip disk drive.
+version 3.4 February 4, 1985 -
+	move special area including stack+bss+io
+	to the LAST half-meg of mem after sizing.
+	fix "d" command.
+version 3.5 February 6, 1985 -
+	combined gl1 / gl2 proms.
+	scrolling.
+	eliminated "Sys3" tools.
+	device drivers ignore fstype.
+version 3.6 February 28, 1985 -
+	boot from multibus proms.
+	fix bug in bigbooting.
+	fix bugs in termulating (microsw).
+	March 10, 1985 -
+	added msdelay() calibration
+	fixed rs170 clear
+	fixed autoboot md:
+version 3.7 March 19, 1985 -
+	improved sa lib.
+	fixed <break> from program.
+	improved scrolling.
+	eliminated !* split screen.
+	improved terminal emulation:
+	added "transmit" feature - \EN
+	somewhat improved nx driver
+	fixed leading 0 bug where insisted on 0x, 0o, or 0t
+	fixed clear bug (t - vi) disappearing cursor.
+version 3.8 August 2, 1985 -
+	added efs support
+version 3.9 November 8, 1985 -
+	added multiple indir extents (ugh)
+	19200 baud termulating fix
+	DTR termulating fix
+version 3.9 February 19, 1986 -
+	can load bootable prom image at addr >= 0x100000
+
+10dec84 -
+in order for the Makefiles to work correctly,		XXX
+./Sys3lib should be moved to /Sys3lib			XXX
+./Sys3bin should be moved to /Sys3bin			XXX
+
+ 3jan85 -
+mon/adv*.c may be sacrificed to save space.
+
+12feb85 -
+Sys3 tools no longer needed.
+BUT MUST USE ./segld which is ld hacked to take -LD
+
+30may85 -
+created "promsplit" for burning 1 at a time.
+
+2aug85 -
+added efs support
+
+8nov85 -
+19200 baud fix
+DTR fix
+deleted extraneous net junk
+
+19feb86 -
+fix memclr() to preserve prom image even if addr >= 0x100000

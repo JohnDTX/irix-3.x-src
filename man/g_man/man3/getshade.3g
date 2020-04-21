@@ -1,0 +1,32 @@
+.TH getshade 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getshade
+\- returns the current shade
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getshade()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getsha()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getshade: longint;"
+.sp
+.SH DESCRIPTION
+.B getshade
+returns the current shading value.  
+It is an index into the color map and is meaningful in
+color map mode but not in RGB mode.  
+.SH "SEE ALSO"
+setshade, spclos
+.sp
+\f2Programming Guide\fP, Section 13.1, Shading
+.SH NOTE
+This routine is available only in immediate mode.

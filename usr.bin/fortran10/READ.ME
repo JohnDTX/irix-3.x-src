@@ -1,0 +1,18 @@
+
+
+Turn the .o files in bin into executables as follows:
+     cc pascal.o -o pascal
+(for each .o file).
+
+The libraries are recreated using the Build.SVSlib, Build.SGlib, and
+Build scripts in the lib and flib directories.  All of the remaining 
+modules are recreated by compiling them as Pascal programs BEING SURE 
+TO USE svs.paslib.obj INSTEAD OF paslib.obj since our modules depend 
+on mark/release!!!
+
+All of the source code flags are set properly for the Silicon Graphics
+68010 system.
+
+The assembler is for use ONLY in rebuilding our system from source.  It
+is not part of the system available for distribution or other use.
+

@@ -1,0 +1,47 @@
+'\" t
+.TH gethitcode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gethitcode
+\- returns the current system hitcode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long gethitcode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function gethit()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function gethitcode: longint;"
+.SH DESCRIPTION
+.B gethitcode
+returns the global variable 
+.I hitcode,
+which keeps a cumulative 
+record of clipping plane hits.  It does not change the hitcode value.
+.PP
+The hitcode is a 6-bit number (see below), with one bit 
+for each clipping plane.  
+.sp
+.TS
+center ;
+cp10 cp10 cp10 cp10 cp10 cp10 
+| ce | ce | ce | ce | ce | ce |.
+5	4	3	2	1	0
+_
+far	near	top	bottom	right	left
+_
+.TE
+.SH "SEE ALSO"
+clearhitcode, gselect, pick
+.sp
+.I Programming Guide,
+Section 9.2, Picking
+.SH NOTE
+This routine is available only in immediate mode.

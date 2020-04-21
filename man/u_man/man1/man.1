@@ -1,0 +1,345 @@
+'\"macro stdmacro
+.TH MAN 1
+.SH NAME
+man, manprog \- print entries in this manual
+.SH SYNOPSIS
+.B man
+[ options ] [ section ] titles
+.PP
+.B /usr/lib/manprog
+file
+.tr ~"
+.if t .ds i ''
+.if n .ds i ""
+.SH DESCRIPTION
+.I Man\^
+locates and prints the entry of this manual named
+.I title\^
+in the specified
+.IR section .
+(For historical reasons, the word ``page''
+is often used as a synonym for ``entry'' in this context.)\
+Requests for entries are case-insensitive and
+only the first nine characters 
+are significant.
+They can contain shell metacharacters.
+The
+.I section\^
+number may not have
+a subsection letter suffix.
+A new
+.I section\^
+can be specified before each
+.IR title .
+If no
+.I section\^
+is specified, the whole manual is searched for
+.IR title .
+If multiple entries match the request,
+.I man
+pauses between them. 
+Specifying the section will greatly speed up finding the entry.
+.PP
+.I Man
+first searches for the entry in the directories of pre-formatted man
+pages
+.RB ( /usr/man/?_man/cat?
+and
+.BR /usr/man/local/cat? )
+for quick printing of frequently referenced pages.
+If there is not a pre-formatted page then one will be created
+(unless certain incompatible options are specified,
+.IR e.g. ,
+.BR -t ).
+.PP
+.I Options\^
+and their meanings are:
+.PP
+.PD 0
+.TP 11
+.B \-t
+Typeset the entry
+in the default format (8.5\*i\(mu11\*i).
+.TP
+.B \-s
+Typeset the entry in the small format (6\*i\(mu9\*i).
+.TP
+.B \-T4014
+Display the typeset output on a Tektronix 4014 terminal using
+.IR tc (1).
+.TP
+.B \-Ttek
+Same as
+.BR \-T4014 .
+.TP
+.B \-Tst
+Print the typeset output on the
+.SM MHCC STARE
+facility
+(this option is not usable on most systems).
+.TP
+.B \-Tvp
+Print the typeset output on a
+Versatec printer;
+this option is not available at all
+.SM UNIX
+System sites.
+.TP
+.BI \-T term\^
+Format the entry using
+.I nroff
+and print it on the standard output
+(usually, the terminal);
+.I term\^
+is the terminal type (see
+.IR term (5)
+and the explanation below);
+for a list of recognized values of
+.IR term ,
+type
+.BR "help term2" .
+The default value of
+.I term\^
+is
+.BR 450 .
+.TP
+.B \-w
+Print on the standard output only the
+.I "path names\^"
+of the entries,
+relative to
+.BR /usr/man ,
+or to the current directory for
+.B \-d
+option.
+.TP
+.B \-d
+Search the current directory rather than
+.BR /usr/man ;
+requires the full file name (e.g.,
+.BR cu.1c ,
+rather than just
+.BR cu ).
+.TP
+.B \-12
+Indicates that the manual entry is to be produced in
+12-pitch.
+May be used when
+.SM
+.B $TERM
+(see below)
+is set to one of
+.BR 300 ,
+.BR 300s ,
+.BR 450 ,
+and
+.BR 1620 .
+(The pitch switch on the
+.SM DASI
+300 and 300s terminals must be manually set to
+.B 12
+if this option is used.)
+.TP
+.B \-c
+Causes
+.I man\^
+to invoke
+.IR col (1);
+note that
+.IR col (1)
+is invoked automatically by
+.I man\^
+unless
+.I term\^
+is one of
+.BR 300 ,
+.BR 300s ,
+.BR 450 ,
+.BR 37 ,
+.BR 4000a ,
+.BR 382 ,
+.BR 4014 ,
+.BR tek ,
+.BR 1620 ,
+and
+.BR X .
+.TP
+.B \-y
+Causes
+.I man\^
+to use the non-compacted version of the macros.
+.PD
+.PP
+The above
+.I options\^
+other than
+.BR \-d ,
+.BR \-c ,
+and
+.B \-y
+are mutually exclusive, except that the
+.B \-s
+option may be used in conjunction with the first four
+.B \-T
+options above.
+Any other
+.I options\^
+are passed to
+.IR troff ,
+.IR nroff ,
+or the
+.IR man (5)
+macro package.
+.PP
+When using
+.IR nroff ,
+.I man\^
+examines the environment variable
+.SM
+.B $TERM
+(see
+.IR environ (5))
+and attempts to select options to
+.IR nroff ,
+as well as filters,
+that adapt the output to the terminal being used.
+The
+.BI \-T term\^
+option overrides the value of
+.SM
+.BR $TERM\*S ;
+in particular, one should use
+.B \-Tlp
+when sending the output of
+.I man\^
+to a line printer.
+.PP
+If the first line of the input for an entry consists
+solely of the string:
+.IP
+.BI \&'\^\e~\| " x"
+.PP
+where
+.I x\^
+is any combination of the three characters
+.BR c ,
+.BR e ,
+and
+.BR t ,
+and
+where there is exactly one blank between the double quote
+.RB ( ~ )
+and
+.IR x ,
+then
+.I man\^
+will preprocess its input through the appropriate combination of
+.IR cw (1),
+.IR eqn (1)
+(\f3neqn\fP for \f3nroff\fP)
+and
+.IR tbl (1),
+respectively;
+if
+.I eqn
+or
+.I neqn
+are invoked, they will automatically read the file
+.B /usr/pub/eqnchar
+(see
+.IR eqnchar (5)).
+.PP
+The
+.I man\^
+command executes
+.I manprog\^
+that takes a file name as its argument.
+.I Manprog\^
+calculates and returns a string of
+three register definitions used by the formatters
+identifying the date the file was last modified.
+The returned string has the form:
+.PP
+.RS
+.BI \-rd day
+.BI \-rm month
+.BI \-ry year
+.RE
+.PP
+and is passed to
+.I nroff\^
+which sets this string as variables for the
+.I man\^
+macro package.
+Months are given from 0 to 11, therefore month is always
+1 less than the actual month.
+The
+.I man\^
+macros calculate the correct month.
+If the
+.I man\^
+macro package is invoked as an option to
+.IR nroff / troff
+(i.e.,
+.IR "nroff \-man file" ),
+then the current
+day/month/year is used as the printed date.
+.SH EXAMPLES
+.IP
+man \|man
+.PP
+reproduces on the terminal this entry,
+as well as any other entries named
+.I man\^
+that may exist in other sections of the manual, e.g.,
+.IR man (5).
+.IP
+man 2 get\\*
+.PP
+ will display the entries for all system calls
+that begin with ``get''.
+.SH FILES
+.PD 0
+.TP \w'/usr/man/u_man/man[1-8]/\(**\ \ \ \ 'u
+/usr/man/[au]_man/man[1-8]/\(**
+the \f3\s-1UNIX\s+1 Programmer's Manual\fP
+.TP
+/usr/man/local/man[1-8]/\(**
+local additions
+.TP
+/usr/man/[au]_man/cat[1-8]/\(**
+pre-formatted man pages for fast printing
+.TP
+/usr/man/local/cat[1-8]/\(**
+pre-formatted local man pages for fast printing
+.TP
+/usr/lib/manprog
+calculates modification dates of entries
+.PD
+.SH SEE ALSO
+cw(1),
+eqn(1),
+nroff(1),
+tbl(1),
+tc(1),
+troff(1),
+environ(5),
+man(5),
+term(5).
+.SH BUGS
+All entries are supposed to be reproducible either on
+a typesetter or on a terminal.
+However, on a terminal some information is necessarily lost.
+.tr ~~
+.\"	@(#)man.1	5.2 of 5/18/82
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/man.1,v 1.1 89/03/27 16:46:55 root Exp $
+.\" $Log:	man.1,v $
+Revision 1.1  89/03/27  16:46:55  root
+Initial check-in for 3.7
+
+.\" Revision 1.3  86/10/03  17:28:31  rmr
+.\" *** empty log message ***
+.\" 
+.\" Revision 1.2  85/01/08  11:04:03  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

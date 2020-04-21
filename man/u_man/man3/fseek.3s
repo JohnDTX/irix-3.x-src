@@ -1,0 +1,86 @@
+'\"macro stdmacro
+.TH FSEEK 3S
+.SH NAME
+fseek, rewind, ftell \- reposition a file pointer in a stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int fseek (stream, offset, ptrname)
+.br
+.SM
+.B FILE\*S \(**stream;
+.br
+.B long offset;
+.br
+.B int ptrname;
+.PP
+.B void rewind (stream)
+.br
+.SM
+.B FILE\*S \(**stream;
+.PP
+.B long ftell (stream)
+.br
+.SM
+.B FILE\*S \(**stream;
+.SH DESCRIPTION
+.I Fseek\^
+sets the position of the next input or output
+operation on the
+.IR stream .
+The new position is at the signed distance
+.I offset\^
+bytes
+from the beginning, from the current position, or from the end of the file,
+according as
+.I ptrname\^
+has the value 0, 1, or 2.
+.PP
+.IR Rewind\^ ( stream\^ )
+is equivalent to
+.IR fseek\^ ( stream ", 0L, 0),"
+except that no value is returned.
+.PP
+.I Fseek\^
+and
+.I rewind\^
+undo any effects of
+.IR ungetc\^ (3S).
+.PP
+After
+.I fseek\^
+or
+.IR rewind ,
+the next operation on a file opened for update
+may be either input or output.
+.PP
+.I Ftell\^
+returns the offset of the current byte relative to the beginning
+of the file associated with the named
+.IR stream .
+.SH SEE ALSO
+lseek(2),
+fopen(3S).
+.SH DIAGNOSTICS
+.I Fseek\^
+returns non-zero for improper seeks,
+otherwise zero.
+An improper seek can be, for example, an
+.I fseek\^
+done on a file that has not been opened via
+.IR fopen ;
+in particular,
+.I fseek\^
+may not be used on a terminal, or on a file opened via
+.IR popen\^ (3S).
+.SH WARNING
+Although on the \s-1UNIX\s+1 System an offset returned by
+.I ftell\^
+is measured in bytes, and it is permissible to seek to positions
+relative to that offset,
+portability to non-\s-1UNIX\s+1 systems requires that
+an offset be used by
+.I fseek\^
+directly. Arithmetic may not meaningfully be performed on such
+a offset, which is not necessarily measured in bytes.
+.\"	@(#)fseek.3s	5.1 of 10/25/83

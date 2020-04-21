@@ -1,0 +1,82 @@
+'\"macro stdmacro
+.TH ACCTMERG 1M
+.SH NAME
+acctmerg \- merge or add total accounting files
+.SH SYNOPSIS
+.B /usr/lib/acct/acctmerg
+[\^options\^] [\^file\^] . . .
+.SH DESCRIPTION
+.I Acctmerg\^
+reads its standard input and up to nine additional files,
+all in the
+.B tacct\^
+format (see
+.IR acct (4)),
+or an
+.SM ASCII
+version thereof.
+It merges these inputs by adding records whose keys (normally user
+.SM ID
+and name)
+are identical, and expects the inputs to be sorted on those keys.
+.I Options\^
+are:
+.PP
+.PD 0
+.TP "\w'\-m\ \ \ 'u"
+.B \-a
+Produce output in
+.SM ASCII
+version of
+.BR tacct .
+.TP
+.B \-i
+Input files are in
+.SM ASCII
+version of
+.BR tacct .
+.TP
+.B \-p
+Print input with no processing.
+.TP
+.B \-t
+Produce a single record that totals all input.
+.TP
+.B \-u
+Summarize by user
+.SM ID\*S,
+rather than user
+.SM ID
+and name.
+.TP
+.B \-v
+Produce output in verbose
+.SM ASCII
+format,
+with more precise notation for floating point numbers.
+.PD
+.SH EXAMPLE
+.PP
+The following sequence is useful for making ``repairs''
+to any file kept in this format:
+.PP
+.RS
+.nf
+acctmerg \|\-v \|<file1 \|>file2
+	\f2edit file2 as desired\fP .\|.\|.
+acctmerg \|\-a \|<file2 \|>file1
+.fi
+.RE
+.SH SEE ALSO
+acct(1M),
+acctcms(1M),
+acctcom(1),
+acctcon(1M),
+acctprc(1M),
+acctsh(1M),
+fwtmp(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.\"	@(#)acctmerg.1m	5.1 of 10/17/83

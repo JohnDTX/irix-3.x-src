@@ -1,0 +1,36 @@
+.TH callfunc 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B callfunc
+\- calls a function from within an object
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "callfunc(fctn, nargs, arg1, arg2, ..., argn)"
+.B "int (*fctn)();"
+.B "long nargs, arg1, arg2, ..., argn;
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "available only in C"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "available only in C"
+.SH DESCRIPTION
+.B callfunc
+calls an arbitrary function from within an object.
+The function
+.I "fctn (nargs, arg1, arg2, ..., argn)"
+is called
+when \f3callfunc\f1 executes in the object. 
+.SH SEE ALSO
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine cannot be called remotely.
+
+

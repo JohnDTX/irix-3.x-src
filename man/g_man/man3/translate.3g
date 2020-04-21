@@ -1,0 +1,42 @@
+.TH translate 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B translate
+\- translates graphical primitives
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "translate(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine transl(x, y, z)"
+.B "real x, y, z"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure translate(x, y, z: Coord);"
+.SH DESCRIPTION
+.B translate
+moves the object space origin to a point specified
+in the current object coordinate system. 
+.B translate
+is a modeling routine
+which changes the current transformation matrix.
+All objects drawn after
+.B translate
+executes are translated.
+Use
+.B pushmatrix
+and
+.B popmatrix
+to limit the scope of the translation.
+.SH "SEE ALSO"
+popmatrix, pushmatrix, rot, rotate, scale
+.sp
+.I Programming Guide,
+Section 4.1, Modeling Transformations

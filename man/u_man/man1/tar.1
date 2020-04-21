@@ -1,0 +1,348 @@
+'\"macro stdmacro
+.TH TAR 1
+.SH NAME
+tar \- tape archiver
+.SH SYNOPSIS
+.B tar
+key [ name ... ]
+.SH DESCRIPTION
+.fi
+.PP
+.I tar
+saves and restores multiple files on a single file (usually a magnetic
+tape, but it can be any file).
+The 
+.I key
+argument controlls
+.IR tar 's
+actions.
+The
+.I key
+is a string of characters containing at most one function letter and possibly
+one or more function modifiers.  Other arguments to
+.I tar
+are file or directory names specifying which files to dump or restore.
+In all cases, appearance of a directory name refers (recursively) to
+the files and  subdirectories of that directory.
+These files are dumped to tape in alphabetical order.
+.PP
+A
+.I tar
+archive is a stream of 512-byte header structures
+which may be followed by file data rounded up to the next
+512-byte boundary.
+The end of the archive is signaled by two header structures
+beginning with null bytes.
+.\"	When
+.\"	.I tar
+.\"	has seen the end of the archive, it will do up to two more
+.\"	reads in search of the real end-of-file so that on magnetic
+.\"	tapes, the tape will be positioned after the file mark, i.e.
+.\"	at the beginning of the next tape file, if any.
+.PP
+The function portion of the key is specified by one of the following letters:
+.TP 8
+.B  x
+Extract the named files from the tape.  If a named file
+matches a directory whose contents had been written onto the tape, this
+directory is (recursively) extracted.  The owner, modification time, and mode
+are restored (if possible).  If no file argument is given, the entire content
+of the tape is extracted.  Note that if multiple entries specifying the same
+file are on the tape, the last entry overwrites all earlier entries.
+.TP 8
+.B  X
+For each file to be extracted,
+if it is identical to the file in the corresponding
+position in the comparison tree, link the existing file
+to the new file.
+Otherwise, extract the new file as a separate new file.
+.B X
+is like 
+.B x 
+but also takes the next argument
+as the root of a directory tree for comparison.
+.TP 8
+.B  t
+List the names of the specified files each time they occur on
+the tape.  If no file argument is given, list all of the names on the tape.
+.TP 8
+.B  c
+Create a new tape; writing starts at the beginning of the tape
+instead of after the last file.  This option assumes you are at
+the beginning of the tape.
+.TP 8
+.B  C
+Compare files on tape against existing files.
+For each specified file, print a line with a key
+character followed by the file name.
+.nf
+.ta +4m,+2m
+	L	linked to an earlier file on the tape
+	S	symbolic link
+	B	block special file
+	C	character special file
+	P	named pipe
+	?	can't read the disk file, so can't compare
+	>	disk file doesn't exist
+	=	files compare
+	!	files don't compare
+.fi
+.PP
+In addition to the letter
+which selects the function desired the following characters may be used:
+.TP 8
+.B  d
+On output, 
+.I tar 
+normally places information specifying owner and modes
+of directories in the archive.  Former versions of 
+.IR tar , 
+when encountering
+this information print error messages of the form:
+.br
+	``<name>/: cannot create''.
+.br
+This option suppresses the printing of the directory information.
+This option implies the \f3D\f1 option.
+.TP 8
+.B  D
+On output, 
+.I tar 
+normally places information specifying the owner, modes,
+and device numbers
+of character and block special files and named pipes (
+.I fifos
+) in
+the archive.
+Former versions of 
+.IR tar , 
+when encountering
+this information create an ordinary file of the same name whose contents
+is the device number, in binary.
+This option suppresses the special file information.
+.TP 8
+.B  p
+This option restores files to their original modes,
+ignoring the present
+.IR umask (2).
+Setuid and sticky information
+are also restored to the super-user.
+.TP 10
+\f3\&0\f1, \f3\&1\f1, \f3\&2\f1, \f3\&3\f1, \f3\&4\f1, \f3\&5\f1, \f3\&6\f1, \f3\&7\f1, \f3\&8\f1, \f3\&9\f1
+.br
+This modifier selects an alternate drive on which the tape is mounted.
+The default is 
+.IR /dev/rmt1 .
+.TP 10
+.B  v
+Normally
+.I tar
+does its work silently.  The
+.B v
+(verbose) option make
+.I tar
+print the name of each file it treats preceded by the function
+letter.  With the
+.B t
+function, the verbose option
+gives more information about the tape entries than just their names.
+.TP 10
+.B  w
+.I tar
+prints the action to be taken followed by file name, then
+waits for user confirmation. If a word beginning with `y'
+is given, the action is done.  Any other input means do not do it.
+.TP 10
+.B f
+.I tar
+uses the next argument as the name of the archive instead of
+.IR /dev/rmt1 . 
+If the name of the file is `-', tar writes to standard output or
+reads from standard input (whichever is appropriate). Thus,
+.I tar
+can be used as the head or tail of a filter chain.
+To move hierarchies, use the command
+.sp .5
+.ti +.5i
+cd fromdir;\0tar cBf \- . | (cd todir; tar xBf \-)
+
+To move hierarchies across systems, use:
+
+.ti +.5i
+xx system 'cd fromdir;\0tar cBf \- .' | (cd todir; tar xBf \-)
+
+To backup a hierarchy to a remote tape drive, use:
+
+.ti +.5i
+tar cBf \- fromdir | xx system 'dd ibs=10k obs=200k \\
+.br
+.ti +.5i
+of=/dev/rmt1'
+
+To extract from a remote tape, use:
+
+.ti +.5i
+xx system 'dd ibs=200k obs=10k if=/dev/rmt1' | tar xBf \-
+
+The
+.I xx
+command merges standard output with standard error.  If there are any
+error messages, they will cause the second
+.I tar
+to fail. 
+Due to an attempt to write a record (the error message) 
+whose size is not a multiple of 512, a write
+error occurs.
+This problem can be avoided 
+by using the Bourne shell's capability to redirect just
+standard error on the remote system with the command:
+
+.ti +.5i
+xx system 'cd fromdir;\0/bin/sh \-c "tar cBf \- . \\
+.br
+.ti +.5i
+2>/dev/console"' | tar xBf \- 
+.TP 10
+.B b
+.I tar
+uses the next argument as the blocking factor for tape records. The
+default is 400 for the cartridge tape, 1 for standard input
+and standard output,
+and 20 otherwise.
+.\" This option should only be used with raw magnetic
+.\" tape archives (See
+.\" .B f
+.\" above) or the default tape device.
+If the tape was written with a blocking factor that
+does not exceed the default for that device (20 or 400), 
+the block size is determined automatically
+when reading a tape.
+Use the default blocking factor with a cartridge tape.
+Due to the blocking algorithm, 
+a tar tape created by writing to the standard output should be read from
+standard input. 
+.TP 10
+.B l
+If it cannot resolve all of the links to the
+files dumped, 
+.I tar 
+prints error messages.  If 
+.B l 
+is not specified, no error messages are printed.
+.TP 10
+.B m
+Do not restore the modification times.  The modification time
+will be the time of extraction.
+.TP 10
+.B e
+Force
+.I tar
+to continue reading past tape errors.
+.TP 10
+.B L
+Force
+.I tar
+to follow symbolic links as if they were normal files or
+directories.
+.\"	Normally,
+.\"	.I tar
+.\"	does not follow symbolic links.
+.TP 10
+.B B
+Force input and output blocking to 20 blocks per record.  This option
+allows 
+.I tar
+to work across a communications channel where the blocking may not
+be maintained.
+.TP 10
+.B R
+When extracting from tape, ignore leading slashes on file names,
+i.e., extract all files relative to the current directory.
+.TP 10
+.B U
+For each file extracted, unlink existing file (if any).
+.TP 10
+.B o
+Do not \f2chown\f1 (or \f2chgrp\f1) files.
+.\" .TP 10
+.\" .B V
+.\" Variable blocking; the last tape block will not be filled to the blocking
+.\" size.
+.TP 10
+.B a
+Reset access times of input files after they have been copied to the archive.
+.TP 10
+.B q
+Turn on debugging and extra error diagnostics.
+Supplying this flag multiple times increases debugging level.
+.PP
+If a file name is preceded by
+.BR \-C ,
+then
+.I tar
+will perform a
+.IR chdir (2)
+to that file name.  This allows multiple directories not
+related by a close common parent to be archived using short
+relative path names.  For example, to archive files from 
+.I /usr/include
+and from 
+.IR /etc , 
+one might use
+.PP
+.ti +0.5i
+tar c \-C /usr  include \-C /  etc
+.\"	.PP
+.\"	Previous restrictions dealing with
+.\"	.IR tar 's
+.\"	inability to properly handle blocked archives have been lifted.
+.\"	on Berkeley systems thanks to an enhanced magnetic tape driver.
+.PP
+If a file name of
+.B \-
+is given on the command line when making an archive then
+.I tar
+will read its standard input for a list of files to back up,
+one per line; the list is terminated by an EOF.
+For example, to back up all files that have changed in the last week,
+one might use
+.PP
+.ti +0.5i
+find / \- local ! \-type  d \-mtime \-7 \-type f \-print | tar ca \-
+.SH FILES
+/dev/rmt?
+.br
+/tmp/tar*
+.SH DIAGNOSTICS
+Error messages about bad key characters and tape read/write errors.
+.PP
+Error messages if enough memory is not available to hold the link tables.
+.SH BUGS
+Inserting a second tape could cause a system crash.
+.PP
+There is no way to ask for the
+.IR n \-th
+occurrence of a file.
+.PP
+The system must be rebooted after hard tape errors.
+.PP
+The
+.B u
+option can be slow.
+.PP
+File name length is limited to 100 characters.
+.\"	.br
+.\"	There is no way to selectively follow symbolic links.
+.PP
+The data for a file with multiple links is output to
+tape with the first link encountered.   Thus, an attempt
+to extract a subsequent link by itself will not have the
+desired result.
+.PP
+The cartridge tape drive always reads and writes 
+in multiples of 512\-byte records.
+Each tape must be created from scratch.  Files may not be appended.
+Archives cannot be spread over multiple tapes.
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/tar.1,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:50:40 $

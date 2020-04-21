@@ -1,0 +1,81 @@
+'\"macro stdmacro
+.TH FREXP 3C
+.SH NAME
+frexp (_lfrexp), ldexp (_lldexp), modf (_lmodf) \- manipulate parts of floating-point numbers
+.SH SYNOPSIS
+.nf
+.B float frexp (value, eptr)
+.B float value;
+.B int \(**eptr;
+.PP
+.B long float _lfrexp (value, eptr)
+.B long float value;
+.B int \(**eptr;
+.PP
+.B float ldexp (value, exp)
+.B float value;
+.B int exp;
+.PP
+.B long float _lldexp (value, exp)
+.B long float value;
+.B int exp;
+.PP
+.B float modf (value, iptr)
+.B float value, \(**iptr;
+.PP
+.B long float _lmodf (value, iptr)
+.B long float value, \(**iptr;
+.SH DESCRIPTION
+Every non-zero number can be written uniquely as
+.IR x\^ "\(** 2" \u\s-2n\s+2\d ,
+where the ``mantissa'' (fraction)
+.I x\^
+is in the range
+.RI "0.5 \(<= |" \|x\| "| < 1.0,"
+and the ``exponent''
+.I n\^
+is an integer.
+.I Frexp (_lfrexp)\^
+returns the mantissa of a floating point
+.IR value ,
+and stores the exponent
+indirectly in the location pointed to by 
+.IR eptr .
+.PP
+.I Ldexp (_lfrexp)\^
+returns the quantity
+.IR value\^ "\(** 2" \u\s-2exp\s+2\d .
+.PP
+.I Modf (_lmodf)\^
+returns the signed fractional part of
+.I value\^
+and stores the integral part indirectly
+in the location pointed to by 
+.IR iptr .
+.SH DIAGNOSTICS
+If
+.I ldexp (_lldexp)\^
+would cause overflow, a floating point exception is signalled
+with the type
+.I OVERFL.\^
+Underflow is similarly signalled by the type
+.I UNDERFLOW_A.\^
+.PP
+If 
+.I frexp (_lfrexp)\^
+or 
+.I modf (_lmodf)\^
+is passed infinity or NaN as a value, it will signal a floating point
+exception with the type
+.I CONVERT_INFINITY\^
+for infinity or 
+.I INVALID_OP_A\^
+for NaN.  As 
+.I ldexp (_lldexp)\^
+calls
+.I frexp (_lfrexp),\^
+this exception can also occur when calling ldexp (_lldexp) if
+the passed value is infinite or Nan.
+.SH SEE ALSO
+fpsigset(3C)
+.\"	@(#)frexp.3c	5.1 of 11/1/83

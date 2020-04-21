@@ -1,0 +1,1121 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: JPHASE.2B.TEXT                            *)
+(*                                                                           *)
+(*          (C) Copyright 1984, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               18-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+procedure drelocation(ftree: pcommon);
+  var lcommon: pcommon; lfdreloclist, lfdfreloclist: pfdreloc;
+      PickFDF: Boolean; nextaddr: longint; lsymbol: psymbol;
+begin {drelocation}
+if ftree <> nil
+then begin
+     if ftree^.initlist <> nil
+     then begin
+          getrelocs(ftree,lfdfreloclist,lfdreloclist);
+          while (lfdfreloclist <> nil) or (lfdreloclist <> nil) do begin
+                if lfdfreloclist = nil
+                then PickFDF := FALSE
+                else if lfdreloclist = nil
+                     then PickFDF := TRUE
+                     else PickFDF :=
+                            lfdfreloclist^.daddr < lfdreloclist^.daddr;
+                if PickFDF
+                then begin
+                     nextaddr := ftree^.loc + lfdfreloclist^.daddr;
+                     lsymbol := @lfdfreloclist^.rname^;
+                     { Relocate Data with respect to text segment }
+                     if TARGETOS = UNISOFT
+                     then begin 
+                          if lsymbol^.Defined
+                          then begin outone($20); out(0,3); end { wrt text }
+                          else begin
+                               outone($E0);   { symbol table relative, long }
+                               outone(0);     { alignment character }
+                               out(lsymbol^.symtabnum,2);
+                               end;
+                          out(nextaddr,4); 
+                          drelocbytes := drelocbytes + 8;
+                          end
+                     else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+                     then begin
+                          out(nextaddr,4); 
+                          if lsymbol^.Defined
+                          then out($440,4) { wrt text }
+                          else begin
+                               out(lsymbol^.symtabnum,3);
+                               outone($50);   { symbol table relative, long }
+                               end;
+                          drelocbytes := drelocbytes + 8;
+                          end
+                     else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                             (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                             (TARGETOS = CT5_2)
+                     then begin
+                          out(nextaddr+nxttaddr,4); 
+                          if lsymbol^.Defined
+                          then out(textstnum,4)
+                          else out(lsymbol^.symtabnum,4);
+                          out($11,2);
+                          drelocbytes := drelocbytes + 10;
+                          end
+                     else if (TARGETOS = TEK) or (TARGETOS = SEQ) or
+                             (TARGETOS = OPUS) or (TARGETOS = UNOS)
+                     then begin
+                          writeln('drelocation1 not implemented');
+                          end;
+                     lfdfreloclist := lfdfreloclist^.next;
+                     end
+                else begin {Don't PickFDF}
+                     nextaddr := ftree^.loc + lfdreloclist^.daddr;
+                     lcommon := lfdreloclist^.rname;
+                     if lcommon^.initlist = nil
+                     then begin
+                          { Relocate Data with respect to bss segment }
+                          if TARGETOS = UNISOFT
+                          then begin
+                               if lcommon^.datname.linkno >= 0
+                               then begin outone($A0); out(0,3); end { BSS }
+                               else begin
+                                    outone($E0);{ symbol table relative, long }
+                                    outone(0);  { alignment character }
+                                    out(lcommon^.symtabnum,2);
+                                    end;
+                               out(nextaddr,4);
+                               drelocbytes := drelocbytes + 8;
+                               end
+                          else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+                          then begin
+                               out(nextaddr,4);
+                               if lcommon^.datname.linkno >= 0
+                               then out($840,4) { BSS }
+                               else begin
+                                    out(lcommon^.symtabnum,3);
+                                    outone($50);{ symbol table relative, long }
+                                    end;
+                               drelocbytes := drelocbytes + 8;
+                               end
+                          else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                                  (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                                  (TARGETOS = CT5_2)
+                          then begin
+                               out(nextaddr+nxttaddr,4);
+                               if lcommon^.datname.linkno >= 0
+                               then out(bssstnum,4)
+                               else out(lcommon^.symtabnum,4);
+                               out($11,2);
+                               drelocbytes := drelocbytes + 10;
+                               end
+                          else if (TARGETOS = TEK) or (TARGETOS = SEQ) or
+                                  (TARGETOS = OPUS) or (TARGETOS = UNOS)
+                          then begin
+                               writeln('drelocation2 not implemented');
+                               end;
+                          end
+                     else begin
+                          { Relocate Data with respect to data segment }
+                          if TARGETOS = UNISOFT
+                          then begin
+                               outone($60); out(0,3); out(nextaddr,4);
+                               drelocbytes := drelocbytes + 8;
+                               end
+                          else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+                          then begin
+                               out(nextaddr,4); out($640,4);
+                               drelocbytes := drelocbytes + 8;
+                               end
+                          else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                                  (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                                  (TARGETOS = CT5_2)
+                          then begin
+                               out(nextaddr+nxttaddr,4);
+                               out(datastnum,4); out($11,2);
+                               drelocbytes := drelocbytes + 10;
+                               end
+                          else if (TARGETOS = TEK) or (TARGETOS = SEQ) or
+                                  (TARGETOS = OPUS) or (TARGETOS = UNOS)
+                          then begin
+                               writeln('drelocation3 not implemented');
+                               end;
+                          end;
+                     lfdreloclist := lfdreloclist^.next;
+                     end;
+                end;
+          end;
+     drelocation(ftree^.llink); drelocation(ftree^.rlink);
+     end;
+end; {drelocation}
+
+procedure relocation;
+  var lsymrefs, lcomrefs: preflist; PickSym: Boolean; lastreladdr: longint;
+begin {relocation}
+lsymrefs := symrefs; lcomrefs := comrefs; lastreladdr := 0;
+while (lsymrefs <> nil) or (lcomrefs <> nil) do begin
+      if lsymrefs = nil
+      then PickSym := FALSE
+      else if lcomrefs = nil
+           then PickSym := TRUE
+           else PickSym := lsymrefs^.refloc < lcomrefs^.refloc;
+      if PickSym
+      then begin
+           if TARGETOS = UNISOFT
+           then begin
+                if lsymrefs^.srefto^.Defined
+                then begin outone($20); out(0,3); end { wrt text }
+                else begin
+                     outone($E0);         { symbol table relative, long }
+                     outone(0);           { alignment character }
+                     out(lsymrefs^.srefto^.symtabnum,2);
+                     end;
+                out(lsymrefs^.refloc,4);  { where to relocate }
+                trelocbytes := trelocbytes + 8;
+                end
+           else if TARGETOS = UNOS
+           then begin
+                if (lsymrefs^.refloc - lastreladdr) > 127 
+                then begin { Need long form to set base to lsymrefs^.refloc }
+                     trelocbytes := trelocbytes + 4;
+                     outone(lsymrefs^.refloc div 65536); { High order 8 bits }
+                     out(12,1);                          { newbase }
+                     out(lsymrefs^.refloc mod 65536,2);  { Low order 16 bits }
+                     lastreladdr := lsymrefs^.refloc;
+                     end;
+                trelocbytes := trelocbytes + 4;
+                outone(lsymrefs^.refloc - lastreladdr);  { offset }
+                if lsymrefs^.srefto^.Defined
+                then begin { Relocate with respect to text segment }
+                     outone($22); out(-1,2);
+                     end
+                else begin { Relocate with respect to symtab entry }
+                     outone($30); out(lsymrefs^.srefto^.symtabnum,2);
+                     end;
+                lastreladdr := lsymrefs^.refloc + 4;
+                end
+           else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+           then begin
+                out(lsymrefs^.refloc,4);  { where to relocate }
+                if lsymrefs^.srefto^.Defined
+                then out($440,4) { wrt text }
+                else begin
+                     out(lsymrefs^.srefto^.symtabnum,3);
+                     outone($50);         { symbol table relative, long }
+                     end;
+                trelocbytes := trelocbytes + 8;
+                end
+           else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                   (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                   (TARGETOS = CT5_2)
+           then begin
+                out(lsymrefs^.refloc,4);  { where to relocate }
+                if lsymrefs^.srefto^.Defined
+                then out(textstnum,4)
+                else out(lsymrefs^.srefto^.symtabnum,4);
+                out($11,2);
+                trelocbytes := trelocbytes + 10;
+                end
+           else if (TARGETOS = TEK) or (TARGETOS = SEQ)
+           then begin
+                if not lsymrefs^.srefto^.Defined
+                then begin
+                     outl(lsymrefs^.refloc,4);  { where to relocate }
+                     outl(lsymrefs^.srefto^.symtabnum,3);
+                     if TARGETOS = TEK
+                     then outone($3d)           { disp, s.t., long, pc rel }
+                     else outone($3c);          { disp, s.t., long, pc rel }
+                     trelocbytes := trelocbytes + 8;
+                     end;
+                end
+           else if TARGETOS = OPUS
+           then begin
+                if not lsymrefs^.srefto^.Defined
+                then begin
+                     outl(lsymrefs^.refloc,4);  { where to relocate }
+                     outl(lsymrefs^.srefto^.symtabnum,4);
+                     outl($2111,2);             { RPCRLONG}
+                     trelocbytes := trelocbytes + 10;
+                     end;
+                end;
+           lsymrefs := lsymrefs^.nextref;
+           end
+      else begin { Don't PickSym }
+           if TARGETOS = UNISOFT
+           then begin
+                if lcomrefs^.crefto^.initlist <> nil
+                then begin outone($60); out(0,3); end { wrt data }
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then begin outone($A0); out(0,3); end { wrt bss }
+                     else begin
+                          outone($E0);         { symbol table relative, long }
+                          outone(0);           { alignment character }
+                          out(lcomrefs^.crefto^.symtabnum,2);
+                          end;
+                out(lcomrefs^.refloc,4);  { where to relocate }
+                trelocbytes := trelocbytes + 8;
+                end
+           else if TARGETOS = UNOS
+           then begin
+                if (lcomrefs^.refloc - lastreladdr) > 127 
+                then begin { Need long form to set base to lcomrefs^.refloc }
+                     trelocbytes := trelocbytes + 4;
+                     outone(lcomrefs^.refloc div 65536); { High order 8 bits }
+                     out(12,1);                          { newbase }
+                     out(lcomrefs^.refloc mod 65536,2);  { Low order 16 bits }
+                     lastreladdr := lcomrefs^.refloc;
+                     end;
+                trelocbytes := trelocbytes + 4;
+                outone(lcomrefs^.refloc - lastreladdr);  { offset }
+                if lcomrefs^.crefto^.initlist <> nil
+                then begin outone($23); out(-1,2); end { wrt data }
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then begin outone($24); out(-1,2); end { wrt bss }
+                     else begin { Relocate with respect to symtab entry }
+                          outone($30); out(lcomrefs^.crefto^.symtabnum,2);
+                          end;
+                lastreladdr := lcomrefs^.refloc + 4;
+                end
+           else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+           then begin
+                out(lcomrefs^.refloc,4);  { where to relocate }
+                if lcomrefs^.crefto^.initlist <> nil
+                then out($640,4) { wrt data }
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then out($840,4) { wrt bss }
+                     else begin
+                          out(lcomrefs^.crefto^.symtabnum,3);
+                          outone($50);         { symbol table relative, long }
+                          end;
+                trelocbytes := trelocbytes + 8;
+                end
+           else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                   (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                   (TARGETOS = CT5_2)
+           then begin
+                out(lcomrefs^.refloc,4);  { where to relocate }
+                if lcomrefs^.crefto^.initlist <> nil
+                then out(datastnum,4)
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then out(bssstnum,4)
+                     else out(lcomrefs^.crefto^.symtabnum,4);
+                out($11,2);
+                trelocbytes := trelocbytes + 10;
+                end
+           else if TARGETOS = TEK
+           then begin
+                outl(lcomrefs^.refloc,4);   { where to relocate }
+                if lcomrefs^.crefto^.initlist <> nil
+                then outl($34000006,4)      { wrt data }
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then outl($34000008,4) { wrt bss }
+                     else begin
+                          outl(lcomrefs^.crefto^.symtabnum,3);
+                          outone($3c);      { symbol table relative, long }
+                          end;
+                trelocbytes := trelocbytes + 8;
+                end
+           else if TARGETOS = SEQ
+           then begin
+                outl(lcomrefs^.refloc,4);   { where to relocate }
+                if lcomrefs^.crefto^.initlist <> nil
+                then outl($24000006,4)      { wrt data }
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then outl($24000008,4) { wrt bss }
+                     else begin
+                          outl(lcomrefs^.crefto^.symtabnum,3);
+                          outone($2c);      { symbol table relative, long }
+                          end;
+                trelocbytes := trelocbytes + 8;
+                end
+           else if TARGETOS = OPUS
+           then begin
+                outl(lcomrefs^.refloc,4);   { where to relocate }
+                if lcomrefs^.crefto^.initlist <> nil
+                then outl(datastnum,4)      { wrt data }
+                else if lcomrefs^.crefto^.datname.linkno >= 0
+                     then outl(bssstnum,4)  { wrt bss }
+                     else outl(lcomrefs^.crefto^.symtabnum,4);
+                outl($2101,2);              { RRELLONG }
+                trelocbytes := trelocbytes + 10;
+                end;
+           lcomrefs := lcomrefs^.nextref;
+           end;
+      end;
+if TARGETOS = UNOS
+then begin { put out nxttaddr as endtextrel information }
+     trelocbytes := trelocbytes + 4;
+     outone(nxttaddr div 65536);              { High order 8 bits }
+     outone(10);                              { endtextrel }
+     out(nxttaddr mod 65536,2);               { Low order 16 bits }
+     end;
+if CConstructs then drelocation(ftndatatree);
+if TARGETOS = UNOS
+then begin { put out nxttaddr + nxtdaddr as enddatarel information }
+     trelocbytes := trelocbytes + 4;
+     outone((nxttaddr + nxtdaddr) div 65536); { High order 8 bits }
+     outone(11);                              { enddatarel }
+     out((nxttaddr + nxtdaddr) mod 65536,2);  { Low order 16 bits }
+     end;
+end; {relocation}
+
+procedure symtab;
+
+  procedure outsymbol(fsymbol: psymbol);
+    var lstr: string31; lname: alfa8; i: integer;
+        llonga: array[0..1] of longint;
+  begin {outsymbol}
+  if fsymbol <> nil
+  then with fsymbol^ do begin
+            if TARGETOS = UNISOFT
+            then begin
+                 if Defined
+                 then begin
+                      if symname.linkno < 0
+                      then outone($22) { defined external }
+                      else outone($2); { defined local }
+                      outone(0);   { alignment character }
+                      out(loc,4);  { symbol value }
+                      end
+                 else begin 
+                      outone($20); { undefined external }
+                      outone(0);   { alignment character }
+                      out(0,4);    { symbol value 0 since undefined }
+                      end;
+                 makestr(symname,lstr);
+                 if lstr = '$START'
+                 then if TARGUSCORE
+                      then lstr := '_main'
+                      else lstr := 'main';
+                 outstr(lstr);
+                 symtabbytes := symtabbytes + length(lstr) + 7;
+                 end
+            else if TARGETOS = UNOS
+            then begin
+                 if Defined
+                 then begin
+                      if symname.linkno < 0
+                      then out($12,2) { defined external }
+                      else out($2,2); { defined local }
+                      out(loc,4);     { symbol value }
+                      end
+                 else begin 
+                      out($10,2); { undefined external }
+                      out(0,4);   { symbol value 0 since undefined }
+                      end;
+                 makestr(symname,lstr);
+                 if lstr = '$START'
+                 then if TARGUSCORE
+                      then lstr := '_main'
+                      else lstr := 'main';
+                 { Begin Hack }
+                 if lstr = '_Jfilepo' then lstr := '_Jfilepos';
+                 if lstr = '_Jfilesi' then lstr := '_Jfilesize';
+                 { End Hack }
+                 for i := 1 to 16 do
+                     if i <= length(lstr)
+                     then outone(ord(lstr[i]))
+                     else outone(0);
+                 symtabbytes := symtabbytes + 22;
+                 end
+            else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+            then begin
+                 out(strtabbytes,4); { String table position }
+                 makestr(symname,lstr);
+                 if lstr = '$START'
+                 then if TARGUSCORE
+                      then lstr := '_main'
+                      else lstr := 'main';
+                 strtabbytes := strtabbytes + length(lstr) + 1;
+                 if Defined
+                 then begin
+                      if symname.linkno < 0
+                      then outone($5)  { defined external }
+                      else outone($4); { defined local }
+                      outone(0);   { alignment character }
+                      out(0,2);    { desc }
+                      out(loc,4);  { symbol value }
+                      end
+                 else begin 
+                      outone($1);  { undefined external }
+                      outone(0);   { alignment character }
+                      out(0,2);    { desc }
+                      out(0,4);    { symbol value 0 since undefined }
+                      end;
+                 symtabbytes := symtabbytes + 12;
+                 end
+            else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                    (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                    (TARGETOS = OPUS) or (TARGETOS = CT5_2)
+            then begin
+                 if (TARGETOS = SYS5_2) or (TARGETOS = OPUS) or
+                    (TARGETOS = CT5_2)
+                 then begin
+                      makestr(symname,lstr);
+                      if lstr = '$START'
+                      then if TARGUSCORE
+                           then lstr := '_main'
+                           else lstr := 'main';
+                      if length(lstr) > 8
+                      then begin
+                           llonga[0] := 0;
+                           llonga[1] := chksex4(strtabbytes);
+                           strtabbytes := strtabbytes + length(lstr) + 1;
+                           moveleft(llonga,lname,8);
+                           for i := 1 to 8 do
+                               outone(ord(lname[i]));
+                           end
+                      else for i := 1 to 8 do
+                               if i <= length(lstr)
+                               then outone(ord(lstr[i]))
+                               else outone(0);
+                      end
+                 else begin {CT, ARETE, PLEXUS}
+                      makealfa8(symname,lname);
+                      if lname = '$START  '
+                      then if TARGUSCORE
+                           then lname := '_main   '
+                           else lname := 'main    ';
+                      outname(lname);
+                      end;
+                 if TARGETOS = OPUS
+                 then begin
+                      if Defined
+                      then begin
+                           outl(loc,4);  { symbol value }
+                           outl(1,2);    { section number, text }
+                           outl(0,2);    { type }
+                           if symname.linkno < 0
+                           then outone(2)  { storage class external }
+                           else outone(3); { storage class static }
+                           end
+                      else begin 
+                           outl(0,4);    { symbol value 0 since undefined }
+                           outl(0,2);    { section number unknown }
+                           outl(0,2);    { type }
+                           outone(2);    { storage class, extern }
+                           end;
+                      outone(0);         { number of aux entries }
+                      outl(0,2);         { space }
+                      symtabbytes := symtabbytes + 20;
+                      end
+                 else begin {not OPUS}
+                      if Defined
+                      then begin
+                           out(loc,4);  { symbol value }
+                           out(1,2);    { section number, text }
+                           out(0,2);    { type }
+                           if symname.linkno < 0
+                           then outone(2)  { storage class external }
+                           else outone(3); { storage class static }
+                           end
+                      else begin 
+                           out(0,4);    { symbol value 0 since undefined }
+                           out(0,2);    { section number unknown }
+                           out(0,2);    { type }
+                           outone(2);   { storage class, extern }
+                           end;
+                      outone(0);        { number of aux entries }
+                      symtabbytes := symtabbytes + 18;
+                      end;
+                 end
+            else if (TARGETOS = TEK) or (TARGETOS = SEQ)
+            then begin
+                 outl(strtabbytes,4); { String table position }
+                 makestr(symname,lstr);
+                 if lstr = '$START'
+                 then if TARGUSCORE
+                      then lstr := '_main'
+                      else lstr := 'main';
+                 strtabbytes := strtabbytes + length(lstr) + 1;
+                 if Defined
+                 then begin
+                      if symname.linkno < 0
+                      then outone($5)  { defined external }
+                      else outone($4); { defined local }
+                      outone(0);   { alignment character }
+                      outl(0,2);   { desc }
+                      outl(loc,4); { symbol value }
+                      end
+                 else begin 
+                      outone($1);  { undefined external }
+                      outone(0);   { alignment character }
+                      outl(0,2);   { desc }
+                      outl(0,4);   { symbol value 0 since undefined }
+                      end;
+                 symtabbytes := symtabbytes + 12;
+                 end;
+            outsymbol(llink); outsymbol(rlink);
+            end;
+  end; {outsymbol}
+
+  procedure outcommon(ftree: pcommon);
+    var lstr: string31; lname: alfa8; i: integer;
+        llonga: array[0..1] of longint;
+  begin {outcommon}
+  if ftree <> nil
+  then with ftree^ do begin
+            if TARGETOS = UNISOFT
+            then begin
+                 if initlist <> nil
+                 then begin
+                      if datname.linkno < 0
+                      then outone($23) { defined data external }
+                      else outone($3); { defined data local }
+                      outone(0);       { alignment character }
+                      out(loc+nxttaddr,4);  { text 0 relative data area }
+                      end
+                 else if datname.linkno >= 0
+                      then begin
+                           outone($4);  { defined BSS local }
+                           outone(0);   { alignment character }
+                           out(loc+nxttaddr+nxtdaddr,4);  { text 0 rel, BSS }
+                           end
+                      else begin
+                           outone($20); { undefined external }
+                           outone(0);   { alignment character }
+                           out(size,4); { Common size }
+                           end;
+                 makestr(datname,lstr);
+                 if lstr = '/ /' then lstr := '//';
+                 (*** FOR NOW ***)
+                 if lstr[1] <> '/' then lstr := concat(lstr,'/D');
+                 (*** FOR NOW ***)
+                 outstr(lstr);
+                 symtabbytes := symtabbytes + length(lstr) + 7;
+                 end
+            else if TARGETOS = UNOS
+            then begin
+                 if initlist <> nil
+                 then begin
+                      if datname.linkno < 0
+                      then out($13,2)       { defined data external }
+                      else out($3,2);       { defined data local }
+                      out(loc+nxttaddr,4);  { text 0 relative data area }
+                      end
+                 else if datname.linkno >= 0
+                      then begin
+                           out($4,2);  { defined BSS local }
+                           out(loc+nxttaddr+nxtdaddr,4);  { text 0 rel, BSS }
+                           end
+                      else begin
+                           out($10,2);  { undefined external }
+                           out(size,4); { Common size }
+                           end;
+                 makestr(datname,lstr);
+                 if lstr = '/ /' then lstr := '//';
+                 (*** FOR NOW ***)
+                 if lstr[1] <> '/' then lstr := concat(lstr,'/D');
+                 (*** FOR NOW ***)
+                 for i := 1 to 16 do
+                     if i <= length(lstr)
+                     then outone(ord(lstr[i]))
+                     else outone(0);
+                 symtabbytes := symtabbytes + 22;
+                 end
+            else if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI)
+            then begin
+                 out(strtabbytes,4); { String table position }
+                 makestr(datname,lstr);
+                 if lstr = '/ /' then lstr := '//';
+                 (*** FOR NOW ***)
+                 if lstr[1] <> '/' then lstr := concat(lstr,'/D');
+                 (*** FOR NOW ***)
+                 strtabbytes := strtabbytes + length(lstr) + 1;
+                 if initlist <> nil
+                 then begin
+                      if datname.linkno < 0
+                      then outone($7)  { defined data external }
+                      else outone($6); { defined data local }
+                      outone(0);       { alignment character }
+                      out(0,2);        { desc }
+                      out(loc+nxttaddr,4);  { text 0 relative data area }
+                      end
+                 else if datname.linkno >= 0
+                      then begin
+                           outone($8);  { defined BSS local }
+                           outone(0);   { alignment character }
+                           out(0,2);    { desc }
+                           out(loc+nxttaddr+nxtdaddr,4);  { text 0 rel, BSS }
+                           end
+                      else begin
+                           outone($1);  { undefined external }
+                           outone(0);   { alignment character }
+                           out(0,2);    { desc }
+                           out(size,4); { Common size }
+                           end;
+                 symtabbytes := symtabbytes + 12;
+                 end
+            else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+                    (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+                    (TARGETOS = OPUS) or (TARGETOS = CT5_2)
+            then begin
+                 if (TARGETOS = SYS5_2) or (TARGETOS = OPUS) or
+                    (TARGETOS = CT5_2)
+                 then begin
+                      makestr(datname,lstr);
+                      if lstr = '/ /' then lstr := '//';
+                      (*** FOR NOW ***)
+                      if not AUSTIN
+                      then
+                        if lstr[1] <> '/' then lstr := concat(lstr,'/D');
+                      (*** FOR NOW ***)
+                      if length(lstr) > 8
+                      then begin
+                           llonga[0] := 0;
+                           llonga[1] := chksex4(strtabbytes);
+                           strtabbytes := strtabbytes + length(lstr) + 1;
+                           moveleft(llonga,lname,8);
+                           for i := 1 to 8 do
+                               outone(ord(lname[i]));
+                           end
+                      else for i := 1 to 8 do
+                               if i <= length(lstr)
+                               then outone(ord(lstr[i]))
+                               else outone(0);
+                      end
+                 else begin {CT, ARETE, PLEXUS}
+                      makealfa8(datname,lname);
+                      if lname = '/ /     ' then lstr := '//      ';
+                      (*** FOR NOW ***)
+                      if lname[1] <> '/'
+                      then begin
+                           i := 7;
+                           while lname[i - 1] = ' ' do
+                                 i := i - 1;
+                           lname[i] := '/'; lname[i+1] := 'D';
+                           end;
+                      (*** FOR NOW ***)
+                      outname(lname);
+                      end;
+                 if TARGETOS = OPUS
+                 then begin
+                      if initlist <> nil
+                      then begin
+                           outl(loc+nxttaddr,4); { text 0 relative data area }
+                           outl(2,2);            { section 2, data }
+                           outl(0,2);            { type }
+                           if datname.linkno < 0
+                           then outone(2)        { storage class, external }
+                           else outone(3);       { storage class, static }
+                           outone(0);            { number of aux entries }
+                           end
+                      else if datname.linkno >= 0
+                           then begin
+                                outl(loc+nxttaddr+nxtdaddr,4); {text 0 rel,BSS}
+                                outl(3,2);            { section 3, BSS }
+                                outl(0,2);            { type }
+                                outone(3);            { storage class, static }
+                                outone(0);            { number of aux entries }
+                                end
+                           else begin
+                                outl(size,4);         { Common size }
+                                outl(0,2);            { section 0, undefined }
+                                outl(0,2);            { type }
+                                outone(2);            { storage class, extern }
+                                outone(0);            { number of aux entries }
+                                end;
+                      outl(0,2);                 { space }
+                      symtabbytes := symtabbytes + 20;
+                      end
+                 else begin {not OPUS}
+                      if initlist <> nil
+                      then begin
+                           out(loc+nxttaddr,4);  { text 0 relative data area }
+                           out(2,2);             { section 2, data }
+                           out(0,2);             { type }
+                           if datname.linkno < 0
+                           then outone(2)        { storage class, external }
+                           else outone(3);       { storage class, static }
+                           outone(0);            { number of aux entries }
+                           end
+                      else if datname.linkno >= 0
+                           then begin
+                                out(loc+nxttaddr+nxtdaddr,4); {text 0 rel, BSS}
+                                out(3,2);             { section 3, BSS }
+                                out(0,2);             { type }
+                                outone(3);            { storage class, static }
+                                outone(0);            { number of aux entries }
+                                end
+                           else begin
+                                out(size,4);          { Common size }
+                                out(0,2);             { section 0, undefined }
+                                out(0,2);             { type }
+                                outone(2);            { storage class, extern }
+                                outone(0);            { number of aux entries }
+                                end;
+                      symtabbytes := symtabbytes + 18;
+                      end;
+                 end
+            else if (TARGETOS = TEK) or (TARGETOS = SEQ)
+            then begin
+                 outl(strtabbytes,4); { String table position }
+                 makestr(datname,lstr);
+                 if lstr = '/ /' then lstr := '//';
+                 (*** FOR NOW ***)
+                 if lstr[1] <> '/' then lstr := concat(lstr,'/D');
+                 (*** FOR NOW ***)
+                 strtabbytes := strtabbytes + length(lstr) + 1;
+                 if initlist <> nil
+                 then begin
+                      if datname.linkno < 0
+                      then outone($7)  { defined data external }
+                      else outone($6); { defined data local }
+                      outone(0);       { alignment character }
+                      outl(0,2);        { desc }
+                      outl(loc+nxttaddr,4);  { text 0 relative data area }
+                      end
+                 else if datname.linkno >= 0
+                      then begin
+                           outone($8);  { defined BSS local }
+                           outone(0);   { alignment character }
+                           outl(0,2);   { desc }
+                           outl(loc+nxttaddr+nxtdaddr,4);  { text 0 rel, BSS }
+                           end
+                      else begin
+                           outone($1);  { undefined external }
+                           outone(0);   { alignment character }
+                           outl(0,2);   { desc }
+                           outl(size,4);{ Common size }
+                           end;
+                 symtabbytes := symtabbytes + 12;
+                 end;
+            outcommon(llink); outcommon(rlink);
+            end;
+  end; {outcommon}
+
+begin {symtab}
+if (TARGETOS = CT) or (TARGETOS = ARETE) or
+   (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+   (TARGETOS = CT5_2)
+then begin
+     symtabbytes := symtabbytes + 18;
+     outname('.text   ');
+     out(0,4);       { symbol value }
+     out(1,2);       { section number }
+     out(0,2);       { type }
+     out(3,1);       { storage class static }
+     if TARGETOS = CT
+     then out(0,1)   { no aux entries }
+     else begin {(TARGETOS = ARETE) or (TARGETOS = PLEXUS) or
+                 (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)}
+          out(1,1);     { one aux entries }
+            {Aux entry}
+          symtabbytes := symtabbytes + 18;
+          out(nxttaddr,4);
+          out(trelocbytes div 10,2);
+          out(0,4); out(0,4); out(0,4); 
+          end;
+     symtabbytes := symtabbytes + 18;
+     outname('.data   ');
+     out(nxttaddr,4); { symbol value }
+     out(2,2);       { section number }
+     out(0,2);       { type }
+     out(3,1);       { storage class static }
+     if TARGETOS = CT
+     then out(0,1)   { no aux entries }
+     else begin {(TARGETOS = ARETE) or (TARGETOS = PLEXUS) or
+                 (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)}
+          out(1,1);     { one aux entries }
+            {Aux entry}
+          symtabbytes := symtabbytes + 18;
+          out(nxtdaddr,4);
+          out(drelocbytes div 10,2);
+          out(0,4); out(0,4); out(0,4); 
+          end;
+     symtabbytes := symtabbytes + 18;
+     outname('.bss    ');
+     out(nxttaddr+nxtdaddr,4); { symbol value }
+     out(3,2);       { section number }
+     out(0,2);       { type }
+     out(3,1);       { storage class static }
+     if TARGETOS = CT
+     then out(0,1)   { no aux entries }
+     else begin {(TARGETOS = ARETE) or (TARGETOS = PLEXUS) or
+                 (TARGETOS = SYS5_2) or (TARGETOS = CT5_2)}
+          out(1,1);     { one aux entries }
+            {Aux entry}
+          symtabbytes := symtabbytes + 18;
+          out(nxtbaddr,4);
+          out(0,2);
+          out(0,4); out(0,4); out(0,4); 
+          end;
+     end
+else if TARGETOS = OPUS
+then begin
+     symtabbytes := symtabbytes + 20;
+     outname('.file   ');
+     outl(0,4);       { symbol value }
+     outl($fffe,2);   { section number }
+     outl(0,2);       { type }
+     outl($67,1);     { storage class static }
+     outl(1,1);       { one aux entries }
+     outl(0,2);       { space }
+       {Aux entry}
+     symtabbytes := symtabbytes + 20;
+     outname('svs.lang');
+     outl(0,4); outl(0,4); outl(0,4);
+
+     symtabbytes := symtabbytes + 20;
+     outname('.text   ');
+     outl(0,4);       { symbol value }
+     outl(1,2);       { section number }
+     outl(0,2);       { type }
+     outl(3,1);       { storage class static }
+     outl(1,1);       { one aux entries }
+     outl(0,2);       { space }
+       {Aux entry}
+     symtabbytes := symtabbytes + 20;
+     outl(nxttaddr,4);
+     outl(trelocbytes div 10,2);
+     outl(0,4); outl(0,4); outl(0,4); outl(0,2);
+
+     symtabbytes := symtabbytes + 20;
+     outname('.data   ');
+     outl(nxttaddr,4); { symbol value }
+     outl(2,2);       { section number }
+     outl(0,2);       { type }
+     outl(3,1);       { storage class static }
+     outl(1,1);       { one aux entries }
+     outl(0,2);       { space }
+       {Aux entry}
+     symtabbytes := symtabbytes + 20;
+     outl(nxtdaddr,4);
+     outl(drelocbytes div 10,2);
+     outl(0,4); outl(0,4); outl(0,4); outl(0,2);
+          
+     symtabbytes := symtabbytes + 20;
+     outname('.bss    ');
+     outl(nxttaddr+nxtdaddr,4); { symbol value }
+     outl(3,2);       { section number }
+     outl(0,2);       { type }
+     outl(3,1);       { storage class static }
+     outl(1,1);       { one aux entries }
+     outl(0,2);       { space }
+       {Aux entry}
+     symtabbytes := symtabbytes + 20;
+     outl(nxtbaddr,4);
+     outl(0,2);
+     outl(0,4); outl(0,4); outl(0,4); outl(0,2);
+     end;
+outsymbol(nametree); outcommon(ftndatatree);
+end; {symtab}
+
+procedure stringtab;
+
+  procedure strsymbol(fsymbol: psymbol);
+    var lstr: string31; i: integer;
+  begin {strsymbol}
+  if fsymbol <> nil
+  then with fsymbol^ do begin
+            if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI) or
+               (TARGETOS = SYS5_2) or (TARGETOS = TEK) or
+               (TARGETOS = SEQ) or (TARGETOS = OPUS) or
+               (TARGETOS = CT5_2)
+            then begin
+                 makestr(symname,lstr);
+                 if lstr = '$START'
+                 then if TARGUSCORE
+                      then lstr := '_main'
+                      else lstr := 'main';
+                 if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI) or
+                    (TARGETOS = TEK) or (TARGETOS = SEQ) or
+                    ((TARGETOS = SYS5_2) and (length(lstr) > 8)) or
+                    ((TARGETOS = CT5_2) and (length(lstr) > 8)) or
+                    ((TARGETOS = OPUS) and (length(lstr) > 8))
+                 then begin
+                      for i := 1 to length(lstr) do
+                          outone(ord(lstr[i]));
+                      outone(0);
+                      end;
+                 end;
+            strsymbol(llink); strsymbol(rlink);
+            end;
+  end; {strsymbol}
+
+  procedure strcommon(ftree: pcommon);
+    var lstr: string31; i: integer;
+  begin {strcommon}
+  if ftree <> nil
+  then with ftree^ do begin
+            if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI) or
+               (TARGETOS = SYS5_2) or (TARGETOS = TEK) or
+               (TARGETOS = SEQ) or (TARGETOS = OPUS) or
+               (TARGETOS = CT5_2)
+            then begin
+                 makestr(datname,lstr);
+                 if lstr = '/ /' then lstr := '//';
+                 (*** FOR NOW ***)
+                 if not AUSTIN
+                 then
+                   if lstr[1] <> '/' then lstr := concat(lstr,'/D');
+                 (*** FOR NOW ***)
+                 if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI) or
+                    (TARGETOS = TEK) or (TARGETOS = SEQ) or
+                    ((TARGETOS = SYS5_2) and (length(lstr) > 8)) or
+                    ((TARGETOS = CT5_2) and (length(lstr) > 8)) or
+                    ((TARGETOS = OPUS) and (length(lstr) > 8))
+                 then begin
+                      for i := 1 to length(lstr) do
+                          outone(ord(lstr[i]));
+                      outone(0);
+                      end;
+                 end;
+            strcommon(llink); strcommon(rlink);
+            end;
+  end; {strcommon}
+
+begin {stringtab}
+if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI) or
+   (TARGETOS = TEK) or (TARGETOS = SEQ)
+then begin
+     if (TARGETOS = TEK) or (TARGETOS = SEQ)
+     then outl(strtabbytes,4)
+     else out(strtabbytes,4);
+     strsymbol(nametree); strcommon(ftndatatree);
+     end
+else if ((TARGETOS = SYS5_2) or (TARGETOS = CT5_2)) and (strtabbytes > 4)
+     then begin
+          out(strtabbytes,4);
+          strsymbol(nametree); strcommon(ftndatatree);
+          end
+     else if (TARGETOS = OPUS) and (strtabbytes > 4)
+          then begin
+               outl(strtabbytes,4);
+               strsymbol(nametree); strcommon(ftndatatree);
+               end;
+end; {stringtab}
+
+procedure patchheader;
+  var block0: array[0..127] of longint; countread: longint; ptr: ^longint;
+begin {patchheader}
+if HOSTOS = MERLIN
+then begin
+     if blockread(outfile,block0,1,0) <> 1
+     then fatal_error('Can''t patch output file!');
+     end
+else begin
+     seek(outfile,0);
+     if (HOSTOS = TEK) or (HOSTOS = SEQ) or (HOSTOS = OPUS)
+     then ptr := pointer(ord(@outfile) + 14)
+     else ptr := pointer(ord(@outfile) + 12);
+     countread := %%read(512,@block0,ptr^);
+     if countread = 0
+     then fatal_error('Can''t patch output file!');
+     end;
+if (TARGETOS = UNISOFT) or (TARGETOS = SILGRAPH)
+then begin
+     block0[ 4] := chksex4(symtabbytes);     { Symtab size }
+     block0[ 5] := chksex4(trelocbytes);     { Text relocation bytes }
+     block0[ 6] := chksex4(drelocbytes);     { Data relocation bytes }
+     end
+else if TARGETOS = UNOS
+then begin
+     block0[ 6] := chksex4(trelocbytes+drelocbytes); { Relocation bytes }
+     block0[ 7] := chksex4(symtabbytes);             { Symtab size }
+     end
+else if (TARGETOS = HITACHI) or (TARGETOS = TEK) or (TARGETOS = SEQ)
+then begin
+     block0[ 4] := chksex4(symtabbytes);     { Symtab size }
+     block0[ 6] := chksex4(trelocbytes);     { Text relocation bytes }
+     block0[ 7] := chksex4(drelocbytes);     { Data relocation bytes }
+     end
+else if (TARGETOS = CT) or (TARGETOS = ARETE) or
+        (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+        (TARGETOS = CT5_2)
+then begin
+     block0[ 2] :=
+       chksex4($8C +                         { headersize }
+               nxttaddr + nxtdaddr +
+               trelocbytes + drelocbytes);   { file addr of symtab }
+     block0[ 3] := chksex4(symtabbytes div 18);  { numb st entries }
+     { number of reloc entries, 2 bytes ms half, ok to zap linenum count }
+     block0[13] := chksex4((trelocbytes div 10) * $10000);
+     block0[21] := chksex4($8C + nxttaddr +
+                     nxtdaddr + trelocbytes);    { file addr of reloc }
+     { number of reloc entries, 2 bytes ms half, ok to zap linenum count }
+     block0[23] := chksex4((drelocbytes div 10) * $10000);
+     end
+else if TARGETOS = OPUS
+then begin
+     block0[ 2] :=
+       chksex4($A4 +                         { headersize }
+               nxttaddr + nxtdaddr +
+               trelocbytes + drelocbytes);   { file addr of symtab }
+     block0[ 3] := chksex4(symtabbytes div 20);  { numb st entries }
+     { number of reloc entries, 2 bytes ls half, ok to zap linenum count }
+     block0[13] := chksex4(trelocbytes div 10);
+     block0[23] := chksex4($A4 + nxttaddr +
+                     nxtdaddr + trelocbytes);    { file addr of reloc }
+     { number of reloc entries, 2 bytes ls half, ok to zap linenum count }
+     block0[25] := chksex4(drelocbytes div 10);
+     end;
+if HOSTOS = MERLIN
+then begin
+     if blockwrite(outfile,block0,1,0) <> 1
+     then fatal_error('Can''t write output file!');
+     end
+else begin
+     seek(outfile,0);
+     if %%write(countread,@block0,ptr^) <> countread
+     then fatal_error('Can''t write output file!');
+     end;
+end; {patchheader}
+
+procedure phase2;
+begin {phase2}
+textpadding := nxttaddr; nxttaddr := (nxttaddr + 3) and $fffffffc;
+textpadding := nxttaddr - textpadding;
+
+if TARGETOS = CT
+then begin
+     nxtstnum := 3; textstnum := 0; datastnum := 1; bssstnum := 2;
+     end
+else if (TARGETOS = ARETE) or (TARGETOS = PLEXUS) or (TARGETOS = SYS5_2) or
+        (TARGETOS = CT5_2)
+     then begin
+          nxtstnum := 6; textstnum := 0; datastnum := 2; bssstnum := 4;
+          end
+     else if TARGETOS = OPUS
+          then begin
+               nxtstnum := 8; textstnum := 2; datastnum := 4; bssstnum := 6;
+               end
+          else nxtstnum := 0;
+assignsymtabnum(nametree); assigndatalocs(ftndatatree);
+
+if symrefs <> nil then symrefs := sortrefs(symrefs,symrefcount);
+if comrefs <> nil then comrefs := sortrefs(comrefs,comrefcount);
+symrefhead := symrefs; comrefhead := comrefs;
+
+header; textarea;
+
+if (symrefhead <> nil) or (comrefhead <> nil)
+then fatal_error('Bad input file - relocations not found');
+
+dataic := 0;
+if CConstructs
+then begin trickpos := -1; cdataarea(ftndatatree); end
+else dataarea(ftndatatree);
+while dataic < nxtdaddr do begin
+      outone(0); dataic := dataic + 1;
+      end;
+
+if TARGETOS <> UNISOFT
+then relocation;
+
+symtab;
+
+if TARGETOS = UNISOFT
+then relocation;
+
+if (TARGETOS = SILGRAPH) or (TARGETOS = HITACHI) or
+   (TARGETOS = SYS5_2) or (TARGETOS = TEK) or (TARGETOS = SEQ) or
+   (TARGETOS = OPUS) or (TARGETOS = CT5_2)
+then stringtab;
+
+if outbyte <> 0 then flushout;
+
+patchheader;
+end; {phase2}
+

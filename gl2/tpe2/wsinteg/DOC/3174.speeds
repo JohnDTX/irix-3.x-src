@@ -1,0 +1,23 @@
+	3174-1L Measurements on 7/17/87
+
+	VM/CMS 3083
+
+	Text upload to VM (lrecl 80		7672 Bytes/sec
+			  (lrecl 32		7445 Bytes/sec
+	Binary upload     (lrecl 80		5646 Bytes/sec
+			  (lrecl 32		5614 Bytes/sec
+
+	Text down to IRIS (lrecl 80		29932 Bytes/sec
+			  (lrecl 32		29613 Bytes/sec
+	Binary down	  (lrecl 80		31002 Bytes/sec
+
+	on 7/16/87
+
+	Binary down to IRIS			32025 Bytes/sec
+
+	These measurements taken with eight users on the system at 5 a.m.
+
+	The IRIS is a 3020 equivalent, with disks at 92%. These are
+	ballpark numbers for our customer base, and the performance
+	is about twice the Release 3.5 performance with a 3274-41D
+	controller. 

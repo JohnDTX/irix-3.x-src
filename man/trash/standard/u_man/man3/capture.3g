@@ -1,0 +1,138 @@
+.TH capture "" "" "Silicon Graphics"
+.rs
+.sp 0.1i
+.SH\(Dy
+.SH NAME 
+.B "capture, rcapture"
+\- dumps screen images to file or hard-copy device
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "capture(dest, cmap)"
+.B "char *dest;"
+.B "RGBvalue cmap[][3];"
+.IP
+.B "rcapture(dest, cmap, left, right, bottom, top,"
+.B "		dithsize, dithmat, res)"
+.B "char *dest;"
+.B "RGBvalue cmap[][3];"
+.B "Screencoord left, right, bottom, top;"
+.B "long dithsize, res;"
+.B "short *dithmat;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine captur(dest, length, cmap)"
+.B "character*(*) dest"
+.B "integer*4 length"
+.B "character*1 cmap(3,*)"
+.IP
+.B "subroutine rcaptu(dest, length, cmap, left, right, bottom, top,"
+.B "		dithsi, dithma, res)"
+.B "character*(*) dest"
+.B "integer*4 length"
+.B "character*1 cmap(3,*), dithma(dithsi, dithsi)"
+.B "integer*4 left, right, bottom, top, dithsi, res"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure capture(dest: pstring128; var cmap: RGBvalue);"
+.IP
+.B "procedure rcapture(dest: pstring128; var cmap: RGBvalue;"
+.B "		left, right, bottom, top: Screencoord;"
+.B "		dithsize: longint; var dithmat: Short; res: longint);"
+.sp
+.SH DESCRIPTION
+.B capture
+dumps the screen image into the file
+.I dest
+in a format
+that is compatible with a Tektronix 4692 color inkjet printer.
+In C, if
+\f2dest\f1 = 0,
+it creates a file called
+.I capture.img.
+The function used to open
+.I dest
+for output
+allows for spooling to other machines, such as print servers
+(see the
+.B coloropen
+manual pages in section 3 of the
+.I UNIX
+.I Programmer's
+.I Manual,
+.I Volume
+.I 1).
+.PP
+In C, if
+.I cmap
+= 0,
+.B capture
+reads the colormap from the hardware.
+Otherwise,
+.I cmap
+is a pointer to an array of RGBvalue triplets.  This is not
+available in FORTRAN.  You cannot pass a zero (0) in FORTRAN because
+it passes all variables by reference. 
+The size of the array depends on how many bitplanes you have
+and whether you dump an RGB image or a colormapped image.
+For a colormapped image, the size of the array should be
+.EQ
+2 sup NUMBER_OF_PLANES.
+.EN
+The array serves as a software colormap of indices that
+identify the red, green, and blue values for each pixel.
+In RGB mode, the IRIS uses only the first 256 entries in the array
+and looks up each channel (red, green, and blue) individually.
+.PP
+.B rcapture
+is an extension of
+.B capture
+that allows you to specify more variables.
+\f2left, right, bottom,\f1
+and \f2top\f1 define a rectangular section of the screen to capture.
+.I dithsize
+and
+.I dithmat
+are used for software dithering.
+.I dithmat
+is a square matrix of size
+.I dithsize.
+If
+.I dithsize
+or
+.I dithmat
+(or both) are zero (0), there is no dithering.  In FORTRAN, the 
+.I dithsize
+must be zero (0). 
+.PP
+The Tektronix printer accepts data containing 1, 2, or 4 bits per RGB
+component per pixel.
+.I res
+selects one of these formats to generate.
+The printer has four colors (cyan, magenta, yellow, and black)
+and uses
+internal dithering if more than 1 bit per component is specified.
+If dithering is selected the system uses 1 bit per component. 
+.PP
+In FORTRAN, there is an extra argument,
+.I length,
+which is the number of characters in the 
+string
+.I dest.
+.SH "SEE ALSO"
+Manual pages for the following commands are located in the
+.I UNIX
+.I Programmer's
+.I Manual,
+Volume I:
+.PP
+colord(1M),
+coloropen(3),
+tek(7)
+.SH NOTE
+This routine is available only in immediate mode.
+.PP
+This routine only works on workstations.

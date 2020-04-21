@@ -1,0 +1,63 @@
+'\"macro stdmacro
+.TH FERROR 3S
+.SH NAME
+ferror, feof, clearerr, fileno \- stream status inquiries
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int feof (stream)
+.SM
+.B FILE
+.B \(**stream;
+.PP
+.B int ferror (stream)
+.SM
+.B FILE
+.B \(**stream;
+.PP
+.B void clearerr (stream)
+.SM
+.B FILE
+.B \(**stream;
+.PP
+.B int fileno(stream)
+.SM
+.B FILE
+.B \(**stream;
+.SH DESCRIPTION
+.I Feof\^
+returns non-zero when
+.SM
+.B EOF
+has previously
+been detected reading the named input
+.IR stream ,
+otherwise zero.
+.PP
+.I Ferror\^
+returns non-zero when an I/O error has previously occurred reading from
+or writing to
+the named
+.IR stream ,
+otherwise zero.
+.PP
+.I Clearerr\^
+resets the error indicator and
+.SM
+.B EOF
+indicator to zero on the named
+.IR stream .
+.PP
+.I Fileno\^
+returns the integer file descriptor
+associated with the named
+.IR stream ;
+see
+.IR open (2).
+.SH NOTE
+All these functions are implemented as macros;
+they cannot be declared or redeclared.
+.SH SEE ALSO
+open(2),
+fopen(3S).
+.\"	@(#)ferror.3s	5.1 of 10/19/83

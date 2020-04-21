@@ -1,0 +1,421 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: LIB.MISC.TEXT                            *)
+(*                                                                           *)
+(*          (C) Copyright 1982, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               01-Feb-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure prompt(message: string45; var s: string45);
+begin
+if argc > 1
+then begin
+  if argc >= largc
+  then begin s := argv[largc]^; largc := largc + 1; end
+  else s := '';
+  if s = '-l' then s := '';
+  end
+else begin
+  if IsATerminal then write(message);
+  if ComFlag
+  then begin
+       if IsATerminal then write(' : ');
+       if eof(commandfile)
+       then begin
+            if IsATerminal then writeln('*** Eof ***');
+            close(commandfile);
+            ComFlag := FALSE;
+            prompt(message,s);
+            end
+       else begin
+            readln(commandfile,s);
+            if IsATerminal then writeln(s);
+            end;
+       end
+  else begin
+       if IsATerminal then write(' - ');
+       readln(s);
+       if length(s) > 0
+       then if s[1] = '<'
+            then begin
+                 delete(s,1,1);
+                 reset(commandfile,s);
+                 if ioresult = 0
+                 then ComFlag := TRUE
+                 else begin
+                      s := concat(s,'.text');
+                      reset(commandfile,s);
+                      if ioresult = 0
+                      then ComFlag := TRUE
+                      else writeln('\07*** Unable to open file ***');
+                      end;
+                 prompt(message,s);
+                 end;
+       end;
+  end;
+if (s = '-u') or (s = '-U')
+then begin
+     SaveUText := FALSE;
+     prompt(message,s);
+     end;
+end; {prompt}
+
+procedure suffix(var fname: string45; suf: string45);
+begin
+if (length(fname) <= length(suf)) or
+   (pos(suf,fname) <> length(fname) - length(suf) + 1)
+then fname := concat(fname,suf);
+end; {suffix}
+
+procedure initialize;
+  var trix: record case integer of
+                     0: (i: integer);
+                     1: (c: packed array[0..1] of char);
+            end;
+begin
+largc := 2;
+if (ENVIRONMENT = ELITE)
+then
+writeln('LIBRARY - NS16000 Library Utility ',VERSION,'       ',DATE)
+else
+writeln('LIBRARY - MC68000 Library Utility ',VERSION,'       ',DATE);
+writeln('(C) Copyright 1982, 1985 Silicon Valley Software, Inc.');
+writeln;
+ComFlag := FALSE; SaveUText := TRUE;
+prompt('Listing file',fname);
+if length(fname) = 0
+then ListFlag := FALSE
+else begin
+     ListFlag := TRUE;
+     rewrite(mapfile,fname);
+     end;
+if (ENVIRONMENT = ELITE)
+then begin
+     prompt('Output file [#obj]',fname); suffix(fname,'#obj');
+     end
+else begin
+     prompt('Output file ',fname);
+     end;
+rewrite(outfile,fname);
+files := nil;
+lprocbase := 0;
+ltypebase := 0;
+StartFlag := FALSE;
+nametree := nil; modlist := nil;
+nummods := 0;
+outbyte := 0;
+outblock := 0;
+reloclist := nil;
+trix.i := 1; FlipBytes := ord(trix.c[0]) = 1;
+end; {initialize}
+
+procedure splitbytes(v: integer; var high,low: integer);
+  var c: packed array[0..1] of 0..255;
+begin
+moveleft(v,c,2);
+if FlipBytes
+then begin high := c[1]; low := c[0]; end
+else begin high := c[0]; low := c[1]; end;
+end; {splitbytes}
+
+procedure nextblock;
+begin
+inword := 0; inblock := inblock + 1;
+if blockread(infile,inbuff,1,inblock) <> 1
+then begin
+     writeln('\07Object Code Format Error, Unexpected end of file');
+     goto 999;
+     end;
+end; {nextblock}
+
+function nextbyte: integer;
+  var firstbyte: integer;
+begin
+if HalfFlag
+then begin
+     HalfFlag := FALSE;
+     nextbyte := lastbyte;
+     end
+else begin
+     if inword > 255 then nextblock;
+     if FlipBytes
+     then splitbytes(inbuff[inword],lastbyte,firstbyte)
+     else splitbytes(inbuff[inword],firstbyte,lastbyte);
+     inword := inword + 1; HalfFlag := TRUE; nextbyte := firstbyte;
+     end;
+end; {nextbyte}
+
+function nextword: integer;
+  var i: integer; c: array[0..1] of -128..127;
+begin
+if FlipBytes
+then begin c[1] := nextbyte; c[0] := nextbyte; end
+else begin c[0] := nextbyte; c[1] := nextbyte; end;
+moveleft(c,i,2); nextword := i;
+end; {nextword}
+
+function next3bytes: longint;
+  var l: longint; c: array[0..3] of -128..127;
+begin
+if FlipBytes
+then begin
+     c[3] := 0; c[2] := nextbyte; c[1] := nextbyte; c[0] := nextbyte;
+     end
+else begin
+     c[0] := 0; c[1] := nextbyte; c[2] := nextbyte; c[3] := nextbyte;
+     end;
+moveleft(c,l,4); next3bytes := l;
+end; {next3bytes}
+
+function next4bytes: longint;
+  var l: longint; c: array[0..3] of -128..127;
+begin
+if FlipBytes
+then begin
+     c[3] := nextbyte; c[2] := nextbyte; c[1] := nextbyte; c[0] := nextbyte;
+     end
+else begin
+     c[0] := nextbyte; c[1] := nextbyte; c[2] := nextbyte; c[3] := nextbyte;
+     end;
+moveleft(c,l,4); next4bytes := l;
+end; {next4bytes}
+
+procedure skip(fbytes: integer);
+begin
+if HalfFlag
+then begin
+     writeln('\07*** skip called with HalfFlag = TRUE ***');
+     end;
+if odd(fbytes)
+then begin
+     writeln('\07*** skip called with fbytes odd ***');
+     end;
+inword := inword + fbytes div 2;
+if inword > 255 then begin
+     inblock := inblock + inword div 256;
+     inword := inword mod 256;
+     if blockread(infile,inbuff,1,inblock) <> 1
+     then begin
+          writeln('\07Object Code Format Error, Unexpected end of file');
+          goto 999;
+          end;
+     end;
+end; {skip}
+
+procedure ignore(fbytes: integer);
+  var i,j: integer;
+begin
+for i := 1 to fbytes do j := nextbyte;
+end; {ignore}
+
+function LocalName(fname: alfa8): Boolean;
+  var i: integer; Result: Boolean; ch: char;
+begin
+if fname[1] = '$'
+then begin
+     Result := TRUE; i := 1;
+     while Result and (i < 8) do begin
+           i := i + 1; ch := fname[i];
+           if (ch < '0') or (ch > '9')
+           then if ch = ' '
+                then i := 8
+                else Result := FALSE;
+           end;
+     LocalName := Result;
+     end
+else LocalName := FALSE;
+end; {LocalName}
+
+procedure inclname(var fname: alfa8; finc: integer);
+  var i,n: integer; ch: char;
+begin
+n := 0; i := 8;
+while fname[i] = ' ' do i := i - 1;
+while i >= 2 do begin
+      ch := fname[i];
+      n := n*10 + ord(ch) - ord('0');
+      i := i - 1;
+      end;
+n := n + finc;
+if lprocmax <= n
+then lprocmax := n + 1;
+for i := 2 to 8 do begin
+    fname[i] := chr(n mod 10 + ord('0'));
+    n := n div 10;
+    end;
+end; {inclname}
+
+procedure incltype(var ftypeno: integer);
+begin
+if ftypeno > 0
+then begin
+     ftypeno := ftypeno + ltypebase;
+     if ftypeno > ltypemax then ltypemax := ftypeno;
+     end;
+end; {incltype}
+
+procedure reada8(var fname: alfa8);
+  var i: integer;
+begin
+for i := 1 to 8 do
+    fname[i] := chr(nextbyte);
+end; {reada8}
+
+procedure readlnkname(var fname: alfa8);
+begin
+reada8(fname);
+if LocalName(fname) then inclname(fname,lprocbase);
+end; {readlnkname}
+
+function readtypeno: integer;
+  var ltypeno: integer;
+begin
+ltypeno := nextword; incltype(ltypeno);
+readtypeno := ltypeno;
+end; {readtypeno}
+
+procedure reads45(var fstr: string45; len: integer);
+  var i: integer;
+begin
+fstr := '';
+for i := 1 to len do begin
+    fstr := concat(fstr,' ');
+    fstr[i] := chr(nextbyte);
+    end;
+end; {reads45}
+
+procedure insertint(var fpint: pintlist; fval: integer);
+  var newpint,thispint,lastpint: pintlist; ExitFlag: Boolean;
+begin
+new(newpint); newpint^.next := nil; newpint^.int := fval;
+if fpint = nil
+then fpint := newpint
+else if fpint^.int > fval
+     then begin
+          newpint^.next := fpint;
+          fpint := newpint;
+          end
+     else begin
+          thispint := fpint; ExitFlag := FALSE;
+          repeat
+                 lastpint := thispint;
+                 thispint := thispint^.next;
+                 if thispint <> nil
+                 then ExitFlag := thispint^.int > fval
+                 else ExitFlag := TRUE;
+          until ExitFlag;
+          newpint^.next := thispint; lastpint^.next := newpint;
+          end;
+end; {insertint}
+
+procedure insertpatch(var fpatchlist: ppatchlist; fval,floc: integer);
+  var newpatch,thispatch,lastpatch: ppatchlist; ExitFlag: Boolean;
+begin
+new(newpatch);
+with newpatch^ do
+     begin nextpatch := nil; patchval := fval; patchloc := floc; end;
+if fpatchlist = nil
+then fpatchlist := newpatch
+else if fpatchlist^.patchloc > floc
+     then begin
+          newpatch^.nextpatch := fpatchlist;
+          fpatchlist := newpatch;
+          end
+     else begin
+          thispatch := fpatchlist; ExitFlag := FALSE;
+          repeat
+                 lastpatch := thispatch;
+                 thispatch := thispatch^.nextpatch;
+                 if thispatch <> nil
+                 then ExitFlag := thispatch^.patchloc > floc
+                 else ExitFlag := TRUE;
+          until ExitFlag;
+          newpatch^.nextpatch := thispatch;
+          lastpatch^.nextpatch := newpatch;
+          end;
+end; {insertpatch}
+
+procedure entername(fsymbol: psymbol);
+  var lsymbol: psymbol;
+begin
+if nametree = nil
+then nametree := fsymbol
+else begin
+     lsymbol := nametree;
+     while lsymbol <> nil do
+           with lsymbol^ do
+                if linkname = fsymbol^.linkname
+                then begin
+                     writeln('\07Duplicate name');
+                     lsymbol := nil;
+                     end
+                else if linkname < fsymbol^.linkname
+                     then if llink = nil
+                          then begin
+                               llink := fsymbol;
+                               lsymbol := nil;
+                               end
+                          else lsymbol := llink
+                     else if rlink = nil
+                          then begin
+                               rlink := fsymbol;
+                               lsymbol := nil;
+                               end
+                          else lsymbol := rlink;
+     end;
+end; {entername}
+
+procedure entermod(fmod: pmod);
+  var lmod: pmod;
+begin
+if modlist = nil
+then begin
+     modlist := fmod;
+     fmod^.modno := nummods;
+     nummods := nummods + 1;
+     end
+else begin
+     lmod := modlist;
+     while lmod^.next <> nil do
+           lmod := lmod^.next;
+     lmod^.next := fmod;
+     fmod^.modno := nummods;
+     nummods := nummods + 1;
+     end;
+end; {entermod}
+
+function lookupname(fname: alfa8): psymbol;
+  var lsymbol: psymbol; ExitFlag: Boolean;
+begin
+lsymbol := nametree;
+ExitFlag := FALSE;
+while not ExitFlag and (lsymbol <> nil) do
+      with lsymbol^ do
+           if fname = linkname
+           then ExitFlag := TRUE
+           else if fname < linkname
+                then lsymbol := rlink
+                else lsymbol := llink;
+lookupname := lsymbol;
+end; {lookupname}
+
+procedure printsymbols(fsymbol: psymbol);
+begin
+if fsymbol <> NIL
+then with fsymbol^ do begin
+     printsymbols(rlink);
+     write(mapfile,linkname,' - ',username,'   ');
+     if Defined
+     then begin
+          write(mapfile,loc:6 hex,',',modnum);
+          end
+     else write(mapfile,'******');
+     writeln(mapfile);
+     printsymbols(llink);
+     end;
+end; {printsymbols}
+
+

@@ -1,0 +1,85 @@
+'\"macro stdmacro
+.\" Copyright (c) 1980 Regents of the University of California.
+.\" All rights reserved.  The Berkeley software License Agreement
+.\" specifies the terms and conditions for redistribution.
+.\"
+.\"	@(#)timedc.1m	6.1 (Berkeley) 5/28/86
+.\"
+.TH TIMEDC 1M
+.UC 6
+.ad
+.SH NAME
+timedc \- timed control program
+.SH SYNOPSIS
+.B /usr/etc/timedc
+[ command [ argument ... ] ]
+.SH DESCRIPTION
+.I Timedc
+is used to control the operation of the \f2timed\fP program.
+It may be used to:
+.IP
+\(bu measure the differences between machines' clocks,
+.IP
+\(bu find the location where the master time server is running,
+.IP
+\(bu enable or disable tracing of messages received by \f2timed\fP, and
+.IP
+\(bu perform various debugging actions.
+.PP
+Without any arguments,
+.I timedc
+will prompt for commands from the standard input.
+If arguments are supplied,
+.IR timedc
+interprets the first argument as a command and the remaining
+arguments as parameters to the command.  The standard input
+may be redirected causing
+.I timedc
+to read commands from a file.
+Commands may be abbreviated;
+recognized commands are:
+.IP
+\f3?\f1 [ command ... ]
+.br
+\f3help\f1 [ command ... ]
+.sp .25
+Print a short description of each command specified in the argument list,
+or, if no arguments are given, a list of the recognized commands.
+.IP
+\f3clockdiff\f1 host ...
+.sp .25
+Compute the differences between the clock of the host machine
+and the clocks of the machines given as arguments.
+.IP
+\f3trace\f1 { \f3on\f1 | \f3off\f1 }
+.sp .25
+Enable or disable the tracing of incoming messages to \f2timed\fP
+in the file /usr/adm/timed.log.
+.IP
+\f3quit\f1
+.sp .25
+Exit from timedc.
+.PP
+Other commands may be included for use in testing and debugging
+.IR timed ;
+the help command and
+the program source may be consulted for details.
+.SH FILES
+.nf
+.ta \w'/usr/adm/timed.masterlog       'u
+/usr/adm/timed.log			tracing file for timed
+/usr/adm/timed.masterlog		log file for master timed
+.fi
+.bp
+.SH "SEE ALSO"
+date(1), icmp(7P), timed(1M).
+.br
+\f2TSP: The Time Synchronization Protocol for UNIX 4.3BSD\fP, 
+R. Gusella and S. Zatti
+.SH DIAGNOSTICS
+.nf
+.ta \w'?Ambiguous command      'u
+?Ambiguous command	abbreviation matches more than one command
+?Invalid command	no match found
+?Privileged command	command can be executed by root only
+.fi

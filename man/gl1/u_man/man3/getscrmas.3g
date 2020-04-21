@@ -1,0 +1,29 @@
+.TH getscrmask 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getscrmask
+- return the current screen mask
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getscrmask(left, right, bottom, top)"
+.B "Screencoord *left, *right, *bottom, *top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getscr(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getscrmask(var left, right, bottom, top: Screencoord);"
+.sp
+.SH DESCRIPTION
+.I Getscrmask
+returns the screen coordinates of the current sceen mask
+in the parameters
+left, right, bottom, and top.
+.SH "SEE ALSO"
+.I scrmask, popviewport, pushviewport
+.SH NOTE
+This command can only be used in immediate mode.

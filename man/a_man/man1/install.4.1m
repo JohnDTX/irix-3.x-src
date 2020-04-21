@@ -1,0 +1,260 @@
+'\"macro stdmacro
+.if n .pH g1a.install @(#)install	30.4 of 12/25/85
+.TH INSTALL.4D 1M
+.SH NAME
+Install \- install commands
+.SH SYNOPSIS
+.B /etc/Install
+.RB  [ \-c " dira]"
+.RB  [ \-f " dirb]"
+.RB  [ \-i ]
+.RB  [ \-n " dirc]"
+.RB  [ \-m " mode]"
+.RB  [ \-u " user]"
+.RB  [ \-g "\0group]"
+.RB  [ \-o ]
+.RB  [ \-s ]
+.RB  [ \-F " dirb]"
+.RB  [ \-dir ]
+.RB  [ \-ln " source]"
+.RB  [ \-lns " source]"
+.RB  [ \-src "\0source]"
+.RB  [ \-idb " idbattr]"
+filelist [dirx .\|.\|.]
+.SH DESCRIPTION
+The
+.I Install\^
+command is most commonly used in ``makefiles''
+[See
+.IR make (1)]
+to install a
+.I filelist\^
+(a single updated target file or a quoted list of several target files) in a
+specific place within a file system.
+Each file in
+.I filelist\^
+is installed by copying it into the appropriate directory, thereby retaining the
+mode and owner of the original command.
+The files in
+.I filelist\^
+may be simple filenames in the current directory or relative pathnames
+containing directory components.
+In the latter case, the directory components will be created with default mode
+and ownership if they do not exist already in the target tree.
+The program prints messages telling the user exactly what files it is
+replacing or creating and where they are going.
+.PP
+If no options or directories
+.RI ( dirx " .\|.\|.)"
+are given,
+.I Install\^
+will search
+a set of default directories
+.RB ( /bin ,
+.BR /usr/bin ", " /etc ", " /lib ,
+and
+.BR /usr/lib ,
+in that order)
+for a file with the same name as the current file in
+.IR filelist .
+When the first occurrence is found,
+.I Install\^
+issues a message saying that it is overwriting that file with
+the current file
+and proceeds to do so.
+If the file is not found, the program states this and exits without
+further action.
+.PP
+If one or more directories
+.RI ( dirx " .\|.\|.)"
+are specified after
+.IR filelist ,
+those directories will be searched before the directories specified
+in the default list.
+In any case the target directory selected will be prefixed by the value of
+the environment variable
+.BR ROOT .
+.PP
+Unless otherwise specified, the
+.B \-idb
+option may be used with any other options.
+The meanings of the options are:
+.PP
+.RS 5
+.TP 15
+.BI \-c "  dira\^"
+Installs new commands (\f2filelist\fP\^) in the directory specified by
+.IR dira ,
+only if they are
+not
+found.
+If any file in
+.IR filelist\^
+is found,
+.I Install\^
+issues a message saying that the file already
+exists, and exits without overwriting it.
+May be used alone or with the
+.BR \-m ,
+.BR \-u ,
+.BR \-g ,
+.BR \-s ,
+.BR \-ln ,
+.BR \-lns ,
+and
+.B \-src
+options.
+.TP 15
+.BI \-f "  dirb\^"
+Forces files in
+.I filelist\^
+to be installed in the given directory, whether or not they already exist.
+If a file being installed does not already exist, the mode and owner
+of the new file will be set to \f3755\fP and \f3bin\fP, respectively.
+If the file already exists, the mode and owner will be that of the
+already existing file.
+May be used alone or with the
+.B \-o
+or
+.B \-s
+options.
+.TP 15
+.B \-i
+Ignores the default directory list, searching only through the given
+directories
+.RI ( dirx " .\|.\|.)."
+May be used alone or with any options other than
+.B \-c
+.BR \-f ,
+.BR \-F ,
+and
+.BR \-dir .
+.TP 15
+.BI \-n "  dirc\^"
+If a file in
+.I filelist\^
+is not found in any of the searched directories, it is put in the directory
+specified in
+.IR dirc .
+The mode and owner of the new file will be set to \f3755\fP and \f3bin\fP,
+respectively.
+May be used alone or with any options other than
+.BR \-c ,
+.BR \-f ,
+.BR \-F ,
+and
+.BR \-dir .
+.TP 15
+.BI \-m "  mode\^"
+The mode of the new file is set to
+.IR mode "."
+Available only to the superuser; may not be used with
+.BR \-f .
+.TP 15
+.BI \-u "  user\^"
+The owner of the new file is set to
+.IR user "."
+Available only to the superuser; may not be used with
+.BR \-f .
+.TP 15
+.BI \-g "  group\^"
+The group id of the new file is set to
+.IR group "."
+Available only to the superuser; may not be used with
+.BR \-f .
+.TP 15
+.B \-o
+If a file in
+.I filelist\^
+is found, this option saves the ``found'' file by copying it to
+.BI \s-1OLD\s0 file\^
+in the directory in which it was found.
+This option is useful when installing a frequently used file such as
+.I /bin/sh
+or
+.IR /etc/getty ,
+where the existing file cannot be removed.
+.B -o
+may be used alone or with any options other than
+.BR \-c .
+.TP 15
+.B \-s
+Suppresses printing of messages other than error messages.
+May be used alone or with any other options.
+.TP 15
+.BI \-F " dirb\^"
+Like
+.BR -f ,
+but does not force mode and ownership of a new file to that of the old one
+if it exists in
+.IR dirb .
+May be used with any options other than
+.BR \-i ,
+.BR \-c ,
+.BR \-f ,
+.BR \-n ,
+and
+.BR \-dir .
+.TP 15
+.B \-dir
+Takes
+.I filelist
+to be a list of directories to be created in the target tree.  Directory
+names will be prefixed with the value of the
+.B ROOT
+environment variable.
+May be used with any options other than
+.BR \-i ,
+.BR \-c ,
+.BR \-f ,
+.BR \-F ,
+and
+.BR \-n .
+.TP 15
+.BI \-ln " source\^"
+Makes hard links to the installed file
+.I source\^
+(prefixed by
+.BR ROOT )
+from the files listed in
+.IR filelist .
+May not be used with
+.BR -f ,
+.BR -lns ,
+and
+.BR -src .
+.TP 15
+.BI \-lns " source\^"
+Makes symbolic links to the installed file
+.I source\^
+(prefixed by
+.BR ROOT )
+from the files listed in
+.IR filelist .
+May not be used with
+.BR -f ,
+.BR -ln ,
+and
+.BR -src .
+.TP 15
+.BI \-src " source\^"
+Uses
+.I source
+as the pathname to the single source file to be installed.  This option allows
+renaming to be combined with installation.
+.TP 15
+.BI \-idb " idbattr\^"
+Ignored by this version of
+.IR Install ,
+this option allows arbitrary attributes to be passed to an installation
+database initializer.
+.SH NOTES
+.I Install
+is provided for compatibility with the IRIS 4D software building methods.
+.RE
+.SH SEE ALSO
+make(1)
+.br
+install.1m.
+
+

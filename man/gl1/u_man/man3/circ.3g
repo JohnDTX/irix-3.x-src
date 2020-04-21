@@ -1,0 +1,39 @@
+.TH circ 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I circ
+- outline a circular region
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "circ(x, y, radius) "
+.B "Coord x, y, radius; "
+.IP 
+.B "circi(x, y, radius) "
+.B "Icoord x, y, radius;"
+.IP 
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine circ(x, y, radius)"
+.B "real x, y, radius"
+.IP 
+.B "subroutine circi(x, y, radius)"
+.B "integer x, y, radius"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure circ(x, y, radius: Coord); "
+.IP 
+.B "procedure circi(x, y, radius: Icoord);"
+.sp
+.SH DESCRIPTION
+\f2Circ\f1 outlines a circle.
+The circle has center at (\f3x\f1,\f3y\f1) and radius \f3radius\f1,
+both specified in world coordinates.
+Since a circle is a two-dimensional shape,
+these commands have only 2D forms.  The circle is in the \f3x\f1\(mi\f3y\f1 plane,
+with \f3z\f1 coordinate = 0, and is drawn using the current color, linestyle,
+linewidth, and writemask.
+.SH "SEE ALSO"
+.I arc, arcf, circf, curve

@@ -1,0 +1,76 @@
+.TH MAKEKEY 1
+.SH NAME
+makekey \- generate encryption key
+.SH SYNOPSIS
+.B /usr/lib/makekey
+.SH DESCRIPTION
+.I Makekey\^
+improves the usefulness of encryption schemes
+depending on a key by increasing the amount of time required to
+search the key space.
+It reads 10 bytes from its standard input,
+and writes 13 bytes on its standard output.
+The output depends on the input in a way intended
+to be difficult to compute (i.e., to require a substantial
+fraction of a second).
+.PP
+The first eight input bytes
+(the
+.IR "input key\|" )
+can be arbitrary
+.SM ASCII
+characters.
+The last
+two (the
+.IR salt\| )
+are best chosen from the set of digits,
+.BR . ,
+.BR / ,
+and
+upper- and lower-case
+letters.
+The salt characters are repeated as the first two characters of the output.
+The remaining 11 output characters are chosen from the same set as the salt
+and constitute the
+.IR "output key" .
+.PP
+The transformation performed is essentially the following:
+the salt is used to select one of 4,096 cryptographic
+machines all based on the National Bureau of Standards
+.SM DES
+algorithm, but broken in 4,096 different ways.
+Using the
+.I input key\^
+as key,
+a constant string is fed into the machine and recirculated
+a number of times.
+The 64 bits that come out are distributed into the 66
+.I output key\^
+bits in the result.
+.PP
+.I Makekey\^
+is intended for programs that perform encryption
+(e.g.,
+.IR ed\^ (1)
+and
+.IR crypt\^ (1)).
+Usually, its input and output will be pipes.
+.SH EXAMPLE
+.IP
+.nf
+/usr/lib/makekey
+abcdefgh23
+23xq5GyrhLTCA
+.fi
+.PP
+The first line invokes 
+.IR makekey ,
+the second line is the
+input to 
+.IR makekey ,
+and the third is the new key generated
+by 
+.IR makekey .
+.SH SEE ALSO
+crypt(1), ed(1), passwd(4).
+.\"	@(#)makekey.1	5.1 of 11/8/83

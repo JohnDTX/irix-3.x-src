@@ -1,0 +1,42 @@
+.TH noise 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B noise
+\- filters valuator motion
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "noise(v, delta) "
+.B "Device v; "
+.B "short delta;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine noise(v, delta)"
+.B "integer*4 v, delta"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure noise(v: Device; delta: Short);"
+.SH DESCRIPTION
+.B noise
+determines how often queued valuators make entries in the event queue.
+Some valuators are noisy. For example, a device that is not moving can 
+still report 
+small
+fluctuations in value.  \f3noise\f1 can set a
+lower limit on what constitutes a move.  That is, the value of a
+noisy valuator (\f2v\f1) must change by at least \f2delta\f1 before the
+motion is considered significant. For example, 
+\f3noise(v,5)\f1 means that valuator \f2v\f1 must move at least 5 
+units before it makes a new queue entry.
+.SH "SEE ALSO"
+setvaluator
+.sp
+.I Programming Guide,
+Section 7.4, The Event Queue
+.SH NOTE
+This routine is available only in immediate mode.

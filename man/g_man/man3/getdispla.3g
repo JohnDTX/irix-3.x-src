@@ -1,0 +1,45 @@
+'\" t
+.TH getdisplaymode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getdisplaymode
+\- returns the current display mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getdisplaymode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getdis()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getdisplaymode: longint;"
+.SH DESCRIPTION
+.B getdisplaymode
+returns the current display mode. 
+0 indicates RGB single buffer mode;
+1 indicates color map, single buffer mode;
+2 indicates color map, double buffer mode.
+.sp
+.TS
+center, box;
+cB | cB | cB
+n l.
+Value	Display Mode	Symbolic Name
+_
+0	RGB single buffer mode 	DMRGB
+1	color map single buffer mode	DMSINGLE
+2	color map double buffer mode	DMDOUBLE
+.TE
+.SH "SEE ALSO"
+doublebuffer, RGBmode, singlebuffer
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes
+.SH NOTE
+This routine is available only in immediate mode.

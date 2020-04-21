@@ -1,0 +1,51 @@
+.TH deflinestyle 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B deflinestyle
+\- defines a linestyle
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "deflinestyle(n, ls) "
+.B "short n;"
+.B "Linestyle ls;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine deflin(n, ls)"
+.B "integer*4 n, ls"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure deflinestyle(n: Short; ls: Linestyle);"
+.SH DESCRIPTION
+.B deflinestyle
+defines a linestyle
+which is a write-enabled pattern that is applied when lines
+are drawn.
+The least-significant bit of the linestyle is applied first.
+.I n
+specifies an index into a table where the linestyles are stored,
+and
+.I ls
+specifies a 16-bit pattern.
+You can define up to 2\u\s-4\&15\s0\d linestyles.
+By default, index 0 contains the pattern 0xFFFF,
+which draws solid lines and cannot be redefined.  
+There is no performance penalty for
+drawing non-solid lines.  To replace a linestyle,
+respecify the previous index.
+.PP
+When using multiple windows, patterns, cursors, and fonts are
+available to all windows.
+.SH "SEE ALSO"
+defcursor, defpattern, defrasterfont, 
+getlstyle, lsrepeat, setlinestyle 
+.sp
+.I Programming Guide , 
+Section 5.1, Linestyles
+.SH NOTE
+This routine can be used only in immediate mode.

@@ -1,0 +1,27 @@
+.TH getcolor  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getcolor
+- return the current color
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Colorindex getcolor()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function getcol()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getcolor: Colorindex;"
+.sp
+.SH DESCRIPTION
+.I Getcolor
+returns the current color.  
+It is an index into the color map, and is meaningful in
+either single or double buffer mode.  The command is ignored in RGB mode.
+.SH "SEE ALSO"
+.I color, singlebuffer, doublebuffer
+.SH NOTE
+This command can only be used in immediate mode.

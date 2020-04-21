@@ -1,0 +1,95 @@
+NAME
+	ioctl - control of PCOX logic
+
+SYNOPSYS
+	#include "pxw.h"
+
+	ioctl(fd, request, argp)
+	int fd, request;
+	char *argp;
+
+DESCRIPTION
+	'Ioctl' performs a variety of functions on the descriptor fd, which
+	was previously opened for the PCOX logic.
+
+	The following 'ioctl' calls apply to the PCOX interface logic:
+
+	The 'request' has encoded in it whether the argument is an "in"
+	or "out" parameter, and the size of the argument 'argp' in bytes.
+	Macros and defines used in specifying an ioctl 'request' are
+	located in the file "pxw.h".
+
+RETURN VALUE
+	If an error has occured, a value of -1 is returned and 'errno' is
+	set to indicate the error.
+
+ERRORS
+	"Ioctl will fail if one or more of the folloing are true:
+
+	[EBADF]		D is not a valid descriptor.
+
+	[ENOTTY]	The specified request does not apply to the kind of
+			object which the descriptor 'd' references.
+
+	[EINVAL]	'Request' or 'argp' is not valid.
+
+SEE ALSO
+	execve(2), fcntl(2), tty(4), ioctl(2), intro(4N)
+
+NAME
+	pxd - UNIX IBM 3270 coax-A interface
+
+DESCRIPTION
+	The file 'pxd' refers to the UNIX driver for the 3278 interface
+	logic on the MULTIBUS.
+
+	The following definitions are from "pxw.h":
+
+	/*
+	 * Structures and definitions for PCOX io control commands
+	 */
+	
+	/* PCOX io control commands */
+
+#define kb_nano(c)		ioctl(fd, 0, (c))
+#define set_signal(c)		ioctl(fd, 1, (c))
+#define reset_signal(c) 	ioctl(fd, 2, (c))
+#define force_signal(c)		ioctl(fd, 3, (c))
+#define get_current(addr)	ioctl(fd, 4, (addr))
+#define init_signal()		ioctl(fd, 5, (char *)0)
+#define read_avail(addr)	ioctl(fd, 6, (addr))
+#define fetch_byte(addr)	ioctl(fd, 7, (addr))
+#define store_byte(addr)	ioctl(fd, 8, (addr))
+#define get_outb_status(addr)	pxdioctl(fd,10, (addr))
+#define raise1()		ioctl(fd,11, (char *)0)
+#define kill_outb()		pxdioctl(fd,12, (char *)0)
+#define force_open_init()	ioctl(fd,13, (char *)0)
+#define read_open_init(addr)	ioctl(fd,14, (addr))
+#define test_dma_memory(addr)	ioctl(fd,15, (addr))
+#define set_rglout_ptr(addr)	pxdioctl(fd,16, (addr))
+#define set_rglcntu(addr)	pxdioctl(fd,17, (addr))
+
+	After an open to '/dev/pxd' the user enables file transfer by the
+set_rgout_ptr call with the address of a structure:
+
+	char *	bodyaddr - address to write file body to
+	long	bodylen - maximum file length accepted.
+
+
+EXAMPLE
+	extern int errno;
+	int fd;
+	typedef struct {
+		char * bodyaddr;
+		long   bodylen;
+	} rxfile ;
+	rxfile pxl;
+
+	if ((fd = open("/dev/pxd", O_RDWR, 0)) < 0)
+		return -1;		/* could not open '/dev/pxd' */
+	pxl.bodyaddr = bodyplace;
+	pxl.bodylen = PXDMASIZE;
+
+	if (set_rglout_ptr(&pxl) == -1)
+		return -1;		/* could not enable file transfer */
+

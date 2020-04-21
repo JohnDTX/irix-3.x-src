@@ -1,0 +1,452 @@
+'\"		Copyright (c) 1984 AT&T
+'\"		  All Rights Reserved
+'\"     THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF AT&T
+'\"   The copyright notice above does not evidence any actual
+'\"   or intended publication of such source code.
+'\"#ident	"@(#)macros	1.45"
+'''\"	PWB Manual Entry Macros - 1.40 of 2/27/83
+.so /usr/lib/macros/strings.mm
+.de th	\" version 6 title macro
+.tm wrong version of man entry macros - use -man6
+.ab 
+..
+'''\"	Tm: Trademark indicator
+.if n .ds Tm \uTM\d
+.if t .ds Tm \v'-0.5m'\s-4TM\s+4\v'0.5m'
+.de }E\"reset basic page layout
+.}f
+.in \\n()Ru+\\n(INu
+.ll \\n(LLu
+.lt \\n(LLu
+.pl \\n()Lu
+..
+.de DT\"default tabs
+.if t .ta 3.6m 7.2m 10.8m 14.4m 18m 21.6m 25.2m 28.8m 32.4m 36m 39.6m 43.2m 46.8m
+.if n .ta 5n 10n 15n 20n 25n 30n 35n 40n 45n 50n 55n 60n 65n
+..
+.de }f\"set font and size
+.if t .vs \\n()Vp
+.ps \\n()S
+.ft 1
+..
+.de }H\"header
+.ev 1
+.}C
+.}E
+.ie \\n()s 'sp 2v
+.el 'sp 3v
+.ps \\n()S-1
+.bd 1 3
+.ie @@\\*(]P@ .tl @\\*(]E@\\*(]D@\\*(]E@
+.el .tl @\\*(]E@\\*(]D \|\\*(]P@\\*(]E@
+.bd 1
+.ps \\n()S
+.ie \\n()s 'sp 1.5v
+.el 'sp 3v
+.ev
+.ns
+..
+.de }F\"footer
+.ev 1
+.}E
+.if \\n()s 'sp |\\n(.pu-1v-1p
+.if \\n()t 'sp |\\n(.pu-3v
+.if n 'sp |\\n(.pu-4v
+.if n .tl @Page %@@\\*(]T@
+.if \\n()s .tl @@- % -@@
+.if \\n()t \{.if o .tl @Page %@@\\*(]T@
+.	      if e .tl @\\*(]T@@Page %@ \}
+'bp
+.ev
+..
+.if n .ig
+.de }C\"cut mark
+.po 0i
+.lt 7.5i
+.if \\n()s .tl @\l@0.25i@@@\l@0.25i@\h@1i@\l@0.25i@@
+.if \\n()t .tl @\l@0.25i@@@\l@0.25i@@
+.lt
+.po
+..
+.de }M\"final cut mark
+.}N
+.wh -.5p }C
+.ll \\n(LLu
+.bp
+..
+.de }K\"no run-out unless there was a .TH
+.}N
+.pl 1
+.ll \\n(LLu
+..
+.de TH\"set title and heading
+.PD
+.nr IN \\n()Mu
+.if t .ds ]E \\$1\^(\^\\$2\^)
+.if n .ds ]E \\$1(\\$2)
+'\"next 6 lines define center part of header
+.if \\n()s .ds ]D
+.if \\n()t .ds ]D UNIX System V
+.if n .ds ]D UNIX System V
+.ds ]P\"
+.if !@\\$3@@ .ds ]P (\^\\$3\^)
+.if !@\\$4@@ .ds ]D \\$4
+.wh 0 }H
+.wh -\\n(:mu }F
+.em }M
+.if \\n(nl .bp 1
+.nr )I \\n()Mu
+.nr )R 0
+.}E
+.DT
+.if n \{.na
+.	 nh \}
+.if t \{.bd S 3 3
+.	 hy 14 \}
+..
+.de SH\"section heading
+.}X 0 "\\$1" smaller
+.nr )E 2
+\&\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6
+..
+.de SS\"sub section heading
+.}X 3n "" ""
+.nr )E 2
+\&\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6
+..
+.de }X\"subroutine for section heading
+.}E
+.ti \\$1
+.sp \\n(PDu
+.ne 1.1v
+.nr )R 0
+.fi
+.ss 12
+.if @\\$2@SYNOPSIS@ .ss 18
+.it 1 }N
+.if !@\\$3@@ .SM
+.bd 1 3
+..
+.de }2\"end of SH (cf .}X above and .}N below)
+.nr )E 0
+.}E
+.nr )I \\n()Mu
+.ns
+.bd 1
+..
+.de SM\"small
+.ps \\n()S-1
+.if !@\\$1@@ \&\\$1
+.if !@\\$2@@ \&\\$2
+.if !@\\$3@@ \&\\$3
+.if !@\\$4@@ \&\\$4
+.if !@\\$5@@ \&\\$5
+.if !@\\$6@@ \&\\$6
+.if !@\\$1@@ .ps \\n()S
+.if @\\$1@@ .it 1 }N
+..
+.de I\"italic
+.ft 2
+.it 1 }N
+.if !@\\$1@@ \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6
+..
+.de B\"bold
+.ft 3
+.it 1 }N
+.if !@\\$1@@ \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6
+..
+.de RI\"roman-italic
+.}S 1 2 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.de IR\"italic-roman
+.}S 2 1 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.de IB\"italic-bold
+.if t .}S 2 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.if n .}S 2 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.de RB\"roman-bold
+.if t .}S 1 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.if n .}S 1 3 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.de BR\"bold-roman
+.if t .}S 3 1 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.if n .}S 3 1 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.de BI\"bold-italic
+.if t .}S 3 2 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+.if n .}S 3 2 \& "\\$1" "\\$2" "\\$3" "\\$4" "\\$5" "\\$6"
+..
+.de }S\"handle mixed fonts by making special case of shift-out of italic
+.ds ]C
+.if @\\$1@2@ .if !@\\$5@@ .ds ]C\^
+.ie !@\\$4@@ .}S \\$2 \\$1 "\\$3\f\\$1\\$4\\*(]C" "\\$5" "\\$6" "\\$7" "\\$8" "\\$9"
+.el \\$3
+.}f
+..
+.de PP\"paragraph
+.sp \\n(PDu
+.ne 1.1v
+.}E
+.nr )I \\n()Mu
+.ns
+..
+.de P\"synonym for .PP
+.PP
+..
+.de LP\"obsolete synonym for PP (not advertised)
+.PP
+..
+.de PD\"paragraph distance
+.if t .nr PD .4v
+.if n .nr PD 1v
+.if !@\\$1@@ .nr PD \\$1v
+..
+.de HP\"paragraph with hanging indent
+.sp \\n(PDu
+.ne 1.1v
+.if !@\\$1@@ .nr )I \\$1n
+.ll \\n(LLu
+.in \\n()Ru+\\n(INu+\\n()Iu
+.ti \\n()Ru+\\n(INu
+.}f
+..
+.de IP\"indented paragraph
+.TP \\$2
+\&\\$1
+..
+.de TP\"tagged paragraph (paragraph with hanging label)
+.if !@\\$1@@ .nr )I \\$1n
+.sp \\n(PDu
+.ne 1.1v
+.in \\n()Ru
+.lg 0
+.ns
+.it 1 }N
+.nr )E 1
+.di ]B
+..
+.de }1\"end of TP (cf .}N below)
+.ds ]Y \&\\*(]B\\
+.rm ]B
+.nr )E 0
+.if !@\\$1@@ .nr )I \\$1n
+.}f
+.ll \\n(LLu
+.in \\n()Ru+\\n(INu+\\n()Iu
+.ti \\n(INu
+.ie !\\n()Iu+\\n()Ru-\w@\\*(]Y@u-3p \{\\*(]Y
+.br \}
+.el \\*(]Y\h@|\\n()Iu+\\n()Ru@\c
+.}f
+.lg
+..
+.de }N\"end of 1-line features
+.if \\n()E .br
+.di
+.if @\\n()E@0@ .}f
+.if @\\n()E@1@ .}1
+.if @\\n()E@2@ .}2
+..
+.de RS\"increase relative indent
+.nr ]\\n+()p \\n()I
+.nr )\\n()p \\n()R
+.ie !@\\$1@@ .nr )R +\\$1n
+.el .nr )R +\\n()I
+.nr )I \\n()Mu
+.}E
+..
+.de RE\"decrease relative indent
+.if !@\\$1@@ \{.ie @\\$1@0@ .nr )p 1 1
+.		el .nr )p \\$1 1 \}
+.ds ]a \\*(]N\\n()p
+.ds ]r \\*(]S\\n()p
+.nr )I \\*(]a
+.nr )R \\*(]r
+.if \\n()p .nr )p -1
+.}E
+..
+'''\"	.de PM [CA:CP:N:P:BP:BR:BPP:BPN:ILL:CI-II:]
+'\"	Disclosure notice macro.
+.de PM
+.ie @\\$1@@ .		nr ;t 0
+.el .ie @\\$1@CI-II@ .	nr ;t 6
+.el .ie @\\$1@PM6@ .	nr ;t 6
+.el .ie @\\$1@ILL@ .	nr ;t 5
+.el .ie @\\$1@PM5@ .	nr ;t 5
+.el .ie @\\$1@BPP@ .	nr ;t 4
+.el .ie @\\$1@BR@ .	nr ;t 4
+.el .ie @\\$1@PM4@ .	nr ;t 4
+.el .ie @\\$1@CP@ .	nr ;t 3
+.el .ie @\\$1@PM3@ .	nr ;t 3
+.el .ie @\\$1@CA@ .	nr ;t 2
+.el .ie @\\$1@PM2@ .	nr ;t 2
+.el .nr ;t 1	\"includes PM1,BP,N,P,BPN and is also the default for an invalid arg.
+.ie \\n(;t=0 \{\
+.	(B
+.	(E 2 0		\" clear position 2 - CI-II message
+.	(B
+.	(E 3 0 \}	\" clear position 3 - regular PM messages
+.el .ie \\n(;t=6 \{\
+.	(B
+\!.	tl @@\\*(]m@@
+\!.	tl @@\\*(]o@@
+\!.     tl @@\\*(]p@@
+\!.     tl @@\\*(]q@@
+.	(E 2 4v \}
+.el .ie \\n(;t=5 \{\
+.	(B
+\!.	tl @@\\*(]i@@
+\!.	tl @@\\*(]j@@
+\!.	tl @@\\*(]k@@
+\!.	tl @@\\*(]l@@
+.	(E 3 4v \}
+.el .ie \\n(;t=4 \{\
+.	(B
+\!.	tl @@\\*(]U@@
+\!.	tl @@\\*(]V@@
+\!.	tl @@\\*(]W@@
+\!.	tl @@\\*(]X@@
+.	(E 3 4v \}
+.el .ie \\n(;t=3 \{\
+.	(B
+\!.	tl @@\\*(]I@@
+\!.	tl @@\\*(]J@@
+\!.	tl @@\\*(]K@@
+\!.	tl @@\\*(]L@@
+.	(E 3 4v \}
+.el .ie \\n(;t=2 \{\
+.	(B
+\!.	tl @@\\*(]A@@
+\!.	tl @@\\*(]F@@
+\!.	tl @@\\*(]G@@
+\!.	tl @@\\*(]H@@
+.	(E 3 4v \}
+.el \{\
+.	(B
+\!.	tl @@\\*(]M@@
+\!.	tl @@\\*(]O@@
+\!.	tl @@\\*(]Q@@
+\!.	tl @@\\*(]R@@
+.	(E 3 4v \}
+..
+'\"	)G - print disclosure notice
+'\"	traps for bottom blocks as set by (B, (E
+.de )G
+.ev 2
+.nf
+.sp 1
+.?1		\" print all bottom blocks
+.?2
+.?3
+.?4
+.br
+.ev
+'bp		\" force end of page
+..
+'''\"	(B: define a (generic) bottom block
+'\"	paired by the (E macro.
+.de (B
+.ev 1
+'fi
+.di >K		\" save a bottom block
+..
+'''\"	(E: end a bottom block
+''\"	.(E <id> <size>
+'\"	close the current bottom block, make it number <id> (1-5) with
+'\"	<size> (if no <size> - use \n(dn)
+.de (E
+.br
+.di
+.ev
+.ie (\\n(dn=0)&(0\\$2=0) \{\
+.	nr ?\\$1 0		\" clear a bottom block
+.	rm >K ?\\$1
+'	br \}
+.el \{\
+.	ie 0\\$2>0 .nr ?\\$1 0\\$2	\" specific length
+.	el         .nr ?\\$1 \\n(dn \}	\" length of diversion
+'\"  Now compute bottom of page trap positions
+.nr :U \\n(:mu+\\n(?1+\\n(?2+\\n(?3+\\n(?4+\\n(?5+1v	\" new bottom trap pos
+.if \\n(:Uu>(\\n(.pu-\\n(nlu-.5v) 'bp	\" new page if bigger than room
+.ch )G			\" remove current trap, if any
+.rn >K ?\\$1		\" new bottom block
+.wh -\\n(:Uu )G		\" bottom mark position
+..
+'''>S>NOCOMPACT<<name>>
+'\"DT, PD, and SM invoked internally!
+'\"set page size
+.nr )s 0
+.if t .if \ns .nr )s 1\"register )s=1 iff troff & small format; 0 otherwise
+.nr )t 0
+.if t .if !\ns .nr )t 1\"register )t=1 iff troff & large format; 0 otherwise
+.if \n()s \{.nr )L 9i
+.	     nr LL 4.75i
+.	     nr )O .75i
+.	     nr )S 9
+.	     nr )V 10 \}
+.if \n()t \{.nr )L 11i
+.	     nr LL 6.5i
+.	     nr )O .463i
+.	     nr )S 10
+.	     nr )V 12 \}
+.if t \{.ds R \(rg
+.	 ds S \s\n()S
+'	 br \}
+.if n \{\
+.	ie !\ns \{\
+.		nr )L 11i
+.		nr LL 6.5i
+.		nr )O .463i
+'		br \}
+.	el \{\
+.		nr )L 9i	\" small page for nroff
+.		nr LL 4.75i
+.		nr )O .75i
+'		br\}
+.	ds R (Reg.)
+.	ds S
+'	br \}
+.if \nT .nr LL 80n\" for TTY-43
+.if \nV>1 \{\" for Versatec
+.	nr LL 82n
+.	nr )L 84v
+.	rm ul \}
+.nr )p 0 1
+.ds ]N \\\\n(]
+.ds ]S \\\\n()
+'\"set month
+.if @\nd@0@ .nr m \n(mo-1
+.if @\nm@0@ .ds ]b January
+.if @\nm@1@ .ds ]b February
+.if @\nm@2@ .ds ]b March
+.if @\nm@3@ .ds ]b April
+.if @\nm@4@ .ds ]b May
+.if @\nm@5@ .ds ]b June
+.if @\nm@6@ .ds ]b July
+.if @\nm@7@ .ds ]b August
+.if @\nm@8@ .ds ]b September
+.if @\nm@9@ .ds ]b October
+.if @\nm@10@ .ds ]b November
+.if @\nm@11@ .ds ]b December
+'\"set date
+.if n \{.nr m \nm+1
+.	 ie \nd .ds ]T (last mod. \nm/\nd/\ny)
+.	 el .ds ]T (printed \n(mo/\n(dy/\n(yr)
+'	 br \}
+.if \n()s .ds ]T
+.if \n()t \{.ie \nd .ds ]T \*(]b \nd, 19\ny
+.	      el .ds ]T \*(]b \n(dy, 19\n(yr
+'	      br \}
+.pl \n()Lu
+.ll \n(LLu
+.lt \n(LLu
+.po \n()Ou
+.}f
+.if \n()s .nr :m 3.5v
+.if \n()t .nr :m 6v
+.if n .nr :m 7v
+.if t .nr )M 3.6m
+.if n .nr )M 5n
+.em }K\"redefined in .TH
+'''>E>NOCOMPACT<<name>>

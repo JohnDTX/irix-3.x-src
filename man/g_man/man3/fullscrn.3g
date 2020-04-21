@@ -1,0 +1,46 @@
+.TH fullscrn 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B fullscrn 
+\- gives a program the entire screen as a window
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "fullscrn()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine fullsc()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure fullscrn;"
+.SH DESCRIPTION
+.B fullscrn
+gives a program the entire screen as a window under the window manager.
+It makes the call: 
+.sp
+.nf
+	viewport(0,XMAXSCREEN,0,YMAXSCREEN);\f1
+.fi
+.sp
+and sets up the default
+\f3ortho\f1,
+which
+.B winopen 
+defines.
+\f3fullscrn\f1 eliminates all protections
+that prevent graphics processes from 
+drawing on each other.  Use it with caution or a
+sense of humor.
+.SH "SEE ALSO"
+endfullscrn, endpupmode, pupcolor, pupmode
+.sp
+\f2Using mex\fP,
+Chapter 2, Programming with mex
+.SH NOTE
+This routine is 
+available only in immediate mode. 

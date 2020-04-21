@@ -1,0 +1,18 @@
+is:s:initdefault:						#default state
+s0::sysinit:/etc/rc.s0 1>/dev/console 2>&1			#fix console
+bc::bootwait:/etc/brc </dev/console >/dev/console 2>&1		#bootrun cmds
+bl::bootwait:/etc/bcheckrc </dev/console >/dev/console 2>&1	#bootlog
+rc::bootwait:/etc/rc 1>/dev/console 2>&1			#run com
+pf::powerfail:/etc/powerfail 1>/dev/console 2>&1		#power fail
+co::respawn:/etc/getty console co_9600 none LDISC1		#console
+d1:x:respawn:/etc/getty ttyd1 dx_9600 none LDISC1		#serial 1
+d2:x:respawn:/etc/getty ttyd2 dx_9600 none LDISC1		#serial 2
+d3:x:respawn:/etc/getty ttyd3 dx_9600 none LDISC1		#serial 3
+c0:x:respawn:/etc/getty ttyd4 dx_9600 none LDISC1	# serial option port 4
+c1:x:respawn:/etc/getty ttyd5 dx_9600 none LDISC1	# serial option port 5
+c2:x:respawn:/etc/getty ttyd6 dx_9600 none LDISC1	# serial option port 6
+c3:x:respawn:/etc/getty ttyd7 dx_9600 none LDISC1	# serial option port 7
+c4:x:respawn:/etc/getty ttyd8 dx_9600 none LDISC1	# serial option port 8
+c5:x:respawn:/etc/getty ttyd9 dx_9600 none LDISC1	# serial option port 9
+c6:x:respawn:/etc/getty ttyd10 dx_9600 none LDISC1	# serial option port 10
+c7:x:respawn:/etc/getty ttyd11 dx_9600 none LDISC1	# serial option port 11

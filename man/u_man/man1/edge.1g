@@ -1,0 +1,140 @@
+'\"macro stdmacro
+.TH EDGE 1G
+.SH NAME
+edge \- window-based debugger
+.SH SYNOPSIS
+.B edge
+[\ 
+.B \-r
+\ ] [\ 
+.B \-i
+\ ] [\ 
+.BR \-I\0 dir
+\ ] [\  
+.BR \-c\0 file
+\ ] [\ objfile\ ]
+.SH DESCRIPTION
+\f2Edge\f1\^
+is a window-based interface to \f2dbx\f1(1).
+.I Objfile
+is an object file that you create by using the \f3\-g\f1 flag when you compile
+your FORTRAN or C source code.
+When you start \f2edge\f1,
+it creates three windows: the \f2dbx\f1
+command window, the source window, and the user input/output window.
+The \f2dbx\f1 window contains the \f2dbx\f1
+prompt. You can use the typical \f2dbx\f1
+commands here. This window also contains
+buttons for sending commands to \f2dbx\f1.
+The user window, stdin/stdout/stderr,
+acts as the user program's input and output window.
+The source window contains the user program's source code.
+You can resize, reshape and move these windows by pressing and holding the
+right mouse button in the title bar. This produces the \f2mex\f1(1G)
+menu.
+See below for more information on windows.
+.PP
+Arguments to \f2edge\f1
+are the same as those to \f2dbx\f1.
+.SS The Dbx Window
+See \f2dbx\f1(1)
+for the line interface in this window. You use the buttons in this window by
+moving the cursor over the item you want to select, then pressing the left
+mouse button. The buttons invoke these commands:
+.IP \f3rerun\f1
+Sends the \f3rerun\f1
+command to \f2dbx\f1.
+\f2Edge\f1 uses arguments you specified for the last \f3run\f1
+command to rerun your program.
+.IP \f3stop\f1
+Sets a breakpoint at the currently
+selected line in the source window. Selecting text
+in the source window is discussed below.
+.IP \f3step\f1
+Single steps one source line.
+.IP \f3next\f1
+Single steps one source line, but skips over function and subroutine calls.
+.IP \f3cont\f1
+Continues execution.
+.IP \f3print\f1
+Prints the value of the variable selected in the source window.
+.IP \f3where\f1
+Prints a stack trace from the current point of execution.
+.IP \f3trace\f1
+Traces execution of all source lines.
+The currently executing line is highlighted in green in the source window.
+.IP \f3interrupt\f1
+Sends an interrupt to \f2dbx\f1.
+.IP \f3sh\f1
+Forks a shell in a window.
+The environment variable
+.SM SHELL
+determines which shell is used.
+.IP \f3quit\f1
+Exits from \f2edge\f1.
+.PP
+When you press the the right mouse button over any \f2edge\f1 window, you see
+a menu with the following choices:
+.IP \f3attach\f1
+Attaches input focus to the window.
+.IP \f3select\f1
+Pops and attaches to the window.
+.IP \f3edit\f1
+Lets you edit a source file. This choice contains a sub-menu that lists the
+source files that make up your program. Slide the cursor to the right
+to see the sub-menu, then select the file you want to edit. This invokes
+the editor specified by the $EDIT environment variable on the
+selected file.
+.IP \f3file\f1
+Lets you read another source file into the source window. This choice contains
+a sub-menu that lists the source
+files that make up your program. Select the file you
+want displayed in the source window.
+.SS The Source Window
+The source window displays your source. The currently
+executing line is highlighted in green. Breakpoints are highlighted in red.
+Selected text is highlighted in yellow. Select text by pressing
+and holding
+the left mouse button, dragging the cursor over the text to be selected, then
+releasing the mouse button. When you use the \f3file\f1 or \f3/\f1 commands
+in the \f2dbx\f1 window, the results  will be reflected in the source window.
+The title bar of this window contains the name of the file being
+displayed.
+.SS The User window.
+This window acts as the user program's stdin/stdout/stderr.
+.SS Edgerc syntax.
+If the file \f3.edgerc\f1 exists in the current directory,
+\f2edge\f1 reads it. The syntax for commands in the \f3.edgerc\f1 file follow:
+.IP "\f3size\f1 window [rows] [columns]"
+\f2window\f1 specifies either the dbx, source, or user
+window.
+\f2Rows\f1 specifies the number of rows the window should occupy,
+and \f2columns\f1 specifies the number of columns the window should occupy.
+If you do not specify \f2rows\f1 and \f2columns\f1, you
+will be prompted to size and place your windows.
+.IP "\f3origin\f1 window [xcoord] [ycoord]"
+This command causes the specified window's origin to be at \f2xcoord, ycoord\f1.
+If you do not specify \f2xcoord\f1 and \f2ycoord\f1, you will
+be prompted to place your own windows.
+.ne 10v
+.IP "\f3color\f1 text background"
+\f2Text\f1 and \f2background\f1 are integers that specify the 
+color indices to be used for text and background.
+.SH FILES
+.ta \w'/usr/lib/gsh\ \ \ 'u
+a.out	default object file
+.br
+\&.edgerc	initialization commands
+.br
+/usr/lib/gsh	terminal emulator
+.SH SEE ALSO
+cc(1), f77(1), dbx(1)
+.br
+.I Getting Started with edge for C
+.br
+.I Getting Started with edge for FORTRAN
+.SH AUTHOR
+Jim Terhorst
+.SH BUGS
+\f2Edge\f1 uses the color indices 0-7. If you modify these, 
+you modify \f2edge's\f1 colors.

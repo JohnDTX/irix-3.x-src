@@ -1,0 +1,54 @@
+.TH editobj 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B editobj
+\- opens an object for editing
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "editobj(obj) "
+.B "Object obj;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine editob(obj)"
+.B "integer*4 obj"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure editobj(obj: Object);"
+.SH DESCRIPTION
+.B editobj
+opens an object for editing.
+A pointer acts as a cursor
+that appends new routines.
+The pointer is
+initially set to the end of the object.
+The system appends graphics routines
+to the object until either a
+.B closeobj
+or a pointer positioning routine
+(\f3objdelete, objinsert,\f1
+or
+\f3objreplace\f1)
+executes.
+Usually,
+you need not be concerned
+about storage allocation.
+Objects grow and shrink automatically
+as routines
+are added and deleted.
+.PP
+If 
+.B editobj
+specifies an undefined object, the system displays an error message. 
+.SH "SEE ALSO"
+compactify, objdelete, objinsert, objreplace
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

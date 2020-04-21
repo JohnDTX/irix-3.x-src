@@ -1,0 +1,43 @@
+'\"macro stdmacro
+.TH GETVERSION 2
+.SH NAME
+getversion \- get version information from the operating system
+.SH SYNOPSIS
+\f3getversion\f1 (type, buf)
+.br
+.B "int type;"
+.br
+.B "char \(**buf;"
+.SH DESCRIPTION
+\f2Getversion\f1 returns version information about various features
+of the running operating system.  \f2Type\f1 is used to identify
+which type of version information is being requested.  In all cases,
+\f2buf\f1 will contain the result of the particular version request.
+For a complete list of the types and expected return values,
+see \f2<sys/kversion.h>\f1.
+.PP
+\f2Getversion\f1
+will fail if one or more of the following are true:
+.IP "" .3i
+The \f2type\f1 value is outside the allowable range.
+.SM
+\%[EINVAL]
+.IP
+\f2Buf\f1 points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH RETURN VALUE
+Upon successful completion, a zero result is returned.  Otherwise,
+a value of -1 is returned and errno is to to indicate the
+error.
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#66, D0
+.B movl	type, A0
+.B movl	buf, D1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT

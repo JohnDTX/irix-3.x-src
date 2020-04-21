@@ -1,0 +1,22 @@
+.TH pagewritemask  3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2pagewritemask\fP - set the writemask for the textport background
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pagewritemask(pmask) "
+.B "Colorindex pmask;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pagewr(pmask)"
+.B "integer*2 pmask"
+.sp
+.SH DESCRIPTION
+\f2Pagewritemask\fP sets the textport background writemask.
+.SH "SEE ALSO"
+.I color, pagecolor, textcolor, textport,
+.I textwritemask, tpoff, tpon, writemask
+.SH NOTE
+This command can only be used in immediate mode.

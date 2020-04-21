@@ -1,0 +1,27 @@
+total 104
+drwxrwxr-x  3 glen     doc           512 Apr  4 15:27 ./
+drwxrwxr-x  9 bob      doc           512 Apr  4 15:27 ../
+-rw-rw-r--  1 diane    doc             0 Apr  4 15:27 2700
+-rw-rw-r--  1 bob      doc           269 Jan 25 17:33 Makefile
+drwxrwxr-x  2 bob      doc            24 Aug  9  1984 RCS/
+-rw-rw-r--  1 glen     doc           168 Jun 12  1984 README
+-rw-rw-r--  1 glen     doc          2775 Jun 11  1984 ascii.5
+-rw-rw-r--  1 glen     doc          1659 Jul  3  1984 environ.5
+-rw-rw-r--  1 glen     doc          1787 Jun  8  1984 eqnchar.5
+-rw-rw-r--  1 glen     doc          1261 May 18  1984 fcntl.5
+-rw-rw-r--  1 glen     doc          1137 May 18  1984 greek.5
+-rw-r--r--  1 bob      doc          1909 Feb 13 13:23 ibtab.5
+-rw-rw-r--  1 glen     doc           204 May 18  1984 intro.5
+-rw-rw-r--  1 glen     doc          6978 Jun  7  1984 man.5
+-rw-rw-r--  1 glen     doc          5369 May 23  1984 me.5
+-rw-rw-r--  1 glen     doc          1641 May 18  1984 mm.5
+-rw-rw-r--  1 glen     doc          5581 Jun  7  1984 mosd.5
+-rw-rw-r--  1 glen     doc           993 May 18  1984 mptx.5
+-rw-rw-r--  1 glen     doc          7329 Jun  7  1984 ms.5
+-rw-rw-r--  1 glen     doc          7455 May 18  1984 mv.5
+-rw-rw-r--  1 glen     doc          5338 Jun 12  1984 rcsfile.5
+-rw-rw-r--  1 glen     doc          8670 Jun  7  1984 regexp.5
+-rw-rw-r--  1 glen     doc          1427 May 18  1984 stat.5
+-rw-rw-r--  1 glen     doc          2875 May 22  1984 term.5
+-rw-rw-r--  1 glen     doc         25239 Jun 11  1984 termcap.5
+-rw-rw-r--  1 glen     doc          1267 May 22  1984 types.5

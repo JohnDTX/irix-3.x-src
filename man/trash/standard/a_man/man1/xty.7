@@ -1,0 +1,60 @@
+.TH XTY 7 
+.SH NAME
+xty \- TELNET/rlogin terminal interface
+.SH DESCRIPTION
+The 
+\f2xty\f1
+device works like a normal tty device,
+except that it communicates with the EXOS 8000
+on-board TELNET/rlogin server instead of
+with an actual terminal multiplexer.
+.LP
+Minor device numbers 0-7 are used like any other
+tty device by the system's login listener [see \f2getty\f1(1M)].
+The xty device emulates the behavior of a tty device that
+implements modem controls.
+An open request to the xty device blocks until some \f2rlogin\f1(1C) or
+\f2telnet\f1(1C) client connects to the on-board TELNET/rlogin server.
+This is equivalent to a modem asserting carrier detect.
+If the TELNET/rlogin client severs the connection before logging out,
+the xty device sends the SIGHUP signal to the user's process group.
+This is equivalent to a modem losing carrier.
+When the xty device is closed, it severs the TELNET/rlogin connection.
+.LP
+Minor device number 8 is reserved for the uucp server program
+[see \f2ud\f1(1M)].
+.LP
+The xty driver is initially configured in the host system's
+normal (``cooked'') tty startup mode.
+It responds as follows to TELNET option state changes:
+.sp
+.nf
+DO ECHO		echoing is enabled
+DONT ECHO		echoing is disabled
+DO BINARY		raw mode is enabled
+DONT BINARY	raw mode is disabled
+.fi
+.sp
+All other TELNET options have no effect.
+.PP
+TELNET Network Virtual Terminal (NVT) functions
+have the following effects:
+.sp
+.nf
+IP	send SIGINT signal to user's process group
+AYT	on-board server returns an ASCII BEL
+EC	same as typing current erase character
+EL	same as typing current kill character
+AO	no effect
+.fi
+.RE
+.PP
+.. The command \f2make devices\f1
+.. in the EXOS installation procedure creates the xty device nodes.
+.SH FILES
+.ta 20n
+/dev/ttyT[0-7]	TELNET/rlogin server devices
+.br
+/dev/ttyT8	uucp server device
+.SH SEE ALSO
+netload(1M), rlogin(1C), telnet(1C), ud(1M)

@@ -1,0 +1,118 @@
+!!- System /OS (language): KER:soucefiles, as of 6 Sep 85 -!!
+(Turbo Pascal): TURBO.*
+/AT&T System III or V: (see /Unix)
+/Berkeley Unix: (see /Unix)
+/CPM-80 (LASM): CP4*.{ASM,HLP,DOC,BWR,UPD}
+/CPM-86 (ASM86): C86*.{A86 BWR HLP DOC}
+/MS-DOS (MASM): MS*.{ASM,H,UPD,HLP,BWR,FOR,DOC,C,BAS}
+/RTU: (see /Unix)
+/Software Tools (Ratfor): ST*.*
+/System III or V: (see /Unix)
+/Ultrix: (see /Unix)
+/Unix (C): CKAAAA.HLP,CKC*.*,CKU*.*,CKW*.*
+/Unos:  (see /Unix)
+/UTS:   (see /Unix)
+/Venix: (see /Unix)
+/Xenix: (see /Unix)
+Acorn BBC Micro /OS1.20 (ADE): BBC*.*
+ACT Apricot /MS-DOS (MASM): APRICOT.ASM (old, 1 file) or else see /MS-DOS (new)
+Alpha Micro /AMOSL (Assembler): AM68K.*
+Altos 986 /Xenix (C): (see /Unix)
+APC: (see NEC)
+Apollo Domain /Aegis (Pascal): APO*.*
+Apple II /CPM-80 (LASM): (see /CPM-80)
+Apple II /DOS (Apple Assembler): AP2KER.{TXT,DOC}
+Apple II /DOS (CROSS): APP*.{M65,HLP,BAS,FOR,DOC,BWR}
+Apple Macintosh (Sumacc C): CKC*.*, CKM*.{DOC,BWR,UPD,BLD,MAK,SED,RC}
+Apricot: (see ACT)
+Atari Home Computers /DOS (Action!): ATARI.*
+BBC Micro: (see Acorn)
+BBN C/70 /IOS (C): (see /Unix)
+Burroughs B6800 /CANDE (Algol): B68K*.*
+Burroughs B7900 (Algol): B79*.*
+CDC Cyber series /NOS or NOSBE (Fortran-77,Assembler): CDC*.*
+Commodore-64 /DOS (CROSS): C64BOOT.*, C64*.{M65,BAS}, C64KER.{DOC,HLP}
+Commodore-64 /Forth (Forth): C644*.{SCR,DOC,HLP}
+Compupro Interfacer 3-4/CPM-80 (ASM): CPMPRO.{M80,HLP}
+Cray-1 /CTSS (Fortran-77): CRAY.*
+Data General MV series /AOS or AOSVS (SP/Pascal): AOSK2.*
+Data General Nova /RDOS (Fortran-5): RDOS*.*
+Data General S250 /AOS (Fortran-5): AOSKER*.*
+DEC PDP-11 /MUMPS-11 (MUMPS-82): MP*.*
+DEC PDP-11 /RSX,RSTS,RT,TSX (Macro-11): K11*.{MAC,COM,ODL,E80,M41,DOC,HLP,BWR}
+DEC PDP-11 /RT11 (OMSI Pascal): RT*.*
+DEC PDP-8 /OS8 or RTS8 (PAL): K08*.*
+DEC Pro-300 Series /POS (Bliss): PRO*.{CMD,MAC,FOR,REQ,ODL,BLI,BAS,DOC,INS,HLP}
+DEC Pro-300 Series /POS (Macro-11): (see DEC PDP-11 /RSX...)
+DEC Pro-300 Series /RT (Macro-11): (see DEC PDP-11 /RSX...)
+DEC Pro-300 Series /Venix: (see /Unix)
+DEC Rainbow /CPM-86 (ASM86): (see /CPM-86)
+DEC VAX /VMS (Bliss,Macro-32): VMS*.{BLI,REQ,MAR,COM,DOC,HLP,MEM}
+DEC VAX /VMS (C): CKAAAA.HLP,CKC*.*, CKU*.*, CKV*.*, CKW*.*
+DEC VAX /VMS (Pascal,Fortran): VX*.*
+DECsystem-10 /TOPS-10 (Macro Assembler, Bliss): K10*.{REQ,BLI,MAC,CCL,CTL,HLP}
+DECSYSTEM-20 /TOPS-20 (Macro Assembler): K20*.*
+DG: (see Data General)
+Fortune: (see /Unix)
+Fujitsu Micro-16s /CPM-86 (ASM86): (see /CPM-86)
+Harris 800 /VOS (Pascal,Assembler): H800*.*
+Heath: (see also Zenith)
+Heath H8 /CPM-80 (ASM): CPMH8.M80
+Hewlett-Packard: (see HP)
+Honeywell /MULTICS (PL/I): MU*.*
+Honeywell CP6 /IBEX (Pascal): HCP*.*
+Honeywell DPS8 /GCOS (B): HDP*.{B,DOC,FTN,ROF}
+Honeywell DPS8 /GCOS (C): HG*.{TXT,A,DOC,C,HLP}
+Honeywell L610 /MS-DOS (MASM): HL610.ASM, HL6ANN.TXT, HL6TRAN.BAS
+HP-150 /MS-DOS (MASM): (see /MS-DOS)
+HP-1000 /RTE6VM (Fortran-77): HPM*.*
+HP-3000 /Sofware Tools: (see /Software Tools)
+HP-3000 /MPE (SPL): HP3000.*
+HP-9000 /HP-UX: (see /Unix)
+HP-98x6 Series (HP Pascal): HP9*.*
+IBM 370 Series /MTS (Assembler): MTS*.{ASM,DOC}
+IBM 370 Series /MTS (Pascal): MTS*.{PAS,DOC}
+IBM 370 Series /MUSIC (Assembler): IMU*.*
+IBM 370 Series /MVS-GUTS (Assembler): GUTS.*
+IBM 370 Series /MVS-TSO (Asembler): TSO*.*
+IBM 370 Series /VM-CMS (Assembler): CMS*.*
+IBM 370 Series /VM-CMS (Pascal VS): CM2*.*
+IBM PC,XT,AT /PC-DOS or MS-DOS (MASM): (see /MS-DOS)
+IBM PC,XT,AT /PCIX (C): (see /Unix)
+IBM PC /UCSD p-System (UCSD Pascal): UCIBM*.*
+ICL/Perq: (see Perq)
+Intel MDS /ISIS (PL/M): MDS*.*
+Kaypro: (see /CPM-80)
+Luxor ABC800/ABCDOS (Basic): LUX*.*
+NCR Tower: (see /Unix)
+ND (Norsk? Nord? Data?) series /Simtran III (ND-Pascal): ND*.{PAS,HLP,MAC,TXT}
+NEC APC /CPM-86 (ASM86): (see /CPM-86)
+NEC APC /MS-DOS (MASM): (see /MS-DOS)
+Pascal MicroEngine /UCSD p-System (UCSD Pascal): UCMI*.*
+PDP: (see DEC)
+Perkin-Elmer 3200 series /OS32 (Fortran): PERKIN.*
+Perq /POS (Pascal): PQ*.*
+Prime /PRIMOS (PL/P): PRI*.*
+Rainbow: (see DEC)
+Sanyo 1100 MBC /CPM-80 (ASM): CPMSYO.M80
+Seequa Chameleon /MS-DOS (MASM): SEEQUA.*
+Sirius-1 /CPM-86 (MASM): VIC*.A86
+Sirius-1 /MS-DOS (C): VIC*.{C,H,HLP,IOH}
+Sirius-1 /MS-DOS (MASM): SIR*.{FOR,BAS,ASM,DOC,SRC}
+Sperry 1100 /Exec (Assembler): UNI*.{ASM,HLP}
+Sperry 1100 /Exec (Pascal): UNI*.{PAS,HLP}
+Sperry 1100 /Sofware Tools: (see /Software Tools)
+Tandem /NonStop (TAL): TANDEM.*
+Tandy-2000 /MS-DOS (MASM): TA2000.{ASM,HLP}
+Tektronix 4170 /CPM-86 (ASM86): (see /CPM-86)
+Terak /UCSD p-System (UCSD Pascal): UCTE*.*
+TRS-80 Color Computer/DOS (EDTASM): CC*{ASM,DOC,BAS}
+TRS-80 Model 4 /TRSDOS (ASM): M4*.{ASM,DOC,HLP,BAS}
+TRS-80 Model I /TRSDOS (M80): TRS*.{SRC,BAS,BWR,DOC,HLP}
+TRS-80 Model III /TRSDOS: (see TRS-80 Model I)
+Univac: (see Sperry)
+VAX: (see DEC)
+Victor: (see Sirius)
+Zenith 100 /MS-DOS (MASM): (see /MS-DOS)
+Zenith 100 /CPM-80 (LASM): (see /CPM-80)
+Zenith 89  /CPM-80 (LASM): (see /CPM-80)

@@ -1,0 +1,46 @@
+'\"macro stdmacro
+.TH ROBOT 1D
+.SH NAME
+robot \- control a robot arm
+.SH SYNOPSIS
+.B /usr/people/demos/robot
+.SH DESCRIPTION
+.PP
+.I Robot\^
+displays a model of an imaginary robot arm.
+Operator controls adjust the viewing parameters, the articulation of the arm,
+and the illumination.
+.PP
+Most user interface is through the mouse and mouse buttons.
+Press some combination of buttons and move the mouse to alter the display.
+The functions selected are displayed on the lower edge of the screen.
+.PP
+In the default case, the simulated object is lit as by a point source
+behind the viewpoint.
+Type
+.I S
+to simulate light from an arbitrary distant point source.
+Hold down the middle mouse button and right mouse and move the mouse to alter
+the altitude and azimuth of the light source.
+Other combinations of buttons still allow viewpoint modification and
+articulation of the object.
+Type
+.I s
+to return to normal illumination.
+.SH AUTHOR
+.PP
+Kurt Akeley
+.SH BUGS
+.PP
+The hidden-surface removal fails at a few extreme positions of the object.
+.SH "HARDWARE REQUIREMENTS"
+A minimum configuration of 12 bitplanes and 1.5 Megabytes of memory is
+required.
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man1/RCS/robot.1d,v 1.1 89/03/27 16:49:37 root Exp $
+.\" $Log:	robot.1d,v $
+Revision 1.1  89/03/27  16:49:37  root
+Initial check-in for 3.7
+
+.\" Revision 1.1  84/12/11  13:37:55  bob
+.\" Initial revision
+.\" 

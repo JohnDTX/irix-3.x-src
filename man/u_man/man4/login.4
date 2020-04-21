@@ -1,0 +1,30 @@
+'\"macro stdmacro
+.TH LOGIN 4
+.SH NAME
+login, cshrc \- setting up a C Shell environment
+.SH DESCRIPTION
+The file
+.BR \&.login
+is executed before a session begins.
+The file
+.BR \&.cshrc
+is executed each time a shell is forked.
+These files are useful for setting environment
+variables and terminal modes.
+If the file
+.B /etc/cshrc
+exists, it will be executed for every user before
+.BR .login
+is read.
+.SH NOTE
+The C Shell must be specified as the user's login shell
+in the file \f2/etc/passwd\fP.
+.SH FILES
+~/.login
+.br
+~/.cshrc
+.br
+/etc/cshrc
+.SH SEE ALSO
+csh(1), env(1), login(1), mail(1), stty(1),
+su(1), passwd(4), environ(5), term(5).

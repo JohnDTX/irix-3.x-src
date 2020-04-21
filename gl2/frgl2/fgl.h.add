@@ -1,0 +1,65 @@
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c									 c
+c 		 Copyright (C) 1983, Silicon Graphics, Inc.		 c
+c									 c
+c  These coded instructions, statements, and computer programs  contain  c
+c  unpublished  proprietary  information of Silicon Graphics, Inc., and  c
+c  are protected by Federal copyright law.  They  may  not be disclosed  c
+c  to  third  parties  or copied or duplicated in any form, in whole or  c
+c  in part, without the prior written consent of Silicon Graphics, Inc.  c
+c									 c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+C     graphics libary header file
+
+C     maximum X and Y screen coordinates
+
+      INTEGER*4 XMAXSC
+      INTEGER*4 YMAXSC
+
+C     various hardware/software limits
+
+      INTEGER*4 ATTRIB
+      INTEGER*4 VPSTAC
+      INTEGER*4 MATRIX
+      INTEGER*4 STARTT
+      INTEGER*4 ENDTAG
+    
+C     names for colors in color map loaded by ginit()
+
+      INTEGER*4 BLACK
+      INTEGER*4 RED
+      INTEGER*4 GREEN
+      INTEGER*4 YELLOW
+      INTEGER*4 BLUE
+      INTEGER*4 MAGENT
+      INTEGER*4 CYAN
+      INTEGER*4 WHITE
+
+C     maximum X and Y screen coordinates
+
+      PARAMETER (XMAXSC = 1023)
+      PARAMETER (YMAXSC = 767)
+
+C     various hardware/software limits
+
+      PARAMETER (ATTRIB = 10)
+      PARAMETER (VPSTAC = 8)
+      PARAMETER (MATRIX = 32)
+      PARAMETER (STARTT = -2)
+      PARAMETER (ENDTAG	= -3)
+
+C     names for colors in color map loaded by ginit()
+
+      PARAMETER (BLACK = 0)
+      PARAMETER (RED   = 1)
+      PARAMETER (GREEN = 2)
+      PARAMETER (YELLOW= 3)
+      PARAMETER (BLUE  = 4)
+      PARAMETER (MAGENT= 5)
+      PARAMETER (CYAN  = 6)
+      PARAMETER (WHITE = 7)
+
+C     function return values
+

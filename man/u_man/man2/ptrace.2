@@ -1,0 +1,270 @@
+'\"macro stdmacro
+.TH PTRACE 2 
+.SH NAME
+ptrace \- process trace
+.SH SYNOPSIS
+.B int ptrace (request, pid, addr, data);
+.br
+.B int request, pid, addr, data;
+.SH DESCRIPTION
+.I ptrace\^
+provides a means by which a parent process
+may control the execution of a child process.
+Its primary use is for the implementation of breakpoint debugging.
+The child process behaves normally until it encounters a signal (see
+.IR signal\^ (2)
+for the list), at which time it enters a stopped state
+and its parent is notified via
+.IR  wait\^ (2).
+When the child is in the stopped state,
+its parent can examine and modify its ``core image'' using
+.IR ptrace .
+Also, the parent can cause the child either to terminate
+or continue, with the possibility of ignoring the signal that caused it to
+stop.
+.PP
+The
+.I request\^
+argument determines the precise action to be taken by
+.I ptrace\^
+and is one of the following:
+.RS .3i
+.TP "\w'\f34, 5\f1\ \ 'u"
+.B 0
+This request
+must be issued by the child process if it is to be traced by its parent.
+It turns on the child's trace flag that stipulates that the child should be
+left in a stopped state upon receipt of
+a signal rather than the state specified by
+.IR func ;
+see
+.IR signal\^ (2).
+The
+.IR pid ", " addr ", and " data\^
+arguments are ignored, and a return value is not defined for this request.
+Peculiar results will ensue if the parent does not expect to trace the child.
+.RE
+.PP
+The remainder of the requests can only be used by the parent process.
+For each,
+.I pid\^
+is the process
+.SM ID
+of the child.
+The child must be in a stopped state before these requests are made.
+.RS .3i
+.TP "\w'\f34, 5\f1\ \ 'u"
+.B 1, 2
+With these requests, the word at location
+.I addr\^
+in the address space of the child is returned to the parent process.
+Either request
+.B 1
+or request
+.B 2
+may be used with equal results.
+The
+.I data\^
+argument is ignored.
+These two requests will fail if
+.I addr\^
+is not the start address of a word, in which case a value of \-1 is
+returned to the parent process and the parent's
+.I errno\^
+is set to
+.SM \%EIO.
+.TP
+.B 3
+With this request, the word at location
+.I addr\^
+in the child's
+.SM USER
+area in the system's address space (see \f3<sys/user.h>\fP)
+is returned to the parent process.
+Addresses are system dependent.
+The
+.I data\^
+argument is ignored.
+This request will fail if
+.I addr\^
+is not the start address of a word or is outside the
+.SM USER
+area, in which case a value of \-1 is returned to the parent process and
+the parent's
+.I errno\^
+is set to
+.SM EIO.
+.TP
+.B 4, 5
+With these requests, the value given by the
+.I data\^
+argument is written into the address space of the child at location
+.IR addr .
+Either request 4 or request 5 may be used with equal results.
+Upon successful completion, the value written into the address space of the
+child is returned to the parent.
+These two requests will fail if
+.I addr\^
+is a location in a pure procedure space
+and another process is executing in that space,
+or
+.I addr\^
+is not the start address of a word.
+Upon failure a value of \-1 is returned to the parent
+process and the parent's
+.I errno\^
+is set to
+.SM EIO\*S.
+.TP
+.B 6
+With this request, a few entries in the child's
+.SM USER
+area can be written.
+.I Data\^
+gives the value that is to be written and
+.I addr\^
+is the location of the entry.
+The few entries that can be written are:
+.RS .3i
+.TP "\w'\f34, 5\f1\ \ 'u"
+\&
+the general registers
+.br
+the condition codes
+.br
+the floating point status register and floating point registers
+.br
+certain bits of the Processor Status Word
+.RE
+.TP "\w'\f34, 5\f1\ \ 'u"
+.B 7
+This request causes the child to resume execution.
+If the
+.I data\^
+argument is 0, all pending signals including the one that caused the child to
+stop are canceled before it resumes execution.
+If the
+.I data\^
+argument is a valid signal number, the child resumes execution as if it had
+incurred that signal and any other pending signals are canceled.
+The
+.I addr\^
+argument must be equal to 1 for this request.
+Upon successful completion, the  value of
+.I data\^
+is returned to the parent.
+This request will fail if
+.I data\^
+is not 0 or a valid signal number, in which case a value of \-1 is returned
+to the parent process and the parent's
+.I errno\^
+is set to
+.SM EIO\*S.
+.TP
+.B 8
+This request causes the child to terminate with the same consequences as
+.IR exit\^ (2).
+.TP
+.B 9
+This request sets the trace bit in the Processor Status Word of the child
+and then executes the same
+steps as listed above for request
+.BR 7 .
+The trace bit causes an interrupt upon completion of one machine instruction.
+This effectively allows single stepping of the child.
+.br
+Note: the trace bit remains set after an interrupt.
+.TP
+.B 10,11
+These requests are read/write processor registers.  For the 68010 and
+68020 the
+order is:
+.RS .3i
+.TP "\w'\f34, 5\f1\ \ 'u"
+\&
+0  \- D0
+.br
+1  \- D1
+.br
+2  \- D2
+.br
+3  \- D3
+.br
+4  \- D4
+.br
+5  \- D5
+.br
+6  \- D6
+.br
+7  \- D7
+.br
+8  \- A0
+.br
+9  \- A1
+.br
+10 \- A2
+.br
+11 \- A3
+.br
+12 \- A4
+.br
+13 \- A5
+.br
+14 \- A6
+.br
+15 \- SP (A7)
+.br
+16 \- PC
+.br
+17 \- PS
+.RE
+.PP
+To forestall possible fraud,
+.I ptrace\^
+inhibits the set-user-id facility
+on subsequent
+.IR exec\^ (2)
+calls.
+If a traced process calls
+.IR exec ,
+it will stop before executing the first instruction of the new image
+showing signal
+.SM
+.BR SIGTRAP .
+.SH GENERAL ERRORS
+.I ptrace\^
+will in general fail if one or more of the following are true:
+.RS .3i
+.PP
+.I request\^
+is an illegal number.
+.SM
+\%[EIO]
+.PP
+.I pid\^
+identifies a child that does not exist or has not executed a
+.I ptrace\^
+with request
+.BR 0 .
+.SM
+\%[ESRCH]
+.RE
+.SH SEE ALSO
+exec(2), signal(2), wait(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#26,D0
+.B movl	D2,save	| save D2 register
+.B clrl	_errno
+.B movl	request,A0
+.B movl	pid,D1
+.B movl	addr,A1
+.B movl	data,D2
+.B trap	#0
+.B movl	save,D2	| restore D2 register
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)ptrace.2	5.1 of 11/2/83

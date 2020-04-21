@@ -1,0 +1,122 @@
+'\"macro stdmacro
+.TH READ 2 
+.SH NAME
+read \- read from file
+.SH SYNOPSIS
+.B int read (fildes, buf, nbyte)
+.br
+.B int fildes;
+.br
+.B char \(**buf;
+.br
+.B unsigned nbyte;
+.SH DESCRIPTION
+.I Fildes\^
+is a
+file descriptor
+obtained from a
+.IR creat ,
+.IR open ,
+.IR dup ,
+.IR fcntl ,
+or
+.I pipe\^
+system call.
+.PP
+.I Read\^
+attempts to read
+.I nbyte\^
+bytes from the file associated with
+.I fildes\^
+into the buffer pointed to by
+.IR buf .
+.PP
+On devices capable of seeking,
+the
+.I read\^
+starts at a position in the file given by the file pointer
+associated with
+.IR fildes .
+Upon return from
+.IR read ,
+the file pointer is incremented by the number of bytes actually read.
+.PP
+Devices that are incapable of seeking always read from the current
+position.
+The value of a file pointer associated with such a file is undefined.
+.PP
+Upon successful completion,
+.I read\^
+returns the number of bytes actually read and placed in the buffer;
+this number may be less than
+.I nbyte\^
+if the file is associated with a communication line
+(see
+.IR ioctl\^ (2)
+and
+.IR termio\^ (7)),
+or if the number of bytes left in the file is less than
+.I nbyte\^
+bytes.
+A value of 0 is returned when an
+end-of-file has been reached.
+.PP
+When attempting to read from an empty pipe (or
+.SM FIFO\*S):
+.IP "" .3i
+If
+.SM O_NDELAY
+is set, the read will return a 0.
+.IP
+If
+.SM O_NDELAY
+is clear, the read will block until data is written to the file
+or the file is no longer open for writing.
+.PP
+When attempting to read a file associated with a tty that has no data
+currently available:
+.IP "" .3i
+If
+.SM O_NDELAY
+is set, the read will return a 0.
+.IP
+If
+.SM O_NDELAY
+is clear, the read will block until data becomes available.
+.PP
+.I Read\^
+will fail if one or more of the following are true:
+.IP "" .3i
+.I Fildes\^
+is not a valid file descriptor open for reading.
+.SM
+\%[EBADF]
+.IP
+.I Buf\^
+points outside the allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion a non-negative integer is returned
+indicating the number of bytes actually read.
+Otherwise, a \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+creat(2), dup(2), fcntl(2), ioctl(2), open(2), pipe(2), termio(7).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#3,D0
+.B movl	fildes,A0
+.B movl	buf,D1
+.B movl	nbytes,A1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.PP
+The number of bytes read is returned in 
+.BR D0 .
+.DT
+.\"	@(#)read.2	5.1 of 11/1/83

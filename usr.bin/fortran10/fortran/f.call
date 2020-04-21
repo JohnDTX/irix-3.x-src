@@ -1,0 +1,859 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.CALL.TEXT                              *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               18-Mar-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure ckstrparm{*var fattr: attr*};
+begin
+if fattr.treeptr <> nil
+then
+  if fattr.treeptr^.binop = 221 {FCONCAT}
+  then begin
+    fattr.treeptr := newunnode(217 {FCHTEMP},fattr.treeptr);
+    fattr.treeptr^.unsubop := fattr.atype.siz;
+    if fattr.atype.siz < 0 then error(248);
+    end;
+end; {ckstrparm}
+
+procedure fcall{*fpn: pn; callkind: idkind*};
+  var lpn: pn; gop,argop: integer; ltype: ftntype;
+
+  procedure newarg(var fpn: pn);
+    var lpn, lpn2: pn;
+  begin {newarg}
+  lpn := newbinnode(0,gattr.treeptr,nil);
+  if fpn = nil
+  then fpn := lpn
+  else begin
+    lpn2 := fpn;
+    while lpn2^.rightarg <> nil do
+      lpn2 := lpn2^.rightarg;
+    lpn2^.rightarg := lpn;
+    end;
+  end; {newarg}
+  
+  procedure calluser(fpn: pn);
+    var formals: pnlist; formal,actuals,lpn: pn; lop,lsubop,lstmtbufp: integer;
+        HollerithArg,NormalArg: Boolean; llabel: alfa6; lident: idstring;
+        llab: plabelrec;
+  begin
+  formals := fpn^.arglist; actuals := nil;
+  if token = LPARENSY
+  then
+    begin
+    HollerithArg := IsHollerith;
+    if HollerithArg then fscanhollerith else fscan;
+    while (token <> RPARENSY) and (token <> EOLNSY) do
+      begin
+      if formals = nil
+      then formal := nil
+      else formal := formals^.nrec;
+      lsubop := 0; NormalArg := TRUE;
+      if token = IDENTSY
+      then begin
+        lpn := lookupname(localtree,ident);
+        if lpn <> nil
+        then
+          if lpn^.nkind in [FUNCT,SUBR,EXTERN,INTRIN]
+          then begin
+            lstmtbufp := stmtbufp; lident := ident; fscan;
+            if (token = LPARENSY) or ((lpn^.nkind <> INTRIN) and lpn^.RtnLocal)
+            then begin
+              stmtbufp := lstmtbufp; ident := lident; token := IDENTSY;
+              end
+            else begin
+              gattr.treeptr := lpn; NormalArg := FALSE;
+              if lpn^.nkind = INTRIN
+              then begin
+                lop := 5;
+                if lpn^.ifunno = 0 then error(254);
+                end
+              else lop := 3;
+              end;
+            end;
+        end
+      else
+        if token = STARSY
+        then begin
+          PassLabels := TRUE; getlabel(llabel); lop := 4;
+          newn(gattr.treeptr,LABL,'LABELARG'{???llabel???});
+          NormalArg := FALSE;
+          gattr.treeptr^.labp := jumptolabel(llabel);
+          gattr.atype.typ := INTEGR;
+          llab := findlabel(llabel,EXECLAB); llab^.LabIsArg := TRUE;
+          fscan;
+          end;
+      if NormalArg
+      then begin
+        expression; needaddr(gattr.treeptr);
+        if HollerithArg
+        then begin 
+          if gattr.treeptr <> nil
+          then
+            if gattr.treeptr^.node <> CSTNODE then error(298);
+          if not CharEqu then error(299);
+          lop := 6;
+          end
+        else
+          if gattr.atype.typ = CHARACTER
+          then begin ckstrparm(gattr); lop := 1; end
+          else
+            if IsAddress(gattr.treeptr)
+            then lop := 0
+            else begin
+              if gattr.atype.typ = LOGICAL
+              then makeisize(gattr,deflsize)
+              else
+                if gattr.atype.typ = INTEGR
+                then makeisize(gattr,defisize);
+              lop := 2; lsubop := gattr.atype.siz;
+              end;
+        end;
+      if fpn^.NDefined
+      then
+        if formal = nil
+        then error(94)
+        else
+          if (gattr.atype.typ <> formal^.idtype.typ) and
+             (not HollerithArg)
+          then
+            if not ((lop = 3 {PROCPARM}) and
+                    (formal^.nkind in [SUBR,FUNCT,EXTERN]))
+            then
+              
+              { CHARACTER*-1 circumvents type checking }
+              
+              if (formal^.idtype.typ <> CHARACTER) or
+                 (formal^.idtype.siz <> -1)
+              then
+                if OnlyAnsi or ArgCheck
+                then error(95)
+                else warning(95);
+      newarg(actuals);
+      lpn := actuals;
+      while lpn^.rightarg <> nil do lpn := lpn^.rightarg;
+      lpn^.binop := lop; lpn^.binsubop := lsubop;
+      if formals <> nil then formals := formals^.next;
+      if token = COMMASY 
+      then begin
+        HollerithArg := IsHollerith;
+        if HollerithArg then fscanhollerith else fscan;
+        end
+      else if token <> RPARENSY then begin error(26); fscan; end;
+      end;
+    if token = RPARENSY then fscan else error(26);
+    end
+  else if callkind = FUNCT then error(169);
+  if (formals <> nil) and fpn^.NDefined then error(93);
+  if callkind = SUBR
+  then begin
+    new(newstmt,CALLST);
+    with newstmt^ do begin
+      nextstmt := nil; stmtop := CALLST;
+      procpn := fpn; parglist := actuals;
+      end;
+    end
+  else begin
+    gattr.atype := fpn^.idtype;
+    gattr.treeptr := newbinnode(176{USRFUNC},fpn,actuals);
+    if gattr.atype.typ = CHARACTER
+    then begin
+      gattr.treeptr := newunnode(213 {CHFRSLT},gattr.treeptr);
+      gattr.treeptr^.unsubop := gattr.atype.siz;
+      end;
+    end;
+  end; {calluser}
+  
+  
+  procedure typedarg(ftype: ftntype; AddrFlag: Boolean);
+  begin {typedarg}
+  expression;
+  if AddrFlag then needaddr(gattr.treeptr);
+  if gattr.atype.typ = CHARACTER then ckstrparm(gattr);
+  if gattr.atype.typ = INTEGR then makeisize(gattr,ftype.siz);
+  if (gattr.atype.typ <> ftype.typ) or
+     ((gattr.atype.siz <> ftype.siz) and (ftype.siz <> 0))
+  then error(87);
+  end; {typedarg}
+  
+  
+  procedure int4arg(fop: integer);
+  begin {int4arg}
+  typedarg(int4type,TRUE); gop := fop;
+  end; {int4arg}
+  
+  
+  procedure realarg(fop: integer);
+  begin {realarg}
+  typedarg(realtype,TRUE); gop := fop;
+  end; {realarg}
+  
+  
+  procedure doublearg(fop: integer);
+  begin {doublearg}
+  typedarg(doubletype,TRUE); gop := fop;
+  end; {doublearg}
+  
+  
+  procedure complexarg(fop: integer);
+  begin {complexarg}
+  typedarg(cmplxtype,TRUE); gop := fop;
+  end; {complexarg}
+  
+  
+  procedure ird(fop: integer; AddrFlag: Boolean);
+  begin {ird}
+  expression;
+  if AddrFlag then needaddr(gattr.treeptr);
+  if gattr.atype.typ = INTEGR 
+  then makeisize(gattr,4)
+  else
+    if gattr.atype.typ = REEL
+    then 
+      if gattr.atype.siz = 4 
+      then fop := fop + 1 
+      else fop := fop + 2
+    else error(87);
+  gop := fop;
+  end; {ird}
+  
+  procedure irdc(fop: integer);
+  begin {irdc}
+  expression; needaddr(gattr.treeptr);
+  if gattr.atype.typ = INTEGR 
+  then makeisize(gattr,4)
+  else
+    if gattr.atype.typ = REEL
+    then 
+      if gattr.atype.siz = 4 
+      then fop := fop + 1 
+      else fop := fop + 2
+    else
+      if gattr.atype.typ = COMPLEX 
+      then fop := fop + 3 
+      else error(87);
+  gop := fop;
+  end; {irdc}
+  
+  
+  procedure rd(fop: integer);
+  begin {rd}
+  expression; needaddr(gattr.treeptr);
+  if gattr.atype.typ = REEL
+  then begin
+    if gattr.atype.siz = 8 
+    then fop := fop + 1;
+    end
+  else error(87);
+  gop := fop;
+  end; {rd}
+  
+  
+  procedure rdc(fop: integer);
+  begin {rdc}
+  expression; needaddr(gattr.treeptr);
+  if gattr.atype.typ = REEL
+  then begin
+    if gattr.atype.siz = 8 
+    then fop := fop + 1;
+    end
+  else
+    if gattr.atype.typ = COMPLEX 
+    then fop := fop + 2 
+    else error(87);
+  gop := fop;
+  end; {rdc}
+  
+  
+  procedure ird2(fop: integer; AddrFlag: Boolean);
+    var llpn: pn;
+  begin {ird2}
+  expression;
+  if AddrFlag then needaddr(gattr.treeptr);
+  if gattr.atype.typ = INTEGR 
+  then makeisize(gattr,4)
+  else
+    if gattr.atype.typ = REEL
+    then 
+      if gattr.atype.siz = 4 
+      then fop := fop + 1
+      else fop := fop + 2
+    else error(87);
+  llpn := newbinnode(0,gattr.treeptr,nil);
+  if token = COMMASY 
+  then begin 
+    fscan; typedarg(gattr.atype,AddrFlag); newarg(llpn); 
+    end
+  else error(290);
+  gop := fop; gattr.treeptr := llpn;
+  end; {ird2}
+  
+  
+  procedure typeddoublearg(fop: integer; ftype: ftntype; AddrFlag: Boolean);
+    var llpn: pn;
+  begin
+  typedarg(ftype,AddrFlag); gop := fop;
+  llpn := newbinnode(0,gattr.treeptr,nil);
+  if token = COMMASY 
+  then begin fscan; typedarg(ftype,AddrFlag); newarg(llpn); end
+  else error(290);
+  gattr.treeptr := llpn;
+  end; {typeddoublearg}
+  
+  
+  procedure typedlist(fop: integer; ftype: ftntype);
+    var llpn: pn; count: integer;
+  begin 
+  count := 0; typedarg(ftype,TRUE);
+  while token = COMMASY do begin
+    llpn := nil; newarg(llpn); count := count + 1;
+    fscan; typedarg(ftype,TRUE); newarg(llpn);
+    gattr.treeptr := newbinnode(178 {STDFUNC},fpn,llpn);
+    gattr.treeptr^.binsubop := fop;
+    end;
+  if count = 0 then error(290);
+  gop := 1;
+  end; {typedlist}
+  
+  
+  procedure char2(fop: integer);
+    var llpn: pn;
+  begin
+  gop := fop; expression;
+  if gattr.atype.typ = CHARACTER
+  then ckstrparm(gattr)
+  else error(87);
+  llpn := newbinnode(gattr.atype.siz,gattr.treeptr,nil);
+  if token = COMMASY 
+  then begin 
+    fscan; expression;
+    if gattr.atype.typ = CHARACTER
+    then ckstrparm(gattr)
+    else error(87);
+    llpn^.rightarg := newbinnode(gattr.atype.siz,gattr.treeptr,nil);
+    end
+  else error(290);
+  gattr.treeptr := llpn; gattr.atype := log1type;
+  end; {char2}
+  
+  
+  { FORTRAN 77 Standard Intrinsic Functions }
+  
+  
+  { LEN }
+  
+  procedure flen;
+    var DoIt: Boolean; lpn: pn;
+  begin
+  expression; 
+  gop := 17 {LEN};
+  if gattr.atype.typ = CHARACTER
+  then begin
+    DoIt := TRUE;
+    if (gattr.treeptr^.node = UNNODE) and
+       (gattr.treeptr^.unop = 223 {MKFCH})
+    then begin
+      lpn := gattr.treeptr^.unarg;
+      if lpn^.node = IDENTNODE
+      then begin
+         if (lpn^.nkind = VARS) and not lpn^.Indirect
+         then begin
+           new(gattr.treeptr,CSTNODE);
+           with gattr.treeptr^ do begin
+             node := CSTNODE; csttype := int4type; cstvalu.ival := lpn^.size;
+             end;
+           gop := 1 {NOP}; DoIt := FALSE;
+           end;
+         end;
+      end;
+    if DoIt then ckstrparm(gattr);
+    end
+  else error(87);
+  end; {flen}
+  
+  
+  { ABS }
+  
+  procedure fabs;
+  begin
+  irdc(56);
+  if gattr.atype.typ = COMPLEX
+  then gattr.atype := realtype;
+  end; {fabs}
+  
+  
+  { CMPLX }
+  
+  procedure fcmplx;
+    var ltype: ftntype; ltree: pn;
+  begin
+  gop := 1 {NOP}; expression;
+  if gattr.atype.typ <> COMPLEX
+  then begin
+    ltype := gattr.atype;
+    if Numeric(gattr.atype.typ)
+    then makentype(gattr,realtype)
+    else error(249);
+    ltree := gattr.treeptr;
+    if token = COMMASY
+    then begin {Double argument}
+      fscan; expression;
+      if (ltype.typ <> gattr.atype.typ) or
+         (ltype.siz <> gattr.atype.siz)
+      then error(87)
+      else
+        if Numeric(gattr.atype.typ)
+        then makentype(gattr,realtype)
+        else error(249);
+      end
+    else begin
+      new(gattr.treeptr,CSTNODE);
+      with gattr.treeptr^ do begin
+        node := CSTNODE; csttype := realtype; cstvalu.rval := 0;
+        end;
+      end;
+    gattr.treeptr := newbinnode(208 {COMPLEX},gattr.treeptr,ltree);
+    gattr.treeptr^.binsubop := 0;    { L = Imag, R = Real }
+    end;
+  gattr.atype := cmplxtype;
+  end; {fcmplx}
+  
+  
+  { ATAN2 }
+  
+  procedure fatan2;
+    var llpn: pn;
+  begin {fatan2}
+  rd(76);
+  llpn := newbinnode(0,gattr.treeptr,nil);
+  if token = COMMASY 
+  then begin 
+    fscan; typedarg(gattr.atype,TRUE); newarg(llpn); 
+    end
+  else error(290);
+  gattr.treeptr := llpn;
+  end; {fatan2}
+  
+  
+  { MAX, MIN }
+  
+  procedure fmaxmin(fop: integer);
+    var llpn: pn; count: integer;
+  begin {fmaxmin}
+  count := 0; ird(fop,FALSE);
+  while token = COMMASY do begin
+    llpn := nil; newarg(llpn); count := count + 1;
+    fscan; typedarg(gattr.atype,FALSE); newarg(llpn);
+    gattr.treeptr := newbinnode(178 {STDFUNC},nil,llpn);
+    gattr.treeptr^.binsubop := gop;
+    end;
+  if count = 0 then error(290);
+  gop := 1;
+  end; {fmaxmin}
+  
+  
+  procedure twoints(fop,ffop: integer);
+    var llpn: pn; lattr: attr;
+  begin
+  expression; lattr := gattr; llpn := nil;
+  if lattr.atype.typ <> INTEGR 
+  then begin error(139); lattr.atype := int4type; end;
+  if token = COMMASY 
+  then begin 
+    fscan; expression;
+    if gattr.atype.typ <> INTEGR 
+    then begin error(139); gattr.atype := int4type; end;
+    maxnumtypes(lattr,gattr);
+    llpn := newbinnode(fop + lattr.atype.siz div 2,lattr.treeptr,
+                           newbinnode(0,gattr.treeptr,nil));
+    end
+  else error(290);
+  gattr.treeptr := llpn; gop := ffop;
+  end; {twoints}
+  
+  
+  procedure oneint(fop,ffop: integer);
+  begin
+  expression;
+  if gattr.atype.typ <> INTEGR 
+  then begin error(139); gattr.atype := int4type; end;
+  gattr.treeptr := newbinnode(fop + gattr.atype.siz div 2,gattr.treeptr,nil);
+  gop := ffop;
+  end; {oneint}
+  
+  
+begin {fcall}
+with fpn^ do
+     begin
+     if nkind = INTRIN
+     then begin
+          if token = LPARENSY then fscan else error(24);
+          case key of
+            0: { Misc.  } error(0);
+            
+            { Single argument, single return type intrinsics }
+            
+            1: { IFIX   } realarg(2);
+            2: { IDINT  } doublearg(3);
+            3: { INT    } irdc(1);
+            4: { FLOAT  } int4arg(5);
+            5: { SNGL   } doublearg(7);
+            6: { REAL   } irdc(5);
+            7: { DBLE   } irdc(9);
+            8: { ICHAR  } begin
+                          ltype.typ := CHARACTER; ltype.siz := 0;
+                          typedarg(ltype,TRUE); gop := 13;
+                          end;
+            9: { CHAR   } begin
+                          ltype.typ := INTEGR; ltype.siz := 1;
+                          typedarg(ltype,FALSE); gop := 14;
+                          argop := numcharcalls;
+                          numcharcalls := numcharcalls + 1;
+                          end;
+           10: { IDNINT } doublearg(16);
+           11: { NINT   } rd(15);
+           12: { LEN    } flen;
+           13: { AIMAG  } complexarg(18);
+           14: { CONJG  } complexarg(19);
+           
+           { Single argument, generic return type intrinsics }
+           
+           15: { AINT   } rd(21);
+           16: { DINT   } doublearg(22);
+           17: { ANINT  } rd(23);
+           18: { DNINT  } doublearg(24);
+           19: { LOG10  } rd(25);
+           20: { ALOG10 } realarg(25);
+           21: { DLOG10 } doublearg(26);
+           22: { TAN    } rd(27);
+           23: { DTAN   } doublearg(28);
+           24: { ASIN   } rd(29);
+           25: { DASIN  } doublearg(30);
+           26: { ACOS   } rd(31);
+           27: { DACOS  } doublearg(32);
+           28: { ATAN   } rd(33);
+           29: { DATAN  } doublearg(34);
+           30: { SINH   } rd(35);
+           31: { DSINH  } doublearg(36);
+           32: { COSH   } rd(37);
+           33: { DCOSH  } doublearg(38);
+           34: { TANH   } rd(39);
+           35: { DTANH  } doublearg(40);
+           
+           36: { SQRT   } rdc(41);
+           37: { DSQRT  } doublearg(42);
+           38: { CSQRT  } complexarg(43);
+           39: { EXP    } rdc(44);
+           40: { DEXP   } doublearg(45);
+           41: { CEXP   } complexarg(46);
+           42: { LOG    } rdc(47);
+           43: { ALOG   } realarg(47);
+           44: { DLOG   } doublearg(48);
+           45: { CLOG   } complexarg(49);
+           46: { SIN    } rdc(50);
+           47: { DSIN   } doublearg(51);
+           48: { CSIN   } complexarg(52);
+           49: { COS    } rdc(53);
+           50: { DCOS   } doublearg(54);
+           51: { CCOS   } complexarg(55);
+           
+           { Single argument, return type is exceptional in some way }
+           
+           52: { IABS   } int4arg(56);
+           53: { ABS    } fabs;
+           54: { DABS   } doublearg(58);
+           55: { CABS   } begin  complexarg(59); gattr.atype := realtype; end;
+           
+           { Multiple argument intrinsics }
+           
+           56: { CMPLX  } fcmplx;
+           57: { MOD    } ird2(66,FALSE);
+           58: { AMOD   } typeddoublearg(67,realtype,FALSE);
+           59: { DMOD   } typeddoublearg(68,doubletype,FALSE);
+           60: { ISIGN  } typeddoublearg(69,int4type,FALSE);
+           61: { SIGN   } ird2(69,FALSE);
+           62: { DSIGN  } typeddoublearg(71,doubletype,FALSE);
+           63: { IDIM   } typeddoublearg(72,int4type,FALSE);
+           64: { DIM    } ird2(72,FALSE);
+           65: { DDIM   } typeddoublearg(74,doubletype,FALSE);
+           66: { DPROD  } begin
+                          typeddoublearg(75,realtype,FALSE);
+                          gattr.atype.siz := 8;
+                          end;
+           67: { ATAN2  } fatan2;
+           68: { DATAN2 } typeddoublearg(77,doubletype,TRUE);
+           
+           69: { MAX    } fmaxmin(78);
+           75: { MIN    } fmaxmin(81);
+           70: { MAX0   } typedlist(78,int4type);
+           76: { MIN0   } typedlist(81,int4type);
+           71: { AMAX1  } typedlist(79,realtype);
+           77: { AMIN1  } typedlist(82,realtype);
+           72: { DMAX1  } typedlist(80,doubletype);
+           78: { DMIN1  } typedlist(83,doubletype);
+           73: { AMAX0  } begin
+                          typedlist(78,int4type); makentype(gattr,realtype);
+                          end;
+           79: { AMIN0  } begin
+                          typedlist(81,int4type); makentype(gattr,realtype);
+                          end;
+           74: { MAX1   } begin
+                          typedlist(79,realtype); makentype(gattr,int4type);
+                          end;
+           80: { MIN1   } begin
+                          typedlist(82,realtype); makentype(gattr,int4type);
+                          end;
+           
+           81: { INDEX  } begin char2(88); gattr.atype := int4type; end;
+           82: { LLT    } char2(89);
+           83: { LLE    } char2(91);
+           84: { LGT    } char2(90);
+           85: { LGE    } char2(92);
+           
+           { Misc. special functions }
+           
+           86: { PEEK   } int4arg(100);
+           87: { ISNUM  } rd(101);
+           88: { ISNAN  } rd(103);
+           89: { ISINF  } rd(105);
+           90: { IOR    } twoints(83,107);
+           91: { IAND   } twoints(80,108);
+           92: { INOT   } oneint(89,109);
+           93: { IEOR   } twoints(86,110);
+           94: { ISHFT  } typeddoublearg(111,int4type,FALSE);
+           95: {*ISHFTC } ;
+           96: {*IBITS  } ;
+           97: {*BTST   } ;
+           98: {*IBSET  } ;
+           99: {*IBCLR  } ;
+          end; {case}
+          if token = RPARENSY then fscan else error(26);
+          if (key >= 75) and (key <= 80) then gop := gop + 5;
+          if (key <= 14) or ((key >= 86) and (key <= 89))
+          then gattr.atype := fpn^.idtype;
+          if not (gop in [1,6,11,20])
+          then begin
+            if (key <= 55) or ((key >= 86) and (key <= 89))
+            then gattr.treeptr := newbinnode(argop,gattr.treeptr,nil);
+            gattr.treeptr := newbinnode(178 {STDFUNC},fpn,gattr.treeptr);
+            gattr.treeptr^.binsubop := gop;
+            end;
+          end
+     else begin
+          if (nkind = UNKN) and (unbounds = nil)
+          then begin
+               if Indirect
+               then lpn := nil
+               else lpn := lookupid(globaltree,fpn^.name);
+               if lpn = nil
+               then begin
+                    nkind := callkind; rtnno := -1; rtnlev := 2;
+                    arglist := nil; NDefined := FALSE;
+                    if not Indirect then makeglobal(fpn);
+                    { nkind = UNKN is never in globaltree }
+                    end
+               else { Already appears in globaltree }
+                    if (lpn^.nkind = SUBR) or (lpn^.nkind = FUNCT)
+                    then begin
+                         nkind := lpn^.nkind; rtnno := lpn^.rtnno;
+                         rtnlev := 2; NDefined := lpn^.NDefined;
+                         arglist := lpn^.arglist;
+                         end
+                    else begin
+                         error(34);
+                         nkind := callkind; rtnno := -1; rtnlev := 2;
+                         arglist := nil; NDefined := FALSE;
+                         end;
+               RtnLocal := FALSE;
+               end;
+          if nkind = EXTERN
+          then begin
+               nkind := callkind;
+               if not Indirect
+               then makeglobal(fpn);  { nkind = EXTERN is never in globaltree }
+               end;
+          if nkind <> callkind then error(88);
+          if RtnLocal then error(251);
+          calluser(fpn);
+          end;
+     end;
+end; {fcall}
+
+procedure variable{fpn: pn};
+  var lattr: attr; lpb: pbound; lpn,lpn2,arrpn,lastpn: pn;
+      ExitFlag,SubStrFlag,FirstTime: Boolean;
+  
+  procedure vsubstring(loval: pn; fattr: attr);
+    var lpn: pn; lsize: integer;
+  begin
+  SubStrFlag := TRUE;
+  if loval = nil
+  then begin
+    new(loval,CSTNODE);
+    with loval^ do begin
+      node := CSTNODE; cstvalu.ival := 1;
+      csttype.typ := INTEGR; csttype.siz := 2;
+      end;
+    end;
+  if fattr.atype.typ = CHARACTER
+  then begin
+    if fattr.treeptr <> nil
+    then
+      if fattr.treeptr^.node = IDENTNODE
+      then begin
+        if fattr.treeptr^.nkind = VARS
+        then begin
+          if fattr.treeptr^.bounds <> nil then error(240);
+          end
+        else
+          if fattr.treeptr^.nkind <> FUNCT then error(240);
+        end
+      else
+        if fattr.treeptr^.node = TRINODE
+        then
+          if fattr.treeptr^.triop <> 214 {FINDEX}
+          then error(240);
+    fattr.treeptr := newunnode(223 {MKFCH},fattr.treeptr);
+    lsize := fattr.atype.siz; fattr.treeptr^.unsubop := lsize;
+    end
+  else error(240);
+  fscan; {skip ':'}
+  if token <> RPARENSY
+  then begin
+    expression;
+    if gattr.atype.typ <> INTEGR then error(229);
+    makeisize(gattr,2);
+    end
+  else gattr.treeptr := newunnode(23 {NIL},nil);
+  if token = RPARENSY then fscan else error(26);
+  new(lpn,TRINODE);
+  with lpn^ do begin
+    node := TRINODE; triop := 222 {SUBSTR};
+    tri1 := fattr.treeptr; tri2 := loval; tri3 := gattr.treeptr;
+    end;
+  gattr.treeptr := lpn; gattr.atype.typ := CHARACTER;
+  gattr.atype.siz := lsize;
+  end; {vsubstring}
+  
+begin {variable}
+SubStrFlag := FALSE;
+with fpn^, gattr do begin
+  if nkind = UNKN then declunkn(fpn);
+  atype := idtype; treeptr := fpn;
+  if fpn^.nkind = FUNCT
+  then begin
+    if not fpn^.RtnLocal then error(37);
+    end
+  else
+    if fpn^.nkind = VARS
+    then begin
+      refcount := refcount + 1;
+      if incommon <> nil
+      then begin
+        if incommon^.nkind = COMMON
+        then incommon^.refcount := incommon^.refcount + 1;
+        end;
+      if level = STFUNVAR {Stmt funct} then needaddr(fpn);
+      end
+    else error(37);
+  end;
+if token = LPARENSY
+then begin
+  if fpn^.nkind = VARS then lpb := fpn^.bounds else lpb := nil;
+  lattr := gattr; fscan;
+  if token = COLONSY then vsubstring(nil,lattr)
+  else begin
+    expression;
+    if gattr.atype.typ <> INTEGR then error(229);
+    if token = COLONSY
+    then begin
+      makeisize(gattr,2); vsubstring(gattr.treeptr,lattr);
+      end
+    else begin
+      if (CHIP = M68000) or (CHIP = M68020)
+      then makeisize(gattr,4)
+      else begin
+        minsize2(gattr); FirstTime := TRUE;
+        new(arrpn,INDEXNODE);
+        with arrpn^ do begin
+          node := INDEXNODE; indexop := 9{INDEX};
+          inxexpr := nil; inxaddr := lattr.treeptr;
+          end;
+        end;
+      ExitFlag := FALSE;
+      repeat
+        if (CHIP = M68000) or (CHIP = M68020)
+        then begin
+          new(lpn,TRINODE);
+          with lpn^ do begin
+            node := TRINODE; triop := 214 {FINDEX};
+            tript := lpb; tri1 := lattr.treeptr; tri2 := gattr.treeptr;
+            end;
+          lattr.treeptr := lpn;
+          end
+        else begin
+          new(lpn,INDEXNODE);
+          with lpn^ do begin
+            node := INDEXNODE; indexop := 11{ADJINDX}; InxCkBnd := FALSE;
+            inxexpsz := gattr.atype.siz; inxbnds := lpb;
+            inxexpr := gattr.treeptr;
+            end;
+          if FirstTime
+          then begin arrpn^.inxexpr := lpn; lastpn := arrpn; end
+          else begin
+            new(lpn2,INDEXNODE);
+            with lpn2^ do begin
+              node := INDEXNODE; indexop := 10{SCALE}; inxexpr := lpn;
+              inxaddr := lastpn^.inxexpr; lastpn^.inxexpr := lpn2;
+              end;
+            lastpn := lpn2;
+            end;
+          FirstTime := FALSE;
+          end;
+        if lpb <> nil
+        then lpb := lpb^.next
+        else error(56);
+        if token = COMMASY
+        then begin
+          fscan; expression; makeisize(gattr,4);
+          if gattr.atype.typ <> INTEGR then error(229);
+          end
+        else ExitFlag := TRUE;
+      until ExitFlag;
+      if (CHIP <> M68000) and (CHIP <> M68020)
+      then lattr.treeptr := arrpn;
+      if token = RPARENSY then fscan else error(26);
+      if lpb <> nil then error(57);
+      gattr := lattr;
+      if token = LPARENSY
+      then begin
+        fscan;
+        if token = COLONSY
+        then vsubstring(nil,lattr)
+        else begin
+          expression;
+          if gattr.atype.typ <> INTEGR then error(229);
+          makeisize(gattr,2);
+          if token = COLONSY
+          then vsubstring(gattr.treeptr,lattr)
+          else error(239);
+          end;
+        end;
+      end;
+    end;
+  end; { token = LPARENSY }
+if (gattr.atype.typ = CHARACTER) and not SubStrFlag
+then begin
+  gattr.treeptr := newunnode(223 {MKFCH},gattr.treeptr);
+  gattr.treeptr^.unsubop := gattr.atype.siz;
+  end;
+end; {variable}
+
+
+                                                                                                                                       

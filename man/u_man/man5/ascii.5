@@ -1,0 +1,67 @@
+'\"macro stdmacro
+.\".if t .ds ' \s+4\v@.333m@\'\v@-.333m@\s-4
+.if t .ds ' '
+.if n .ds ' '
+.\".if t .ds ` \s+4\v@.333m@\`\v@-.333m@\s-4
+.if t .ds ` `
+.if n .ds ` `
+.TH ASCII 5
+.SH NAME
+ascii \- map of \s-1ASCII\s+1 character set
+.SH SYNOPSIS
+.B cat /usr/pub/ascii
+.SH DESCRIPTION
+.I Ascii\^
+is a map of the
+.SM ASCII
+character set,
+giving both octal and hexadecimal equivalents of each character,
+to be printed as needed.
+It contains:
+.PP
+.nf
+.ps -1
+.if n .in 0
+.if n .ta 9n 18n 27n 36n 45n 54n 63n 72n
+.if \n()s .ta 9.5n 19n 28.5n 38n 47.5n 57n 66.5n 76n
+.if \n()t .ta 9.5n 19n 28.5n 38n 47.5n 57n 66.5n 76n
+|000 nul	|001 soh	|002 stx	|003 etx	|004 eot	|005 enq	|006 ack	|007 bel	|
+|010 bs	|011 ht	|012 nl	|013 vt	|014 np	|015 cr	|016 so	|017 si	|
+|020 dle	|021 dc1	|022 dc2	|023 dc3	|024 dc4	|025 nak	|026 syn	|027 etb	|
+|030 can	|031 e\h@.1m@m	|032 sub	|033 esc	|034 fs	|035 gs	|036 rs	|037 us	|
+|040 sp	|041 !	|042 "	|043 #	|044 $	|045 %	|046 &	|047 \*'	|
+|050 (	|051 )	|052 *	|053 +	|054 ,	|055 \-	|056 \f3.\fP	|057 /	|
+|060 0	|061 1	|062 2	|063 3	|064 4	|065 5	|066 6	|067 7	|
+|070 8	|071 9	|072 :	|073 ;	|074 <	|075 =	|076 >	|077 ?	|
+|100 @	|101 A	|102 B	|103 C	|104 D	|105 E	|106 F	|107 G	|
+|110 H	|111 I	|112 J	|113 K	|114 L	|115 M	|116 N	|117 O	|
+|120 P	|121 Q	|122 R	|123 S	|124 T	|125 U	|126 V	|127 W	|
+|130 X	|131 Y	|132 Z	|133 [	|134 \e	|135 ]	|136 ^	|137 _	|
+|140 \*`	|141 a	|142 b	|143 c	|144 d	|145 e	|146 f	|147 g	|
+|150 h	|151 i	|152 j	|153 k	|154 l	|155 m	|156 n	|157 o	|
+|160 p	|161 q	|162 r	|163 s	|164 t	|165 u	|166 v	|167 w	|
+|170 x	|171 y	|172 z	|173 {	|174 |	|175 }	|176 ~	|177 del	|
+.sp 1v
+|\000 nul	|\001 soh	|\002 stx	|\003 etx	|\004 eot	|\005 enq	|\006 ack	|\007 bel	|
+|\008 bs	|\009 ht	|\00a nl	|\00b vt	|\00c np	|\00d cr	|\00e so	|\00f si	|
+|\010 dle	|\011 dc1	|\012 dc2	|\013 dc3	|\014 dc4	|\015 nak	|\016 syn	|\017 etb	|
+|\018 can	|\019 e\h@.1m@m	|\01a sub	|\01b esc	|\01c fs	|\01d gs	|\01e rs	|\01f us	|
+|\020 sp	|\021 !	|\022 "	|\023 #	|\024 $	|\025 %	|\026 &	|\027 \*'	|
+|\028 (	|\029 )	|\02a *	|\02b +	|\02c ,	|\02d \-	|\02e \f3.\fP	|\02f /	|
+|\030 0	|\031 1	|\032 2	|\033 3	|\034 4	|\035 5	|\036 6	|\037 7	|
+|\038 8	|\039 9	|\03a :	|\03b ;	|\03c <	|\03d =	|\03e >	|\03f ?	|
+|\040 @	|\041 A	|\042 B	|\043 C	|\044 D	|\045 E	|\046 F	|\047 G	|
+|\048 H	|\049 I	|\04a J	|\04b K	|\04c L	|\04d M	|\04e N	|\04f O	|
+|\050 P	|\051 Q	|\052 R	|\053 S	|\054 T	|\055 U	|\056 V	|\057 W	|
+|\058 X	|\059 Y	|\05a Z	|\05b [	|\05c \e	|\05d ]	|\05e ^	|\05f _	|
+|\060 \*`	|\061 a	|\062 b	|\063 c	|\064 d	|\065 e	|\066 f	|\067 g	|
+|\068 h	|\069 i	|\06a j	|\06b k	|\06c l	|\06d m	|\06e n	|\06f o	|
+|\070 p	|\071 q	|\072 r	|\073 s	|\074 t	|\075 u	|\076 v	|\077 w	|
+|\078 x	|\079 y	|\07a z	|\07b {	|\07c |	|\07d }	|\07e ~	|\07f del	|
+.ps
+.DT
+.if t .cs 1
+.fi
+.SH FILES
+/usr/pub/ascii
+.\"	@(#)ascii.5	5.1 of 10/15/83

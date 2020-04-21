@@ -1,0 +1,67 @@
+.TH polf  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I polf
+- draw a filled convex polygon on the screen
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "polf(n, parray) "
+.B "long n; "
+.B "Coord parray[][3];"
+.IP 
+.B "polfi(n, parray) "
+.B "long n; "
+.B "Icoord parray[][3];"
+.IP 
+.B "polf2(n, parray) "
+.B "long n; "
+.B "Coord parray[][2];"
+.IP 
+.B "polf2i(n, parray) "
+.B "long n; "
+.B "Icoord parray[][2];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine polf(n, parray)"
+.B "integer n"
+.B "real parray(3,n)"
+.IP 
+.B "subroutine polfi(n, parray)"
+.B "integer n"
+.B "integer parray(3,n)"
+.IP 
+.B "subroutine polf2(n, parray)"
+.B "integer n"
+.B "real parray(2,n)"
+.IP 
+.B "subroutine polf2i(n, parray)"
+.B "integer n"
+.B "integer parray(2,n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure polf(n: integer; var parray: Coord3array);"
+.IP 
+.B "procedure polfi(n: integer; var parray: Icoord3array);"
+.IP 
+.B "procedure polf2(n: integer; var parray: Coord2array);"
+.IP 
+.B "procedure polf2i(n: integer; var parray: Icoord2array);"
+.sp
+.SH DESCRIPTION
+.I Polf
+fills polygonal areas using the current
+texture pattern, color, and writemask.  \f2Polf\f1 takes two arguments:  an 
+array of points and the number of points
+in that array.  Polygons are represented
+as arrays of points.   All polygons described must be convex.  
+No errors are reported if concave polygons are specified; the
+system does not check for them.  However, they produce unpredictable results.
+The first and last points are automatically connected
+to close a polygon.  The points can be expressed as integers or 
+real numbers, in 2D or 3D space.
+Two-dimensional polygons are drawn with \f3z\f1=0.
+.SH "SEE ALSO"
+.I poly, rect, rectf

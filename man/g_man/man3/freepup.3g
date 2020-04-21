@@ -1,0 +1,33 @@
+.TH freepup 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B freepup 
+\- returns a menu and its data structures to the system
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "freepup(pup)"
+.B "long pup;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine freepu(pup)"
+.B "integer*4 pup"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure freepup(pup: longint);"
+.SH DESCRIPTION
+.B freepup
+returns the data structures associated with a pop-up menu to the
+system, making more memory available.
+.SH "SEE ALSO"
+addtopup, defpup, dopup, newpup
+.sp
+\f2Using mex\fP, Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine
+available only in immediate mode under the window manager. 

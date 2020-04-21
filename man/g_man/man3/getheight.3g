@@ -1,0 +1,36 @@
+.TH getheight 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getheight
+\- returns the maximum character height in the current raster font
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getheight()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function gethei()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getheight: longint;"
+.SH DESCRIPTION
+.B getheight
+returns the maximum height 
+of the characters, which \f3defrasterfont\f1 defines, 
+in the current raster font,
+including ascenders (in characters such as t and h) and descenders
+(such as y and p).  The height is usually the number of pixels
+between the top of the tallest ascender and the bottom of the
+lowest descender.
+.SH "SEE ALSO"
+getdescender, getfont, strwidth
+.sp
+.I Programming Guide, 
+Section 5.3, Fonts
+.SH NOTE
+This routine is available only in immediate mode.

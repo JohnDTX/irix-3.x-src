@@ -1,0 +1,1419 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: DBG.LOAD.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1983, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                           All Rights Reserved.                23-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+function load(fname: string63; finaddr,foutaddr: longint;
+              fargc: integer; fargv: longint): integer;
+  label 9;
+  type quickrec = record head: longint;
+                         start: longint;
+                         dsize: longint;
+                         code: array[0..30000] of byte;
+                  end;
+       jtheadrec = record head: longint;
+                          jtaddr: longint;
+                          jtsize: longint;
+                          dsize: longint;
+                          numfdata: integer;
+                          z1,z2,z3: integer;
+                          fdsizes: array[0..1000] of longint;
+                   end;
+       jtsegrec = record nsegs: integer;
+                         aseg: array[1..100] of
+                                 record firstdesc: longint;
+                                        fileaddr: longint;
+                                        segsize: longint;
+                                        memaddr: longint;
+                                        s1,s2,s3,s4: longint;
+                                 end;
+                  end;
+       jtentryrec = record offinseg: longint;
+                           inst: integer;
+                           actaddr: longint;
+                    end;
+  var CloseFlag,QuickLoad: Boolean;
+      ff: file;
+      pb: ^byte;
+      firstbyte: byte;
+      i,blocks: integer;
+      size,p1: longint;
+      pquick: ^quickrec;
+      pjthead: ^jtheadrec;
+      pjtseg: ^jtsegrec;
+      pjtentry: ^jtentryrec;
+      buff: packed array[0..511] of 0..255;
+      blockno,byteno: integer;
+      
+  procedure seekf(l: longint);
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       byteno := l mod 512; blockno := l div 512;
+       if blockread(ff,buff,1,blockno) <> 1
+       then begin load := 2; { Can't read } goto 9; end;
+       end;
+  end; {seekf}
+  
+  function nextfbyte: integer;
+    var i: integer;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       if byteno >= 512
+       then begin
+            byteno := 0; blockno := blockno + 1;
+            if blockread(ff,buff,1,blockno) <> 1
+            then begin load := 2; { Can't read } goto 9; end;
+            end;
+       nextfbyte := buff[byteno];
+       byteno := byteno + 1;
+       end;
+  end; {nextfbyte}
+  
+  function nextfword: integer;
+    var c: array[0..1] of -128..127; i: integer;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       c[0] := nextfbyte; c[1] := nextfbyte;
+       moveleft(c,i,2); nextfword := i;
+       end;
+  end; {nextfword}
+  
+  function next3fbytes: longint;
+    var c: array[0..3] of -128..127; l: longint;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       c[0] := 0; c[1] := nextfbyte; 
+       c[2] := nextfbyte; c[3] := nextfbyte;
+       moveleft(c,l,4); next3fbytes := l;
+       end;
+  end; {next3fbytes}
+  
+  function nextflong: longint;
+    var c: array[0..3] of -128..127; l: longint;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       c[0] := nextfbyte; c[1] := nextfbyte; 
+       c[2] := nextfbyte; c[3] := nextfbyte;
+       moveleft(c,l,4); nextflong := l;
+       end;
+  end; {nextflong}
+  
+  procedure skipf(fsize: longint);
+    var lbyteno: longint;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       lbyteno := byteno + fsize;
+       if lbyteno > 511
+       then seekf(lbyteno + ord4(blockno)*512)
+       else byteno := lbyteno;
+       end;
+  end; {skipf}
+  
+  procedure loadseg(fileaddr,memaddr,segsize: longint);
+    var i,j: integer; size,offset,l: longint;
+        pb: pbyte; pl: ^longint;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       seekf(fileaddr); i := nextfbyte;
+       while i <> $81 {ENDBLOCK} do begin
+             size := next3fbytes;
+             case i of
+                  $80, { MODULEBLOCK }
+                  $82, { ENTRYBLOCK }
+                  $83, { EXTERNBLOCK }
+                  $84: { STARTBLOCK }
+                       begin
+                       skipf(size - 4);
+                       end;
+                  $85: { CODEBLOCK }
+                       begin
+                       j := nextfbyte;
+                       offset := memaddr + next3fbytes;
+                       for l := 1 to size - 8 do begin
+                           pb := pointer(offset);
+                           pb^ := nextfbyte;
+                           offset := offset + 1;
+                           end;
+                       end;
+                  $93: { CODERELDATA }
+                       begin
+                       j := nextfword;
+                       if j > numdatas
+                       then begin load := 994; goto 9; end;
+                       for i := 1 to (size - 6) div 4 do begin
+                           l := nextflong;
+                           pl := pointer(memaddr + l);
+                           pl^ := pl^ + data^[j-1].address;
+                           end;
+                       end;
+             otherwise: begin
+                        writeln('*** Bad Block ',i:2 hex);
+                        load := 995; goto 9;
+                        end;
+             end; {case}
+             i := nextfbyte;
+             end;
+       end;
+  end; {loadseg}
+  
+  procedure datainitrel(fileaddr,jtaddr: longint);
+    var i,datano,refno: integer; size,offset,l,jtoff: longint;
+        pb: pbyte; pl: ^longint;
+  begin
+  if ENVIRONMENT = MERLIN
+  then begin
+       seekf(fileaddr);
+       i := nextfbyte;
+       
+       { Data Initialization }
+       
+       while i = $94 do begin
+             size := next3fbytes;
+             datano := nextfword;
+             offset := nextflong;
+             pb := pointer(data^[datano - 1].address + offset);
+             for l := 11 to size do begin
+                 pb^ := nextfbyte;
+                 pb := pointer(ord(pb) + 1);
+                 end;
+             if odd(size) then i := nextfbyte;
+             i := nextfbyte;
+             end;
+       
+       { Data Reference Data }
+       
+       while i = $95 do begin
+             size := next3fbytes;
+             datano := nextfword;
+             offset := nextflong;
+             refno := nextfword;
+             pl := pointer(data^[datano - 1].address + offset);
+             pl^ := pl^ + data^[refno - 1].address;
+             i := nextfbyte;
+             end;
+       
+       { Data Reference Code }
+       
+       while i = $97 do begin
+             size := next3fbytes;
+             datano := nextfword;
+             offset := nextflong;
+             jtoff := nextflong;
+             pl := pointer(data^[datano - 1].address + offset);
+             pl^ := jtaddr + jtoff;
+             i := nextfbyte;
+             end;
+       end;
+  end; {datainitrel}
+  
+begin {load}
+if ENVIRONMENT = MERLIN
+then begin
+     CloseFlag := FALSE; load := 0; prog.state := NONE;
+     reset(ff,fname);
+     if ioresult = 0
+     then begin
+          CloseFlag := TRUE;
+          if hicmark - locmark < 512
+          then begin load := 1; { Won't fit } goto 9; end;
+          pb := pointer(locmark);
+          if blockread(ff,pb^,1,0) <> 1
+          then begin load := 2; { Can't read } goto 9; end;
+          firstbyte := pb^;
+          if (firstbyte = -114) or (firstbyte = -113)
+          then begin
+               QuickLoad := firstbyte = -114;
+               for i := 0 to 7 do begin prog.a[i] := 0; prog.d[i] := 0; end;
+               prog.a[7] := hidmark + 8 - sizeof(a5rec);
+               prog.sr := 0;
+               
+               { Read first record:                         }
+               { QuickLoad = whole program, else Jump Table }
+               
+               pquick := pointer(locmark);
+               size := pquick^.head and $00FFFFFF;
+               if size > (hicmark - locmark) - 1024
+               then begin load := 1; { Won't fit } goto 9; end;
+               blocks := (size + 511) div 512;
+               if blockread(ff,pb^,blocks,0) <> blocks
+               then begin load := 2; { Can't read } goto 9; end;
+               if QuickLoad
+               then begin
+                    prog.jt := 0;
+                    prog.loadaddr := ord(@pquick^.code);
+                    prog.pc := prog.loadaddr + pquick^.start;
+                    prog.initsp := pointer(prog.a[7]);
+                    with prog.initsp^ do begin
+                         fstdin := finaddr; fstdout := foutaddr;
+                         ffargv := fargv; ffargc := fargc; 
+                         fstderr := foutaddr;
+                         end;
+                    if numsegs <> 1 then begin load := 999; goto 9; end;
+                    if size - 12 <> seg^[0].size
+                    then begin load := 996; goto 9; end;
+                    seg^[0].address := prog.loadaddr;
+                    prog.state := LOADED;
+                    write('Loaded.');
+                    end
+               else begin { Not QuickLoad }
+                    pjthead := pointer(locmark);
+                    pjtseg := @pjthead^.fdsizes[pjthead^.numfdata];
+                    if numsegs <> pjtseg^.nsegs
+                    then begin load := 999; goto 9; end;
+                    if numdatas <> pjthead^.numfdata
+                    then begin load := 998; goto 9; end;
+                    locmark := locmark + size;
+                    
+                    { Allocate Data Areas }
+                    
+                    database := lodmark;
+                    for i := numdatas - 1 downto 0 do begin
+                        data^[i].address := lodmark;
+                        lodmark := lodmark + data^[i].size;
+                        if odd(lodmark) then lodmark := lodmark + 1;
+                        if data^[i].size <> pjthead^.fdsizes[numdatas - i - 1]
+                        then begin
+                             writeln('*** Data area #',i,' ''',data^[i].name,
+                                ''' is size $',data^[i].size hex,
+                                ' but should be $',
+                                pjthead^.fdsizes[numdatas - i - 1] hex);
+                             load := 997; goto 9;
+                             end;
+                        end;
+                    pb := pointer(lodmark); release(pb);
+                    
+                    { Data Initialization and Relocation }
+                    
+                    datainitrel(size,ord(pjtseg));
+                    
+                    { Load all segments }
+                    
+                    for i := 1 to numsegs do
+                        with pjtseg^.aseg[i] do begin
+                             if segsize <> seg^[i - 1].size
+                             then begin load := 996; goto 9; end;
+                             if segsize + locmark > hicmark - 2048
+                             then begin load := 1; { Won't fit } goto 9; end;
+                             memaddr := locmark;
+                             seg^[i - 1].address := locmark;
+                             loadseg(fileaddr,locmark,segsize);
+                             p1 := firstdesc;
+                             firstdesc := firstdesc +
+                                  (ord(pjtseg) - pjthead^.jtaddr);
+                             while p1 < pjtseg^.aseg[i+1].firstdesc do begin
+                                   pjtentry :=
+                                        pointer(p1 - pjthead^.jtaddr + 
+                                                   ord(pjtseg));
+                                   pjtentry^.inst := $4ef9; {JMP relocsbrels.L}
+                                   pjtentry^.actaddr := 
+                                     locmark+pjtentry^.offinseg;
+                                   p1 := p1 + 10;
+                                   end;
+                             locmark := locmark + segsize;
+                             end;
+                    prog.jt := ord(pjtseg);
+                    prog.a[4] := prog.jt;
+                    prog.loadaddr := prog.jt;
+                    prog.pc := pjtseg^.aseg[1].firstdesc + 4;
+                    prog.initsp := pointer(prog.a[7]);
+                    with prog.initsp^ do begin
+                         fstdin := finaddr; fstdout := foutaddr;
+                         ffargv := fargv; ffargc := fargc; 
+                         fstderr := foutaddr;
+                         end;
+                    prog.state := LOADED;
+                    { --- Don't forget RELOCATION --- }
+                    end;
+               end
+          else if firstbyte = -128
+               then load := 4
+               else load := 3;
+          writeln;
+          end
+     else load := 5;
+     9: ;
+     if CloseFlag then close(ff);
+     end;
+end; {load}
+
+procedure loadadventure;
+  const LOBOUND = $1A000;
+  var ff: file; buff: packed array[0..511] of 0..255; byteno, blockno: integer;
+      proglomark, proghimark, transferaddress: longint;
+      LoadingDone: Boolean; nextmark,i,count: integer; targetaddress: ^byte;
+      lintegerp: ^integer; llongintp: ^longint;
+  
+  function nextfbyte: integer;
+    var i: integer;
+  begin
+  if ENVIRONMENT = ADVENTURE
+  then begin
+       if byteno >= 512
+       then begin
+            blockno := blockno + 1; byteno := 0;
+            if blockread(ff,buff,1) <> 1 then fillchar(buff,512,chr(0));
+            end;
+       nextfbyte := buff[byteno];
+       byteno := byteno + 1;
+       end;
+  end; {nextfbyte}
+  
+  function nextflong: longint;
+    var c: array[0..3] of -128..127; l: longint;
+  begin
+  if ENVIRONMENT = ADVENTURE
+  then begin
+       c[0] := nextfbyte; c[1] := nextfbyte; 
+       c[2] := nextfbyte; c[3] := nextfbyte;
+       moveleft(c,l,4); nextflong := l;
+       end;
+  end; {nextflong}
+  
+begin {loadadventure}
+if ENVIRONMENT = ADVENTURE
+then begin
+     prog.state := NONE;
+     reset(ff,pfname);
+     if ioresult <> 0
+     then begin
+          pfname := concat(pfname,'.bin');
+          reset(ff,pfname);
+          end;
+     if ioresult = 0
+     then begin
+          if DebugFlag then writeln;
+          proglomark := $7FFFFFFE; {Very Big}
+          proghimark := $80000000; {Very Small}
+          transferaddress := -1; {Not set}
+          blockno := -1; byteno := 32767; {Force initial block read}
+          LoadingDone := FALSE;
+          repeat
+                 nextmark := nextfbyte;
+                 case nextmark of
+                    0: LoadingDone := TRUE;
+                    2: begin {memory data mark}
+                       targetaddress := pointer(nextflong);
+                       count := nextfbyte;
+                       if DebugFlag 
+                       then writeln('Memory data mark=',
+                                    ord(targetaddress):6 hex,
+                                    ' Count=',count);
+                       if (ord(targetaddress) - LOBOUND) < 0
+                       then begin
+                         writeln('*** Must not debug programs located below ',
+                                 LOBOUND:6 hex,' ***');
+                         halt(ERRHALT);
+                         end;
+                       if (ord(targetaddress) + count) > proghimark
+                       then proghimark := ord(targetaddress) + count;
+                       if ord(targetaddress) < proglomark
+                       then proglomark := ord(targetaddress);
+                       for i := 1 to count do begin
+                         targetaddress^ := nextfbyte;
+                         targetaddress := pointer(ord(targetaddress) + 1);
+                         end;
+                       end;
+                   22: begin {transfer address mark}
+                       transferaddress := nextflong;
+                       if DebugFlag
+                       then writeln('Transfer address mark=',transferaddress);
+                       end;
+            otherwise: begin
+                       writeln('*** Unexpected data in .BIN file ***');
+                       writeln('Value=',nextmark,
+                               ' Block=',blockno,
+                               ' Byte=',byteno);
+                       halt(ERRHALT);
+                       end;
+                 end; {case}
+          until LoadingDone;
+          if DebugFlag
+          then begin
+               writeln('Proglomark=',proglomark:6 hex);
+               writeln('Proghimark=',proghimark:6 hex);
+               end;
+          if odd(proglomark)
+          then begin
+            writeln('*** Can''t debug program loaded on odd address ***');
+            halt(ERRHALT);
+            end;
+          if proglomark <> transferaddress
+          then begin
+            writeln('*** Can''t debug program with non zero entry address ***');
+            halt(ERRHALT);
+            end;
+          
+          { Entry code -                                       }
+          { _main: Load A4 with with address of the jump table }
+          {        MOVE.L #0,D7                                }
+          {        MOVE.L #breakaddr,D6   (ADVENTURE only)     }
+          {        Jump to $START                              }
+          {        Dbgtable (28 bytes):                        }
+          {           6 byte absolute jump                     }
+          {           4 byte text relative zero                }
+          {           4 byte data relative zero                }
+          {           4 byte bss  relative zero                }
+          {           2 byte flag, zero unless debugging       }
+          {           4 byte timedate simulator                }
+          {           4 byte area reserved for future use      }
+          
+          moveleft(proglomark,lintegerp,4);
+          if lintegerp^ <> 18937 {LEA jumptable,A4}
+          then begin
+            writeln('*** Unexpected data at lowest program address ***');
+            halt(ERRHALT);
+            end;
+          llongintp := pointer(ord(lintegerp) + 26);
+          llongintp^ := ord(@%_break);
+          llongintp := pointer(ord(llongintp) + 4);
+          textareabase := llongintp^;
+          llongintp := pointer(ord(llongintp) + 4);
+          dataareabase := llongintp^;
+          llongintp := pointer(ord(llongintp) + 4);
+          bssareabase := llongintp^;
+          lintegerp := pointer(ord(llongintp) + 4);
+          lintegerp^ := 1; {Tell program it is being debugged}
+          llongintp := pointer(ord(lintegerp) + 2);
+          timedate := llongintp^; {Text+Data+BSS size}
+          with prog do begin
+            for i := 0 to 7 do 
+              begin d[i] := 0; a[i] := 0; end;
+            pc := proglomark; sr := 0; jt := proglomark + 24;
+            loadaddr := proglomark; state := LOADED;
+            initsp := nil; {Don't know it yet}
+            a[1] := ord(@input);
+            a[2] := ord(@output);
+            a[3] := ord(@stderr);
+            a[4] := proglomark + 24; {Needed for initial trap}
+            d[2] := largc;
+            d[3] := ord(largv);
+            end;
+          if proghimark > (proglomark + timedate)
+          then begin
+            writeln('*** Loaded program larger than expected ***');
+            halt(ERRHALT);
+            end;
+          {Set starting heap address for debugger after loaded program}
+          targetaddress := pointer(proglomark + timedate);
+          release(targetaddress);
+          close(ff);
+          end
+     else begin
+          writeln('*** Can''t load ',pfname,' ***');
+          halt(ERRHALT);
+          end;
+     end;
+end; {loadadventure}
+
+procedure readaout;
+  var symbaseloc, symtabsize, strbaseloc, i, llong: longint;
+      symbuf, strbuf: array[0..511] of byte;
+      symblock, symind, symbufisblock: integer;
+      strblock, strind, strbufisblock: integer;
+      symentry: array[0..2] of longint;
+      lint, len: integer; procnam: alfa31; lname: alfa8;
+      curmodbase: integer; UnAnchored: Boolean;
+      lmodrec: pmodrec; ldatarec: pdatarec;
+      lentry: pentryrec; lindex: integer;
+  
+  function getsymbyte: integer;
+  begin {getsymbyte}
+  if (ENVIRONMENT = GENIX ) or (ENVIRONMENT = XENIX_O) or
+     (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+     (ENVIRONMENT = SYS5_2)
+  then begin
+    if (symblock <> symbufisblock) or (symind > 511)
+    then begin
+      if symind > 511
+      then begin symblock := symblock + 1; symind := 0; end;
+      if blockread(f,symbuf,1,symblock) <> 1
+      then begin writeln('Can''t read a.out file'); halt; end;
+      symbufisblock := symblock;
+      end;
+    getsymbyte := symbuf[symind]; symind := symind + 1;
+    end;
+  end; {getsymbyte}
+
+  function getsymlong: longint;
+    var c: array[0..3] of byte; lint: longint;
+  begin {getsymlong}
+  if (ENVIRONMENT = GENIX ) or (ENVIRONMENT = XENIX_O) or
+     (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+     (ENVIRONMENT = SYS5_2)
+  then begin
+    c[0] := getsymbyte; c[1] := getsymbyte; 
+    c[2] := getsymbyte; c[3] := getsymbyte; 
+    moveleft(c,lint,4); getsymlong := lint;
+    end;
+  end; {getsymlong}
+
+  function getstrbyte: integer;
+  begin {getstrbyte}
+  if (ENVIRONMENT = GENIX ) or (ENVIRONMENT = SG_O) or
+     (ENVIRONMENT = SYS5_2)
+  then begin
+    if (strblock <> strbufisblock) or (strind > 511)
+    then begin
+      if strind > 511
+      then begin strblock := strblock + 1; strind := 0; end;
+      if blockread(f,strbuf,1,strblock) <> 1
+      then begin writeln('Can''t read strings in a.out file'); halt; end;
+      strbufisblock := strblock;
+      end;
+    getstrbyte := strbuf[strind]; strind := strind + 1;
+    end;
+  end; {getstrbyte}
+
+  procedure relocsbrels(ftree: pdatarec);
+  begin {relocsbrels}
+  if (ENVIRONMENT = GENIX) and (not (TEKFLAG or DYNIXFLAG or OPUSFLAG))
+  then if ftree <> nil
+       then with ftree^ do begin
+                 if inmodule <> nil
+                 then 
+                   if inmodule^.modtable <> -1
+                   then address := address + inmodule^.sb;
+                 relocsbrels(llink); relocsbrels(rlink); 
+                 end;
+  end; {relocsbrels}
+  
+begin {readaout}
+if (ENVIRONMENT = GENIX) and (not (TEKFLAG or DYNIXFLAG or OPUSFLAG))
+then begin
+  reset(f,pfname);
+  if ioresult <> 0
+  then begin 
+    writeln('Can''t open ',pfname,' to read symbol table.'); halt; 
+    end;
+  symbufisblock := -1; strbufisblock := -1; {Buffers empty}
+  symblock := 0; symind := 0;
+  llong := getsymlong; {magic}
+  if llong > 264 {nmagic} then symbaseloc := 1024 else symbaseloc := 60;
+  if OLDDYNIX
+  then begin
+    bssareabase := getsymlong {textsize}; {Add in data areas later}
+    symbaseloc := getsymlong {datasize} + symbaseloc + bssareabase;
+    end
+  else begin
+    bssareabase := getsymlong {textsize} + getsymlong {datasize};
+    symbaseloc := symbaseloc + bssareabase;
+    end;
+  llong := getsymlong; {bsssize}
+  symtabsize := getsymlong; {symtab size}
+  textareabase := getsymlong; prog.pc := textareabase; {entry pt}
+  llong := getsymlong; {entry pt mod#}
+  symbaseloc := symbaseloc + getsymlong; {reloc table size}
+  strbaseloc := symtabsize + symbaseloc;
+  
+  symblock := symbaseloc div 512; symind := symbaseloc mod 512;
+  symentry[1] := 0; {Clear continuation flag}
+  UnAnchored := FALSE; {No curmodbase set}
+  i := 1;
+  while i <= (symtabsize div 12) do begin
+    if (symentry[1] and $20) = $20
+    then begin {Skip continuation entry}
+      symentry[0] := getsymlong; symentry[1] := getsymlong;
+      symentry[2] := getsymlong;
+      end
+    else begin {Get initial entry}
+      symentry[0] := getsymlong; symentry[1] := getsymlong;
+      symentry[2] := getsymlong;
+      if symentry[1] = $66
+      then begin {A new module}
+        curmodbase := symentry[2]; UnAnchored := TRUE;
+        if OLDDYNIX
+        then begin
+          {Header data size is not to be trusted, count on bss relative}
+          {data areas being in the final (%initfun) module.            }
+          llong := getsymlong; llong := getsymlong; llong := getsymlong;
+          llong := getsymlong; llong := getsymlong; llong := getsymlong;
+          if (llong and $2) <> 0 then llong := llong + 2;
+          bssareabase := bssareabase + llong {true data size for module};
+          i := i + 2;
+          end;
+        end
+      else
+        if (symentry[1] = $90) and ((symentry[0] and $1F) = $1A)
+        then begin {BSS relative data area}
+          (*** duplicated code, find way to share it ***)
+          strblock := (strbaseloc + symentry[0] div 64) div 512;
+          strind := (strbaseloc + symentry[0] div 64) mod 512;
+          len := 0; lint := getstrbyte;
+          while (lint <> 0) and (len < 31) do begin
+            len := len + 1; procnam[len] := chr(lint); lint := getstrbyte;
+            end;
+          (*** end duplicated code ***)
+          if (len > 2) and (procnam[1] <> '/')
+          then
+            if (procnam[len] = 'D') and (procnam[len - 1] = '/')
+            then len := len - 2
+            else
+              if procnam[len] = '/' then len := len - 1;
+          ldatarec := avllookup(@procnam,len);
+          if ldatarec <> nil
+          then begin
+               ldatarec^.address := bssareabase + symentry[2];
+               if len = 8
+               then begin
+                    moveleft(procnam,lname,8);
+                    if lname = '//regs//'
+                    then dataareabase := ldatarec^.address;
+                    end;
+               end;
+          end
+        else
+          if (symentry[1] = $110) and ((symentry[0] and $1F) = $1B) and
+             Unanchored
+          then begin
+            strblock := (strbaseloc + symentry[0] div 64) div 512;
+            strind := (strbaseloc + symentry[0] div 64) mod 512;
+            len := 0; lint := getstrbyte;
+            while (lint <> 0) and (len < 31) do begin
+              len := len + 1; procnam[len] := chr(lint); lint := getstrbyte;
+              end;
+            {Find module containing procnam}
+            lentry := entrylookup(@procnam,len);
+            if lentry <> nil
+            then begin
+                 lindex := getindex(lentry); { sets lastmodule }
+                 if lastmodule^.modtable = -1
+                 then begin
+                      Unanchored := FALSE;
+                      lastmodule^.modtable := curmodbase;
+                      end;
+                 end;
+            end;
+      end;
+    i := i + 1;
+    end; {while}
+  {Anchored all possible modules}
+  lmodrec := modules;
+  while lmodrec <> nil do begin
+    if lmodrec^.modtable <> -1
+    then begin
+      symblock := (lmodrec^.modtable + 1024) div 512;
+      symind := (lmodrec^.modtable + 1024) mod 512;
+      lmodrec^.sb := getsymlong;
+      lmodrec^.address := getsymlong; {link base - discard}
+      lmodrec^.address := getsymlong;
+      for lint := 0 to lmodrec^.numentrys -1 do
+        lmodrec^.entry^[lint].address :=
+          lmodrec^.entry^[lint].address + lmodrec^.address;
+      end;
+    lmodrec := lmodrec^.next;
+    end;
+  {Relocate all SB relative data areas}
+  relocsbrels(datatree^.rlink); { root }
+  close(f);
+  end
+else if ENVIRONMENT = XENIX_O
+then begin
+  reset(f,pfname);
+  if ioresult <> 0
+  then begin 
+    writeln('Can''t open ',pfname,' to read symbol table.'); halt; 
+    end;
+  symbufisblock := -1; symblock := 0; symind := 0;
+  llong := getsymlong; {magic}
+  bssareabase := getsymlong {textsize} + getsymlong {datasize};
+  symbaseloc := $20 {headersize} + bssareabase;
+  llong := getsymlong; {bsssize}
+  symtabsize := getsymlong; {symtab size}
+  llong := getsymlong; {text relocation size}
+  llong := getsymlong; {data relocation size}
+  textareabase := getsymlong; prog.pc := textareabase; {entry pt}
+  symblock := symbaseloc div 512; symind := symbaseloc mod 512;
+  while symtabsize > 0 do begin
+    i := getsymbyte;     {tag  } symtabsize := symtabsize - 1;
+    len := getsymbyte;   {fill } symtabsize := symtabsize - 1;
+    llong := getsymlong; {value} symtabsize := symtabsize - 4;
+    len := 0; lint := getsymbyte; symtabsize := symtabsize - 1;
+    while (lint <> 0) and (len < 31) do begin
+      len := len + 1; procnam[len] := chr(lint);
+      lint := getsymbyte; symtabsize := symtabsize - 1;
+      end;
+    (*** !!!
+    writeln(i:2 hex,'  ',llong:8 hex,'  ',procnam:len);
+    !!! ***)
+    if i = $22 {defined text}
+    then begin
+         if (len = 8) and (procnam[1] = '%') and (procnam[2] = 'T')
+         then begin
+              lentry := entrylookup(@procnam,len);
+              if lentry <> nil
+              then if lentry^.address = 0
+                   then begin
+                        lindex := getindex(lentry); { sets lastmodule }
+                        if lastmodule^.modtable = -1
+                        then begin
+                             lastmodule^.modtable := 0;
+                             lastmodule^.address := llong;
+                             for lint := 0 to lastmodule^.numentrys - 1 do
+                               lastmodule^.entry^[lint].address :=
+                                 lastmodule^.entry^[lint].address + llong;
+                             end;
+                        lentry^.address := $7ffffffc; {Out of the way}
+                        end;
+              end;
+         end
+    else if (i = $23) or (i = $24) {defined data or defined BSS}
+         then begin
+              if (len > 2) and (procnam[1] <> '/')
+              then
+                if (procnam[len] = 'D') and (procnam[len - 1] = '/')
+                then len := len - 2
+                else
+                  if procnam[len] = '/' then len := len - 1;
+              if (len = 2) and (procnam[1] = '/') and (procnam[2] = '/')
+              then begin len := 3; procnam[2] := ' '; procnam[3] := '/'; end;
+              ldatarec := avllookup(@procnam,len);
+              if ldatarec <> nil
+              then begin
+                   ldatarec^.address := llong;
+                   if len = 8
+                   then begin
+                        moveleft(procnam,lname,8);
+                        if lname = '//regs//'
+                        then dataareabase := ldatarec^.address;
+                        end;
+                   end;
+              end;
+    end;
+  close(f);
+  lmodrec := modules;
+  while lmodrec <> nil do begin
+        if lmodrec^.modtable = -1
+        then begin
+             writeln('.dbg file does not correspond to target program.');
+             halt(ERRHALT);
+             end;
+        lmodrec := lmodrec^.next;
+        end;
+  end
+else if (ENVIRONMENT = CT_O) or (ENVIRONMENT = SYS5_2) or OPUSFLAG
+then begin
+  reset(f,pfname);
+  if ioresult <> 0
+  then begin 
+    writeln('Can''t open ',pfname,' to read symbol table.'); halt; 
+    end;
+  symbufisblock := -1; symblock := 0; symind := 0;
+  llong := getsymlong; {magic/sectors}
+  llong := getsymlong; {timedate}
+  symbaseloc := getsymlong; {file ptr to symtab}
+  if OPUSFLAG
+  then symtabsize := getsymlong {num st entries} * 20  {symtab entry size}
+  else symtabsize := getsymlong {num st entries} * 18; {symtab entry size}
+  llong := getsymlong; {size opt hdr and flags}
+  llong := getsymlong; llong := getsymlong; {skip 16 bytes of opt hdr}
+  llong := getsymlong; llong := getsymlong;
+  if OPUSFLAG {Skip total of 24 bytes}
+  then begin llong := getsymlong; llong := getsymlong; end;
+  textareabase := getsymlong; prog.pc := textareabase; {entry pt}
+  symblock := symbaseloc div 512; symind := symbaseloc mod 512;
+  if (ENVIRONMENT = SYS5_2) or OPUSFLAG
+  then begin
+    strbufisblock := -1; strbaseloc := symbaseloc + symtabsize;
+    end;
+  while symtabsize > 0 do begin
+    len := 0; lint := getsymbyte;
+    if ((ENVIRONMENT = SYS5_2) or OPUSFLAG) and (lint = 0)
+    then begin
+      lint := getsymbyte; lint := getsymbyte; lint := getsymbyte;
+      llong := getsymlong;
+      strblock := (strbaseloc + llong) div 512;
+      strind := (strbaseloc + llong) mod 512;
+      len := 0; lint := getstrbyte;
+      while (lint <> 0) and (len < 31) do begin
+        len := len + 1; procnam[len] := chr(lint); lint := getstrbyte;
+        end;
+      end
+    else begin {not SYS5_2 or OPUSFLAG or shortname}
+      if lint <> 0
+      then begin len := 1; procnam[1] := chr(lint); end;
+      for i := 2 to 8 do begin
+        lint := getsymbyte;
+        if lint <> 0
+        then begin len := len + 1; procnam[len] := chr(lint); end;
+        end;
+      end;
+    llong := getsymlong;  {value}
+    if OPUSFLAG
+    then begin
+         i := getsymbyte;      {sec# }
+         lindex := getsymbyte; {fill }
+         end
+    else begin {not OPUSFLAG}
+         lindex := getsymbyte; {fill }
+         i := getsymbyte;      {sec# }
+         end;
+    lindex := getsymbyte; {fill }
+    lindex := getsymbyte; {fill }
+    lindex := getsymbyte; {st cl}
+    lint := getsymbyte;   {#aux }
+    if OPUSFLAG
+    then begin
+         curmodbase := getsymbyte; curmodbase := getsymbyte; {discard}
+         symtabsize := symtabsize - 20;
+         for curmodbase := 1 to lint*20 do begin {discard aux entries}
+           lint := getsymbyte; symtabsize := symtabsize -1;
+           end;
+         end
+    else begin {not OPUSFLAG}
+         symtabsize := symtabsize - 18;
+         for curmodbase := 1 to lint*18 do begin {discard aux entries}
+           lint := getsymbyte; symtabsize := symtabsize -1;
+           end;
+         end;
+    (*** !!!
+    writeln('Section ',i:2 hex,'  storcl ',lindex:2 hex,'  ',
+             llong:8 hex,'  ',procnam:len);
+    !!! ***)
+    if (i = 1) and (lindex = 2) {defined text}
+    then begin
+         if (len = 8) and (procnam[1] = '%') and (procnam[2] = 'T')
+         then begin
+              lentry := entrylookup(@procnam,len);
+              if lentry <> nil
+              then if lentry^.address = 0
+                   then begin
+                        lindex := getindex(lentry); { sets lastmodule }
+                        if lastmodule^.modtable = -1
+                        then begin
+                             lastmodule^.modtable := 0;
+                             lastmodule^.address := llong;
+                             for lint := 0 to lastmodule^.numentrys - 1 do
+                               lastmodule^.entry^[lint].address :=
+                                 lastmodule^.entry^[lint].address + llong;
+                             end;
+                        lentry^.address := $7ffffffc; {Out of the way}
+                        end;
+              end;
+         end
+    else if ((i = 2) or (i = 3)) and (lindex = 2) {defined data or defined BSS}
+         then begin
+              if (len > 2) and (procnam[1] <> '/')
+              then
+                if (procnam[len] = 'D') and (procnam[len - 1] = '/')
+                then len := len - 2
+                else
+                  if procnam[len] = '/' then len := len - 1;
+              if (len = 2) and (procnam[1] = '/') and (procnam[2] = '/')
+              then begin len := 3; procnam[2] := ' '; procnam[3] := '/'; end;
+              ldatarec := avllookup(@procnam,len);
+              if ldatarec <> nil
+              then begin
+                   ldatarec^.address := llong;
+                   if len = 8
+                   then begin
+                        moveleft(procnam,lname,8);
+                        if lname = '//regs//'
+                        then dataareabase := ldatarec^.address;
+                        end;
+                   end;
+              end;
+    end;
+  close(f);
+  lmodrec := modules;
+  while lmodrec <> nil do begin
+        if lmodrec^.modtable = -1
+        then begin
+             writeln('.dbg file does not correspond to target program.');
+             halt(ERRHALT);
+             end;
+        lmodrec := lmodrec^.next;
+        end;
+  end
+else if (ENVIRONMENT = SG_O) or
+        ((ENVIRONMENT = GENIX) and (TEKFLAG or DYNIXFLAG))
+then begin
+  reset(f,pfname);
+  if ioresult <> 0
+  then begin 
+    writeln('Can''t open ',pfname,' to read symbol table.'); halt; 
+    end;
+  symbufisblock := -1; strbufisblock := -1; {Buffers empty}
+  symblock := 0; symind := 0;
+  llong := getsymlong; {magic}
+  if DYNIXFLAG
+  then symbaseloc := -2048
+  else
+    if llong > 264 {nmagic}
+    then symbaseloc := 1024
+    else symbaseloc := 32;
+  bssareabase := getsymlong {textsize} + getsymlong {datasize};
+  symbaseloc := symbaseloc + bssareabase;
+  llong := getsymlong; {bsssize}
+  symtabsize := getsymlong; {symtab size}
+  if (ENVIRONMENT = GENIX) and (TEKFLAG or DYNIXFLAG)
+  then begin
+    textareabase := getsymlong; prog.pc := textareabase; {entry pt}
+    symbaseloc := symbaseloc + getsymlong + getsymlong; {reloc table sizes}
+    end
+  else begin {SG_O}
+    { Entry point first if Berkeley but not Silicon Graphics }
+    symbaseloc := symbaseloc + getsymlong + getsymlong; {reloc table sizes}
+    textareabase := getsymlong; prog.pc := textareabase; {entry pt}
+    end;
+  strbaseloc := symtabsize + symbaseloc;
+  symblock := symbaseloc div 512; symind := symbaseloc mod 512;
+  i := 1;
+  while i <= (symtabsize div 12) do begin
+    symentry[0] := getsymlong;
+    if (ENVIRONMENT = GENIX) and (TEKFLAG or DYNIXFLAG)
+    then symentry[1] := getsymlong and $ff
+    else symentry[1] := getsymlong and $ff000000;
+    symentry[2] := getsymlong;
+    (***
+    writeln(symentry[0]:8 hex,'  ',symentry[1]:8 hex,'  ',symentry[2]:8 hex);
+    ***)
+    if (symentry[1] = $5000000) or (symentry[1] = $5)
+    then begin {text external}
+      strblock := (strbaseloc + symentry[0]) div 512;
+      strind := (strbaseloc + symentry[0]) mod 512;
+      len := 0; lint := getstrbyte;
+      while (lint <> 0) and (len < 31) do begin
+        len := len + 1; procnam[len] := chr(lint); lint := getstrbyte;
+        end;
+      (***
+      writeln('Proc: ',procnam:len);
+      ***)
+      if (len = 8) and (procnam[1] = '%') and (procnam[2] = 'T')
+      then begin
+           lentry := entrylookup(@procnam,len);
+           if lentry <> nil
+           then if lentry^.address = 0
+                then begin
+                     lindex := getindex(lentry); { sets lastmodule }
+                     if lastmodule^.modtable = -1
+                     then begin
+                          lastmodule^.modtable := 0;
+                          lastmodule^.address := symentry[2];
+                          for lint := 0 to lastmodule^.numentrys - 1 do
+                            lastmodule^.entry^[lint].address :=
+                              lastmodule^.entry^[lint].address + symentry[2];
+                          end;
+                     lentry^.address := $7ffffffc; {Out of the way}
+                     end;
+           end;
+      end
+    else if (symentry[1] = $7000000) or (symentry[1] = $9000000) or
+            (symentry[1] = $7) or (symentry[1] = $9)
+    then begin {data or bss external}
+      strblock := (strbaseloc + symentry[0]) div 512;
+      strind := (strbaseloc + symentry[0]) mod 512;
+      len := 0; lint := getstrbyte;
+      while (lint <> 0) and (len < 31) do begin
+        len := len + 1; procnam[len] := chr(lint); lint := getstrbyte;
+        end;
+      (***
+      writeln('Data: ',procnam:len);
+      ***)
+      if (len > 2) and (procnam[1] <> '/')
+      then
+        if (procnam[len] = 'D') and (procnam[len - 1] = '/')
+        then len := len - 2
+        else
+          if procnam[len] = '/' then len := len - 1;
+      if (len = 2) and (procnam[1] = '/') and (procnam[2] = '/')
+      then begin len := 3; procnam[2] := ' '; procnam[3] := '/'; end;
+      ldatarec := avllookup(@procnam,len);
+      if ldatarec <> nil
+      then begin
+           ldatarec^.address := symentry[2];
+           if len = 8
+           then begin
+                moveleft(procnam,lname,8);
+                if lname = '//regs//'
+                then dataareabase := ldatarec^.address;
+                end;
+           end;
+      end;
+    i := i + 1;
+    end; {while}
+  close(f);
+  lmodrec := modules;
+  while lmodrec <> nil do begin
+        if lmodrec^.modtable = -1
+        then begin
+             writeln('.dbg file does not correspond to target program.');
+             halt(ERRHALT);
+             end;
+        lmodrec := lmodrec^.next;
+        end;
+  end;
+end; {readaout}
+
+procedure loadunisoftunos;
+  var garbage: cint; lstatus: statustype;
+      useraddr, abovezero: longint; i, targetinst: integer;
+      cwaitval, llong1, llong2: longint;
+      mybuf: array[0..127] of longint; myfile: file; {SILGRAPH}
+  
+  procedure callit(pathname: pbytearray; fargv: pargvtype);
+    var i,len: integer; largvarray: argvtype; lpathname: bytearray;
+  begin {callit}
+  if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or
+     (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+     (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+     (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+  then begin
+    len := pathname^[0];
+    moveleft(pathname^[1],lpathname[0],len);
+    lpathname[len] := 0;
+    for i := 1 to largc do begin
+      len := fargv^[i]^[0];
+      new(largvarray[i]);
+      moveleft(fargv^[i]^[1],largvarray[i]^[0],len);
+      largvarray[i]^[len] := 0;
+      end;
+    largvarray[largc+1] := nil;
+    {Redirect standard input and output}
+    if ifname <> ''
+    then begin 
+         close(input); reset(input,ifname); 
+         if ioresult <> 0
+         then begin
+              writeln('Error opening input file');
+              halt(ERRHALT);
+              end;
+         end;
+    if ofname <> ''
+    then begin 
+         close(output); rewrite(output,ofname); 
+         if ioresult <> 0
+         then begin
+              writeln(stderr,'Error opening output file');
+              halt(ERRHALT);
+              end;
+         end;
+    if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+       (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+       (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+       (ENVIRONMENT = SYS5_2)
+    then begin
+      if USCOREFLAG
+      then begin
+           if _execv(largvarray,lpathname) = -1
+           then begin
+             writeln('Unable to exec ',pfname,' as program to be debugged');
+             halt(ERRHALT);
+             end;
+           end
+      else begin
+           if execv(largvarray,lpathname) = -1
+           then begin
+             writeln('Unable to exec ',pfname,' as program to be debugged');
+             halt(ERRHALT);
+             end;
+           end;
+      end
+    else if ENVIRONMENT = UNOS
+    then begin
+      if (*** _fexecv(largvarray,largc,3,2,1,lpathname) < 0 ***)
+              _execvp(largvarray,lpathname) < 0
+      then begin
+        writeln('Unable to exec ',pfname,' as program to be debugged');
+        halt(ERRHALT);
+        end
+      end;
+    end;
+  end; {callit}
+  
+begin {loadunisoftunos}
+if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or
+   (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+   (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+   (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+then begin
+  if USCOREFLAG then childpid := _fork else childpid := fork;
+  if childpid = 0
+  then begin {Child}
+    {Declare intention to be traced}
+    if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+       (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+       (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+       (ENVIRONMENT = SYS5_2)
+    then if USCOREFLAG
+         then garbage := _ptrace(0,0,0,0)
+         else garbage := ptrace(0,0,0,0)
+    else 
+      if ENVIRONMENT = UNOS
+      then begin
+        if _pdebug(0) < 0 then writeln('Can''t be traced');
+        end;
+    callit(@pfname,@largv^); 
+    end
+  else begin {Parent}
+    if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+       (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+       (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+       (ENVIRONMENT = SYS5_2)
+    then if USCOREFLAG
+         then _wait(lstatus)
+         else wait(lstatus)
+    else
+      if ENVIRONMENT = UNOS
+      then begin
+        cwaitval := _cwait(llong1,llong2);
+        if cwaitval = 4
+        then
+          if _pdebug(childpid) < 0 
+          then begin
+            writeln('Can''t debug child process');
+            cwaitval := 0;
+            end;
+        end; 
+    if ((ENVIRONMENT = UNISOFT) and (lstatus[CINTSIZE - 1] <> $7f)) or
+       ((ENVIRONMENT = XENIX) and (lstatus[CINTSIZE - 1] <> $7f)) or
+       ((ENVIRONMENT = XENIX_O) and (lstatus[CINTSIZE - 1] <> $7f)) or
+       ((ENVIRONMENT = CT_O) and (lstatus[CINTSIZE - 1] <> $7f)) or
+       ((ENVIRONMENT = SYS5_2) and (lstatus[CINTSIZE - 1] <> $7f)) or
+       ((ENVIRONMENT = SG_O) and (lstatus[CINTSIZE - 1] <> $7f)) or
+       ((ENVIRONMENT = UNOS) and (cwaitval <> 4)) or
+       ((ENVIRONMENT = GENIX) and (lstatus[0] <> $7f))
+    then begin {Target is not restartable}
+      writeln('Debugger terminating');
+      halt(ERRHALT);
+      end
+    else  {Target is restartable}
+      if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+         (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+         (ENVIRONMENT = SYS5_2)
+      then begin
+        with prog do begin
+          for i := 0 to 7 do 
+            begin d[i] := 0; a[i] := 0; end;
+          sr := 0; jt := 0;
+          loadaddr := 0; state := LOADED;
+          initsp := nil; {Don't know it yet}
+          end;
+        end
+      else begin {not dotosys}
+        prog.state := NONE;
+        if SILGRAPH
+        then begin
+          reset(myfile,pfname);
+          if ioresult <> 0
+          then begin
+            writeln('Can''t open ',pfname,' to determine entry point.');
+            halt;
+            end;
+          if blockread(myfile,mybuf,1) <> 1
+          then begin
+            writeln('Can''t read ',pfname,' to determine entry point.');
+            halt;
+            end;
+          useraddr := mybuf[7] + 2; abovezero := useraddr + 5096;
+          close(myfile);
+          end
+        else begin
+          {getul is in the jump table at $8210 on Xenix}
+          abovezero := ord4(@getul) + 4096; {Some address above text zero}
+          useraddr := abovezero - 5096; {Some address below text zero}
+          end;
+        if ENVIRONMENT = UNOS
+        then
+          if useraddr < 0 then useraddr := 0;
+        
+        (* Entry Code -                                       *)
+        (* _main: Load A4 with with address of the jump table *)
+        (*        MOVE.L #0,D7                                *)
+        (*        Jump to $START                              *)
+        (*        Dbgtable (28 bytes):                        *)
+        (*           6 byte absolute jump                     *)
+        (*           4 byte text relative zero                *)
+        (*           4 byte data relative zero                *)
+        (*           4 byte bss  relative zero                *)
+        (*           2 byte flag, zero unless debugging       *)
+        (*           4 byte timedate simulator                *)
+        (*           4 byte area reserved for future use      *)
+        
+        repeat
+          targetinst := getuw(useraddr);
+          useraddr := useraddr + 2;
+        until (targetinst = 18937) {LEA jumptable,A4} or
+              (useraddr > abovezero); {Prevent infinite loop}
+        if targetinst <> 18937
+        then begin
+          writeln('Target program not recognizable for debugging.');
+          halt(ERRHALT);
+          end;
+        textareabase := getul(useraddr + 22);
+        dataareabase := getul(useraddr + 26);
+        bssareabase := getul(useraddr + 30);
+        setuw(dataareabase,1); {Set the being debugged flag}
+        timedate := getul(useraddr + 36);
+        with prog do begin
+          for i := 0 to 7 do 
+            begin d[i] := 0; a[i] := 0; end;
+          pc := 0; sr := 0; jt := useraddr + 16;
+          loadaddr := 0; state := LOADED;
+          initsp := nil; {Don't know it yet}
+          end;
+        end;
+    end;
+  end;
+end; {loadunisoftunos}
+
+procedure loadcromix;
+  type bytes = array[0..100000] of byte;
+  var ff: file; buff: packed array[0..511] of 0..255; byteno,blockno: integer;
+      junk,numpsects,i,j,k,bits: integer; pmem: ^bytes;
+      memsize,startaddr,loadaddr,psectaddr,initsize,relocsize,l: longint;
+      laddr,maddr: ^longint; waddr: ^integer;
+  
+  function nextfbyte: integer;
+    var i: integer;
+  begin
+  if ENVIRONMENT = CROMIX
+  then begin
+       if byteno >= 512
+       then begin
+            blockno := blockno + 1; byteno := 0;
+            if blockread(ff,buff,1,blockno) <> 1
+            then fillchar(buff,512,chr(0));
+            end;
+       nextfbyte := buff[byteno];
+       byteno := byteno + 1;
+       end;
+  end; {nextfbyte}
+  
+  function nextfword: integer;
+    var c: array[0..1] of -128..127; i: integer;
+  begin
+  if ENVIRONMENT = CROMIX
+  then begin
+       c[0] := nextfbyte; c[1] := nextfbyte; 
+       moveleft(c,i,2); nextfword := i;
+       end;
+  end; {nextfword}
+  
+  function nextflong: longint;
+    var c: array[0..3] of -128..127; l: longint;
+  begin
+  if ENVIRONMENT = CROMIX
+  then begin
+       c[0] := nextfbyte; c[1] := nextfbyte; 
+       c[2] := nextfbyte; c[3] := nextfbyte;
+       moveleft(c,l,4); nextflong := l;
+       end;
+  end; {nextflong}
+  
+begin {loadcromix}
+if ENVIRONMENT = CROMIX
+then begin
+     prog.state := NONE;
+     reset(ff,pfname);
+     if ioresult = 0
+     then begin
+          blockno := -1; byteno := 32000;
+          if nextfword <> $FFFFC7C7
+          then begin
+               writeln('*** ''',pfname,''' is not a .BIN file ***');
+               exit(loadcromix);
+               end;
+          junk := nextflong; junk := nextfbyte; numpsects := nextfbyte;
+          memsize := nextflong; startaddr := nextflong;
+          for i := 1 to 4 do junk := nextflong;
+          if memavail < memsize + 4096
+          then begin
+               writeln('*** Insufficient memory to run ***');
+               exit(loadcromix);
+               end;
+          loadaddr := ord(%_new4(memsize)); textareabase := loadaddr;
+          for i := 1 to numpsects do begin
+              junk := nextflong; psectaddr := nextflong;
+              initsize := nextflong; relocsize := nextflong;
+              pmem := pointer(psectaddr + loadaddr);
+              for l := 0 to initsize-1 do pmem^[l] := nextfbyte;
+              for l := 0 to relocsize-1 do begin
+                  bits := nextfbyte;
+                  if bits <> 0
+                  then begin
+                       laddr := pointer(loadaddr + psectaddr + (l+1)*16);
+                       for j := 0 to 7 do begin
+                           laddr := pointer(ord(laddr) - 2);
+                           if odd(bits) then laddr^ := laddr^ + loadaddr;
+                           bits := bits div 2;
+                           end;
+                       end;
+                  end;
+              end;
+          { Set up JMP DEBUG.L instruction }
+          waddr := pointer(loadaddr + 24); laddr := pointer(loadaddr + 26);
+          if (waddr^ <> -1) or (laddr^ <> -1)
+          then begin
+               writeln('*** Can''t debug - Program linked with ***');
+               writeln('*** CROLINKER dated prior to 22-Feb-84 ***');
+               halt(-1);
+               end;
+          waddr^ := $4EF9; laddr^ := ord(@%_break);
+          laddr := pointer(loadaddr + memsize - 4); laddr^ := 0;
+          maddr := pointer(ord(largv) + 4*largc);
+          for i := 0 to largc do begin
+              laddr := pointer(ord(laddr) - 4); laddr^ := maddr^;
+              pmem := pointer(maddr^); j := pmem^[0];
+              for k := 1 to j do pmem^[k-1] := pmem^[k]; pmem^[j] := 0;
+              maddr := pointer(ord(maddr) - 4);
+              end;
+          waddr := pointer(ord(laddr) - 2); waddr^ := largc;
+          for i := 0 to 7 do begin prog.d[i] := 0; prog.a[i] := 0; end;
+          prog.a[7] := ord(waddr); prog.a[4] := loadaddr + 24;
+          prog.pc := loadaddr + startaddr;
+          prog.sr := 0; prog.jt := loadaddr + 24;
+          prog.loadaddr := loadaddr;
+          prog.initsp := nil; { Not used }
+          prog.state := LOADED;
+          close(ff);
+          end
+     else writeln('*** Can''t open ''',pfname,''' ***');
+     end;
+end; {loadcromix}
+
+procedure loadprog;
+  var i: integer;
+begin
+if ENVIRONMENT = MERLIN
+then begin
+     if ifname = '' then reset(fin,'/console') else reset(fin,ifname);
+     if ioresult <> 0
+     then begin
+          writeln('Error opening input file');
+          halt(ERRHALT);
+          end;
+     if ofname = '' then rewrite(fout,'/console') else rewrite(fout,ofname);
+     if ioresult <> 0
+     then begin
+          writeln('Error opening output file');
+          halt(ERRHALT);
+          end;
+     i := load(pfname,ord(@fin),ord(@fout),largc,ord(largv));
+     if i <> 0
+     then writeln('*** Can''t load ',pfname,', result = ',i,' ***');
+     end
+else if ENVIRONMENT = ADVENTURE
+     then loadadventure
+else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or 
+        (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+        (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+        (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+     then loadunisoftunos
+else if ENVIRONMENT = CROMIX
+     then loadcromix;
+end; {loadprog}
+
+

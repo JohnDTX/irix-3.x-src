@@ -1,0 +1,238 @@
+# command line assignments:
+#
+#	HDWR =		$HDWR
+#	UC =		3 or 4
+#	DC =		3 or 4
+#	INTER =		2 or 3		(for gf1 and uc4)
+#	PROCESSOR =	1 or 2 or 3	(for pm1, pm2 (ip1), or ip2)
+
+.SUFFIXES:
+.SUFFIXES: .r .b .ls .o .s .c
+
+BOOT =		$$BOOT
+VERSION =	$(UC)$(DC)$(INTER)
+DOTB =		makedir$(VERSION)$(PROCESSOR)
+CC =		cc68
+LD =		ld68
+CFLAGS =	-O -I. -I$(HDWR)/include\
+		  -DUC$(UC) -DDC$(DC) -DINTER$(INTER) -DPM$(PROCESSOR)\
+		  -DPROMALONE
+DOTRFLAGS =	-r -s
+DOTDFLAGS =	-d
+LIBS1 =		iolib/iolib.a
+LIBS2 =		/ws/pmII/stand/libstand.a
+LIBS3 =		-lc
+IP2DIAG =	../../../juniper/diag
+BALL =		ball/ball16.bpc
+UCTEST =	uctest.h
+CONSOLE =	console.h
+GETCMND =	getcmnd.h
+COMMANDS =	commands.h
+UCDEV =		$(HDWR)/include/ucdev.h
+DCDEV =		$(HDWR)/include/dcdev.h
+GFDEV =		gfdev.h
+BPCCODES =	$(HDWR)/include/bpccodes.h
+VFSM =		$(HDWR)/include/vfsm.h
+RELOCATE =	relocate.h
+OBJS1 =		$(DOTB)/main.b \
+		$(DOTB)/console.b \
+		$(DOTB)/utilities.b \
+		$(DOTB)/randomdemo.b \
+		$(DOTB)/bptest.b \
+		$(DOTB)/uctest.b \
+		$(DOTB)/fmtest.b \
+		$(DOTB)/maptest.b \
+		$(DOTB)/dcpal.b \
+		$(DOTB)/cwtest.b \
+		$(DOTB)/uctests.b \
+		$(DOTB)/bpctest.b \
+		$(DOTB)/interface.b \
+		$(DOTB)/getcmnd.b \
+		$(DOTB)/balldemo.b \
+		$(DOTB)/scroll.b \
+		$(DOTB)/time.b \
+		$(DOTB)/uc4stuff.b \
+		$(DOTB)/ddatest.b \
+		$(DOTB)/pixeltest.b \
+		$(DOTB)/help.b \
+		$(DOTB)/error.b \
+		$(DOTB)/buserror.b
+OBJS2 =		$(OBJS1) \
+		$(DOTB)/memtest.b \
+		$(DOTB)/cmp.b \
+		$(DOTB)/history.b
+OBJS3 =		$(OBJS1) \
+		$(DOTB)/vbr.b \
+		$(DOTB)/ip2mem.b \
+		$(DOTB)/ip2test.b \
+		$(DOTB)/fptest.b \
+		$(DOTB)/dofpop.b
+
+# gf defs for oven version only - includes gf standalone test
+GFDIR = 	../gf/ws$(PROCESSOR)prom
+GFOBJS =	$(GFDIR)/gl2rams.b \
+		$(GFDIR)/testall.b \
+		$(GFDIR)/header.b \
+		$(GFDIR)/gl2initall.b \
+		$(GFDIR)/gl2bpctest.b \
+		$(GFDIR)/reset.b \
+		$(GFDIR)/mch.b \
+		$(GFDIR)/betacode.b \
+		$(GFDIR)/gl2bustests.b
+
+bpcd$(VERSION)1.r:	$(OBJS1)
+	@echo -n char date\[\] \= \" > date.c
+	@date | tr -d '\012' >> date.c
+	@echo \"\; >> date.c
+	$(CC) -c -o $(DOTB)/date.b date.c
+	$(CC) $(DOTRFLAGS) -o bpcd$(VERSION)1.r $(OBJS1) $(DOTB)/date.b \
+	  $(LIBS1)
+
+bpcd$(VERSION)2.r:	$(OBJS2) $(GFOBJS)
+	@echo -n char date\[\] \= \" > date.c
+	@date | tr -d '\012' >> date.c
+	@echo \"\; >> date.c
+	$(CC) -c -o $(DOTB)/date.b date.c
+	cd $(GFDIR); make objs
+	time $(CC) $(DOTRFLAGS) -o bpcd$(VERSION)2.r \
+	  -i/ws/pmII/stand/crtstand.b $(OBJS2) $(GFOBJS) $(DOTB)/date.b \
+	  $(LIBS2)
+
+# includes gf test stuff - for oven test
+oven$(VERSION)2.r:	$(OBJS2) $(GFOBJS)
+	@echo -n char date\[\] \= \" > date.c
+	@date | tr -d '\012' >> date.c
+	@echo \"\; >> date.c
+	$(CC) -c -o $(DOTB)/date.b date.c
+	cd $(GFDIR); make objs
+	$(CC) $(DOTRFLAGS) -o oven$(VERSION)2.r \
+	  -i/ws/pmII/stand/crtstand.b $(OBJS2) $(GFOBJS) $(DOTB)/date.b \
+	  $(LIBS2)
+
+bpcd$(VERSION)3.r:	$(OBJS3) $(GFOBJS)
+	@echo -n char date\[\] \= \" > date.c
+	@date | tr -d '\012' >> date.c
+	@echo \"\; >> date.c
+	cd $(GFDIR); make objs
+	$(CC) -c -o $(DOTB)/date.b date.c
+	time $(LD) -T 20000000 -o bpcd$(VERSION)3 \
+	  $(OBJS3) $(GFOBJS) $(IP2DIAG)/ip2io.b $(DOTB)/date.b $(LIBS3) -X -x
+	rev68 bpcd$(VERSION)3 bpcd$(VERSION)3.r
+
+$(DOTB)/memtest.b:	memtest/memtest.c
+	$(CC) -c -Imemtest $(CFLAGS) -o $(DOTB)/memtest.b memtest/memtest.c
+
+$(DOTB)/cmp.b:	memtest/cmp.s
+	$(CC) -c -Imemtest $(CFLAGS) -o $(DOTB)/cmp.b memtest/cmp.s
+
+$(DOTB)/ip2mem.b:	ip2mem/ip2mem.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/ip2mem.b ip2mem/ip2mem.c
+
+$(DOTB)/ip2test.b:	ip2mem/ip2test.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/ip2test.b ip2mem/ip2test.c
+
+$(DOTB)/console.b:	$(UCDEV) $(DCDEV) $(UCTEST) $(CONSOLE) $(GETCMND) \
+			$(COMMANDS) console.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/console.b console.c
+
+$(DOTB)/utilities.b:	$(UCDEV) $(DCDEV) $(UCTEST) $(CONSOLE) $(GETCMND) \
+			$(VFSM) $(BPCCODES) utilities.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/utilities.b utilities.c
+
+$(DOTB)/balldemo.b:	$(UCDEV) $(UCTEST) $(CONSOLE) $(BALL) balldemo.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/balldemo.b balldemo.c
+
+$(DOTB)/randomdemo.b:	$(UCDEV) $(UCTEST) $(CONSOLE) randomdemo.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/randomdemo.b randomdemo.c
+
+$(DOTB)/uctest.b:	$(UCDEV) $(UCTEST) $(CONSOLE) uctest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/uctest.b uctest.c
+
+$(DOTB)/bptest.b:	$(UCDEV) $(UCTEST) $(CONSOLE) $(BPCCODES) bptest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/bptest.b bptest.c
+
+$(DOTB)/fmtest.b:	$(UCDEV) $(UCTEST) $(CONSOLE) fmtest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/fmtest.b fmtest.c
+
+$(DOTB)/cwtest.b:	$(UCDEV) $(UCTEST) $(CONSOLE) cwtest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/cwtest.b cwtest.c
+
+$(DOTB)/bpctest.b:	$(UCDEV) $(CONSOLE) bpctest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/bpctest.b bpctest.c
+
+$(DOTB)/maptest.b:    $(UCDEV) $(DCDEV) $(CONSOLE) $(VFSM) $(UCTEST) maptest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/maptest.b maptest.c
+
+$(DOTB)/uctests.b:	$(UCDEV) $(UCTEST) $(CONSOLE) uctests.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/uctests.b uctests.c
+
+$(DOTB)/scroll.b:	$(UCDEV) $(UCTEST) $(CONSOLE) scroll.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/scroll.b scroll.c
+
+$(DOTB)/dcpal.b:	$(UCDEV) $(DCDEV) $(UCTEST) $(CONSOLE) \
+			$(BPCCODES) $(VFSM) dcpal.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/dcpal.b dcpal.c
+
+$(DOTB)/main.b:		$(CONSOLE) $(GETCMND) $(COMMANDS) $(RELOCATE) main.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/main.b main.c
+
+$(DOTB)/interface.b:	$(UCTEST) $(GFDEV) $(BETACODES) interface.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/interface.b interface.c
+
+$(DOTB)/getcmnd.b:	$(GETCMND) getcmnd.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/getcmnd.b getcmnd.c
+
+$(DOTB)/uc4stuff.b:	$(UCTEST) $(UCDEV) $(CONSOLE) uc4stuff.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/uc4stuff.b uc4stuff.c
+
+$(DOTB)/ddatest.b:	$(UCTEST) $(UCDEV) $(CONSOLE) ddatest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/ddatest.b ddatest.c
+
+$(DOTB)/pixeltest.b:	$(UCTEST) $(UCDEV) $(CONSOLE) $(BPCCODES) pixeltest.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/pixeltest.b pixeltest.c
+
+$(DOTB)/time.b:		$(UCTEST) $(UCDEV) time.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/time.b time.c
+
+makehelp:	makehelp.c
+	cc -o makehelp makehelp.c
+
+help.c:		help.ascii $(GETCMND) $(COMMANDS) makehelp
+	makehelp < help.ascii > help.c
+
+$(DOTB)/help.b: help.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/help.b help.c
+
+$(DOTB)/error.b: error.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/error.b error.c
+
+$(DOTB)/buserror.b: buserror.c
+	$(CC) -c -S -DPM$(PROCESSOR) buserror.c
+	$(CC) -c -DPM$(PROCESSOR) -o $(DOTB)/buserror.b \
+	  buserror.c
+
+$(DOTB)/history.b: history.c
+	$(CC) -c $(CFLAGS) -o $(DOTB)/history.b history.c
+
+$(DOTB)/vbr.b:	vbr.s
+	$(CC) -c -o $(DOTB)/vbr.b vbr.s
+
+$(DOTB)/fptest.b:	fpa/fptest.c
+	$(CC) -c $(CFLAGS) -Ifpa -DIP2DIAG -o $(DOTB)/fptest.b fpa/fptest.c
+
+$(DOTB)/dofpop.b:	fpa/dofpop.c
+	$(CC) -c $(CFLAGS) -Ifpa -DIP2DIAG -o $(DOTB)/dofpop.b fpa/dofpop.c
+
+test1.r:	test1.b
+	$(CC) $(DOTRFLAGS) -o test1.r test1.b $(LIBS1)
+
+test1.b:	test1.c
+	$(CC) -c $(CFLAGS) test1.c
+
+test2.r:	test2.b
+	$(CC) $(DOTRFLAGS) -o test2.r -i/ws/pmII/stand/crtstand.b \
+	  test2.b $(LIBS2)
+
+test2.b:	test2.c
+	$(CC) -c $(CFLAGS) test2.c
+

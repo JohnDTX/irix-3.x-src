@@ -1,0 +1,196 @@
+'\"macro stdmacro
+.TH LINT 1 
+.SH NAME
+lint \- a C program checker
+.SH SYNOPSIS
+.B lint
+[
+.B \-abhlnpuvx
+]
+file ...
+.SH DESCRIPTION
+.I Lint\^
+attempts to detect features of the C program
+.I files\^
+which are
+likely to be bugs, non-portable, or wasteful.
+It also checks type usage more strictly
+than the compilers.
+Among the things which are currently detected are
+unreachable statements,
+loops not entered at the top,
+automatic variables declared and not used,
+and logical expressions whose value is constant.
+Moreover, the usage of functions is checked to find
+functions which return values in some places and not in others,
+functions called with varying numbers of arguments,
+and functions whose values are not used.
+.PP
+It is assumed that all the
+.I files\^
+are to be loaded together; they are checked for
+mutual compatibility.
+By default,
+.I lint\^
+uses function definitions from the standard lint library
+.BR llib-lc.ln ;
+function definitions from the portable lint library
+.B llib-port.ln
+are used when
+.I lint\^
+is invoked with the
+.B \-p
+option.
+.PP
+Any number of
+.I lint\^
+options may be used, in any order.
+The following options are used to suppress certain kinds of complaints:
+.TP "\w'\f3\-l\f2x\f1\ \ 'u"
+.B \-a
+Suppress complaints about assignments of long values to variables that are not
+long.
+.TP
+.B \-b
+Suppress complaints about
+.B break
+statements that cannot be reached.
+(Programs produced by 
+.I lex\^
+or
+.I yacc\^
+will often result in a large number of such complaints.)
+.TP
+.B \-h
+Do not apply heuristic tests that attempt to intuit bugs, improve
+style, and reduce waste.
+.TP
+.B \-u
+Suppress complaints about functions and external variables used and not defined,
+or defined and not used.
+(This option is suitable for running
+.I lint\^
+on a subset of files of a larger program.)
+.TP
+.B \-v
+Suppress complaints about unused arguments in functions.
+.TP
+.B \-x
+Do not report variables referred to by external declarations but never used.
+.PP
+The following arguments alter
+.IR lint\^ 's
+behavior:
+.TP "\w'\f3\-l\f2x\f1\ \ 'u"
+.BI \-l x
+Include additional lint library
+.BI llib-l x .ln .
+You can include a lint version of the math library
+.B llib-lm.ln
+by inserting
+.B \-lm
+on the command line. This argument does not suppress the default use of
+.BR llib-lc.ln .
+This option can be used to keep local lint libraries and is useful in the
+development of multi-file projects.
+.TP
+.B \-n
+Do not check compatibility against either the standard or the portable
+lint library.
+.TP
+.B \-p
+Attempt to check portability to other dialects
+(\s-1IBM\s0 and \s-1GCOS\s0) of C.
+.PP
+The
+.BR \-D ,
+.BR \-U ,
+and
+.B \-I
+options of
+.IR cc\^ (1)
+are also recognized as separate arguments.
+.PP
+Certain conventional comments in the C source
+will change the behavior of
+.IR lint :
+.TP .3i
+/\(**\s-1NOTREACHED\s0\(**/
+at appropriate points
+stops comments about unreachable code.
+.TP
+.RI /\(**\s-1VARARGS\s+1 n \(**/
+suppresses
+the usual checking for variable numbers of arguments
+in the following function declaration.
+The data types of the first
+.I n\^
+arguments are checked;
+a missing
+.I n\^
+is taken to be 0.
+.TP
+/\(**\s-1ARGSUSED\s0\(**/
+turns on the
+.B \-v
+option for the next function.
+.TP
+/\(**\s-1LINTLIBRARY\s0\(**/
+at the beginning of a file shuts off complaints about
+unused functions in this file.
+.PP
+.I Lint\^
+produces its first output on a per source file basis.
+Complaints regarding included files are collected and printed
+after all source files have been processed.
+Finally,
+information gathered from all input files is collected and checked for
+consistency.
+At this point,
+if it is not clear whether a complaint stems from a given source file or from
+one of its included files,
+the source file name will be printed followed by a question mark.
+.SH EXAMPLE
+.IP
+lint \-b myfile.c
+.LP
+checks the consistency of the file "myfile.c".
+The 
+.B \-b
+option indicates that unreachable 
+.B break
+statements are not to be checked.
+This option might well be used on files that 
+.IR lex\^ (1)
+generates.
+.SH FILES
+.PD 0
+.TP "\w'/usr/lib/lint/llib-port.ln\ \ \ 'u"
+/usr/lib/lint/lint[12]
+programs
+.TP
+/usr/lib/lint/llib-lc.ln
+declarations for standard functions 
+(binary format; source is in
+.BR /usr/lib/lint/llib-lc )
+.TP
+/usr/lib/lint/llib-port.ln
+declarations for portable functions 
+(binary format; source is in
+.BR /usr/lib/lint/llib-port )
+.TP
+/usr/lib/lint/llib-lm.ln
+declarations for standard math functions 
+(binary format; source is in
+.BR /usr/lib/lint/llib-lm )
+.TP
+/usr/tmp/\(**lint\(**
+temporaries
+.PD
+.SH SEE ALSO
+cc(1). 
+.SH BUGS
+.IR exit\^ (2)
+and other functions which do not return
+are not understood; this causes various lies.
+.\"	@(#)lint.1	5.1 of 11/8/83

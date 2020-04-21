@@ -1,0 +1,55 @@
+.TH defbasis 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B defbasis
+\- defines a basis matrix
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defbasis(id, mat)"
+.B "long id;"
+.B "Matrix mat;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defbas(id, mat)"
+.B "integer*4 id"
+.B "real mat(4,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defbasis(id: Short; var mat: Matrix);"
+.SH DESCRIPTION
+.B defbasis
+defines basis matrices to generate curves 
+and patches. 
+.I matrix 
+is saved and is associated with 
+.I id.
+Use
+.I id
+in subsequent calls to 
+.B curvebasis 
+and 
+.B patchbasis.
+.PP
+When using multiple windows, 
+patterns, cursors, and fonts are available 
+to all windows.
+.SH "SEE ALSO"
+crv,
+crvn,
+curvebasis,
+curveprecision,
+patch,
+patchbasis,
+patchcurves,
+patchprecision
+.sp
+.I Programming Guide, 
+Section 11.2, Drawing Curves
+.SH NOTE
+This routine is available only in immediate mode.

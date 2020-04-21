@@ -1,0 +1,30 @@
+'\"macro stdmacro
+.TH RMPRINTER 1M
+.SH NAME
+rmprinter \- remove a printer from the \s-1LP\s0 spooling system
+.SH SYNOPSIS
+/usr/spool/lp/etc/util/rmprinter printer
+.SH DESCRIPTION
+.I rmprinter
+performs tasks that undo the actions of
+.I mkPS, mkcentpr,
+and
+.IR mknetpr.
+It removes the interface file, the log file, and calls various
+.IR lpadmin (1M)
+functions to remove references to the printer in the spooler.
+.SH FILES
+/usr/spool/lp/etc/log/\f2printer\f1-log
+/usr/spool/lp/interface/\f2printer\f1
+.SH SEE ALSO
+.na
+lpshut(1M),
+lp(1),
+lpadmin(1M),
+lpsched(1M),
+lpshut(1M),
+lpstat(1),
+mkcentpr,
+mknetpr,
+mkPS.
+

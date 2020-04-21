@@ -1,0 +1,158 @@
+'\"macro stdmacro
+.TH CHMOD 2 
+.SH NAME
+chmod \- change mode of file
+.SH SYNOPSIS
+.B int chmod (path, mode)
+.br
+.B char \(**path;
+.br
+.B int mode;
+.SH DESCRIPTION
+.I Path\^
+points to a
+path name
+naming a file.
+.I Chmod\^
+sets the access permission portion of the named file's mode
+according to the bit pattern contained in
+.IR mode .
+.PP
+Access permission bits are interpreted as follows:
+.PP
+.RS
+.PD 0
+.TP \w'04000\ \ \ 'u
+04000
+Set user
+.SM ID
+on execution.
+.TP
+02000
+Set group
+.SM ID
+on execution.
+.TP
+01000
+Save text image after execution
+.TP
+00400
+Read by owner
+.TP
+00200
+Write by owner
+.TP
+00100
+Execute (or search if a directory) by owner
+.TP
+00070
+Read, write, execute (search) by group
+.TP
+00007
+Read, write, execute (search) by others
+.RE
+.PD
+.PP
+The effective user
+.SM ID
+of the process must match the
+owner of the file or be
+super-user
+to change the mode of a file.
+.PP
+If the effective user
+.SM ID
+of the process is not
+super-user,
+mode bit 01000 (save text image on execution) is cleared.
+.PP
+If the effective user
+.SM ID
+of the process is not
+super-user
+or the effective group
+.SM ID
+of the process does not match the
+group
+.SM ID
+of the file,
+mode bit 02000 (set group
+.SM ID
+on execution)
+is cleared.
+.PP
+If an executable file is prepared for sharing (see the 
+.I cc
+-n option), then mode bit 01000 prevents the system from
+abandoning the swap-space image of the program-text portion
+of the file when its last user
+terminates.
+Thus, when the next user of the file executes it,
+the text need not be read from the file
+system but can simply be swapped in,
+saving time.
+.PP
+Changing the owner of a file turns off the set-user-id bit,
+unless the superuser does it.
+This makes the system somewhat more secure 
+at the expense of a degree of compatibility.
+.PP
+.I Chmod\^
+will fail and the file mode will be unchanged
+if one or more of the following are true:
+.IP "" .3i
+A component of
+the
+path prefix
+is not a directory.
+.SM
+\%[ENOTDIR]
+.IP
+The named file does not exist.
+.SM
+\%[ENOENT]
+.IP
+Search permission is denied on a
+component of the
+path prefix.
+.SM
+\%[EACCES]
+.IP
+The effective user
+.SM ID
+does not match the owner of the file
+and the effective user
+.SM ID
+is not super-user.
+.SM
+\%[EPERM]
+.IP
+The named file resides on a read-only file system.
+.SM
+\%[EROFS]
+.IP
+.I Path\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.br
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0
+is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+chown(2), mknod(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#15,D0
+.B movl	path,A0
+.B movl	mode,D1
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)chmod.2	5.1 of 10/19/83

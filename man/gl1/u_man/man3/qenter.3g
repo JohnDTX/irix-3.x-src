@@ -1,0 +1,31 @@
+.TH qenter 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I qenter
+- create a queue entry
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qenter(qtype, val)"
+.B "short qtype, val;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qenter(qtype, val)"
+.B "integer*2 qtype, val"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qenter(qtype, val: Short);"
+.sp
+.SH DESCRIPTION
+.I Qenter
+takes two 16-bit integers, \f3qtype\fP and \f3value\fP,
+and enters them into the queue.
+There is no way to distinguish user-defined and system-defined
+entries unless disjoint sets of types are used.
+See the \f2IRIS Graphics Library\fP for a list of system-defined types.
+.SH "SEE ALSO"
+.I qreset, qtest, qread
+.SH NOTE
+This command can only be used in immediate mode.

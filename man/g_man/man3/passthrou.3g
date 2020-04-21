@@ -1,0 +1,44 @@
+.TH passthrough 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B passthrough
+\- passes a single token through the Geometry Pipeline
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "passthrough(token)"
+.B "short token;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine passth(token)"
+.B "integer*4 token"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure passthrough(token: longint);"
+.SH DESCRIPTION
+.B passthrough
+passes a single 16-bit integer through the Geometry Pipeline. Use it
+in feedback mode to parse the returned information.
+.PP
+For example, you can use 
+.B passthrough 
+between every pair of points that is
+being transformed and clipped by the Geometry Engines. 
+If a point is clipped out,
+two
+.B passthrough
+tokens appear in a row in the output buffer.
+It is dangerous to use 
+.B passthrough
+when not in feedback mode; it
+can send a random routine to the raster subsystem.
+.SH "SEE ALSO"
+.I Programming Guide,
+Section 10.2, Feedback Mode
+.SH NOTE
+This routine is available only in feedback mode.

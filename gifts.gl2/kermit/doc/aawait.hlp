@@ -1,0 +1,820 @@
+=C Kermit Versions Under Development, as of 14 March 86
+=C
+=C This is a list of Kermit implementations not yet received by Columbia; some
+=C of them may be done or nearly done, others may just be good intentions.
+=C The list does not always include implementations that we do
+=C have for which new releases may be under development.
+
+Craig Bevins
+=C somewhere in Australia..
+=N "munnari!ipso.oz!craigb"@seismo
+=S various 6809/FLEX
+=L C
+
+Egbert Jan van den Bussche,
+Delft, Netherlands
+=S various 6809/FLEX
+=N 
+=L C
+
+Glen Campbell
+Commercial Systems, Inc.
+1106 Clayton Lane, #101E
+Austin TX 78723
+=S TurboDOS 1.3
+=L ASM
+=T 512-454-9250
+
+Jon Steer
+Videotel Inc.
+Woburn, MA
+=T 617-933-0408
+=S 68000
+=L Forth    
+
+Tony Addyman,
+Salford Univ,
+UK
+=S Acorn BBC/Z80, CP/M
+=L ASM
+
+Bertil Schou
+Loughborough Univ, UK
+=S Acorn BBC/Torch, CP/M
+=L ASM
+
+Lee Smith
+Acorn Computers Ltd,
+Fulbourn Road, Cherry Hinton
+Cambridge CB1 4JN
+ENGLAND
+=S Acorn ACW/Panos
+=L C or Modula-2  
+
+Manasseh Katz
+=S Altos 586, MP/M-86
+=L Turbo Pascal
+=N MKATZ@UMDA.BITNET
+
+(via) Alan Phillips, Lancaster Univ, UK
+=S Amstrad, CP/M-80
+=L ASM
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+Dave Devendorf, GMS Inc,
+2306 South Fairview St,
+Santa Ana, CA 92704-4984
+=T 714-641-1650
+=S ANVIL-1000MD,ANVIL-4000, CAD/CAM systems
+
+Dick Atlee, U of Md
+=N ATLEE@UMDC.BITNET
+=S Apple II DOS 
+=L Merlin BigMac
+
+(via) Alan Phillips, Lancaster Univ, UK
+=S Apple II CP/M-80 Z80/CPS card
+=L ASM
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+Torbjorn Nordlind,
+Apple/Stockholm
+=S Apple III, SOS
+=L Pascal
+
+Pat Phalen
+McGladrey,Hendrickson & Pullen,
+525 17th Street, Rock Island, IL  61201,
+=S Apple III, SOS
+=L Pascal
+=T 309-794-1144 
+=P March 86
+=C almost done
+
+Apple/Cupertino
+=S Apple Lisa Desktop 
+=L Pascal
+=C probably defunct, like Lisa
+
+Jim Noble, Planning Research Corp,
+1500 Planning Research Drive,
+McLean, VA 22102
+=T 703-556-1394
+=S Apple Macintosh
+=L Megamax C
+=C Converting to Megamax C from SUMacC.
+
+Jack Powell or Charlie Jackson,
+Antic Magazine
+=T 415-957-0886
+=S Atari 520 ST
+=L C
+=C Gave up
+
+David Getreu
+Atari
+=N OC.ATARI@CU20B
+=S Atari 520 ST
+=L C
+=C Never started?
+
+Mike O'Connor
+3571 Ft. Meade Rd #215
+Laurel, Md. 20707
+=T 301-498-6040
+=S Atari 520 ST
+
+John Rushmeyer 
+Monmouth College
+=S BTI-8000 VRM      
+=L Pascal   
+=N vax135!petsd!moncol!john@ucbvax.berkeley.edu
+
+Bill Catchings 
+Foundation Computer Systems
+Cary, NC 27511 
+=S Burroughs B20 BTOS     
+=L C        
+=C probably won't after all
+
+Michael Thompson V.P. 
+Systems Development
+Accounting Systems & Analysis, Inc.
+12297 Hidden Hills Drive
+Jacksonville, FL  32225 
+=S Burroughs B20 BTOS     
+=L
+=T 904-724-6799
+=C long range plan
+   
+Scott Newman 
+Digital Equipment of Canada, London, Ont.
+=S Burroughs B20 BTOS     
+=L Pascal  
+=T 519-673-1440 x223
+=N newman%troa01.DEC@decwrl.DEC.COM
+=D March 14, 1986
+
+Sonya Shapiro, FEICO/McGraw-Hill,
+24 Hartwell Ave 
+Lexington, MA  02173
+=S Burroughs 7700/7800              
+=L
+
+P.Kytolaakso 
+HYLK Finland
+=S Burroughs B7800          
+=L Pascal   
+=N Pekka_Kyt|laakso_HYLK%QZCOM.MAILNET
+
+George M. Weaver, Department of Astronomy
+Penn State University 
+=S Charles River UNOS     
+=L C
+=N GMW@PSUVM.BITNET
+=C UV-68              
+
+via Alan Phillips
+Lancaster Univ, UK
+=S Cifer 1886 CP/M-80  
+=L ASM     
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+John Wills, Garrett Canada, 255 Attwell Dr.
+Rexdale, Ontario 
+CANADA M9W5B8
+=S Commodore Amiga AmigaDOS 
+=T 416-675-1411 x2752  
+=D 3-10-86
+=L 
+
+Eric Lavitsky
+Rutgers U 
+=S Commodore Amiga AmigaDOS 
+=C But he's making a commercial product out of it.
+=N LAVITSKY@RUTGERS
+
+Jonathan Field 
+Barrington Technical
+Brewster Road
+Barrington NH 03825
+=S ComputerDevices "DOT" MS-DOS 1.25   
+=L MASM     
+=T 603-664-2787 
+=C done, CU waiting for it
+
+No Name
+=S Computer Vision CGOS 4000    
+=L 
+=C Reportedly being distributed by vendor
+
+
+Jean Roy
+DOT/TSC
+Cambridge MA
+=S Convergent C3            
+=L MASM     
+
+Bill Catchings
+Foundation Computer Systems
+=S Convergent CTOS     
+=L C        
+=C CTOS is almost just like BTOS, q.v./ This effort probably defunct.
+                                   
+
+Losinger AG
+Bern, Switzerland
+=S Corvus Concept CCOS     
+=L 
+
+Mike Hardy
+San Diego Supercomputer Center
+PO Box 85608
+San Diego, CA 92138
+=S Cray Supercomputer
+=L 
+=T 619-455-5072
+=C Have gotten a version to transfer sometimes (small files).
+
+John Helm 
+=S Cromemco Z80	CP/M     
+=L ASM / CDOS	  
+=N OC.HELM@CU20B
+=C done, waiting for it
+
+Losinger AG
+Bern, Switzerland
+=S Cromemco Cromix   
+=L C        
+
+via Alan Phillips
+Lancaster Univ, UK
+=S Cromemco        
+=L CP/M-80  ASM     
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+John Sambrook
+=S Data General MV AOS/VS   
+=L Pascal
+=N entropy!gandalf@uw-beaver
+
+Devon S. McCullough 
+George Carrette 
+=S DEC-10/20 ITS / TOPS-20    
+=L MacLisp  
+=N DEVON@MC.LCS.MIT.EDU, angel!gjc@LMI-ANGEL.ARPA
+
+Brian Nelson
+U of Toledo
+=S DEC PDP-11 IAS      
+=L Macro-11 
+=N BRIAN@UOFT02.BITNET 
+=C have binary, no source
+
+=S DEC PDP-11 IAS      
+=L Ratfor   
+=C Someone in France, submitted to DECUS, announced in Dec 85 DECUS Newsletter
+
+David Spector
+NYU
+=S Elxsi 6400 EMBOS    
+=L C        
+=N C00.D-SPECTOR@NYU20.CCNET
+
+Mack Witty
+Martin Marietta
+Englewood CO
+=S Elxsi 6400 EMBOS    
+=L Pascal   
+=T 303-790-3081
+
+Tony Addyman
+Salford Univ, UK        
+=S Epson PX8 CP/M    
+=L ASM
+
+Ken-ichiro Murakami
+NTT Research Lab
+2nd Research Section
+3-9-11, Midoricho
+Musashino-shi, 180 
+>JAPAN
+=S Fujitsu FM-8 CP/M-80           
+=N hplabs!kddlab!nttmecl!murakami@Berkeley
+
+Jeffrey B. Sicherman
+1221 N. State College Blvd #8
+Anaheim, CA  92806
+=S General Automamation minicomputers                                        
+=L FORTRAN  
+
+Bob Wilson
+GE
+4701 Forbes Blvd
+Lanham, MD 20706
+=S Gould/SEL 32 MPX      
+=T 301-459-2900 (or 205-837-7701?)
+
+Larry Tate
+Simulation Associates Inc
+Newport News, VA
+=S Gould/SEL 32 MPX      
+=L Fortran  
+=N CNISWONGER@SIMTEL20
+
+Adam Glenath
+SYPRO
+Sveavagen 34
+103 64 Stoclholm
+>SWEDEN
+=S Gould/SEL 32 MPX      
+=L Fortran  
+
+Dave Durand
+Singer Link
+2224 Bay Area Blvd
+Houston TX 77058
+=S Gould/SEL 32 MPX      
+=L Fortran  
+=T 713-280-4552
+
+John Kerr, CAE Electronics, Ltd.
+Box 1800
+Saint-Laurent
+Quebec h4L 4X4
+Gould/SEL 32 MPX      
+=L Fortran
+=T 514-341-6780
+
+Roger Horton
+Sheffield City Polytechnic, UK
+=S HP-86       
+=T Sheffield 20911 ext 2419
+
+Gordon Haverland
+=S HP Integral HP-UX    
+=L C        
+=N GH0N@TC.CC.CMU.EDU
+=C Add PAM user interface
+
+Robin Simpson
+Computer Centre
+Deakin Univ,
+Geelong Victoria
+>Australia
+=S Hitachi Peach      
+=N "decvax!mulga!robin.deakcm"@Berkeley
+=L 
+
+Mike Haws
+Interactive Computing Services
+Denver CO 
+=S Honeywell 6000/DTSS 
+=L PL/I    
+=T 303-936-7448 
+=C initial version completed, but not ready for distribution
+				   
+1 ISG/DOU
+Attn:  1Lt Andrew Postosky
+The Pentagon
+Washington, DC 20330-6345
+=S Honeywell DPS8/GCOS
+=L
+=T 202-696-6033
+=C Completed; Sending to us on tape.
+=D 31 Mar 86
+
+Lee Hallin, Honeywell
+Los Angeles CA.
+=S Honeywell DPS8,90 
+=L PL-6     
+=N Lee-Hallin%LADC@CISL-SERVICE-MULTICS.ARPA
+=T 213-649-6870 x317
+
+via Alan Phillips
+Lancaster Univ, UK
+=S Honeywell MultiSystem Executive Concur. CP/M-86 
+=L ASM86 
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+
+Mike Gemeny
+Sync Data Inc.
+Silver Spring MD
+=S HP-2000 ACCESS   
+=L Basic
+=T 301-946-2069
+
+Chris Hanson
+Yekta Gursel
+MIT.
+=S HP-98xx
+=L HP-Pascal
+=N CPH%MIT-OZ@MIT-MC
+
+Andrea Martin
+Rice University
+Houston TX
+=S IBM 370 Series MVS/TSO
+=L PL/I
+=T 713-527-4005
+=C done, but you have to get it directly from Rice; they don't supply
+=C     complete source code)				
+                               
+Steve Blankinship
+Triangle Universities Computation Center (TUCC)
+P. O. Box 12076
+Research Triangle Park,  NC  27709
+=N TUCSEB@TUCC.BITNET
+=S IBM MVS/TSO
+=L Assembler
+=D 2 Apr 86
+=C Done, based on 2.01 of CMS Kermit
+
+Franklin A. Davis  
+Institut fuer Informatik und angewandte
+Mathematik, Universitaet Bern,
+Laenggassstrasse 51, CH-3012  Bern,
+Switzerland
+=S IBM 370 Series MVS/TSO
+=L Pascal   
+=N U02F@CBEBDA3T.BITNET
+
+Raymond Koluvek
+DESY - DPT. R2
+Notkestrasse 85
+2000 Hamburg 52
+>W.Germany
+=S IBM 370 Series MVS/TSO VTAM
+=L Pascal/Assem
+=T 040/8998/2362
+=N R02KER@DHHDESY3.BITNET            
+  
+
+Roger Fajman, NIH
+=S IBM 370 Series MVS/TSO
+=L Assem    
+=N RAF@UMDC.BITNET
+
+George M. Weaver
+Department of Astronomy
+Penn State University
+=S IBM 370 Series MVS/ INTERACT                
+=L EXEC     
+=N GMW@PSUVM.BITNET
+               
+Pat Phalen 
+McGladrey,Hendrickson & Pullen
+525 17th Street
+Rock Island, IL  61201
+=S IBM 370 Series VM/CMS
+=L Assem.   
+=T 309-794-1144.  
+=C Adding support to v2.01 for MICOM 7400 protocol converter. 
+                                    
+=S IBM 370 Series DOS/VSE  
+=L 
+=C Nobody...  DOS/VSE does not know how to talk
+=C to asynchronous ASCII TTY devices, which is 
+=C  a requirement for Kermit.  Best hope --
+=C  run DOS/VSE under VM, use VM/CMS Kermit, and
+=C  convert files between CMS and DOS.
+
+=S IBM System 34,38, etc.    
+=C Like DOS/VSE -- these systems don't know how
+=C to talk to asynchronous TTY devices, only to
+=C "5251 display stations" over twinax cable.
+
+Russell Hayden
+NEC Electronics Inc.
+One Natick Executive Park       
+Natick, MA 01760
+=S IBM PC CP/M-86
+=L ASM86  	 
+=C Japan distrib.                                 
+=T 617-655-8833  				  
+
+John Klensin
+MIT 
+=S IBM PC,XT,AT CP/M-86
+=L ASM86    
+=N Klensin@MIT-MULTICS
+
+Dr. T.L. Peters, Gut Hormone Laboratory,
+Gasthuisberg O&N
+B-3000 LEUVEN
+Belgium.
+=S IBM PC,XT,AT THEOS86 
+=T (32)16-237901 ext. 335		  
+			 
+Nisha Jain
+3 Ransom Road
+Athens OH 45701
+=S IBM PC family UCSD
+=L UCSD p-System Pascal        
+=T 614-592-1660
+=C adding server support to Cornell version
+                                   
+Alistair Milne
+=S IBM PC, Stride, UCSD, DEC Rainbow,... 
+=L UCSD p-System Pascal   
+=N milne@ICSE.UCI.EDU
+
+=S IBM Series/1 EDX      
+=L EDL
+=C somebody started but gave up
+
+Dave Allum
+South West Universities
+Regional Computer Centre
+Bath, UK
+=S ICL 2900 VME (/B) S3       
+
+Chuck Haas
+Intel/Denver
+=S Intel 86/310 iRMX-86
+=L ASM86    
+
+Larry Grim
+Mesh Inc.
+Oxford, PA  19363
+802 Bethel Rd,
+=S Intel 86/310 iRMX-86        
+=T 215-932-3709
+
+Bdale Garbee
+CMU
+=S Intel 86/330 Xenix    
+=L C        
+=N AG0B@TE.CC.CMU.EDU
+
+Eugene Richman
+Kodak 23/7
+Rochester NY 14560
+=S Intel iPDS ISIS  Series 2, 4                           
+=L PLM-80   
+=T 716-722-4596
+=C Adding file interruption, fixing up user
+=C interface (menu), SET commands, etc.                                   
+                                   
+Jim Ryan
+Presco Inc.
+=S Intel iPDS ISIS     
+=L PLM-80
+
+via Alan Phillips
+Lancaster Univ, UK
+=S Joyce-Loebl UCSD     
+=L UCSD     
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+via Alan Phillips
+Lancaster Univ, UK
+=S Magiscan 2 p-System
+=L Pascal   
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+Gary L. Bassett
+Modular Data Systems Inc
+2525 Bay Area Blvd
+3rd Floor
+Houston TX 77058
+=S Modcomp Classic Max IV   
+=L Fortran  
+=T 713-486-1712                                  
+                                   
+Will Young
+State of Vermont
+Office of the Secretary of State
+109 State Street
+Montpelier VT  05602
+=S Motorola 4-Phase IV/80                      
+=T 802-828-2363
+
+Paul Butler, M156
+Motorola Inc
+2200 W Broadway Road
+Mesa, AZ  85202
+=S Motorola SAT-96 MDOS
+=T 602-962-3502
+
+Holly Knight
+=S Motorola VME-10 Versados          
+=N nmtvax.CSnet
+
+Wm. Pierce, Motorola Semiconductor
+3102 N. 56th St, MS/56-122
+Phoenix, AZ 85108 
+=S Motorola VME-10 Versados /UnixSysV         
+=L C
+=T 602-952-3169                
+
+William Pierce
+Motorola
+=S Motorola Xormacs Development Sys Versados /UnixSysV 
+=L C
+
+Hans Muller
+AI&DS
+Mt.View, CA
+=S Motorola Xormacs Versados                  
+=L C
+=N hans@aids-unix
+                
+W. Grossmann, P. Hellbach,
+Kurt Eichweber Praezisionsgeraetewerk GmbH
+Schuetzenstr. 75-85, D-2000 Hamburg, W.Germ.
+=S Motorola 68000  Versados
+=T 00149 40 85396 0 x205                                   
+
+P.C. Hariharan
+Johns Hopkins 
+Dept of Chemistry
+Baltimore MD 21218
+=S Naked Mini OS4        
+=T 301-338-7468                                  
+               
+Karen L. Fikri
+Mgr, Medical Systems
+Product Management
+NCR Corp.
+950 Danby Road
+Ithaca NY 14850
+=S NCR 9300  
+=L Poly-FORTH         
+=T 607-273-5310
+
+Midge Suman 
+Wesleyan University Computer Center
+Science Tower, Room 547
+Middletown, CT  06457
+=S NCR DM5 MS DOS & CP/M                    
+=N SUMAN@WESLYN
+=C done
+=T 203-347-9411-3046   
+
+Russ Hayden
+NEC Electronics,
+1 Natick Executive Park
+Natick MA  01760
+=S NEC In-Circuit Emulator MP/M-86
+=L ASM86    
+=T 617-655-8833
+
+Russell Hayden
+NEC Electronics Inc.
+One Natick Executive Park       
+Natick, MA 01760
+=S NEC IE70K/Series CP/M-86   
+=L 
+=C Japan distrib.
+=T  617-655-8833  
+
+Russell Hayden
+NEC Electronics Inc.
+One Natick Executive Park       
+Natick, MA 01760
+=S NEC IE700K/Series (Own)    
+=L 
+=C Japan distrib.
+=T  617-655-8833  				  
+
+Russell Hayden
+NEC Electronics Inc.
+One Natick Executive Park       
+Natick, MA 01760
+=S NEC MD-086 MP/M-86  
+=L 
+=C Japan distrib.
+=T  617-655-8833  				  
+
+Russell Hayden
+NEC Electronics Inc.
+One Natick Executive Park       
+Natick, MA 01760
+=S NEC MD-080
+=L 
+=C Japan distrib.
+=T  617-655-8833  				  
+
+Ken-ichiro Murakami
+NTT, Japan
+=S NEC PC8900 CP/M-80          
+=N hplabs!kddlab!nttmecl!murakami@Berkeley
+
+Ken-ichiro Murakami
+NTT, Japan
+=S NEC PC9900 CP/M-86           
+=N hplabs!kddlab!nttmecl!murakami@Berkeley
+
+Russell Hayden
+NEC Electronics Inc.
+One Natick Executive Park       
+Natick, MA 01760
+=S NEC PC9801 CP/M-86  & MS-DOS
+=L 
+=C Japan distrib.
+=T  617-655-8833  				  
+
+via Alan Phillips
+Lancaster Univ, UK
+North Star Advantage CP/M-80  
+=L ASM
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+Ken-ichiro Murakami
+NTT, Japan
+=S NTT Lisp Machine ELIS     
+=L TAO     
+=N hplabs!kddlab!nttmecl!murakami@Berkeley
+
+Frans v. Grotel, Customer Support Mgr,
+Philips Microcomputer Development Systems
+Philips I&E T&M CD-MDS, Bldg TQ III-451
+5600 MD Eindhoven, Netherlands
+=S Philips MDS-II Unix 4.0 C & Philips PEDS (=v7)                   
+=N mcvax!philmds!mdsca!frans
+=C based on v3 of Unix Kermit
+
+Frans v. Grotel, Customer Support Mgr,
+Philips Microcomputer Development Systems
+Philips I&E T&M CD-MDS, Bldg TQ III-451
+5600 MD Eindhoven, Netherlands
+=S Philips P3200   
+=N mcvax!philmds!mdsca!frans
+
+Claus D. Schmid, PROTEUS Gesellschaft fuer
+Datentechnik mbH, Haid-und-Neu-Strasse 7-9,
+7500 Karlsruhe
+West Germany, 0721/693015
+=S Proteus Z80 MP/M
+=L ASM?     
+
+Claus D. Schmid, PROTEUS Gesellschaft fuer
+Datentechnik mbH, Haid-und-Neu-Strasse 7-9,
+7500 Karlsruhe
+West Germany, 0721/693015
+=S Proteus 68000 CP/M-68K
+=L C
+
+Fred Knox
+Alza Corp
+950 Page Mill Rd
+Palo Alto, CA 94303-0802
+=S Motorola 68000 CP/M-68K 
+=L C or ASM 
+=T 415-494-5000
+
+Neville D. Newman
+=S Motorola 68000 CP/M-68K 
+=L C        
+=N NEVILLE%UMASS-CS.CSNET@CSNET-RELAY
+
+via Alan Phillips
+Lancaster Univ, UK
+Research Machines RM380Z CP/M-80  
+=L ASM     
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+Felix Diner
+Lundy Co.
+1 Robert Lane
+Glen Head NY  11545
+=S "Slicer" MS DOS   
+=L MASM     
+
+Peter Teklinski
+NJ Inst. of Tech
+Computer Services Dept
+323 King Blvd
+Newark, NJ  07102 
+=S Sperry 9080 VS9              
+
+G. Meier-Currat & A. de Haller,
+Charmilles Technologies SA
+109, Rue de Lyon, Case postale 293
+CH-1211 Geneva 13, Switzerland
+Texas Instruments Professional MS-DOS   
+=L MASM     
+=T (022) 45 88 21                                   
+=C Added interrupt-driven port i/o to MSXTIP.ASM
+=D Feb 86
+				   
+via Alan Phillips
+Lancaster Univ, UK
+=S U-Microcomputer U-MAN 1000 CP/M-86k       
+=N SYSKERMIT%vax1.central.lancaster.ac.uk@ucl-cs
+
+Technical Systems Consultants, Inc.
+111 Providence Road
+Chapel Hill
+North Carolina 27514
+=T 919-493-1451
+=S UniFLEX Operating System
+
+=S Varian VISTA 402
+=C Distributed by Varian
+
+Jon L White, Xerox-PARC
+=S Xerox 1100 Interlisp D     
+=C Reportedly, Xerox is distributing a version of Kermit with the 1108.

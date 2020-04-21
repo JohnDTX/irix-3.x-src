@@ -1,0 +1,162 @@
+'\"macro stdmacro
+.TH DATE 1
+.SH NAME
+date \- print and set the date
+.SH SYNOPSIS
+.B date
+[ \f3+\fPformat ]
+.br
+.B date
+[
+.B \-n
+]
+mmddhhmm[.ss][yy]
+.SH DESCRIPTION
+If no argument is given,
+or if the argument begins with \f3+\fP,
+the current date and time are printed.
+Otherwise, the current date is set.
+The first
+.I mm\^
+is the month number;
+.I dd\^
+is the day number in the month;
+.I hh\^
+is the hour number (24 hour system);
+the second
+.I mm\^
+is the minute number;
+.I ss\^
+is the second number, which must be preceded with a period, and is optional;
+.I yy\^
+is the last 2 digits of the year number and is optional.
+The current year is the default if no year is mentioned.
+.PP
+If 
+.IR timed (1M)
+is running on the machine, the date is set on all machines in the
+network which are also running
+.IR timed .
+However, the 
+.B \-n
+flag means ``no network'', i.e., it does not set the date for all the
+machines on the network.
+The system operates in \s-1GMT\s0;
+.I date\^
+takes care of the conversion to and from
+local standard and daylight time.
+.PP
+If the argument begins with \f3+\fP,
+the output of
+.I date\^
+is under the control of the user.
+The format for the output is similar to that of
+the first argument to
+.IR printf (3S).
+All output fields are of fixed size (zero padded
+if necessary).
+Each field descriptor is preceded by \f3%\fP
+and will be replaced in the output by
+its corresponding value.
+A single \f3%\fP is encoded by \f3%%\fP.
+All other
+characters are copied to the output without change.
+The string is always terminated with a new-line character.
+.PP
+Field Descriptors:
+.RS
+.PD 0
+.TP 5
+.B  n
+insert a new-line character
+.TP 5
+.B  t
+insert a tab character
+.TP 5
+.B  m
+month of year \- 01 to 12
+.TP 5
+.B  d
+day of month \- 01 to 31
+.TP 5
+.B  y
+last 2 digits of year \- 00 to 99
+.TP 5
+.B D
+date as mm/dd/yy
+.TP 5
+.B  H
+hour \- 00 to 23
+.TP 5
+.B  M
+minute \- 00 to 59
+.TP 5
+.B  S
+second \- 00 to 59
+.TP 5
+.B T
+time as \s-1HH:MM:SS\s+1
+.TP 5
+.B  j
+day of year \- 001 to 366
+.TP 5
+.B  w
+day of week \- Sunday = 0
+.TP 5
+.B  a
+abbreviated weekday \- Sun to Sat
+.TP 5
+.B  h
+abbreviated month \- Jan to Dec
+.TP 5
+.B  r
+time in
+.SM AM/PM 
+notation
+.TP 5
+.B  z
+abbreviated time-zone, lower-case
+.TP 5
+.B  Z
+abbreviated time-zone, upper-case
+.RE
+.ne 8
+.SH EXAMPLES
+.PP
+.RS
+date \-n 10080045.1787
+.RE
+.PP
+sets the date on the local machine only to Oct 8, 12:45:17 \s-1AM\s+1, 1987.
+Issuing
+.RS
+date\| '+DATE: %m/%d/%y%nTIME: %H:%M:%S'
+.RE
+.PP
+immediately afterwards generates the output:
+.PP
+.RS
+DATE: 10/08/87
+.br
+TIME: 12:45:20
+.RE
+.PP
+.SH DIAGNOSTICS
+.TP "\w'\f2bad\ format\ character\ \ \fP'u"
+.I No permission\^
+if
+you aren't the super-user and you try to change the date;
+.TP
+.I bad conversion\^
+if the date set is syntactically incorrect;
+.TP
+.I bad format character\^
+if the field
+descriptor is not recognizable.
+.SH FILES
+/dev/kmem
+.SH SEE ALSO
+timed(1M).
+.SH WARNING
+It is a bad practice to change the date while the system is
+running multi-user.

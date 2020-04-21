@@ -1,0 +1,45 @@
+.TH setdepth 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B setdepth
+\- sets up a 3-D viewport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setdepth(near, far)"
+.B "Screencoord near, far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setdep(near, far)"
+.B "integer*4 near, far"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setdepth(near, far: Screencoord);"
+.SH DESCRIPTION
+.B viewport
+specifies a mapping from the left, right,
+bottom, and top clipping planes in world coordinate values
+to screen coordinate values.
+.B setdepth
+completes this mapping for homogeneous world coordinates.
+The two arguments map the near and far clipping planes to the desired
+screen coordinate values.  The default is
+\f3setdepth(0, 1023)\fP.
+The legal values range from 32767 (0x7FFF) to
+-32768 (0x8000).  When used for depth-cueing or z-buffering, the range
+should be restricted to (0x3FFF) to (0xC000).
+.P
+The depth is the distance from your eye.
+.B setdepth
+is used in z-buffering,
+depth-cueing, and certain feedback applications.
+.SH "SEE ALSO"
+depthcue, endfeedback, feedback, zbuffer
+.sp
+.I Programming Guide,
+Section 12.1, Z-Buffer Mode

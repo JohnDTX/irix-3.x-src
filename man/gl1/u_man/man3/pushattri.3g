@@ -1,0 +1,43 @@
+.TH pushattributes  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I pushattributes
+- push attributes on a stack
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "pushattributes()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine pushat"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure pushattributes;"
+.sp
+.SH DESCRIPTION
+Global state can be saved with the \f2pushattributes\f1 command.
+A stack of attributes
+is maintained, and \f2pushattributes\f1 puts copies of global state
+variables on the stack.  The global state variables that will be saved are:  
+.TS
+center ;
+l l.
+backbuffer	linewidth
+color	object font
+raster font	reset linestyle
+frontbuffer	RGB color
+linestyle	RGB writemask
+linestyle backup	texture
+writemask
+.TE
+.PP
+The attribute stack is 12 levels deep.  The
+.I pushattributes
+command is ignored if the stack is full.
+.SH "SEE ALSO"
+.I backbuffer, color, frontbuffer, 
+.I linewidth, lsbackup, objfont, 
+.I popattributes, resetls, RGBcolor,
+.I RGBwritemask, setlinestyle, settexture, writemask

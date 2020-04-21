@@ -1,0 +1,43 @@
+.TH gRGBcursor 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gRGBcursor
+- return the characteristics of the cursor in RGB mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gRGBcursor(index, red, green, blue, redm, greenm, bluem, b)"
+.B "short *index;"
+.B "RGBvalue *red, *green, *blue, *redm, *greenm, *bluem;"
+.B "Boolean *b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gRGBcu(index, red, green, blue, redm, greenm, bluem, b)"
+.B "integer*2 index, red, green, blue, redm, greenm, bluem;"
+.B "logical b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gRGBcursor(var index: Short; "
+.B "	var red, green, blue, redm, greenm, bluem: RGBvalue;"
+.B "	var b: Boolean);"
+.sp
+.SH DESCRIPTION
+The
+.I gRGBcursor
+command returns the seven parameters of the last \f2RGBcursor\f1 command
+executed.  These
+are: \f3index\f1, \f3red\f1, \f3green\f1, \f3blue\f1, \f3redm\f1,
+\f3greenm\f1, and \f3bluem\f1.  For a more detailed description, see
+\f2RGBcursor\f1.  It also returns a boolean 
+.B b
+that is 
+.I TRUE
+is the automatic cursor is on.
+The system must be in RGB mode when this command
+is executed; otherwise, it is ignored.
+.SH "SEE ALSO"
+.I RGBcursor
+.SH NOTE
+This command can only be used in immediate mode.

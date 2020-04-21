@@ -1,0 +1,35 @@
+'\"macro stdmacro
+.TH DBADD 1
+.SH NAME
+dbadd \- add an entry to a database
+.SH SYNOPSIS
+.PP
+.B
+dbadd
+.I
+database-name key
+.SH DESCRIPTION
+.PP
+.I
+Dbadd
+adds the the text from the standard input to the named database, using
+the given key.
+For information on the 
+Emacs
+database facility, see the following documents:
+.PP
+.RS 5
+.I
+Emacs Reference Manual
+.br
+.SH SEE ALSO
+Several utilities, in addition to dbadd,
+are provided for manipulating the Emacs databases outside of Emacs.
+.IP "dbcreate(1)" 17
+create a database.
+.IP "dbbuild(1)" 17
+builds a database from a shell command file.
+.IP "dblist(1)" 17
+lists the keys in the database.
+.IP "dbprint(1)" 17
+prints the contents of a database entry.

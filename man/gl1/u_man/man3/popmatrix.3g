@@ -1,0 +1,24 @@
+.TH popmatrix  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I popmatrix
+- pop the transformation matrix stack
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popmatrix()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popmat"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popmatrix;"
+.sp
+.SH DESCRIPTION
+.I Popmatrix
+pops the transformation matrix stack.  The matrix on top of the stack before
+the execution of \f2popmatrix\f1 is lost.
+.SH "SEE ALSO"
+.I loadmatrix, multmatrix, pushmatrix

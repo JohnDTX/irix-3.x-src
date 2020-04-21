@@ -1,0 +1,24 @@
+'\"macro stdmacro
+.TH SSP 1
+.SH NAME
+ssp \- make output single spaced
+.SH SYNOPSIS
+.B ssp
+[ name ... ]
+.SH DESCRIPTION
+.I Ssp\^
+removes extra blank lines and causes all output to be single spaced.
+It can be used directly, or as a filter after 
+.I nroff\^
+or other text formatting operations.
+.SH EXAMPLE
+.IP
+nroff -mm filea fileb | ssp >> filec
+.PP
+would 
+.I nroff\^
+the files with the 
+.B \-mm
+macro package, then single space the output and direct it to
+.BR filec .
+.\"	@(#)ssp.1	5.1 of 11/16/83

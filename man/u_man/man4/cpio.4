@@ -1,0 +1,90 @@
+'\" t
+'\"macro stdmacro
+.TH CPIO 4
+.SH NAME
+cpio \- format of cpio archive
+.SH DESCRIPTION
+.PP
+The header structure, when the
+.B \-c
+option of
+.IR cpio (1)
+is not used, is:
+.PP
+.RS .3i
+.TS
+l l l.
+struct {
+	short	h_magic,
+		h_dev;
+	ushort	h_ino,
+		h_mode,
+		h_uid,
+		h_gid;
+	short	h_nlink,
+		h_rdev,
+		h_mtime[2],
+		h_namesize,
+		h_filesize[2];
+	char	h_name[h_namesize rounded to word];
+} Hdr;
+.TE
+.RE
+.PP
+When the
+.B \-c
+option is used, the header
+information is described by:
+.PP
+.RS .3i
+sscanf(Chdr,"%6o%6o%6o%6o%6o%6o%6o%6o%11lo%6o%11lo%s",
+.RS +7
+.nf
+&Hdr.h_magic, &Hdr.h_dev, &Hdr.h_ino, &Hdr.h_mode,
+&Hdr.h_uid, &Hdr.h_gid, &Hdr.h_nlink, &Hdr.h_rdev,
+&Longtime, &Hdr.h_namesize,&Longfile,Hdr.h_name);
+.fi
+.RE
+.RE
+.PP
+.I Longtime\^
+and
+.I Longfile\^
+are equivalent to
+.I Hdr.h_mtime\^
+and
+.IR Hdr.h_filesize ,
+respectively.
+The
+contents
+of each file are recorded in an element
+of the array of varying length structures,
+.IR archive ,
+together with other items describing the file.
+Every instance of 
+.I h_magic\^
+contains the constant 070707 (octal).
+The items
+.I h_dev\^
+through 
+.I h_mtime\^
+have meanings explained in
+.IR  stat (2).
+The length of the null-terminated path name
+.IR h_name ,
+including the null byte,
+is given by
+.IR h_namesize .
+.PP
+The last record
+of the
+.I archive\^
+always contains the name \s-1TRAILER!!!\s0.
+Special files, directories, and the trailer are recorded
+with 
+.I
+h_filesize
+equal to zero.
+.SH "SEE ALSO"
+cpio(1), find(1), stat(2).
+.\"	@(#)cpio.4	5.1 of 10/15/83

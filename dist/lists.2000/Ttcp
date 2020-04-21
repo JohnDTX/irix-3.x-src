@@ -1,0 +1,10 @@
+etc/net/net
+etc/net/netload
+etc/rc.tcp
+kernels/2400.tcp
+tcpwsirisrc
+usr/bin/ftp
+usr/bin/rcp
+usr/bin/rlogin
+usr/bin/rsh
+usr/bin/telnet

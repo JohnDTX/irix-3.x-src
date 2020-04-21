@@ -1,0 +1,96 @@
+'\"macro stdmacro
+.TH BRC 1M
+.SH NAME
+brc, bcheckrc, rc, powerfail \- system initialization 
+shell scripts
+.SH SYNOPSIS
+.B /etc/brc
+.PP
+.B /etc/bcheckrc
+.PP
+.B /etc/rc
+.PP
+.B /etc/powerfail
+.SH DESCRIPTION
+Except for
+.IR powerfail ,
+these shell procedures are executed via
+entries in
+.I /etc/inittab
+(see
+.IR inittab (4))
+by
+.IR init (1M)
+when the system is changed out of
+.SM
+.I "SINGLE USER"
+mode.
+.I Powerfail
+is executed whenever a system power failure is detected.
+.PP
+The
+.I brc
+procedure performs model-specific system initialization chores.
+When invoked on a new system which lacks the file
+.I /etc/fstab
+(see
+.IR mntent (4)),
+it builds a default filesystem table.
+.I brc
+may also create special device links when run for the first time on a new
+system.
+.PP
+The
+.I bcheckrc
+procedure performs all the necessary consistency checks to
+prepare the system to change into multi-user mode.
+It sets the system date, either by using the result of
+.I rc.getdate (1M)
+or prompting for it.
+.I Bcheckrc
+also checks the file systems with
+.IR fsck (1M).
+.PP
+The
+.I rc
+procedure starts all system
+daemons before the terminal
+lines are enabled for multi-user mode.
+In addition, file systems are mounted and
+accounting, error logging, and system activity logging
+.\"and the Remote Job Entry (\s-1RJE\s+1) system
+are activated in this procedure.  After
+.I rc
+has completed its normal command sequence, it can optionally execute
+the
+.I "rc.local"
+script.  The
+.I "rc.local"
+script should be used for per-site non-standard machine initialization,
+and is guaranteed to not be provided or modified by Silicon Graphics
+software distributions.
+.PP
+The
+.I powerfail
+procedure is invoked when the system detects a power
+failure condition.
+It shuts the system down using
+.IR reboot (1M).
+.\"Its chief duty is to reload any
+.\"programmable micro-processors with their appropriate scripts,
+.\"if appropriate.
+.\"It also logs the fact that a power failure occurred.
+.PP
+These shell procedures, in particular
+.IR rc ,
+may be used for several run-level states.
+.\"The \f2who\f1(1) command may be used to get the run-level information.
+.SH SEE ALSO
+init(1M),
+fsck(1M),
+killall(1M),
+reboot(1M),
+shutdown(1M),
+.\"who(1),
+inittab(4).
+.\"	@(#)brc.1m	5.1 of 10/17/83

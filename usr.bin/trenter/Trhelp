@@ -1,0 +1,54 @@
+/*	@(#)Trhelp	1.2	*/
+/*
+ * @(#)$Header: /d2/3.7/src/usr.bin/trenter/RCS/Trhelp,v 1.1 89/03/27 18:29:47 root Exp $
+ * $Log:	Trhelp,v $
+# Revision 1.1  89/03/27  18:29:47  root
+# Initial check-in for 3.7
+# 
+ * Revision 1.2  85/02/06  19:11:19  bob
+ * Customized for SGI (untested)
+ * 
+ */
+#define	H_NAME		"Enter your name."
+#define	H_CO		"Enter your company name."
+#define	H_PHONE		"Enter phone number."
+#define	H_ROOM		"Enter your room number (or 'na')."
+#define	H_ADDR		"Enter your company address."
+#define	H_CITY		"Enter city name."
+#define	H_STATE		"Enter name of state."
+#define	H_ZIP		"Enter postal zip code."
+#define	H_COUNTRY	"Enter name of your country."
+#define	H_CID		"Enter your SGI-assigned customer ID (or 'na')."
+#define	H_SID		"Enter your SGI-assigned site ID (or 'na')."
+#define	H_CPUNO		"Enter your CPU serial number (or 'na')."
+#define	H_MACH		"Enter machine type (e.g., 780, 750, 70)."
+#define	H_TYPE		"Enter type of trouble report:\n\
+	doc (documentation)\n\
+	enh (enhancement)\n\
+	sw  (software)\n\
+	hdw (hardware)\n\
+	fw  (firmware)\n\
+	cs  (customer support)\n\
+	unk (unknown)"
+#define	H_PROD	\
+"Enter the name of the SGI product in which the trouble occurred\n\
+(e.g., 2400, 2500, unix, Workstation FORTRAN, Remote GL, etc)."
+#define	H_OS_REL \
+"Enter the release of UNIX you are running (e.g., GL2-W2.2)."
+#define	H_PROD_REL \
+"Enter the release of the product causing trouble (not prompted if\n\
+product is 'unix')."
+#define	H_SEV		"Enter severity of the problem:\n\
+	1) critical -- system is inoperable\n\
+	2) severe -- a fix must be made for work to continue (the date by\n\
+		     which a fix is required will be prompted)\n\
+	3) normal -- a work-around exists\n\
+	4) non-critical -- a desired change"
+#define	H_RDATE  \
+"Enter date by which a fix for a severity 2 is needed (format is mm/dd/yy).\n\
+The date given must be at least a week from the date of this report."
+#define	H_ABS		"Enter short (one line) summary of problem."
+#define	H_DESC	\
+"Enter full description of problem.  This is a multi-line field; input is\n\
+terminated by a line consisting of '.' alone."
+#define	H_ATT		"Enter 'y' if attachments are provided, 'n' otherwise."

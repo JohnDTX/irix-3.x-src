@@ -1,0 +1,429 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: P.BODY.1.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               10-May-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure body(fsys: setofsys; pfname: identrec; var bodystmt: pstmt);
+  var lstmt,laststmt: pstmt; lab: plabrec; lstr: idstring; i: integer;
+  
+  procedure statement(fsys: setofsys; var fstmt: pstmt);
+    label 1;
+    var lpn: pn; lab: plabrec; lstmt: pstmt;
+    
+    procedure makefsize(var fattr: attr; tosize: integer);
+      var lsize,op: integer; lpt: pt;
+    begin
+    lsize := fattr.asize;
+    if lsize <> tosize
+    then begin
+      if tosize = 4
+      then begin lpt := realptr; op := 55; {REAL84} end
+      else begin lpt := doubleptr; op := 54; {REAL48} end;
+      if fattr.treeptr <> nil
+      then
+        if fattr.treeptr^.node = CSTNODE
+        then fattr.treeptr^.csttype := lpt
+        else fattr.treeptr := newunnode(op,fattr.treeptr);
+      fattr.typtr := lpt; fattr.asize := tosize;
+      end;
+    end; {makefsize}
+    
+    procedure matchisizes(var aattr,battr: attr);
+      var asize,bsize: integer;
+    begin
+    asize := aattr.asize; bsize := battr.asize;
+    if asize <> bsize
+    then
+      if asize < bsize
+      then makescsize(aattr,bsize)
+      else makescsize(battr,asize);
+    end; {matchisizes}
+    
+    procedure minsize2(var fattr: attr);
+    begin
+    if fattr.asize < 2
+    then makescsize(fattr,2);
+    end; {minsize2}
+    
+    procedure makesetsize(var fattr: attr; fsize: integer);
+    begin
+    with fattr do begin
+      treeptr := newunnode(170 {ADJSET},treeptr);
+      treeptr^.unsubop := fsize*256 + asize;
+      asize := fsize;
+      end;
+    end; {makesetsize}
+    
+    procedure matchsetsizes(var aattr,battr: attr);
+    begin
+    if aattr.asize <> battr.asize
+    then if aattr.asize = 0
+         then makesetsize(battr,0)
+         else if battr.asize = 0
+              then makesetsize(aattr,0)
+              else if aattr.asize > battr.asize
+                   then makesetsize(battr,aattr.asize)
+                   else makesetsize(aattr,battr.asize);
+    end; {matchsetsizes}
+    
+    procedure float(var fattr: attr);
+    begin
+    makescsize(fattr,4);
+    if fattr.treeptr <> nil
+    then
+      if fattr.treeptr^.node = CSTNODE
+      then
+        with fattr.treeptr^ do
+          begin cstvalu.dvalu := cstvalu.ivalu; csttype := realptr; end
+      else fattr.treeptr := newunnode(56{FLOAT44},fattr.treeptr);
+    fattr.typtr := realptr; fattr.asize := 4;
+    end; {float}
+    
+    procedure dfloat(var fattr: attr);
+    begin
+    makescsize(fattr,4);
+    if fattr.treeptr <> nil
+    then
+      if fattr.treeptr^.node = CSTNODE
+      then
+        with fattr.treeptr^ do
+          begin cstvalu.dvalu := cstvalu.ivalu; csttype := doubleptr; end
+      else fattr.treeptr := newunnode(57{FLOAT48},fattr.treeptr);
+    fattr.typtr := doubleptr; fattr.asize := 8;
+    end; {dfloat}
+    
+    procedure maxnumtype(var aattr,battr: attr);
+      var IntA,IntB,RealA,RealB,DoubleA,DoubleB: Boolean;
+    begin
+    if aattr.typtr <> battr.typtr
+    then begin
+      with aattr do begin
+        IntA := CompTypes(typtr,intptr);
+        RealA := typtr = realptr;
+        DoubleA := typtr = doubleptr;
+        end;
+      with battr do begin
+        IntB := CompTypes(typtr,intptr);
+        RealB := typtr = realptr;
+        DoubleB := typtr = doubleptr;
+        end;
+      if (IntA or RealA or DoubleA) and (IntB or RealB or DoubleB)
+      then
+        if IntA and IntB
+        then matchisizes(aattr,battr)
+        else
+          if IntA
+          then begin
+            makescsize(aattr,4);
+            if RealB then float(aattr) else dfloat(aattr);
+            end
+          else
+            if IntB
+            then begin
+              makescsize(battr,4);
+              if RealA then float(battr) else dfloat(battr);
+              end
+            else
+              if RealA then makefsize(aattr,8) else makefsize(battr,8);
+      end
+    else
+      if aattr.asize <> battr.asize then matchisizes(aattr,battr);
+    end; {maxnumtype}
+    
+    procedure chtostring(var fattr: attr);
+      var lstrval: strvaltype;
+    begin
+    new(lstrval);
+    with lstrval^ do begin
+      strpart := '        '; next := nil;
+      strpart[1] :=  chr(fattr.treeptr^.cstvalu.ivalu);
+      end;
+    with fattr.treeptr^ do begin
+      csttype := str1ptr; cstvalu.svalu := lstrval;
+      cstvalu.svalulen := 1;
+      end;
+    fattr.typtr := str1ptr; fattr.asize := 2;
+    end; {chtostring}
+    
+    function Paoc(fpt: pt): Boolean;
+      var lo,hi: longint;
+    begin
+    Paoc := FALSE;
+    if fpt <> nil
+    then
+      if (fpt^.form = ARRAYS) and
+         (fpt^.arrayof = charptr) and
+         fpt^.PckdArr
+      then
+        if CompTypes(fpt^.indexedby,intptr)
+        then begin
+          getbounds(fpt^.indexedby,lo,hi);
+          Paoc := lo = 1;
+          end;
+    end; {Paoc}
+    
+    procedure expression(fsys: setofsys); forward;
+      
+    procedure call(fsys: setofsys; fpn: pn); forward;
+    
+    procedure selector(fsys: setofsys; fpn: pn; var Pckd,PckdStorage: Boolean);
+      var lattr: attr; op,numbits,myrightbit,i,indxsize: integer;
+          lpn,lpn2,arrpn: pn; lpt: pt; OK,FirstTime: Boolean; lo,hi: longint;
+    begin
+    PckdStorage := FALSE; Pckd := FALSE;
+    with lattr do begin
+      with fpn^ do begin
+        typtr := idtype; treeptr := fpn; asize := fullbytes(typtr);
+        if class = FIELD
+        then begin
+          with display[disx] do
+            if occur = REC
+            then begin Pckd := RecPckd; withcount := withcount + 1; end;
+          lpn := newunnode(43{WITHREC},nil);
+          if level <= 1
+          then lpn^.unsubop := disx - 1
+          else lpn^.unsubop := disx - level;
+          treeptr := newbinnode(15{FIELD},lpn,treeptr);
+          PckdStorage := PckdField;
+          if PckdStorage
+          then begin
+            getbounds(typtr,lo,hi); asize := 2;
+            treeptr := newunnode(62{EXTUSFLD} + ord(lo < 0),treeptr);
+            numbits := typtr^.bytes*8 + typtr^.bits;
+            myrightbit := 16 - bitoff - numbits;
+            treeptr^.unsubop := numbits*256 + myrightbit;
+            end;
+          end
+        else if class = FUNC
+          then begin
+            if pfdeclkind = STANDARD
+            then error(145)
+            else
+              if pfdecl = FORMAL
+              then error(146)
+              else begin
+                OK := FALSE;
+                for i := top downto 1 do
+                  with display[i] do
+                    if occur = BLK
+                    then if rootlink = fpn
+                         then OK := TRUE;
+                if not OK then error(171);
+                if pflev < level - 1
+                then RefBelow := TRUE
+                else refcount := refcount + 1;
+                end;
+            end
+          else if class = VARS
+            then begin
+              if vlev < level
+              then begin
+                   RefBelow := TRUE;
+                   if vlev > 1 then uplevref[vlev] := uplevref[vlev] + 1;
+                   end;
+              refcount := refcount + 1;
+              end;
+        end; {with fpn^}
+      if not (token in selectsys + fsys)
+      then skip(28,selectsys + fsys);
+      while token in selectsys do
+        begin
+        if token = LBRACKSY
+        then begin
+          arrpn := lattr.treeptr; FirstTime := TRUE; numbits := 0;
+          repeat
+            if typtr <> nil
+            then 
+              if (typtr^.form <> ARRAYS) and (typtr^.form <> STRINGS)
+              then begin error(135); typtr := nil; end;
+            scan;
+            expression(fsys + [COMMASY,RBRACKSY]);
+            if (CHIP = M68000) or (CHIP = M68020)
+            then begin
+              indxsize := 2;
+              if typtr <> nil
+              then
+                if typtr^.form = ARRAYS
+                then
+                  if typtr^.BigArray then indxsize := 4;
+              makescsize(gattr,indxsize); lpt := gattr.typtr; new(lpn,TRINODE);
+              with lpn^ do begin
+                node := TRINODE; triop := 16{INDEX}; tript := lattr.typtr;
+                tri1 := lattr.treeptr; tri2 := gattr.treeptr;
+                end;
+              lattr.treeptr := lpn;
+              end
+            else begin
+              if gattr.asize < 2 then makescsize(gattr,2);
+              lpt := gattr.typtr; new(lpn,INDEXNODE);
+              with lpn^ do begin
+                node := INDEXNODE; indexop := 11{ADJINDEX};
+                InxCkBnd := FALSE; inxexpsz := gattr.asize; inxsz := 0;
+                inxexpr := gattr.treeptr;
+                end;
+              if not FirstTime
+              then begin
+                new(lpn2,INDEXNODE);
+                with lpn2^ do begin
+                  node := INDEXNODE; indexop := 10{SCALE};
+                  inxexpr := lattr.treeptr;
+                  inxsz := lattr.asize; inxaddr := lpn;
+                  end;
+                end;
+              end;
+            if typtr <> nil
+            then begin
+              with typtr^ do
+                if form = ARRAYS
+                then begin
+                  if not CompTypes(indexedby,lpt) then error(136);
+                  getbounds(indexedby,lo,hi);
+                  if (CHIP <> M68000) and (CHIP <> M68020)
+                  then lpn^.inxsz := lo;
+                  if RangeFlag and (gattr.treeptr <> nil)
+                  then
+                    if gattr.treeptr^.node = CSTNODE
+                    then begin
+                      if (gattr.treeptr^.cstvalu.ivalu < lo) or
+                         (gattr.treeptr^.cstvalu.ivalu > hi)
+                      then error(169);
+                      end
+                    else
+                      if (CHIP = M68000) or (CHIP = M68020)
+                      then begin
+                        treeptr^.tri2 :=
+                            newbinnode(46{RCHECK},nil,treeptr^.tri2);
+                        treeptr^.tri2^.leftpt := indexedby;
+                        if indxsize = 2
+                        then treeptr^.tri2^.binsubop := 1
+                        else treeptr^.tri2^.binsubop := 2;
+                        end
+                      else begin
+                        lpn^.InxCkBnd := TRUE; lpn^.inxbound := hi;
+                        end;
+                  PckdStorage := BitPacked; Pckd := PckdArr;
+                  if PckdStorage
+                  then begin
+                       asize := 2; numbits := typtr^.bitsperel;
+                       if typtr^.SignedEl then numbits := numbits + 32;
+                       end
+                  else asize := fullbytes(arrayof);
+                  typtr := arrayof;
+                  end
+                else { form = STRINGS }
+                  begin
+                  if not CompTypes(lpt,intptr) then error(136);
+                  if (CHIP <> M68000) and (CHIP <> M68020)
+                  then
+                    if RangeFlag
+                    then begin
+                      lpn^.InxCkBnd := TRUE; lpn^.inxbound := typtr^.stringlen;
+                      end;
+                  Pckd := TRUE; PckdStorage := TRUE;
+                  typtr := charptr; asize := 2; numbits := 8;
+                  end;
+              if (CHIP <> M68000) and (CHIP <> M68020)
+              then
+                if FirstTime
+                then lattr.treeptr := lpn
+                else lattr.treeptr := lpn2;
+              end;
+            FirstTime := FALSE;
+          until token <> COMMASY;
+          if (CHIP <> M68000) and (CHIP <> M68020)
+          then begin
+            new(lpn,INDEXNODE);
+            with lpn^ do begin
+              node := INDEXNODE; indexop := 9{INDEX};
+              inxexpr := lattr.treeptr; inxaddr := arrpn;
+              if numbits = 0 then inxsz := asize else inxsz := -numbits;
+              end;
+            lattr.treeptr := lpn;
+            end;
+          if token = RBRACKSY then scan else error(34);
+          end
+        else if token = PERIODSY
+          then begin
+            if typtr <> nil
+            then
+              if typtr^.form <> RECORDS
+              then begin error(137); typtr := nil; end;
+            scan;
+            if token = IDENTSY
+            then begin
+              if typtr <> nil
+              then begin
+                Pckd := typtr^.PckdRec;
+                lpn := searchlocal(typtr^.fields);
+                treeptr := newbinnode(15{FIELD},treeptr,lpn);
+                if lpn <> nil
+                then begin
+                  typtr := lpn^.idtype; PckdStorage := lpn^.PckdField;
+                  if PckdStorage
+                  then begin
+                    getbounds(lpn^.idtype,lo,hi); asize := 2;
+                    lattr.treeptr := newunnode(62{EXTUSFLD} + ord(lo < 0),
+                                               lattr.treeptr);
+                    numbits := lpn^.idtype^.bytes*8 + lpn^.idtype^.bits;
+                    myrightbit := 16 - lpn^.bitoff - numbits;
+                    lattr.treeptr^.unsubop := numbits*256 + myrightbit;
+                    end
+                  else asize := fullbytes(typtr);
+                  end
+                else begin error(147); typtr := nil; end;
+                end;
+              scan;
+              end
+            else error(29);
+            end
+          else if token = UPARROWSY
+            then begin
+              if typtr <> nil
+              then begin
+                if typtr^.form = FILES
+                then begin
+                  if typtr^.fileof = nil then error(161);
+                  if (typtr^.fileof = charptr) and typtr^.PckdFile
+                  then op := 14{TEXT}
+                  else
+                    if LeftHandSide
+                    then op := 12{POINTER}
+                    else op := 13{FILUP};
+                  typtr := typtr^.fileof;
+                  treeptr := newunnode(op,treeptr);
+                  asize := fullbytes(typtr);
+                  if op = 14
+                  then begin
+                    treeptr := newunnode(62 {EXTUFLD},treeptr);
+                    if TARGSEX = MALE
+                    then treeptr^.unsubop := 8*256 + 8
+                    else treeptr^.unsubop := 8*256;
+                    PckdStorage := TRUE;
+                    end;
+                  end
+                else
+                  if typtr^.form = POINTERS
+                  then begin
+                    typtr := typtr^.pointerto;
+                    treeptr := newunnode(12{POINTER},treeptr);
+                    asize := fullbytes(typtr);
+                    end
+                  else begin error(138); typtr := nil; end;
+                end;
+              scan;
+              end;
+        if not (token in fsys + selectsys)
+        then skip(20,fsys + selectsys);
+        end;
+      gattr := lattr;
+      end;
+    end; {selector}
+    
+
+                                       

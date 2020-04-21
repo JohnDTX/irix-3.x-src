@@ -1,0 +1,4 @@
+htonl(x)
+{
+	return (x);
+}

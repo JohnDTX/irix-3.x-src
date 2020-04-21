@@ -1,0 +1,397 @@
+'\" t
+'\"macro stdmacro
+.TH SIGNAL 2
+.SH NAME
+signal \- specify what to do upon receipt of a signal
+.SH SYNOPSIS
+.B #include <sys/signal.h>
+.PP
+.B int (\(**signal (sig, func))(\^\^)
+.br
+.B int sig;
+.br
+.B int (\(**func)(\^\^);
+.SH DESCRIPTION
+.I Signal\^
+allows the calling process to choose one of three ways
+in which it is possible to handle the receipt of a specific signal.
+.I Sig\^
+specifies the signal and
+.I func\^
+specifies the choice.
+.PP
+.I Sig\^
+can be assigned any one of the following except
+.BR \s-1SIGKILL\s+1 : 
+.TS
+center;
+lB l l.
+\s-1SIGHUP\s+1	\01	hangup
+\s-1SIGINT\s+1	\02	interrupt
+\s-1SIGQUIT\s+1	\03*	quit
+\s-1SIGILL\s+1	\04*	illegal instruction (not reset when caught)
+\s-1SIGTRAP\s+1	\05*	trace trap (not reset when caught)
+\s-1SIGIOT\s+1	\06*	\s-1IOT\s0 instruction
+\s-1SIGEMT\s+1	\07*	\s-1EMT\s0 instruction
+\s-1SIGFPE\s+1	\08*	floating point exception
+\s-1SIGKILL\s+1	\09	kill (cannot be caught or ignored)
+\s-1SIGBUS\s+1	10*	bus error
+\s-1SIGSEGV\s+1	11*	segmentation violation
+\s-1SIGSYS\s+1	12*	bad argument to system call
+\s-1SIGPIPE\s+1	13	write on a pipe with no one to read it
+\s-1SIGALRM\s+1	14	alarm clock
+\s-1SIGTERM\s+1	15	software termination signal
+\s-1SIGUSR1\s+1	16	user defined signal 1
+\s-1SIGUSR2\s+1	17	user defined signal 2
+\s-1SIGCLD\s+1	18	death of a child (see \f2\s-1WARNING\s+1\f1 below)
+\s-1SIGPWR\s+1	19	power fail (see \f2\s-1WARNING\s+1\f1 below)
+\s-1SIGWINCH\s+1	25	window size changes
+\s-1SIGIO\s+1	26	input/output possible
+\s-1SIGURG\s+1	27	urgent condition on i/o channel
+.sp .5
+.T&
+l s s.
+See below for the significance of the asterisk ( \(** ) in the above list.
+.TE
+.PP
+.I Func\^
+is assigned one of three values:
+.BR \s-1SIG_DFL\s+1 ,
+.BR \s-1SIG_IGN\s+1 ,
+or a
+.IR "function address" .
+The actions prescribed by these values of are as follows: 
+.PP
+.SM
+.B SIG_DFL
+\&\-  terminate process upon receipt of a signal
+.RS .3i
+Upon receipt of the signal
+.IR sig ,
+the receiving process is to be terminated with the following consequences:
+.RS .3i
+.PP
+All of the receiving process's open file descriptors will be closed.
+.PP
+If the parent process of the receiving process is executing a
+.IR wait ,
+it will be notified of the
+termination of the receiving process and the terminating signal's number
+will be made available to the parent process; see
+.IR wait (2).
+.PP
+If the parent process of the receiving process is not executing a
+.IR wait ,
+the receiving process will be transformed into a zombie process (see
+.IR exit (2)
+for definition of zombie process).
+.PP
+The parent process
+.SM ID
+of each of the receiving process's existing
+child processes and zombie processes will be set to 1.
+This means the initialization process (see
+.IR intro (2))
+inherits each of these processes.
+.PP
+Each attached shared memory segment is detached and the value of
+.B shm_nattach
+in the data structure associated with its shared memory identifier
+is decremented by 1.
+.PP
+For each semaphore for which the receiving process has set a semadj value (see
+.IR semop (2)),
+that semadj value is added to the semval of the specified semaphore.
+.PP
+If the process has a process, text, or data lock, an
+.I unlock\^
+is performed (see
+.IR plock (2)).
+.PP
+An accounting record will be written on the accounting file if the system's 
+accounting routine is enabled; see
+.IR acct (2).
+.PP
+If the receiving process's process
+.SM ID\*S,
+tty group
+.SM ID\*S,
+and process group
+.SM ID
+are equal,
+the signal
+.B
+.SM SIGHUP
+will be sent to all of the processes that have a process group
+.SM ID
+equal to the process group
+.SM ID
+of the receiving process.
+.PP
+A `core image' will be made in
+the current working directory of the receiving
+process if
+.I sig\^
+is one for which an asterisk appears in the above list
+.I and
+the following conditions are met:
+.RS .3i
+.PP
+The effective user
+.SM ID
+and the real user
+.SM ID
+of the receiving 
+process are equal.
+.PP
+An ordinary file named
+.B core
+exists and is writable or can be created.
+If the file must be created, it will have the following properties:
+.RS .3i
+.PP
+a mode of 0666 modified by the file creation mask
+.RI (see  " umask" (2))
+.PP
+a file owner
+.SM ID
+that is the same as the effective user
+.SM ID
+of the receiving process
+.PP
+a file group
+.SM ID
+that is the same as the effective group
+.SM ID
+of the receiving process
+.RE
+.RE
+.RE
+.RE
+.PP
+.SM
+.B SIG_IGN
+\&\-  ignore signal
+.RS .3i
+The signal 
+.I sig\^
+is to be ignored.
+.PP
+Note: the signal
+.B
+.SM SIGKILL
+cannot be ignored.
+.RE
+.PP
+.I function address\^
+\&\-  catch signal
+.RS .3i
+Upon receipt of the signal
+.IR sig ,
+the receiving process is to execute the signal-catching function pointed to by
+.IR func .
+The signal number
+.I sig\^
+will be passed as the only argument to the signal-catching function.
+Before entering the signal-catching function, the value of
+.I func\^
+for the caught signal will be set to
+.SM
+.B SIG_DFL
+unless the signal is
+.SM
+.BR SIGILL ,
+.SM
+.BR SIGTRAP ", or"
+.SM
+.BR SIGPWR .
+.PP
+Upon return from the signal-catching function, the receiving process will
+resume execution at the point it was interrupted.
+.PP
+When a signal that is to be caught occurs during a 
+.IR read ", a"  " write" ,
+.RI an " open" ", or an " ioctl\^
+system call on a slow device (like a terminal; but not a file), during a
+.IR pause
+system call, or during a
+.I wait\^
+system call that does not return immediately due to the existence of a
+previously stopped or zombie
+process, the signal-catching function will be executed and then the
+interrupted system call will return a \-1 to the calling process with
+.I errno\^
+set to
+.SM EINTR\*S.
+.PP
+Note: the signal
+.B
+.SM SIGKILL
+cannot be caught.
+.RE
+.PP
+A call to
+.I signal\^
+cancels a pending signal
+.I sig\^
+except for a pending
+.B \s-1SIGKILL\s+1
+signal.
+.PP
+.I Signal\^
+will fail if one or more of the following are true:
+.IP "" .3i
+.I Sig\^
+is an illegal signal number, including
+.SM
+.BR SIGKILL .
+.SM
+\%[EINVAL]
+.IP
+.I Func\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.SH RETURN VALUE
+Upon successful completion,
+.I signal\^
+returns the previous value of
+.I func\^
+for the specified signal
+.IR sig .
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+kill(1), kill(2), pause(2), ptrace(2), wait(2), setjmp(3C).
+.SH WARNING
+Other signals that behave differently than the signals described above
+exist in this release of the system; they are:
+.PP
+.RS
+.nf
+.ta \w'SIGMMMMM 'u +\w'15\(**  'u
+.BR \s-1SIGCLD\s+1 "	18	death of a child (reset when caught)"
+.BR \s-1SIGPWR\s+1 "	19	power fail (not reset when caught)"
+.BR \s-1SIGWINCH\s+1 "	25	window size changes
+.fi
+.RE
+.PP
+For these signals,
+.I func\^
+is assigned one of three values:
+.BR \s-1SIG_DFL\s+1 ,
+.BR \s-1SIG_IGN\s+1 ,
+or a
+.IR "function address"  .
+The actions prescribed by these values of are as follows: 
+.PP
+.SM
+.B SIG_DFL
+- ignore signal
+.RS .3i
+The signal is to be ignored.
+.RE
+.PP
+.SM
+.B SIG_IGN
+- ignore signal
+.RS .3i
+The signal is to be ignored.
+Also, if
+.I sig\^
+is
+.SM
+.BR SIGCLD ,
+the calling process's child processes will not create zombie processes when
+they terminate; see
+.IR exit (2).
+.RE
+.PP
+.I function address\^
+- catch signal
+.RS .3i
+If the signal is
+.SM
+.B SIGPWR
+or
+.BR SIGWINCH ,
+the action to be taken is the same as that described above for
+.I func\^
+equal to
+.IR "function address" .
+The same is true if the signal is
+.SM
+.B SIGCLD
+except, that while the process is executing the signal-catching function
+any received
+.SM
+.B SIGCLD
+signals will be queued and the signal-catching function will be continually
+reentered until the queue is empty.
+.RE
+.PP
+The
+.SM
+.B SIGCLD
+affects two other system calls 
+.RI ( wait "(2), and " exit (2))
+in the following ways:
+.ta w'\f2wait\f1 \ \ 'u
+.TP 
+.I wait\^
+If the
+.I func\^
+value of
+.SM
+.B SIGCLD
+is set to
+.SM
+.B SIG_IGN
+and a
+.I wait\^
+is executed, the
+.I wait\^
+will block until all of the calling process's child processes terminate;
+it will then return a value of \-1 with
+.I errno\^
+set to
+.SM ECHILD.
+.ta w'\f2wait\f1 \ \ 'u
+.TP 
+.I exit\^
+If in the exiting process's parent process the
+.I func\^
+value of
+.SM
+.B SIGCLD
+is set to
+.SM
+.BR SIG_IGN ,
+the exiting process will not create a zombie process.
+.PP
+When processing a pipeline, the shell
+makes the last process in the pipeline the parent of the proceeding processes.
+A process that may be piped into in this manner (and thus become the parent
+of other processes) should take care not to set
+.SM
+.B SIGCLD
+to be caught.
+.SH BUGS
+.PP
+If a repeated signal arrives before the last one can be reset, there
+is no chance to catch it.
+.PP
+The type specification of the routine and its
+.I func
+argument are problematical.
+.PP
+The symbols
+.I sighnd
+and
+.I sigtrap
+are globally defined symbols used by 
+.IR signal (2)
+and are reserved words.
+.DT
+.\"	@(#)signal.2	5.1 of 11/16/83

@@ -1,0 +1,27 @@
+.TH gexit 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gexit
+- terminate an IRIS program
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gexit()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gexit"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gexit;"
+.sp
+.SH DESCRIPTION
+.I Gexit
+is the final graphics command in an IRIS program.  It
+flushes communication buffers and waits 
+for the graphics pipeline to empty.
+.SH "SEE ALSO"
+.I ginit, greset
+.SH NOTE
+This command can only be used in immediate mode.

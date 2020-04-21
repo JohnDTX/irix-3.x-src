@@ -1,0 +1,956 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.2.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               04-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+function FindAddr(fcattr: cattr; var a: pregrec; var delta: longint): Boolean;
+  var i,j: integer; ldelta: longint;
+begin
+with fcattr do
+     case ckind of
+       VARB: begin
+             j := -1; ldelta := delta;
+             for i := A6 downto D0 do
+                 with reg[i].v do
+                      if (rvkind = ADDRRV) and (rvlev = vlev) and
+                         (abs(voffset - rvoffset) < abs(ldelta))
+                      then begin
+                           ldelta := voffset - rvoffset; j := i;
+                           end;
+             if j >= 0
+             then begin
+                  reg[j].r^.count := reg[j].r^.count + 1;
+                  a := reg[j].r; delta := ldelta;
+                  reg[j].t := timer; timer := timer + 1;
+                  totaladdrsinregs := totaladdrsinregs + 1;
+                  FindAddr := TRUE;
+                  end
+             else FindAddr := FALSE;
+             end;
+       FDAT: begin
+             j := -1; ldelta := delta;
+             for i := AMAX downto A0 do
+                 with reg[i].v do
+                      if (rvkind = ADDRRV) and (rvlev = -flev) and
+                         (abs(doffset - rvoffset) < abs(ldelta))
+                      then begin
+                           ldelta := doffset - rvoffset; j := i;
+                           end;
+             if j >= 0
+             then begin
+                  reg[j].r^.count := reg[j].r^.count + 1;
+                  reg[j].t := timer; timer := timer + 1;
+                  a := reg[j].r; delta := ldelta;
+                  totaladdrsinregs := totaladdrsinregs + 1;
+                  FindAddr := TRUE;
+                  end
+             else FindAddr := FALSE;
+             end;
+     otherwise: FindAddr := FALSE;
+     end; {case}
+end; {FindAddr}
+
+procedure findvarb(var fcattr: cattr; fsize: integer);
+  var i: integer;
+begin
+with fcattr do
+     case ckind of
+       VARB: for i := D0 to AMAX do
+                 with reg[i].v do
+                      if (rvkind = VALURV) and (rvoffset = voffset) and
+                         (rvlev = vlev) and (rvsize = fsize)
+                      then begin
+                           reg[i].r^.count := reg[i].r^.count + 1;
+                           reg[i].t := timer; timer := timer + 1;
+                           fcattr.ckind := EXPR; fcattr.exreg := reg[i].r;
+                           totalvarsinregs := totalvarsinregs + 1;
+                           end;
+       FDAT: for i := D0 to AMAX do
+                 with reg[i].v do
+                      if (rvkind = VALURV) and (rvoffset = doffset) and
+                         (rvlev = -flev) and (rvsize = fsize)
+                      then begin
+                           reg[i].r^.count := reg[i].r^.count + 1;
+                           reg[i].t := timer; timer := timer + 1;
+                           fcattr.ckind := EXPR; fcattr.exreg := reg[i].r;
+                           totalfvarsinregs := totalfvarsinregs + 1;
+                           end;
+                           
+     end; {case}
+end; {findvarb}
+
+procedure findavarb(var fcattr: cattr; fsize: integer);
+  var i: integer;
+begin
+with fcattr do
+     case ckind of
+       VARB: for i := AMAX downto D0 do
+                 with reg[i].v do
+                      if (rvkind = VALURV) and (rvoffset = voffset) and
+                         (rvlev = vlev) and (rvsize = fsize)
+                      then begin
+                           reg[i].r^.count := reg[i].r^.count + 1;
+                           reg[i].t := timer; timer := timer + 1;
+                           fcattr.ckind := EXPR; fcattr.exreg := reg[i].r;
+                           totalvarsinregs := totalvarsinregs + 1;
+                           end;
+       FDAT: for i := AMAX downto D0 do
+                 with reg[i].v do
+                      if (rvkind = VALURV) and (rvoffset = doffset) and
+                         (rvlev = -flev) and (rvsize = fsize)
+                      then begin
+                           reg[i].r^.count := reg[i].r^.count + 1;
+                           reg[i].t := timer; timer := timer + 1;
+                           fcattr.ckind := EXPR; fcattr.exreg := reg[i].r;
+                           totalfvarsinregs := totalfvarsinregs + 1;
+                           end;
+                           
+     end; {case}
+end; {findavarb}
+
+function FindIndex(fcattr: cattr; var felsize: longint; fexpsize: integer;
+                  var d: pregrec): Boolean;
+  var i,dregno: integer;
+begin
+with fcattr do
+     case ckind of
+       EXPR: begin
+             dregno := exreg^.regno;
+             if reg[dregno].Perm
+             then begin
+                  for i := D0 to D7 do
+                      with reg[i].v do
+                           if (rvkind = INDXRV) and (rvoffset = dregno*4) and
+                              (rvlev = 0) and (felsize = rvinxcst) and
+                              (fexpsize = rvsize)
+                           then begin
+                                totalindxsinregs := totalindxsinregs + 1;
+                                reg[i].r^.count := reg[i].r^.count + 1;
+                                d := reg[i].r; felsize := 1;
+                                reg[i].t := timer; timer := timer + 1;
+                                FindIndex := TRUE; exit(FindIndex);
+                                end;
+                  end;
+             FindIndex := FALSE;
+             end;
+       VARB: begin
+             for i := D0 to D7 do
+                 with reg[i].v do
+                      if (rvkind = INDXRV) and (voffset = rvoffset) and
+                         (rvlev = vlev) and (felsize = rvinxcst) and
+                         (fexpsize = rvsize)
+                      then begin
+                           totalindxsinregs := totalindxsinregs + 1;
+                           reg[i].r^.count := reg[i].r^.count + 1;
+                           d := reg[i].r; felsize := 1;
+                           reg[i].t := timer; timer := timer + 1;
+                           FindIndex := TRUE; exit(FindIndex);
+                           end;
+             FindIndex := FALSE;
+             end;
+       FDAT: begin
+             for i := D0 to D7 do
+                 with reg[i].v do
+                      if (rvkind = INDXRV) and (doffset = rvoffset) and
+                         (rvlev = -flev) and (felsize = rvinxcst) and
+                         (fexpsize = rvsize)
+                      then begin
+                           totalindxsinregs := totalindxsinregs + 1;
+                           reg[i].r^.count := reg[i].r^.count + 1;
+                           d := reg[i].r; felsize := 1;
+                           reg[i].t := timer; timer := timer + 1;
+                           FindIndex := TRUE; exit(FindIndex);
+                           end;
+             FindIndex := FALSE;
+             end;
+     otherwise: FindIndex := FALSE;
+     end; {case}
+end; {FindIndex}
+
+function getbase(flevel: integer): pregrec;
+  var a,a2: pregrec; lcattr: cattr; delta: longint;
+begin
+if flevel <= 0 then flevel := 1;
+with bases[flevel] do
+     case bwhere of
+          BLNK: begin
+                a2 := getbase(flevel + 1); freereg(a2);
+                a := getreg(A0,AMAX);
+                { MOVE.L 8(A2),A } genrr(8296,a,a2); gen(8);
+                end;
+          BMEM: begin
+                lcattr.ckind := VARB; lcattr.vlev := flevel;
+                lcattr.voffset := 0; delta := 1;
+                if FindAddr(lcattr,a,delta)
+                then begin
+                     if a^.regno <= D7
+                     then begin
+                          a2 := a; a := getreg(A0,AMAX); freereg(a2);
+                          { MOVE.L D,A } genrr(8256,a,a2);
+                          end;
+                     end
+                else begin
+                     if flevel > level
+                     then with withcattr[flevel - level] do begin
+                               if wblockno <> 0
+                               then blktable[wblockno div (MAXBLOCKS + 1)]^
+                                 [wblockno and MAXBLOCKS].SaveWith := TRUE;
+                               end;
+                     a := getreg(A0,AMAX);
+                     { MOVE.L boff(A6),A } genr0(8302,a); gen(boffset);
+                     end;
+                end;
+          BREG: if bregno >= A0
+                then a := reg[bregno].r
+                else begin
+                     a := getreg(A0,AMAX);
+                     { MOVE.L D,A } genrr(8256,a,reg[bregno].r);
+                     end;
+          BADR: error(2987); { Should never happen }
+     end; {case}
+with reg[a^.regno].v do
+     if rvkind = UNKNRV
+     then begin
+          rvsize := LONG; rvkind := ADDRRV;
+          rvlev := flevel; rvoffset := 0;
+          end;
+getbase := a;
+end; {getbase}
+
+procedure pushbase(flevel: integer);
+  var a: pregrec; lop: integer;
+begin
+if flevel <= 0 then flevel := 1;
+with bases[flevel] do
+     case bwhere of
+          BLNK: begin
+                a := getbase(flevel + 1); freereg(a);
+                { MOVE.L 8(A),-(SP) } genr(12072,a); gen(8);
+                end;
+          BMEM: begin
+                if flevel > level
+                then with withcattr[flevel - level] do
+                     if wblockno <> 0
+                     then blktable[wblockno div (MAXBLOCKS + 1)]^
+                             [wblockno and MAXBLOCKS].SaveWith := TRUE;
+                { MOVE.L boff(A6),-(SP) } gen(12078); gen(boffset);
+                end;
+          BREG: begin
+                lop := 12032; { MOVE.L D,-(SP) }
+                if bregno >= A0 then lop := lop + 8;
+                genr(lop,reg[bregno].r);
+                end;
+          BADR: error(2988); { Should never happen }
+     end; {case}
+end; {pushbase}
+
+procedure globref(fid: linkid; fblk,foff: integer);
+  var lproc: pprocref; lref: preflist; Done: Boolean;
+begin
+lproc := proclist; Done := FALSE;
+while (not Done) and (lproc <> nil) do
+      if idEQid(lproc^.procname,fid)
+      then Done := TRUE
+      else lproc := lproc^.next;
+if not Done
+then begin
+     new(lproc);
+     with lproc^ do begin
+          reflist := nil; procname := fid; next := proclist;
+          end;
+     proclist := lproc;
+     end;
+new(lref);
+with lref^ do begin
+     refblk := fblk; refoff := foff;
+     next := lproc^.reflist; lproc^.reflist := lref;
+     end;
+end; {globref}
+
+procedure genjump(fop,flab: integer);
+begin
+pcbrablk(fop,flab);
+end; {genjump}
+
+procedure genjsr(fid: linkid);
+begin
+if idEQid(fid,entryid)
+then genjump(_BSR,entrylab)
+else begin
+     globref(fid,nextblk,pc + 2 - blkpc);
+     if SHORTCALLS
+     then begin { JSR $+xxx } gen(20154); gen(0); end
+     else begin { JSR xxx.L } gen(20153); gen(0); gen(0); end;
+     end;
+end; {genjsr}
+
+procedure genjsra(fname: alfa8);
+  var lstr: idstring; lid: linkid;
+begin
+maka8str(lstr,fname); makeid(lid,-1,lstr); genjsr(lid);
+end; {genjsra}
+
+procedure addtosp(fval: integer);
+begin
+if fval <> 0
+then begin
+     if abs(fval) <= 8
+     then if fval > 0
+          then { ADDQ.W #x,SP } gen(20559 + (fval and 7)*512)
+          else { SUBQ.W #x,SP } gen(20815 + ((-fval) and 7)*512)
+     else begin
+          { ADDA.W #x,SP } gen(-8452); gen(fval);
+          end;
+     LastPop := TRUE; popbytes := fval;
+     end;
+end; {addtosp}
+
+function loadint(fval: longint; fsize: integer): pregrec;
+  var d: pregrec; op: integer;
+begin
+if FindCnst(d,fval,fsize)
+then loadint := d
+else begin
+     d := getreg(D0,D7); loadint := d;
+     if (fval <= 127) and (fval >= 0)
+     then begin { MOVEQ #val,D } genr0(28672 + fval,d); fsize := LONG; end
+     else if (fval < 0) and (fval >= -128)
+          then begin { MOVEQ #val,D } genr0(28928 + fval,d); fsize := LONG; end
+          else begin
+               if fsize <= WORD
+               then op := 12348 { MOVE.W #,D }
+               else op := 8252; { MOVE.L #,D }
+               genr0(op,d);
+               if fsize = LONG then gen2(fval) else gen(fval);
+               end;
+     with reg[d^.regno] do begin
+          v.rvkind := CNSTRV; v.ival := fval; v.rvsize := fsize;
+          end;
+     ccodereg := d^.regno;
+     end;
+end; {loadint}
+
+procedure fixindxoffset(var fcattr: cattr);
+  var a: pregrec; LockFlag: Boolean;
+begin
+with fcattr do begin
+     if (inoffset > 127) or (inoffset < -128)
+     then begin
+          LockFlag := TRUE;
+          if inxrreg^.InReg
+          then if reg[inxrreg^.regno].Locked then LockFlag := FALSE;
+          if LockFlag then lock(inxrreg);
+          load(inxareg); freereg(inxareg); a := getreg(A0,AMAX);
+          { LEA off(XA),A } genrr(16872,a,inxareg); gen(inoffset);
+          if LockFlag then unlock(inxrreg);
+          inoffset := 0; inxareg := a;
+          if inxareg^.regno >= A5
+          then with reg[a^.regno].v do begin
+                    rvsize := LONG; rvkind := ADDRRV;
+                    RVReadOnly := TRUE; rvoffset := 0;
+                    if inxareg^.regno = A5 then rvlev := 1 else rvlev := level;
+                    end
+          else reg[a^.regno].v := reg[inxareg^.regno].v;
+          incrv(a^.regno,inoffset);
+          end;
+     if inoffset < 0 then inoffset := inoffset + 256;
+     end;
+end; {fixindxoffset}
+
+procedure geneffaddr(fop: integer; fcattr: cattr; fsize: integer;
+                    ImmFlag: Boolean; immvalue: longint);
+  var a,base,d: pregrec; op: integer; lbigcref: pbigcref;
+  
+  procedure genimm;
+  begin
+  if ImmFlag
+  then if fsize = LONG
+       then gen2(immvalue)
+       else gen(immvalue);
+  end; {genimm}
+  
+begin {geneffaddr}
+makevalid(fcattr);
+with fcattr do
+     case ckind of
+          EXPR: begin
+                if exreg^.regno >= A0 then fop := fop + 8;
+                genr(fop,exreg); freereg(exreg); genimm;
+                end;
+          ADDR: begin
+                if aoffset = 0
+                then begin genr(fop + 16,adreg); genimm; end
+                else begin
+                     genr(fop + 40,adreg); genimm; gen(aoffset);
+                     end;
+                freereg(adreg);
+                end;
+          INDX: begin
+                fixindxoffset(fcattr);
+                genr(fop + 48,inxareg); genimm;
+                op := inxrreg^.regno*4096 + inoffset;
+                if LongIndex then op := op + 2048;
+                gen(op); freereg(inxareg); freereg(inxrreg);
+                end;
+          VARB: begin
+                base := getbase(vlev);
+                if voffset = 0
+                then begin genr(fop + 16,base); genimm; end
+                else begin genr(fop + 40,base); genimm; gen(voffset); end;
+                freereg(base);
+                end;
+          FDAT: begin
+                gen(fop + 57); genimm; ftndref(flev); gen2(doffset);
+                end;
+          CNST: case cvalu.cstkind of
+                     SCALCNST:
+                         begin
+                         gen(fop + 60); genimm;
+                         if fsize = LONG then gen(cvalu.ivalu[0]);
+                         gen(cvalu.ivalu[1]);
+                         end;
+                     STRCNST,
+                     PAOCCNST,
+                     SETCNST:
+                         begin
+                         gen(fop + 58);
+                         new(lbigcref);
+                         with lbigcref^ do begin
+                              bigclab := newlabel; bigval := cvalu;
+                              next := bigclist; bigclist := lbigcref;
+                              pcrefblk(bigclab);
+                              end;
+                         end;
+                end; {case}
+          COND: error(2005);
+          STCK: begin gen(fop + 31); genimm; end;
+                { i.e. (SP)+ not -(SP) }
+          BOOL: error(2006);
+          BITZ: error(2007);
+     end; {case}
+end; {geneffaddr}
+
+procedure testd(d: pregrec; fsize: integer);
+begin
+if fsize = BYTE
+then { TST.B D } genr(18944,d)
+else if fsize = WORD
+     then { TST.W D } genr(19008,d)
+     else { TST.L D } genr(19072,d);
+end; {testd}
+
+procedure addil(var r: pregrec; fval: longint);
+begin
+load(r); isolate(r);
+if r^.regno >= A0
+then { ADDA.L #xxx,A } genr0(-11780,r)
+else { ADDI.L #xxx,D } genr(1664,r);
+gen2(fval);
+incrv(r^.regno,fval);
+end; {addil}
+
+function loadaddress(fcattr: cattr): pregrec; forward;
+
+procedure uparrow(var fcattr: cattr);
+  var DoIt: Boolean; a: pregrec;
+begin
+with fcattr do begin
+     DoIt := TRUE;
+     if ckind = EXPR
+     then if exreg^.regno >= A0
+          then begin DoIt := FALSE; a := exreg; end;
+     if DoIt
+     then begin
+          a := getreg(A0,AMAX); lock(a);
+          { MOVE.L ?,A } geneffaddr(4160 + a^.regno*512,fcattr,LONG,FALSE,0);
+          unlock(a);
+          end;
+     ckind := ADDR; adreg := a; aoffset := 0;
+     end;
+end; {uparrow}
+
+procedure incoffset(var fcattr: cattr; foffset: longint);
+  var loffset: longint; a: pregrec;
+begin
+makevalid(fcattr);
+if foffset <> 0
+then with fcattr do
+          case ckind of
+               ADDR: begin
+                     loffset := aoffset + foffset;
+                     if abs(loffset) > 32767
+                     then begin
+                          addil(adreg,loffset); aoffset := 0;
+                          end
+                     else aoffset := loffset;
+                     end;
+               INDX: begin
+                     loffset := inoffset + foffset;
+                     if abs(loffset) > 32767
+                     then begin
+                          lock(inxareg);
+                          if (not LongIndex) and (inxrreg^.regno <= D7)
+                          then begin
+                               load(inxrreg); isolate(inxrreg);
+                               { EXT.L } genr(18624,inxrreg);
+                               LongIndex := TRUE;
+                               end;
+                          addil(inxrreg,loffset);
+                          unlock(inxareg); inoffset := 0;
+                          end
+                     else inoffset := loffset;
+                     end;
+               VARB: begin
+                     loffset := voffset + foffset;
+                     if abs(loffset) > 32767
+                     then begin
+                          a := loadaddress(fcattr); addil(a,foffset);
+                          ckind := ADDR; adreg := a; aoffset := 0;
+                          end
+                     else voffset := loffset;
+                     end;
+               FDAT: doffset := doffset + foffset;
+          end; {case}
+end; {incoffset}
+
+procedure makesetconst(var fcattr: cattr);
+  var lpint: pintlist; lcattr: cattr;
+begin
+lpint := fcattr.cvalu.setvalu;
+lcattr.ckind := CNST;
+lcattr.cvalu.cstkind := SCALCNST;
+if lpint <> nil
+then begin
+     lcattr.cvalu.ivalu[0] := lpint^.int;
+     lcattr.cvalu.ivalu[1] := lcattr.cvalu.ivalu[0];
+     lpint := lpint^.next;
+     end
+else lcattr.cvalu.ivalu[1] := 0;
+if lpint <> nil
+then lcattr.cvalu.ivalu[1] := lpint^.int
+else lcattr.cvalu.ivalu[0] := 0;
+fcattr := lcattr;
+end; {makesetconst}
+
+procedure genstrcnst(fstring: pstrcrec; flen: integer);
+  var i,j,lval: integer;
+begin
+lval := flen*256; j := 0;
+for i := 1 to flen do begin
+    j := j + 1;
+    if j > 8
+    then begin j := 1; fstring := fstring^.next; end;
+    if odd(j)
+    then gen(lval + ord(fstring^.strval[j]))
+    else lval := ord(fstring^.strval[j])*256;
+    end;
+if not odd(j) then gen(lval);
+end; {genstrcnst}
+
+procedure genpaoccnst(fstring: pstrcrec; flen: integer);
+  var i,j,lval: integer;
+begin
+j := 0;
+for i := 1 to flen do begin
+    j := j + 1;
+    if j > 8
+    then begin j := 1; fstring := fstring^.next; end;
+    if odd(j)
+    then lval := ord(fstring^.strval[j])*256
+    else gen(lval + ord(fstring^.strval[j]));
+    end;
+if odd(j) then gen(lval);
+end; {genpaoccnst}
+
+procedure pushaddress(fcattr: cattr);
+  var DoIt: Boolean; llen: integer;
+begin
+DoIt := TRUE;
+with fcattr do
+     case ckind of
+          VARB: if voffset = 0
+                then begin pushbase(vlev); DoIt := FALSE; end;
+          ADDR: if aoffset = 0
+                then begin
+                     load(adreg);
+                     { MOVE.L adreg,-(SP) } genr(12040,adreg);
+                     DoIt := FALSE;
+                     freereg(adreg);
+                     end;
+          CNST: if (cvalu.cstkind = STRCNST) or (cvalu.cstkind = PAOCCNST)
+                then if cvalu.len <= 125
+                     then begin
+                          llen := cvalu.len; DoIt := FALSE;
+                          if cvalu.cstkind = STRCNST then llen := llen + 1;
+                          if odd(llen) then llen := llen + 1;
+                          { BSR.S } gen(24832 + llen);
+                          if cvalu.cstkind = STRCNST
+                          then genstrcnst(cvalu.strvalu,cvalu.len)
+                          else genpaoccnst(cvalu.strvalu,cvalu.len);
+                          end;
+     end; {case}
+if DoIt then geneffaddr(18496 { PEA } ,fcattr,LONG,FALSE,0);
+end; {pushaddress}
+
+procedure genlitcref(fcattr: cattr; fsize: integer);
+  var llitcref: plitcref;
+begin
+with fcattr do
+     if (cvalu.cstkind = SCALCNST) and (fsize = QUAD) or (fsize = LONG)
+     then begin
+          llitcref := litclist;
+          while llitcref <> nil do
+                with llitcref^ do begin
+                     if litval = cvalu.lvalu
+                     then if fsize = litvalsz
+                          then if (fsize = LONG) or
+                                  (cvalu.lvalu2 = litval2)
+                               then begin
+                                    pcrefblk(litclab);
+                                    exit(genlitcref);
+                                    end;
+                     llitcref := next;
+                     end;
+          new(llitcref);
+          with llitcref^ do begin
+               litclab := newlabel; next := litclist;
+               litval := cvalu.lvalu; litval2 := cvalu.lvalu2;
+               litvalsz := fsize; litclist := llitcref;
+               pcrefblk(litclab);
+               end;
+          end
+     else error(1873);
+end; {genlitcref}
+
+procedure pushcaddress(fcattr: cattr; fsize: integer);
+begin
+{ PEA $+x } gen(18554); genlitcref(fcattr,fsize);
+end; {pushcaddress}
+
+function loadaddress{*fcattr: cattr): pregrec*};
+  var a,a2: pregrec; lop: integer; lv: regvalrec;
+      delta: longint; lcattr: cattr;
+begin
+makevalid(fcattr);
+with fcattr do begin
+     lcattr := fcattr; lv.rvkind := UNKNRV; delta := 32767;
+     case ckind of
+       VARB: begin
+             lv.rvkind := ADDRRV; lv.rvoffset := voffset;
+             lv.rvlev := vlev; lv.rvsize := LONG;
+             end;
+       FDAT: begin
+             lv.rvkind := ADDRRV; lv.rvoffset := doffset;
+             lv.rvlev := -flev; lv.rvsize := LONG;
+             end;
+       ADDR: with reg[adreg^.regno] do
+                  if v.rvkind = ADDRRV
+                  then begin
+                       delta := aoffset;
+                       lv := reg[adreg^.regno].v;
+                       lv.rvoffset := lv.rvoffset + aoffset;
+                       if lv.rvlev > 0
+                       then begin
+                            lcattr.ckind := VARB; lcattr.vlev := lv.rvlev;
+                            lcattr.voffset := lv.rvoffset;
+                            end
+                       else begin
+                            lcattr.ckind := FDAT; lcattr.flev := -lv.rvlev;
+                            lcattr.doffset := lv.rvoffset;
+                            end;
+                       end;
+     end; {case}
+     if FindAddr(lcattr,a2,delta)
+     then begin
+          if ckind = ADDR then freereg(adreg);
+          ckind := ADDR; adreg := a2; aoffset := delta;
+          if adreg^.regno <= D7
+          then begin
+               a := getreg(A0,AMAX);
+               { MOVE.L D,A } genrr(8256,a,adreg);
+               freereg(adreg); adreg := a;
+               if abs(delta) > 8
+               then begin
+                    { ADDA.W #x,A } genr0(-12036,a); gen(delta);
+                    aoffset := 0;
+                    end;
+               reg[a^.regno].v := lv;
+               end;
+          end;
+     if (ckind = ADDR) and (aoffset <= 8) and (aoffset >= -8) and
+        ((adreg^.count <= 1) or (aoffset = 0))
+     then begin
+          a := adreg; load(a);
+          if aoffset <> 0
+          then begin
+               if aoffset > 0
+               then lop := 20616 { ADDQ.L #aoff,A }
+               else lop := 20872;{ SUBQ.L #-aof,A }
+               isolate(a); genr(lop + (abs(aoffset) mod 8)*512,a);
+               incrv(a^.regno,aoffset);
+               end;
+          end
+     else begin
+          a := getreg(A0,AMAX); lock(a);
+          { LEA } geneffaddr(12736 + a^.regno*512,fcattr,LONG,FALSE,0);
+          unlock(a); reg[a^.regno].v := lv;
+          end;
+     end;
+loadaddress := a;
+end; {loadaddress}
+
+procedure pushint(fvalue: longint; fsize: integer);
+  var op: integer; d: pregrec;
+begin
+if fvalue = 0
+then begin
+     if fsize <= WORD
+     then { CLR.W -(SP) } gen(16999)
+     else if LastPop and (popbytes = 4)
+          then begin ungen(2); { CLR.L (SP) } gen(17047); end
+          else { CLR.L -(SP) } gen(17063);
+     end
+else if FindCnst(d,fvalue,fsize)
+     then begin
+          if fsize = BYTE
+          then op := 7936 { MOVE.B D,-(SP) }
+          else if fsize <= WORD
+               then op := 16128 { MOVE.W D,-(SP) }
+               else op := 12032;{ MOVE.L D,-(SP) }
+          genr(op,d); freereg(d);
+          end
+     else if (fvalue >= -32768) and (fvalue <= 32767) and (fsize = LONG)
+          then begin
+               { PEA xxx.w } gen(18552); gen(fvalue);
+               end
+          else begin
+               if fsize = BYTE
+               then { MOVE.B #xxx,-(SP) } gen(7996)
+               else if fsize <= WORD
+                    then { MOVE.W #xxx,-(SP) } gen(16188)
+                    else if LastPop and (popbytes = 4)
+                         then begin
+                              ungen(2);
+                              { MOVE.L #xxx,(SP) } gen(11964);
+                              end
+                         else { MOVE.L #xxx,-(SP) } gen(12092);
+               if fsize = LONG
+               then gen2(fvalue)
+               else gen(fvalue);
+               end;
+end; {pushint}
+
+procedure loadcc(var fcattr: cattr);
+  var d: pregrec; RegAvail: Boolean;
+begin
+RegAvail := FreeRegs(D0,D7);
+if RegAvail
+then begin
+     d := getreg(D0,D7);
+     { Scc D } genr(20672 + ord(fcattr.cc)*256,d);
+     end
+else begin
+     { Scc -(SP) } gen(20711 + ord(fcattr.cc)*256);
+     d := getreg(D0,D7);
+     { MOVE.B (SP)+,D } genr0(4127,d);
+     end;
+fcattr.ckind := BOOL; fcattr.exreg := d;
+end; {loadcc}
+
+function loadd(var fcattr: cattr; fsize: integer): pregrec;
+  var DoIt,CCValid: Boolean; d: pregrec; op: integer; lv: regvalrec;
+begin
+DoIt := TRUE; CCValid := FALSE;
+with fcattr do begin
+     if (ckind = VARB) or (ckind = FDAT)
+     then begin
+          lv.rvsize := fsize; lv.rvkind := VALURV; lv.rvReadOnly := FALSE;
+          if ckind = VARB
+          then begin lv.rvlev := vlev; lv.rvoffset := voffset; end
+          else begin lv.rvlev := -flev; lv.rvoffset := doffset; end;
+          findvarb(fcattr,fsize);
+          end
+     else lv.rvkind := UNKNRV;
+     if ckind = EXPR
+     then begin
+          if exreg^.regno <= D7
+          then begin d := exreg; DoIt := FALSE; end;
+          end
+     else if ckind = CNST
+          then begin
+               if cvalu.cstkind = SETCNST then makesetconst(fcattr);
+               d := loadint(cvalu.lvalu,fsize); DoIt := FALSE;
+               end
+          else begin
+               if ckind = COND
+               then loadcc(fcattr);
+               if ckind = BOOL
+               then begin
+                    d := exreg; load(d); isolate(d); erase(d);
+                    DoIt := FALSE; CCValid := TRUE;
+                    if fsize = BYTE
+                    then { NEG.B D } genr(17408,d)
+                    else begin { ANDI.W #1,D } genr(576,d); gen(1); end;
+                    end
+               else if ckind = BITZ
+                    then begin
+                         d := exreg; load(d); isolate(d); erase(d);
+                         DoIt := FALSE; CCValid := TRUE;
+                         { ANDI.W #1,D } genr(576,d); gen(1);
+                         end;
+               if not DoIt
+               then if fsize = LONG
+                    then { EXT.L d } genr(18624,d);
+               end;
+     if DoIt
+     then begin
+          case fsize of
+            BYTE: op := 4096;
+            WORD: op := 12288;
+            LONG: op := 8192;
+            QUAD: {Error};
+          end; {case}
+          d := getreg(D0,D7); lock(d);
+          geneffaddr(op + d^.regno*512,fcattr,fsize,FALSE,0);
+          unlock(d); CCValid := TRUE; reg[d^.regno].v := lv;
+          end;
+     ckind := EXPR; exreg := d; loadd := d;
+     if CCValid then ccodereg := d^.regno;
+     end;
+end; {loadd}
+
+function loada(var fcattr: cattr): pregrec;
+  var DoIt: Boolean; a: pregrec; lv: regvalrec;
+begin
+DoIt := TRUE;
+with fcattr do begin
+     if (ckind = VARB) or (ckind = FDAT)
+     then begin
+          lv.rvsize := LONG; lv.rvkind := VALURV; lv.rvReadOnly := FALSE;
+          if ckind = VARB
+          then begin lv.rvlev := vlev; lv.rvoffset := voffset; end
+          else begin lv.rvlev := -flev; lv.rvoffset := doffset; end;
+          findvarb(fcattr,LONG);
+          end
+     else lv.rvkind := UNKNRV;
+     if ckind = EXPR
+     then begin
+          if exreg^.regno >= A0
+          then begin a := exreg; DoIt := FALSE; end;
+          end
+     else if (ckind = COND) or (ckind = BOOL) or (ckind = BITZ)
+          then a := loadd(fcattr,LONG);
+     if DoIt
+     then begin
+          a := getreg(A0,AMAX); lock(a);
+          geneffaddr(8256 { MOVEA } + (a^.regno - 8)*512,fcattr,LONG,FALSE,0);
+          unlock(a); reg[a^.regno].v := lv;
+          end;
+     ckind := EXPR; exreg := a; loada := a;
+     end;
+end; {loada}
+
+procedure dupref(var fcattr: cattr; fsize: integer);
+  var d: pregrec;
+begin
+with fcattr do
+     case ckind of
+          EXPR,
+          BOOL,
+          BITZ: if not reg[exreg^.regno].Perm
+                then exreg^.count := exreg^.count + 1;
+          ADDR: if not reg[adreg^.regno].Perm
+                then adreg^.count := adreg^.count + 1;
+          VARB,
+          FDAT,
+          CNST: ;
+          INDX: begin
+                if not reg[inxareg^.regno].Perm
+                then inxareg^.count := inxareg^.count + 1;
+                if not reg[inxrreg^.regno].Perm
+                then inxrreg^.count := inxrreg^.count + 1;
+                end;
+          COND: begin
+                loadcc(fcattr);
+                exreg^.count := exreg^.count + 1;
+                end;
+          STCK: begin
+                if fsize = QUAD
+                then begin
+                     gen(12079); gen(4); { MOVE.L 4(SP),-(SP) }
+                     gen(12079); gen(4); { MOVE.L 4(SP),-(SP) }
+                     end
+                else begin
+                     d := loadd(fcattr,fsize);
+                     d^.count := d^.count + 1;
+                     end;
+                end;
+     end; {case}
+end; {dupref}
+
+procedure pushvalue(fcattr: cattr; fsize: integer);
+  var DoIt: Boolean; op: integer; d,a: pregrec;
+begin
+makevalid(fcattr);
+if fcattr.ckind <> STCK
+then if fsize < QUAD
+     then begin
+          DoIt := TRUE;
+          with fcattr do
+               if ckind = CNST
+               then begin
+                    if cvalu.cstkind = SCALCNST
+                    then begin pushint(cvalu.lvalu,fsize); DoIt := FALSE; end;
+                    end
+               else if (ckind = BOOL) or (ckind = COND) or (ckind = BITZ)
+                    then d := loadd(fcattr,fsize);
+          if DoIt
+          then begin
+               if fsize = BYTE
+               then op := 7936 { MOVE.B ?,-(SP) }
+               else if fsize <= WORD
+                    then op := 16128 { MOVE.W ?,-(SP) }
+                    else begin
+                         if LastPop and (popbytes = 4)
+                         then begin
+                              ungen(2);
+                              op := 11904;{ MOVE.L ?,(SP) }
+                              end
+                         else op := 12032;{ MOVE.L ?,-(SP) }
+                         end;
+               geneffaddr(op,fcattr,fsize,FALSE,0);
+               end;
+          end
+     else begin { QUAD }
+          if fcattr.ckind = CNST
+          then begin
+               pushint(fcattr.cvalu.lvalu2,LONG);
+               pushint(fcattr.cvalu.lvalu,LONG);
+               end
+          else begin
+               if (fcattr.ckind = ADDR) and (fcattr.aoffset = 0)
+               then begin
+                    { MOVE.L 4(A),-(SP) } genr(12072,fcattr.adreg);
+                                          gen(4);
+                    { MOVE.L (A),-(SP) } genr(12048,fcattr.adreg);
+                    freereg(fcattr.adreg);
+                    end
+               else begin
+                    incoffset(fcattr,8); a := loadaddress(fcattr);
+                    isolate(a);
+                    { MOVE.L -(A),-(SP) } genr(12064,a);
+                    { MOVE.L -(A),-(SP) } genr(12064,a);
+                    freereg(a); incrv(a^.regno,-8);
+                    end;
+               end;
+          end;
+end; {pushvalue}
+
+
+                 

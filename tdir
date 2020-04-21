@@ -1,0 +1,7 @@
+#! /bin/sh
+
+
+for i in `cat Dirlist`
+do
+	mkdir $i/RCS
+done

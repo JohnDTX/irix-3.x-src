@@ -1,0 +1,29 @@
+'\"macro stdmacro
+.TH BLANKTIME 1G
+.SH NAME
+blanktime \- set the screen blanking timeout
+.SH SYNOPSIS
+.B blanktime 
+nframes
+.SH DESCRIPTION
+The screen of the iris will normally blank (turn black) if the system 
+receives no input events for about 15 minutes.  This is done to
+protect the color display. 
+.I blanktime\^
+makes it possible to change the time before
+the screen is blanked, or disable the screen blanking feature completely. 
+The argument
+.I nframes\^
+specifies the screen blanking timeout in frame times.
+Since there are 67 frames per second on the standard 60 Hz 
+monitor, \f2nframes\f1 should be 67 times
+the number of seconds that the system should wait before blanking the 
+screen.
+If
+.I nframes\^
+is given as 0, screen blanking is disabled.
+.SH EXAMPLE
+.IP
+blanktime 6700
+.PP
+makes the screen blank if no input device is touched for 100 seconds.

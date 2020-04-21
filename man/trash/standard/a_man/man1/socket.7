@@ -1,0 +1,59 @@
+.TH SOCKET 7  
+.SH NAME
+socket \- EXOS communications end point
+.SH DESCRIPTION
+Sockets are special files that are used to maintain host data structures
+for an EXOS 8010 communications end point.
+Opening a socket initializes the host data structures
+and the corresponding EXOS board data structures.
+This process requires cooperation with the \f2/dev/EXOS/admin\f1 device.
+.PP
+\f2ioctl\f1 calls implement any protocol specific operations.
+A \f2read\f1 or \f2write\f1 to a socket device transfers data
+to and from a remote process.
+.PP
+A large number of \f2ioctl\f1 calls apply to sockets and have the
+general form
+.sp
+.nf
+#include <sys/soioctl.h>
+#include <net/route.h>
+ioctl (s, code, arg)
+PARAM *arg;
+.fi
+.sp
+The definition of PARAM depends on the codes shown below.
+Results, if any, are returned in *arg.
+.PP
+Applicable codes are the following:
+.sp
+.nf
+.ta 2.0i
+SIOCADDRT	Add routing table entry (PARAM : route; no result)
+SIOCATMARK	At out-of-band mark?  (no argument; RESULT : short)
+SIOCCHGTGRT	Change routing table entry  (PARAM : route; no result)
+SIOCDELRT	Delete routing table entry  (PARAM : route; no result)
+SIOCDONE	Shutdown read/write on socket  (PARAM : int; no result)
+SIOCGKEEP	Inspect keep-alive  (no argument; RESULT : short)
+SIOCGLINGER	Get linger time  (no argument; RESULT : short)
+SIOCGPGRP	Get process group  (no argument; RESULT : short)
+SIOCRCVOOB	Get out-of-band data  (no argument; RESULT : char)
+SIOCSENDOOB	Send out-of-band data  (PARAM : char; no result)
+SIOCSKEEP	Set keep-alive  (PARAM : int; no result)
+SIOCSLINGER	Set linger time  (PARAM : int; no result)
+SIOCSPGRP	Set process group  (PARAM : int; no result)
+.sp
+.fi
+route is defined as \f2struct rtentry route\f1.
+.SH SEE ALSO
+socket(3N), accept(3N), connect(3N), receive(3N), send(3N),
+errlog(7), inet(7P), tcp(7P), udp(7P),
+and the Berkeley 4.2BSD documents
+.br
+socket(2), route(1M)
+.br
+\f2A 4.2bsd Interprocess Communication Primer\f1
+.SH FILES
+/dev/EXOS/admin
+.br
+/dev/EXOS/socket*

@@ -1,0 +1,38 @@
+#! /bin/sh
+
+#  strip
+#
+#	strips the objects in the release source tree.  This should be done
+#	before running gensizes.  Files are excluded from stripping by adding
+#	the "nostrip" attribute to the corresponding entry in the idb.
+#
+#	We ignore warnings of "not in a.out format" and "already stripped"
+#	because they are uninteresting.  Every text file is "not in a.out
+#	format so it is a no-op."  We do want other errors though so they
+#	are printed on stdout.
+#
+
+while test $# -gt 0
+do
+	case $1 in
+	-s) shift ; sbase=$1 ;;
+	-i) shift ; idb=$1 ;;
+	-m) shift ; machine=$1 ;;
+	--) shift ; break ;;
+	*) break ;;
+	esac
+	shift
+done
+
+if test -z "$idb" ; then idb=$sbase/idb ; fi
+
+case "$machine" in
+2000|iris) other=3000 ;;
+3000|juniper) other=2000 ;;
+*) echo "setenv machine or use '-m' option'" ; exit 1 ;;
+esac
+
+$ROOT/usr/sbin/idbscan -i $idb -s $sbase '
+	if (!@'$other' && type == "f" && !@nostrip)
+		print(spath(srcpath))
+' | xargs /bin/strip  2>&1 | egrep -v 'not in a.out format|already stripped'

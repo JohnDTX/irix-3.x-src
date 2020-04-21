@@ -1,0 +1,36 @@
+7 April, 1987.                                          Silicon Graphics, Inc.
+Mark Bradley						Mountain View, CA.
+
+
+
+The tests in this directory are for the purpose of testing the functionality
+of the IO subsystem at a gross level.  They will generate appropriate errors
+where necessary that will indicate the existence of a problem, should there
+be any and should be used to direct a user to the appropriate problem area.
+
+All of the commands make full use of the driver for the specified device
+and will report error conditions when appropriate.
+
+No Makefile is necessary for these commands, as they run under /bin/csh.
+
+
+TEST DESCRIPTIONS
+*****************************************************************************
+
+
+DISKTEST--reads and writes large files under /,  using unix commands.
+	  Performs data compares to ensure data integrity.
+
+ENETTEST--executes a command on a remote host via the ethernet controller.
+
+PRINTTEST-sends ascii character output to a print device through a Centronics
+          interface controller.
+
+QICTEST---executes tar, dd, cpio on several files and compares data for
+          integrity.  For use on 1/4 inch tape drives.
+
+TAPETEST--executes tar, dd, cpio on several files and compares data for
+	  integrity.  For use on 1/2 inch tape drives.
+
+SIOTEST---interactive test to send characters through the serial option 
+	  controller.

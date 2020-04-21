@@ -1,0 +1,43 @@
+.TH window 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B window
+\- defines a perspective projection transformation
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "window(left, right, bottom, top, near, far) "
+.B "Coord left, right, bottom, top, near, far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine window(left, right, bottom, top, near, far)"
+.B "real left, right, bottom, top, near, far"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure window(left, right, bottom, top, near, 
+.br
+.B	far: Coord);
+.SH DESCRIPTION
+.B window
+specifies the position and size of a rectangular viewing frustum
+in terms of the boundaries of the rectangular region (\f2left,
+right, bottom, top\f1); the distance closest to the eye in the
+near clipping plane (\f2near\f1); and the distance to the
+far clipping plane (\f2far\f1).
+The system projects the image with perspective onto the screen area that
+.B viewport
+defines.
+.PP
+.B window
+loads a matrix onto the transformation stack; it
+overwrites whatever was on the stack.
+.SH "SEE ALSO"
+ortho, perspective, viewport
+.sp
+.I Programming Guide,
+Section 4.3, Projection Transformations

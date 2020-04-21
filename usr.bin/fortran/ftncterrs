@@ -1,0 +1,297 @@
+-1 File: ftncterrs.text
+-1 Date: 04-Apr-85
+0 Unknown error
+1 Fatal error reading source block
+2 Non-numeric characters in label field
+3 Too many continuation lines
+4 Fatal end-of-file encountered
+5 Labeled continuation line
+6 Missing field on $ compiler directive line
+7 Option or input format inconsistent with ANSI Standard FORTRAN 77
+8 Unrecognizable $ compiler directive 
+9 Input source file not a valid text file format
+10 Maximum depth of include file nesting exceeded
+11 Integer constant overflow
+12 Error in real constant
+13 Too many digits in constant
+14 Identifier too long
+15 Character constant extends to end of line
+16 Character constant is zero length
+17 Illegal character in input
+18 Integer constant expected
+19 Label expected
+20 Error in label
+21 Type name expected (INTEGER[*n], REAL[*n], DOUBLE PRECISION,
+21 COMPLEX, LOGICAL[*n], or CHARACTER[*n])
+22 INTEGER constant expected
+23 Extra characters at end of statement
+24 '(' expected
+25 Letter IMPLICIT'ed more than once
+26 ')' expected
+27 Letter expected
+28 Identifier expected
+29 Dimension(s) required in DIMENSION statement
+30 Array dimensioned more than once
+31 Maximum of 7 dimensions in an array
+32 Incompatible arguments to EQUIVALENCE
+33 Variable appears more than once in a type specification
+33 statement
+34 This identifier has already been declared
+35 This intrinsic function cannot be passed as an argument
+36 Identifier must be a variable
+37 Identifier must be a variable or the current FUNCTION name
+38 '/' expected
+39 Named COMMON block already saved
+40 Variable already appears in a COMMON block
+41 Variables in different COMMON blocks cannot be EQUIVALENCE'd
+42 Number of subscripts in EQUIVALENCE statement does not agree
+42 with variable declaration
+43 EQUIVALENCE subscript out of range
+44 Two distinct cells EQUIVALENCE'd to the same location in a
+44 COMMON block
+45 EQUIVALENCE statement extends a COMMON block in a negative
+45 direction
+46 EQUIVALENCE statement forces a variable to two distinct
+46 locations, not in a COMMON block
+47 Statement number expected
+48 Mixed CHARACTER and numeric items not allowed in same COMMON
+48 block
+49 CHARACTER items cannot be EQUIVALENCE'd to non-CHARACTER items
+50 Illegal symbols in an expression
+51 Cannot use SUBROUTINE name in an expression
+52 Type of argument must be INTEGER or REAL 
+53 Type of argument must be INTEGER, REAL or CHARACTER 
+54 Types of comparisons must be compatible
+55 Type of expression must be LOGICAL
+56 Too many subscripts
+57 Too few subscripts
+58 Variable expected
+59 '=' expected
+60 Size of EQUIVALENCE'd CHARACTER items must be the same
+61 Illegal assignment - types do not match
+62 Can only call SUBROUTINES
+63 Dummy arguments cannot appear in COMMON statements
+64 Dummy arguments cannot appear in EQUIVALENCE statements
+65 Assumed-size array declarations can only be used for dummy arrays
+66 Adjustable-size array declarations can only be used for dummy arrays
+67 Assumed-size array dimension specifier, "*", must be the upper
+67 bound of the last dimension
+68 Adjustable bound must be either a dummy argument or be in
+68 COMMON prior to appearance
+69 Adjustable bound must be simple integer expression containing
+69 only constants, COMMON variables, or PARAMETER constant names
+70 Cannot have more than one main program
+71 The size of a named COMMON block must be the same in all
+71 subprograms
+72 Dummy arguments cannot appear in DATA statements
+73 Variables in blank COMMON cannot appear in DATA statements 
+74 Names of SUBROUTINES, FUNCTIONS, INTRINSIC FUNCTIONS and such
+74 cannot appear in DATA statements
+75 Subscripts out of range in DATA statement
+76 Repeat count must be integer value greater than zero
+77 Constant expected
+78 Type conflict in DATA statement
+79 Number of variables does not match the number of values in
+79 DATA statement list
+80 Statement cannot have a label
+81 No such INTRINSIC function
+82 Type declaration for INTRINSIC function does not match actual
+82 type of INTRINSIC function
+83 Letter expected
+84 Type of FUNCTION does not agree with previous usage
+85 This subprogram has already appeared in this compilation
+86 This procedure has already been defined as appearing in another
+86 compilation unit via a $USES command
+87 Error in type of argument to INTRINSIC function
+88 SUBROUTINE/FUNCTION previously used as a FUNCTION/SUBROUTINE
+89 Unrecognizable statement
+90 Expression not allowed
+91 Missing END statement
+92 A program unit cannot appear in a $SEPARATE compilation
+93 Fewer actual arguments than formal arguments in a FUNCTION or
+93 SUBROUTINE reference
+94 More actual arguments than formal arguments in a FUNCTION or
+94 SUBROUTINE reference
+95 Type of actual argument does not agree with formal argument
+96 The following procedures were called but not defined
+97 This procedure already defined in an $EXT directive
+98 Size of type CHARACTER item must be between 1 and 4096
+99 INTEGER*4 variable required
+100 Statement out of order
+101 Unrecognizable statement
+102 Illegal jump into block
+103 Label already used for FORMAT
+104 Label already defined
+105 Jump to FORMAT label
+106 DO statement forbidden in this context
+107 DO label must follow a DO statement
+108 ENDIF forbidden in this context
+109 No matching IF for this ENDIF
+110 Improperly nested DO block in IF block
+111 ELSEIF forbidden in this context
+112 No matching IF for ELSEIF
+113 Improperly nested DO or ELSE block
+114 '(' expected
+115 ')' expected
+116 THEN expected
+117 Logical expression expected
+118 ELSE statemenr forbidden in this context
+119 No matching IF for ELSE
+120 Unconditional GOTO forbidden in this context
+121 Assigned GOTO forbidden in this context
+122 Block IF statement forbidden in this context
+123 Logical IF statement forbidden in this context
+124 Arithmetic IF statement forbidden in this context
+125 ',' expected
+126 Expression of wrong type
+127 RETURN forbidden in this context
+128 STOP forbidden in this context
+129 END forbidden in this context
+131 Label referenced but not defined
+132 DO or IF block not terminated
+133 FORMAT statement not permitted in this context
+134 FORMAT label already referenced
+135 FORMAT must be labelled
+136 Identifier expected
+137 Intreger variable expected
+138 'TO' expected
+139 Integer expression expected
+140 Assigned GOTO but no ASSIGN statements
+141 Unrecognizable character constant as option
+142 Character constant expected as option
+143 Integer expression expected for unit designation
+144 STATUS option expected after ',' in CLOSE statement
+145 Character expression as filename in OPEN
+146 FILE= option must be present in OPEN statement
+147 RECL= option specified twice in OPEN statement
+148 Integer expression expected for RECL= option in OPEN statement
+149 Unrecognizable option in OPEN statement
+150 Direct access files must specify RECL= in OPEN statement
+151 Adjustable arrays not allowed as input-output list elements
+152 End of statement encountered in implied DO, expressions
+152 beginning with '(' not allowed as input-output list elements
+153 Variable required as control for implied DO
+154 Expressions not allowed as reading input-output list elements
+155 REC= option appears twice in statement
+156 REC= options expects integer expression
+157 END= option only allowed in READ statement
+158 END= option appears twice in statement
+159 Unrecognizable input-output unit
+160 Unrecognizable format in input-output statement
+161 Options expected after ',' in input-output statement
+162 Unrecognizable input-output list element
+163 Label used as format but not defined in FORMAT statement
+164 Integer variable used as assigned format but no ASSIGN statement
+165 Label of an executable statement used as format
+166 Integer variable expected for assigned format
+167 Label defined more than once as format
+169 FUNCTION references require "()"
+170 INTEGER expression expected for array dimension bound
+171 Lower dimension bound must be less than or equal to
+172 upper dimension bound
+172 DATA statement cannot initialize arrays of unknown size
+200 Variable name of named COMMON name expected
+201 This variable already SAVE'd
+202 Cannot SAVE dummy arguments
+203 Cannot SAVE COMMON variables
+204 INTEGER and LOGICAL *1, *2, or *4 only
+205 No *n allowed for DOUBLE PRECISION
+206 Only REAL*4 or REAL*8 allowed
+207 No *n allowed for COMPLEX
+208 Size expression only allowed for CHARACTER 
+209 INTEGER constant expression expected
+210 INTEGER constant or INTEGER constant expression expected
+211 CHARACTER substring expression out of range
+212 CHARACTER substring expression must be of type INTEGER
+213 Error in CHARACTER substring expression
+214 CHARACTER expression expected
+215 LOGICAL expression expected
+216 CHARACTER*(*) only allowed for dummy arguments
+217 Undeclared PARAMETER constant
+218 Constant expression not allowed
+219 Arithmetic operators only apply to numeric values
+220 Malformed COMPLEX constant
+221 Maximum of seven levels of implied-DO allowed
+222 Error in DATA statement variable list
+223 Error in implied DO list in data statement
+224 Variables in named COMMON can only appear in a DATA statement
+224 which is in a BLOCK DATA subprogram
+225 Integer subscript expected
+226 Subscript error
+227 This identifier is already in use as an implied-DO
+227 control variable
+229 Integer expression required
+230 Division by zero
+231 Error in COMPLEX primary
+232 Numeric expression or CHARACTER expression expected
+233 COMPLEX can only compare for equality
+234 COMPLEX is not compatible with DOUBLE PRECISION
+235 Constant expression expected
+236 ENTRY statements must appear in SUBROUTINE or FUNCTION
+236 subprograms
+237 ENTRY statements cannot be within a block IF or a DO
+237 statement range
+238 Concatenation only applies to CHARACTER values
+239 ':' expected
+240 Substring operations only apply to CHARACTER variables
+240 or CHARACTER array elements
+241 Error in subscript or implied DO expression in a DATA statement
+242 Implied DO iteration count is zero in a DATA statement
+243 Error in formal argument list
+244 Alternate return is not allowed in a FUNCTION subprogram
+245 Substring error in EQUIVALENCE statement
+246 EQUIVALENCE statement must not require *2, *4, or *8
+246 variables to be allocated on odd byte addresses
+247 EQUIVALENCE statement must not require a COMMON block to
+247 be allocated on an odd byte address
+248 CHARACTER arguments cannot contain concatenation of values
+248 that are of size *(*)
+249 Numeric expression expected
+250 SUBROUTINE or FUNCTION name has already been used as a
+250 COMMON name
+251 Recursive calls are not allowed
+252 Statement-FUNCTIONS require variable or value arguments
+253 Alternate ENTRY in CHARACTER FUNCTION must be of type
+253 CHARACTER and must be the same size as the FUNCTION
+254 This INTRINSIC FUNCTION cannot be passed as an argument
+255 Executable statements cannot appear in BLOCK DATA subprograms
+256 An argument to an entry statement has already appeared as
+256 a local variable
+270 Assigned GO TO variable must be INTEGER or INTEGER*4
+271 INTEGER, REAL, or DOUBLE PRECISION variable expected
+272 INTEGER, REAL, or DOUBLE PRECISION expression expected
+273 Unrecognizable element in option list
+274 Option appears more than once in an option list
+275 Incorrect type for variable
+276 Variable must be *4 in size
+277 CHARACTER variable or CHARACTER array element required
+278 CHARACTER expression expected
+279 Cannot have FILE and UNIT specifier in same INQUIRE statement
+280 Must have a FILE or UNIT specifier in INQUIRE statement
+281 Must have UNIT specifier
+282 PRINT statement requires no option list - use WRITE
+283 WRITE statement must have an option list
+284 READ statement must not have both REC= and END= options
+285 Must not specify REC= option with * format specifier
+286 Cannot do internal input-output with * format specifier
+287 Cannot use REC= specifier with internal input-output
+288 Malformed implied DO loop
+289 Implied DO loop must have simple variable for loop control
+290 Wrong number of arguments to intrinsic function
+291 Unit set more than once in input-output statement
+292 No unit specified in input-output statement
+293 Error in FORMAT statement
+294 Hexadecimal constant expected
+295 Too many characters in statement
+296 Can't find $INCLUDE file
+297 Hollerith item must be 1 to 255 characters in length
+298 Hollerith constant expected
+299 Numeric use of holleriths requires $CHAREQU option
+300 Feature not included in ANSI Standard FORTRAN 77
+301 COMMON name too long
+302 Feature not included in ANSI Standard FORTRAN 77
+400 Code file write error
+403 Procedure too large (code buffer too small)
+32767 
+
+                                                                                                                                                                                                                                                                                     

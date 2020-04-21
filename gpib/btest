@@ -1,0 +1,3 @@
+# blast test
+xib -b -t 1024 -f /dev/ib01 &
+xib -b -l 1024 -f /dev/ib11 &

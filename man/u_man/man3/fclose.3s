@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH FCLOSE 3S 
+.SH NAME
+fclose, fflush \- close or flush a stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int fclose (stream)
+.br
+.SM
+.B FILE
+.B \(**stream;
+.PP
+.B int fflush (stream)
+.br
+.SM
+.B FILE
+.B \(**stream;
+.SH DESCRIPTION
+.I Fclose\^
+causes any buffered data
+for the named
+.I stream\^
+to be written out,
+and the
+.I stream\^
+to be closed.
+.PP
+.I Fclose\^
+is performed automatically for all open files upon
+calling
+.IR exit (2).
+.PP
+.I Fflush\^
+causes any buffered data for the named
+.I stream\^
+to be 
+written to that file.
+The
+.I stream\^
+remains open.
+.SH DIAGNOSTICS
+These functions return 0 for success, and
+.SM
+.B EOF
+if any error (such as trying to write to a file that has not been opened
+for writing) was detected.
+.SH "SEE ALSO"
+close(2),
+exit(2),
+fopen(3S),
+setbuf(3S).
+.\"	@(#)fclose.3s	5.1 of 10/19/83

@@ -1,0 +1,17 @@
+1) deleted empty ".so" files
+2) deleted:	aliases.7
+		err.7
+		hosts.7
+3) no eqn
+4) no tbl
+
+To print a manual page in this directory, type:
+
+	eqn "filename(s)" | tbl | xroff -man5
+
+
+November 2, 1985.  Robinf.  I created a directory called tools.  This
+directory contains two shell scripts which can be used to check files
+in and out of the RCS directory.
+
+

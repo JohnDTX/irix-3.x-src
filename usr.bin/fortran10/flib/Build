@@ -1,0 +1,66 @@
+../bin/pascal flibinit.pas; ../bin/code flibinit.i
+../bin/pascal flibrec.pas; ../bin/code flibrec.i
+../bin/pascal flibwr.pas; ../bin/code flibwr.i
+../bin/pascal flibwd.pas; ../bin/code flibwd.i
+../bin/pascal fliblw.pas; ../bin/code fliblw.i
+../bin/pascal fliblwr.pas; ../bin/code fliblwr.i
+../bin/pascal fliblwd.pas; ../bin/code fliblwd.i
+../bin/pascal fliblr.pas; ../bin/code fliblr.i
+../bin/pascal flibfmt.pas; ../bin/code flibfmt.i
+../bin/pascal flibfw.pas; ../bin/code flibfw.i
+../bin/pascal flibfwr.pas; ../bin/code flibfwr.i
+../bin/pascal flibfwd.pas; ../bin/code flibfwd.i
+../bin/pascal flibfr.pas; ../bin/code flibfr.i
+../bin/pascal flibfrr.pas; ../bin/code flibfrr.i
+../bin/pascal flibfrd.pas; ../bin/code flibfrd.i
+../bin/pascal flibu.pas; ../bin/code flibu.i
+../bin/pascal flibchain.pas; ../bin/code flibchain.i
+../bin/pascal flibstop.pas; ../bin/code flibstop.i
+../bin/pascal flibopen.pas; ../bin/code flibopen.i
+../bin/pascal flibback.pas; ../bin/code flibback.i
+../bin/pascal flibinq.pas; ../bin/code flibinq.i
+../bin/pascal flibusr.pas; ../bin/code flibusr.i
+../bin/pascal flibusr2.pas; ../bin/code flibusr2.i
+../bin/asm68k ufio
+../bin/asm68k ftnchar
+../bin/asm68k ftn.misc
+../bin/asm68k cai
+../bin/fortran cmplxf.for; ../bin/code cmplxf.i
+../bin/library <<!
+-u
+
+ftnlib.obj
+flibback.obj
+flibchain.obj
+flibfmt.obj
+flibfr.obj
+flibfrd.obj
+flibfrr.obj
+flibfw.obj
+flibfwd.obj
+flibfwr.obj
+flibinit.obj
+flibinq.obj
+fliblr.obj
+fliblw.obj
+fliblwd.obj
+fliblwr.obj
+flibopen.obj
+flibrec.obj
+flibstop.obj
+flibu.obj
+flibusr.obj
+flibusr2.obj
+flibwd.obj
+flibwr.obj
+ufio.obj
+ftnchar.obj
+ftn.misc.obj
+cai.obj
+cmplxf.obj
+
+!
+mv ftnlib.obj ftnlib.tmp
+rm *.obj
+mv ftnlib.tmp ftnlib.obj
+sync

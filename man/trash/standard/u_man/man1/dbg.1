@@ -1,0 +1,37 @@
+.TH DBG 1
+.SH NAME
+dbg \- debug a FORTRAN or Pascal program
+.SH SYNOPSIS
+.B dbg 
+.I progname
+.SH DESCRIPTION
+.PP
+.I Dbg
+can be used to debug a FORTRAN or Pascal program, or a program which
+is a mixture of FORTRAN and Pascal.  It allows the setting of breakpoints,
+the examination and setting of variables, and dumps of the program's call
+chain.  
+.I Dbg
+is not a true source debugger, as one cannot examine source while in the
+debugger.  It is, however, source oriented as all commands are with respect
+to source line numbers.  The line numbers referred to when using 
+.I dbg
+can be obtained by generating a source listing during compilation.
+.PP
+In order to run 
+.I dbg 
+on a program, the entire program must be compiled and linked with
+the 
+.I "-g"
+switch.  This will generate a debugger information file in the
+same directory as the final executable.  If the executable is
+not debugged in this directory, special options must be given 
+to 
+.I dbg.
+Complete documentation on 
+.I dbg,
+including command syntax, is found in Vol IIB of the
+.I "UNIX Programmer's Manual."
+.SH SEE ALSO
+FORTRAN Debugger Reference Manual in the \f2UNIX Programmer's Manual\f1,
+Volume IIB.

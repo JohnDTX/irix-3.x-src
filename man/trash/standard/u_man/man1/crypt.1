@@ -1,0 +1,113 @@
+.TH CRYPT 1
+.SH NAME
+crypt \- encode/decode
+.SH SYNOPSIS
+.B crypt
+[ password ]
+.SH DESCRIPTION
+.I Crypt\^
+reads from the standard input and writes
+on the standard output.
+The
+.I password\^
+is a key that selects a particular transformation.
+If no
+.I password\^
+is given,
+.I crypt\^
+demands a key from the terminal and turns
+off printing while the key is being typed in.
+.I Crypt\^
+encrypts and decrypts with the same key:
+.PP
+.RS
+crypt \|key \|<clear \|>cypher
+.br
+crypt \|key \|<cypher \|\(bv \|pr
+.RE
+.PP
+will print the clear.
+.PP
+Files encrypted by
+.I crypt\^
+are compatible with those treated by the editor
+.I ed\^
+in encryption mode.
+.PP
+The security of encrypted files depends on three factors:
+the fundamental method must be hard to solve;
+direct search of the key space must be infeasible;
+``sneak paths'' by which keys or clear text can become
+visible must be minimized.
+.PP
+.I Crypt\^
+implements a one-rotor machine designed along the lines
+of the German Enigma, but with a 256-element rotor.
+Methods of attack on such machines are known, but not widely;
+moreover the amount of work required is likely to be large.
+.PP
+The transformation of a key into the internal
+settings of the machine is deliberately designed to
+be expensive, i.e. to take a substantial fraction of
+a second to compute.
+However,
+if keys are restricted to (say)
+three lower-case letters,
+then encrypted files can be read by expending only
+a substantial fraction of
+five minutes of machine time.
+.PP
+Since the key is an argument to the
+.I crypt\^
+command,
+it is potentially visible to users executing
+.IR ps\^ (1)
+or a derivative.
+To minimize this possibility,
+.I crypt\^
+takes care to destroy any record of the key
+immediately upon entry.
+The choice of keys and key security
+are the most vulnerable aspect of
+.IR crypt .
+.SH EXAMPLE
+.IP
+crypt asa < sleeper.c > zzz
+.PP
+will use the string "asa" as key to the encryption algorithm
+to encrypt the contents of "sleeper.c", and place the encrypted
+output in file "zzz".  File "zzz" at this point will be unreadable.
+.SM NOTE 
+that the original file, "sleeper.c", remains in readable form.
+To obtain readable print-out of the file "zzz", it
+could be decoded as follows:
+.IP
+crypt < zzz
+.PP
+After the response:
+.IP
+Enter key:
+.PP
+the user types in "asa".
+.SH FILES
+.ta \w'/dev/tty\ \ \ \ 'u
+/dev/tty	for typed key
+.DT
+.SH SEE ALSO
+ed(1),
+makekey(1).
+.SH BUGS
+If output is piped to
+.I nroff\^
+and the encryption key is
+.I not\^
+given on the command line,
+.I crypt\^
+can leave terminal modes in a strange state
+(see
+.IR stty\^ (1)).
+.br
+If two or more files encrypted with the same key are concatenated
+and an attempt is made to decrypt the result, only the
+contents of the first of the original files will be decrypted correctly.
+.\"	@(#)crypt.1	5.1 of 10/31/83

@@ -1,0 +1,174 @@
+'\"macro stdmacro
+.TH CHMOD 1
+.SH NAME
+chmod \- change mode
+.SH SYNOPSIS
+.B chmod
+mode files
+.SH DESCRIPTION
+The permissions of
+the named
+.I files\^
+are changed
+according to
+.IR mode ,
+which may be absolute or symbolic.
+An absolute
+.I mode\^
+is an octal
+number constructed
+from the \s-1OR\s+1 of the
+following modes:
+.PP
+.PD 0
+.RS
+.TP \w'4000\ \ \ \ 'u
+4000
+set user
+.SM ID
+on execution
+.TP
+2000
+set group
+.SM ID
+on execution
+.TP
+1000
+sticky bit, see
+.IR chmod\^ (2)
+.TP
+0400
+read by owner
+.TP
+0200
+write by owner
+.TP
+0100
+execute (search in directory) by owner
+.TP
+0070
+read, write, execute (search) by group
+.TP
+0007
+read, write, execute (search) by others
+.RE
+.PD
+.PP
+A symbolic
+.I mode\^
+has the form:
+.IP "" 5
+.RI [ " who " ] " op permission " [ " op permission " ]
+]
+.PP
+The
+.I who\^
+part is a combination
+of the letters
+.B u
+(for user's permissions),
+.B g
+(group)
+and
+.B o
+(other).
+The letter
+.B a
+stands for
+.BR ugo ,
+the default if
+.I who\^
+is omitted.
+.PP
+.I Op\^
+can be
+.B +
+to add
+.I permission\^
+to the file's mode,
+.B \-
+to take away
+.IR permission ,
+or
+.B =
+to assign
+.I permission\^
+absolutely
+(all other bits will
+be reset).
+.PP
+.I Permission\^
+is any combination of the letters
+.B r
+(read),
+.B w
+(write),
+.B x
+(execute),
+.B s
+(set owner or group \s-1ID\s0)
+and
+.B t
+(save text, or sticky);
+.BR u ,
+.BR g ,
+or
+.B o
+indicate that
+.I permission\^
+is to be taken
+from the current
+mode.
+Omitting
+.I permission\^
+is only useful
+with
+.B =
+to take away
+all permissions.
+.PP
+Multiple symbolic modes separated by commas may be given.
+Operations are performed
+in the order specified.
+The letter
+.B s
+is only useful
+with
+.B u
+or
+.B g
+and
+.B t
+only works
+with
+.BR u .
+.PP
+Only the owner of a file (or the super-user) may change its mode.
+.SH EXAMPLE
+.IP
+chmod 755 filename 
+.PP
+changes the mode of "filename" to: read, write, execute (400+200+100)
+by owner; read, execute (40+10) for group; read, execute (4+1) for others. 
+An
+.I ls -l\^
+of filename shows [-rwxr-xr-x filename] that the requested mode is
+in effect.
+.IP
+chmod = filename
+.PP
+will take away all permissions from 
+.IR filename ,
+including yours.
+.IP
+chmod o-w file
+.PP
+denies write permission to others.
+.IP
+chmod +x file
+.PP
+makes a file executable.
+.SH "SEE ALSO"
+ls(1),
+chmod(2).
+.\"	@(#)chmod.1	5.1 of 10/26/83

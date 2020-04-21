@@ -1,0 +1,43 @@
+'\"macro stdmacro
+.TH CHECKMM 1
+.SH NAME
+checkmm \- checks documents formatted with the mm macros
+.SH SYNOPSIS
+\f3checkmm\f1 [ files ]
+.SH DESCRIPTION
+.B checkmm
+stands for "check memorandum memos."  Use
+.B checkmm
+to check for syntax errors in files that have been prepared for
+the 
+.IR mm (1)
+or
+.IR mmt (1)
+command.  For example,
+.I checkmm
+checks that you have a 
+.B .DE
+(display end macro) corresponding to every
+.B .DS
+(display start macro).
+.PP
+The output for 
+.I checkmm
+is the number of lines checked, and a list of macros
+that are unfinished because of missing macros.  If you did
+not include a file name on the command line,
+.I checkmm
+takes input from standard input.
+.SH SEE ALSO
+eqn(1),
+mm(1),
+mmt(1),
+mvt(1),
+neqn(1),
+tbl(1),
+mm(5).
+.SH DIAGNOSTICS
+"checkmm: Cannot open \f2file\f1," if \f2file\f1 is
+unreadable.  The remaining output of the program is diagnostic of the 
+source file.
+./" 	%W% of %G%

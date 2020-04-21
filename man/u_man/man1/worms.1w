@@ -1,0 +1,14 @@
+'\"macro stdmacro
+.TH WORMS 1W
+.SH NAME
+worms \- U\s-2NIX\s+2 worms running on the IRIS
+.SH SYNOPSIS
+.B worms
+.SH DESCRIPTION
+.I worms 
+is the U\s-2NIX\s+2 worms program running on the IRIS.  
+The middle mouse button makes 
+worms that sleep for a second after moving.
+The left mouse button makes 
+fat worms.
+

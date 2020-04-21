@@ -1,0 +1,11 @@
+is:0:initdefault:# @(#)$Header: /d2/3.7/src/etc/RCS/inittab.2300,v 1.1 89/03/27 15:38:01 root Exp $
+s0::sysinit:/etc/rc.s0 1>/dev/console 2>&1			#fix console
+rr::sysinit:/etc/rootcopy >/dev/console 2>&1
+fp::sysinit:/etc/fload >/dev/console 2>&1
+bc::bootwait:/etc/brc </dev/console 1>/dev/console 2>&1 	#bootrun cmds
+bl::bootwait:/etc/bcheckrc </dev/console >/dev/console 2>&1 	#bootlog
+sl::bootwait:(rm -f /dev/syscon;ln /dev/systty /dev/syscon;) 1>/dev/console 2>&1
+rc::bootwait:/etc/rc 1>/dev/console 2>&1 			#run com
+pf::powerfail:/etc/powerfail 1>/dev/console 2>&1 		#power fail
+co::respawn:/bin/su - guest -c "exec /bin/tesh" < /dev/console 2> /dev/console > /dev/console
+d1::respawn:/etc/getty ttyd1 dx_9600 none LDISC0

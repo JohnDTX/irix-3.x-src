@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH FLPUXFER 1M
+.SH NAME
+flpuxfer \- transfer the bootable floppy
+.SH SYNOPSIS
+.B /etc/flpuxfer
+{
+.B md0a
+|
+.B md0c
+}
+.SH DESCRIPTION
+.I flpuxfer
+is used when building a U\s-2NIX\s+2 on a hard disk from floppies.
+It is run after booting off the bootable floppy.
+It first makes a filesystem on the partition specified by its argument
+and mounts it.
+It then copies the contents of the floppy to the hard disk filesystem.
+Finally, it patches the kernel on the hard disk
+to expect the root filesystem to be on device specified
+by the argument.
+.SH FILES
+.ta \w'/dev/mf0a   'u
+.nf
+/vmunix	kernel
+/dev/md0a	root partition
+/dev/md0c	backup partition
+.fi
+.SH SEE ALSO
+adb(1), mkbootflp(1M).
+

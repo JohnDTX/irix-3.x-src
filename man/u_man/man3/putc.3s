@@ -1,0 +1,136 @@
+'\"macro stdmacro
+.TH PUTC 3S
+.SH NAME
+putc, putchar, fputc, putw \- put character or word on a stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int putc (c, stream)
+.br
+.B char c;
+.br
+.SM
+.B FILE\*S \(**stream;
+.PP
+.B int putchar (c)
+.br
+.B char c;
+.PP
+.B int fputc (c, stream)
+.br
+.B char c;
+.br
+.SM
+.B FILE\*S \(**stream;
+.PP
+.B int putw (w, stream)
+.br
+.B int w;
+.br
+.SM
+.B FILE\*S \(**stream;
+.SH DESCRIPTION
+.I Putc\^
+writes the character
+.I c\^
+onto the output
+.I stream\^
+(at the position where the file pointer, if defined,
+is pointing).
+.IR Putchar\^ ( c )
+is defined as
+.IR putc\^ ( "c, stdout\^" ).
+.I Putc\^
+and
+.I putchar\^
+are macros.
+.PP
+.I Fputc\^
+behaves like
+.IR putc ,
+but is a function rather than a macro.
+.I Fputc\^
+runs more slowly than
+.IR putc ,
+but takes less space per invocation.
+.PP
+.I Putw\^
+writes the word (32-bit integer on the 68000)
+.I w\^
+to the output
+.I stream\^
+(at the position at which the file pointer, if defined, is pointing).
+.I Putw\^
+neither assumes nor causes special alignment in the file.
+.PP
+Output streams, with the exception of the standard error stream
+.IR stderr ,
+are by default buffered if the output refers to a file
+and line-buffered if the
+output refers to a terminal.
+The standard error output stream
+.I stderr\^
+is by default unbuffered,
+but use of
+.I freopen\^
+(see
+.IR fopen\^ (3S))
+will cause it to become buffered or line-buffered.
+When an output stream is unbuffered information is queued for writing on the
+destination file or terminal as soon as written;
+when it is buffered many characters are saved up and written as a block;
+when it is line-buffered each line of output is queued for writing on the
+destination terminal as soon as the line is completed
+(that is, as soon as a new-line character is written
+or terminal input is requested).
+.IR setbuf\^ (3S)
+may be used to change the
+stream's buffering strategy.
+.SH SEE ALSO
+fclose(3S),
+ferror(3S),
+fopen(3S),
+fread(3S),
+printf(3S),
+puts(3S),
+setbuf(3S).
+.SH DIAGNOSTICS
+On success, these functions each return the value they have written.
+On failure, they return the constant
+.SM
+.BR EOF .
+This will occur if the file
+.I stream\^
+is not open for writing,
+or if the output file cannot be grown.
+Because
+.SM
+.B EOF
+is a valid integer,
+.IR ferror\^ (3S)
+should be used to detect
+.I putw\^
+errors.
+.SH BUGS
+Because it is implemented as a macro,
+.I putc\^
+treats incorrectly a
+.I stream\^
+argument with side effects.
+In particular,
+.B putc(c, \(**f++);
+doesn't work sensibly.
+.I Fputc\^
+should be used instead.
+.br
+Because of possible differences in word length and byte ordering,
+files written using
+.I putw\^
+are machine-dependent,
+and may not be read using
+.I getw\^
+on a different processor.
+For this reason the use of
+.I putw\^
+should be avoided.
+.\"	@(#)putc.3s	5.1 of 10/25/83

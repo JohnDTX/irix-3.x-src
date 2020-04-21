@@ -1,0 +1,10 @@
+#! /bin/sh
+
+case $1 in
+-u)	after=  shared=  config=  ; shift ;;
+*)	after=@ shared=+ config=- ;;
+esac
+
+$ROOT/usr/sbin/idbscan -i $sbase/idb $* "&& printf ('%s%s\n', dstpath, after ? '$after' :
+					shared ? '$shared' :
+					config ? '$config' : '')"

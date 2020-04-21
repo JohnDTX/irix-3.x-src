@@ -1,0 +1,5 @@
+#! /bin/csh
+mex >& /tmp/mex.log
+makemap
+texback 4
+textcolors 0 7 4 4

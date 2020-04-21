@@ -1,0 +1,142 @@
+'\"macro stdmacro
+'\" t
+.TH EFSINODE 4
+.SH NAME
+efsinode \- format of an Extent file system inode
+.SH SYNOPSIS
+.B #include <sys/param.h>
+.br
+.B #include <sys/inode.h>
+.SH DESCRIPTION
+An
+.I inode
+under the Extent file system has the following structure.
+.PP
+.nf
+.in +.3i
+#define	EFS_DIRECTEXTENTS	12
+
+/*
+ * Extent based file system inode as it appears on disk.
+ * The efs inode is 128 bytes long.
+ */
+struct	efs_dinode {
+	ushort	di_mode;		/* type and access permissions */
+	short	di_nlink;    		/* number of links */
+	ushort	di_uid;      		/* owner's user id number */
+	ushort	di_gid;      		/* group's group id number */
+	off_t	di_size;     		/* number of bytes in file */
+	time_t	di_atime;		/* time of last access (to contents) */
+	time_t	di_mtime;		/* of last modification (of contents) */
+	time_t	di_ctime;		/* of last modification to inode */
+	time_t	di_etime;		/* time last extended */
+	short	di_numextents;		/* # of extents */
+	short	di_unused;		/* UNUSED */
+	union {
+		extent	di_extents[EFS_DIRECTEXTENTS];
+		dev_t	di_dev;		/* device for IFCHR/IFBLK */
+	} di_u;
+};
+.fi
+.in -.3i
+.LP
+The types
+.IR ushort ,
+.IR off_t ,
+.IR time_t ,
+and
+.I dev_t
+are defined in
+.IR types (5).
+The
+.I extent
+type is defined as follows.
+.PP
+.nf
+.in +.3i
+/*
+ * Extent descriptor structure used in Extent file system inodes.
+ * There are two kinds of extents descriptors:  direct and indirect.
+ *
+ * A direct extent descriptor maps a logical segment of its file to
+ * to a physical segment (i.e., extent)  on the volume.  The physical
+ * segment is characterized by a starting address and a length, both
+ * in basic blocks.  The direct extent descriptor as used here contains
+ * a logical file offset, also in basic blocks.
+ *
+ * An array of indirect extent descriptor's maps a file to an array of
+ * direct extent descriptors on the volume.
+ */
+typedef struct	extent {
+unsigned int	ex_magic:8,		/* magic #, must be 0 */
+		ex_bn:24,		/* bb # on volume */
+		ex_length:8,		/* length of this extent in bb's */
+		ex_offset:24;		/* logical file offset in bb's */
+} extent;
+.fi
+.in -.3i
+.LP
+.I di_mode
+contains the type of the file
+(plain file, directory, etc),
+and its read, write, and execute permissions
+for the file's owner, group, and public.
+.I di_nlink
+contains the number of links to the inode.
+Correctly formed directories have
+a minimum of two links:
+a link in the directory's parent
+and the `.' link in the directory itself.
+Additional links may be caused by `..' links from subdirectories.
+.I di_uid
+and
+.I di_gid
+contain the user id and group id of the file
+(used to determine which set of access permissions apply:
+owner, group, or public).
+.I di_size
+contains the length of the file in bytes.
+.PP
+.I di_atime
+is the time of last access to the file's contents.
+.I di_mtime
+is the time of last modification of the file's contents.
+.I di_ctime
+is the time of last modification of the inode,
+as opposed to the contents of the file it represents.
+.I di_etime
+is the time of last
+.I extension
+of the file.
+These times are given in seconds since
+the beginning of 1970 GMT.
+.PP
+.I di_numextents
+is the number of extents claimed by the file.
+If less than or equal to
+.I EFS_DIRECTEXTENTS
+then the extent descriptors appear directly in the inode as
+.IR "di_u.di_extents[0 .. di_numextents-1]" .
+When the number of extents exceeds this range, then the
+.IR "di_u.di_extents"
+are used to contain a list of
+.I indirect
+extents.  The field
+.IR "di_u.di_extents[0].ex_offset"
+is used to contain the number of indirect extents.  Indirect
+extents are pointers to blocks holding extent information.  There
+are at most
+.I EFS_DIRECTEXTENTS
+indirect extents.
+.PP
+If the inode is a block or character special inode,
+.I "di_u.di_numexents"
+is 0,
+and
+.I "di_u.di_dev"
+contains a
+number
+identifying the device.
+.SH SEE ALSO
+stat(2), inode(4), fs(4), efs(4), types(5).
+.\"	@(#)inode.4	5.1 of 10/15/83

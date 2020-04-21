@@ -1,0 +1,52 @@
+.TH move  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I move
+- move to a specified point
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "move(x, y, z) "
+.B "Coord x, y, z;"
+.IP 
+.B "movei(x, y, z) "
+.B "Icoord x, y, z;"
+.IP 
+.B "move2(x, y) "
+.B "Coord x, y;"
+.IP 
+.B "move2i(x, y) "
+.B "Icoord x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine move(x, y, z)"
+.B "real x, y, z"
+.IP 
+.B "subroutine movei(x, y, z)"
+.B "integer x, y, z"
+.IP 
+.B "subroutine move2(x, y)"
+.B "real x, y"
+.IP 
+.B "subroutine move2i(x, y)"
+.B "integer x, y"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure move(x, y, z: Coord);"
+.IP 
+.B "procedure movei(x, y, z: Icoord);"
+.IP 
+.B "procedure move2(x, y: Coord);"
+.IP 
+.B "procedure move2i(x, y: Icoord);"
+.sp
+.SH DESCRIPTION
+The \f2move\f1 command moves (without drawing)
+to the specified world space point, and updates the current graphics position.
+The \f2move\f1 command has four forms: 3D floating point, 3D integer, 2D
+floating point, and 2D integer;\f2 move2(x, y)\f1 is equivalent to 
+\f2move(x, y, 0.0)\f1.
+.SH "SEE ALSO"
+.I draw, pnt

@@ -1,0 +1,45 @@
+'\"macro stdmacro
+.TH SUBJ 1
+.SH NAME
+subj \- generate a list of subjects from a document
+.SH SYNOPSIS
+.I subj
+.I file ...
+.SH DESCRIPTION
+.I subj 
+searches
+.I file ...
+for subjects that might be appropriate in a subject-page
+index and prints the list of subjects on the standard output.
+The document should contain formatting commands (from 
+.IR nroff ,
+.IR troff ,
+and
+.I mm
+among others) to make the best use of
+.IR subj .
+.SH SEE ALSO
+ndx(1),
+troff(1),
+mm(1),
+nroff(1).
+.SH WARNINGS
+.PP
+.I subj
+selects sequences of capitalized words as subjects except
+the first word in each sentence.  Thus,if a sentence begins
+with a proper noun, the capitalization rule will not select
+this word as a subject.  On the other hand, since each
+sentence is expected to begin on a newline, the first word
+of a sentence that begins in the middle of a line may be 
+erroneously selected.
+.PP
+The output of 
+.I subj
+may not be appropriate for your needs and should be edited accordingly.
+.SH BUGS
+.PP
+.I subj
+also selects as subjects modifier-noun sequences from the abstract,
+headings and topic sentences (the first sentence in each paragraph, and
+occasionally a word is incorrectly categorized as a noun or adjective.

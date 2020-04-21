@@ -1,0 +1,86 @@
+'\"macro stdmacro
+.TH DSD 7
+.SH NAME
+dsd \- st-506 disk/tape/floppy controller
+.SH SYNOPSIS
+.B "controller dsd0 at mb0 csr 0x7F00 priority 1 vector dsdintr
+.br
+.B "disk md0 at dsd0 drive 1 flags 0x00
+.br
+.B "disk md1 at dsd0 drive 2 flags 0x00
+.SH DESCRIPTION
+This is a MULTIBUS st-506 disk and tape controller.
+The driver software supports two winchester hard disk drives,
+one qic-02 streaming tape drive, and one floppy drive.
+This manual page documents the hard disk support.
+See \f2qic\f1(7) for
+information on the streaming tape support and \f2floppy\f1(7) for
+the floppy support.
+.PP
+Files with minor device numbers 0 through 7 refer to various portions
+of drive 0;
+minor devices 8 through 15 refer to drive 1, etc.
+The standard device names begin with ``md'' followed by
+the drive number and then a letter a-h for partitions 0-7 respectively.
+The character ? stands here for a drive number in the range 0-7.
+.PP
+The block files access the disk using the system's normal
+buffering mechanism and may be read and written without regard to
+physical disk records.  There is also a `raw' interface
+which provides for direct transmission between the disk
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.'
+.PP
+In raw I/O counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.PP
+The size of the various partitions supported by the driver in fact
+are a function of the drive itself.  Present on each drive is a boot
+label which contains the partitions sizes and locations.
+.SH FILES
+/dev/md[01][a-h] block files
+.br
+/dev/rmd[01][a-h] raw files
+.SH SEE ALSO
+autoconf(7),
+qic(7),
+floppy(7)
+.SH DIAGNOSTICS
+\f3panic: dsdattach: geteblk() failed\f1.  Can't happen. See a guru.
+.br
+\f3md%d (***No label***)\f1.  The named drive has no boot label and
+thus cannot be used.
+.br
+\f3(%s Name: %s)\f1.  On a successful attach, the drive type is
+printed out followed by its ``name'' (a user specifiable name).
+.br
+\f3md%d%c: %s err(%s) at %d/%d/%d retry:%d\f1
+.br
+\f3%d/%d/%d req%d atc%d\f1. A hard error of some sort occured.
+.br
+\f3dsdcmd: dsdbusy was not set to Zero(0)
+.br
+panic: dsd: no status posted
+.br
+dsd: cmd(%s), dev(%d), controller is hung on the bus
+.br
+panic: dsd: couldn't start!
+.br
+dsd: interrupt with empty queue
+.br
+dsd: zero status
+.br
+panic: dsdstatus
+.br
+dsdstatus: dsdcmd failure
+.br
+dsd: soft error: dev(%x)\f1. Any of the above errors indicates that
+something is seriously wrong with the controller.
+.SH BUGS
+There are far too many printouts in the driver. There should be specific
+messages for specific problems.

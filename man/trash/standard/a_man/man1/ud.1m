@@ -1,0 +1,70 @@
+.TH UD 1M  
+.SH NAME
+ud \- uucp/mail network daemon
+.SH SYNOPSIS
+.B ud
+[
+.B \-n 
+\f2name_of_unix\f1
+]
+.LP
+.SH DESCRIPTION
+\f2ud\f1 connects through the EXOS on-board rlogin server
+to a special xty device and waits for some program
+(presumably uucico) to open the xty device and send
+a string identifying a system to connect to.
+\f2ud\f1 then uses the rlogin protocol to establish a connection to the
+system name identified by the string.
+The effect of \f2ud\f1 is to allow uucico
+network as if it were directly connected
+to that system over a modem or RS-232 wire.
+.LP
+\f2ud\f1 attempts to determine when and if the
+process on the special xty device has exited.
+Upon so determining, \f2ud\f1 kills whatever children it has and
+goes back to listening for a new string.
+.LP
+\f2ud\f1, after making the \f2socket\f1(3) and \f2connect\f1(3)
+calls, sends four null characters and reads one null character.  
+This reading and writing is required of the rlogin
+client when talking to the EXOS on-board rlogin daemon.
+.LP
+The default \f2name_of_unix\f1 is /vmunix.
+.LP
+.SH EXAMPLE
+To use \f2ud\f1 as a network mailer, add a line to the
+\f2/usr/lib/uucp/L.sys\f1 file for each system to be called.
+The system name should be the same as used in \f2/etc/hosts\f1.
+If you want to use aliases, add additional lines to \f2L.sys\f1.
+Designate ttyT8 as the device.  
+The login sequence differs from
+a normal uucp login sequence in that it begins by expecting nothing
+and by sending the remote system's name.  
+Subsequent to this, a normal uucp login sequence ensues.  
+For example, \f2L.sys\f entries
+for a system named "excelan" (alias "xln") might look like this:
+.IP
+excelan Any ttyT8 9600 ttyT8 "" excelan assword "^M^M" in:-EOT-in: uucp assword: sesame
+.br
+xln Any ttyT8 9600 ttyT8 "" xln assword "^M^M" in:-EOT-in: uucp assword: sesame
+.LP
+Of course, the uucp L-devices file must also be
+set to have /dev/ttyT8 as a direct line at 9600 baud.  
+The /dev/ttyT8 device is determined by the maximum number of xty devices
+defined in the UNIX kernel.  
+This number is currently eight.  
+Do not place a login listener on the this device.
+.LP
+\f2ud\f1 is normally started from \f2/etc/rc\f1.
+.SH FILES
+.nf
+/dev/ttyT8	special xty device used by \f2ud\f1 connections
+/vmunix		default kernel namelist
+.fi
+.SH SEE ALSO
+uucp(1c), mail(1)
+.br
+D. A. Nowitz, \f2Uucp Implementation Description\f1
+.SH BUGS
+If your uucp installation does not work properly, \f2ud\f1
+will not work.

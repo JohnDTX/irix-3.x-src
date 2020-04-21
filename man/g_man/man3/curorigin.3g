@@ -1,0 +1,47 @@
+.TH curorigin 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B curorigin
+\- sets the origin of a cursor
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "curorigin(n, xorigin, yorigin)"
+.B "short n, xorigin, yorigin;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine curori(n, xorigin, yorigin)"
+.B "integer*4 n, xorigin, yorigin"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure curorigin(n, xorigin, yorigin: Short);"
+.SH DESCRIPTION
+.B curorigin 
+sets the origin of a cursor.  The origin is the point
+on the cursor that aligns with the current cursor valuators.
+The lower left corner of the cursor has coordinates (0,0).
+Before calling \f3curorigin\f1, the cursor must be defined with 
+.BR defcursor .
+.I n
+is an index into the cursor table created by
+\f3defcursor\f1.
+.B curorigin
+does not take effect until you call
+\f3setcursor\f1.
+.sp
+The default of
+.B
+curorigin
+is at (0,0) for user-defined glyphs.
+.SH "SEE ALSO"
+attachcursor, defcursor, setcursor
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

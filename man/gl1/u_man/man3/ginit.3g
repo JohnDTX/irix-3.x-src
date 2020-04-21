@@ -1,0 +1,30 @@
+.TH ginit  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I ginit
+- initialize the IRIS
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "ginit()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine ginit"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure ginit;"
+.sp
+.SH DESCRIPTION
+\f2Ginit\f1 is the first graphics library
+command in every IRIS program. 
+It initializes the hardware, allocates memory for symbol tables
+and display lists, and sets up default values for global state variables
+in the same manner as \f2greset\f1.
+It has no arguments and should be called only once, before any other library
+command.
+.SH "SEE ALSO"
+.I gexit, greset
+.SH NOTE
+This command can only be used in immediate mode.

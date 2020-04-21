@@ -1,0 +1,4003 @@
+%!PS-Adobe-1.0
+%%Creator: gandalf:celia (Celia Szente)
+%%Title: stdin (ditroff)
+%%CreationDate: Wed Dec 16 13:00:03 1987
+%%EndComments
+% lib/psdit.pro -- prolog for psdit (ditroff) files
+% Copyright (c) 1984, 1985 Adobe Systems Incorporated. All Rights Reserved.
+% last edit: shore Sat Nov 23 20:28:03 1985
+% RCSID: $Header: /d2/3.7/src/man/upmman0/RCS/tocv2.out,v 1.1 89/03/27 17:07:11 root Exp $
+
+/$DITroff 140 dict def $DITroff begin
+/fontnum 1 def /fontsize 10 def /fontheight 10 def /fontslant 0 def
+/xi {0 72 11 mul translate 72 resolution div dup neg scale 0 0 moveto
+  /fontnum 1 def /fontsize 10 def /fontheight 10 def /fontslant 0 def F
+  /pagesave save def}def
+/PB{save /psv exch def currentpoint translate 
+  resolution 72 div dup neg scale 0 0 moveto}def
+/PE{psv restore}def
+/arctoobig 90 def /arctoosmall .05 def
+/m1 matrix def /m2 matrix def /m3 matrix def /oldmat matrix def
+/tan{dup sin exch cos div}def
+/point{resolution 72 div mul}def
+/dround	{transform round exch round exch itransform}def
+/xT{/devname exch def}def
+/xr{/mh exch def /my exch def /resolution exch def}def
+/xp{}def
+/xs{docsave restore end}def
+/xt{}def
+/xf{/fontname exch def /slotno exch def fontnames slotno get fontname eq not
+ {fonts slotno fontname findfont put fontnames slotno fontname put}if}def
+/xH{/fontheight exch def F}def
+/xS{/fontslant exch def F}def
+/s{/fontsize exch def /fontheight fontsize def F}def
+/f{/fontnum exch def F}def
+/F{fontheight 0 le {/fontheight fontsize def}if
+   fonts fontnum get fontsize point 0 0 fontheight point neg 0 0 m1 astore
+   fontslant 0 ne{1 0 fontslant tan 1 0 0 m2 astore m3 concatmatrix}if
+   makefont setfont .04 fontsize point mul 0 dround pop setlinewidth}def
+/X{exch currentpoint exch pop moveto show}def
+/N{3 1 roll moveto show}def
+/Y{exch currentpoint pop exch moveto show}def
+/S{show}def
+/ditpush{}def/ditpop{}def
+/AX{3 -1 roll currentpoint exch pop moveto 0 exch ashow}def
+/AN{4 2 roll moveto 0 exch ashow}def
+/AY{3 -1 roll currentpoint pop exch moveto 0 exch ashow}def
+/AS{0 exch ashow}def
+/MX{currentpoint exch pop moveto}def
+/MY{currentpoint pop exch moveto}def
+/MXY{moveto}def
+/cb{pop}def	% action on unknown char -- nothing for now
+/n{}def/w{}def
+/p{pop showpage pagesave restore /pagesave save def}def
+/abspoint{currentpoint exch pop add exch currentpoint pop add exch}def
+/distance{dup mul exch dup mul add sqrt}def
+/dstroke{currentpoint stroke moveto}def
+/Dl{2 copy gsave rlineto stroke grestore rmoveto}def
+/arcellipse{/diamv exch def /diamh exch def oldmat currentmatrix pop
+ currentpoint translate 1 diamv diamh div scale /rad diamh 2 div def
+ currentpoint exch rad add exch rad -180 180 arc oldmat setmatrix}def
+/Dc{dup arcellipse dstroke}def
+/De{arcellipse dstroke}def
+/Da{/endv exch def /endh exch def /centerv exch def /centerh exch def
+ /cradius centerv centerv mul centerh centerh mul add sqrt def
+ /eradius endv endv mul endh endh mul add sqrt def
+ /endang endv endh atan def
+ /startang centerv neg centerh neg atan def
+ /sweep startang endang sub dup 0 lt{360 add}if def
+ sweep arctoobig gt
+ {/midang startang sweep 2 div sub def /midrad cradius eradius add 2 div def
+  /midh midang cos midrad mul def /midv midang sin midrad mul def
+  midh neg midv neg endh endv centerh centerv midh midv Da
+  currentpoint moveto Da}
+ {sweep arctoosmall ge
+  {/controldelt 1 sweep 2 div cos sub 3 sweep 2 div sin mul div 4 mul def
+  centerv neg controldelt mul centerh controldelt mul
+  endv neg controldelt mul centerh add endh add
+  endh controldelt mul centerv add endv add
+  centerh endh add centerv endv add rcurveto dstroke}
+ {centerh endh add centerv endv add rlineto dstroke}ifelse}ifelse}def
+
+/Barray 200 array def % 200 values in a wiggle
+/D~{mark}def
+/D~~{counttomark Barray exch 0 exch getinterval astore /Bcontrol exch def pop
+ /Blen Bcontrol length def Blen 4 ge Blen 2 mod 0 eq and
+ {Bcontrol 0 get Bcontrol 1 get abspoint /Ycont exch def /Xcont exch def
+  Bcontrol 0 2 copy get 2 mul put Bcontrol 1 2 copy get 2 mul put
+  Bcontrol Blen 2 sub 2 copy get 2 mul put
+  Bcontrol Blen 1 sub 2 copy get 2 mul put
+  /Ybi /Xbi currentpoint 3 1 roll def def 0 2 Blen 4 sub
+  {/i exch def
+   Bcontrol i get 3 div Bcontrol i 1 add get 3 div
+   Bcontrol i get 3 mul Bcontrol i 2 add get add 6 div
+   Bcontrol i 1 add get 3 mul Bcontrol i 3 add get add 6 div
+   /Xbi Xcont Bcontrol i 2 add get 2 div add def
+   /Ybi Ycont Bcontrol i 3 add get 2 div add def
+   /Xcont Xcont Bcontrol i 2 add get add def
+   /Ycont Ycont Bcontrol i 3 add get add def
+   Xbi currentpoint pop sub Ybi currentpoint exch pop sub rcurveto
+  }for dstroke}if}def
+end
+/ditstart{$DITroff begin
+ /nfonts 60 def			% NFONTS makedev/ditroff dependent!
+ /fonts[nfonts{0}repeat]def
+ /fontnames[nfonts{()}repeat]def
+/docsave save def
+}def
+
+% character outcalls
+/oc {/pswid exch def /cc exch def /name exch def
+   /ditwid pswid fontsize mul resolution mul 72000 div def
+   /ditsiz fontsize resolution mul 72 div def
+   ocprocs name known{ocprocs name get exec}{name cb}
+   ifelse}def
+/fractm [.65 0 0 .6 0 0] def
+/fraction
+ {/fden exch def /fnum exch def gsave /cf currentfont def
+  cf fractm makefont setfont 0 .3 dm 2 copy neg rmoveto
+  fnum show rmoveto currentfont cf setfont(\244)show setfont fden show 
+  grestore ditwid 0 rmoveto} def
+/oce {grestore ditwid 0 rmoveto}def
+/dm {ditsiz mul}def
+/ocprocs 50 dict def ocprocs begin
+(14){(1)(4)fraction}def
+(12){(1)(2)fraction}def
+(34){(3)(4)fraction}def
+(13){(1)(3)fraction}def
+(23){(2)(3)fraction}def
+(18){(1)(8)fraction}def
+(38){(3)(8)fraction}def
+(58){(5)(8)fraction}def
+(78){(7)(8)fraction}def
+(sr){gsave 0 .06 dm rmoveto(\326)show oce}def
+(is){gsave 0 .15 dm rmoveto(\362)show oce}def
+(->){gsave 0 .02 dm rmoveto(\256)show oce}def
+(<-){gsave 0 .02 dm rmoveto(\254)show oce}def
+(==){gsave 0 .05 dm rmoveto(\272)show oce}def
+end
+
+% an attempt at a PostScript FONT to implement ditroff special chars
+% this will enable us to 
+%	cache the little buggers
+%	generate faster, more compact PS out of psdit
+%	confuse everyone (including myself)!
+50 dict dup begin
+/FontType 3 def
+/FontName /DIThacks def
+/FontMatrix [.001 0.0 0.0 .001 0.0 0.0] def
+/FontBBox [-220 -280 900 900] def% a lie but ...
+/Encoding 256 array def
+0 1 255{Encoding exch /.notdef put}for
+Encoding
+ dup 8#040/space put %space
+ dup 8#110/rc put %right ceil
+ dup 8#111/lt put %left  top curl
+ dup 8#112/bv put %bold vert
+ dup 8#113/lk put %left  mid curl
+ dup 8#114/lb put %left  bot curl
+ dup 8#115/rt put %right top curl
+ dup 8#116/rk put %right mid curl
+ dup 8#117/rb put %right bot curl
+ dup 8#120/rf put %right floor
+ dup 8#121/lf put %left  floor
+ dup 8#122/lc put %left  ceil
+ dup 8#140/sq put %square
+ dup 8#141/bx put %box
+ dup 8#142/ci put %circle
+ dup 8#143/br put %box rule
+ dup 8#144/rn put %root extender
+ dup 8#145/vr put %vertical rule
+ dup 8#146/ob put %outline bullet
+ dup 8#147/bu put %bullet
+ dup 8#150/ru put %rule
+ dup 8#151/ul put %underline
+ pop
+/DITfd 100 dict def
+/BuildChar{0 begin
+ /cc exch def /fd exch def
+ /charname fd /Encoding get cc get def
+ /charwid fd /Metrics get charname get def
+ /charproc fd /CharProcs get charname get def
+ charwid 0 fd /FontBBox get aload pop setcachedevice
+ 2 setlinejoin 40 setlinewidth
+ newpath 0 0 moveto gsave charproc grestore
+ end}def
+/BuildChar load 0 DITfd put
+%/UniqueID 5 def
+/CharProcs 50 dict def
+CharProcs begin
+/space{}def
+/.notdef{}def
+/ru{500 0 rls}def
+/rn{0 750 moveto 500 0 rls}def
+/vr{0 800 moveto 0 -770 rls}def
+/bv{0 800 moveto 0 -1000 rls}def
+/br{0 750 moveto 0 -1000 rls}def
+/ul{0 -250 moveto 500 0 rls}def
+/ob{200 250 rmoveto currentpoint newpath 200 0 360 arc closepath stroke}def
+/bu{200 250 rmoveto currentpoint newpath 200 0 360 arc closepath fill}def
+/sq{80 0 rmoveto currentpoint dround newpath moveto
+    640 0 rlineto 0 640 rlineto -640 0 rlineto closepath stroke}def
+/bx{80 0 rmoveto currentpoint dround newpath moveto
+    640 0 rlineto 0 640 rlineto -640 0 rlineto closepath fill}def
+/ci{355 333 rmoveto currentpoint newpath 333 0 360 arc
+    50 setlinewidth stroke}def
+
+/lt{0 -200 moveto 0 550 rlineto currx 800 2cx s4 add exch s4 a4p stroke}def
+/lb{0 800 moveto 0 -550 rlineto currx -200 2cx s4 add exch s4 a4p stroke}def
+/rt{0 -200 moveto 0 550 rlineto currx 800 2cx s4 sub exch s4 a4p stroke}def
+/rb{0 800 moveto 0 -500 rlineto currx -200 2cx s4 sub exch s4 a4p stroke}def
+/lk{0 800 moveto 0 300 -300 300 s4 arcto pop pop 1000 sub
+    0 300 4 2 roll s4 a4p 0 -200 lineto stroke}def
+/rk{0 800 moveto 0 300 s2 300 s4 arcto pop pop 1000 sub
+    0 300 4 2 roll s4 a4p 0 -200 lineto stroke}def
+/lf{0 800 moveto 0 -1000 rlineto s4 0 rls}def
+/rf{0 800 moveto 0 -1000 rlineto s4 neg 0 rls}def
+/lc{0 -200 moveto 0 1000 rlineto s4 0 rls}def
+/rc{0 -200 moveto 0 1000 rlineto s4 neg 0 rls}def
+end
+
+/Metrics 50 dict def Metrics begin
+/.notdef 0 def
+/space 500 def
+/ru 500 def
+/br 0 def
+/lt 416 def
+/lb 416 def
+/rt 416 def
+/rb 416 def
+/lk 416 def
+/rk 416 def
+/rc 416 def
+/lc 416 def
+/rf 416 def
+/lf 416 def
+/bv 416 def
+/ob 350 def
+/bu 350 def
+/ci 750 def
+/bx 750 def
+/sq 750 def
+/rn 500 def
+/ul 500 def
+/vr 0 def
+end
+
+DITfd begin
+/s2 500 def /s4 250 def /s3 333 def
+/a4p{arcto pop pop pop pop}def
+/2cx{2 copy exch}def
+/rls{rlineto stroke}def
+/currx{currentpoint pop}def
+/dround{transform round exch round exch itransform} def
+end
+end
+/DIThacks exch definefont pop
+ditstart
+(psc)xT
+576 1 1 xr
+1(Times-Roman)xf 1 f
+2(Times-Italic)xf 2 f
+3(Times-Bold)xf 3 f
+4(Times-BoldItalic)xf 4 f
+5(Helvetica)xf 5 f
+6(Helvetica-Bold)xf 6 f
+7(Courier)xf 7 f
+8(Courier-Bold)xf 8 f
+9(Symbol)xf 9 f
+10(DIThacks)xf 10 f
+10 s
+1 f
+xi
+%%EndProlog
+
+%%Page: 1 1
+10 s 0 xH 0 xS 1 f
+12 s
+3 f
+1381 480(TABLE)N
+1746(OF)X
+1920(CONTENTS)X
+561 672(2.)N
+669(System)X
+998(Calls)X
+1 f
+849 816(intro)N
+3 f
+1225(.)X
+1321(.)X
+1 f
+1477(introduction)X
+1972(to)X
+2071(system)X
+2362(calls)X
+2563(and)X
+2726(error)X
+2937(numbers)X
+849 912(accept)N
+3 f
+1318(.)X
+1414(.)X
+1510(.)X
+1606(.)X
+1702(.)X
+1798(.)X
+1894(.)X
+1 f
+2050(accept)X
+2321(a)X
+2388(connection)X
+2835(on)X
+2955(a)X
+3022(socket)X
+849 1008(access)N
+3 f
+1235(.)X
+1331(.)X
+1427(.)X
+1523(.)X
+1619(.)X
+1715(.)X
+1811(.)X
+1907(.)X
+1 f
+2063(determine)X
+2473(accessibility)X
+2974(of)X
+3078(a)X
+3145(\256le)X
+849 1104(acct)N
+3 f
+1220(.)X
+1316(.)X
+1412(.)X
+1508(.)X
+1604(.)X
+1700(.)X
+1 f
+1856(enable)X
+2132(or)X
+2236(disable)X
+2533(process)X
+2845(accounting)X
+849 1200(alarm)N
+3 f
+1216(.)X
+1312(.)X
+1408(.)X
+1504(.)X
+1600(.)X
+1696(.)X
+1792(.)X
+1888(.)X
+1984(.)X
+2080(.)X
+1 f
+2236(set)X
+2367(a)X
+2434(process's)X
+2815(alarm)X
+3059(clock)X
+849 1296(bind)N
+3 f
+1245(.)X
+1341(.)X
+1437(.)X
+1533(.)X
+1629(.)X
+1725(.)X
+1821(.)X
+1917(.)X
+2013(.)X
+2109(.)X
+2205(.)X
+1 f
+2361(bind)X
+2556(a)X
+2623(name)X
+2856(to)X
+2955(a)X
+3022(socket)X
+849 1392(brk)N
+3 f
+1186(.)X
+1282(.)X
+1378(.)X
+1474(.)X
+1570(.)X
+1666(.)X
+1 f
+1822(change)X
+2119(data)X
+2304(segment)X
+2649(space)X
+2887(allocation)X
+849 1488(chdir)N
+3 f
+1259(.)X
+1355(.)X
+1451(.)X
+1547(.)X
+1643(.)X
+1739(.)X
+1835(.)X
+1931(.)X
+2027(.)X
+2123(.)X
+1 f
+2279(change)X
+2576(working)X
+2920(directory)X
+849 1584(chmod)N
+3 f
+1294(.)X
+1390(.)X
+1486(.)X
+1582(.)X
+1678(.)X
+1774(.)X
+1870(.)X
+1966(.)X
+2062(.)X
+2158(.)X
+2254(.)X
+2350(.)X
+1 f
+2506(change)X
+2803(mode)X
+3041(of)X
+3145(\256le)X
+849 1680(chown)N
+3 f
+1270(.)X
+1366(.)X
+1462(.)X
+1558(.)X
+1654(.)X
+1750(.)X
+1846(.)X
+1 f
+2002(change)X
+2299(owner)X
+2563(and)X
+2726(group)X
+2974(of)X
+3078(a)X
+3145(\256le)X
+849 1776(chroot)N
+3 f
+1232(.)X
+1328(.)X
+1424(.)X
+1520(.)X
+1616(.)X
+1712(.)X
+1808(.)X
+1904(.)X
+2000(.)X
+2096(.)X
+2192(.)X
+2288(.)X
+1 f
+2444(change)X
+2741(root)X
+2920(directory)X
+849 1872(close)N
+3 f
+1235(.)X
+1331(.)X
+1427(.)X
+1523(.)X
+1619(.)X
+1715(.)X
+1811(.)X
+1907(.)X
+2003(.)X
+2099(.)X
+2195(.)X
+2291(.)X
+1 f
+2447(close)X
+2669(a)X
+2736(\256le)X
+2883(descriptor)X
+849 1968(connect)N
+3 f
+1296(.)X
+1392(.)X
+1488(.)X
+1584(.)X
+1680(.)X
+1776(.)X
+1872(.)X
+1 f
+2028(initiate)X
+2321(a)X
+2388(connection)X
+2835(on)X
+2955(a)X
+3022(socket)X
+849 2064(creat)N
+3 f
+1187(.)X
+1283(.)X
+1379(.)X
+1475(.)X
+1 f
+1631(create)X
+1886(a)X
+1953(new)X
+2137(\256le)X
+2284(or)X
+2388(rewrite)X
+2685(an)X
+2800(existing)X
+3129(one)X
+849 2160(dup)N
+3 f
+1204(.)X
+1300(.)X
+1396(.)X
+1492(.)X
+1588(.)X
+1684(.)X
+1780(.)X
+1876(.)X
+1 f
+2032(duplicate)X
+2410(an)X
+2525(open)X
+2736(\256le)X
+2883(descriptor)X
+849 2256(exec)N
+3 f
+1163(.)X
+1259(.)X
+1355(.)X
+1451(.)X
+1547(.)X
+1643(.)X
+1739(.)X
+1835(.)X
+1931(.)X
+2027(.)X
+2123(.)X
+2219(.)X
+2315(.)X
+2411(.)X
+2507(.)X
+2603(.)X
+1 f
+2759(execute)X
+3078(a)X
+3145(\256le)X
+849 2352(exit)N
+3 f
+1187(.)X
+1283(.)X
+1379(.)X
+1475(.)X
+1571(.)X
+1667(.)X
+1763(.)X
+1859(.)X
+1955(.)X
+2051(.)X
+2147(.)X
+2243(.)X
+2339(.)X
+2435(.)X
+1 f
+2591(terminate)X
+2980(process)X
+849 2448(fcntl)N
+3 f
+1252(.)X
+1348(.)X
+1444(.)X
+1540(.)X
+1636(.)X
+1732(.)X
+1828(.)X
+1924(.)X
+2020(.)X
+2116(.)X
+2212(.)X
+2308(.)X
+2404(.)X
+2500(.)X
+2596(.)X
+2692(.)X
+1 f
+2848(\256le)X
+2995(control)X
+849 2544(fork)N
+3 f
+1166(.)X
+1262(.)X
+1358(.)X
+1454(.)X
+1550(.)X
+1646(.)X
+1742(.)X
+1838(.)X
+1934(.)X
+2030(.)X
+2126(.)X
+2222(.)X
+2318(.)X
+1 f
+2474(create)X
+2729(a)X
+2796(new)X
+2980(process)X
+849 2640(getdents)N
+759(read)X
+949(directory)X
+1321(entries)X
+1602(and)X
+1765(put)X
+1912(in)X
+2011(a)X
+2078(\256le)X
+2225(system)X
+2516(independent)X
+3011(format)X
+849 2736(getdomainname)N
+3 f
+1625(.)X
+1721(.)X
+1817(.)X
+1913(.)X
+1 f
+2069(get/set)X
+2345(name)X
+2578(of)X
+2682(current)X
+2979(domain)X
+849 2832(getdtablesize)N
+3 f
+1527(.)X
+1623(.)X
+1719(.)X
+1815(.)X
+1911(.)X
+2007(.)X
+2103(.)X
+2199(.)X
+1 f
+2355(get)X
+2497(descriptor)X
+2906(table)X
+3118(size)X
+849 2928(gethostid)N
+3 f
+1425(.)X
+1521(.)X
+1617(.)X
+1 f
+1773(get/set)X
+2049(unique)X
+2335(identi\256er)X
+2707(of)X
+2811(current)X
+3108(host)X
+849 3024(gethostname)N
+3 f
+1504(.)X
+1600(.)X
+1696(.)X
+1792(.)X
+1888(.)X
+1984(.)X
+2080(.)X
+2176(.)X
+1 f
+2332(get)X
+2474(name)X
+2707(of)X
+2811(current)X
+3108(host)X
+849 3120(getpagesize)N
+3 f
+1459(.)X
+1555(.)X
+1651(.)X
+1747(.)X
+1843(.)X
+1939(.)X
+2035(.)X
+2131(.)X
+2227(.)X
+2323(.)X
+1 f
+2479(get)X
+2621(system)X
+2912(page)X
+3118(size)X
+849 3216(getpeername)N
+3 f
+1476(.)X
+1572(.)X
+1668(.)X
+1764(.)X
+1860(.)X
+1956(.)X
+2052(.)X
+1 f
+2208(get)X
+2350(name)X
+2583(of)X
+2687(connected)X
+3102(peer)X
+849 3312(getpid)N
+1328(get)X
+1470(process,)X
+1806(process)X
+2118(group,)X
+2390(and)X
+2553(parent)X
+2818(process)X
+3130(IDs)X
+849 3408(getsockname)N
+3 f
+1531(.)X
+1627(.)X
+1723(.)X
+1819(.)X
+1915(.)X
+2011(.)X
+2107(.)X
+2203(.)X
+2299(.)X
+2395(.)X
+2491(.)X
+1 f
+2647(get)X
+2789(socket)X
+3059(name)X
+849 3504(getsockopt)N
+3 f
+1486(.)X
+1582(.)X
+1678(.)X
+1774(.)X
+1870(.)X
+1966(.)X
+1 f
+2122(get)X
+2264(and)X
+2427(set)X
+2558(options)X
+2865(on)X
+2985(sockets)X
+849 3600(getuid)N
+827(get)X
+969(real)X
+1138(user,)X
+1346(effective)X
+1708(user,)X
+1916(real)X
+2085(group,)X
+2357(and)X
+2520(effective)X
+2882(group)X
+3130(IDs)X
+849 3696(getversion)N
+1332(get)X
+1474(version)X
+1781(information)X
+2260(from)X
+2471(the)X
+2613(operating)X
+3001(system)X
+849 3792(ioctl)N
+3 f
+1219(.)X
+1315(.)X
+1411(.)X
+1507(.)X
+1603(.)X
+1699(.)X
+1795(.)X
+1891(.)X
+1987(.)X
+2083(.)X
+2179(.)X
+2275(.)X
+2371(.)X
+2467(.)X
+2563(.)X
+1 f
+2719(control)X
+3016(device)X
+849 3888(ip2mapio)N
+3 f
+1413(.)X
+1509(.)X
+1605(.)X
+1701(.)X
+1797(.)X
+1893(.)X
+1989(.)X
+1 f
+2145(multibus)X
+2506(mapping)X
+2867(operations)X
+849 3984(kill)N
+3 f
+1126(.)X
+1222(.)X
+1 f
+1378(send)X
+1578(a)X
+1645(signal)X
+1899(to)X
+1998(a)X
+2065(process)X
+2377(or)X
+2481(a)X
+2548(group)X
+2796(of)X
+2900(processes)X
+849 4080(link)N
+3 f
+1209(.)X
+1305(.)X
+1401(.)X
+1497(.)X
+1593(.)X
+1689(.)X
+1785(.)X
+1881(.)X
+1977(.)X
+2073(.)X
+2169(.)X
+2265(.)X
+2361(.)X
+2457(.)X
+2553(.)X
+2649(.)X
+1 f
+2805(link)X
+2979(to)X
+3078(a)X
+3145(\256le)X
+849 4176(listen)N
+3 f
+1250(.)X
+1346(.)X
+1442(.)X
+1538(.)X
+1634(.)X
+1730(.)X
+1826(.)X
+1 f
+1982(listen)X
+2215(for)X
+2351(connections)X
+2835(on)X
+2955(a)X
+3022(socket)X
+849 4272(lseek)N
+3 f
+1271(.)X
+1367(.)X
+1463(.)X
+1559(.)X
+1655(.)X
+1751(.)X
+1847(.)X
+1943(.)X
+2039(.)X
+1 f
+2195(move)X
+2433(read/write)X
+2848(\256le)X
+2995(pointer)X
+849 4368(mkdir)N
+3 f
+1216(.)X
+1312(.)X
+1408(.)X
+1504(.)X
+1600(.)X
+1696(.)X
+1792(.)X
+1888(.)X
+1984(.)X
+2080(.)X
+2176(.)X
+2272(.)X
+2368(.)X
+2464(.)X
+1 f
+2620(make)X
+2853(a)X
+2920(directory)X
+849 4464(mknod)N
+3 f
+1280(.)X
+1376(.)X
+1 f
+1532(make)X
+1765(a)X
+1832(directory,)X
+2228(or)X
+2332(a)X
+2399(special)X
+2691(or)X
+2795(ordinary)X
+3145(\256le)X
+849 4560(mount)N
+3 f
+1305(.)X
+1401(.)X
+1497(.)X
+1593(.)X
+1689(.)X
+1785(.)X
+1881(.)X
+1977(.)X
+2073(.)X
+2169(.)X
+2265(.)X
+2361(.)X
+1 f
+2517(mount)X
+2787(a)X
+2854(\256le)X
+3001(system)X
+849 4656(msgctl)N
+3 f
+1296(.)X
+1392(.)X
+1488(.)X
+1584(.)X
+1680(.)X
+1776(.)X
+1872(.)X
+1968(.)X
+2064(.)X
+1 f
+2220(message)X
+2570(control)X
+2867(operations)X
+849 4752(msgget)N
+3 f
+1334(.)X
+1430(.)X
+1526(.)X
+1622(.)X
+1718(.)X
+1814(.)X
+1910(.)X
+2006(.)X
+2102(.)X
+2198(.)X
+2294(.)X
+2390(.)X
+1 f
+2546(get)X
+2688(message)X
+3038(queue)X
+561 4992(Version)N
+889(3.0)X
+1845(-)X
+1901(i)X
+1952(-)X
+2640(December)X
+3076(1987)X
+
+2 p
+%%Page: 2 2
+12 s 0 xH 0 xS 1 f
+2 f
+561 240(Table)N
+820(of)X
+935(Contents)X
+1 f
+849 480(msgop)N
+3 f
+1305(.)X
+1401(.)X
+1497(.)X
+1593(.)X
+1689(.)X
+1785(.)X
+1881(.)X
+1977(.)X
+2073(.)X
+2169(.)X
+2265(.)X
+2361(.)X
+1 f
+2517(message)X
+2867(operations)X
+849 576(nfsmount)N
+3 f
+1346(.)X
+1442(.)X
+1538(.)X
+1634(.)X
+1730(.)X
+1826(.)X
+1922(.)X
+2018(.)X
+2114(.)X
+1 f
+2270(mount)X
+2540(an)X
+2655(NFS)X
+2854(\256le)X
+3001(system)X
+849 672(nfssvc)N
+3 f
+1227(.)X
+1323(.)X
+1419(.)X
+1515(.)X
+1611(.)X
+1707(.)X
+1803(.)X
+1899(.)X
+1995(.)X
+2091(.)X
+2187(.)X
+2283(.)X
+2379(.)X
+2475(.)X
+2571(.)X
+1 f
+2727(NFS)X
+2926(daemons)X
+849 768(nice)N
+3 f
+1179(.)X
+1275(.)X
+1371(.)X
+1467(.)X
+1563(.)X
+1659(.)X
+1755(.)X
+1851(.)X
+1947(.)X
+2043(.)X
+1 f
+2199(change)X
+2496(priority)X
+2809(of)X
+2913(a)X
+2980(process)X
+849 864(open)N
+3 f
+1206(.)X
+1302(.)X
+1398(.)X
+1494(.)X
+1590(.)X
+1686(.)X
+1782(.)X
+1878(.)X
+1974(.)X
+2070(.)X
+1 f
+2226(open)X
+2437(for)X
+2573(reading)X
+2886(or)X
+2990(writing)X
+849 960(pause)N
+3 f
+1268(.)X
+1364(.)X
+1460(.)X
+1556(.)X
+1652(.)X
+1748(.)X
+1844(.)X
+1940(.)X
+2036(.)X
+1 f
+2192(suspend)X
+2525(process)X
+2837(until)X
+3038(signal)X
+849 1056(phys)N
+3 f
+1221(.)X
+1317(.)X
+1413(.)X
+1 f
+1569(allow)X
+1807(a)X
+1874(process)X
+2186(to)X
+2285(access)X
+2555(physical)X
+2900(addresses)X
+849 1152(pipe)N
+3 f
+1185(.)X
+1281(.)X
+1377(.)X
+1473(.)X
+1569(.)X
+1665(.)X
+1761(.)X
+1857(.)X
+1953(.)X
+1 f
+2109(create)X
+2364(an)X
+2479(interprocess)X
+2968(channel)X
+849 1248(plock)N
+3 f
+1204(.)X
+1300(.)X
+1396(.)X
+1492(.)X
+1588(.)X
+1684(.)X
+1 f
+1840(lock)X
+2030(process,)X
+2366(text,)X
+2559(or)X
+2663(data)X
+2848(in)X
+2947(memory)X
+849 1344(pro\256l)N
+3 f
+1210(.)X
+1306(.)X
+1402(.)X
+1498(.)X
+1594(.)X
+1690(.)X
+1786(.)X
+1882(.)X
+1978(.)X
+2074(.)X
+2170(.)X
+2266(.)X
+1 f
+2422(execution)X
+2821(time)X
+3017(pro\256le)X
+849 1440(ptrace)N
+3 f
+1268(.)X
+1364(.)X
+1460(.)X
+1556(.)X
+1652(.)X
+1748(.)X
+1844(.)X
+1940(.)X
+2036(.)X
+2132(.)X
+2228(.)X
+2324(.)X
+2420(.)X
+2516(.)X
+2612(.)X
+1 f
+2768(process)X
+3080(trace)X
+849 1536(read)N
+3 f
+1148(.)X
+1244(.)X
+1340(.)X
+1436(.)X
+1532(.)X
+1628(.)X
+1724(.)X
+1820(.)X
+1916(.)X
+2012(.)X
+2108(.)X
+2204(.)X
+2300(.)X
+2396(.)X
+2492(.)X
+2588(.)X
+1 f
+2744(read)X
+2934(from)X
+3145(\256le)X
+849 1632(readlink)N
+3 f
+1319(.)X
+1415(.)X
+1511(.)X
+1607(.)X
+1703(.)X
+1799(.)X
+1895(.)X
+1991(.)X
+1 f
+2147(read)X
+2337(value)X
+2570(of)X
+2674(a)X
+2741(symbolic)X
+3118(link)X
+849 1728(reboot)N
+3 f
+1281(.)X
+1377(.)X
+1473(.)X
+1569(.)X
+1665(.)X
+1761(.)X
+1857(.)X
+1953(.)X
+2049(.)X
+2145(.)X
+2241(.)X
+2337(.)X
+2433(.)X
+1 f
+2589(reboot)X
+2859(the)X
+3001(system)X
+849 1824(recv)N
+3 f
+1196(.)X
+1292(.)X
+1388(.)X
+1484(.)X
+1580(.)X
+1676(.)X
+1772(.)X
+1868(.)X
+1 f
+2024(receive)X
+2327(a)X
+2394(message)X
+2744(from)X
+2955(a)X
+3022(socket)X
+849 1920(rename)N
+3 f
+1282(.)X
+1378(.)X
+1474(.)X
+1570(.)X
+1666(.)X
+1762(.)X
+1858(.)X
+1954(.)X
+2050(.)X
+2146(.)X
+1 f
+2302(change)X
+2599(the)X
+2741(name)X
+2974(of)X
+3078(a)X
+3145(\256le)X
+849 2016(rmdir)N
+3 f
+1232(.)X
+1328(.)X
+1424(.)X
+1520(.)X
+1616(.)X
+1712(.)X
+1808(.)X
+1904(.)X
+2000(.)X
+2096(.)X
+2192(.)X
+2288(.)X
+2384(.)X
+1 f
+2540(remove)X
+2853(a)X
+2920(directory)X
+849 2112(select)N
+3 f
+1222(.)X
+1318(.)X
+1414(.)X
+1510(.)X
+1606(.)X
+1702(.)X
+1 f
+1858(synchronous)X
+2367(I/O)X
+2519(multiplexing)X
+3036(-)X
+3092(TCP)X
+849 2208(semctl)N
+3 f
+1301(.)X
+1397(.)X
+1493(.)X
+1589(.)X
+1685(.)X
+1781(.)X
+1877(.)X
+1973(.)X
+1 f
+2129(semaphore)X
+2570(control)X
+2867(operations)X
+849 2304(semget)N
+3 f
+1321(.)X
+1417(.)X
+1513(.)X
+1609(.)X
+1705(.)X
+1801(.)X
+1897(.)X
+1993(.)X
+2089(.)X
+2185(.)X
+2281(.)X
+1 f
+2437(get)X
+2579(set)X
+2710(of)X
+2814(semaphores)X
+849 2400(semop)N
+3 f
+1310(.)X
+1406(.)X
+1502(.)X
+1598(.)X
+1694(.)X
+1790(.)X
+1886(.)X
+1982(.)X
+2078(.)X
+2174(.)X
+2270(.)X
+1 f
+2426(semaphore)X
+2867(operations)X
+849 2496(send)N
+3 f
+1203(.)X
+1299(.)X
+1395(.)X
+1491(.)X
+1587(.)X
+1683(.)X
+1779(.)X
+1875(.)X
+1971(.)X
+1 f
+2127(send)X
+2327(a)X
+2394(message)X
+2744(from)X
+2955(a)X
+3022(socket)X
+849 2592(sethostname)N
+3 f
+1457(.)X
+1553(.)X
+1649(.)X
+1745(.)X
+1841(.)X
+1937(.)X
+2033(.)X
+2129(.)X
+2225(.)X
+2321(.)X
+1 f
+2477(set)X
+2608(name)X
+2841(of)X
+2945(host)X
+3129(cpu)X
+849 2688(setpgrp)N
+3 f
+1264(.)X
+1360(.)X
+1456(.)X
+1552(.)X
+1648(.)X
+1744(.)X
+1840(.)X
+1936(.)X
+2032(.)X
+2128(.)X
+2224(.)X
+2320(.)X
+1 f
+2476(set)X
+2607(process)X
+2919(group)X
+3167(ID)X
+849 2784(setuid)N
+3 f
+1288(.)X
+1384(.)X
+1480(.)X
+1576(.)X
+1672(.)X
+1768(.)X
+1864(.)X
+1960(.)X
+2056(.)X
+2152(.)X
+2248(.)X
+1 f
+2404(set)X
+2535(user)X
+2719(and)X
+2882(group)X
+3130(IDs)X
+849 2880(sginap)N
+3 f
+1265(.)X
+1361(.)X
+1457(.)X
+1553(.)X
+1 f
+1709(timed)X
+1953(sleep)X
+2175(and)X
+2338(processor)X
+2730(yield)X
+2947(function)X
+849 2976(shmctl)N
+3 f
+1314(.)X
+1410(.)X
+1506(.)X
+1602(.)X
+1698(.)X
+1794(.)X
+1 f
+1950(shared)X
+2225(memory)X
+2570(control)X
+2867(operations)X
+849 3072(shmget)N
+3 f
+1261(.)X
+1357(.)X
+1453(.)X
+1549(.)X
+1645(.)X
+1741(.)X
+1837(.)X
+1933(.)X
+2029(.)X
+1 f
+2185(get)X
+2327(shared)X
+2602(memory)X
+2947(segment)X
+849 3168(shmop)N
+3 f
+1323(.)X
+1419(.)X
+1515(.)X
+1611(.)X
+1707(.)X
+1803(.)X
+1899(.)X
+1995(.)X
+2091(.)X
+1 f
+2247(shared)X
+2522(memory)X
+2867(operations)X
+849 3264(shutdown)N
+3 f
+1375(.)X
+1471(.)X
+1 f
+1627(shut)X
+1811(down)X
+2048(part)X
+2222(of)X
+2326(a)X
+2393(full-duplex)X
+2845(connection)X
+849 3360(signal)N
+3 f
+1284(.)X
+1380(.)X
+1476(.)X
+1 f
+1632(specify)X
+1934(what)X
+2145(to)X
+2244(do)X
+2364(upon)X
+2580(receipt)X
+2867(of)X
+2971(a)X
+3038(signal)X
+849 3456(socket)N
+3 f
+1293(.)X
+1389(.)X
+1 f
+1545(create)X
+1800(an)X
+1915(endpoint)X
+2276(for)X
+2412(communication)X
+3036(-)X
+3092(TCP)X
+849 3552(socketpair)N
+3 f
+1430(.)X
+1526(.)X
+1622(.)X
+1718(.)X
+1814(.)X
+1 f
+1970(create)X
+2225(a)X
+2292(pair)X
+2466(of)X
+2570(connected)X
+2985(sockets)X
+849 3648(stat)N
+3 f
+1164(.)X
+1260(.)X
+1356(.)X
+1452(.)X
+1548(.)X
+1644(.)X
+1740(.)X
+1836(.)X
+1932(.)X
+2028(.)X
+2124(.)X
+2220(.)X
+2316(.)X
+2412(.)X
+2508(.)X
+2604(.)X
+1 f
+2760(get)X
+2902(\256le)X
+3049(status)X
+849 3744(statfs)N
+3 f
+1245(.)X
+1341(.)X
+1437(.)X
+1533(.)X
+1629(.)X
+1725(.)X
+1821(.)X
+1 f
+1977(get)X
+2119(\256le)X
+2266(system)X
+2557(information)X
+3036(-)X
+3092(TCP)X
+849 3840(stime)N
+3 f
+1273(.)X
+1369(.)X
+1465(.)X
+1561(.)X
+1657(.)X
+1753(.)X
+1849(.)X
+1945(.)X
+2041(.)X
+2137(.)X
+2233(.)X
+2329(.)X
+2425(.)X
+2521(.)X
+2617(.)X
+2713(.)X
+2809(.)X
+1 f
+2965(set)X
+3096(time)X
+849 3936(symlink)N
+3 f
+1367(.)X
+1463(.)X
+1559(.)X
+1655(.)X
+1751(.)X
+1847(.)X
+1943(.)X
+2039(.)X
+1 f
+2195(make)X
+2428(symbolic)X
+2805(link)X
+2979(to)X
+3078(a)X
+3145(\256le)X
+849 4032(sync)N
+3 f
+1225(.)X
+1321(.)X
+1417(.)X
+1513(.)X
+1609(.)X
+1705(.)X
+1801(.)X
+1897(.)X
+1993(.)X
+2089(.)X
+2185(.)X
+2281(.)X
+2377(.)X
+1 f
+2533(update)X
+2814(super-block)X
+849 4128(sysfs)N
+3 f
+1215(.)X
+1311(.)X
+1407(.)X
+1503(.)X
+1599(.)X
+1695(.)X
+1791(.)X
+1887(.)X
+1 f
+2043(get)X
+2185(\256le)X
+2332(system)X
+2623(type)X
+2813(information)X
+849 4224(time)N
+3 f
+1166(.)X
+1262(.)X
+1358(.)X
+1454(.)X
+1550(.)X
+1646(.)X
+1742(.)X
+1838(.)X
+1934(.)X
+2030(.)X
+2126(.)X
+2222(.)X
+2318(.)X
+2414(.)X
+2510(.)X
+2606(.)X
+2702(.)X
+2798(.)X
+1 f
+2954(get)X
+3096(time)X
+849 4320(times)N
+3 f
+1277(.)X
+1373(.)X
+1469(.)X
+1565(.)X
+1661(.)X
+1757(.)X
+1 f
+1913(get)X
+2055(process)X
+2367(and)X
+2530(child)X
+2747(process)X
+3059(times)X
+849 4416(truncate)N
+3 f
+1310(.)X
+1406(.)X
+1502(.)X
+1598(.)X
+1694(.)X
+1790(.)X
+1 f
+1946(truncate)X
+2281(a)X
+2348(\256le)X
+2495(to)X
+2594(a)X
+2661(speci\256ed)X
+3027(length)X
+849 4512(ulimit)N
+3 f
+1216(.)X
+1312(.)X
+1408(.)X
+1504(.)X
+1600(.)X
+1696(.)X
+1792(.)X
+1888(.)X
+1984(.)X
+2080(.)X
+2176(.)X
+2272(.)X
+1 f
+2428(get)X
+2570(and)X
+2733(set)X
+2864(user)X
+3048(limits)X
+849 4608(umask)N
+3 f
+1319(.)X
+1415(.)X
+1511(.)X
+1607(.)X
+1703(.)X
+1799(.)X
+1895(.)X
+1991(.)X
+1 f
+2147(set)X
+2278(and)X
+2441(get)X
+2583(\256le)X
+2730(creation)X
+3065(mask)X
+849 4704(umount)N
+3 f
+1305(.)X
+1401(.)X
+1497(.)X
+1593(.)X
+1689(.)X
+1785(.)X
+1881(.)X
+1977(.)X
+2073(.)X
+2169(.)X
+2265(.)X
+1 f
+2421(unmount)X
+2787(a)X
+2854(\256le)X
+3001(system)X
+561 4944(December)N
+997(1987)X
+1831(-)X
+1887(ii)X
+1965(-)X
+2820(Version)X
+3148(3.0)X
+
+3 p
+%%Page: 3 3
+12 s 0 xH 0 xS 1 f
+2 f
+2552 240(Table)N
+2811(of)X
+2926(Contents)X
+1 f
+849 480(uname)N
+3 f
+1326(.)X
+1422(.)X
+1518(.)X
+1614(.)X
+1710(.)X
+1806(.)X
+1 f
+1962(get)X
+2104(name)X
+2337(of)X
+2441(current)X
+2738(UNIX)X
+3001(system)X
+849 576(unlink)N
+3 f
+1269(.)X
+1365(.)X
+1461(.)X
+1557(.)X
+1653(.)X
+1749(.)X
+1845(.)X
+1941(.)X
+2037(.)X
+2133(.)X
+2229(.)X
+1 f
+2385(remove)X
+2698(directory)X
+3070(entry)X
+849 672(ustat)N
+3 f
+1240(.)X
+1336(.)X
+1432(.)X
+1528(.)X
+1624(.)X
+1720(.)X
+1816(.)X
+1912(.)X
+2008(.)X
+2104(.)X
+2200(.)X
+1 f
+2356(get)X
+2498(\256le)X
+2645(system)X
+2936(statistics)X
+849 768(utime)N
+3 f
+1201(.)X
+1297(.)X
+1393(.)X
+1489(.)X
+1585(.)X
+1681(.)X
+1 f
+1837(set)X
+1968(\256le)X
+2115(access)X
+2385(and)X
+2548(modi\256cation)X
+3059(times)X
+849 864(wait)N
+3 f
+1217(.)X
+1313(.)X
+1409(.)X
+1505(.)X
+1 f
+1661(wait)X
+1851(for)X
+1987(child)X
+2204(process)X
+2516(to)X
+2615(stop)X
+2799(or)X
+2903(terminate)X
+849 960(write)N
+3 f
+1236(.)X
+1332(.)X
+1428(.)X
+1524(.)X
+1620(.)X
+1716(.)X
+1812(.)X
+1908(.)X
+2004(.)X
+2100(.)X
+2196(.)X
+2292(.)X
+2388(.)X
+2484(.)X
+2580(.)X
+1 f
+2736(write)X
+2958(on)X
+3078(a)X
+3145(\256le)X
+3 f
+561 1152(3.)N
+669(Subroutines)X
+1 f
+849 1296(intro)N
+3 f
+1188(.)X
+1284(.)X
+1380(.)X
+1476(.)X
+1572(.)X
+1 f
+1728(introduction)X
+2223(to)X
+2322(subroutines)X
+2789(and)X
+2952(libraries)X
+849 1392(a64l)N
+1144(convert)X
+1457(between)X
+1802(long)X
+1997(integer)X
+2289(and)X
+2452(base-64)X
+2775(ASCII)X
+3049(string)X
+849 1488(abort)N
+3 f
+1229(.)X
+1325(.)X
+1421(.)X
+1517(.)X
+1613(.)X
+1709(.)X
+1805(.)X
+1901(.)X
+1997(.)X
+2093(.)X
+2189(.)X
+2285(.)X
+1 f
+2441(generate)X
+2792(an)X
+2907(IOT)X
+3091(fault)X
+849 1584(abs)N
+3 f
+1148(.)X
+1244(.)X
+1340(.)X
+1436(.)X
+1532(.)X
+1628(.)X
+1724(.)X
+1820(.)X
+1916(.)X
+2012(.)X
+1 f
+2168(return)X
+2422(integer)X
+2714(absolute)X
+3059(value)X
+849 1680(assert)N
+3 f
+1206(.)X
+1302(.)X
+1398(.)X
+1494(.)X
+1590(.)X
+1686(.)X
+1782(.)X
+1878(.)X
+1974(.)X
+2070(.)X
+2166(.)X
+1 f
+2322(verify)X
+2576(program)X
+2926(assertion)X
+849 1776(atof)N
+3 f
+1149(.)X
+1245(.)X
+1341(.)X
+1 f
+1497(convert)X
+1810(ASCII)X
+2084(string)X
+2327(to)X
+2426(\257oating-point)X
+2974(number)X
+849 1872(bessel)N
+3 f
+1231(.)X
+1327(.)X
+1423(.)X
+1519(.)X
+1615(.)X
+1711(.)X
+1807(.)X
+1903(.)X
+1999(.)X
+2095(.)X
+2191(.)X
+2287(.)X
+2383(.)X
+2479(.)X
+1 f
+2635(Bessel)X
+2910(functions)X
+849 1968(blt)N
+3 f
+1147(.)X
+1243(.)X
+1339(.)X
+1435(.)X
+1531(.)X
+1627(.)X
+1723(.)X
+1819(.)X
+1915(.)X
+2011(.)X
+2107(.)X
+2203(.)X
+2299(.)X
+2395(.)X
+1 f
+2551(block)X
+2789(transfer)X
+3107(data)X
+849 2064(bsearch)N
+3 f
+1348(.)X
+1444(.)X
+1540(.)X
+1636(.)X
+1732(.)X
+1828(.)X
+1924(.)X
+2020(.)X
+2116(.)X
+2212(.)X
+2308(.)X
+2404(.)X
+2500(.)X
+2596(.)X
+1 f
+2752(binary)X
+3022(search)X
+849 2160(bstring)N
+3 f
+1318(.)X
+1414(.)X
+1510(.)X
+1606(.)X
+1702(.)X
+1798(.)X
+1894(.)X
+1990(.)X
+2086(.)X
+2182(.)X
+2278(.)X
+1 f
+2434(byte)X
+2624(string)X
+2867(operations)X
+849 2256(byteorder)N
+1261(convert)X
+1574(values)X
+1844(between)X
+2189(host)X
+2373(and)X
+2536(network)X
+2875(byte)X
+3065(order)X
+849 2352(clock)N
+3 f
+1220(.)X
+1316(.)X
+1412(.)X
+1508(.)X
+1604(.)X
+1700(.)X
+1796(.)X
+1892(.)X
+1988(.)X
+2084(.)X
+2180(.)X
+2276(.)X
+1 f
+2432(report)X
+2686(CPU)X
+2896(time)X
+3092(used)X
+849 2448(conv)N
+3 f
+1218(.)X
+1314(.)X
+1410(.)X
+1506(.)X
+1602(.)X
+1698(.)X
+1794(.)X
+1890(.)X
+1986(.)X
+2082(.)X
+2178(.)X
+2274(.)X
+2370(.)X
+1 f
+2526(translate)X
+2877(characters)X
+849 2544(ctermid)N
+3 f
+1347(.)X
+1443(.)X
+1539(.)X
+1635(.)X
+1731(.)X
+1827(.)X
+1923(.)X
+1 f
+2079(generate)X
+2430(\256le)X
+2577(name)X
+2810(for)X
+2946(terminal)X
+849 2640(ctime)N
+3 f
+1265(.)X
+1361(.)X
+1457(.)X
+1553(.)X
+1649(.)X
+1745(.)X
+1841(.)X
+1937(.)X
+1 f
+2093(convert)X
+2406(date)X
+2591(and)X
+2754(time)X
+2950(to)X
+3049(string)X
+849 2736(ctype)N
+3 f
+1276(.)X
+1372(.)X
+1468(.)X
+1564(.)X
+1660(.)X
+1756(.)X
+1852(.)X
+1948(.)X
+1 f
+2104(classify)X
+2422(or)X
+2526(translate)X
+2877(characters)X
+849 2832(curses)N
+3 f
+1281(.)X
+1 f
+1437(screen)X
+1707(functions)X
+2089(with)X
+2284(``optimal'')X
+2731(cursor)X
+2995(motion)X
+849 2928(cuserid)N
+3 f
+1347(.)X
+1443(.)X
+1539(.)X
+1635(.)X
+1731(.)X
+1 f
+1887(get)X
+2029(character)X
+2407(login)X
+2629(name)X
+2862(of)X
+2966(the)X
+3108(user)X
+849 3024(dbm)N
+3 f
+1233(.)X
+1329(.)X
+1425(.)X
+1521(.)X
+1617(.)X
+1713(.)X
+1809(.)X
+1905(.)X
+2001(.)X
+2097(.)X
+2193(.)X
+2289(.)X
+1 f
+2445(data)X
+2630(base)X
+2825(subroutines)X
+849 3120(dial)N
+884(establish)X
+1245(and)X
+1408(relinquish)X
+1817(an)X
+1932(out-going)X
+2330(terminal)X
+2676(line)X
+2845(connection)X
+849 3216(directory)N
+3 f
+1379(.)X
+1475(.)X
+1571(.)X
+1667(.)X
+1763(.)X
+1859(.)X
+1955(.)X
+2051(.)X
+2147(.)X
+2243(.)X
+2339(.)X
+1 f
+2495(directory)X
+2867(operations)X
+849 3312(directory)N
+3 f
+1379(.)X
+1475(.)X
+1571(.)X
+1667(.)X
+1763(.)X
+1859(.)X
+1955(.)X
+2051(.)X
+2147(.)X
+2243(.)X
+2339(.)X
+1 f
+2495(directory)X
+2867(operations)X
+849 3408(drand48)N
+1119(generate)X
+1470(uniformly)X
+1879(distributed)X
+2315(pseudo-random)X
+2937(numbers)X
+849 3504(dup2)N
+3 f
+1175(.)X
+1271(.)X
+1367(.)X
+1463(.)X
+1559(.)X
+1655(.)X
+1751(.)X
+1847(.)X
+1943(.)X
+2039(.)X
+2135(.)X
+1 f
+2291(duplicate)X
+2669(a)X
+2736(\256le)X
+2883(descriptor)X
+849 3600(ecvt)N
+3 f
+1231(.)X
+1327(.)X
+1423(.)X
+1519(.)X
+1615(.)X
+1 f
+1771(convert)X
+2084(\257oating-point)X
+2632(number)X
+2950(to)X
+3049(string)X
+849 3696(end)N
+3 f
+1197(.)X
+1293(.)X
+1389(.)X
+1485(.)X
+1581(.)X
+1677(.)X
+1773(.)X
+1869(.)X
+1965(.)X
+2061(.)X
+2157(.)X
+1 f
+2313(last)X
+2471(locations)X
+2843(in)X
+2942(program)X
+849 3792(erf)N
+3 f
+1141(.)X
+1237(.)X
+1 f
+1393(error)X
+1604(function)X
+1949(and)X
+2112(complementary)X
+2736(error)X
+2947(function)X
+849 3888(ether)N
+3 f
+1268(.)X
+1364(.)X
+1460(.)X
+1556(.)X
+1652(.)X
+1748(.)X
+1844(.)X
+1940(.)X
+1 f
+2096(monitor)X
+2425(traf\256c)X
+2679(on)X
+2799(the)X
+2941(Ethernet)X
+849 3984(ethers)N
+3 f
+1223(.)X
+1319(.)X
+1415(.)X
+1511(.)X
+1607(.)X
+1703(.)X
+1 f
+1859(ethernet)X
+2194(address)X
+2506(mapping)X
+2867(operations)X
+849 4080(exp)N
+1247(exponential,)X
+1745(logarithm,)X
+2168(power,)X
+2456(square)X
+2731(root)X
+2910(functions)X
+849 4176(fclose)N
+3 f
+1292(.)X
+1388(.)X
+1484(.)X
+1580(.)X
+1676(.)X
+1772(.)X
+1868(.)X
+1964(.)X
+2060(.)X
+2156(.)X
+2252(.)X
+1 f
+2408(close)X
+2630(or)X
+2734(\257ush)X
+2944(a)X
+3011(stream)X
+849 4272(ferror)N
+3 f
+1291(.)X
+1387(.)X
+1483(.)X
+1579(.)X
+1675(.)X
+1771(.)X
+1867(.)X
+1963(.)X
+2059(.)X
+2155(.)X
+2251(.)X
+1 f
+2407(stream)X
+2688(status)X
+2931(inquiries)X
+849 4368(ffs)N
+3 f
+1131(.)X
+1227(.)X
+1323(.)X
+1419(.)X
+1515(.)X
+1611(.)X
+1707(.)X
+1803(.)X
+1899(.)X
+1995(.)X
+2091(.)X
+2187(.)X
+2283(.)X
+2379(.)X
+1 f
+2535(bit)X
+2661(string)X
+2904(operation)X
+849 4464(\257oor)N
+3 f
+1197(.)X
+1 f
+1353(\257oor,)X
+1582(ceiling,)X
+1893(remainder,)X
+2332(absolute)X
+2677(value)X
+2910(functions)X
+849 4560(fopen)N
+3 f
+1233(.)X
+1329(.)X
+1425(.)X
+1521(.)X
+1617(.)X
+1713(.)X
+1809(.)X
+1905(.)X
+2001(.)X
+2097(.)X
+2193(.)X
+2289(.)X
+2385(.)X
+2481(.)X
+2577(.)X
+1 f
+2733(open)X
+2944(a)X
+3011(stream)X
+849 4656(fpsigset)N
+3 f
+1361(.)X
+1457(.)X
+1 f
+1613(C)X
+1701(\257oating)X
+2019(point)X
+2241(exception)X
+2640(handling)X
+3001(system)X
+849 4752(fread)N
+3 f
+1219(.)X
+1315(.)X
+1411(.)X
+1507(.)X
+1603(.)X
+1699(.)X
+1795(.)X
+1891(.)X
+1987(.)X
+2083(.)X
+2179(.)X
+2275(.)X
+2371(.)X
+1 f
+2527(binary)X
+2797(input/output)X
+561 4992(Version)N
+889(3.0)X
+1818(-)X
+1874(iii)X
+1979(-)X
+2640(December)X
+3076(1987)X
+
+4 p
+%%Page: 4 4
+12 s 0 xH 0 xS 1 f
+2 f
+561 240(Table)N
+820(of)X
+935(Contents)X
+1 f
+849 480(frexp)N
+3 f
+1273(.)X
+1369(.)X
+1465(.)X
+1 f
+1621(manipulate)X
+2074(parts)X
+2285(of)X
+2389(\257oating-point)X
+2937(numbers)X
+849 576(fseek)N
+3 f
+1193(.)X
+1289(.)X
+1385(.)X
+1481(.)X
+1577(.)X
+1673(.)X
+1769(.)X
+1 f
+1925(reposition)X
+2334(a)X
+2401(\256le)X
+2548(pointer)X
+2845(in)X
+2944(a)X
+3011(stream)X
+849 672(ftw)N
+3 f
+1198(.)X
+1294(.)X
+1390(.)X
+1486(.)X
+1582(.)X
+1678(.)X
+1774(.)X
+1870(.)X
+1966(.)X
+2062(.)X
+2158(.)X
+2254(.)X
+2350(.)X
+2446(.)X
+2542(.)X
+1 f
+2698(walk)X
+2909(a)X
+2976(\256le)X
+3123(tree)X
+849 768(gamma)N
+3 f
+1280(.)X
+1376(.)X
+1472(.)X
+1568(.)X
+1664(.)X
+1760(.)X
+1856(.)X
+1952(.)X
+2048(.)X
+2144(.)X
+2240(.)X
+2336(.)X
+1 f
+2492(log)X
+2639(gamma)X
+2947(function)X
+849 864(getc)N
+3 f
+1223(.)X
+1319(.)X
+1415(.)X
+1511(.)X
+1607(.)X
+1703(.)X
+1799(.)X
+1 f
+1955(get)X
+2097(character)X
+2475(or)X
+2579(word)X
+2800(from)X
+3011(stream)X
+849 960(getcwd)N
+3 f
+1286(.)X
+1382(.)X
+1478(.)X
+1 f
+1634(get)X
+1776(pathname)X
+2175(of)X
+2279(current)X
+2576(working)X
+2920(directory)X
+849 1056(getenv)N
+3 f
+1289(.)X
+1385(.)X
+1481(.)X
+1577(.)X
+1673(.)X
+1769(.)X
+1 f
+1925(return)X
+2179(value)X
+2412(for)X
+2548(environment)X
+3059(name)X
+849 1152(getgrent)N
+3 f
+1321(.)X
+1417(.)X
+1513(.)X
+1609(.)X
+1705(.)X
+1801(.)X
+1897(.)X
+1993(.)X
+2089(.)X
+2185(.)X
+2281(.)X
+2377(.)X
+1 f
+2533(get)X
+2675(group)X
+2923(\256le)X
+3070(entry)X
+849 1248(getgroups)N
+3 f
+1374(.)X
+1470(.)X
+1566(.)X
+1662(.)X
+1758(.)X
+1854(.)X
+1950(.)X
+2046(.)X
+2142(.)X
+2238(.)X
+2334(.)X
+1 f
+2490(get)X
+2632(group)X
+2880(access)X
+3150(list)X
+849 1344(gethostbyname)N
+3 f
+1577(.)X
+1673(.)X
+1769(.)X
+1865(.)X
+1961(.)X
+2057(.)X
+2153(.)X
+2249(.)X
+1 f
+2405(get)X
+2547(network)X
+2886(host)X
+3070(entry)X
+849 1440(gethostident)N
+3 f
+1492(.)X
+1588(.)X
+1684(.)X
+1780(.)X
+1 f
+1936(get)X
+2078(the)X
+2220(host's)X
+2473(unique)X
+2759(identi\256cation)X
+849 1536(getlogin)N
+3 f
+1387(.)X
+1483(.)X
+1579(.)X
+1675(.)X
+1771(.)X
+1867(.)X
+1963(.)X
+2059(.)X
+2155(.)X
+2251(.)X
+2347(.)X
+2443(.)X
+2539(.)X
+1 f
+2695(get)X
+2837(login)X
+3059(name)X
+849 1632(getmntent)N
+3 f
+1394(.)X
+1490(.)X
+1586(.)X
+1682(.)X
+1778(.)X
+1 f
+1934(get)X
+2076(\256le)X
+2223(system)X
+2514(descriptor)X
+2923(\256le)X
+3070(entry)X
+849 1728(getnetent)N
+3 f
+1377(.)X
+1473(.)X
+1569(.)X
+1665(.)X
+1761(.)X
+1857(.)X
+1953(.)X
+2049(.)X
+2145(.)X
+2241(.)X
+2337(.)X
+2433(.)X
+1 f
+2589(get)X
+2731(network)X
+3070(entry)X
+849 1824(getnetgrent)N
+3 f
+1417(.)X
+1513(.)X
+1609(.)X
+1705(.)X
+1801(.)X
+1897(.)X
+1993(.)X
+2089(.)X
+2185(.)X
+1 f
+2341(get)X
+2483(network)X
+2822(group)X
+3070(entry)X
+849 1920(getopt)N
+3 f
+1253(.)X
+1349(.)X
+1445(.)X
+1541(.)X
+1637(.)X
+1 f
+1793(get)X
+1935(option)X
+2205(letter)X
+2428(from)X
+2639(argument)X
+3027(vector)X
+849 2016(getpass)N
+3 f
+1341(.)X
+1437(.)X
+1533(.)X
+1629(.)X
+1725(.)X
+1821(.)X
+1917(.)X
+2013(.)X
+2109(.)X
+2205(.)X
+2301(.)X
+2397(.)X
+2493(.)X
+1 f
+2649(read)X
+2839(a)X
+2906(password)X
+849 2112(getprotoent)N
+3 f
+1467(.)X
+1563(.)X
+1659(.)X
+1755(.)X
+1851(.)X
+1947(.)X
+2043(.)X
+2139(.)X
+2235(.)X
+2331(.)X
+2427(.)X
+1 f
+2583(get)X
+2725(protocol)X
+3070(entry)X
+849 2208(getpw)N
+3 f
+1300(.)X
+1396(.)X
+1492(.)X
+1588(.)X
+1684(.)X
+1780(.)X
+1876(.)X
+1972(.)X
+2068(.)X
+2164(.)X
+2260(.)X
+2356(.)X
+1 f
+2512(get)X
+2654(name)X
+2887(from)X
+3098(UID)X
+849 2304(getpwent)N
+3 f
+1375(.)X
+1471(.)X
+1567(.)X
+1663(.)X
+1759(.)X
+1855(.)X
+1951(.)X
+2047(.)X
+2143(.)X
+2239(.)X
+1 f
+2395(get)X
+2537(password)X
+2923(\256le)X
+3070(entry)X
+849 2400(getrpcent)N
+3 f
+1377(.)X
+1473(.)X
+1569(.)X
+1665(.)X
+1761(.)X
+1857(.)X
+1953(.)X
+2049(.)X
+2145(.)X
+2241(.)X
+2337(.)X
+2433(.)X
+2529(.)X
+2625(.)X
+1 f
+2781(get)X
+2923(rpc)X
+3070(entry)X
+849 2496(getrpcport)N
+3 f
+1428(.)X
+1524(.)X
+1620(.)X
+1716(.)X
+1812(.)X
+1908(.)X
+2004(.)X
+2100(.)X
+2196(.)X
+2292(.)X
+1 f
+2448(get)X
+2590(RPC)X
+2795(port)X
+2974(number)X
+849 2592(gets)N
+3 f
+1165(.)X
+1261(.)X
+1357(.)X
+1453(.)X
+1549(.)X
+1645(.)X
+1741(.)X
+1837(.)X
+1933(.)X
+2029(.)X
+2125(.)X
+1 f
+2281(get)X
+2423(a)X
+2490(string)X
+2733(from)X
+2944(a)X
+3011(stream)X
+849 2688(getservent)N
+3 f
+1419(.)X
+1515(.)X
+1611(.)X
+1707(.)X
+1803(.)X
+1899(.)X
+1995(.)X
+2091(.)X
+2187(.)X
+2283(.)X
+2379(.)X
+2475(.)X
+1 f
+2631(get)X
+2773(service)X
+3070(entry)X
+849 2784(gettimeofday)N
+3 f
+1490(.)X
+1586(.)X
+1682(.)X
+1778(.)X
+1874(.)X
+1970(.)X
+2066(.)X
+2162(.)X
+2258(.)X
+2354(.)X
+2450(.)X
+1 f
+2606(get)X
+2748(date)X
+2933(and)X
+3096(time)X
+849 2880(getut)N
+3 f
+1219(.)X
+1315(.)X
+1411(.)X
+1507(.)X
+1603(.)X
+1699(.)X
+1795(.)X
+1891(.)X
+1987(.)X
+2083(.)X
+2179(.)X
+2275(.)X
+1 f
+2431(access)X
+2701(utmp)X
+2923(\256le)X
+3070(entry)X
+849 2976(getwd)N
+3 f
+1294(.)X
+1390(.)X
+1486(.)X
+1582(.)X
+1 f
+1738(get)X
+1880(current)X
+2177(working)X
+2521(directory)X
+2893(pathname)X
+849 3072(hsearch)N
+3 f
+1325(.)X
+1421(.)X
+1517(.)X
+1613(.)X
+1709(.)X
+1805(.)X
+1901(.)X
+1997(.)X
+2093(.)X
+1 f
+2249(manage)X
+2573(hash)X
+2773(search)X
+3043(tables)X
+849 3168(hypot)N
+3 f
+1273(.)X
+1369(.)X
+1465(.)X
+1561(.)X
+1657(.)X
+1753(.)X
+1849(.)X
+1945(.)X
+2041(.)X
+1 f
+2197(Euclidean)X
+2607(distance)X
+2947(function)X
+849 3264(ibtab)N
+3 f
+1180(.)X
+1276(.)X
+1372(.)X
+1468(.)X
+1564(.)X
+1660(.)X
+1756(.)X
+1 f
+1912(package)X
+2252(for)X
+2388(dealing)X
+2696(with)X
+2891(ibtab)X
+3108(\256les)X
+849 3360(inet)N
+3 f
+1153(.)X
+1249(.)X
+1345(.)X
+1441(.)X
+1537(.)X
+1633(.)X
+1 f
+1789(Internet)X
+2113(address)X
+2425(manipulation)X
+2958(routines)X
+849 3456(insque)N
+3 f
+1240(.)X
+1336(.)X
+1432(.)X
+1528(.)X
+1624(.)X
+1720(.)X
+1 f
+1876(insert/remove)X
+2430(element)X
+2760(from)X
+2971(a)X
+3038(queue)X
+849 3552(l3tol)N
+3 f
+1192(.)X
+1 f
+1348(convert)X
+1661(between)X
+2006(3-byte)X
+2276(integers)X
+2605(and)X
+2768(long)X
+2963(integers)X
+849 3648(logname)N
+3 f
+1371(.)X
+1467(.)X
+1563(.)X
+1659(.)X
+1755(.)X
+1851(.)X
+1947(.)X
+2043(.)X
+2139(.)X
+1 f
+2295(return)X
+2549(login)X
+2771(name)X
+3004(of)X
+3108(user)X
+849 3744(lsearch)N
+3 f
+1314(.)X
+1410(.)X
+1506(.)X
+1602(.)X
+1698(.)X
+1794(.)X
+1890(.)X
+1986(.)X
+2082(.)X
+2178(.)X
+1 f
+2334(linear)X
+2578(search)X
+2848(and)X
+3011(update)X
+849 3840(malloc)N
+3 f
+1252(.)X
+1348(.)X
+1444(.)X
+1540(.)X
+1636(.)X
+1732(.)X
+1828(.)X
+1924(.)X
+2020(.)X
+2116(.)X
+2212(.)X
+1 f
+2368(main)X
+2585(memory)X
+2930(allocator)X
+849 3936(matherr)N
+3 f
+1347(.)X
+1443(.)X
+1539(.)X
+1635(.)X
+1731(.)X
+1827(.)X
+1923(.)X
+2019(.)X
+2115(.)X
+2211(.)X
+1 f
+2367(error-handling)X
+2947(function)X
+849 4032(memory)N
+3 f
+1310(.)X
+1406(.)X
+1502(.)X
+1598(.)X
+1694(.)X
+1790(.)X
+1886(.)X
+1982(.)X
+2078(.)X
+2174(.)X
+2270(.)X
+2366(.)X
+1 f
+2522(memory)X
+2867(operations)X
+849 4128(mktemp)N
+3 f
+1306(.)X
+1402(.)X
+1498(.)X
+1594(.)X
+1690(.)X
+1786(.)X
+1882(.)X
+1978(.)X
+2074(.)X
+2170(.)X
+1 f
+2326(make)X
+2559(a)X
+2626(unique)X
+2912(\256le)X
+3059(name)X
+849 4224(monitor)N
+3 f
+1381(.)X
+1477(.)X
+1573(.)X
+1669(.)X
+1765(.)X
+1861(.)X
+1957(.)X
+2053(.)X
+2149(.)X
+1 f
+2305(prepare)X
+2618(execution)X
+3017(pro\256le)X
+849 4320(mount)N
+3 f
+1238(.)X
+1334(.)X
+1430(.)X
+1 f
+1586(keep)X
+1792(track)X
+2009(of)X
+2113(remotely)X
+2480(mounted)X
+2841(\256lesystems)X
+849 4416(ndbm)N
+3 f
+1233(.)X
+1329(.)X
+1425(.)X
+1521(.)X
+1617(.)X
+1713(.)X
+1809(.)X
+1905(.)X
+2001(.)X
+2097(.)X
+2193(.)X
+2289(.)X
+1 f
+2445(data)X
+2630(base)X
+2825(subroutines)X
+849 4512(nlist)N
+3 f
+1167(.)X
+1263(.)X
+1359(.)X
+1455(.)X
+1551(.)X
+1647(.)X
+1743(.)X
+1839(.)X
+1935(.)X
+2031(.)X
+2127(.)X
+1 f
+2283(get)X
+2425(entries)X
+2706(from)X
+2917(name)X
+3150(list)X
+849 4608(perror)N
+3 f
+1287(.)X
+1383(.)X
+1479(.)X
+1575(.)X
+1671(.)X
+1767(.)X
+1863(.)X
+1959(.)X
+2055(.)X
+2151(.)X
+2247(.)X
+1 f
+2403(system)X
+2694(error)X
+2905(messages)X
+849 4704(popen)N
+3 f
+1289(.)X
+1385(.)X
+1481(.)X
+1577(.)X
+1673(.)X
+1769(.)X
+1865(.)X
+1961(.)X
+1 f
+2117(initiate)X
+2410(pipe)X
+2600(to/from)X
+2913(a)X
+2980(process)X
+561 4944(December)N
+997(1987)X
+1821(-)X
+1877(iv)X
+1976(-)X
+2820(Version)X
+3148(3.0)X
+
+5 p
+%%Page: 5 5
+12 s 0 xH 0 xS 1 f
+2 f
+2552 240(Table)N
+2811(of)X
+2926(Contents)X
+1 f
+849 480(printf)N
+3 f
+1205(.)X
+1301(.)X
+1397(.)X
+1493(.)X
+1589(.)X
+1685(.)X
+1781(.)X
+1877(.)X
+1973(.)X
+2069(.)X
+2165(.)X
+2261(.)X
+1 f
+2417(print)X
+2623(formatted)X
+3022(output)X
+849 576(putc)N
+3 f
+1242(.)X
+1338(.)X
+1434(.)X
+1530(.)X
+1626(.)X
+1722(.)X
+1818(.)X
+1 f
+1974(put)X
+2121(character)X
+2499(or)X
+2603(word)X
+2824(on)X
+2944(a)X
+3011(stream)X
+849 672(putpwent)N
+3 f
+1391(.)X
+1487(.)X
+1583(.)X
+1679(.)X
+1775(.)X
+1871(.)X
+1967(.)X
+2063(.)X
+2159(.)X
+1 f
+2315(write)X
+2537(password)X
+2923(\256le)X
+3070(entry)X
+849 768(puts)N
+3 f
+1155(.)X
+1251(.)X
+1347(.)X
+1443(.)X
+1539(.)X
+1635(.)X
+1731(.)X
+1827(.)X
+1923(.)X
+2019(.)X
+2115(.)X
+2211(.)X
+1 f
+2367(put)X
+2514(a)X
+2581(string)X
+2824(on)X
+2944(a)X
+3011(stream)X
+849 864(qsort)N
+3 f
+1215(.)X
+1311(.)X
+1407(.)X
+1503(.)X
+1599(.)X
+1695(.)X
+1791(.)X
+1887(.)X
+1983(.)X
+2079(.)X
+2175(.)X
+2271(.)X
+2367(.)X
+2463(.)X
+2559(.)X
+2655(.)X
+1 f
+2811(quicker)X
+3124(sort)X
+849 960(rand)N
+3 f
+1247(.)X
+1343(.)X
+1439(.)X
+1535(.)X
+1631(.)X
+1727(.)X
+1823(.)X
+1 f
+1979(simple)X
+2260(random-number)X
+2904(generator)X
+849 1056(random)N
+725(better)X
+969(random)X
+1287(number)X
+1605(generator;)X
+2020(routines)X
+2354(for)X
+2490(changing)X
+2867(generators)X
+849 1152(rcmd)N
+1235(routines)X
+1569(for)X
+1705(returning)X
+2082(a)X
+2149(stream)X
+2430(to)X
+2529(a)X
+2596(remote)X
+2888(command)X
+849 1248(regcmp)N
+3 f
+1299(.)X
+1395(.)X
+1491(.)X
+1587(.)X
+1 f
+1743(compile)X
+2078(and)X
+2241(execute)X
+2560(regular)X
+2857(expression)X
+849 1344(rexec)N
+3 f
+1259(.)X
+1355(.)X
+1451(.)X
+1547(.)X
+1643(.)X
+1739(.)X
+1 f
+1895(return)X
+2149(stream)X
+2430(to)X
+2529(a)X
+2596(remote)X
+2888(command)X
+849 1440(rnusers)N
+1300(return)X
+1554(information)X
+2033(about)X
+2271(users)X
+2492(on)X
+2612(remote)X
+2904(machines)X
+849 1536(rpc)N
+3 f
+1195(.)X
+1291(.)X
+1387(.)X
+1483(.)X
+1 f
+1639(library)X
+1920(routines)X
+2254(for)X
+2390(remote)X
+2682(procedure)X
+3091(calls)X
+849 1632(rwall)N
+3 f
+1193(.)X
+1289(.)X
+1385(.)X
+1481(.)X
+1577(.)X
+1673(.)X
+1769(.)X
+1 f
+1925(write)X
+2147(to)X
+2246(speci\256ed)X
+2612(remote)X
+2904(machines)X
+849 1728(scandir)N
+3 f
+1350(.)X
+1446(.)X
+1542(.)X
+1638(.)X
+1734(.)X
+1830(.)X
+1926(.)X
+2022(.)X
+2118(.)X
+2214(.)X
+2310(.)X
+2406(.)X
+2502(.)X
+1 f
+2658(scan)X
+2853(a)X
+2920(directory)X
+849 1824(scandir)N
+3 f
+1350(.)X
+1446(.)X
+1542(.)X
+1638(.)X
+1734(.)X
+1830(.)X
+1926(.)X
+2022(.)X
+2118(.)X
+2214(.)X
+2310(.)X
+2406(.)X
+2502(.)X
+1 f
+2658(scan)X
+2853(a)X
+2920(directory)X
+849 1920(scanf)N
+3 f
+1242(.)X
+1338(.)X
+1434(.)X
+1530(.)X
+1626(.)X
+1722(.)X
+1818(.)X
+1914(.)X
+2010(.)X
+2106(.)X
+2202(.)X
+1 f
+2358(convert)X
+2671(formatted)X
+3070(input)X
+849 2016(setbuf)N
+3 f
+1275(.)X
+1371(.)X
+1467(.)X
+1563(.)X
+1659(.)X
+1755(.)X
+1851(.)X
+1947(.)X
+2043(.)X
+1 f
+2199(assign)X
+2463(buffering)X
+2845(to)X
+2944(a)X
+3011(stream)X
+849 2112(setfpe)N
+789(FORTRAN)X
+1260(and)X
+1423(Pascal)X
+1693(\257oating-point)X
+2241(exception)X
+2640(handling)X
+3001(system)X
+849 2208(setjmp)N
+3 f
+1305(.)X
+1401(.)X
+1497(.)X
+1593(.)X
+1689(.)X
+1785(.)X
+1881(.)X
+1977(.)X
+2073(.)X
+2169(.)X
+2265(.)X
+2361(.)X
+2457(.)X
+2553(.)X
+1 f
+2709(non-local)X
+3097(goto)X
+849 2304(sinh)N
+3 f
+1166(.)X
+1262(.)X
+1358(.)X
+1454(.)X
+1550(.)X
+1646(.)X
+1742(.)X
+1838(.)X
+1934(.)X
+2030(.)X
+2126(.)X
+2222(.)X
+2318(.)X
+1 f
+2474(hyperbolic)X
+2910(functions)X
+849 2400(sleep)N
+3 f
+1181(.)X
+1277(.)X
+1373(.)X
+1469(.)X
+1565(.)X
+1661(.)X
+1757(.)X
+1853(.)X
+1949(.)X
+1 f
+2105(suspend)X
+2438(execution)X
+2837(for)X
+2973(interval)X
+849 2496(spray)N
+3 f
+1232(.)X
+1328(.)X
+1424(.)X
+1520(.)X
+1 f
+1676(scatter)X
+1952(data)X
+2137(in)X
+2236(order)X
+2463(to)X
+2562(check)X
+2811(the)X
+2953(network)X
+849 2592(ssignal)N
+3 f
+1338(.)X
+1434(.)X
+1530(.)X
+1626(.)X
+1722(.)X
+1818(.)X
+1914(.)X
+2010(.)X
+2106(.)X
+2202(.)X
+2298(.)X
+2394(.)X
+2490(.)X
+1 f
+2646(software)X
+3001(signals)X
+849 2688(stdio)N
+3 f
+1217(.)X
+1313(.)X
+1409(.)X
+1505(.)X
+1601(.)X
+1 f
+1757(standard)X
+2107(buffered)X
+2457(input/output)X
+2952(package)X
+849 2784(stdipc)N
+3 f
+1237(.)X
+1333(.)X
+1 f
+1489(standard)X
+1839(interprocess)X
+2328(communication)X
+2952(package)X
+849 2880(string)N
+3 f
+1220(.)X
+1316(.)X
+1412(.)X
+1508(.)X
+1604(.)X
+1700(.)X
+1796(.)X
+1892(.)X
+1988(.)X
+2084(.)X
+2180(.)X
+2276(.)X
+2372(.)X
+2468(.)X
+1 f
+2624(string)X
+2867(operations)X
+849 2976(strtol)N
+3 f
+1229(.)X
+1325(.)X
+1421(.)X
+1517(.)X
+1613(.)X
+1709(.)X
+1805(.)X
+1901(.)X
+1997(.)X
+2093(.)X
+2189(.)X
+1 f
+2345(convert)X
+2658(string)X
+2901(to)X
+3000(integer)X
+849 3072(swab)N
+3 f
+1248(.)X
+1344(.)X
+1440(.)X
+1536(.)X
+1632(.)X
+1728(.)X
+1824(.)X
+1920(.)X
+2016(.)X
+2112(.)X
+2208(.)X
+2304(.)X
+2400(.)X
+2496(.)X
+2592(.)X
+2688(.)X
+1 f
+2844(swap)X
+3065(bytes)X
+849 3168(syslog)N
+3 f
+1249(.)X
+1345(.)X
+1441(.)X
+1537(.)X
+1633(.)X
+1729(.)X
+1825(.)X
+1921(.)X
+2017(.)X
+2113(.)X
+2209(.)X
+2305(.)X
+2401(.)X
+1 f
+2557(control)X
+2854(system)X
+3145(log)X
+849 3264(system)N
+3 f
+1283(.)X
+1379(.)X
+1475(.)X
+1571(.)X
+1667(.)X
+1763(.)X
+1859(.)X
+1955(.)X
+2051(.)X
+2147(.)X
+2243(.)X
+1 f
+2399(issue)X
+2615(a)X
+2682(shell)X
+2888(command)X
+849 3360(termcap)N
+3 f
+1381(.)X
+1477(.)X
+1573(.)X
+1 f
+1729(terminal)X
+2075(independent)X
+2570(operation)X
+2958(routines)X
+849 3456(tmp\256le)N
+3 f
+1287(.)X
+1383(.)X
+1479(.)X
+1575(.)X
+1671(.)X
+1767(.)X
+1863(.)X
+1959(.)X
+2055(.)X
+2151(.)X
+2247(.)X
+1 f
+2403(create)X
+2658(a)X
+2725(temporary)X
+3145(\256le)X
+849 3552(tmpnam)N
+3 f
+1331(.)X
+1427(.)X
+1523(.)X
+1619(.)X
+1715(.)X
+1811(.)X
+1 f
+1967(create)X
+2222(a)X
+2289(name)X
+2522(for)X
+2658(a)X
+2725(temporary)X
+3145(\256le)X
+849 3648(trig)N
+3 f
+1149(.)X
+1245(.)X
+1341(.)X
+1437(.)X
+1533(.)X
+1629(.)X
+1725(.)X
+1821(.)X
+1917(.)X
+2013(.)X
+2109(.)X
+2205(.)X
+1 f
+2361(trigonometric)X
+2910(functions)X
+849 3744(tsearch)N
+3 f
+1298(.)X
+1394(.)X
+1490(.)X
+1586(.)X
+1682(.)X
+1778(.)X
+1874(.)X
+1970(.)X
+2066(.)X
+1 f
+2222(manage)X
+2546(binary)X
+2816(search)X
+3086(trees)X
+849 3840(ttyname)N
+3 f
+1349(.)X
+1445(.)X
+1541(.)X
+1637(.)X
+1733(.)X
+1829(.)X
+1925(.)X
+2021(.)X
+2117(.)X
+2213(.)X
+1 f
+2369(\256nd)X
+2542(name)X
+2775(of)X
+2879(a)X
+2946(terminal)X
+849 3936(ttyslot)N
+3 f
+1225(.)X
+1321(.)X
+1 f
+1477(\256nd)X
+1650(the)X
+1792(slot)X
+1955(in)X
+2054(the)X
+2196(utmp)X
+2418(\256le)X
+2565(of)X
+2669(the)X
+2811(current)X
+3108(user)X
+849 4032(ungetc)N
+3 f
+1286(.)X
+1382(.)X
+1478(.)X
+1574(.)X
+1670(.)X
+1 f
+1826(push)X
+2031(character)X
+2409(back)X
+2615(into)X
+2789(input)X
+3011(stream)X
+849 4128(userexit)N
+1123(user)X
+1307(routine)X
+1604(for)X
+1740(intercepting)X
+2225(FORTRAN)X
+2696(runtime)X
+3020(errors.)X
+849 4224(utmp)N
+3 f
+1202(.)X
+1298(.)X
+1394(.)X
+1490(.)X
+1586(.)X
+1682(.)X
+1778(.)X
+1874(.)X
+1 f
+2030(make)X
+2263(and)X
+2426(delete)X
+2681(/etc/utmp)X
+3070(entry)X
+849 4320(writev)N
+3 f
+1300(.)X
+1396(.)X
+1492(.)X
+1588(.)X
+1684(.)X
+1780(.)X
+1876(.)X
+1972(.)X
+2068(.)X
+2164(.)X
+2260(.)X
+2356(.)X
+2452(.)X
+2548(.)X
+2644(.)X
+1 f
+2800(write)X
+3022(output)X
+849 4416(xcmd)N
+3 f
+1224(.)X
+1320(.)X
+1416(.)X
+1512(.)X
+1608(.)X
+1704(.)X
+1800(.)X
+1896(.)X
+1992(.)X
+2088(.)X
+1 f
+2244(remote)X
+2536(execution)X
+2935(via)X
+3077(XNS)X
+849 4512(xdr)N
+3 f
+1199(.)X
+1295(.)X
+1 f
+1451(library)X
+1732(routines)X
+2066(for)X
+2202(external)X
+2537(data)X
+2722(representation)X
+849 4608(xnsconnect)N
+3 f
+1473(.)X
+1569(.)X
+1665(.)X
+1761(.)X
+1857(.)X
+1953(.)X
+2049(.)X
+2145(.)X
+2241(.)X
+1 f
+2397(make)X
+2630(XNS)X
+2845(connection)X
+849 4704(xns\256le)N
+968(\256nd)X
+1141(an)X
+1256(available)X
+1629(network)X
+1968(channel)X
+2292(or)X
+2396(return)X
+2650(channel)X
+2974(number)X
+561 4944(Version)N
+889(3.0)X
+1834(-)X
+1890(v)X
+1962(-)X
+2640(December)X
+3076(1987)X
+
+6 p
+%%Page: 6 6
+12 s 0 xH 0 xS 1 f
+2 f
+561 240(Table)N
+820(of)X
+935(Contents)X
+1 f
+849 480(xnsioctl)N
+3 f
+1366(.)X
+1462(.)X
+1558(.)X
+1654(.)X
+1750(.)X
+1846(.)X
+1942(.)X
+2038(.)X
+1 f
+2194(ioctls)X
+2427(for)X
+2563(XNS)X
+2778(and)X
+2941(Ethernet)X
+849 576(xnslib)N
+3 f
+1227(.)X
+1323(.)X
+1419(.)X
+1515(.)X
+1611(.)X
+1707(.)X
+1803(.)X
+1 f
+1959(XNS)X
+2174(network)X
+2513(support)X
+2825(subroutines)X
+849 672(xnslib)N
+3 f
+1264(.)X
+1360(.)X
+1456(.)X
+1552(.)X
+1648(.)X
+1744(.)X
+1840(.)X
+1936(.)X
+1 f
+2092(XNS)X
+2307(network)X
+2646(support)X
+2958(routines)X
+849 768(xnswrite)N
+3 f
+1385(.)X
+1481(.)X
+1577(.)X
+1673(.)X
+1769(.)X
+1865(.)X
+1961(.)X
+2057(.)X
+2153(.)X
+1 f
+2309(write)X
+2531(to)X
+2630(XNS)X
+2845(connection)X
+849 864(ypclnt)N
+3 f
+1238(.)X
+1334(.)X
+1430(.)X
+1526(.)X
+1622(.)X
+1718(.)X
+1814(.)X
+1910(.)X
+2006(.)X
+1 f
+2162(yellow)X
+2448(pages)X
+2691(client)X
+2930(interface)X
+849 960(yppasswd)N
+3 f
+1442(.)X
+1538(.)X
+1634(.)X
+1730(.)X
+1 f
+1886(update)X
+2167(Yellow)X
+2474(Pages)X
+2722(user)X
+2906(password)X
+561 4908(December)N
+997(1987)X
+1821(-)X
+1877(vi)X
+1976(-)X
+2820(Version)X
+3148(3.0)X
+
+6 p
+%%Trailer
+xt
+
+xs

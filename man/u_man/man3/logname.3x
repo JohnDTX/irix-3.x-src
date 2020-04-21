@@ -1,0 +1,23 @@
+'\"macro stdmacro
+.TH LOGNAME 3X
+.SH NAME
+logname \- return login name of user
+.SH SYNOPSIS
+.B char \(**logname( )
+.SH DESCRIPTION
+.I Logname\^
+returns a pointer to the null-terminated login name;
+it extracts the \f3\s-1$LOGNAME\s+1\fP variable from the user's environment.
+.PP
+This routine is kept in
+.BR /usr/lib/lib\s-1PW\s+1.a .
+.SH FILES
+/etc/profile
+.SH SEE ALSO
+env(1), login(1), profile(4), environ(5).
+.SH BUGS
+The return values point to static data whose content is overwritten by each
+call.
+.PP
+This method of determining a login name is subject to forgery.
+.\"	@(#)logname.3x	5.1 of 10/21/83

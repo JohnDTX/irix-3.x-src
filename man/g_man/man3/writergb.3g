@@ -1,0 +1,55 @@
+.TH writeRGB 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B writeRGB
+\- paints a row of pixels on the screen
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "writeRGB(n, red, green, blue) "
+.B "short n; "
+.B "RGBvalue red[], green[], blue[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine writeR(n, red, green, blue)"
+.B "integer*4 n"
+.B "character*(*) red, green, blue"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure writeRGB(n: Short; var red, green, 
+.br
+.B	blue: RGBvalue);
+.SH DESCRIPTION
+.B writeRGB
+paints a row of pixels on the screen in RGB mode.
+.I n 
+specifies the number of pixels to paint;
+\f2red, green,\f1 \f2blue\f1 specify arrays of colors for each pixel.
+The starting location is the current character postition.
+The system updates the current character position to the pixel
+that follows the last painted pixel.
+The current character position becomes undefined if the updated pixel
+position is greater than XMAXSCREEN.
+.PP
+Pixels are painted from left to right, 
+and are clipped to the current screenmask.
+.PP
+.B writeRGB
+does not automatically wrap from one line to the next.
+It supplies a 24-bit RGB value (8 bits for each color) for each pixel.
+This value is written directly into the bitplanes.  
+
+.ne 15 
+.SH "SEE ALSO"
+readRGB, RGBcolor, RGBwritemask, scrmask, writepixels
+.sp .5v
+.I Programming Guide,
+Section 3.9, Writing and Reading Pixels
+.SH NOTE
+This routine is available
+only in immediate mode and RGB mode.

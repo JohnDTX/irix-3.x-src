@@ -1,0 +1,3 @@
+This directory is for making "fbcld" -- the console for the alpha system.
+Contains .b's, special gfdev.h and dcdev.h (with ALPHA switches), and a
+minimum of special .c's.

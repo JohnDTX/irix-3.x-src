@@ -1,0 +1,143 @@
+'\"macro stdmacro
+.ds P UNIX
+.TH UUTO 1C
+.SH NAME
+uuto, uupick \- public unix system-to-unix system file copy
+.SH SYNOPSIS
+.B uuto
+[ options ] source-files destination
+.br
+.B uupick
+[
+.B \-s
+system ]
+.SH DESCRIPTION
+.I Uuto\^
+sends
+.I source-files\^
+to
+.IR destination .
+.I Uuto\^
+uses the
+.IR uucp\^ (1C)
+facility to send files,
+while it allows the local system to control the file access.
+A source-file name is a path name on your machine.
+Destination has the form:
+.IP "" 5
+system\f3!\fP\f2user\fP
+.PP
+where
+.I system\^
+is taken from a list of system names
+that
+.I uucp\^
+knows about (see
+.IR uuname ).
+.I User\^
+is the login name
+of someone on the specified system.
+.PP
+Two \f2options\^\fP are available:
+.PP
+.PD 0
+.TP "\w'\f3\-m\f1\ \ 'u"
+.B \-p
+Copy the source file into the spool directory before transmission.
+.TP
+.B \-m
+Send mail to the sender when the copy is complete.
+.PD
+.PP
+The files (or sub-trees if directories are specified) are sent to
+.SM PUBDIR
+on
+.IR system ,
+where
+.SM PUBDIR
+is a public directory defined in the
+.I uucp\^
+source.
+Specifically the files are sent to
+.IP "" 5
+\s-1PUBDIR\s+1/receive/\f2user\fP/\f2mysystem\f1/files.
+.PP
+The destined recipient is notified by
+.IR mail\^ (1)
+of the arrival of files.
+.PP
+.I Uupick\^
+accepts or rejects the files transmitted to the user.
+Specifically,
+.I uupick\^
+searches
+.SM PUBDIR
+for files destined for the user.
+For each entry (file or directory) found,
+the following message is printed on the standard output:
+.IP
+\f3from \f2system\^\f3:\f1 [\^file \f2file-name\^\f1] [dir \f2dirname\^\f1] \f3?\f1
+.PP
+.I Uupick\^
+then reads a line from the standard input to determine the
+disposition of the file:
+.TP "\w'\s-1EOT\s+1\ (control-d)\^\ \ 'u"
+<new-line>
+Go on to next entry.
+.TP
+.B d
+Delete the entry.
+.TP
+\f3m\fP [ \f2dir\^\fP ]
+Move the entry to named directory
+.I dir\^
+(current directory is default).
+.TP
+\f3a\fP [ \f2dir\^\fP ]
+Same as \f3m\f1 except moving all the files sent from
+.IR system .
+.TP
+.B p
+Print the content of the file.
+.TP
+.B q
+Stop.
+.TP
+\s-1EOT\s0 (control-d)
+Same as
+.BR q .
+.TP
+.BI ! command\^
+Escape to the shell to do
+.IR command .
+.TP
+.B *
+Print a command summary.
+.PP
+.I Uupick\^
+invoked with the
+.BI \-s system\^
+option will only search
+the
+.SM PUBDIR
+for files sent from
+.IR system .
+.SH EXAMPLE
+.IP
+uuto -p file1 file2 file3 ucbvax!Joe
+.PP
+would send the three files to user Joe on ucbvax
+.IP
+uupick [executed by Joe]
+.PP
+would tell him what has arrived and from where.
+.SH FILES
+.ta \w'\s-1PUBDIR\s+1/usr/spool/uucppublic\ \ \ \ 'u
+\s-1PUBDIR\s+1/usr/spool/uucppublic	public directory
+.DT
+.SH SEE ALSO
+mail(1), uucp(1C), uustat(1C), uux(1C).
+.\"	@(#)uuto.1c	5.1 of 11/14/83
+.\" $Source: /d2/3.7/src/man/u_man/man1/RCS/uuto.1c,v $
+.\" @(#)$Revision: 1.1 $
+.\" $Date: 89/03/27 16:51:22 $

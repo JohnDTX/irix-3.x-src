@@ -1,0 +1,18 @@
+
+The following file(s) were NOT updated in census due to errors:
+PS/SGI/fonts/CouObl10.font
+PS/SGI/fonts/CouObl24.font
+PS/SGI/fonts/Courie24.font
+PS/SGI/fonts/HelObl10.font
+PS/SGI/fonts/TimRom20.font
+diag/bpc/prom4433/bpcd4433.2
+diag/bpc/prom4433/bpcd4433.r
+diag/io/tapefiles/testfile2
+diag/io/tapefiles/testfile3
+dist/lists.2000/:GL2-W2.4r2/list.upd
+dist/lists.3000/:GL2-W3.4r2/list.root
+dist/lists.3000/:GL2-W3.4r2/list.upd
+dist/lists.3000/:GL2-W3.4r2/list.usr
+test/tape/testfile2
+test/tape/testfile3
+usr.bin/edge/gsh/shell-icon

@@ -1,0 +1,82 @@
+'\"macro stdmacro
+.TH ACCTCMS 1M
+.SH NAME
+acctcms \- command summary from per-process accounting records
+.SH SYNOPSIS
+.B /usr/lib/acct/acctcms
+[\^options\^] files
+.SH DESCRIPTION
+.I Acctcms\^
+reads one or more
+.IR files ,
+normally in the form described in
+.IR acct (4).
+It adds all records for processes that
+executed identically-named commands,
+sorts them,
+and writes them to the standard output,
+normally using an internal summary format.
+The \f2options\fP are:
+.PP
+.PD 0
+.TP
+.B \-a
+Print output in
+.SM ASCII
+rather than in the internal summary format.
+The output includes command name,
+number of times executed,
+total kcore-minutes,
+total
+.SM CPU
+minutes,
+total real minutes,
+mean size (in K),
+mean
+.SM CPU
+minutes per invocation,
+and ``hog factor'', as in
+.IR acctcom (1).
+Output is normally sorted by total kcore-minutes.
+.TP
+.B \-c
+Sort by total
+.SM CPU
+time, rather than total kcore-minutes.
+.TP
+.B \-j
+Combine all commands invoked only once under ``\(**\(**\(**other''.
+.TP
+.B \-n
+Sort by number of command invocations.
+.TP
+.B \-s
+Any file names encountered hereafter are already in internal summary format.
+.PD
+.SH EXAMPLE
+.PP
+A typical sequence for performing daily command accounting and
+for
+maintaining a running total is:
+.PP
+.RS
+.nf
+acctcms \|file \|.\|.\|. \|>today
+cp \|total \|previoustotal
+acctcms \|\-s \|today \|previoustotal \|>total
+acctcms \|\-a \|\-s \|today
+.fi
+.RE
+.SH SEE ALSO
+acct(1M),
+acctcom(1),
+acctcon(1M),
+acctmerg(1M),
+acctprc(1M),
+acctsh(1M),
+fwtmp(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.\"	@(#)acctcms.1m	5.1 of 10/17/83

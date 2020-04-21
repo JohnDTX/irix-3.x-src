@@ -1,0 +1,808 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: U.PHASE2.3.TEXT                           *)
+(*                                                                           *)
+(*          (C) Copyright 1982, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               14-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  procedure irelocation;
+    var lastreltextic, nextaddr: longint; lseg: psegment;
+        PickBss, PickData: Boolean; heapmark: ^Boolean;
+    
+    procedure advancerel(amount: longint);
+    begin
+    if ENVIRONMENT = IDRIS
+    then begin
+      while amount >= 8223 do begin 
+        iout(63,1); iout(255,1);
+        amount := amount - 8223;
+        end;
+      if amount < 0
+      then fatal_error('Attempt to relocate same location twice')
+      else 
+        if amount > 0
+        then
+          if amount <= 31
+          then iout(amount,1)
+          else begin
+            amount := amount - 32;
+            iout((amount div 256) + 32,1);
+            iout(amount mod 256,1);
+            end;
+      end (* ENVIRONMENT = IDRIS *)
+    else if ENVIRONMENT = QU68000
+    then begin
+      if amount < 0
+      then fatal_error('Attempt to relocate same location twice')
+      else begin
+        while amount >= 4 do begin
+          iout(0,4); amount := amount - 4;
+          end;
+        if amount > 0 then iout(0,amount);
+        end;
+      end (* ENVIRONMENT = QU68000 *)
+    else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+    then begin
+      if amount < 0
+      then fatal_error('Attempt to relocate same location twice')
+      else begin
+        while amount >= 4 do begin
+          iout(0,4); amount := amount - 4;
+          end;
+        if amount > 0 then iout(0,amount);
+        end;
+      end (* (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM) *)
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or
+            (ENVIRONMENT = ALTOS) or (ENVIRONMENT = CT) or
+            (ENVIRONMENT = LANDL) or (ENVIRONMENT = SANTACRUZ) or
+            (ENVIRONMENT = NCR) or (ENVIRONMENT = ARETE) or
+            (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = NBI) or
+            (ENVIRONMENT = PLEXUS) or (ENVIRONMENT = MULTI)
+    then begin
+      if amount < 0
+      then fatal_error('Attempt to relocate same location twice');
+      end; (* ENVIRONMENT: UNISOFT, UNOS, ALTOS, BERKELEY, NBI, PLEXUS,
+                           LANDL, SANTACRUZ, CT, ARETE, MULTI, or NCR *)
+    end; { advancerel }
+    
+    procedure ireldescriptor(fsymbol: psymbol; fseg: psegment; 
+                             DoUndefineds: Boolean);
+      var lentrynum: integer;
+    begin
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if (Visible and (seg = fseg) and Defined) or 
+                 ((not Defined) and DoUndefineds)
+              then begin
+                   nextaddr := nextaddr + 2;
+                   advancerel(nextaddr - lastreltextic);
+                   if ENVIRONMENT = IDRIS
+                   then begin
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       lentrynum := isymtabentry + 4;
+                       if lentrynum >= 175
+                       then begin
+                         iout(254,1); { FE hex }
+                         lentrynum := lentrynum - 175;
+                         iout((lentrynum div 256) + 128,1);
+                         iout(lentrynum mod 256,1);
+                         end
+                       else
+                         if lentrynum >= 47
+                         then begin
+                           iout(254,1); { FE hex }
+                           iout(lentrynum - 47,1);
+                           end
+                         else iout(66 + 4*lentrynum,1);
+                       end
+                     else iout(70,1); { Relocate with respect to text segment }
+                     end (* ENVIRONMENT = IDRIS *)
+                   else if (ENVIRONMENT = UNISOFT) or
+                           (ENVIRONMENT = SANTACRUZ) or
+                           (ENVIRONMENT = MULTI)
+                   then begin
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(224,1); iout(0,1); (* long, symbol table external *)
+                       iout(isymtabentry,2); (* symbol table entry number *)
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(32,1); iout(0,3);
+                       end;
+                     iout(nextaddr,4); (* where it happens *)
+                     end
+                   else if ENVIRONMENT = ALTOS
+                   then begin
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+                     iout(nextaddr,4); (* where it happens *)
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(isymtabentry,2); (* symbol table entry number *)
+                       iout(8,1); {External undefined}
+                       iout(4,1); {Long}
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(0,2); {No symbol table number}
+                       iout(3,1); {Text relative}
+                       iout(4,1); {Long}
+                       end;
+                     end
+                   else if ENVIRONMENT = UNOS
+                   then begin
+                     if (nextaddr - lastreltextic) > 127 
+                     then begin (* Need long form to set new base *)
+                       totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                       (* Put out nextaddr as new base *)
+                       iout(nextaddr div 65536,1); (* High order 8 bits *)
+                       iout(12,1); (* newbase *)
+                       iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+                       lastreltextic := nextaddr;
+                       end;
+                     (* Relocate *)
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                     iout(nextaddr - lastreltextic,1); (* offset *)
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(48,1); (* long, undefined, global *)
+                       iout(isymtabentry,2); (* symbol table entry number *)
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(34,1); iout(-1,2);
+                       end;
+                     end
+                   else if ENVIRONMENT = QU68000
+                   then begin
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(isymtabentry*16 + 8,2);
+                       iout(0,2);
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(2,2); iout(0,2);
+                       end;
+                     end
+                   else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+                   then begin
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(5,2);
+                       iout(isymtabentry*8 + 4,2);
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(5,2); iout(2,2);
+                       end;
+                     end
+                   else if (ENVIRONMENT = CT) or (ENVIRONMENT = ARETE) or
+                           (ENVIRONMENT = PLEXUS)
+                   then begin
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+                     iout(nextaddr,4); (* where it happens *)
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(isymtabentry,4); (* symbol table entry number *)
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(defrefs+undefrefs+1,4); (* symtab entry number *)
+                       end;
+                     iout(17,2); (* relocate long *)
+                     end
+                   else if ENVIRONMENT = NCR
+                   then begin
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+                     iout(nextaddr,4); (* where it happens *)
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(isymtabentry,4); (* symbol table entry number *)
+                       iout($E000,2); {external}
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(0,4); iout($2000,2); {text relative}
+                       end;
+                     end
+                   else if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY)
+                   then begin
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+                     iout(nextaddr,4); (* where it happens *)
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout(isymtabentry,3); (* symbol table entry number *)
+                       iout(92,1);
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout(4,3); iout(76,1);
+                       end;
+                     end
+                   else if ENVIRONMENT = NBI
+                   then begin
+                     totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+                     iout(nextaddr,4); (* where it happens *)
+                     if DoUndefineds
+                     then begin
+                       { Relocate with respect to symtab entry }
+                       iout($e0,1); (* external, long *)
+                       iout(0,1);
+                       iout(isymtabentry,2); (* symbol table entry number *)
+                       end
+                     else begin
+                       { Relocate with respect to text segment }
+                       iout($20,1); (* text, long *)
+                       iout(0,3);
+                       end;
+                     end;
+                   nextaddr := nextaddr + 4; lastreltextic := nextaddr;
+                   end;
+              ireldescriptor(llink,fseg,DoUndefineds);
+              ireldescriptor(rlink,fseg,DoUndefineds);
+              end;
+    end; {ireldescriptor}
+    
+    procedure irelocatewrttext;
+    begin {irelocatewrttext}
+    { Relocate with respect to text segment }
+    if ENVIRONMENT = IDRIS
+    then iout(70,1)
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ) or
+            (ENVIRONMENT = MULTI)
+    then begin 
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(32,1); iout(0,3); iout(nextaddr,4); 
+      end
+    else if ENVIRONMENT = ALTOS
+    then begin 
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); 
+      iout(0,2); {No symbol table number}
+      iout(3,1); {Text relative}
+      iout(4,1); {Long}
+      end
+    else if ENVIRONMENT = UNOS
+    then begin 
+      if (nextaddr - lastreltextic) > 127 
+      then begin (* Need long form to set new base *)
+        totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+        (* Put out nextaddr as new base *)
+        iout(nextaddr div 65536,1); (* High order 8 bits *)
+        iout(12,1); (* newbase *)
+        iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+        lastreltextic := nextaddr;
+        end;
+      (* Relocate *)
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+      iout(nextaddr - lastreltextic,1); (* offset *)
+      iout(34,1); iout(-1,2);
+      end
+    else if ENVIRONMENT = QU68000
+    then begin 
+      iout(2,2); iout(0,2);
+      end
+    else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+    then begin
+      iout(5,2); iout(2,2);
+      end
+    else if (ENVIRONMENT = CT) or (ENVIRONMENT = ARETE) or
+            (ENVIRONMENT = PLEXUS)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(defrefs+undefrefs+1,4); iout(17,2);
+      end
+    else if ENVIRONMENT = NCR
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(0,4); iout($2000,2);
+      end
+    else if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout(4,3); iout(76,1);
+      end
+    else if ENVIRONMENT = NBI
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout($20,1); iout(0,3);
+      end;
+    nextaddr := nextaddr + 4; lastreltextic := nextaddr;
+    end; {irelocatewrttext}
+    
+    procedure irelocatewrtdata;
+    begin {irelocatewrtdata}
+    { Relocate with respect to data segment }
+    if ENVIRONMENT = IDRIS
+    then iout(74,1)
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ) or
+            (ENVIRONMENT = MULTI)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(96,1); iout(0,3); iout(nextaddr,4);
+      end
+    else if ENVIRONMENT = ALTOS
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout(0,2); iout(4,1); iout(4,1);
+      end
+    else if ENVIRONMENT = UNOS
+    then begin
+      if (nextaddr - lastreltextic) > 127 
+      then begin (* Need long form to set new base *)
+        totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+        (* Put out nextaddr as new base *)
+        iout(nextaddr div 65536,1); (* High order 8 bits *)
+        iout(12,1); (* newbase *)
+        iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+        lastreltextic := nextaddr;
+        end;
+      (* Relocate with respect to data *)
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+      iout(nextaddr - lastreltextic,1); (* offset *)
+      iout(35,1); iout(-1,2);
+      end
+    else if ENVIRONMENT = QU68000
+    then begin
+      iout(4,2); iout(0,2);
+      end
+    else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+    then begin
+      iout(5,2); iout(1,2);
+      end
+    else if ENVIRONMENT = CT
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(defrefs+undefrefs+2,4); iout(17,2);
+      end
+    else if (ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(defrefs+undefrefs+3,4); iout(17,2);
+      end
+    else if ENVIRONMENT = NCR
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(0,4); iout($6000,2);
+      end
+    else if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout(6,3); iout(76,1);
+      end
+    else if ENVIRONMENT = NBI
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout($60,1); iout(0,3);
+      end;
+    lastreltextic := nextaddr + 4;
+    end; {irelocatewrtdata}
+    
+    procedure irelocatewrtbss;
+    begin {irelocatewrtbss}
+    { Relocate with respect to bss segment }
+    if ENVIRONMENT = IDRIS
+    then iout(78,1)
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ) or
+            (ENVIRONMENT = MULTI)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(160,1); iout(0,3); iout(nextaddr,4);
+      end
+    else if ENVIRONMENT = ALTOS
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout(0,2); iout(5,1); iout(4,1);
+      end
+    else if ENVIRONMENT = UNOS
+    then begin
+      if (nextaddr - lastreltextic) > 127 
+      then begin (* Need long form to set new base *)
+        totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+        (* Put out nextaddr as new base *)
+        iout(nextaddr div 65536,1); (* High order 8 bits *)
+        iout(12,1); (* newbase *)
+        iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+        lastreltextic := nextaddr;
+        end;
+      (* Relocate with respect to BSS *)
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+      iout(nextaddr - lastreltextic,1); (* offset *)
+      iout(36,1); iout(-1,2);
+      end
+    else if ENVIRONMENT = QU68000
+    then begin
+      iout(6,2); iout(0,2);
+      end
+    else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+    then begin
+      iout(5,2); iout(3,2);
+      end
+    else if ENVIRONMENT = CT
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(defrefs+undefrefs+3,4); iout(17,2);
+      end
+    else if (ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(defrefs+undefrefs+5,4); iout(17,2);
+      end
+    else if ENVIRONMENT = NCR
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 10;
+      iout(nextaddr,4); iout(0,4); iout($A000,2);
+      end
+    else if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY)
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout(8,3); iout(76,1);
+      end
+    else if ENVIRONMENT = NBI
+    then begin
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 8;
+      iout(nextaddr,4); iout($a0,1); iout(0,3);
+      end;
+    lastreltextic := nextaddr + 4;
+    end; {irelocatewrtbss}
+    
+    procedure irelocatedataarea;
+      var lftndata, lftndata2: pfcommon; lastreldataic: longint;
+          lfdreloclist, lfdfreloclist: pfdreloc; PickFDF: Boolean;
+    begin (* irelocatedataarea *)
+    lastreldataic := 0; {Some systems relocate off this base}
+    lftndata := ftndatalist;
+    while lftndata <> nil do begin
+      if lftndata^.initlist <> nil
+      then begin
+        getrelocs(lftndata,lfdfreloclist,lfdreloclist);
+        while (lfdfreloclist <> nil) or (lfdreloclist <> nil) do begin
+          if lfdfreloclist = nil
+          then PickFDF := FALSE
+          else
+            if lfdreloclist = nil
+            then PickFDF := TRUE
+            else PickFDF := lfdfreloclist^.daddr < lfdreloclist^.daddr;
+          if PickFDF
+          then begin
+            nextaddr := lftndata^.reladdr + lfdfreloclist^.daddr;
+            advancerel(nextaddr - lastreldataic);
+            
+            { Relocate Data with respect to text segment }
+            if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ) or
+               (ENVIRONMENT = MULTI)
+            then begin 
+              totalbytesdatarelocationinfo := 
+                totalbytesdatarelocationinfo + 8;
+              iout(32,1); iout(0,3); iout(nextaddr,4); 
+              end
+            else if ENVIRONMENT = UNOS
+            then begin
+              if (nextaddr - lastreldataic) > 127 
+              then begin (* Need long form to set new base *)
+                totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                (* Put out nextaddr as new base *)
+                iout(nextaddr div 65536,1); (* High order 8 bits *)
+                iout(12,1); (* newbase *)
+                iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+                lastreldataic := nextaddr;
+                end;
+              (* Relocate *)
+              totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+              iout(nextaddr - lastreldataic,1); (* offset *)
+              iout(34,1); iout(-1,2);
+              end
+            else if (ENVIRONMENT = CT) or (ENVIRONMENT = ARETE) or
+                    (ENVIRONMENT = PLEXUS)
+            then begin
+              totalbytesdatarelocationinfo := 
+                totalbytesdatarelocationinfo + 10;
+              iout(nextaddr+totalcodesize,4); 
+              iout(defrefs+undefrefs+1,4); iout(17,2);
+              end
+            else if ENVIRONMENT = NCR
+            then begin
+              totalbytesdatarelocationinfo := 
+                totalbytesdatarelocationinfo + 10;
+              iout(nextaddr,4); 
+              iout(0,4); iout($2000,2);
+              end
+            else if (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = LANDL)
+            then begin
+              totalbytesdatarelocationinfo := 
+                totalbytesdatarelocationinfo + 8;
+              iout(nextaddr,4); iout(4,3); iout(76,1);
+              end
+            else if ENVIRONMENT = NBI
+            then begin
+              totalbytesdatarelocationinfo := 
+                totalbytesdatarelocationinfo + 8;
+              iout(nextaddr,4); iout($20,1); iout(0,3);
+              end
+            else if ENVIRONMENT <> ADVENTURE
+            then fatal_error('C data relocation not implemented');
+            lastreldataic := nextaddr + 4;
+            
+            lfdfreloclist := lfdfreloclist^.next;
+            end
+          else begin {Don't PickFDF}
+            nextaddr := lftndata^.reladdr + lfdreloclist^.daddr;
+            advancerel(nextaddr - lastreldataic);
+            lftndata2 := lookupfcommon(ftndatatree,lfdreloclist^.rname);
+            if lftndata2^.initlist = nil
+            then begin
+              
+              { Relocate Data with respect to bss segment }
+              if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ) or
+                 (ENVIRONMENT = MULTI)
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 8;
+                iout(160,1); iout(0,3); iout(nextaddr,4);
+                end
+              else if ENVIRONMENT = UNOS
+              then begin
+                if (nextaddr - lastreldataic) > 127 
+                then begin (* Need long form to set new base *)
+                  totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                  (* Put out nextaddr as new base *)
+                  iout(nextaddr div 65536,1); (* High order 8 bits *)
+                  iout(12,1); (* newbase *)
+                  iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+                  lastreldataic := nextaddr;
+                  end;
+                (* Relocate with respect to BSS *)
+                totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                iout(nextaddr - lastreldataic,1); (* offset *)
+                iout(36,1); iout(-1,2);
+                end
+              else if ENVIRONMENT = CT
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 10;
+                iout(nextaddr+totalcodesize,4);
+                iout(defrefs+undefrefs+3,4); iout(17,2);
+                end
+              else if (ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 10;
+                iout(nextaddr+totalcodesize,4);
+                iout(defrefs+undefrefs+5,4); iout(17,2);
+                end
+              else if ENVIRONMENT = NCR
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 10;
+                iout(nextaddr,4); 
+                iout(0,4); iout($A000,2);
+                end
+              else if (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = LANDL)
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 8;
+                iout(nextaddr,4); iout(8,3); iout(76,1);
+                end
+              else if ENVIRONMENT = NBI
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 8;
+                iout(nextaddr,4); iout($a0,1); iout(0,3);
+                end
+              else if ENVIRONMENT <> ADVENTURE
+              then fatal_error('C data relocation not implemented');
+              lastreldataic := nextaddr + 4;
+              
+              end
+            else begin
+              
+              { Relocate Data with respect to data segment }
+              if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = SANTACRUZ) or
+                 (ENVIRONMENT = MULTI)
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 8;
+                iout(96,1); iout(0,3); iout(nextaddr,4);
+                end
+              else if ENVIRONMENT = UNOS
+              then begin
+                if (nextaddr - lastreldataic) > 127 
+                then begin (* Need long form to set new base *)
+                  totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                  (* Put out nextaddr as new base *)
+                  iout(nextaddr div 65536,1); (* High order 8 bits *)
+                  iout(12,1); (* newbase *)
+                  iout(nextaddr mod 65536,2); (* Low order 16 bits *)
+                  lastreldataic := nextaddr;
+                  end;
+                (* Relocate with respect to data *)
+                totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+                iout(nextaddr - lastreldataic,1); (* offset *)
+                iout(35,1); iout(-1,2);
+                end
+              else if ENVIRONMENT = CT
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 10;
+                iout(nextaddr+totalcodesize,4);
+                iout(defrefs+undefrefs+2,4); iout(17,2);
+                end
+              else if (ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 10;
+                iout(nextaddr+totalcodesize,4);
+                iout(defrefs+undefrefs+3,4); iout(17,2);
+                end
+              else if ENVIRONMENT = NCR
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 10;
+                iout(nextaddr,4); 
+                iout(0,4); iout($6000,2);
+                end
+              else if (ENVIRONMENT = BERKELEY) or (ENVIRONMENT = LANDL)
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 8;
+                iout(nextaddr,4); iout(6,3); iout(76,1);
+                end
+              else if ENVIRONMENT = NBI
+              then begin
+                totalbytesdatarelocationinfo := 
+                  totalbytesdatarelocationinfo + 8;
+                iout(nextaddr,4); iout($60,1); iout(0,3);
+                end
+              else if ENVIRONMENT <> ADVENTURE 
+              then fatal_error('C data relocation not implemented');
+              lastreldataic := nextaddr + 4;
+              
+              end;
+            lfdreloclist := lfdreloclist^.next;
+            end;
+          end;
+        end;
+      lftndata := lftndata^.next;
+      end;
+    end; (* irelocatedataarea *)
+    
+  begin { irelocation }
+  lastreltextic := 0; 
+  totalbytesrelocationinfo := 0; totalbytesdatarelocationinfo := 0;
+  
+  { Relocate entry code }
+  nextaddr := 2;
+  advancerel(nextaddr - lastreltextic); irelocatewrttext;
+  nextaddr := nextaddr + 8; { Skip MOVE.L into D5 and JMP instruction word }
+  advancerel(nextaddr - lastreltextic); irelocatewrttext;
+  
+  { Relocate debug table with DBGTABLESIZE bytes }
+  nextaddr := nextaddr + 2; { Skip absolute jump instruction word }
+  advancerel(nextaddr - lastreltextic); irelocatewrttext;
+  advancerel(nextaddr - lastreltextic); 
+  irelocatewrttext; 
+  irelocatewrtdata; nextaddr := nextaddr + 4;
+  irelocatewrtbss;  nextaddr := nextaddr + 4;
+  nextaddr := nextaddr + 10; { Skip flag and 8 byte space }
+  
+  lseg := seglist;
+  while lseg <> nil do
+        begin
+        ireldescriptor(nametree,lseg,FALSE);
+        lseg := lseg^.nextseg;
+        end;
+  ireldescriptor(nametree,nil,TRUE);
+  
+  { Relocate references to FORTRAN data areas }
+  
+  thisseg := seglist;
+  while thisseg <> nil do begin
+    mark(heapmark);
+    ftextpatchlist := nil; fdatapatchlist := nil; fbsspatchlist := nil;
+    InRelocation := TRUE; walkfcommon(ftndatatree); InRelocation := FALSE;
+    while (ftextpatchlist <> nil) or 
+          (fdatapatchlist <> nil) or 
+          (fbsspatchlist <> nil) do begin
+      PickBss := FALSE; PickData := FALSE;
+      if ftextpatchlist = nil
+      then
+        if fdatapatchlist = nil
+        then PickBss := TRUE
+        else
+          if fbsspatchlist = nil
+          then PickData := TRUE
+          else 
+            if fbsspatchlist^.patchloc < fdatapatchlist^.patchloc
+            then PickBss := TRUE
+            else PickData := TRUE
+      else {ftextpatchlist <> nil}
+        if fdatapatchlist = nil
+        then begin
+          if fbsspatchlist <> nil
+          then PickBss := fbsspatchlist^.patchloc < ftextpatchlist^.patchloc;
+          end
+        else {Both data and text patch lists non nil}
+          if fbsspatchlist = nil
+          then PickData := fdatapatchlist^.patchloc < ftextpatchlist^.patchloc
+          else begin {All three not nil}
+            if fdatapatchlist^.patchloc < ftextpatchlist^.patchloc
+            then 
+              if fbsspatchlist^.patchloc < fdatapatchlist^.patchloc
+              then PickBss := TRUE
+              else PickData := TRUE
+            else
+              if fbsspatchlist^.patchloc < ftextpatchlist^.patchloc
+              then PickBss := TRUE;
+            end;
+      if PickBss
+      then begin
+        nextaddr := fbsspatchlist^.patchloc + thisseg^.segbaseaddr;
+        advancerel(nextaddr - lastreltextic);
+        irelocatewrtbss;
+        fbsspatchlist := fbsspatchlist^.nextpatch;
+        end
+      else 
+        if PickData
+        then begin
+          nextaddr := fdatapatchlist^.patchloc + thisseg^.segbaseaddr;
+          advancerel(nextaddr - lastreltextic);
+          irelocatewrtdata;
+          fdatapatchlist := fdatapatchlist^.nextpatch;
+          end
+        else begin
+          nextaddr := ftextpatchlist^.patchloc + thisseg^.segbaseaddr;
+          advancerel(nextaddr - lastreltextic);
+          irelocatewrttext;
+          ftextpatchlist := ftextpatchlist^.nextpatch;
+          end;
+      end;
+    release(heapmark);
+    thisseg := thisseg^.nextseg;
+    end;
+  if ENVIRONMENT = UNOS
+  then begin { endtextrel information }
+    totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+    (* Put out totalcodesize as endtextrel *)
+    iout(totalcodesize div 65536,1); (* High order 8 bits *)
+    iout(10,1); (* endtextrel *)
+    iout(totalcodesize mod 65536,2); (* Low order 16 bits *)
+    end;
+  if CConstructs then irelocatedataarea;
+  if ENVIRONMENT = IDRIS 
+  then iout(0,2) { End of relocation information }
+  else
+    if ENVIRONMENT = UNOS
+    then begin { enddatarel information }
+      totalbytesrelocationinfo := totalbytesrelocationinfo + 4;
+      (* Put out totalcodesize + datasize as enddatarel *)
+      iout((totalcodesize + datasize) div 65536,1); (* High order 8 bits *)
+      iout(11,1); (* endtextrel *)
+      iout((totalcodesize + datasize) mod 65536,2); (* Low order 16 bits *)
+      end
+    else
+      if (ENVIRONMENT = QU68000) or
+         (ENVIRONMENT = REGULUS) or 
+         (ENVIRONMENT = CPM)
+      then begin
+        advancerel((totalcodesize + datasize) - lastreltextic);
+        end;
+  end; { irelocation }
+  
+

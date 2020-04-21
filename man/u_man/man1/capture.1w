@@ -1,0 +1,29 @@
+'\"macro stdmacro
+.TH CAPTURE 1W
+.\".rs
+.\".sp 0.1i
+.\".SH\(Dy
+.SH NAME 
+capture
+\- dump screen image to file
+.SH SPECIFICATION
+.B /usr/people/gifts/mextools/imgtools/capture
+[ dest ]
+.sp
+.SH DESCRIPTION
+.I capture
+dumps a representation of the screen into the file
+.I dest
+in a format
+compatible with printers supported for use with the IRIS.
+The destination file,
+.I dest,
+may be printed directly using the print spooler \f2lp\f1(1).
+.SH "SEE ALSO"
+lp(1)
+.br
+\f2IRIS Series 3000 Owner's Guide,\f1 Section C.2.2, ``Image Files''.
+.br
+\f2IRIS Workstation Guide, Series 2000,\f1 Section C.2.2, ``Image Files''.
+.SH NOTE
+This command can be used only in immediate mode.

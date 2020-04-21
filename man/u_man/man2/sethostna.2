@@ -1,0 +1,32 @@
+'\"macro stdmacro
+.TH SETHOSTNAME 2 
+.SH NAME
+sethostname \- set name of host cpu
+.SH SYNOPSIS
+.B sethostname(name, namelen)
+.br
+.B char *name;
+.br
+.B int namelen;
+.SH DESCRIPTION
+This call sets the name of the host processor to be
+.IR name ,
+which has length
+.I namelen\^
+characters.
+This is normally executed when the system is bootstrapped, executed
+out of the file
+.BR /etc/rc .
+The name set should not be a nickname for the machine, but the full
+name of the machine, i.e., "IRIS3030".
+.SH SEE ALSO
+gethostname(2).
+.\"	@(#)sethostname.2	5.1 of 11/17/83
+.SH NOTE
+The primitives documented on this manual page
+are system calls, but unlike most system calls
+they are not resolved by libc.
+To compile and link a program that makes these calls,
+follow the procedures for section (3B) routines as
+described in
+.IR intro (3).

@@ -1,0 +1,27 @@
+From sue Wed Sep  3 10:23:26 1986
+Received: by olympus.SGI (5.15/5.6)
+	id AA15119; Wed, 3 Sep 86 10:23:04 PDT
+Date: Wed, 3 Sep 86 10:23:04 PDT
+From: sue (Susan Luttner)
+Message-Id: <8609031723.AA15119@olympus.SGI>
+To: oz
+Subject: SCR #1947 has been assigned to you.
+
+            SCR: 1947
+	     By: roma!kuta
+           Date: 08/10/86
+       Customer: 
+        Release: GL2-W3.4
+Models Affected: 2400T, 2500T, 3020, 3030
+Documentation Affected: UPM, Vol1, Version 2.0
+          Topic: eqn(1) and eqnchar(5) weren't typeset with eqn
+           Type: BUG
+       Category: documentation
+       Refer to: document
+
+    Description: None of the eqn constructs in these two pages
+    Assigned to: oz
+    Assigned to: rmr
+have been expanded.
+      Test Case: 
+

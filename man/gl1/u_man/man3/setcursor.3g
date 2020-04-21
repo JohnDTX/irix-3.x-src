@@ -1,0 +1,35 @@
+.TH setcursor 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I setcursor
+- set the cursor characteristics
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setcursor(index, color, wtm) "
+.B "short index; "
+.B "Colorindex color, wtm;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setcursor(index, color, wtm)"
+.B "integer*2 index, color, wtm"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setcursor(index: Short; color, wtm: Colorindex);"
+.sp
+.SH DESCRIPTION
+.I Setcursor
+allows selection of a cursor glyph from a table 
+already defined by the user.
+The first argument, \f3index\f1, picks a glyph from the definition table.
+\f3Color\f1 and \f3wtm\f1 select a color and writemask
+for the cursor.  The origin of the cursor glyph is at its lower
+left corner.  This is the position influenced by valuators attached
+to the cursor, and is also the position used by \f2pick\f1 for the 
+hit window.
+.SH "SEE ALSO"
+.I attachcursor, defcursor, getcursor, RGBcursor
+.SH NOTE
+This command can only be used in immediate mode.

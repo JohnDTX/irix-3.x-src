@@ -1,0 +1,1291 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.1.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               15-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure gen(fop: integer); forward;
+
+procedure error(n: integer);
+  var ch: char;
+begin
+errors := errors + 1;
+writeln;
+writeln('\07*** Error ',n,' ***');
+writeln('PC = ',pc,', IN = ',inblock,':',inbyte,
+        ', OUT = ',outblock,':',outbyte);
+if HOSTOS <> MERLIN then goto 999;
+repeat
+       write('Type <CR> to continue, <ESC> to exit - ');
+       read(ch);
+       if ch = chr(27) then goto 999;
+until ch = ' ';
+gen($ffff);
+end; {error}
+
+function nextbyte: integer;
+  var i: integer;
+begin
+if inbyte >= lastinbyte 
+then begin
+     inblock := inblock + lastinbyte div 512;
+     i := blockread(infile,inbuff,MAXIBLOCKS,inblock);
+     if i = 0
+     then begin error(409); goto 999; end;
+     inbyte := 0; lastinbyte := i*512;
+     end;
+i := inbuff[inbyte];
+if i < 0 then i := i + 256;
+inbyte := inbyte + 1;
+nextbyte := i;
+end; {nextbyte}
+
+function peekbyte: integer;
+begin
+peekbyte := nextbyte; inbyte := inbyte - 1;
+end; {peekbyte}
+
+function nextword: integer;
+  var i,j: integer;
+begin
+i := nextbyte;
+j := nextbyte;
+nextword := i*256 + j;
+end; {nextword}
+
+function next3bytes: longint;
+  var l: longint; c: array[0..3] of -128..127;
+begin
+c[0] := 0; c[1] := nextbyte; c[2] := nextbyte; c[3] := nextbyte;
+moveleft(c,l,4); next3bytes := l;
+end; {next3bytes}
+
+function nextlong: longint;
+  var l: longint; c: array[0..3] of -128..127;
+begin
+c[0] := nextbyte; c[1] := nextbyte; c[2] := nextbyte; c[3] := nextbyte;
+moveleft(c,l,4); nextlong := l;
+end; {nextlong}
+
+procedure nexts(var fstr: idstring);
+  var i,n: integer;
+begin
+n := nextbyte; fstr[0] := chr(n);
+for i := 1 to n do
+    fstr[i] := chr(nextbyte);
+end; {nexts}
+
+procedure maka8str(var fstr: idstring; fname: alfa8);
+  var i,n: integer;
+begin
+n := 8;
+while (n > 0) and (fname[n] = ' ') do n := n - 1;
+fstr[0] := chr(n);
+for i := 1 to n do fstr[i] := fname[i];
+end; {maka8str}
+
+procedure makelname(flabelno: integer; var fstr: idstring);
+  var i,n: integer;
+begin
+if flabelno <= 999
+then n := 4
+else if flabelno <= 9999
+     then n := 5
+     else n := 6;
+fstr[0] := chr(n); fstr[1] := '$';
+for i := 2 to n do begin
+    fstr[i] := chr(ord('0') + flabelno mod 10);
+    flabelno := flabelno div 10;
+    end;
+end; {makelname}
+
+procedure getusrstr(var fstr: idstring; fid: linkid);
+  var i,n: integer;
+begin
+if fid.tail = nil
+then begin
+     n := 4;
+     while (n > 0) and (fid.n4[n] = ' ') do n := n - 1;
+     fstr[0] := chr(n);
+     for i := 1 to n do fstr[i] := fid.n4[i];
+     end
+else begin
+     fstr := concat('XXXX',fid.tail^.s);
+     for i := 1 to 4 do fstr[i] := fid.n4[i];
+     end;
+end; {getusrstr}
+
+procedure getlnkstr(var fstr: idstring; fid: linkid);
+begin
+if fid.linkno < 0
+then getusrstr(fstr,fid)
+else makelname(fid.linkno,fstr);
+end; {getlnkstr}
+
+function idEQid(var a,b: linkid): Boolean;
+begin
+if (a.linkno = b.linkno) and (a.n4 = b.n4)
+then if a.tail = nil
+     then idEQid := b.tail = nil
+     else if b.tail <> nil
+          then idEQid := a.tail^.s = b.tail^.s
+          else idEQid := FALSE
+else idEQid := FALSE;
+end; {idEQid}
+
+function idLTid(var a,b: linkid): Boolean;
+begin
+if a.linkno = b.linkno
+then if a.linkno < 0
+     then if a.n4 < b.n4
+          then idLTid := TRUE
+          else if a.n4 = b.n4
+               then if a.tail = nil
+                    then idLTid := b.tail <> nil
+                    else if b.tail = nil
+                         then idLTid := FALSE
+                         else idLTid := a.tail^.s < b.tail^.s
+               else idLTid := FALSE
+     else idLTid := FALSE
+else idLTid := a.linkno < b.linkno;
+end; {idLTid}
+
+procedure makeid(var fid: linkid; fno: integer; fstr: idstring);
+  var i: integer;
+begin
+with fid do begin
+     linkno := fno;
+     for i := 1 to 4 do
+         if i <= length(fstr)
+         then n4[i] := fstr[i]
+         else n4[i] := ' ';
+     if length(fstr) <= 4
+     then tail := nil
+     else begin
+          delete(fstr,1,4);
+          case length(fstr) div 4 of
+            0: new(tail,0);
+            1: new(tail,1);
+            2: new(tail,2);
+            3: new(tail,3);
+            4: new(tail,4);
+            5: new(tail,5);
+            6: new(tail,6);
+            7: new(tail,7);
+          end; {case}
+          moveleft(fstr,tail^.s,length(fstr) + 1);
+          end;
+     end;
+end; {makeid}
+
+procedure nextlinkid(var fid: linkid);
+  var linkno: integer; lstr: idstring;
+begin
+linkno := nextword; nexts(lstr);
+makeid(fid,linkno,lstr);
+end; {nextlinkid}
+
+procedure seekicode(fblock,fbyte: integer);
+begin
+while fbyte >= 512 do begin fblock := fblock + 1; fbyte := fbyte - 512; end;
+if blockread(infile,inbuff,1,fblock) = 1
+then begin inblock := fblock; inbyte := fbyte; lastinbyte := 512; end
+else error(2020);
+end; {seekicode}
+
+procedure flushout;
+  var i,n: integer;
+begin
+n := (outbyte + 511) div 512;
+for i := outbyte to n*512 - 1 do
+    outbuff[i] := 0;
+if blockwrite(outfile,outbuff,n,outblock) <> n
+then error(408);
+outblock := outblock + n; outbyte := 0;
+end; {flushout}
+
+procedure out(k: integer);
+begin
+if outbyte > MAXOBUFF then flushout;
+outbuff[outbyte] := k;
+outbyte := outbyte + 1;
+end; {out}
+
+procedure out2(k: integer);
+  var c: array[0..1] of -128..127;
+begin
+moveleft(k,c,2); out(c[0]); out(c[1]);
+end; {out2}
+
+procedure out3(k: longint);
+  var c: array[0..3] of -128..127;
+begin
+moveleft(k,c,4); out(c[1]); out(c[2]); out(c[3]);
+end; {out3}
+
+procedure out4(k: longint);
+  var c: array[0..3] of -128..127;
+begin
+moveleft(k,c,4); out(c[0]); out(c[1]); out(c[2]); out(c[3]);
+end; {out4}
+
+procedure outs8(fstr: idstring);
+  var i: integer;
+begin
+for i := 1 to 8 do
+    if i <= length(fstr)
+    then out(ord(fstr[i]))
+    else out(ord(' '));
+end; {outs8}
+
+procedure outuid8(fid: linkid);
+  var lstr: idstring;
+begin
+getusrstr(lstr,fid); outs8(lstr);
+end; {outuid8}
+
+procedure outlid8(fid: linkid);
+  var lstr: idstring;
+begin
+getlnkstr(lstr,fid); outs8(lstr);
+end; {outlid8}
+
+procedure outs(fstr: idstring);
+  var i: integer;
+begin
+for i := 0 to length(fstr) do out(ord(fstr[i]));
+end; {outs}
+
+procedure outlid(var fid: linkid);
+  var lstr: idstring;
+begin
+out2(fid.linkno); getusrstr(lstr,fid); outs(lstr);
+if not odd(length(lstr)) then out(0);
+end; {outlid}
+
+function namesize(var fid: linkid): integer;
+  var n: integer;
+begin
+if fid.tail = nil
+then begin
+     n := 5; while fid.n4[n-1] = ' ' do n := n - 1;
+     if odd(n) then n := n + 1;
+     namesize := n;
+     end
+else begin
+     n := length(fid.tail^.s) + 5;
+     if odd(n) then n := n + 1;
+     namesize := n;
+     end;
+end; {namesize}
+
+procedure gen{fop: integer};
+begin
+if codeword > MAXCBUFF
+then begin
+     if thiscbuf^.next = nil
+     then begin
+          new(thiscbuf^.next);
+          thiscbuf^.next^.last := thiscbuf;
+          thiscbuf^.next^.next := nil;
+          end;
+     thiscbuf := thiscbuf^.next; codeword := 0;
+     end;
+thiscbuf^.buff[codeword] := fop; codeword := codeword + 1;
+pc := pc + 2; ccodereg := SP; LastPop := FALSE; LastPushQ := FALSE;
+end; {gen}
+
+procedure ungen(k: integer);
+begin
+codeword := codeword - (k div 2); pc := pc - k;
+while codeword < 0 do begin
+      if thiscbuf^.last <> nil
+      then thiscbuf := thiscbuf^.last
+      else error(5262);
+      codeword := codeword + MAXCBUFF;
+      end;
+end; {ungen}
+
+procedure genr(fop: integer; r: pregrec);
+begin
+gen(fop + (r^.regno and 7));
+end; {genr}
+
+procedure genrr(fop: integer; rr,r: pregrec);
+begin
+gen(fop + (rr^.regno and 7)*512 + (r^.regno and 7));
+end; {genrr}
+
+procedure gennr(fop,rr: integer; r: pregrec);
+begin
+gen(fop + (rr and 7)*512 + (r^.regno and 7));
+end; {gennr}
+
+procedure genr0(fop: integer; rr: pregrec);
+begin
+gen(fop + (rr^.regno and 7)*512);
+end; {genr0}
+
+procedure gen2(fop: longint);
+  var c: array[0..1] of integer;
+begin
+moveleft(fop,c,4); gen(c[0]); gen(c[1]);
+end; {gen2}
+
+function newlabel: integer;
+begin
+nextlabel := nextlabel - 1;
+newlabel := nextlabel;
+end; {newlabel}
+
+function lookupilabel(flabelno: integer): integer;
+  var k,i: integer;
+begin
+if flabelno >= 0
+then begin
+     k := flabelno div 128;
+     if poslabs[k] <> nil
+     then lookupilabel := poslabs[k]^[flabelno and 255]
+     else begin
+          new(poslabs[k]);
+          for i := 0 to 255 do poslabs[k]^[i] := 0;
+          lookupilabel := 0;
+          end;
+     end
+else begin
+     flabelno := -flabelno; k := flabelno div 128;
+     if neglabs[k] <> nil
+     then lookupilabel := neglabs[k]^[flabelno and 255]
+     else begin
+          new(neglabs[k]);
+          for i := 0 to 255 do neglabs[k]^[i] := 0;
+          lookupilabel := 0;
+          end;
+     end;
+end; {lookupilabel}
+
+procedure deflbblk; forward;
+
+procedure defilabel(flabno: integer);
+  var junk: integer;
+begin
+ccodereg := SP; LastPop := FALSE; LastPushQ := FALSE;
+deflbblk;
+junk := lookupilabel(flabno);
+if flabno >= 0
+then poslabs[flabno div 128]^[flabno and 255] := nextblk
+else begin
+     flabno := -flabno;
+     neglabs[flabno div 128]^[flabno and 255] := nextblk;
+     end;
+end; {defilabel}
+
+function getnewblk(k: integer): pblk;
+  var n: integer;
+begin
+if nextblk < MAXBLOCKS*MAXBIGBLOCKS
+then begin
+     n := nextblk div (MAXBLOCKS + 1);
+     if blktable[n] = nil then new(blktable[n]);
+     with blktable[n]^[nextblk and MAXBLOCKS] do begin
+          blkaddr := blkpc; blksize := pc - blkpc; DeadCode := TRUE;
+          end;
+     getnewblk := @blktable[n]^[nextblk and MAXBLOCKS];
+     nextblk := nextblk + 1; pc := pc + k; blkpc := pc;
+     end
+else begin error(9001); getnewblk := nil; end;
+LastPop := FALSE; LastPushQ := FALSE;
+end; {getnewblk}
+
+procedure pcbrablk(fop,flab: integer);
+  var lblk: pblk;
+begin
+lblk := getnewblk(6);
+with lblk^ do begin
+     blktag := TAG_BR6; refblk := flab; brop := fop;
+     end;
+end; {pcbrablk}
+
+procedure pcfbrablk(fop,flab: integer);
+  var lblk: pblk;
+begin
+lblk := getnewblk(6);
+with lblk^ do begin
+     blktag := TAG_FBR6; refblk := flab; brop := fop;
+     end;
+end; {pcfbrablk}
+
+procedure pcrefblk(flab,fsize: integer);
+  var lblk: pblk;
+begin
+lblk := getnewblk(4);
+with lblk^ do begin
+     blktag := TAG_PC4; refblk := flab; brop := fsize;
+     end;
+end; {pcrefblk}
+
+procedure linkblk(freg: register);
+  var lblk: pblk;
+begin
+lblk := getnewblk(6);
+with lblk^ do begin
+     blktag := TAG_LINK; areg := freg - 8;
+     end;
+end; {linkblk}
+
+procedure rsaveblk;
+  var lblk: pblk;
+begin
+lblk := getnewblk(4);
+lblk^.blktag := TAG_SAVE;
+end; {rsaveblk}
+
+procedure rloadblk;
+  var lblk: pblk;
+begin
+lblk := getnewblk(4);
+lblk^.blktag := TAG_LOAD;
+end; {rloadblk}
+
+procedure rbyteblk(n: integer);
+  var lblk: pblk;
+begin
+lblk := getnewblk(2);
+with lblk^ do begin
+     blktag := TAG_RBYT; roff := n;
+     end;
+end; {rbyteblk}
+
+procedure cjmpblk(ftable: pcaserec; fnum: longint; freg: register;
+                  felselab: integer; FAnyHoles: Boolean);
+  var lcase: pcaselst; lblk: pblk;
+begin
+new(lcase);
+with lcase^ do begin
+     next := gcaselist; gcaselist := lcase;
+     thistable := ftable; numentrys := fnum;
+     tablabno := newlabel; elselabno := felselab;
+     entrysz := 4; cjmpaddr := 0; ctabaddr := 0;
+     AnyHoles := FAnyHoles; TabFarAway := TRUE;
+     end;
+lblk := getnewblk(12);
+with lblk^ do begin
+     blktag := TAG_CJMP; creg := freg; cvallist := lcase;
+     end;
+end; {cjmpblk}
+
+procedure ctabblk(ftable: pcaselst; fnum: longint);
+  var lblk: pblk;
+begin
+defilabel(ftable^.tablabno);
+lblk := getnewblk(4*fnum);
+with lblk^ do begin
+     blktag := TAG_CTAB; creg := 0; cvallist := ftable;
+     end;
+end; {ctabblk}
+
+procedure forget;
+  var i: integer;
+begin
+for i := D0 to A4 do
+    reg[i].v.rvkind := UNKNRV;
+end; {forget}
+
+procedure deflbblk;
+  var lblk: pblk;
+begin
+forget;
+if pc <> blkpc
+then begin
+     xtralblks := xtralblks + 1;
+     lblk := getnewblk(0);
+     lblk^.blktag := TAG_LAB;
+     end;
+end; {deflbblk}
+
+procedure withblk(freg,foff: integer);
+  var lblk: pblk;
+begin
+lblk := getnewblk(4);
+with lblk^ do begin
+     blktag := TAG_WITH; wreg := freg; withoff := foff; SaveWith := FALSE;
+     end;
+end; {withblk}
+
+procedure gettemp(var fcattr: cattr; fsize: integer);
+  var ltmp,lastltmp,fltmp,flastltmp: ptmplist; FoundOne: Boolean;
+      foffset,loffset: longint;
+begin
+fsize := (fsize + 3) and $7ffffffc; FoundOne := FALSE;
+ltmp := templist;
+while ltmp <> nil do
+      with ltmp^ do begin
+           if size >= fsize
+           then begin
+                loffset := addr + (size - fsize);
+                if (not FoundOne) or (abs(loffset) < abs(foffset))
+                then begin
+                     foffset := loffset; FoundOne := TRUE;
+                     fltmp := ltmp; flastltmp := lastltmp;
+                     end;
+                end;
+           lastltmp := ltmp; ltmp := next;
+           end;
+if FoundOne
+then with fltmp^ do begin
+          with fcattr do begin
+               ckind := VARB; voffset := foffset; vlev := level;
+               end;
+          if size = fsize
+          then if fltmp = templist
+               then templist := next
+               else flastltmp^.next := next
+          else size := size - fsize;
+          end
+else begin
+     lc := lc + fsize;
+     with fcattr do begin
+          ckind := VARB; voffset := -lc; vlev := level;
+          end;
+     end;
+end; {gettemp}
+
+procedure freetemp(fcattr: cattr; fsize: integer);
+  var ltmp,lastltmp: ptmplist;
+begin
+fsize := (fsize + 3) and $7ffffffc;
+lastltmp := nil; ltmp := templist;
+while ltmp <> nil do
+      with ltmp^ do
+           if addr > fcattr.voffset
+           then if addr - fsize = fcattr.voffset
+                then begin
+                     addr := addr - fsize;
+                     size := size + fsize;
+                     exit(freetemp);
+                     end
+                else ltmp := nil
+           else if addr + size = fcattr.voffset
+                then begin
+                     size := size + fsize;
+                     if next <> nil
+                     then if next^.addr = addr + size
+                          then begin
+                               size := size + next^.size;
+                               next := next^.next;
+                               end;
+                     exit(freetemp);
+                     end
+                else begin
+                     lastltmp := ltmp; ltmp := next;
+                     end;
+new(ltmp);
+with ltmp^ do begin
+     addr := fcattr.voffset; size := fsize;
+     if lastltmp = nil
+     then begin next := templist; templist := ltmp; end
+     else begin next := lastltmp^.next; lastltmp^.next := ltmp; end;
+     end;
+end; {freetemp}
+
+function comhash(n: integer): integer;
+begin
+comhash := (n*111) mod MAXUNITS;
+end; {comhash}
+
+procedure defdata(var ftree: pcommonrec);
+  var i,lhashno: integer; lcom,mcom: pcommonrec; ExitFlag: Boolean;
+begin
+new(lcom);
+with lcom^ do begin
+     left := nil; right := nil;
+     commonno := nextword; lhashno := comhash(commonno);
+     if commonno = 0
+     then begin writeln('*** COMMONNO = 0 ***'); error(10000); end;
+     hashno := lhashno; reflist := nil;
+     datasize := nextlong; nextlinkid(comname);
+     end;
+if ftree = nil
+then ftree := lcom
+else begin
+     mcom := ftree; ExitFlag := FALSE;
+     repeat
+            with mcom^ do
+                 if hashno < lhashno
+                 then if left = nil
+                      then begin left := lcom; ExitFlag := TRUE; end
+                      else mcom := left
+                 else if right = nil
+                      then begin right := lcom; ExitFlag := TRUE; end
+                      else mcom := right;
+     until ExitFlag;
+     end;
+end; {defdata}
+
+function findcommon(fcommonno: integer; ftree: pcommonrec): pcommonrec;
+  var lcom: pcommonrec; lhashno: integer; ExitFlag: Boolean;
+begin
+lhashno := comhash(fcommonno);
+lcom := ftree;
+ExitFlag := FALSE;
+while (lcom <> nil) and not ExitFlag do
+      with lcom^ do
+           if hashno = lhashno
+           then ExitFlag := TRUE
+           else if hashno < lhashno
+                then lcom := left
+                else lcom := right;
+findcommon := lcom;
+end; {findcommon}
+
+procedure ftndref(fcommonno: integer);
+  var lftnd: pcommonrec; lref: pblkoff;
+begin
+lftnd := findcommon(fcommonno,ftndtree);
+new(lref);
+with lref^ do begin
+     blk := nextblk; off := pc - blkpc;
+     next := lftnd^.reflist; lftnd^.reflist := lref;
+     end;
+end; {ftndref}
+
+procedure genea(fop: integer; fcattr: cattr; fsiz: sizes);
+  forward;
+
+procedure geneai(fop: integer; fcattr: cattr; fsiz: sizes; ival: longint);
+  forward;
+
+procedure genrea(fop: integer; freg: pregrec; fcattr: cattr; fsiz: sizes);
+  forward;
+
+procedure genfear(fop: integer; fcattr: cattr; freg: pregrec; fsiz: sizes);
+  forward;
+
+procedure savereg(freg: register);
+  var op,loff: integer;
+begin
+with reg[freg].r^ do begin
+     if freg <= SP
+     then begin
+          gettemp(memcattr,4);
+          op := 8512 + freg; { MOVE.L D/A,d(A) }
+          if memcattr.vlev <= 1
+          then op := op + 2560 {A5}
+          else op := op + 3072 {A6};
+          if abs(memcattr.voffset) > 32767
+          then begin gen(op + 64); gen($0170); gen2(memcattr.voffset); end
+          else begin gen(op); gen(memcattr.voffset); end;
+          end
+     else if JUN_FLAG
+          then begin
+               gettemp(memcattr,8);
+               if memcattr.vlev <= 1
+               then { MOVE.L x.W,d(A5) } op := $2B78
+               else { MOVE.L x.W,d(A6) } op := $2D78;
+               loff := $8000 + (freg and 15)*16;
+               if abs(memcattr.voffset) > 32767
+               then begin
+                    op := op + 64;
+                    gen(op); gen(loff + J_MOVEHI); gen($170);
+                    gen2(memcattr.voffset);
+                    gen(op); gen(loff + J_MOVELO); gen($170);
+                    gen2(memcattr.voffset+4);
+                    end
+               else begin
+                    gen(op); gen(loff + J_MOVEHI); gen(memcattr.voffset);
+                    gen(op); gen(loff + J_MOVELO); gen(memcattr.voffset+4);
+                    end;
+               end
+          else begin
+               gettemp(memcattr,12);
+               genfear(_FSTORE,memcattr,reg[freg].r,X);
+               end;
+     InMem := TRUE;
+     end;
+end; {savereg}
+
+procedure saveallregs;
+  var i,regmask,bit,lastreg,numregs: integer; lcattr: cattr;
+begin
+bit := 1; regmask := 0; numregs := 0;
+for i := D0 to A1 do
+    with reg[i].r^ do begin
+         if (i <= D2) or (i >= A0)
+         then begin
+              if reg[i].Locked then begin prregs; error(13507); end;
+              if count > 0
+              then if not InMem
+                   then begin
+                        regmask := regmask + bit;
+                        numregs := numregs + 1; lastreg := i;
+                        end;
+              end;
+         bit := bit + bit;
+         end;
+if numregs > 0
+then if numregs = 1
+     then savereg(lastreg)
+     else begin
+          gettemp(lcattr,numregs*4);
+          geneai(_MOVEM_L,lcattr,W,regmask);
+          for i := D0 to A1 do
+              if (i <= D2) or (i >= A0)
+              then with reg[i].r^ do
+                        if count > 0
+                        then if not InMem
+                             then begin
+                                  InMem := TRUE; memcattr := lcattr;
+                                  if lcattr.ckind = FDAT
+                                  then lcattr.doffset := lcattr.doffset + 4
+                                  else lcattr.voffset := lcattr.voffset + 4;
+                                  end;
+          end;
+if JUN_FLAG
+then begin
+     for i := F1 to F4 do
+         with reg[i].r^ do begin
+              if reg[i].Locked then begin prregs; error(13508); end;
+              if count > 0
+              then if not InMem
+                   then savereg(i);
+              end;
+     end
+else begin
+     bit := 128; regmask := 0; numregs := 0;
+     for i := F0 to F3 do
+         with reg[i].r^ do begin
+              if reg[i].Locked then begin prregs; error(13508); end;
+              if count > 0
+              then if not InMem
+                   then begin
+                        regmask := regmask + bit;
+                        numregs := numregs + 1; lastreg := i;
+                        end;
+              bit := bit div 2;
+              end;
+     if numregs > 0
+     then if numregs = 1
+          then savereg(lastreg)
+          else begin
+               gettemp(lcattr,numregs*12);
+               geneai(_FMOVEM,lcattr,W,$F000+regmask);
+               for i := F0 to F3 do
+                   with reg[i].r^ do
+                        if count > 0
+                        then if not InMem
+                             then begin
+                                  InMem := TRUE; memcattr := lcattr;
+                                  if lcattr.ckind = FDAT
+                                  then lcattr.doffset := lcattr.doffset + 12
+                                  else lcattr.voffset := lcattr.voffset + 12;
+                                  end;
+               end;
+     end;
+end; {saveallregs}
+
+procedure clearscr;
+  var i: integer;
+begin
+for i := D0 to F3 do
+    if (i <= D2) or ((i >= A0) and (i <= A1)) or (i >= F0)
+    then with reg[i] do
+              if not Perm
+              then begin
+                   r^.InReg := FALSE;
+                   new(r);
+                   with r^ do begin
+                        count := 0; InReg := TRUE; InMem := FALSE;
+                        end;
+                   v.rvkind := UNKNRV;
+                   end;
+end; {clearscr}
+
+procedure clearouter;
+var i: integer;
+begin
+	for i := D0 to FF do
+		with reg[i] do
+			case v.rvkind of
+			VALURV:
+				if v.rvlev <= level then v.rvkind := UNKNRV;
+			INDRRV,
+			INDXRV:
+				v.rvkind := UNKNRV;
+			end;
+end;
+
+function getreg(loreg,hireg: register): pregrec;
+  label 1,2;
+  var r1,r2,rtime: integer; FoundOne: Boolean;
+begin
+FoundOne := FALSE;
+for r1 := loreg to hireg do
+    with reg[r1] do
+         if not Perm
+         then if not Locked
+              then if r^.count = 0
+                   then if v.rvkind = UNKNRV
+                        then if Used
+                             then goto 1
+                             else begin
+                                  if FoundOne then r1 := r2;
+                                  goto 1;
+                                  end
+                        else if Used
+                             then if FoundOne
+                                  then begin
+                                       if rtime > t
+                                       then begin r2 := r1; rtime := t; end;
+                                       end
+                                  else begin
+                                       FoundOne := TRUE; r2 := r1; rtime := t;
+                                       end;
+if FoundOne
+then begin r1 := r2; goto 1; end;
+for r1 := loreg to hireg do
+    with reg[r1] do
+         if not Perm
+         then if not Locked
+              then if r^.InMem then goto 2;
+FoundOne := FALSE;
+for r2 := loreg to hireg do
+    with reg[r2] do
+         if not Perm
+         then if not Locked
+              then if FoundOne
+                   then begin
+                        if t < reg[r1].t then r1 := r2;
+                        end
+                   else begin FoundOne := TRUE; r1 := r2; end;
+if not FoundOne
+then begin
+     writeln; writeln('Register ',loreg,' - ',hireg);
+     prregs;
+     error(2002);
+     end;
+savereg(r1);
+2:
+reg[r1].r^.InReg := FALSE;
+new(reg[r1].r);
+1:
+with reg[r1].r^ do
+     begin count := 1; InReg := TRUE; regno := r1; InMem := FALSE; end;
+with reg[r1] do begin
+     getreg := r; t := timer; timer := timer + 1;
+     Used := TRUE; v.rvkind := UNKNRV;
+     end;
+end; {getreg}
+
+function getpreg(loreg,hireg: register): pregrec;
+  label 1;
+  var r1: integer;
+begin
+for r1 := hireg downto loreg do
+    with reg[r1] do
+         if not Perm
+         then if not Locked
+              then if r^.count = 0 then goto 1;
+for r1 := hireg downto loreg do
+    with reg[r1] do
+         if not Perm
+         then if not Locked
+              then begin
+                   if not r^.InMem then savereg(r1);
+                   reg[r1].r^.InReg := FALSE;
+                   new(reg[r1].r);
+                   goto 1;
+                   end;
+getpreg := nil; exit(getpreg);
+1:
+with reg[r1].r^ do
+     begin count := 32000; InReg := TRUE; regno := r1; InMem := FALSE; end;
+with reg[r1] do begin
+     Perm := TRUE; getpreg := r; Used := TRUE; t := timer; timer := timer + 1;
+     v.rvkind := UNKNRV;
+     end;
+end; {getpreg}
+
+procedure freepreg(fp: pregrec);
+begin
+with fp^ do begin
+     (****) if not InReg then error(9393);
+     (****) if not reg[regno].Perm
+     (****) then begin write('FREEPREG of not Perm '); prreg(regno);
+     (****) writeln; prregs; error(9823); end;
+     count := 0; InReg := TRUE; InMem := FALSE;
+     with reg[regno] do
+          begin Perm := FALSE; Locked := FALSE; end;
+     end;
+end; {freepreg}
+
+function FreeRegs(loreg,hireg: register): Boolean;
+begin
+FreeRegs := FALSE;
+while loreg <= hireg do
+      with reg[loreg] do begin
+           if not Perm
+           then if not Locked
+                then if r^.count = 0
+                     then begin FreeRegs := TRUE; exit(FreeRegs); end;
+           loreg := loreg + 1;
+           end;
+end; {FreeRegs}
+
+procedure freereg(freg: pregrec);
+begin
+with freg^ do
+     if InReg
+     then begin
+          if not reg[freg^.regno].Perm
+          then if count <= 0
+               then begin
+                    writeln; write('Register ');
+                    prreg(freg^.regno); writeln; error(2003);
+                    end
+               else count := count - 1;
+          end
+     else if count <= 0
+          then begin
+               writeln('Freeing a reg that''s not InReg, count <= 0');
+               prregrec(freg); writeln;
+               error(2999);
+               end
+          else count := count - 1;
+end; {freereg}
+
+procedure load(var fregrec: pregrec);
+  var lregrec: pregrec;
+begin
+with fregrec^ do
+     if not InReg
+     then begin
+          if regno <= D7
+          then begin
+               lregrec := getreg(D0,D7);
+               genrea(_MOVE_L,lregrec,memcattr,L);
+               end
+          else if regno <= SP
+               then begin
+                    lregrec := getreg(A0,AMAX);
+                    genrea(_MOVEA_L,lregrec,memcattr,L);
+                    end
+               else if regno >= F0
+                    then if M81_FLAG
+                         then begin
+                              lregrec := getreg(F0,F7);
+                              genfear(_FLOAD,memcattr,lregrec,X);
+                              end
+                         else if JUN_FLAG
+                              then lregrec := loadjreg(fregrec,D);
+          InReg := TRUE; regno := lregrec^.regno;
+          reg[regno].r := fregrec;
+          end;
+end; {load}
+
+procedure lock(fregrec: pregrec);
+begin
+(***) if not fregrec^.InReg
+(***) then begin writeln('Locking a value not in a register!'); 
+(***)      prregrec(fregrec); writeln; error(8000); end;
+(***) if reg[fregrec^.regno].Locked
+(***) then begin writeln('Locking a Locked Register: '); 
+(***)      prregrec(fregrec); writeln; error(8001); end;
+reg[fregrec^.regno].Locked := TRUE;
+end; {lock}
+
+procedure unlock(fregrec: pregrec);
+begin
+(***) if not fregrec^.InReg
+(***) then begin writeln('Ulocking a value not in a register!');
+(***)      prregrec(fregrec); writeln; error(8002); end;
+(***) if not reg[fregrec^.regno].Locked
+(***) then begin writeln('Unlocking an Unlocked Register: ');
+(***)      prregrec(fregrec); writeln; error(8003); end;
+reg[fregrec^.regno].Locked := FALSE;
+end; {unlock}
+
+procedure lockcattr(var fcattr: cattr);
+begin
+with fcattr do
+     case ckind of
+       EXPR,
+       BITZ,
+       BOOL,
+       FEXP,
+       JEXP: lock(exreg);
+       ADDR: lock(adreg);
+       INDX: begin lock(inxareg); lock(inxrreg); end;
+       INDR: begin
+             lock(ireg);
+             if ixreg <> nil then lock(ixreg);
+             end;
+     end; {case}
+end; {lockcattr}
+
+procedure unlockcattr(var fcattr: cattr);
+begin
+with fcattr do
+     case ckind of
+       EXPR,
+       BITZ,
+       BOOL,
+       FEXP,
+       JEXP: unlock(exreg);
+       ADDR: unlock(adreg);
+       INDX: begin unlock(inxareg); unlock(inxrreg); end;
+       INDR: begin
+             unlock(ireg);
+             if ixreg <> nil then unlock(ixreg);
+             end;
+     end; {case}
+end; {unlockcattr}
+
+procedure makevalid(var fcattr: cattr);
+begin
+with fcattr do
+     case ckind of
+       FEXP,
+       EXPR: if not exreg^.InReg
+             { Don't Know length or would: then fcattr := exreg^.memcattr; }
+             { Instead: } then load(exreg);
+       BITZ,
+       BOOL: if not exreg^.InReg then load(exreg);
+       ADDR: if not adreg^.InReg then load(adreg);
+       INDX: if not inxareg^.InReg
+             then begin
+                  if not inxrreg^.InReg then load(inxrreg);
+                  if reg[inxrreg^.regno].Locked
+                  then load(inxareg)
+                  else begin
+                       lock(inxrreg); load(inxareg); unlock(inxrreg);
+                       end;
+                  end
+             else if not inxrreg^.InReg
+                  then if reg[inxareg^.regno].Locked
+                       then load(inxrreg)
+                       else begin
+                            lock(inxareg); load(inxrreg); unlock(inxareg);
+                            end;
+       INDR: begin
+             if not ireg^.InReg then load(ireg);
+             if ixreg <> nil
+             then if not ixreg^.InReg then load(ixreg);
+             end;
+       JEXP: if JUN_FLAG
+             then if not exreg^.InReg then load(exreg);
+     end; {case}
+end; {makevalid}
+
+procedure make2valid(var acattr,bcattr: cattr);
+begin
+makevalid(acattr); lockcattr(acattr);
+makevalid(bcattr); unlockcattr(acattr);
+end; {make2valid}
+
+procedure isol(var fregrec: pregrec; fsiz: sizes; CCFlag: Boolean);
+  var r: pregrec; op: integer; LockFlag: Boolean;
+begin
+with fregrec^ do
+     if count > 1
+     then begin
+          load(fregrec); LockFlag := reg[fregrec^.regno].Locked;
+          if not LockFlag then lock(fregrec);
+          if fsiz = X
+          then begin
+               r := getreg(F0,F7); { FMOVE.X Fx,Fy }
+               gen($F200); gen(((regno and 7)*8 + (r^.regno and 7))*128);
+               end
+          else begin
+               if fsiz = W
+               then op := 12288 { MOVE.W }
+               else op := 8192; { MOVE.L }
+               if regno <= D7
+               then r := getreg(D0,D7)
+               else begin op := op + 72; r := getreg(A0,AMAX); end;
+               genrr(op,r,fregrec);
+               if CCFlag then ccodereg := r^.regno;
+               end;
+          if not LockFlag then unlock(fregrec);
+          reg[r^.regno].v := reg[regno].v;
+          count := count - 1; r^.count := 1; fregrec := r;
+          end
+     else begin
+          if not InReg then load(fregrec);
+          InMem := FALSE;
+          end;
+end; {isol}
+
+procedure isolate(var fregrec: pregrec);
+begin
+if fregrec^.regno >= F0
+then isol(fregrec,X,FALSE)
+else isol(fregrec,L,FALSE);
+end; {isolate}
+
+procedure clearregs(Initial: Boolean);
+  var lreg: integer;
+begin
+ccodereg := SP;
+for lreg := D0 to FF do
+    with reg[lreg] do begin
+         Perm := (lreg > AMAX) and (lreg <= SP);
+         t := 0; Locked := FALSE; new(r);
+         if Initial
+         then begin
+              if (lreg <= D2) or ((lreg >= A0) and (lreg <= A1))
+              then Used := TRUE
+              else Used := FALSE;
+              v.rvkind := UNKNRV;
+              end;
+         with r^ do begin
+              InReg := TRUE; regno := lreg; InMem := FALSE;
+              if Perm then count := 32000 else count := 0;
+              end;
+         end;
+end; {clearregs}
+
+function IsDReg(var fcattr: cattr): Boolean;
+begin
+with fcattr do
+     if ckind = EXPR
+     then IsDReg := exreg^.regno <= D7
+     else IsDReg := FALSE;
+end; {IsDReg}
+
+function IsAReg(var fcattr: cattr): Boolean;
+begin
+with fcattr do
+     if ckind = EXPR
+     then IsAReg := exreg^.regno >= A0
+     else IsAReg := FALSE;
+end; {IsAReg}
+
+function ShiftMult(fvalue: integer; var bits: integer): Boolean;
+begin
+bits := 0;
+if fvalue > 0
+then begin
+     while not Odd(fvalue) do
+           begin bits := bits + 1; fvalue := fvalue div 2; end;
+     ShiftMult := (fvalue = 1) and (bits <= 16);
+     end
+else ShiftMult := FALSE;
+end; {ShiftMult}
+
+function ShShMult(fvalue: integer; var count1: integer;
+                  var SubFlag: Boolean; var count2: integer): Boolean;
+begin
+ShShMult := TRUE; SubFlag := FALSE; count2 := 0;
+case fvalue of
+  3: count1 := 1;
+  5: count1 := 2;
+  6: begin count1 := 1; count2 := 1; end;
+  7: begin count1 := 3; SubFlag := TRUE; end;
+  9: count1 := 3;
+ 10: begin count1 := 2; count2 := 1; end;
+ 12: begin count1 := 1; count2 := 2; end;
+ 14: begin count1 := 3; count2 := 1; SubFlag := TRUE; end;
+ 15: begin count1 := 4; SubFlag := TRUE; end;
+ 17: count1 := 4;
+ 18: begin count1 := 3; count2 := 1; end;
+ 20: begin count1 := 2; count2 := 2; end;
+otherwise: ShShMult := FALSE;
+end; {case}
+end; {ShShMult}
+
+procedure gethilo(fval: longint; var hi,lo: integer);
+  var c: array[0..1] of integer;
+begin
+moveleft(fval,c,4); hi := c[0]; lo := c[1];
+end; {gethilo}
+
+procedure extref;
+  var n,i: integer; lproc: pprocref;
+begin
+new(lproc);
+with lproc^ do begin
+     n := nextword; pflev := nextbyte; reflist := nil;
+     next := proclist; proclist := lproc;
+     nextlinkid(procname);
+     end;
+if n > 1023 then error(2004);
+i := n div 32;
+if userprocs[i] = nil then new(userprocs[i]);
+userprocs[i]^[n mod 32] := lproc;
+end; {extref}
+
+function getstrvalu(flen: integer): pstrcrec;
+  var lstring: pstrcrec; i,count: integer;
+begin
+if flen > 0
+then begin
+     new(lstring);
+     with lstring^ do begin
+          strval := '        '; next := nil;
+          end;
+     end
+else lstring := nil;
+getstrvalu := lstring;
+count := 0;
+for i := 1 to flen do begin
+    count := count + 1;
+    if count > 8
+    then begin
+         new(lstring^.next); lstring := lstring^.next;
+         with lstring^ do begin
+              strval := '        '; next := nil;
+              end;
+         count := 1;
+         end;
+    lstring^.strval[count] := chr(nextbyte);
+    end;
+end; {getstrvalu}
+
+procedure erase(r: pregrec);
+begin
+reg[r^.regno].v.rvkind := UNKNRV;
+end; {erase}
+
+procedure incrv(fregno: register; fvalu: longint);
+begin
+if fvalu <> 0
+then with reg[fregno] do
+          case v.rvkind of
+            CNSTRV: v.ival := v.ival + fvalu;
+            ADDRRV: v.rvoffset := v.rvoffset + fvalu;
+            UNKNRV,
+            VALURV,
+            INDXRV,
+            INDRRV: v.rvkind := UNKNRV;
+          end; {case}
+end; {incrv}
+
+procedure addidreg(d1: pregrec; fvalue: longint; fsiz: sizes);
+  var lop: integer;
+begin
+if fvalue <> 0
+then begin
+     if abs(fvalue) <= 8
+     then begin
+          if fvalue > 0 then lop := 20480 { ADDQ } else lop := 20736; { SUBQ }
+          if fsiz > B
+          then if fsiz = W then lop := lop + 64 else lop := lop + 128;
+          gennr(lop,abs(fvalue),d1);
+          end
+     else begin
+          lop := 1536; { ADDI }
+          if fsiz > B
+          then if fsiz = W then lop := lop + 64 else lop := lop + 128;
+          genr(lop,d1);
+          if fsiz <= W then gen(fvalue) else gen2(fvalue);
+          end;
+     incrv(d1^.regno,fvalue); ccodereg := d1^.regno;
+     end;
+end; {addidreg}
+
+

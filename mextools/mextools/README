@@ -1,0 +1,79 @@
+
+	Contents:
+
+	    images - some images that can be pasted to the screen 
+	    imglib - a library for reading and writing images
+	    imgtools - a few simple tools for dealing with images
+	    include - files defining image files and the colormap
+	    mexrcs - a .mexrc file
+	    portlib - a utility library
+	    tools - a collection of tools that use the window manager
+
+	You probably should put mextools/imgtools and mextools/tools
+	in your path to make it easier to get at these goodies. . .
+	in c-shell you will type something like:
+
+	% set path=( /usr/people/gifts/mextools/imgtools \
+					/usr/people/gifts/mextools/tools $path)
+
+	Here is an exercise:
+
+	    0. first do a make in this directory, /usr/people/gifts/mextools, 
+	            and wait for it to finish. "% make". 
+
+	    1. copy mexrcs/tools.mexrc ~/.mexrc .  This file is used by
+	    	    mex when it starts up, otherwise it uses the init file
+		    /usr/lib/gl2/mexrc.  
+
+	    2. cd into tools and run startup: "% cd tools" and then "% startup".
+	    	    This script starts the window manager, maps a bunch of
+		    colors, and starts a program to draw the background.
+		    This will take a few seconds.  
+
+	    3. now try showmap - you gotta use the right mouse button to sweep 
+		    out a region after the cursor becomes a corner. Hold the 
+		    button down, move the mouse and release the button. This 
+		    program displays the colors in the colormap.
+
+	    4. try clock - this is a simple desk clock.
+
+	    5. now try to move and resize the clock using the right
+		    mouse button.
+
+	    6. try cedit - select it for input and use the left button
+		    to pick a color to edit, and move the sliders.
+
+	    7. try mag - select it for input and use the left button
+		    to pick a region of the screen to magnify. See if
+		    you can figure out how to make it magnify by
+		    a factor 5 instead of 2.
+
+	    8. ok, now look at all the source in this whole tree and try
+		    figure out how it works. 
+
+	    9. the file "~/.mexrc" describes to the window manager which
+		    color indexes to use for the border and the title
+		    bar etc. Notice that the startup script runs makemap.
+		    Makemap maps these indexes to be resonable colors.
+		    If you are a curious sort you can take a look at
+		    ~/.mexrc .  If things look strange when you start the 
+		    window manager without using the "startup" script, as
+		    in "% mex", this is only because some of the color indexes
+		    listed in ~/.mexrc are not maped. You can deal with this
+		    probelem by always starting the window manager with the
+		    startup script, or editing your ~/.mexrc file.
+
+	    10. the default mexrc file is set up so that if you are attached
+		    to the background, you can use the left mouse button to 
+		    pop the window you are pointing at, and use the middle
+		    button to move windows around on the screen.  If you
+		    click down in a corner of a window, you can resize quickly
+		    also. good luck.
+
+
+The makefiles contain a few defines that select differing parts of
+include files. These are:  -DUNIX and -DIP2 or -DPM2
+
+UNIX is because this is a unix based system (we also make a V kernel
+	based terminal)
+IP2 and PM2 are the 68020 and 68010 cpu boards.

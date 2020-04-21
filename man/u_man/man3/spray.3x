@@ -1,0 +1,54 @@
+'\"macro stdmacro
+.\" @(#)spray.3r 1.2 86/07/18 SMI; new on release 3.0
+.TH SPRAY 3X
+.SH NAME
+spray \- scatter data in order to check the network
+.SH SYNOPSIS
+.ft B
+#include <rpcsvc/spray.h>
+.SH RPC INFO
+.nf
+program number:
+	SPRAYPROG
+.PP
+xdr routines:
+	xdr_sprayarr(xdrs, arr);
+		XDR *xdrs;
+		struct sprayarr *arr;
+	xdr_spraycumul(xdrs, cumul);
+		XDR *xdrs;
+		sturct spraycumul *cumul;
+procs:
+	SPRAYPROC_SPRAY
+		Takes no arguments, returns no value.
+		Increments a counter in server daemon.
+		The server does not return this call, so the caller should have a timeout of 0.
+	SPRAYPROC_GET
+		Takes no arguments, returns \fIstruct spraycumul\fP with value of counter and clock.
+	SPRAYPROC_CLEAR
+		Takes no arguments and returns no value.
+		Zeros out counter and clock.
+versions:
+	SPRAYVERS_ORIG
+.PP
+structures:
+	struct spraycumul {
+		unsigned counter;
+		struct timeval clock;
+	};
+	struct sprayarr {
+		int *data;
+		int lnth;
+	};
+.fi
+.SH FILES
+/usr/lib/librpcsvc.a	RPC services library
+.SH SEE ALSO
+spray(1M), sprayd(1M).
+.SH NOTE
+To compile and link a program that calls any of these routines,
+use a compile command of the form:
+.RS
+\f3cc \-I/usr/include/sun \-I/usr/include/bsd \f2prog.c\f3 \-lrpcsvc \-lsun \-lbsd\f1
+.RE
+

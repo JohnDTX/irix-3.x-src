@@ -1,0 +1,30 @@
+.TH popmatrix 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B popmatrix
+\- pops the transformation matrix stack
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "popmatrix()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine popmat"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure popmatrix;"
+.SH DESCRIPTION
+.B popmatrix
+pops the transformation matrix stack.  
+When \f3popmatrix\f1 executes, the matrix on top of the stack
+is lost.
+.SH "SEE ALSO"
+loadmatrix, multmatrix, pushmatrix
+.sp
+.I Programming Guide,
+Section 4.5, User-Defined Transformations

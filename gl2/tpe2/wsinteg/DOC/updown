@@ -1,0 +1,134 @@
+/**************************************************************************
+ *									  *
+ * 		 Copyright (C) 1985, Silicon Graphics, Inc.		  *
+ *									  *
+ *  These coded instructions, statements, and computer programs  contain  *
+ *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
+ *  are protected by Federal copyright law.  They  may  not be disclosed  *
+ *  to  third  parties  or copied or duplicated in any form, in whole or  *
+ *  in part, without the prior written consent of Silicon Graphics, Inc.  *
+ *									  *
+ **************************************************************************/
+ 
+	This document describes file transport
+	Peter Ecclesine 20 November 85 Revised 20 December 85
+
+	Description of the Upload/Download file transfer
+
+	The file transfer software has two components, the mainframe
+	VM/CMS driver module UDT, and the iris program t3279.
+
+	The t3279 program provides many 3270 inteface capabilities that
+	are described elsewhere, and this document will only
+	describe it's use for text or binary file transfer with
+	the UDT module on a VM/CMS mainframe. The t3279 menu entries used
+	are 19 to cause the 3274 controller to have device end status, and 
+	4 or 34. Entry 4 executes 3278/9 emulation and responds to
+	UDT messages. Entry 34 is the same as entry 4 in function, and it
+	blinks keyboard L1 for each message received, and L2 for each
+	message transmitted to UDT. This allows the operator to 
+	observe the progress of the transfer. The t3279 menu displays
+	the 3278 keyboard mapping used in the emulation.
+
+	The mainframe file transfer program UDT is called with the
+	following arguments:
+
+	UDT VERB FN FT FM (LRECL XXXX
+
+	VERB	BCMS2SGI	Binary from mainframe to IRIS
+		TCMS2SGI	Text from mainframe to IRIS
+		BSGI2CMS	Binary from IRIS to mainframe
+		TSGI2CMS	Text from IRIS to mainframe
+	FN			mainframe file name
+	FT			mainframe file type
+	FM			optional mainframe file mode
+	(LRECL XXXX		CMS logical record length for inbound transfer
+				* note FN, FT, are capital letters on iris.
+				* note FN, FT have 8 characters max each
+
+	e.g. UDT TCMS2SGI TEST FORTRAN A to send the text program
+				TEST FORTRAN to the iris as TEST.FORTRAN
+
+	UDT installation
+
+	Have the system operator create an account with 10 cylinders of 3350
+	storage (i.e. MYACOUNT). Log into MYACOUNT and have the system operator
+	attach the system tape drive to you (i.e. att 521 MYACOUNT 181).
+	Issue the following VM commands:
+		REW 181
+		TAPE LOAD * * A
+		DET 181
+		FLIST * * A
+	This will load the distribution drivers, documents, and sample
+	programs and execs. Read or print the .DOC files.
+
+	UDT operation
+
+	The operator of the iris types t3279, views the menu, and types 4 to
+	enter 3278/9 emulation. The operator logs into the account
+	with the UDT module, and attaches relevant disks used for the
+	file transfers desired. The example here will copy PROFILE EXEC to
+	XXX EXEC on the mainframe, then download and upload in binary, followed
+	by text.
+
+		COPY PROFILE EXEC A XXX EXEC A
+		UDT BCMS2SGI XXX EXEC
+		(UDT SAYS GRAF 200 DEFINED)
+		#CP DISC
+		dial back to the same account
+		DIAL MYACOUNT
+		the iris prints "file xfer complete"
+		the operator types CTRL-T  CTRL-T to enter and exit 3278 test
+			and have the dial connection dropped.
+		the operator logs back to the same account
+		LOG MYACOUNT password
+		B
+		B
+		ERASE XXX EXEC
+		UDT BSGI2CMS XXX EXEC A
+		#CP DISC
+		dial back to the same account
+		DIAL MYACOUNT
+		the iris prints "file xfer complete"
+		the operator types CTRL-T  CTRL-T to enter and exit 3278 test
+			and have the dial connection dropped.
+		the operator logs back to the same account
+		LOG MYACOUNT password
+		B
+		B
+		FLIST XXX EXEC
+		UDT TCMS2SGI XXX EXEC A
+		#CP DISC
+		dial back to the same account
+		DIAL MYACOUNT
+		the iris prints "file xfer complete"
+		the operator types CTRL-T  CTRL-T to enter and exit 3278 test
+			and have the dial connection dropped.
+		the operator logs back to the same account
+		LOG MYACOUNT password
+		B
+		B
+		ERASE XXX EXEC
+		UDT TSGI2CMS XXX EXEC A
+		#CP DISC
+		dial back to the same account
+		DIAL MYACOUNT
+		the iris prints "file xfer complete"
+		the operator types CTRL-T  CTRL-T to enter and exit 3278 test
+			and have the dial connection dropped.
+		the operator logs back to the same account
+		LOG MYACOUNT password
+		B
+		B
+		FLIST XXX EXEC
+		the XXX EXEC is the text download and upload version of
+		the PROFILE EXEC. EBCDIC [ and ] will be lost in text file
+		transfer.
+		The TWICE EXEC performs the above transfers with just the
+		CMS command TWICE.
+
+		The important file transfer error is #2. This error means the
+		UDT module on the mainframe didn't respond to an iris
+		message. It usually means that the GRAF 200 device has been
+		killed, and the operator must log the account off before
+		attempting another transfer.

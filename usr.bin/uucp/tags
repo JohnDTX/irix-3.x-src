@@ -1,0 +1,235 @@
+APPCMD	uux.c	?^#define APPCMD(d) {\\$?
+ASSERT	uucp.h	?^#define ASSERT(e, s1, s2, i1) if (!(e)) {\\$?
+DEBUG	uucp.h	?^#define DEBUG(l, f, s) if (Debug >= l) fprintf(std?
+DEC	uudecode.c	?^#define DEC(c)	(((c) - ' ') & 077)$?
+ENC	uuencode.c	?^#define ENC(c) (((c) & 077) + ' ')$?
+FORWARDING	uux.c	?^#define FORWARDING(a) (a[0] != '\\0')$?
+GENRCV	uux.c	?^#define GENRCV(f, a, b, c) {\\$?
+GENSEND	uux.c	?^#define GENSEND(f, a, b, c, d, e) {\\$?
+GENXUUCP	uux.c	?^#define GENXUUCP(f, a, b, c) {\\$?
+ISCNTL	pk.h	?^#define	ISCNTL(a)	((a & 0300)==0)$?
+MIN	pk.h	?^#define	MIN(a,b)	((a<b)? a:b)$?
+Mcico	cico.c	?^main(argc, argv, envp)$?
+Muuclean	uuclean.c	?^main(argc, argv, envp)$?
+Muucp	uucp.c	?^main(argc, argv, envp)$?
+Muudecode	uudecode.c	?^main(argc, argv)$?
+Muuencode	uuencode.c	?^main(argc, argv)$?
+Muulog	uulog.c	?^main(argc, argv, envp)$?
+Muuname	uuname.c	?^main(argc,argv, envp)$?
+Muustat	uustat.c	?^main(argc, argv, envp)$?
+Muusub	uusub.c	?^main(argc, argv, envp)$?
+Muux	uux.c	?^main(argc, argv, envp)$?
+Muuxqt	uuxqt.c	?^main(argc, argv, envp)$?
+RAMESG	cntrl.c	?^#define RAMESG(s) if (rmesg('\\0', s) != 0) {(*Turn?
+RMESG	cntrl.c	?^#define RMESG(m, s) if (rmesg(m, s) != 0) {(*Turno?
+Read	conn.c	?^Read(fd, buf, count)$?
+STATNAME	systat.c	?^#define STATNAME(f, n) sprintf(f, "%s/%s.%.7s", Sp?
+UB_SST	uusub.h	?^#define UB_SST(a)	ub_sst(a)$?
+USRF	uust.h	?^#define	USRF(flag)	Usrf |= flag$?
+US_CRS	uust.h	?^#define US_CRS(a)	us_crs(a)$?
+US_RRS	uust.h	?^#define US_RRS(a,b)	us_rrs(a,b)$?
+US_SST	uust.h	?^#define US_SST(a)	us_sst(a)$?
+WMESG	cntrl.c	?^#define WMESG(m, s) if(wmesg(m, s) != 0) {(*Turnof?
+Write	conn.c	?^Write(fd, buf, count)$?
+alarmtr	conn.c	?^alarmtr()$?
+anlwrk	anlwrk.c	?^anlwrk(file, wvec)$?
+anyread	anyread.c	?^anyread(file)$?
+appendf	uulog.c	?^appendf(fp, entryf)$?
+argok	uuxqt.c	?^argok(xc, cmd)$?
+arrived	cntrl.c	?^arrived(opt, file, nuser, rmtsys, rmtuser)$?
+assert	assert.c	?^assert(s1, s2, i1)$?
+bldflst	anlwrk.c	?^bldflst(dir, pre)$?
+blptcl	cntrl.c	?^blptcl(str)$?
+call	conn.c	?^call(flds)$?
+callback	chkpth.c	?^callback(name)$?
+callok	systat.c	?^callok(name)$?
+catch	uustat.c	?^catch()$?
+cgalarm	pk1.c	?^cgalarm() { longjmp(Getjbuf, 1); }$?
+chkperm	chkpth.c	?^chkperm(file, mopt)$?
+chkpre	uuclean.c	?^chkpre(file)$?
+chkpth	chkpth.c	?^chkpth(logname, mchname, path)$?
+chkpub	uucp.c	?^chkpub(ckfile)$?
+chksum	pk0.c	?^chksum(s,n)$?
+chksys	uuclean.c	?^chksys(file)$?
+ckexpf	expfile.c	?^ckexpf(file)$?
+cleanup	cico.c	?^cleanup(code)$?
+clear	us_crs.c	?^clear(p, c)$?
+closedem	cico.c	?^closedem()$?
+closelog	logent.c	?^closelog()$?
+clsacu	conn.c	?^clsacu()$?
+clscfile	gtcfile.c	?^clscfile()$?
+cmtseq	gnxseq.c	?^cmtseq()$?
+cntrl	cntrl.c	?^cntrl(role, wkpre)$?
+compa	conn.c	?^compa(p, q)$?
+compar	uustat.c	?^compar(p, q)$?
+conn	conn.c	?^conn(system)$?
+copy	uucp.c	?^copy(s1, f1, s2, f2)$?
+csys	gtcfile.c	?^csys(p, g)$?
+decode	uudecode.c	?^decode(in, out)$?
+delete	rkill.c	?^delete(no)$?
+delock	ulockf.c	?^delock(s)$?
+dialup	conn.c	?^dialup(ph, flds)$?
+direct	conn.c	?^direct(flds)$?
+dkcall	conn.c	?^dkcall(flds)$?
+dlogent	uucp.h	?^#define dlogent(a, b)	if(Debug)logent(a, b)$?
+dysize	uusub.c	?^#define	dysize(A) (((A)%4)? 365: 366)$?
+edit	uusub.c	?^edit(flag,arg)	$?
+encode	uuencode.c	?^encode(in, out)$?
+entflst	anlwrk.c	?^entflst(file)$?
+euucico	xqt.c	?^euucico(rmtname)$?
+expect	conn.c	?^expect(str, fn)$?
+expfile	expfile.c	?^expfile(file)$?
+exphone	conn.c	?^exphone(in, out)$?
+fdig	conn.c	?^fdig(cp)$?
+finds	conn.c	?^finds(fsys, sysnam, flds)$?
+fixline	line.c	?^fixline(tty, spwant)$?
+fixmode	line.c	?^ * fixmode(tty)$?
+fptcl	cntrl.c	?^fptcl(str)$?
+fr	uudecode.c	?^fr(fd, buf, cnt)$?
+fwdchk	fwdchk.c	?^fwdchk(machine, user, file)$?
+gename	gename.c	?^gename(pre, sys, grade, file)$?
+genbrk	line.c	?^genbrk(fn)$?
+generror	pk1.c	?^generror(p, s)$?
+getargs	getargs.c	?^getargs(s, arps)$?
+getit	rkill.c	?^getit()$?
+getprm	getprm.c	?^getprm(s, prm)$?
+getseq	gename.c	?^getseq(snum)$?
+getto	conn.c	?^getto(flds)$?
+gnamef	gnamef.c	?^gnamef(p, filename)$?
+gninfo	getpwinfo.c	?^gninfo(name, uid, path)$?
+gnsys	gnsys.c	?^gnsys(sname, dir, pre)$?
+gnxseq	gnxseq.c	?^gnxseq(rmtname)$?
+gotfiles	uuxqt.c	?^gotfiles(file)$?
+grdblk	gio.c	?^grdblk(blk, len,  fn)$?
+grddata	gio.c	?^grddata(fn, fp2)$?
+grdmsg	gio.c	?^grdmsg(str, fn)$?
+gtcfile	gtcfile.c	?^gtcfile(sys, Grade)$?
+gtime	uusub.c	?^gtime(yr, mo, day, hr, min, sec)$?
+gturnoff	gio.c	?^gturnoff()$?
+gturnon	gio.c	?^gturnon()$?
+gtwrkf	anlwrk.c	?^gtwrkf(dir, file)$?
+gtwvec	anlwrk.c	?^gtwvec(file, dir, wkpre, wrkvec)$?
+gtxfile	uuxqt.c	?^gtxfile(file)$?
+guinfo	getpwinfo.c	?^guinfo(uid, name, path)$?
+gwd	gwd.c	?^gwd(wkdir)$?
+gwrblk	gio.c	?^gwrblk(blk, len, fn)$?
+gwrdata	gio.c	?^gwrdata(fp1, fn)$?
+gwrmsg	gio.c	?^gwrmsg(type, str, fn)$?
+ifdate	conn.c	?^ifdate(s)$?
+imsg	imsg.c	?^imsg(msg, fn)$?
+index	uudecode.c	?^index(sp, c)$?
+insys	gtcfile.c	?^insys(p, c, g)$?
+intr1	uulog.c	?^intr1()$?
+intrEXIT	cico.c	?^intrEXIT(inter)$?
+isalock	ulockf.c	?^isalock(name) $?
+isdir	expfile.c	?^isdir(name)$?
+iswrk	anlwrk.c	?^iswrk(file, reqst, dir, pre)$?
+jout	uustat.c	?^jout(u)$?
+kill	rkill.c	?^kill(jn)$?
+linit	conn.c	?^linit()$?
+lnotify	cntrl.c	?^lnotify(user, file, mesg)$?
+logcls	logent.c	?^logcls()$?
+logent	logent.c	?^logent(text, status)$?
+login	conn.c	?^login(nf, flds, fn)$?
+lookup	uustat.c	?^lookup(sys)$?
+mailst	mailst.c	?^mailst(user, str, file)$?
+mapsys	gnsys.c	?^mapsys(ls,sysname)$?
+mkdirs	expfile.c	?^mkdirs(name)$?
+mlock	ulockf.c	?^mlock(sys)$?
+mvxfiles	uuxqt.c	?^mvxfiles(xfile)$?
+notfyuser	uuclean.c	?^notfyuser(file)$?
+notify	cntrl.c	?^notify(mailopt, user, file, sys, msgcode)$?
+notin	conn.c	?^notin(sh, lg)$?
+older	uustat.c	?^older(rt,t)$?
+omsg	imsg.c	?^omsg(type, msg, fn)$?
+onelock	ulockf.c	?^onelock(pid,tempfile,name) $?
+onintr	cico.c	?^onintr(inter)$?
+outdec	uudecode.c	?^outdec(p, f, n)$?
+pclose	shio.c	?^pclose(ptr)$?
+pkaccept	pk0.c	?^pkaccept(pk)$?
+pkcget	pk1.c	?^pkcget(fn, b, n)$?
+pkclose	pk0.c	?^pkclose(S)$?
+pkcntl	pk0.c	?^pkcntl(c, pk)$?
+pkdata	pk1.c	?^pkdata(c, sum, pk, bp)$?
+pkfail	gio.c	?^pkfail()$?
+pkgetpack	pk1.c	?^pkgetpack(ipk)$?
+pkmove	pk1.c	?^pkmove(p1, p2, count, flag)$?
+pkoff	pkon.c	?^pkoff(i) int i; { if (i); return; } /*shuts up lin?
+pkon	pkon.c	?^pkon(i,j) int i,j; { if (i == j); return(1); } /* ?
+pkopen	pk1.c	?^pkopen(ifn, ofn)$?
+pkoutput	pk0.c	?^pkoutput(pk)$?
+pkread	pk0.c	?^pkread(S)$?
+pkreset	pk0.c	?^pkreset(pk)$?
+pksack	pk0.c	?^pksack(pk)$?
+pksize	pk0.c	?^pksize(n)$?
+pkwrite	pk0.c	?^pkwrite(S)$?
+pkxstart	pk1.c	?^pkxstart(pk, cntl, x)$?
+pkzero	pk0.c	?^pkzero(s,n)$?
+popen	shio.c	?^popen(cmd, mode)$?
+prefix	prefix.c	?^prefix(pre, s)$?
+pskip	cico.c	?^pskip(p)$?
+putinpub	cntrl.c	?^putinpub(file, tmp, user)$?
+queue	uustat.c	?^queue()$?
+rdpth	chkpth.c	?^rdpth(u)$?
+rejuv	uustat.c	?^rejuv()$?
+restline	line.c	?^restline()$?
+retosndr	uuxqt.c	?^retosndr(user, rmt, file, cmd)$?
+rmesg	cntrl.c	?^rmesg(c, msg)$?
+rmlock	ulockf.c	?^rmlock(name)$?
+rmstat	systat.c	?^rmstat(name)$?
+rmxfiles	uuxqt.c	?^rmxfiles(xfile)$?
+savline	line.c	?^savline()$?
+sdmail	uuclean.c	?^sdmail(file, uid)$?
+sendthem	conn.c	?^sendthem(str, fn)$?
+sethup	line.c	?^sethup(dcf)$?
+setline	line.c	?^setline(type)$?
+setuucp	mailst.c	?^setuucp(p)$?
+shio	shio.c	?^shio(cmd, fi, fo, user)$?
+someread	anyread.c	?^someread(file)$?
+sout	uustat.c	?^sout(s)$?
+split	getprm.c	?^split(name, sys, rest)$?
+srchst	gnsys.c	?^srchst(name, list, n)$?
+stamp	uuclean.c	?^stamp(fd, tp, status, file, c, tv)$?
+startup	cntrl.c	?^startup(role)$?
+stlock	ulockf.c	?^stlock(name)$?
+stmesg	cntrl.c	?^stmesg(u, f, m)$?
+stpre	uuclean.c	?^stpre(p)$?
+stptcl	cntrl.c	?^stptcl(c)$?
+stsys	uuclean.c	?^stsys(p)$?
+substr	uuclean.c	?^substr(p, q)$?
+sysacct	sysacct.c	?^sysacct(bytes, time)$?
+syslog	logent.c	?^syslog(text)$?
+systat	systat.c	?^systat(name, type, text)$?
+timeod	uusub.c	?^timeod(yr, mo, da, hr, min, sec)$?
+timeout	cico.c	?^timeout()$?
+tst	shio.c	?^#define	tst(a,b) (*mode == 'r'? (b) : (a))$?
+ub_sst	ub_sst.c	?^ub_sst(flag)$?
+ufopen	uux.c	?^FILE *ufopen(file, mode)$?
+ulkseq	gnxseq.c	?^ulkseq()$?
+ulockf	ulockf.c	?^ulockf(file, atime)$?
+ultouch	ulockf.c	?^ultouch()$?
+unlinkdf	cntrl.c	?^unlinkdf(file)$?
+update	uusub.c	?^update()$?
+updjb	uucp.h	?^#define updjb()	if(++subjob[0] == 0) ++subjob[0];$?
+us_crs	us_crs.c	?^us_crs(cfile)$?
+us_rrs	us_rrs.c	?^us_rrs(cfilel,stat)$?
+us_sst	us_sst.c	?^us_sst(flag)$?
+uucpname	uucpname.c	?^uucpname(name)$?
+versys	versys.c	?^versys(name)$?
+wmesg	cntrl.c	?^wmesg(m, s)$?
+wrnent	uuclean.c	?^wrnent(file, status, f, tv)$?
+xalarm	xio.c	?^static xalarm() {longjmp(Failbuf);}$?
+xcp	cpmv.c	?^xcp(f1, f2)$?
+xmv	cpmv.c	?^xmv(f1, f2)$?
+xrdblk	xio.c	?^xrdblk(blk, len,  fn)$?
+xrddata	xio.c	?^xrddata(fn, fp2)$?
+xrdmsg	xio.c	?^xrdmsg(str, fn)$?
+xturnoff	xio.c	?^xturnoff()$?
+xturnon	xio.c	?^xturnon()$?
+xuucico	xqt.c	?^xuucico(rmtname)$?
+xuucp	xqt.c	?^xuucp(str)$?
+xuux	uucp.c	?^xuux(ename, s1, f1, s2, f2, opts)$?
+xuuxqt	xqt.c	?^xuuxqt()$?
+xwrdata	xio.c	?^xwrdata(fp1, fn)$?
+xwrmsg	xio.c	?^xwrmsg(type, str, fn)$?
+xxcp	cpmv.c	?^xxcp(f1, f2, mode)$?

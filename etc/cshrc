@@ -1,0 +1,6 @@
+umask 002
+cat /etc/motd
+set mail=/usr/mail/$LOGNAME	# this should be done by csh
+if ( { /bin/mail -e } ) then
+	echo 'You have mail.'
+endif

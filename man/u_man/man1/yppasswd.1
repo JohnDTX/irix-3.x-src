@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH YPPASSWD 1
+.SH NAME
+yppasswd \- change login password in yellow pages
+.SH SYNOPSIS
+.B yppasswd
+\ [ name ]
+.SH DESCRIPTION
+.I Yppasswd
+changes (or installs) a password associated with the user
+.IR name
+(your own name by default)
+in the yellow pages.  The yellow pages password may be different
+from the one on your own machine.
+.LP
+.I Yppasswd
+prompts for the old yellow pages password and then for the new one.
+The caller must supply both.
+The new password must be typed twice, to forestall mistakes.
+.LP
+New passwords must be at least four characters long if they use
+a sufficiently rich alphabet and at least six characters long
+if monocase.  These rules are relaxed if you are insistent enough.
+.LP
+Only the owner of the name or the super-user may change a password;
+in either case you must prove you know the old password.
+.SH "SEE ALSO"
+passwd(1), ypfiles(4), rpc.passwd(1M)
+.SH BUGS
+The update protocol passes all the information to the server in
+one rpc call, without ever looking at it.  Thus if you
+type in your old password incorrectly, you will not be notified until
+after you have entered your new password.

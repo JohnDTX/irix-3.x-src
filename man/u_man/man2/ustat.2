@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH USTAT 2
+.SH NAME
+ustat \- get file system statistics
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <ustat.h>
+.sp
+.B int ustat (dev, buf)
+.br
+.B int dev;
+.br
+.B struct ustat \(**buf;
+.SH DESCRIPTION
+.I Ustat\^
+returns information about a mounted file system.
+.I Dev\^
+is a device number identifying a device containing
+a mounted file system.
+.I Buf\^
+is a pointer to a
+.I ustat\^
+structure that includes the following elements:
+.PP
+.RS
+.nf
+.ta \w'daddr_t\ \ 'u +\w'f_fname[6];\ \ \ \ 'u
+daddr_t	f_tfree;	/\(** Total free blocks \(**/
+ino_t	f_tinode;	/\(** Number of free inodes \(**/
+char	f_fname[6];	/\(** Filsys name \(**/
+char	f_fpack[6];	/\(** Filsys pack name \(**/
+.fi
+.DT
+.RE
+.PP
+.I Ustat\^
+will fail if one or more of the following are true:
+.IP "" .3i
+.I Dev\^
+is not the device number of a device containing a mounted file system.
+.SM
+\%[EINVAL]
+.IP
+.I Buf\^
+points outside the process's allocated address space.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH "SEE ALSO"
+stat(2), fs(4).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#57,D0
+.B movl	buf,A0
+.B movl	dev,D1
+.B movl	#2,A1	| ustat
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)ustat.2	5.1 of 10/19/83

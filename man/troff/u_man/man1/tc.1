@@ -1,0 +1,116 @@
+'\"macro stdmacro
+.TH TC 1 
+.SH NAME
+tc \- troff output interpreter
+.SH SYNOPSIS
+.B tc
+[
+.B \-t
+]
+[
+.BR \-o list
+]
+[
+.B \-a 
+n ]
+[
+.B \-e
+]
+[
+files
+]
+.SH DESCRIPTION
+.I tc
+interprets its
+input (standard input default)
+as output from
+.IR troff (1).
+The standard output of
+.I tc
+is intended for a \s-1TEKTRONIX\s+1 4015 (a 4014 terminal
+with
+.SM ASCII
+and
+.SM APL
+character sets).
+The various typesetter sizes are mapped into the 4014's
+four sizes;
+the entire
+.SM TROFF
+character set is drawn using the 4014's
+character generator,
+using overstruck combinations where necessary,
+producing an altogether displeasing effect.
+Typical usage:
+.IP "" 15
+troff [ \f2options\f1 ] files \||\ tc
+.PP
+At the end of each page
+.I tc
+waits for a new-line (empty line) from the keyboard before
+continuing on to the next page.
+In this wait state,
+the following commands are recognized:
+.TP
+.BI ! cmd
+sends
+.I cmd
+to the shell.
+.TP
+.B e
+inverts state of the screen erase
+.RI ( tc ).
+.TP
+.BI \- n
+skips backward
+.I n
+pages.
+.TP
+.B a 
+.I n
+sets the aspect ratio to
+.IR n .
+.TP
+.B ?
+prints list of available options.
+.PP
+The command line options are:
+.TP
+.B  \-t
+Do not wait between pages (for directing output into a file).
+.TP
+.BI \-o list
+Prints only the pages enumerated in
+.IR list .
+The list consists of pages and page ranges (e.g., 5-17)
+separated by commas.  
+The range
+.I n\-
+goes from
+.I n
+to the end;
+the range
+.I \-n
+goes from the beginning to and including
+page
+.IR n.
+.TP
+.B \-a 
+.I n
+Set the aspect ratio to
+.IR n ;
+default is 1.5.
+.TP
+.B \-e
+Do not erase before each page.
+.SH "SEE ALSO"
+4014(1),
+nroff(1),
+troff(1).
+.SH BUGS
+Font distinctions are lost.
+.br
+It needs a
+.B \-w
+option to wait for input to arrive.
+.\"	%W% of %G%

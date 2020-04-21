@@ -1,0 +1,8 @@
+cc -c -O -DMC68000 -DPM2 -DQPROM -I../include  advent.c
+rm -f ../libmon.a
+ar r ../libmon.a main.o  monitor.o adv_net.o  adv_snoop.o  adv_xx.o  advent.o  boot.o  bootsw.o  cmdsw.o  debug.o  debug_sub.o  download.o  help.o  ls.o  restart.o  swit.o  termulate.o
+ar: creating ../libmon.a
+ranlib ../libmon.a
+:
+:
+:

@@ -1,0 +1,57 @@
+.TH AS 1
+.SH NAME
+as \- assembler
+.SH SYNOPSIS
+.B as
+[
+.B \-o
+objfile ] [
+.B \-l
+] [ name ... ]
+.SH DESCRIPTION
+.I As\^
+assembles the named files, or the standard input if no file name is specified.
+.PP
+All undefined symbols in the assembly are treated as global.
+.PP
+The relocatable output of the assembly is left on the file
+.IR objfile ;
+if that is omitted,
+.I a.out\^
+is used.
+.PP
+The
+.B \-l
+option produces an assembly listing on file 
+.IR objfile.lst .
+If the
+.B \-l
+option is specified and
+no 
+.B \-o
+parameter is specified, the assembly listing is placed on
+.IR a.lst .
+.SH EXAMPLE
+.IP
+as \-o file.o filea fileb filec 
+.PP
+would assemble the three named
+files and put the output
+of the assembly into "file.o".
+.SH FILES
+.ta \w'/tmp/as\(**\ \ \ 'u
+.nf
+/tmp/as\(**	default temporary file
+a.out		default resultant object file
+a.lst		default assembly listing file
+.fi
+.DT
+.SH "SEE ALSO"
+adb(1),
+ld(1),
+nm(1),
+a.out(4)
+.br
+.I "AS Assembler Reference Guide,"
+James L. Gula and Thomas J. Teixeira.
+.\"	@(#)as.1	5.1 of 11/15/83

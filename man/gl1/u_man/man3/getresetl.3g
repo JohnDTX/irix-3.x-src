@@ -1,0 +1,32 @@
+.TH getresetls  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getresetls
+- return the status of \f2resetls\f1
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean getresetls()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function getres()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getresetls: Boolean;"
+.sp
+.SH DESCRIPTION
+.I Getresetls
+returns the current value of the reset linestyle flag.  
+.I TRUE, 
+the default value, means that the linestyle will be 
+reinitialized for each
+line segment.  
+.I FALSE
+means that the pattern will
+rotate continuously across line segment boundaries.
+.SH "SEE ALSO"
+.I resetls
+.SH NOTE
+This command can only be used in immediate mode.

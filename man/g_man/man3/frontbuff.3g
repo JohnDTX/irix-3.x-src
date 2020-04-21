@@ -1,0 +1,47 @@
+.TH frontbuffer 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B frontbuffer
+\- enables updating in the front buffer
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "frontbuffer(b)"
+.B "Boolean b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine frontb(b)"
+.B "logical b"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure frontbuffer(b: Boolean);"
+.SH DESCRIPTION
+.B frontbuffer
+enables updating in the front buffer.
+When the value of \f2b\f1 is 
+FALSE (0),
+(the default value), 
+the front buffer is not enabled. 
+When the value of \f2b\f1 is 
+TRUE (0),
+the front buffer
+is enabled.  This
+routine is useful only in
+double buffer mode. 
+It is ignored in single buffer mode.
+.PP
+.B gconfig
+sets
+.B frontbuffer
+to
+FALSE (0).
+.SH "SEE ALSO"
+backbuffer, doublebuffer, getbuffer
+.sp
+.I Programming Guide, 
+Section 6.1, Display Modes

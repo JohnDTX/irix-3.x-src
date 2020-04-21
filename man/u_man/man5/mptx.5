@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH MPTX 5
+.SH NAME
+mptx \- the macro package for formatting a permuted index
+.SH SYNOPSIS
+.B "nroff \-mptx"
+[ options ] [ files ]
+.PP
+.B "troff \-mptx"
+[ options ] [ files ]
+.SH DESCRIPTION
+This package provides
+a definition for the
+.B \&.xx
+macro used for formatting a permuted
+index as produced by
+.IR ptx (1).
+This package does not provide any other formatting
+capabilities such as headers and footers.
+If these or other capabilities are required,
+the
+.I mptx\^
+macro package
+may be used in conjunction with the
+.I MM\^
+macro package.
+In this case, the
+.B \-mptx
+option must be invoked \f2after\fP the 
+.B \-mm
+call.
+For example:
+.PP
+.RS
+nroff \-cm \-mptx file
+.RE
+or
+.RS
+mm \-mptx file
+.RE
+.SH FILES
+.PD 0
+.TP "\w'/usr/lib/tmac/tmac\f3.\fPptx    'u"
+/usr/lib/tmac/tmac\f3.\fPptx
+pointer to the non-compacted version of the package
+.TP
+/usr/lib/macros/ptx
+non-compacted version of the package
+.PD
+.SH SEE ALSO
+.PD 0
+mm(1), nroff(1), ptx(1), troff(1), mm(5).
+.\"	@(#)mptx.5	5.1 of 10/15/83

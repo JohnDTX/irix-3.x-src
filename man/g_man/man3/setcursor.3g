@@ -1,0 +1,50 @@
+.TH setcursor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B setcursor
+\- sets the cursor characteristics
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setcursor(index, color, wtm) "
+.B "short index; "
+.B "Colorindex color, wtm;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setcur(index, color, wtm)"
+.B "integer*4 index, color, wtm"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setcursor(index: longint; color, wtm: 
+.br
+.B	longint);
+.SH DESCRIPTION
+.B setcursor
+selects a cursor glyph from among those
+defined with
+.B defcursor.
+.I index
+picks a glyph from the definition table.
+.I color
+and
+.I wtm
+set a color and writemask for the cursor.
+The default cursor is zero; it is displayed
+with the color 1 drawn in the first available bitplane,
+and is automatically updated on each vertical retrace.
+.PP
+Under the window manager, \f2color\fP and \f2wtm\fP
+are ignored.
+.SH "SEE ALSO"
+attachcursor, curorigin, curstype, defcursor, 
+getcursor, mapcolor, RGBcursor 
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,30 @@
+'\"macro stdmacro
+.TH LINK 1M
+.SH NAME
+link, unlink \- exercise link and unlink system calls
+.SH SYNOPSIS
+.B /etc/link
+file1 file2
+.br
+.B /etc/unlink
+file
+.SH DESCRIPTION
+.I Link\^
+and
+.I unlink\^
+perform their respective system calls on their
+arguments, abandoning all error checking.
+These commands may only be executed by the super-user,
+who (it is hoped) knows what he or she is doing.
+.SH EXAMPLE
+.IP
+link file1 file2
+.PP
+creates a directory entry for "file2" with the same
+inode number as "file1".  NOTE: 
+.I link 
+should be used with
+extreme caution.
+.SH SEE ALSO
+rm(1), link(2), unlink(2).
+.\"	@(#)link.1m	5.1 of 10/17/83

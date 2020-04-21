@@ -1,0 +1,27 @@
+'\"macro stdmacro
+.TH XNSFILE 3N
+.SH NAME
+xnsfile,xnspathname \- find an available network channel or return channel number
+.SH SYNOPSIS
+.nf
+.B "int xnsfile()"
+.PP
+.fi
+.SH DESCRIPTION
+.I Xnsfile
+returns a channel number.  
+A \-1 is returned on failure, and the VMS error code is left in the 
+external
+.B vmserrno.
+.PP
+.SH SEE ALSO
+sgboot(1M),
+sgbounce(1M),
+xcp(1C),
+xnsd(1M),
+xx(1C),
+xcmd(3N),
+xconnect(3N),
+xnsioctl(3N),
+xnslib(3N),
+xnswrite(3N)

@@ -1,0 +1,118 @@
+'\"macro stdmacro
+.TH ACCTCON 1M
+.SH NAME
+acctcon1, acctcon2 \- connect-time accounting
+.SH SYNOPSIS
+.B /usr/lib/acct/acctcon1
+[\^options\^]
+.PP
+.B /usr/lib/acct/acctcon2
+.SH DESCRIPTION
+.I Acctcon1\^
+converts a sequence of login/logoff records read from its standard input
+to a sequence of records, one per login session.
+Its input should normally be redirected from
+.BR /etc/wtmp .
+Its output is
+.SM ASCII\*S,
+giving
+device,
+user
+.SM ID\*S,
+login name,
+prime connect time (seconds),
+non-prime connect time (seconds),
+session starting time (numeric),
+and starting date and time.
+The \f2options\fP are:
+.PP
+.PD 0
+.TP "\w'\-t\ file\ \ \ 'u"
+.B \-p
+Print input only,
+showing line name,
+login name,
+and time (in both numeric and date/time formats).
+.TP
+.B \-t
+.I Acctcon1\^
+maintains a list of lines on which users are logged in.
+When it reaches the end of its input,
+it emits a session record for each line that still appears to be active.
+It normally assumes that its input is a current file,
+so that it uses the current time as the ending time for
+each session still in progress.
+The
+.B \-t
+flag causes it to use, instead, the last time found in its input,
+thus assuring reasonable and repeatable numbers for non-current files.
+.TP
+.BI \-l " file"\^
+.I File\^
+is created to contain a summary of line usage showing
+line name,
+number of minutes used,
+percentage of total elapsed time used,
+number of sessions charged,
+number of logins,
+and number of logoffs.
+This file helps track line usage,
+identify bad lines,
+and find software and hardware oddities.
+Hang-up, termination of
+.IR login (1)
+and termination of the login shell generate a logoff records,
+so that the number of logoffs is often three to four times the number of sessions.
+See
+.IR init (1M)
+and
+.IR utmp (4).
+.TP
+.BI \-o " file"\^
+.I File\^
+is filled with an overall record for the accounting period,
+giving starting time,
+ending time,
+number of reboots,
+and number of date changes.
+.PD
+.PP
+.I Acctcon2\^
+expects as input a sequence of login session records and converts them
+into total accounting records
+(see
+.B tacct
+format in
+.IR acct (4)).
+.PP
+.SH EXAMPLE
+These commands are typically used as shown below.
+The file
+.B ctmp
+is created only for the use of
+.IR acctprc (1M)
+commands:
+.PP
+.RS .3i
+acctcon1 \-t \-l lineuse \-o reboots <wtmp \(bv sort +1n +2 >ctmp
+.br
+acctcon2 <ctmp \(bv acctmerg >ctacct
+.RE
+.SH FILES
+/etc/wtmp
+.SH SEE ALSO
+acct(1M),
+acctcms(1M),
+acctcom(1),
+acctmerg(1M),
+acctprc(1M),
+acctsh(1M),
+fwtmp(1M),
+runacct(1M),
+acct(2),
+acct(4),
+utmp(4).
+.SH BUGS
+The line usage report is confused by date changes.
+Use \f2wtmpfix\fP (see \f2fwtmp\fP(1M)) to correct this situation.
+.\"	@(#)acctcon.1m	5.1 of 10/17/83

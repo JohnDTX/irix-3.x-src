@@ -1,0 +1,60 @@
+'\"macro stdmacro
+.TH RPC.PASSWD 1M
+.SH NAME
+rpc.passwd \- server for modifying yellow pages password file
+.SH SYNOPSIS
+.B /usr/etc/rpc.passwd
+file [
+.B \-m
+arg1 arg2 ... ]
+.SH DESCRIPTION
+.I rpc.passwd 
+is a server that handles password change requests from
+.IR rpc.passwd (1M).
+It changes a password entry in
+.IR file ,
+which is assumed to be in the format of
+.IR passwd (4).
+An entry in
+.I file
+will only be changed if the password presented by
+.IR yppasswd (1)
+matches the encrypted password of that entry.
+.LP
+If the
+.B \-m
+option is given, then after
+.I file
+is modified, a
+.IR make (1)
+will be performed in
+.IR /usr/etc/yp .
+Any arguments following the flag will be passed to
+.IR make .
+.LP
+This server is not run by default, nor can it be started up from
+.IR inetd (1M).
+If it is desired to enable remote password updating for the yellow pages,
+then an entry for
+.I rpc.passwd
+should be put in the
+.I /etc/rc.nfs
+file of the host serving as the master for the yellow pages
+.I passwd
+file.
+.SH EXAMPLE
+.LP
+If the yellow pages password file is stored as
+.IR /usr/etc/yp/passwd ,
+then to have password changes propagated immediately,
+the server should be invoked as
+.RS
+/usr/etc/rpc.passwd /usr/etc/yp/passwd \-m passwd 
+.RE
+.SH FILES
+/usr/etc/yp/Makefile
+.SH SEE ALSO
+yppasswd(1), passwd(4), ypfiles(4), ypmake(1M)
+.SH CAVEAT
+This server will eventually be replaced with a more general
+service for modifying any map in the yellow pages.

@@ -1,0 +1,79 @@
+.TH ortho 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B ortho, ortho2
+\- define an orthographic projection transformation
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "ortho(left, right, bottom, top, near, far) "
+.B 	Coord left, right, bottom, top, near, far;
+.IP 
+.B "ortho2(left, right, bottom, top) "
+.B 	Coord left, right, bottom, top;
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine ortho(left, right, bottom, top, near, far)"
+.B "real left, right, bottom, top, near, far"
+.IP 
+.B "subroutine ortho2(left, right, bottom, top)"
+.B "real left, right, bottom, top"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure ortho(left, right, bottom, top, near," 
+.B	far: Coord);
+.IP
+.B "procedure ortho2(left, right, bottom, top: Coord);"
+.SH DESCRIPTION
+.B ortho
+specifies
+a box-shaped enclosure in the eye coordinate system that is
+mapped to the viewport.  
+.I left,
+.I right,
+.I bottom,
+.I top
+are the 
+\f2x\f1
+and
+\f2y\f1
+clipping planes.  
+.I near
+and
+.I far
+are distances along the line of sight from the eye space origin, and
+can be negative.  The 
+.I z
+clipping planes are at
+.I \-near
+and 
+.I \-far.
+.PP
+.B ortho2
+defines a 2-D clipping rectangle.
+When you use
+.B ortho2
+with 3-D world coordinates,
+the
+z
+values are not transformed.
+When \f3ortho2\f1 is specified, objects with z values outside
+the range \f2-1\(<=z\(<=1\f1 are clipped out.
+.PP
+Both
+.B ortho
+and
+.B ortho2
+load a matrix onto the transformation stack,
+overwriting what was there.
+.SH "SEE ALSO"
+perspective, window
+.sp .5v
+.I Programming Guide,
+Section 4.3, Projection Transformations
+

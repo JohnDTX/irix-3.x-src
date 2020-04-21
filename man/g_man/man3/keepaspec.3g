@@ -1,0 +1,53 @@
+.TH keepaspect 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B keepaspect 
+\- specifies the aspect ratio of a graphics window
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "keepaspect(x, y)"
+.B "long x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine keepas(x, y)"
+.B "integer*4 x, y"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure keepaspect(x, y: longint);"
+.SH DESCRIPTION
+.B keepaspect
+specifies the aspect ratio of a graphics window.
+Call it at the beginning of a graphics program. 
+It takes effect when
+.B winopen
+is called.
+The resulting graphics window maintains the aspect ratio specified in
+.B keepaspect,
+even if it changes size.
+For example,
+.B keepaspect(1, 1)
+always results in a square graphics window.
+You can also call
+.B keepaspect
+in conjunction with 
+.B winconstraints
+to modify the enforced aspect ratio after the window has been created.
+.PP
+If
+.B winopen
+is not called, or it the system is not running the window manager,
+.B keepaspect
+is ignored.
+.SH "SEE ALSO"
+fudge, winconstraints, winopen 
+.sp
+.I Using mex,
+Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

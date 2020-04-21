@@ -1,0 +1,46 @@
+.TH patchbasis 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B patchbasis
+\- sets current basis matrices
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "patchbasis(uid, vid)"
+.B "long uid, vid;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine patchb(uid, vid)"
+.B "integer*4 uid, vid"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure patchbasis(uid, vid: longint);"
+.SH DESCRIPTION
+.B patchbasis
+sets the current basis matrices
+(defined by
+.B defbasis)
+for the
+.I u
+and
+.I v
+parametric directions of a surface patch.
+.B patch 
+uses the current
+.I u
+and
+.I v
+bases when it executes.
+.SH SEE ALSO
+defbasis,
+patch,
+patchcurves,
+patchprecision
+.sp
+.I Programming Guide,
+Section 11.3, Drawing Surfaces

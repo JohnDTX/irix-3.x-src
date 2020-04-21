@@ -1,0 +1,171 @@
+'\"macro stdmacro
+.TH MONITOR 3C 
+.SH NAME
+monitor, resume_prof, suspend_prof \- prepare execution profile
+.SH SYNOPSIS
+.nf
+.B "void monitor (lowpc, highpc, buffer, bufsize, nfunc)"
+.B int (\(**lowpc)( ), (\(**highpc)( );
+.B short \(**buffer;
+.B int bufsize, nfunc;
+.PP
+.B "void resume_prof ()"
+.PP
+.B "void suspend_prof ()"
+.fi
+.SH DESCRIPTION
+An executable program created by
+.B cc \-p
+automatically includes a call to
+.I monitor\^
+with default parameters.  Explicit calls to 
+.I monitor\^
+are not recommended unless the executable being profiled needs
+larger profiling buffers.  In this case,  it is recommended that
+.I monitor\^
+only be called once from \f3main\fP, and that it be called early in the program.
+.PP
+.I Monitor\^
+is an interface to
+.IR profil\^ (2).
+.I Lowpc\^
+and
+.I highpc\^
+are the addresses of two functions;
+.I buffer\^
+is the address of a (user supplied)
+array of
+.I bufsize\^
+short integers.
+.I Monitor\^
+arranges to record a histogram of
+periodically sampled values of the program counter,
+and of counts of calls
+of certain functions, in the buffer.
+The lowest address sampled
+is that of
+.I lowpc\^
+and the highest is
+just below
+.IR highpc .
+.I Lowpc\^
+may not equal 0 for this use of
+.IR monitor .
+At most
+.I nfunc\^
+call counts can be kept; only calls of functions
+compiled with the profiling option
+.B \-p
+of
+.IR cc\^ (1)
+are recorded.
+(The C Library and Math Library supplied when
+.B cc -p
+is used also have call counts recorded.)
+For the results to be significant,
+especially where there are small, heavily
+used routines,
+it is suggested that the buffer be no more
+than a few times smaller than the range
+of locations sampled.
+.PP
+To profile the entire program,
+it is sufficient to use
+.PP
+	extern etext;
+.br
+	...
+.br
+	monitor ((int (\(**)())2, &etext, buf, bufsize, nfunc);
+.PP
+.I Etext\^
+lies just above all the
+program text; see
+.IR end\^ (3C).
+.PP
+To stop execution monitoring and write the results
+on the file
+.BR mon.out ,
+use
+.PP
+	monitor ((int (\(**)())NULL, 0, 0, 0, 0);
+.PP
+This call is performed by default before program exit.
+.PP
+.IR prof\^ (1)
+can then be used
+to examine the results.
+.PP
+After 
+.I monitor\^
+has been invoked to set up the profiling buffers,
+profiling can be suspended and resumed 
+during the
+program's execution by invoking 
+.I suspend_prof\^
+and
+.I resume_prof.\^
+These functions simply suspend and resume the accumulation of profiling
+time and invocation counts, using the buffers set up by the last call to
+.I monitor.\^
+A few simple rules must be followed
+when using
+.I suspend_prof\^
+and
+.I resume_prof\^
+to ensure that the histogram information accumulated by the program 
+is consistent:
+.PP
+1) 
+.I monitor\^
+must be called prior to any calls to 
+.I suspend_prof\^
+and
+.I resume_prof.\^
+.PP
+2) Prior to entering a portion of the program on which profiling data is
+not desired,
+.I suspend_prof\^
+should be called.
+.PP
+3) If profiling is to resume, \f3profiling must be resumed in the same function in 
+which it was suspended.\fP  Profiling is resumed by calling
+.I resume_prof.\^
+.SH EXAMPLE
+Users of the \f2spline\fP program below have complained of slowness
+in generating the menu on the screen.  As the great majority of 
+time in \f2spline\fP
+is spent performing calculations, it is helpful to exclude from profiling all but the
+function responsible for generating the menu.
+Below is an extract from the main
+routine of \f2spline\fP in which profiling has been suspended \f2except\fP
+during menu display:
+.sp 2
+.nf
+.in +0.5i
+main(argc,argv) 
+<declarations>
+suspend_prof();
+...
+/* loop on the menu selection until valid input */
+do {
+	resume_prof();
+	display_menu(); 
+	suspend_prof();
+	input_ok = select(); 
+} while (!input_ok);
+...
+.in
+.fi
+.sp 2
+.PP
+The resultant profile file will only contain data 
+gathered during the \f2display_menu\fP routine.
+.SH FILES
+mon.out
+.SH SEE ALSO
+cc(1), prof(1), profil(2), end(3C).
+.\"	@(#)monitor.3c	5.1 of 10/25/83
+
+
+

@@ -1,0 +1,25 @@
+.TH RECEIVE 3N 
+.SH NAME
+receive \- receive message from a socket
+.SH SYNOPSIS
+\f3#include <sys/socket.h>
+.sp
+cc = receive(s, from, buf, len);
+.br
+int cc, s;
+.br
+struct sockaddr *from;
+.br
+char *buf;
+.br
+int len;\f1
+.SH DESCRIPTION
+This call receives messages from a SOCK_DGRAM or SOCK_RAW socket.
+\f2from\f1 is the message's source address and 
+\f2cc\f1 the message length.  
+The message is truncated if it is 
+longer than the supplied receive buffer.
+.PP
+\f2receive\f1 waits for a message if one is not available.
+.SH SEE ALSO
+send(3N), socket(3N), tcp(7P)

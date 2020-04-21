@@ -1,0 +1,25 @@
+'\"macro stdmacro
+.TH PROFILE 4
+.SH NAME
+profile \- setting up a Bourne Shell environment at login time
+.SH DESCRIPTION
+If your login directory contains a file named
+.BR \&.profile ,
+that file will be executed (via the shell's
+.B .
+command, i.e.,
+.BR ". .profile")
+before your session begins;
+.BR \&.profile s
+are handy for setting exported environment variables and terminal modes.
+If the file
+.B /etc/profile
+exists, it will be executed for every user before the
+.BR .profile .
+.SH FILES
+\s-1$HOME\s+1/\f3.\fPprofile
+.br
+/etc/profile
+.SH SEE ALSO
+env(1), login(1), mail(1), sh(1), stty(1), su(1), environ(5), term(5).
+.\"	@(#)profile.4	5.1 of 10/15/83

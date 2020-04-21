@@ -1,0 +1,36 @@
+.TH color 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B color 
+\- sets the color index in the current mode 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "color(c) "
+.B "Colorindex c;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine color(c)"
+.B "integer*4 c"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure color(c: Colorindex);"
+.SH DESCRIPTION
+.B color
+sets the current color. 
+The current color (\f2c\fP)
+is an index into
+a color map.  In onemap mode, the color can be from 0 to 4095.
+In multimap mode, \f3color\fP is used in conjunction with a color map number
+and is between 0 and 255.  The number of bitplanes determines the number
+of colors.
+.SH "SEE ALSO"
+getcolor, RGBcolor, RGBwritemask, writemask
+.sp
+\f2Programming Guide\fP,
+Section 6.2, Color Maps

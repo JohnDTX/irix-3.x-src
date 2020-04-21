@@ -1,0 +1,15 @@
+foreach i (`cat file`)
+echo $i
+awk '{if ($0 == ".I Programming Guide,") {\
+	print ".I Graphics Programming,"\
+	getline\
+	$1 = "Section" \
+	for (i = 1; i <= NF; i++)\
+		printf "%s ",$i\
+	printf "\n"\
+	}\
+ else\
+	print $0\
+}' $i > foo
+mv foo $i
+end

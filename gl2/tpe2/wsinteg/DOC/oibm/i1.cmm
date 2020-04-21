@@ -1,0 +1,33 @@
+		 "Introduction"
+
+	The Geometry Link is a high-speed communications link
+between an IRIS series 2000 or series 3000 workstation or terminal
+and an IBM mainframe computer (370/30xx/43xx).
+	With this link, the IRIS can be plugged directly into
+IBM coaxial cabling and can emulate an IBM 3278/79 terminal.
+This document describes how to install and use the Geometry Link.
+
+To complete this procedure:	See Chapter (Section):
+ 
+	Installing the Geometry Link	Chapter 2
+			3270 Emulation	Chapter 3
+			File Transfer	Chapter 4
+	Fortran Remote Graphics		Appendix A
+	
+Silicon Graphics provides a comprehensive product support
+and maintenance program for IRIS products.
+For further information, contact Field Engineering through the Geometry Hotline.
+		Silicon Graphics Geometry Hotline
+ 
+		(800) 252-0222	U.S. except California (toll-free)
+		(800) 345-0222	California (toll-free)
+		(415) 962-0606	Worldwide (collect)
+		 "Conventions"
+	This document uses the standard UNIX convention for
+referring to entries in the UNIX documentation.  The entry name is followed
+by a section number in parentheses.
+For example, cc(1) refers to the cc manual entry in Section 1 of
+the UNIX Programmer's Manual.
+	In command syntax descriptions and examples,
+square brackets ([ ]) surrounding an argument
+indicate that the argument is optional.

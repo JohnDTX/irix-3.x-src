@@ -1,0 +1,50 @@
+*
+* The following devices are those that can be specified in the system
+* description file.  The name specified must agree with the name shown.
+*					     majdev#
+floppy	4	76	115	f0	2	1	4	8	6
+hdsk	4	36	115	q0	4	0	5	4	6
+*
+* The following devices must not be specified in the system description
+* file.  They are here to supply information to the config program.
+*
+con	0	77	324	con	0	0	0	1	0	tty
+memory	0	6	324	mm	0	0	3	1	0
+tty	0	27	324	sy	0	0	2	1	0
+errlog	0	34	324	err	0	0	8	1	0
+*
+* PWB devices
+*
+prf	0	7	304	prf	0	0	25	1	0
+st	0	37	204	st	0	0	30	50	0	st
+pcl11b	8	37	7	pcl	32	0	33	8	5	pcl
+pclctrl	0	34	204	pclc	0	0	34	1	0
+$$$
+*
+* The following entries form the alias table.
+*
+la36	dl11
+kl11	dl11
+rp05	rp04
+rp06	rp04
+rs03	rs04
+te16	tu16
+tu45	tu16
+$$$
+*
+* The following entries form the tunable parameter table.
+*
+buffers	NBUF
+inodes	NINODE
+files	NFILE
+mounts	NMOUNT
+swapmap	SMAPSIZ
+calls	NCALL
+procs	NPROC
+texts	NTEXT
+clists	NCLIST
+sabufs	NSABUF	0
+power	POWER	0
+maxproc	MAXUP	25
+* hashbuf must be a power of 2
+hashbuf	NHBUF	64

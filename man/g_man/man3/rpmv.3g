@@ -1,0 +1,78 @@
+.TH rpmv 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rpmv
+\- relative polygon move
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rpmv(dx, dy, dz)"
+.B "Coord dx, dy, dz;"
+.IP
+.B "rpmvi(dx, dy, dz)"
+.B "Icoord dx, dy, dz;"
+.IP
+.B "rpmvs(dx, dy, dz)"
+.B "Scoord dx, dy, dz;"
+.IP
+.B "rpmv2(dx, dy)"
+.B "Coord dx, dy;"
+.IP
+.B "rpmv2i(dx, dy)"
+.B "Icoord dx, dy;"
+.IP
+.B "rpmv2s(dx, dy)"
+.B "Scoord dx, dy;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rpmv(dx, dy, dz)"
+.B "real dx, dy, dz"
+.IP 
+.B "subroutine rpmvi(dx, dy, dz)"
+.B "integer*4 dx, dy, dz"
+.IP 
+.B "subroutine rpmvs(dx, dy, dz)"
+.B "integer*2 dx, dy, dz"
+.IP 
+.B "subroutine rpmv2(dx, dy)"
+.B "real dx, dy"
+.IP 
+.B "subroutine rpmv2i(dx, dy)"
+.B "integer*4 dx, dy"
+.IP 
+.B "subroutine rpmv2s(dx, dy)"
+.B "integer*2 dx, dy"
+.IP
+.ne 14
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rpmv(dx, dy, dz: Coord)"
+.IP
+.B "procedure rpmvi(dx, dy, dz: Icoord);"
+.IP
+.B "procedure rpmvs(dx, dy, dz: Scoord);"
+.IP
+.B "procedure rpmv2(dx, dy: Coord);"
+.IP
+.B "procedure rpmv2i(dx, dy: Icoord);"
+.IP
+.B "procedure rpmv2s(dx, dy: Scoord);"
+.SH DESCRIPTION
+.B rpmv
+is the relative version of
+\f3pmv\fP.
+It specifies a relative move to the starting point of a filled
+polygon, using the current graphics position as the origin.
+.B rpmv
+updates the current graphics position to the new point.
+.PP
+All polygons must be complex.
+.SH "SEE ALSO"
+pclos, pdr, pmv, rpdr
+.sp
+.I Programming Guide,
+Section 3.6, Polygons

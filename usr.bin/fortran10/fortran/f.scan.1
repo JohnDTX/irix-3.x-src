@@ -1,0 +1,722 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.SCAN.1.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               28-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+{ Compile time error, figures out what line error occurred in. }
+
+procedure warnerror(errnum: integer; ErrorFlag: Boolean);
+  var lch: char; 
+  
+  procedure lerror(var targfile: text);
+    var ctr,line,lstmtbufp,stmtbufline,i: integer;
+        errmess: text; s: string[80]; ArrowFlag: Boolean;
+        locline: longint; locfile: string32;
+    
+    procedure printarrow;
+    begin {printarrow}
+    write(targfile,' <=== '); ArrowFlag := TRUE;
+    locline := lineline[stmtbufline];
+    locfile := filestack[linefile[stmtbufline]].fname;
+    end; {printarrow}
+    
+  begin {lerror}
+  
+  { Calculate the line number of the error }
+  
+  if ((errnum > 10) or (errnum < 0)) and (errnum <> 296) and (errnum <> 302)
+  then begin { Not a getstmt error }
+       
+       { Show position of error }
+       
+       stmtbufline := 0;
+       lstmtbufp := 1;
+       repeat {print a line}
+         write(targfile,fstlinenum+stmtbufline:5,'. ************ ');
+         stmtbufline := stmtbufline + 1; ArrowFlag := FALSE;
+         while lstmtbufp <= lineends[stmtbufline] do begin
+           write(targfile,chr(stmtbuf[lstmtbufp]));
+           if lstmtbufp = stmtbufp then printarrow;
+           lstmtbufp := lstmtbufp + 1;
+           end;
+         if (lstmtbufp >= lalinep) and  {Repeat will exit}
+            (stmtbufp >= lstmtbufp)     {No arrows printed yet}
+         then printarrow;
+         if linetail[stmtbufline] <> '        '
+         then begin
+           if not ArrowFlag then write(targfile,' ':6);
+           write(targfile,linetail[stmtbufline]);
+           end;
+         writeln(targfile);
+       until lstmtbufp >= lalinep;
+       end
+  else begin { Attempting to do line going into inbuf }
+       locline := lalineno; locfile := filestack[lafile].fname;
+       end;
+  
+  { Print the error message }
+  
+  if ErrorFlag
+  then write(targfile,'       ***** Error')
+  else write(targfile,'       ***** Warning');
+  write(targfile,' number ',errnum:1,' in line ',
+          locline:1,' of file ',locfile);
+  if length(errname) > 0
+  then write(targfile,'.  Id = "',errname,'"');
+  writeln(targfile,' *****');
+  reset(errmess,EMESSFILE);
+  if HOSTOS <> ELITE
+  then if ioresult <> 0 then reset(errmess,EMESS2FILE);
+  if ioresult = 0
+  then begin
+    repeat
+      read(errmess,i);
+      if i = errnum
+      then begin
+        readln(errmess,s); writeln(targfile,'       *****',s,' *****');
+        end
+      else readln(errmess);
+    until i > errnum;
+    close(errmess);
+    end;
+  end; {lerror}
+
+begin {warnerror}
+AnyErrors := TRUE;
+if ErrorEnable
+then begin
+  if ErrorFlag then errors := errors + 1 else warnings := warnings + 1;
+  if ListFlag 
+  then lerror(listfile) 
+  else begin
+    writeln;
+    lerror(output);
+    if PromptFlag
+    then
+      repeat
+        write(chr(7),ERRPROMPT);
+        if (HOSTOS = MERLIN) or (HOSTOS = ELITE)
+        then read(lch) else readln(lch);
+        writeln;
+        if (lch = chr(27)) or eof then goto 999;
+      until lch = ' ';
+    end;
+  if ErrFileOpen then lerror(errfile);
+  errname := '';
+  end;
+end; {warnerror}
+
+procedure error{*errnum: integer*};
+begin
+warnerror(errnum,TRUE);
+end; {error}
+
+procedure warning{*errnum: integer*};
+begin
+warnerror(errnum,FALSE);
+end; {warning}
+
+procedure notansi;
+begin {notansi}
+if OnlyAnsi then error(300);
+end; {notansi}
+
+
+{ fillinbuf gets next two blocks from top of open file stack which   }
+{ it assumes is already reset.                                       }
+{   or                                                               }
+{ if this fails, it closes. pops, opens, reads repeatedly until      }
+{ there is a successful read or the file stack empties.              }
+
+procedure fillinbuf;
+  label 1;
+begin
+1: inbuf[512] := 0;
+if blockread(sourcefile,
+             inbuf,
+             2,
+             filestack[topoffilestack].lastrelblkread + 2)
+  <= 0
+then { Top of stack read failed }
+     if topoffilestack = 1
+     then begin EOFSource := TRUE; inbufp := 0; fillchar(inbuf,20,EOLCH); end
+     else begin
+{added by jim t at sgi for dbx }
+				ininclfile := FALSE;
+{----}
+          topoffilestack := topoffilestack - 1;
+          with filestack[topoffilestack] do begin
+               close(sourcefile);
+               reset(sourcefile,fname);
+               curfile := fname;
+               curlineinfile := lineinfile;
+               inbufp := nextchtoread;
+               end;
+          if blockread(sourcefile,
+                       inbuf,
+                       2,
+                       filestack[topoffilestack].lastrelblkread)
+              <= 0
+          then { Fatal error in rereading previously read block }
+               begin error(1); goto 999; end;
+          
+          { Block just reread might have just hit last <CR> }
+          { before it was pushed onto the stack.            }
+          
+          if HOSTOS = CPM then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+          if inbuf[inbufp] = 0 then goto 1;
+          end
+else begin { Top of stack read succeeded }
+     filestack[topoffilestack].lastrelblkread :=
+       filestack[topoffilestack].lastrelblkread + 2;
+     inbufp := 0;
+     if HOSTOS = CPM then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+     if (HOSTOS = ADVENTURE) or (HOSTOS = CPM)
+     then
+       if inbuf[0] = 0 then goto 1;
+     end;
+end; {fillinbuf}
+
+procedure printprevline;
+  var i: integer;
+begin
+if IsPrevLine
+then begin
+     write(listfile,prevlineno:5,'.');
+     if PrevLineCom
+     then write(listfile,' ':8)
+     else write(listfile,stmtnumb:5,':  ');
+     i := 1;
+     while prevline[i] <> ord(EOLCH) do begin
+       write(listfile,chr(prevline[i]));
+       i := i + 1;
+       end;
+     writeln(listfile);
+     end;
+IsPrevLine := FALSE;
+end; {printprevline}
+
+procedure savethisline(FComment: Boolean);
+begin
+IsPrevLine := TRUE; prevline := thisline; prevlineno := linenumber;
+PrevLineCom := FComment;
+end; {savethisline}
+
+{ Get a complete statement from inbuf into stmtbuf, setting the lookahead   }
+{ line if appropriate.                                                      }
+
+procedure getstmt;
+  var linekind: (INITIALLINE, CONTLINE, COMMENTLINE, EOFLINE);
+      linesseen: integer;
+      EndCardFlag: Boolean;
+	gotcppline: boolean;
+  
+
+  { getline picks up one line from inbuf and places it, if appropriate, in  }
+  { stmtbuf.  It classifies line be assignment to linekind.                 }
+  
+  procedure getline(var flabeledby: alfa6;
+                    var FLabFlag:   Boolean);
+    const DIGITMAX = 31;
+    type string80 = string[80];
+    var blankcnt, lstmtbufp, blanksleft, i, nxtlabpos, colcnt: integer;
+        lch,ch: char; { Set by calls on nextch }
+        ldirstring: string80;
+        InclFlag: Boolean;
+        llinep: integer; lbyte: byte;
+{ k, digits, and intval by jim t at SGI for parsing cpp #lines }
+	k : integer;
+	digits: alfa31;
+	intval: integer;
+    
+    
+    { Pick up next character in thisline, feeds blanks at EOL forever }
+    { so that getline need not worry about EOL for first 6 columns    }
+    
+    procedure nextch;
+    begin
+    ch := chr(thisline[llinep]);
+    
+    { If this character is the <CR>, it gets special treatment }
+    
+    if ch = EOLCH
+    then ch := ' '
+    else llinep := llinep + 1;
+    end; {nextch}
+
+    
+    { Gets a compiler directive string from a $ compiler directive line }
+    
+    procedure getdirstring(Makeuc: Boolean; var fstr: string80);
+      var len: integer; lstr: string80;
+    begin
+    repeat
+           nextch;
+    until (ch <> ' ') or (thisline[llinep] = ord(EOLCH));
+    len := 0; lstr := '';
+    while (ch <> ' ') and (len < 80) do begin
+          len := len + 1;
+          if Makeuc
+          then
+            if (ch >= 'a') and (ch <= 'z') then ch := chr(ord(ch) - 32);
+          lstr := concat(lstr,' ');
+          lstr[len] := ch;
+          nextch;
+          end;
+    fstr := lstr;
+    end; {getdirstring}
+    
+    { Gets a compiler directive string from a cpp #  directive line }
+    { added by jimt at SGI for dbx }
+    
+    procedure getcppstring(var fstr: idstring);
+      var len: integer; lstr: idstring;
+    begin
+    repeat
+           nextch;
+    until (ch <> ' ') or (thisline[llinep] = ord(EOLCH));
+    nextch;
+    len := 0; lstr := '';
+    while (ch <> '"') and (len < 80) do begin
+          len := len + 1;
+          lstr := concat(lstr,' ');
+          lstr[len] := ch;
+          nextch;
+          end;
+    fstr := lstr;
+    end; {getcppstring}
+
+
+  begin {getline}
+  gotcppline := FALSE;
+  latail := '        '; lalineno := curlineinfile;
+  lafile := topoffilestack;
+  InclFlag := FALSE; lstmtbufp := stmtbufp;
+  if EOFSource
+  then linekind := EOFLINE
+  else begin { not EOFSource }
+       if inbuf[inbufp] = 16 { DLE }
+       then begin
+            blankcnt := inbuf[inbufp + 1] - ord(' ');
+            inbufp := inbufp + 2; { Need to skip blanks at beginning of line }
+            fillchar(thisline,blankcnt,' ');
+            end
+       else blankcnt := 0;
+       llinep := blankcnt + 1;
+       repeat
+         if inbuf[inbufp] = 0 then fillinbuf;
+         lbyte := inbuf[inbufp];
+         if HOSTOS = ADVENTURE
+         then
+           if lbyte < 0
+           then begin
+             if lbyte = -1
+             then inbufp := inbufp + 1
+             else inbuf[inbufp] := lbyte + 1;
+             lbyte := ord(' ');
+             end
+           else inbufp := inbufp + 1
+         else inbufp := inbufp + 1;
+         if (lbyte = ord('&')) and (llinep = 1)
+         then begin 
+           if OnlyAnsi then error(7);
+           fillchar(thisline,5,' '); llinep := 6; lbyte := ord('.');
+           end;
+         if lbyte = 9 
+         then begin
+           i := 8 - ((llinep-1) mod 8); 
+           while (llinep + i) > 120 do
+             i := i - 1;
+           fillchar(thisline[llinep],i,' '); llinep := llinep + i;
+           end
+         else begin 
+           if lbyte = 10
+           then begin
+             if inbuf[inbufp] = 0 then fillinbuf;
+             if inbuf[inbufp] = 13 then inbufp := inbufp + 1;
+             lbyte := ord(EOLCH);
+             end
+           else
+             if lbyte = 13
+             then begin
+               if inbuf[inbufp] = 0 then fillinbuf;
+               if inbuf[inbufp] = 10 then inbufp := inbufp + 1;
+               lbyte := ord(EOLCH);
+               end;
+           thisline[llinep] := lbyte; 
+           if llinep < 120 then llinep := llinep + 1;
+           end;
+       until lbyte = ord(EOLCH);
+       llinep := 1;
+       nextch;
+       if (ch = 'D') or (ch = 'd')
+       then begin
+         if OnlyAnsi then error(302);
+         if DsRComment then ch := '*' else ch := ' ';
+         end;
+       if (ch = '*') or (ch ='C') or (ch = 'c') or
+          ((ch = ' ') and (thisline[llinep] = ord(EOLCH)))
+       then linekind := COMMENTLINE
+       else
+         if ch = '$'
+         then begin { Option comment line }
+           linekind := COMMENTLINE;
+           getdirstring(TRUE,ldirstring);
+           if ldirstring = 'INCLUDE'
+           then begin
+             getdirstring((HOSTOS = MERLIN) or 
+                          (HOSTOS = ADVENTURE) or
+                          (HOSTOS = CPM),
+                          ldirstring); 
+             if length(ldirstring) = 0 then error(6);
+             InclFlag := TRUE;
+             { Defer processing until line cleanly processed }
+             end
+           else
+             if ldirstring = 'XREF'
+             then XrefFlag := TRUE
+             else
+               if ldirstring = 'SWAP'
+               then Swapped := TRUE
+               else
+                 if ldirstring = 'SEGMENT'
+                 then begin
+                   segname := '        '; i := 0;
+                   getdirstring(TRUE,ldirstring);
+                   while (i < 8) and (i < length(ldirstring)) do begin
+                     i := i + 1;
+                     segname[i] := ldirstring[i];
+                     end;
+                   end
+                 else
+                   if ldirstring = 'COL72'
+                   then FreeForm := FALSE
+                 else
+                   if ldirstring = 'FLOAT'
+                   then FPHardware := TRUE
+                 else
+                   if ldirstring = 'NOFLOAT'
+                   then FPHardware := FALSE
+                 else
+                   if ldirstring = 'NOTBINARY'
+                   then SystemBinary := FALSE
+                 else
+                   if ldirstring = 'DEBUG'
+                   then DebugFlag := TRUE
+                 else
+                   if ldirstring = 'NODEBUG'
+                   then DebugFlag := FALSE
+                 else
+                   if ldirstring = 'ARGCHECK'
+                   then ArgCheck := TRUE
+                 else begin
+                 
+                 {The following not allowed in OnlyAnsi Mode}
+                   
+                      if ldirstring = 'SYSTEM'
+                      then begin
+                           chclass[ord('%')] := LETCL;
+                           chclass[ord('_')] := LETCL;
+                           end
+                      else
+                        if ldirstring = 'F66DO'
+                        then F66DoFlag := TRUE
+                      else
+                        if ldirstring = 'BINARY'
+                        then SystemBinary := TRUE
+                      else
+                        if ldirstring = 'INT2'
+                        then begin
+                          defisize := 2;
+                          if deflsize = 4 then deflsize := 1;
+                          end
+                      else
+                        if ldirstring = 'LOG2'
+                        then deflsize := 2
+                      else
+                        if ldirstring = 'CHAREQU'
+                        then CharEqu := TRUE
+                      else
+                        if (ldirstring = 'NORMW') and
+                           (CHIP = N32000)
+                        then begin
+                             NoRMW := TRUE;
+             writeln('Code generated with restrictions on addressing modes');
+                             end
+                      else
+                        if ldirstring = 'NOARGCHECK'
+                        then ArgCheck := FALSE
+                      else error(8);
+                      if OnlyAnsi then error(7);
+                      end;
+           end
+{added by jim t at SGI, dbx needs line number and file information}
+	 else if ch = '#' 
+		then begin
+			gotcppline := TRUE;
+			nextch; nextch;
+			k := 0;
+  			while (chclass[ord(ch)] = DIGITCL) 
+					and (k < DIGITMAX) do 
+			begin
+				k := k + 1; 
+				digits[k] := ch; 
+				nextch;
+        		end;
+			
+	       		intval := 0;
+	       		for i := 1 to k do
+			begin
+	       		if (intval >= 214748365) or
+	         		((intval >= 214748364) and (digits[i] > '8'))
+	       		then begin error(11); intval := 0; end
+	       		else intval := intval*10 + ord(digits[i]) - ord('0');
+	       		end;
+                   	getcppstring(cppfilename);
+			if gotorigfile = FALSE then
+			begin
+				filestack[1].lineinfile := intval - 1;
+				curlineinfile := intval - 1;
+				linenumber := intval - 1;
+				originalfile := cppfilename;
+				gotorigfile := TRUE;
+				ininclfile := FALSE;
+			end else if cppfilename <> originalfile then
+			begin
+				incline := filestack[1].lineinfile;
+				ininclfile := TRUE;
+			end else begin
+				ininclfile := FALSE;
+				filestack[1].lineinfile := intval - 1;
+				curlineinfile := intval - 1;
+				linenumber := intval - 1;
+			end;
+           		linekind := COMMENTLINE;
+		end
+         else begin { Not a comment line }
+              flabeledby := '      ';
+              nxtlabpos := 1;
+              colcnt := 1;
+              while ((ch = ' ') or (ch = '0')) and (colcnt < 6) do begin
+                 nextch;
+                 colcnt := colcnt + 1;
+                 end;
+              while colcnt < 6 do begin
+                if chclass[ord(ch)] = DIGITCL
+                then begin
+                  flabeledby[nxtlabpos] := ch;
+                  nxtlabpos := nxtlabpos + 1;
+                  end
+                else if ch <> ' ' then error(2);
+                nextch;
+                colcnt := colcnt + 1;
+                end;
+              FLabFlag := nxtlabpos <> 1;
+              
+              { The sixth column character is available }
+              { in ch at this time and colcnt = 6       }
+              
+              if (ch = ' ') or (ch = '0')
+              then linekind := INITIALLINE
+              else linekind := CONTLINE;
+              
+              { Get the rest of the line }
+              
+              if FreeForm then i := 120 else i := 72;
+              blanksleft := scanne(i - colcnt,' ',thisline[llinep]);
+              colcnt := scaneq(i - colcnt,EOLCH,thisline[llinep]);
+              if (blanksleft = colcnt) and
+                 (not FLabFlag) and (ch = ' ')
+              then begin { Blanks everywhere I look }
+                   linekind := COMMENTLINE;
+                   stmtbufp := lstmtbufp;  { Back up the blanks filled in }
+                   end
+              else if (colcnt + stmtbufp) > 1387
+                   then error(295)
+                   else begin
+                        moveleft(thisline[llinep],stmtbuf[stmtbufp],colcnt);
+                        stmtbufp := stmtbufp + colcnt;
+                        end;
+              llinep := llinep + colcnt;
+              if not FreeForm
+              then
+                if colcnt >= 66
+                then begin
+                  i := 73;
+                  while (i <= 80) and (thisline[i] <> ord(EOLCH)) do
+                    begin latail[i-72] := chr(thisline[i]); i := i + 1; end;
+                  end;
+              end; { Not a comment line }
+			if (originalfile <> cppfilename)
+				or (gotcppline = TRUE) then
+			begin
+				extralines := extralines + 1;
+			end;
+       linenumber := linenumber + 1;
+	if gotcppline = FALSE then
+      	 	curlineinfile := filestack[topoffilestack].lineinfile + 1;
+
+       filestack[topoffilestack].lineinfile := curlineinfile;
+       if ListFlag
+       then begin printprevline; savethisline(linekind = COMMENTLINE); end;
+       if InclFlag
+       then begin { Process actual file include here }
+            if EOFSource
+            then filestack[topoffilestack].nextchtoread := 1024
+            else filestack[topoffilestack].nextchtoread := inbufp;
+            filestack[topoffilestack].lineinfile :=
+                     filestack[topoffilestack].lineinfile - 1;
+            if topoffilestack >= MAXFILES
+            then error(10)
+            else begin
+{added by jim t at sgi for dbx }
+				incline := filestack[1].lineinfile;
+				ininclfile := TRUE;
+{----}
+                 topoffilestack := topoffilestack + 1;
+                 with filestack[topoffilestack] do begin
+                      if HOSTOS = MERLIN
+                      then
+                        if (pos('.TEXT',ldirstring) <> length(ldirstring)-4) or
+                           (pos('.TEXT',ldirstring) = 0)
+                        then ldirstring := concat(ldirstring,'.TEXT');
+                      close(sourcefile);
+                      reset(sourcefile,ldirstring);
+                      EOFSource := FALSE;
+                      if ioresult <> 0
+                      then begin error(296); goto 999; end;
+                      lastrelblkread := -2;
+                      nextchtoread := 0;
+                      fname := ldirstring;
+                      lineinfile := 1;
+                      curlineinfile := 1;
+                      curfile := ldirstring;
+                      fillinbuf;
+                      if HOSTOS <> ADVENTURE
+                      then
+                        if inbuf[0] <= 1 then fillinbuf;
+                      end;
+                 end;
+            end;
+         
+       if inbuf[inbufp] = 0 { NULL } then fillinbuf;
+       end; { not EOFSource }
+  end; {getline}
+  
+begin {getstmt}
+
+{ Get the first line of the next statement }
+
+if ininclfile then 
+begin
+	cpplinenum := incline;
+end else begin
+{
+writeln('set cpp line number:curlineinfile=', curlineinfile, ' lineinfile=',filestack[1].lineinfile, ' lineline=', lineline[1], 'linenum=',linenumber);
+}
+	cpplinenum := curlineinfile;
+{
+	cpplinenum := linenumber;
+}
+end;
+
+if LALineDefined
+then begin
+     fstlinenum := linenumber; { linenumber of line the LA line }
+     moveleft(stmtbuf[lalinep],stmtbuf[1],lalinelen);
+     stmtbufp := lalinelen + 1;
+     labeledby := lalabeledby;
+     LabeledFlag := LALabFlag;
+     end
+else begin { No look ahead line defined }
+     repeat
+            stmtbufp := 1;
+            getline(labeledby,LabeledFlag);
+            if linekind = CONTLINE then error(3);
+     until EOFSource or (linekind = INITIALLINE);
+     StmtbufValid := linekind = INITIALLINE;
+     fstlinenum := linenumber; { linenumber of line in just read }
+     end;
+Binary := SystemBinary;
+
+if StmtbufValid
+then begin
+  { If end card, don't read any further lines }
+  
+  lalinep := stmtbufp; stmtbufp := 1;
+  if match('END')
+  then EndCardFlag := getnonblank = EOLCH
+  else EndCardFlag := FALSE;
+  stmtbufp := lalinep;
+  
+  if EndCardFlag
+  then begin
+    lineends[1] := stmtbufp - 1;
+    LALineDefined := FALSE;
+    end
+  else begin { Not end card }
+  
+    { Get the continuation lines of the next statement, and possibly  }
+    { the initial line of the statement after that as the new laline. }
+    
+    linesseen := 1; { The first line has already been seen }
+    linekind := INITIALLINE;
+    repeat
+           lineends[linesseen] := stmtbufp - 1;
+           linetail[linesseen] := latail;
+           linefile[linesseen] := lafile;
+           lineline[linesseen] := lalineno;
+           if linekind <> COMMENTLINE then linesseen := linesseen + 1;
+           getline(lalabeledby,LALabFlag);
+           if (linekind = CONTLINE) and LALabFlag then error(5);
+    until (linesseen > MAXCONTLINES) or (linekind = INITIALLINE);
+    
+    lalinep := stmtbufp; { Assume not laline unless shown otherwise }
+    LALineDefined := FALSE;
+    if linekind = CONTLINE
+    then error(3)
+    else if linekind = INITIALLINE
+         then begin { Set up laline }
+              LALineDefined := TRUE;
+              lalinep := lineends[linesseen - 1] + 1;
+              lalinelen := stmtbufp - lalinep;
+              end;
+    end;
+  stmtbufp := 1;
+  end;
+end; {getstmt}
+
+
+{ getchar called only by FORMAT and to process character constants }
+
+function getchar{*: char*};
+begin
+if stmtbufp < lalinep
+then getchar := chr(stmtbuf[stmtbufp])
+else getchar := EOLCH;
+stmtbufp := stmtbufp + 1;
+end; {getchar}
+
+{ Scanner work horse, gets next nonblank from stmtbuf to build tokens }
+
+function getnonblank{*: char*};
+  var lch: char;
+begin
+repeat
+       if stmtbufp < lalinep
+       then lch := chr(stmtbuf[stmtbufp])
+       else lch := EOLCH;
+       stmtbufp := stmtbufp + 1; { Makes backing up easier }
+until lch <> ' ';
+if (lch >= 'a') and (lch <= 'z')
+then lch := chr(ord(lch) - 32);
+getnonblank := lch;
+end; {getnonblank}
+
+

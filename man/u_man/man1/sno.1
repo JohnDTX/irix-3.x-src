@@ -1,0 +1,127 @@
+'\"macro stdmacro
+.TH SNO 1
+.SH NAME
+sno \- \s-1SNOBOL\s+1 interpreter
+.SH SYNOPSIS
+.B sno
+[ files ]
+.SH DESCRIPTION
+.I Sno\^
+is a
+.SM SNOBOL
+compiler and interpreter
+(with slight differences).
+.I Sno\^
+obtains input from the
+concatenation of the named
+.IR files
+and the standard input.
+All input through a statement
+containing the label
+.B end
+is considered program and is compiled.
+The rest is available to
+.BR syspit .
+.PP
+.I Sno\^
+differs from
+.SM SNOBOL
+in the following ways:
+.RS .3i
+.PP
+There are no unanchored searches.
+To get the same effect:
+.RS .3i
+.TP "\w'a \|\(**x\(** \|b \|= \|x \|c\ \ \ 'u"
+a \|\(**\(** \|b
+unanchored search for
+.IR b .
+.ns
+.TP
+a \|\(**x\(** \|b \|= \|x \|c
+unanchored assignment
+.RE
+.PP
+There is no back referencing.
+.RS .3i
+.TP "\w'a \|\(**x\(** \|b \|= \|x \|c\ \ \ 'u"
+x \|= \|"abc"
+.TP
+a \|\(**x\(** \|x
+is an unanchored search for
+.BR abc .
+.RE
+.PP
+Function declaration is
+done at compile time by the use of the (non-unique) label
+.BR define .
+Execution of a function call begins at the
+statement following the
+.BR define .
+Functions cannot be defined at run time,
+and the use of the name
+.B define
+is preempted.
+There is no provision for automatic variables
+other than parameters.
+Examples:
+.RS .3i
+.PP
+define f( )
+.br
+define f(a, b, c)
+.RE
+.PP
+All labels except
+.B define
+(even
+.BR end )
+must have a non-empty statement.
+.PP
+Labels, functions and variables must all have
+distinct names.
+In particular, the non-empty statement on
+.B end
+cannot merely name a label.
+.PP
+If
+.B start
+is a label in the program,
+program execution will start there.
+If not, execution begins with the first
+executable statement;
+.B define
+is not an executable statement.
+.PP
+There are no built-in functions.
+.PP
+Parentheses for arithmetic are not needed.
+Normal precedence applies.
+Because of this, the arithmetic
+operators
+.B /
+and
+.B \(**
+must be set off by spaces.
+.PP
+The right side of assignments
+must be non-empty.
+.PP
+Either \&'\| or \|"\|
+may be used for literal quotes.
+.PP
+The pseudo-variable
+.B sysppt
+is not available.
+.RE
+.SH SEE ALSO
+awk(1).
+.br
+.IR "\s-1SNOBOL\s+1, a String Manipulation Language" ,
+by D.\ J. Farber, R.\ E. Griswold, and I.\ P. Polonsky,
+.SM
+.I JACM\^
+.B 11
+(1964), pp.\ 21-30.
+.DT
+.\"	@(#)sno.1	5.1 of 11/10/83

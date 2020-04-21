@@ -1,0 +1,29 @@
+.TH maketag  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I maketag
+- name the next command in the display list
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "maketag(t) "
+.B "Tag t;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine maketa(t)"
+.B "integer t"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure maketag(t: Tag);"
+.sp
+.SH DESCRIPTION
+Commands can
+be explicitly named with the \f2maketag\f1 command.  The user supplies a
+31-bit name that is assigned to the command immediately
+following the \f2maketag\f1 command.  The tag itself occupies no space in 
+the object and is local to that object.  The same 31-bit name can be
+used safely in different objects.
+.SH "SEE ALSO"
+.I gentag, istag

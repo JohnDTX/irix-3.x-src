@@ -1,0 +1,42 @@
+
+	These programs demonstrate how one can make a connection to
+	another system using tcp (from an IRIS and to an IRIS) from
+	within an IRIS program.
+
+	To use these programs, accept.c, connect.c and select.c, run
+	make. This will compile the programs.  First run 'accept' on
+	machine 1, then run 'connect machine1' on machine 2 to make a
+	connection.  Once the connection is established, everything
+	you type on the connect side will appear on the accept side.
+	To terminate the session, type EOF (ctrl-d) to the 'connect'
+	program.  This will also cause the 'accept' program to terminate.
+
+	For example:
+
+	machine1% accept
+
+
+	...
+
+	<meanwhile at machine 2>
+	machine2% connect machine1
+	here is a message
+
+	...
+
+	<back at machine 1, the user should see>
+	here is a message
+
+
+	The 'select' program is another version of the 'accept'
+	program that accepts repeated connections from the
+	'connect' program.  Try the same sequence shown above,
+	using 'select' in place of 'accept'.  Note that typing
+	EOF (ctrl-d) on the connect side does not terminate the
+	'select' program on the receiving side.  Invoke 'connect
+	machine1' again and messages typed on machine2 will
+	be echoed by 'select' on machine1.  Type a ctrl-c to
+	terminate 'select' on machine1.
+
+
+

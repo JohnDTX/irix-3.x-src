@@ -1,0 +1,47 @@
+.TH perspective  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I perspective
+- define a perspective projection transformation
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "perspective(fovy, aspect, near, far) "
+.B "Angle fovy;"
+.B "float aspect; "
+.B "Coord near, far;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine perspe(fovy, aspect, near, far)"
+.B "integer*2 fovy"
+.B "real aspect, near, far"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure perspective(fovy: Angle; aspect: real; near, far: Coord);"
+.sp
+.SH DESCRIPTION
+.I Perspective
+defines a projection transformation by indicating the field-of-view
+angle, \f3fovy\f1, 
+in the \f3y\f1 direction of the eye coordinate system, the \f3aspect\f1
+ratio which
+determines the field of view in the \f3x\f1 
+direction, and the distance to the near
+and far clipping planes in the \f3z\f1 direction.  
+The aspect ratio is given as a ratio of \f3x\f1 to \f3y\f1.  
+In general,
+the aspect ratio given in the \f2perspective\f1 command should match the
+aspect ratio of the associated viewport.  For example, \f3aspect\f1=2 
+means the
+viewer sees twice as far in \f3x\f1 as in \f3y\f1.  If the viewport is 
+twice as wide as it is tall, the image will be displayed without distortion.
+The arguments \f3near\f1 and
+\f3far\f1 are distances from the viewer to the near and far clipping planes,
+and these are always positive.
+.PP
+.I Perspective
+loads a matrix onto the transformation stack, overwriting whatever was there.
+.SH "SEE ALSO"
+.I ortho, window

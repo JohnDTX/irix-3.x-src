@@ -1,0 +1,762 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: DBG.READ.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1983, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                           All Rights Reserved.                09-Aug-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure getln(var fnam: alfa31; var fnamlen: integer);
+  var i,linkno: integer;
+begin
+linkno := nextword; fnamlen := nextbyte;
+for i := 1 to fnamlen do fnam[i] := chr(nextbyte);
+if linkno >= 0
+then begin
+     fnamlen := 8; fnam[1] := '$'; linkno := linkno + procbase;
+     if procmax <= linkno
+     then procmax := linkno + 1;
+     for i := 2 to 8 do begin
+         fnam[i] := chr(linkno mod 10 + ord('0'));
+         linkno := linkno div 10;
+         end;
+     end;
+end; {getln}
+
+procedure avlinsert(fdatarec: pdatarec);
+  var ttt, sss, ppp, qqq, rrr: pdatarec;
+      Inserted: Boolean; aaa: balancetype;
+begin {avlinsert}
+if datatree^.rlink = nil
+then datatree^.rlink := fdatarec
+else begin
+     ttt := datatree; sss := datatree^.rlink; ppp := sss; Inserted := FALSE;
+     repeat if namLTnam(fdatarec^.name,fdatarec^.namelen,
+                        ppp^.name,ppp^.namelen)
+            then if ppp^.llink = nil
+                 then begin
+                      qqq := fdatarec; ppp^.llink := qqq;
+                      Inserted := TRUE;
+                      end
+                 else begin
+                      qqq := ppp^.llink;
+                      if qqq^.balance <> ZERO
+                      then begin ttt := ppp; sss := qqq; end;
+                      ppp := qqq;
+                      end
+            else if namLTnam(ppp^.name,ppp^.namelen,
+                             fdatarec^.name,fdatarec^.namelen)
+                 then if ppp^.rlink = nil
+                      then begin
+                           qqq := fdatarec; ppp^.rlink := qqq;
+                           Inserted := TRUE;
+                           end
+                      else begin
+                           qqq := ppp^.rlink;
+                           if qqq^.balance <> ZERO
+                           then begin ttt := ppp; sss := qqq; end;
+                           ppp := qqq;
+                           end
+                 else begin
+                      write('*** Multiply defined data area ''');
+                      wrcharn(fdatarec^.name,fdatarec^.namelen);
+                      writeln(''' ***'); exit(avlinsert);
+                      end;
+     until Inserted;
+     { Adjust balance factors }
+     if namLTnam(fdatarec^.name,fdatarec^.namelen,sss^.name,sss^.namelen)
+     then rrr := sss^.llink else rrr := sss^.rlink;
+     ppp := rrr;
+     while ppp <> qqq do
+           { never fkey = ppp^.key since ppp <> qqq }
+           if namLTnam(fdatarec^.name,fdatarec^.namelen,ppp^.name,ppp^.namelen)
+           then begin ppp^.balance := MINUS; ppp := ppp^.llink; end
+           else begin ppp^.balance := PLUS;  ppp := ppp^.rlink; end;
+     { Balancing act }
+     if namLTnam(fdatarec^.name,fdatarec^.namelen,sss^.name,sss^.namelen)
+     then aaa := MINUS else aaa := PLUS;
+     if sss^.balance = ZERO
+     then begin
+          sss^.balance := aaa;
+          (***) datatree^.llink := pointer(ord(datatree^.llink) + 1); (***)
+          exit(avlinsert);
+          end;
+     if sss^.balance <> aaa
+     then begin sss^.balance := ZERO; exit(avlinsert); end;
+     { sss^.balance = aaa }
+     if rrr^.balance = aaa
+     then begin { Single Rotation } (*** writeln('*** A8 ***'); ***)
+          ppp := rrr;
+          if aaa = MINUS
+          then begin sss^.llink := rrr^.rlink; rrr^.rlink := sss; end
+          else begin sss^.rlink := rrr^.llink; rrr^.llink := sss; end;
+          rrr^.balance := ZERO; sss^.balance := ZERO;
+          end
+     else begin { Double Rotation } (*** writeln('*** A9 ***'); ***)
+          if aaa = MINUS
+          then begin
+               ppp := rrr^.rlink; rrr^.rlink := ppp^.llink;
+               ppp^.llink := rrr; sss^.llink := ppp^.rlink;
+               ppp^.rlink := sss;
+               end
+          else begin
+               ppp := rrr^.llink; rrr^.llink := ppp^.rlink;
+               ppp^.rlink := rrr; sss^.rlink := ppp^.llink;
+               ppp^.llink := sss;
+               end;
+          if ppp^.balance = aaa
+          then begin sss^.balance := -aaa; rrr^.balance := ZERO; end
+          else if ppp^.balance = ZERO
+               then begin sss^.balance := ZERO; rrr^.balance := ZERO; end
+               else begin sss^.balance := ZERO; rrr^.balance := aaa; end;
+          ppp^.balance := ZERO;
+          end;
+     if sss = ttt^.rlink then ttt^.rlink := ppp else ttt^.llink := ppp;
+     end;
+end; {avlinsert}
+
+function avllookup(fname: pbyte; fnamelen: integer): pdatarec;
+  var Foundit: Boolean; ldatarec: pdatarec;
+begin {avllookup}
+Foundit := FALSE; ldatarec := datatree^.rlink; { root }
+while (ldatarec <> nil) and (not Foundit) do
+      if namLTnam(fname,fnamelen,ldatarec^.name,ldatarec^.namelen)
+      then ldatarec := ldatarec^.llink
+      else if namLTnam(ldatarec^.name,ldatarec^.namelen,fname,fnamelen)
+           then ldatarec := ldatarec^.rlink
+           else FoundIt := TRUE;
+avllookup := ldatarec;
+end; {avllookup}
+
+procedure entryinsert(fentryrec: pentryrec);
+  var ttt, sss, ppp, qqq, rrr: pentryrec;
+      Inserted: Boolean; aaa: balancetype;
+begin {entryinsert}
+if entrytree^.rlink = nil
+then entrytree^.rlink := fentryrec
+else begin
+     ttt := entrytree; sss := entrytree^.rlink; ppp := sss; Inserted := FALSE;
+     repeat if namLTnam(fentryrec^.linkname,fentryrec^.linknlen,
+                        ppp^.linkname,ppp^.linknlen)
+            then if ppp^.llink = nil
+                 then begin
+                      qqq := fentryrec; ppp^.llink := qqq;
+                      Inserted := TRUE;
+                      end
+                 else begin
+                      qqq := ppp^.llink;
+                      if qqq^.balance <> ZERO
+                      then begin ttt := ppp; sss := qqq; end;
+                      ppp := qqq;
+                      end
+            else if namLTnam(ppp^.linkname,ppp^.linknlen,
+                             fentryrec^.linkname,fentryrec^.linknlen)
+                 then if ppp^.rlink = nil
+                      then begin
+                           qqq := fentryrec; ppp^.rlink := qqq;
+                           Inserted := TRUE;
+                           end
+                      else begin
+                           qqq := ppp^.rlink;
+                           if qqq^.balance <> ZERO
+                           then begin ttt := ppp; sss := qqq; end;
+                           ppp := qqq;
+                           end
+                 else begin
+                      write('*** Multiply defined entry point ''');
+                      wrcharn(fentryrec^.linkname,fentryrec^.linknlen);
+                      writeln(''' ***'); exit(entryinsert);
+                      end;
+     until Inserted;
+     { Adjust balance factors }
+     if namLTnam(fentryrec^.linkname,fentryrec^.linknlen,
+                 sss^.linkname,sss^.linknlen)
+     then rrr := sss^.llink else rrr := sss^.rlink;
+     ppp := rrr;
+     while ppp <> qqq do
+           { never fkey = ppp^.key since ppp <> qqq }
+           if namLTnam(fentryrec^.linkname,fentryrec^.linknlen,
+                       ppp^.linkname,ppp^.linknlen)
+           then begin ppp^.balance := MINUS; ppp := ppp^.llink; end
+           else begin ppp^.balance := PLUS;  ppp := ppp^.rlink; end;
+     { Balancing act }
+     if namLTnam(fentryrec^.linkname,fentryrec^.linknlen,
+                 sss^.linkname,sss^.linknlen)
+     then aaa := MINUS else aaa := PLUS;
+     if sss^.balance = ZERO
+     then begin
+          sss^.balance := aaa;
+          (***) entrytree^.llink := pointer(ord(entrytree^.llink) + 1); (***)
+          exit(entryinsert);
+          end;
+     if sss^.balance <> aaa
+     then begin sss^.balance := ZERO; exit(entryinsert); end;
+     { sss^.balance = aaa }
+     if rrr^.balance = aaa
+     then begin { Single Rotation } (*** writeln('*** A8 ***'); ***)
+          ppp := rrr;
+          if aaa = MINUS
+          then begin sss^.llink := rrr^.rlink; rrr^.rlink := sss; end
+          else begin sss^.rlink := rrr^.llink; rrr^.llink := sss; end;
+          rrr^.balance := ZERO; sss^.balance := ZERO;
+          end
+     else begin { Double Rotation } (*** writeln('*** A9 ***'); ***)
+          if aaa = MINUS
+          then begin
+               ppp := rrr^.rlink; rrr^.rlink := ppp^.llink;
+               ppp^.llink := rrr; sss^.llink := ppp^.rlink;
+               ppp^.rlink := sss;
+               end
+          else begin
+               ppp := rrr^.llink; rrr^.llink := ppp^.rlink;
+               ppp^.rlink := rrr; sss^.rlink := ppp^.llink;
+               ppp^.llink := sss;
+               end;
+          if ppp^.balance = aaa
+          then begin sss^.balance := -aaa; rrr^.balance := ZERO; end
+          else if ppp^.balance = ZERO
+               then begin sss^.balance := ZERO; rrr^.balance := ZERO; end
+               else begin sss^.balance := ZERO; rrr^.balance := aaa; end;
+          ppp^.balance := ZERO;
+          end;
+     if sss = ttt^.rlink then ttt^.rlink := ppp else ttt^.llink := ppp;
+     end;
+end; {entryinsert}
+
+function entrylookup(flinkname: pbyte; flinknlen: integer): pentryrec;
+  var Foundit: Boolean; lentryrec: pentryrec;
+begin {entrylookup}
+Foundit := FALSE; lentryrec := entrytree^.rlink; { root }
+while (lentryrec <> nil) and (not Foundit) do
+      if namLTnam(flinkname,flinknlen,lentryrec^.linkname,lentryrec^.linknlen)
+      then lentryrec := lentryrec^.llink
+      else if namLTnam(lentryrec^.linkname,lentryrec^.linknlen,
+                       flinkname,flinknlen)
+           then lentryrec := lentryrec^.rlink
+           else FoundIt := TRUE;
+entrylookup := lentryrec;
+end; {entrylookup}
+
+procedure readmap;
+  var i,j: integer; nextaddr,highbits: longint; ch: char; lmodrec: pmodrec;
+      lnam: alfa31; llong: longint;
+      lnamlen: integer; lastmodrec: pmodrec; ldatarec: pdatarec;
+begin {readmap}
+if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = CROMIX) or
+   (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then for i := 1 to 16 do j := nextbyte { Skip Header }
+else if (ENVIRONMENT = ADVENTURE) or (ENVIRONMENT = UNISOFT) or
+        (ENVIRONMENT = UNOS) or (ENVIRONMENT = XENIX)
+     then begin
+          if timedate <> nextlong
+          then begin
+               writeln('*** Warning: Symbol file does not',
+                       ' correspond to loaded program ***');
+               write('*** Do you wish to continue anyway? '); 
+               readln(ch);
+               if (ch <> 'y') and (ch <> 'Y') then halt(ERRHALT);
+               end;
+          if nextlong < 23
+          then begin
+               writeln('*** Can''t use Version 2.4 debugger on programs ***');
+               writeln('*** compiled under versions earlier than V2.3  ***');
+               halt(ERRHALT);
+               end;
+          for i := 1 to 8 do j := nextbyte { Skip remainder of header }
+          end;
+
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin {dotosys}
+     numsegs := nextword; {Discard}
+     for j := 1 to 8 do lnam[j] := chr(nextbyte);
+     new(lmodrec);
+     with lmodrec^ do begin
+          address := 0; size := nextlong; modtable := -1; next := nil;
+          sb := 0; entry := nil; numentrys := 0;
+          end;
+     if modules = nil
+     then modules := lmodrec
+     else begin
+       lastmodrec := modules;
+       while lastmodrec^.next <> nil do
+         lastmodrec := lastmodrec^.next;
+       lastmodrec^.next := lmodrec;
+       end;
+     numsegs := nextlong; {Discard}
+     end
+else begin {not dotosys}
+     numsegs := nextword;
+     seg := pointer(ord(getmem(numsegs*sizeof(segrec))));
+     for i := 0 to numsegs - 1 do
+         with seg^[i] do begin
+              for j := 1 to 8 do name[j] := chr(nextbyte);
+              size := nextlong;
+              if (ENVIRONMENT = ADVENTURE) or (ENVIRONMENT = UNISOFT) or
+                 (ENVIRONMENT = UNOS) or (ENVIRONMENT = CROMIX) or
+                 (ENVIRONMENT = XENIX)
+              then address := nextlong + textareabase
+              else address := nextlong;
+              end;
+     end;
+
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin {dotosys}
+     lmodrec^.numentrys := nextword;
+     numentrys := numentrys + lmodrec^.numentrys;
+     lmodrec^.entry := 
+       pointer(ord(getmem(ord4(lmodrec^.numentrys)*sizeof(entryrec))));
+     for i := 0 to lmodrec^.numentrys - 1 do
+         with lmodrec^.entry^[i] do begin
+              getln(lnam,lnamlen); linkname := savenam(lnam,lnamlen);
+              linknlen := lnamlen; usernlen := 0; username := nil;
+              language := UNKNOWN; parent := NOPARENT;
+              address := nextlong; symbols := nil; level := 0;
+              entryoff := -1; exitoff := -1; statements := nil;
+              wherereg := 0; regmask := 0; regoffset := 0;
+              llink := nil; rlink := nil; balance := ZERO;
+              entryinsert(@lmodrec^.entry^[i]);
+              end;
+     end
+else begin {not dotosys}
+     numentrys := nextword;
+     entry := pointer(ord(getmem(ord4(numentrys)*sizeof(entryrec))));
+     for i := 0 to numentrys - 1 do
+         with entry^[i] do begin
+              getln(lnam,lnamlen); linkname := savenam(lnam,lnamlen);
+              linknlen := lnamlen; usernlen := 0; username := nil;
+              language := UNKNOWN; parent := NOPARENT;
+              address := nextlong; {Segnum top byte} symbols := nil; level := 0;
+              entryoff := -1; exitoff := -1; statements := nil;
+              wherereg := 0; regmask := 0; regoffset := 0;
+              llink := nil; rlink := nil; balance := ZERO;
+              entryinsert(@entry^[i]);
+              end;
+     end;
+
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin {dotosys}
+     numdatas := nextword; nextaddr := 0; database := 0;
+     for i := numdatas - 1 downto 0 do begin
+         getln(lnam,lnamlen);
+         ldatarec := avllookup(@lnam,lnamlen);
+         if ldatarec = nil
+         then begin
+              new(ldatarec);
+              with ldatarec^ do begin
+                   llink := nil; rlink := nil; balance := ZERO;
+                   namelen := lnamlen; name := savenam(lnam,lnamlen);
+                   inmodule := nil; size := 0; address := -1;
+                   end;
+              avlinsert(ldatarec);
+              end;
+         with ldatarec^ do begin
+              llong := nextlong; {Size}
+              if llong > size then size := llong;
+              llong := nextlong; {Address}
+              if llong <> -1 {-1 is Common, otherwise SB relative}
+              then begin address := llong; inmodule := lmodrec; end;
+              end;
+         end;
+     end
+else begin {not dotosys}
+     numdatas := nextword; nextaddr := 0;
+     database := 0; {Reset for MERLIN by load}
+     (***) data := pointer(ord(getmem(ord4(numdatas)*sizeof(datarec))));
+     for i := numdatas - 1 downto 0 do begin
+         (*** new(ldatarec); ***) ldatarec := @data^[i];
+         with ldatarec^ do begin
+              llink := nil; rlink := nil; balance := ZERO; inmodule := nil;
+              getln(lnam,lnamlen);
+              namelen := lnamlen; name := savenam(lnam,lnamlen);
+              size := nextlong; address := nextlong;
+              if (ENVIRONMENT = ADVENTURE) or (ENVIRONMENT = UNISOFT) or
+                 (ENVIRONMENT = UNOS) or (ENVIRONMENT = XENIX)
+              then begin
+                 {High bits: 00 text relative, 01 data relative, }
+                 {           10 bss  relative, 11 absolute.      }
+                 highbits  := address and $c0000000; {Mask off top two bits}
+                 address := address and $3fffffff; {Not really part of address}
+                 if highbits = 0
+                 then address := address + textareabase
+                 else
+                   if highbits = $40000000
+                   then address := address + dataareabase
+                   else
+                     if highbits = $80000000
+                     then address := address + bssareabase;
+                 end
+              else
+                if ENVIRONMENT = MERLIN then begin  
+                   address := nextaddr;
+                   nextaddr := nextaddr + size;
+                   if odd(nextaddr) then nextaddr := nextaddr + 1;
+                   end
+                else if ENVIRONMENT = CROMIX
+                     then begin  
+                        address := address + textareabase;
+                        end;
+              end;
+         avlinsert(ldatarec);
+         end;
+     end;
+end; {readmap}
+
+procedure readsymbols;
+  label 9;
+  var fname,vname: string63;
+      lnam,pnam,unam: alfa31; lnamlen,pnamlen,unamlen: integer;
+      ltypeno,lsize,i,l,m,rsize,llevel: integer;
+      llang: langs; p: pbyte; version: integer;
+      loff,mlong: longint; ldatarec: pdatarec;
+      cc: array[0..3] of byte; lentry: pentryrec;
+  
+  function getty: integer;
+    var lint: integer;
+  begin {getty}
+  lint := nextword;
+  if lint > 0
+  then begin
+    lint := lint + typebase;
+    if lint >= typemax then typemax := lint + 1;
+    end;
+  getty := lint;
+  end; {getty}
+  
+  procedure readtype(ftypeno: integer);
+    var PackedFlag,FirstTime: Boolean; i,j,k,l: integer; 
+        p: pbyte; t: ptyperec;
+  begin
+  k := nextbyte; PackedFlag := k > 15; k := k mod 16;
+  case k of
+    0, {SCALAR}
+    2, {POINTER}
+    3, {SET}
+    6, {FILE}
+    9: {FCHAR}
+       l := 4;
+    1: {SUBRANGE}
+       l := 12;
+    4: {ARRAY}
+       l := 6;
+    5, {STRING}
+    8: {SCONST}
+       l := 2;
+    7: {RECORD}
+       l := 10;
+   10: {FARRAY}
+       l := 18;
+  otherwise: writeln('?Bad type kind');
+  end; {case}
+  loceven;
+  p := locnew(l,FALSE); t := @p^;
+  with t^ do begin
+       PckdType := PackedFlag;
+       case k of
+         0: {SCALAR}
+            begin
+            form := SCALAR;
+            maxconst := nextword;
+            end;
+         1: {SUBRANGE}
+            begin
+            form := SUBRANGE;
+            rangeof := getty; min := nextlong; max := nextlong;
+            end;
+         2: {POINTER}
+            begin
+            form := POINTERS;
+            pointerto := getty;
+            end;
+         3: {SET}
+            begin
+            form := SETS;
+            setof := getty;
+            end;
+         4: {ARRAY}
+            begin
+            form := ARRAYS;
+            indexedby := getty; arrayof := getty;
+            if PackedFlag
+            then begin
+                 i := nextbyte;
+                 if i > 127
+                 then begin i := i - 128; SignedEl := TRUE; end
+                 else SignedEl := FALSE;
+                 bitsperel := i;
+                 end;
+            end;
+         5: {STRING}
+            begin
+            form := STRINGS;
+            stringlen := nextbyte;
+            end;
+         6: {FILE}
+            begin
+            form := FILES;
+            fileof := getty;
+            end;
+         7: {RECORD}
+            begin
+            form := RECORDS;
+            recsize := nextlong;
+            FirstTime := TRUE;
+            l := nextbyte;
+            while l > 0 do begin
+                  j := l + 5 + ord(PackedFlag)*2;
+                  p := locnew(j,TRUE);
+                  if FirstTime
+                  then begin fields := p; FirstTime := FALSE; end;
+                  for i := 1 to j do begin
+                      p^ := l; p := pointer(ord(p) + 1); l := nextbyte;
+                      end;
+                  end;
+            p := locnew(1,TRUE); p^ := 0;
+            end;
+         8: {SCONST}
+            begin
+            form := SCONST;
+            stringlen := nextbyte;
+            end;
+         9: {FCHAR}
+            begin
+            form := FCHAR;
+            charlen := nextword;
+            end;
+        10: {FARRAY}
+            begin
+            i := nextbyte;
+            if i > 1 then begin p := locnew(14*i + 4,FALSE); t := @p^; end;
+            t^.form := FARRAY; t^.dims := i; t^.farrayof := getty;
+            for i := 1 to t^.dims do
+                with t^.bounds[i] do begin
+                     flags := nextbyte; lo := nextlong;
+                     hi := nextlong; sz := nextlong;
+                     end;
+            end;
+       end; {case}
+       end;
+  i := ftypeno div 128; j := ftypeno mod 128;
+  if types[i] = nil
+  then begin
+       new(types[i]);
+       for k := 0 to 127 do types[i]^[k] := nil;
+       end;
+  if types[i]^[j] = nil
+  then types[i]^[j] := t
+  else writeln('?Type ',ftypeno,' is already defined');
+  end; {readtype}
+  
+begin {readsymbols}
+i := nextbyte;
+while i <> 255 do begin
+      case i of
+        0: llang := PASCAL;
+        1: llang := FORTRAN;
+        2: llang := BASIC;
+        3: llang := C;
+      otherwise: llang := UNKNOWN;
+      end; {case}
+      i := nextbyte; {version} l := nextbyte; {sub-version}
+      version := i*100 + l;
+      if version < lowestversion then lowestversion := version;
+      if version < 203
+      then begin
+           writeln('*** Input is for DBG version ',i,'.',l,' ***');
+           writeln('*** This DBG requires version 2.3 or version 2.4 ***');
+           halt(-1);
+           end;
+      llevel := nextbyte;
+      getln(lnam,lnamlen); getln(pnam,pnamlen);
+      unamlen := nextbyte;
+      if unamlen > 31
+      then begin writeln('?Name too long'); halt(ERRHALT); end;
+      for i := 1 to unamlen do unam[i] := chr(nextbyte);
+      lentry := entrylookup(@lnam,lnamlen);
+      if lentry = nil
+      then if lnam[1] = ' '
+           then {Block Data, create lmemaddr, value of p is trash}
+                p := locnew(0,FALSE)
+           else writeln('?"',lnam:lnamlen,'" not in map')
+      else with lentry^ do begin
+                if (unamlen > lnamlen) or
+                   not namEQnam(@unam,unamlen,@lnam,unamlen)
+                then username := savenam(unam,unamlen)
+                else username := linkname;
+                usernlen := unamlen; language := llang; level := llevel;
+                i := getindex(entrylookup(@pnam,pnamlen));
+                if i >= 0 then parent := i;
+                end;
+      ltypeno := getty;
+      while ltypeno <> 0 do begin
+            readtype(ltypeno);
+            ltypeno := getty;
+            end;
+      if lentry <> nil then lentry^.symbols := locnew(0,FALSE);
+      lsize := nextbyte;
+      while lsize <> 0 do begin
+            rsize := lsize + 4;
+            vname[0] := chr(lsize);
+            for i := 1 to lsize do vname[i] := chr(nextbyte);
+            ltypeno := getty;
+            l := nextbyte;
+            case l mod 16 of
+              0,1: begin m := nextword; rsize := rsize + 2; end;
+              2,3: ;
+              4:   begin
+                   getln(lnam,lnamlen);
+                   {::}
+                   loff := nextlong; rsize := rsize + 4;
+                   if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+                      (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+                      (ENVIRONMENT = SYS5_2)
+                   then rsize := rsize + 4;
+                   end;
+              6,7: begin mlong := nextlong; rsize := rsize + 4; end;
+            end; {case}
+            p := locnew(rsize,TRUE);
+            for i := 0 to lsize do begin
+                p^ := ord(vname[i]); p := pointer(ord(p) + 1);
+                end;
+            moveleft(ltypeno,cc,2);
+            for i := 0 to 1 do
+                begin p^ := cc[i]; p := pointer(ord(p) + 1); end;
+            p^ := l; p := pointer(ord(p) + 1);
+            case l mod 16 of
+              0,1: begin
+                   moveleft(m,cc,2);
+                   for i := 0 to 1 do
+                       begin p^ := cc[i]; p := pointer(ord(p) + 1); end;
+                   end;
+              2,3: ;
+              4:   if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+                      (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+                      (ENVIRONMENT = SYS5_2)
+                   then begin
+                     ldatarec := avllookup(@lnam,lnamlen);
+                     if ldatarec = nil
+                     then begin
+                          new(ldatarec);
+                          with ldatarec^ do begin
+                               llink := nil; rlink := nil; balance := ZERO;
+                               namelen := lnamlen;
+                               name := savenam(lnam,lnamlen);
+                               inmodule := nil; size := 0; address := -1;
+                               end;
+                          avlinsert(ldatarec);
+                          end;
+                     moveleft(loff,cc,4);
+                     for i := 0 to 3 do
+                         begin p^ := cc[i]; p := pointer(ord(p) + 1); end;
+                     moveleft(ldatarec,cc,4);
+                     for i := 0 to 3 do
+                         begin p^ := cc[i]; p := pointer(ord(p) + 1); end;
+                     end
+                   else begin {not dotosys}
+                     if lnamlen > 8 then lnamlen := 8;
+                     ldatarec := avllookup(@lnam,lnamlen);
+                     if ldatarec = nil
+                     then begin
+                          write('*** Undefined Data Area ''');
+                          wrcharn(@lnam,lnamlen); writeln(''' ***');
+                          end
+                     else loff := loff + ldatarec^.address;
+                     moveleft(loff,cc,4);
+                     for i := 0 to 3 do
+                         begin p^ := cc[i]; p := pointer(ord(p) + 1); end;
+                     end;
+              6,7: begin
+                   moveleft(mlong,cc,4);
+                   for i := 0 to 3 do
+                       begin p^ := cc[i]; p := pointer(ord(p) + 1); end;
+                   end;
+            end; {case}
+            lsize := nextbyte;
+            end;
+      p := locnew(1,TRUE); p^ := 0;
+      i := nextbyte;
+      end;
+9: ;
+end; {readsymbols}
+
+procedure readbpoints;
+  type rec = record numstmts: integer; a: array[0..9999] of integer; end;
+  var fname: string63; n,i,j,index,entryloc,exitloc,k,m,main: integer; 
+      lnam: alfa31; p: ^rec; lstatements,q: pentryrec; roffset: longint;
+      lentry: pentryrec; lnamlen: integer;
+begin
+n := nextword; lstatements := nil;
+while n > 0 do begin
+      m := 0; roffset := 0; k := nextbyte;
+      case k of
+        0: ;
+        1,2: begin m := nextword; roffset := nextlong; end;
+      end; {case}
+      for i := 1 to n do begin
+          getln(lnam,lnamlen);
+          lentry := entrylookup(@lnam,lnamlen);
+          index := getindex(lentry);
+          if i = 1 then main := index; { First one is subroutine }
+          entryloc := nextlong; exitloc := nextlong;
+          if lentry = nil
+          then begin
+               if lnam[1] <> ' ' {Block Data Name}
+               then writeln('?"',lnam:lnamlen,'" not in map');
+               end
+          else with lentry^ do begin
+                         entryoff := entryloc; exitoff := exitloc;
+                         statements := @lstatements^;
+                         lstatements := lentry;
+                         wherereg := k; regmask := m; regoffset := roffset;
+                         if i <> 1
+                         then begin { Entry }
+                              language := FTNENTRY; parent := main;
+                              end;
+                         end;
+          end;
+      j := nextword;
+      p := pointer(ord(getmem(j*2+2)));
+      with p^ do begin
+           numstmts := j;
+           for i := 0 to j - 1 do a[i] := nextword;
+           end;
+      while lstatements <> nil do begin
+            q := pointer(ord(lstatements^.statements));
+            lstatements^.statements := @p^;
+            lstatements := q;
+            end;
+      n := nextword;
+      end;
+end; {readbpoints}
+
+procedure markmemory;
+  var p: ^longint;
+begin
+if ENVIRONMENT = MERLIN
+then begin
+     p := pointer($108); locmark := p^;
+     p := pointer($10c); hicmark := p^;
+     mark(p); lodmark := ord(p); 
+     lodmark := (lodmark - (lodmark mod 256)) + 256;
+     hidmark := %_getsp - 8192; hidmark := hidmark - (hidmark mod 256);
+     end
+else if ENVIRONMENT = ADVENTURE
+     then begin
+          new(p);
+          prog.d[1] := ord(p); {Target program initial heap}
+          prog.a[7] := %_getsp - 8192;
+          prog.initsp := pointer(prog.a[7] - 2272);
+          end;
+end; {markmemory}
+
+

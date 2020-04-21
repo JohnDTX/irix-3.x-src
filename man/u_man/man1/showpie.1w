@@ -1,0 +1,19 @@
+'\"macro stdmacro
+.TH SHOWPIE 1W
+.SH NAME
+showpie \- show the division of a window into rectangles
+.SH SYNOPSIS
+.B showpie 
+color
+.SH DESCRIPTION
+The window manager
+divides a window into a set of rectangles.
+.I showpie 
+shows the decomposition of its window into rectangles.
+If 
+.I color
+is specified, 
+.I showpie
+displays the outlines of the rectangles in
+that color.
+

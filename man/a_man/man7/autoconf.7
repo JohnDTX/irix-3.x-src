@@ -1,0 +1,67 @@
+'\"macro stdmacro
+.TH AUTOCONF 7
+.SH NAME
+autoconf \- diagnostics from the autoconfiguration code
+.SH DESCRIPTION
+When UNIX bootstraps it probes the innards of the machine it is running
+on and locates controllers, drives, and other devices, printing out
+what it finds on the console.  This procedure is driven by a system
+configuration table which is processed by the
+.I config 
+system call
+and compiled into each kernel.
+.PP
+MULTIBUS devices are located by probing to see if their control-status
+registers respond.  If not, then the autoconfigure code will print
+out a message of the form ``\f2xx\f1 not installed''.  If the control
+status register responds but the device cannot be correctly initialized,
+a diagnostic warning will be printed on the console and the device
+will not be available to the system. 
+.PP
+The variables \f2rootdev\f1 and \f2swapdev\f1 are used as prototypes
+in the kernel
+to specify where the system will find the root and swap devices, respectively.
+As each disk drive is attached to its controller, the systems checks for
+a match agains the \f2rootdev\f1 and \f2swapdev\f1 variables.
+.PP
+If the
+given drive has a root partition on it (specified in the boot label)
+and the same unit number as stored in \f2rootdev\f1 then it is chosen as
+the potential root drive.  The \f3last\f1 such drive found is used as
+the \f2rootdev\f1 (thus ordering of the \f2config\f1 file is important).
+.PP
+If the
+given drive has a swap partition on it (specified in the boot label)
+and the same unit number as stored in \f2swapdev\f1 then it is chosen as
+the potential swap drive.  The \f3last\f1 such drive found is used as
+the \f2swapdev\f1 (thus ordering of the \f2config\f1 file is important).
+.SH SEE ALSO
+intro(7)
+.SH DIAGNOSTICS
+\f3%s%d at mbio 0x%04x ipl %d\f1.  This message is printed when probing
+a simple device or a controller.  It means that the device successfully
+initialized itself (or lied about it anyway); is running at the printed
+multibus I/O address (``mbio'') and will interrupt at priority
+level ``ipl''.
+.PP
+\f3%s%d slave %d\f1.  The slave given drive (tape or disk) is attached
+as the printed slave to the \f2previous\f1 controller printed.
+.PP
+\f3%s%d not installed\f1. The given device was not found on the multibus.
+.PP
+\f3%s%d dead\f1.  The given device responded to its multibus address,
+but did not behave correctly.  This might mean something is broken,
+or that two boards are wired with the same multibus i/o address.  Typically,
+however, if two boards are mis address they won't probe at all, or the
+machine will hang trying to access them.
+.PP
+\f3stray interrupt level %d\f1.  An interrupt occured for which there is
+no interrupt service routine.  A related
+message, \f3panic: default_intr\f2, will follow this message.
+.PP
+\f3root on %s%d%c\f1.  Once all the controllers and devices have been
+probed, the autoconfigure routines will print out the chosen root device.
+.PP
+\f3swap on %s%d%c [%dK]\f1.  Once all the controllers and devices have been
+probed, the autoconfigure routines will print out the chosen swap
+device as well as it size.

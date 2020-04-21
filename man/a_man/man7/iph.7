@@ -1,0 +1,70 @@
+'\"macro stdmacro
+.TH IPH 7
+.SH NAME
+iph \- Interphase 2190 smd disk controller
+.SH SYNOPSIS
+.B "controller iph0 at mb0 csr 0x7010 priority 5 vector ipintr
+.br
+.B "disk ip0 at iph0 drive 0
+.br
+.B "disk ip1 at iph0 drive 1
+.SH DESCRIPTION
+This is a generic MULTIBUS smd disk controller.
+Files with minor device numbers 0 through 7 refer to various portions
+of drive 0;
+minor devices 8 through 15 refer to drive 1, etc.
+The standard device names begin with ``ip'' followed by
+the drive number and then a letter a-h for partitions 0-7 respectively.
+The character ? stands here for a drive number in the range 0-7.
+.PP
+The block files access the disk via the system's normal
+buffering mechanism and may be read and written without regard to
+physical disk records.  There is also a `raw' interface
+which provides for direct transmission between the disk
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.'
+.PP
+In raw I/O counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.PP
+The size of the various partitions supported by the driver in fact
+are a function of the drive itself.  Present on each drive is a boot
+label which contains the partitions sizes and locations.
+.SH FILES
+/dev/ip[0-3][a-h] block files
+.br
+/dev/rip[0-3][a-h] raw files
+.SH SEE ALSO
+autoconf(7)
+.SH DIAGNOSTICS
+\f3ip%d (***No label***)\f1.  The named drive has no boot label and
+thus cannot be used.
+.br
+\f3(%s Name: %s)\f1.  On a successful attach, the drive type is
+printed out followed by its ``name'' (a user specifiable name).
+The name can be defined in the standalone utility
+\f3ipfex.\f1
+.br
+\f3ipintr: iptab.b_active == 0\f1.  A spurious interrupt from the
+controller occured.
+.br
+\f3ipintr hard error(%x): %s block: %d cmd: %s\f1.  A hard error occured
+while reading block %d.
+.br
+\f3ipcmd: timeout wait for status %x\f1.  While attempting to get
+status from the controller, a timeout occured.  The controller is probably
+hung.
+.br
+\f3ipcmd: status: %x error: %x\f1.  A hard error occured during a
+non-interruptable command.
+.br
+\f3ipcmd: timeout waiting for cmd %s to complete\f1.  A command given
+to the drive in a non-interrupt fashion timed out.
+.br
+\f3%s on ip%d, slice %d\f1.  Usually printed by unix prefixed with
+the message ``out of space''.

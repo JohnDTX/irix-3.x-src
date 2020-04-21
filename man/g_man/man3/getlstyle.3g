@@ -1,0 +1,31 @@
+.TH getlstyle 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getlstyle
+\- returns the current linestyle  
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getlstyle()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getlst()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getlstyle: longint;"
+.SH DESCRIPTION
+.B getlstyle
+returns the current linestyle.  The returned value is 
+an index into the linestyle table.
+.SH "SEE ALSO"
+deflinestyle, setlinestyle
+.sp
+.I Programming Guide,
+Section 5.1, Linestyles
+.SH NOTE
+This routine is available only in immediate mode.

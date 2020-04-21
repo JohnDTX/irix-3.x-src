@@ -1,0 +1,16 @@
+'\"macro stdmacro
+.TH WHOAMI 1
+.SH NAME
+whoami \- print effective current user id
+.SH SYNOPSIS
+.B whoami
+.SH DESCRIPTION
+.I Whoami\^
+prints who you are.
+It works even if you are su'd, while \f3who am i\fP does not since
+it uses /etc/utmp.
+.SH FILES
+.DT
+/etc/passwd	Name data base
+.SH "SEE ALSO"
+who(1), id(1)

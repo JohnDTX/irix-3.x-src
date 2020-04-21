@@ -1,0 +1,22 @@
+.TH SOCKETADDR 3N
+.SH NAME
+socketaddr \- return socket address
+.SH SYNOPSIS
+.B #include <sys/socket.h>
+.br
+.B socketaddr(s, addr)
+.br
+.B int s;
+.br
+.B struct sockaddr *addr;
+.SH DESCRIPTION
+.I addr 
+is the address associated with the socket
+.I s.
+If
+.I s
+is not a socket, \-1 and an appropriate 
+.I errno 
+are returned.
+.SH SEE ALSO
+socket(3N)

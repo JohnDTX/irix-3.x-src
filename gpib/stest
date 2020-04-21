@@ -1,0 +1,11 @@
+# test of short sends
+xib -v -f /dev/ib01 \
+	-lttl 1 2 3 4 \
+	-tllt 1025 1024 1023 2049 \
+	-llll 1 1 1 1 \
+	&
+xib -f /dev/ib11 \
+	-tllt 1 2 3 4 \
+	-lttl 1025 1024 1023 2049 \
+	-tttt 1 1 1 1 \
+	&

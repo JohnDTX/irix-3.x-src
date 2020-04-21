@@ -1,0 +1,32 @@
+.TH strwidth 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I strwidth
+- return the width of the specified text string
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long strwidth(str) "
+.B "String str;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer function strwid(str)"
+.B "character*(*) str"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function strwidth(str: String): integer;"
+.sp
+.SH DESCRIPTION
+.I Strwidth
+returns the width, in pixels, of a text string, using
+the character spacing parameters in the currently selected raster font.  This routine
+is useful only when there is a simple mapping from screen to world
+space.  The user must do the mapping.
+.PP
+Undefined characters have zero width.
+.SH "SEE ALSO"
+.I getheight, getlwidth, mapw, mapw2
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,44 @@
+'\"macro stdmacro
+.TH L3TOL 3C 
+.SH NAME
+l3tol, ltol3 \- convert between 3-byte integers and long integers
+.SH SYNOPSIS
+.B void l3tol (lp, cp, n)
+.br
+.B long \(**lp;
+.br
+.B char \(**cp;
+.br
+.B int n;
+.PP
+.B void ltol3 (cp, lp, n)
+.br
+.B char \(**cp;
+.br
+.B long \(**lp;
+.br
+.B int n;
+.SH DESCRIPTION
+.I L3tol\^
+converts a list of
+.I n\^
+three-byte integers packed into a character string
+pointed to by 
+.I cp\^
+into a list of long integers pointed to by
+.IR lp .
+.PP
+.I Ltol3\^
+performs the reverse conversion from long integers
+.RI ( lp\^ )
+to three-byte integers
+.RI ( cp\^ ).
+.PP
+These functions are useful for file-system maintenance
+where the block numbers are three bytes long.
+.SH SEE ALSO
+fs(4).
+.SH BUGS
+Because of possible differences in byte ordering,
+the numerical values of the long integers are machine-dependent.
+.\"	@(#)l3tol.3c	5.1 of 10/25/83

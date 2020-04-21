@@ -1,0 +1,28 @@
+'\"macro stdmacro
+.TH GETRPCPORT 3R
+.SH NAME
+getrpcport \- get RPC port number
+.SH SYNOPSIS
+.ft B
+.nf
+int getrpcport(host, prognum, versnum, proto)
+	char *host;
+	int prognum, versnum, proto;
+.fi
+.SH DESCRIPTION
+.I Getrpcport
+returns the port number for version
+.I versnum
+of the RPC program
+.I prognum
+running on
+.I host
+and using protocol
+.IR proto .
+It returns 0 if it cannot contact the portmapper, or if
+.I prognum
+is not registered.  If
+.I prognum
+is registered but not with version
+.IR versnum ,
+it will return that port number.

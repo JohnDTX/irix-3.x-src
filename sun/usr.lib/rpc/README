@@ -1,0 +1,62 @@
+A guide to the SGI port of SUN rpc.
+
+The following modules should track Sun source exactly except for
+filename shorthands (`"' means the name is the same as Sun).
+
+SUN		SGI
+auth_none.c	"
+auth_unix.h	"
+clnt.h		"
+clnt_raw.c	"
+clnt_tcp.c	"
+clnt_udp.c	"
+pmap_clnt.c	"
+pmap_clnt.h	"
+pmap_getmaps.c	pmap_gmaps.c
+pmap_getport.c	pmap_gport.c
+pmap_prot.c	"
+pmap_prot.h	"
+rpc.h		"
+rpc_msg.h	"
+rpc_prot.c	"
+svc.h		"
+svc_auth.h	"
+svc_raw.c	"
+svc_simple.c	svc_simp.c
+svc_tcp.c	"
+svc_udp.c	"
+xdr.c		"
+xdr.h		"
+xdr_array.c	"
+xdr_float.c	"
+xdr_mem.c	"
+xdr_rec.c	"
+xdr_reference.c	xdr_refer.c
+xdr_stdio.c	"
+
+The following contain changes from Sun source bracketed by #ifdef sgi
+#endif directives.  Occasionally a misspelling in a comment or
+diagnostic message was corrected without being conditionally compiled
+for sgi only.  Also a few implicit ``auto'' storage class variables
+were converted to ``register''.
+
+Makefile	"
+auth.h		"
+auth_kern.c	"
+auth_unix.c	"
+authunix_prot.c	authu_prot.c
+clnt_kudp.c	"
+kudp_fastsend.c	kudp_fast.c
+pmap_rmt.c	"
+subr_kudp.c	"
+svc.c		"
+svc_auth.c	"
+svc_auth_unix.c	svc_auth_u.c
+svc_kudp.c	"
+types.h		"
+
+This module contains struct member name changes for the sake of clarity
+and of the maintainer's sanity.  It will therefore differ greatly but
+cosmetically from Sun source.
+
+xdr_mbuf.c	"

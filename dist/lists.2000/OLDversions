@@ -1,0 +1,23 @@
+boot	004-0124-062	Bootstrap System
+demos	004-0174-023	Update Demos
+dist	004-0024-036	Distribution Tools
+emacs	004-0374-023	Emacs Option
+feboot	004-0031-012	FE Bootstrap Tape
+feupd	004-0041-012	FE Update Tape
+feopt	004-0071-011	FE Option Tape
+ftn	004-0314-023	FORTRAN Option
+games	004-0164-023	Update Games
+gifts	004-0184-021	Update Gifts
+gltut	004-0204-021	Update IRIS Programming Tutorial
+mail	004-0194-021	Update Mail
+man	004-0154-023	Update Manual Pages
+part1	004-0011-043	Release Tape, Part 1
+part2	004-0011-053	Release Tape, Part 2
+part3	004-0011-131	Release Tape, Part 3
+pas	004-0324-023	Pascal Option
+root	004-0134-183	Standard System, Part 1 (root)
+sys	004-0631-013	Reconfigurable Kernel Special
+troff	004-0304-021	Laser Printing Option
+upd	004-0144-033	Update System
+usr	004-0134-193	Standard System, Part 2 (usr)
+xns	004-0394-021	XNS Option

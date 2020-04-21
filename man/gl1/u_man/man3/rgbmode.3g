@@ -1,0 +1,34 @@
+.TH RGBmode  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I RGBmode
+- set a display mode that bypasses the color map
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "RGBmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine RGBmod"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure RGBmode;"
+.sp
+.SH DESCRIPTION
+In RGB mode, all the bitplanes are simultaneously written 
+and displayed.
+Eight-bit values of
+red, green, and blue are written into the bitplanes, and directly
+control the monitor's intensity.  RGB mode is useful only 
+when the system has 24 bitplanes:
+the first sixteen are shared equally between red and green; the last eight
+define the blue component.  A twelve-plane system provides one-quarter
+the maximum intensity in red and green, and no blue at all. 
+\f2RGBmode\f1
+does not take effect until \f2gconfig\f1 is called.
+.SH "SEE ALSO"
+.I doublebuffer, gconfig, getdisplaymode, singlebuffer
+.SH NOTE
+This command can only be used in immediate mode.

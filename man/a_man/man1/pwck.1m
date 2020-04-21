@@ -1,0 +1,50 @@
+'\"macro stdmacro
+.ds P UNIX
+.TH PWCK 1M
+.SH NAME
+pwck, grpck \- password/group file checkers
+.SH SYNOPSIS
+.B /etc/pwck
+[\^file\^]
+.br
+.B /etc/grpck
+[\^file\^]
+.SH DESCRIPTION
+.I Pwck\^
+scans the password file and notes any inconsistencies.
+The checks include validation of the number of fields,
+login name, user \s-1ID\s+1, group \s-1ID\s+1,
+and whether the login directory
+and optional program name exist.
+The default password file is
+.BR /etc/passwd .
+.PP
+.I Grpck\^
+verifies all entries in the group file. This verification
+includes a check of the number of fields, group name,
+group \s-1ID\s+1, and whether all login names appear in the
+password file. The default group file is
+.BR /etc/group .
+.SH EXAMPLE
+.IP
+pwck
+.PP
+will list inconsistencies in 
+.BR /etc/passwd .
+.IP
+grpck
+.PP
+will list inconsistencies in 
+.BR /etc/group .
+.SH FILES
+/etc/group
+.br
+/etc/passwd
+.SH SEE ALSO
+group(4),
+passwd(4).
+.SH DIAGNOSTICS
+Group entries in
+.BR /etc/group
+with no login names are flagged.
+.\"	@(#)pwck.1m	5.1 of 10/17/83

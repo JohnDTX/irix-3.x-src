@@ -1,0 +1,27 @@
+'\"macro stdmacro
+.TH SGBOUNCE 1M
+.SH NAME
+sgbounce \- provide network name service
+.SH SYNOPSIS
+.B sgbounce
+system_name boot_director
+.SH DESCRIPTION
+\f2Sgbounce\fP is a daemon that provides name service to IRIS
+Terminals on an Ethernet local area network.  The system name
+on the command line should be identical to the kernel's idea of
+the host name (i.e. \f2/bin/hostname\fP).  \f2Sgbounce\fP is
+normally run in the background.  For example,
+.sp
+.nf
+.ti +1.0i
+# sgbounce `/bin/hostname` /usr/local/boot &
+.sp
+.fi
+\f2sgbounce\fP can be started by hand, as shown above, but should
+normally be started in the file \f2/etc/rc.xns\fP.
+.SH "NOTE"
+Only one copy of \f2sgbounce\fP may be running at one time.
+.SH "SEE ALSO"
+.nf
+Silicon Graphics, Inc., \f2IRIS Terminal Guide\fP, Appendix B
+sgboot(1M).

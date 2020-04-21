@@ -1,0 +1,54 @@
+.TH rcrvn 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rcrvn
+\- draws a series of curve segments
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rcrvn(n, geom)"
+.B "long n;"
+.B "Coord geom[][4];"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rcrvn(n, geom)"
+.B "integer*4 n"
+.B "real geom(4,n)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rcrvn(n: longint: var geom: Coord);"
+.IP
+.SH DESCRIPTION
+.B rcrvn
+draws a series of rational cubic
+spline curve segments using the current basis
+and precision.
+The control points
+specified in 
+.I geom
+determine
+the shapes of the curve segments
+and are used four at a time.
+For example, if \f2n\f1 is 6, three curve
+segments are drawn, the first using points 0,1,2,3
+as control points, and the second and third segments
+are controlled by points 1,2,3,4 and 2,3,4,5,
+respectively.
+If the current basis is a B-spline, Cardinal spline, or basis
+with similar properties, the curve segments are joined end to end and
+appear as a single curve. 
+.SH "SEE ALSO"
+crv,
+crvn,
+curvebasis,
+curveprecision,
+crvn, 
+defbasis
+.sp
+.I Programming Guide,
+Section 11.2, Drawing Curves

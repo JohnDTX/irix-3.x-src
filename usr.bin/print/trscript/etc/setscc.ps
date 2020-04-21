@@ -1,0 +1,16 @@
+%!
+
+% little proc to set the EEROM scc parameters
+
+serverdict begin
+statusdict begin
+25 sccbatch = =
+0 checkpassword
+   {0 exitserver}
+   {(Incorrect Server Password!!)= flush}
+ifelse
+
+statusdict begin
+
+25 19200 0 setsccbatch
+end

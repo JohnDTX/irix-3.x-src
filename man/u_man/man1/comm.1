@@ -1,0 +1,63 @@
+'\"macro stdmacro
+.TH COMM 1
+.SH NAME
+comm \- select or reject lines common to two sorted files
+.SH SYNOPSIS
+.B comm
+[
+.B \-
+[
+.B 123
+]
+] file1 file2
+.SH DESCRIPTION
+.I Comm\^
+reads
+.I file1\^
+and
+.IR file2 ,
+which
+should be ordered in \s-1ASCII\s0 collating sequence (see
+.IR sort\^ (1)),
+and produces a three-column output: lines only in
+.IR file1 ;
+lines only in
+.IR file2 ;
+and lines in both files.
+The file name
+.B \-
+means the standard input.
+.PP
+Flags 1, 2, or 3 suppress printing of the corresponding
+column.
+Thus
+.B comm
+.B \-12
+prints only the lines common to the two files;
+.B comm
+.B \-23
+prints only lines in the first file but not in the second;
+.B comm
+.B \-123
+is a no-op.
+.SH EXAMPLE
+.IP
+comm -12 filea fileb
+.PP
+prints only the lines common
+to filea and fileb.
+.IP
+comm -23 filea fileb
+.PP
+prints only lines in the first file but not in the second.
+.IP
+comm -123 filea fileb
+.PP
+is not an option, as it suppresses all output.
+.IP
+comm -3 filea fileb
+.PP
+prints only the lines that differ in the two files.
+.SH "SEE ALSO"
+cmp(1), diff(1), sort(1), uniq(1).
+.\"	@(#)comm.1	5.1 of 10/27/83

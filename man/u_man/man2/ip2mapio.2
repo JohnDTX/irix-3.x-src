@@ -1,0 +1,63 @@
+'\"macro stdmacro
+.TH IP2MAPIO 2 
+.SH NAME
+ip2mapio, ip2mapmem, ip2unmap \- multibus mapping operations
+.SH SYNOPSIS
+.B #include <ipII/cpureg.h>
+.PP
+.B void ip2mapio ()
+.br
+.B void ip2mapmem ()
+.br
+.B void ip2unmap ()
+.SH DESCRIPTION
+.PP
+For the IRIS 2400T, IRIS 2500T, and IRIS series 3000 workstations, the
+.IR ip2mapio ", " ip2mapmem ", "
+and
+.I ip2unmap
+calls are provided to allow/disallow program access to the multibus.
+For the IRIS series 2000 workstations, see
+.IR phys (2).
+.PP
+The
+.I ip2mapio
+system call allows program access to the entire 65536 bytes of
+multibus i/o space.  The constant
+.B SEG_MBIO
+defined in \f3<ipII/cpureg.h>\f1
+defines the address in the user's virtual memory space where the i/o space
+will be addressable.
+To address a particular register, one need only add the
+i/o register's multibus address to the
+.B SEG_MBIO
+constant.
+.PP
+The
+.I ip2mapmem
+system call allows program access to the entire 16,777,216 bytes of
+multibus memory space (16 megabytes).  The constant
+.B SEG_MBMEM
+defines the address in the user's virtual memory space where the multibus
+memory space will appear.  To address a particular multibus memory location,
+one need only add the multibus address to the
+.B SEG_MBMEM
+constant.
+.PP
+The
+.B ip2unmap
+system call disables program access to the multibus i/o space and the
+multibus memory space simultaneously.
+.SH NOTES
+No protection is provided for these calls.  Thus, if a user program
+enables access to all of the multibus memory, and then proceeds to
+scribble on multibus memory used by the kernel, bad things will very
+likely happen.
+.PP
+Remember - \f3Power tools can be dangerous\f1.
+.PP
+For a standard configuration of the IP2 processor, the kernel
+will use the lower 2 megabytes of the multibus memory space, with
+the remainder available for other use.
+.SH "SEE ALSO"
+phys(2)

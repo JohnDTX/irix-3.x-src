@@ -1,0 +1,79 @@
+'\"macro stdmacro
+.TH UNAME 2
+.SH NAME
+uname \- get name of current \s-1UNIX\s0 system
+.SH SYNOPSIS
+.B #include <sys/utsname.h>
+.PP
+.B int uname (name)
+.br
+.B struct utsname \(**name;
+.SH DESCRIPTION
+.I Uname\^
+stores
+information identifying the current
+.SM UNIX
+system in the structure pointed to by
+.IR name .
+.PP
+.I Uname\^
+uses the structure
+defined in \f3<sys/utsname.h>\fP:
+.PP
+.RS
+.ta \w'struct\ \ 'u +\w'utsname {\ \ 'u
+.nf
+struct	utsname {
+	char	sysname[9];
+	char	nodename[9];
+	char	release[9];
+	char	version[9];
+	char	machine[9];
+};
+extern struct utsname utsname;
+.fi
+.RE
+.PP
+The fields of the utsname structure contain information as follows:
+.PP
+.RS
+.ta \w'sysname\ \ 'u +\w'nodename\ \ 'u
+.nf
+sysname, nodename:	set to first 8 chars
+		of sethostname()
+.sp 0.5
+release:		IRIS software release
+.sp 0.5
+version:		software version (timestamp)
+.sp 0.5
+machine one of:	m68000
+		m68020
+.fi
+.RE
+.PP
+.I Uname\^
+will fail if
+.I name\^
+points to an invalid address.
+.SM
+\%[EFAULT]
+.SH "RETURN VALUE"
+Upon successful completion, a non-negative value is returned.
+Otherwise, \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+uname(1).
+.bp
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#57,D0
+.B movl	name,A0	| fetch argument
+.B subl	A1,A1	| uname
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)uname.2	5.1 of 10/19/83

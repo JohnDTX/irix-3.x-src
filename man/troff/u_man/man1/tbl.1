@@ -1,0 +1,256 @@
+'\" t
+'\"macro stdmacro
+.ds T \(->
+.if t .ds ^ \^\s+4\v@.3m@^\v@-.3m@\s-4\^
+.if n .ds ^ ^
+.TH TBL 1
+.SH NAME
+tbl \- prepares tables for nroff or troff
+.SH SYNOPSIS
+.B tbl
+[
+.B \-TX
+] 
+.\"[\-\^\- ]
+[ files ]
+.SH DESCRIPTION
+.I tbl\^
+is a preprocessor that formats tables for
+.IR nroff (1)
+or
+.IR troff (1).
+.B tbl
+assumes that lines between the
+.SM
+.B \&.TS
+and
+.SM
+.B \&.TE
+command lines describe tables, thus they
+are re-formatted;
+lines outside these command lines are copied to the standard output.
+(
+.B tbl
+does not alter the
+.SM
+.B \&.TS
+and
+.SM
+.B \&.TE
+command lines.)
+.PP
+Follow
+.SM
+.B \&.TS
+with global options.
+The available global options are:
+.PP
+.RS
+.PD 0
+.TP 10
+.B center
+centers the table (default is left-adjust);
+.TP
+.B expand
+makes the table as wide as the current line length;
+.TP
+.B box
+encloses the table in a box;
+.TP
+.B doublebox
+encloses the table in a double box;
+.TP
+.B allbox
+encloses each item of the table in a box;
+.TP
+.BI "tab (" x )
+uses the character
+.I x\^
+instead of a tab to separate items in a line of input data.
+.TP
+.BI "linesize (" n )
+sets lines or rules (e.g. from \f3box\f1) in \f2n\f2-point type
+.RE
+.PD
+.PP
+End the global options with a semi-colon
+.RB ( ; ).
+.PP
+After global options come lines describing the format of each line of the table.
+Each such format line describes one line of the table itself, except that the
+last format line
+(which you must end with a period)
+describes
+.I all\^
+remaining lines of the table.
+A single key-letter describes each column of each line of the table.
+You may follow this key letter with specifiers that determine 
+the font and point size
+of the corresponding item,
+that indicate where vertical bars are to appear between columns,
+that determine
+column width, inter-column spacing, etc.
+The available key-letters are:
+.PP
+.RS
+.PD 0
+.TP
+.B c
+centers item within the column;
+.TP
+.B r
+right-adjusts item within the column;
+.TP
+.B l
+left-adjusts item within the column;
+.TP
+.B n
+numerically adjusts item in the column:
+units positions of numbers are aligned vertically;
+.TP
+.B s
+spans previous item on the left into this column;
+.TP
+.B a
+centers longest line in this column and then
+left-adjusts all other lines in
+this column with respect to that centered line;
+.TP
+.B \*^
+spans down previous entry in this column;
+.TP
+.B \|_
+replaces this entry with a horizontal line;
+.TP
+.B =
+replaces this entry with a double horizontal line.
+.RE
+.PD
+.PP
+The characters
+.B B
+and
+.B I
+stand for the bold and italic fonts, respectively;
+the character \(bv indicates a vertical line between columns.
+.PP
+The format lines are followed by lines containing the actual data for the
+table, followed finally by
+.SM
+.BR \&.TE .
+Within such data lines, data items are normally separated by tab characters.
+.PP
+If a data line consists of only
+.B _
+or
+.BR = ,
+a single or double line, respectively, is drawn
+across the table at that point;
+if a
+.I "single item\^"
+in a data line consists of only
+.B _
+or
+.BR = ,
+then that item is replaced by a single or double line.
+.PP
+Full details of all these and other features of
+.I tbl\^
+are given in the reference manual cited below.
+.PP
+The
+.SM
+.B \-TX
+option forces
+.I tbl\^
+to use only full vertical line motions, making the output
+more
+suitable for devices that cannot generate partial vertical
+line
+motions (for example, line printers).
+.PP
+If you do not specify 
+.IR files , " tbl"
+reads the standard input.
+.I tbl
+will also read the standard input if it encounters
+.B \-
+as a
+.I file
+argument.
+When 
+.I tbl\^
+is used with
+.IR eqn (1)
+or
+.IR neqn (1),
+put it
+first to minimize the volume
+of data passed through
+pipes.
+.SH EXAMPLE
+If we let \*T represent a tab (which should
+be typed as a genuine tab),
+then
+the input:
+.PP
+.RS
+.nf
+\&\f3.\fPTS
+center \|box \|\f3;\fP
+cB \|s \|s
+cI \|\(bv \|cI \|s
+\*^ \|\(bv \|c \|c
+l \|\(bv \|n \|n \|\f3.\fP
+Household \|Population
+\f3_\fP
+Town\*THouseholds
+\*TNumber\*TSize
+\f3=\fP
+Bedminster\*T789\*T3\f3.\fP26
+Bernards \|Twp\f3.\fP\*T3087\*T3\f3.\fP74
+Bernardsville\*T2018\*T3\f3.\fP30
+Bound \|Brook\*T3425\*T3\f3.\fP04
+Bridgewater\*T7897\*T3\f3.\fP81
+Far \|Hills\*T240\*T3\f3.\fP19
+\&\f3.\fPTE
+.fi
+.RE
+.PP
+yields:
+.PP
+.TS
+center box ;
+cB s s
+cI | cI s
+^ | c c
+l | n n .
+Household Population
+_
+Town	Households
+	Number	Size
+=
+Bedminster	789	3.26
+Bernards Twp.	3087	3.74
+Bernardsville	2018	3.30
+Bound Brook	3425	3.04
+Bridgewater	7897	3.81
+Far Hills	240	3.19
+.TE
+.SH SEE ALSO
+.br
+eqn(1), mm(1), mmt(1), mvt(1), nroff(1), troff(1),
+mm(5) and
+mv(5).
+.PP
+The section entitled ``tbl'' in the \f2Documenter's Workbench User's Guide\f1.
+.PP
+The section entitled ``tbl'' in the \f2Documenter's Workbench Reference Manual\f1.
+.SH BUGS
+.br
+See
+.SM
+.I BUGS\^
+under
+.IR nroff (1).
+.\"	%W% of %G%

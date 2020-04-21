@@ -1,0 +1,32 @@
+.TH finish  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I finish
+- wait until the terminal command queue and pipeline are empty
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "finish()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine finish"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure finish;"
+.sp
+.SH DESCRIPTION
+\f2Finish\f1 blocks the host process until all previous commands 
+have been executed.  
+It forces all unsent commands down the network/graphics pipeline
+to the bitplanes,
+sends a final token, and blocks until that token has gone through
+the network and graphics pipeline, and an acknowledgment has been
+sent.
+It is useful in the presence of network and
+pipeline delays.
+.SH "SEE ALSO"
+.I gflush
+.SH NOTE
+This command can only be used in immediate mode.

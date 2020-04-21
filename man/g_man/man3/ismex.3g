@@ -1,0 +1,27 @@
+.TH ismex 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B ismex
+\- returns TRUE if the window manager is running
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Boolean ismex()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "logical function ismex()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function ismex: Boolean;"
+.SH DESCRIPTION
+.B ismex
+returns TRUE(1) if the window manager is running and FALSE(0) otherwise.
+.SH "SEE ALSO"
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

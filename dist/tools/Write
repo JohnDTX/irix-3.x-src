@@ -1,0 +1,78 @@
+#! /bin/sh
+
+root=$DIST
+v=
+tocexit=:
+dev=/dev/rmt2
+toollist="dist"
+if test -f /bin/smt ; then mt=smt ; else mt=mt ; fi
+
+while test $# -gt 0
+do
+	case $1 in
+	-r)	shift
+		root=$1
+		if test ! -d $root
+		then
+			echo $root: bad root directory. ; exit 1
+		fi
+		;;
+	-f)	shift
+		dev=$1
+		;;
+	-v)	v=v
+		;;
+	-t)	tocexit=exit
+		;;
+	-k)	toollist="Versions dist key"
+		;;
+	-*)	echo $0: unrecognized flage $1 ; exit 1
+		;;
+	*)	break
+	esac
+	shift
+done
+
+tot=0
+
+set -- `for e in $*
+	do
+		none=true
+		if test -f entry.$e ; then echo $e ; none=false ; fi
+		if test -f entry.$e% ; then echo $e% ; none=false ; fi
+		if $none
+		then
+			echo entry.$e not found.  ignored. 1>&2
+		fi
+	done
+`
+
+for e in $*
+do
+	if test ! -f entry.$e
+	then
+		echo Cannot find entry entry.$e 1>&2 ; exit 1
+	fi
+	size=`ls -l entry.$e | awk '{print int(($5/1024+249)/250)*250 }' |
+		sed 's:\.[0-9]*::g'`
+	tot=`expr $tot + $size`
+	if test $tot -gt 42000
+	then
+		echo Warning: size including $e is $tot 1>&2
+	fi
+	echo "$e	$size"
+done > $root/dist/toc
+
+$tocexit 0
+
+$mt rewind
+
+( cd $root ; find $toollist -type f -print | cpio -oh2$v )
+
+for e in $*
+do
+	if test "$v" = v ; then	echo $e ; fi
+	dd if=entry.$e of=$dev bs=250k
+done
+
+$mt rewind

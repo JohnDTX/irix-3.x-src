@@ -1,0 +1,6 @@
+iib.1:iib [ -f ibtabfile ] [ -r ] [ -v ]
+iib.1:.IR /etc/ibtab.
+iib.1:.IR ibtab(5L)).
+iib.1:/etc/ibtab
+iib.1:ibtab(5L),
+iib.1:ibtab(5L),

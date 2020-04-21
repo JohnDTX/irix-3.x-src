@@ -1,0 +1,69 @@
+.TH IDB_SCN 1
+.SH NAME
+idb_scn \- scan an idb file from stdin
+.SH SYNOPSIS
+\fBidb_scn\fP \fIoptions\fP
+[ \fItag\fP ]
+.SH DESCRIPTION
+.I Idb_scn
+reads an idb file from \fIstdin\fP and prints selected fields
+on \fIstdout\fP.
+.PP
+Options:
+.TP
+.B -s
+print source pathnames from the idb.
+.TP
+.B -d
+print destination pathnames from the idb.
+.TP
+.B -di
+same as \fB-d\fP, but ignore {-,+,@} endings in destination pathname.
+When used with \fB-e\fP option,
+the filename in \fIrbase\fP tree is assumed \fInot\fP to have the
+{-,+,@} ending.
+.TP
+.B -type
+print file type on stdout.
+.TP
+.B -nh
+don't print any explanatory header messages on \fIstdout\fP.
+.PP
+The following options
+serve as a further selection for whether a pathname
+gets printed on \fIstdout\fP:
+.TP
+.B -e
+test if source or dest idb file exists in the corresponding \fIsbase\fP
+or \fIrbase\fP tree.  (\fIrbase\fP or \fIsbase\fP option is required.)
+.TP
+\fBrbase\fP \fIname\fP
+\fIname\fP is the location of a destination tree.
+.TP
+\fBsbase\fP \fIname\fP
+\fIname\fP is location of a built source tree.
+.TP
+.B -m
+print filename if the file mode in the idb does not match
+that of the corresponding
+file in the \fIrbase\fP or \fIsbase\fP tree.
+(\fB-m\fP implies \fB-e\fP.)
+.TP
+\fB-t\fP \fIn\fP
+print filename in idb if the corresponding file in the \fIrbase\fP
+or \fIsbase\fP tree is more than \fIn\fP days old.
+(\fB-t\fP implies \fB-e\fP.)
+.PP
+tag will cause only those idb records containing tag to be examined.
+.PP
+If \fB-s\fP is used in addition to either \fB-d\fP or \fB-di\fP, then
+for any destination pathnames printed out \fIstdout\fP, the corresponding
+source pathnames will also be printed.
+.SH EXAMPLE
+To read an idb and extract all the source filenames which do not exist
+in the built source tree located at /d/tree:
+.IP "" .2i
+idb_scn -s -sbase /d/tree -e <idb
+.PP
+.SH AUTHOR
+Dave Spalding

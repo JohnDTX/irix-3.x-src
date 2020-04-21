@@ -1,0 +1,13 @@
+This is the directory for the C runtime low-level floating point routines
+for Juniper's FPA
+
+The following conventions are observed:
+
+	floating point registers f0 and f15, the fpa bus and
+	result registers, are, of course, volatile.
+
+	floating point registers f1..f4 are considered compiler
+	temporary registers, and are volatile accross any call.
+	Thus, the routines in this directory do not have to 
+	save and restore f1..f4. 
+.

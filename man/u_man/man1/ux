@@ -1,0 +1,10 @@
+will gather zero or more files from various systems,
+execute a command on a specified system
+and then send standard output to a file on a specified
+system.
+Note that, for security reasons, many installations will
+limit the list of
+commands executable on behalf of an incoming request from
+.IR uux .
+Many sites will permit little more than
+the receipt of mail (see

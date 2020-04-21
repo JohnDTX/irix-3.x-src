@@ -1,0 +1,37 @@
+.TH textport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B textport
+\- allocates an area of the screen for the textport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textport(left, right, bottom, top)"
+.B "Screencoord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textpo(left, right, bottom, top)"
+.B "integer*4 left, right, bottom, top"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure textport(lesft, right, bottom, top: longint);"
+.SH DESCRIPTION
+.B textport
+allocates an area on the screen for the textport.
+\f2left, right, bottom, top\fP specify the textport
+in screen coordinates.
+.PP
+.B textport
+does not work in RGB mode.
+.SH SEE ALSO
+gettp, pagecolor, 
+pagewritemask, textcolor, textwritemask, tpoff, tpon, viewport
+.sp
+\f2Programming Guide\fP, Chapter 14, Textports 
+.SH NOTE
+This routine is available only in immediate mode.

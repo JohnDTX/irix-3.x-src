@@ -1,0 +1,31 @@
+.TH loadmatrix 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B loadmatrix
+\- loads a transformation matrix
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "loadmatrix(m) "
+.B "Matrix m;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine loadma(m)"
+.B "real m(4,4)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure loadmatrix(var m: Matrix);"
+.SH DESCRIPTION
+.B loadmatrix
+loads a 4x4 floating point matrix onto the matrix stack; it
+replaces the current top matrix.
+.SH "SEE ALSO"
+multmatrix, popmatrix, pushmatrix
+.sp
+.I Programming Guide,
+Section 4.5, User-Defined Transformations

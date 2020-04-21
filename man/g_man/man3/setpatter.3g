@@ -1,0 +1,36 @@
+.TH setpattern 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B setpattern
+\- selects a pattern for filling polygons, rectangles, and curves
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setpattern(index)  "
+.B "short index;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setpat(index)"
+.B "integer*4 index"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure setpattern(index: longint);"
+.SH DESCRIPTION
+.B setpattern
+selects a pattern from among
+those that
+.B defpattern
+defines. The default pattern is pattern 0,
+which is solid.
+If you specify an undefined pattern,
+the default pattern is selected.
+.SH "SEE ALSO"
+color, defpattern, getpattern, writemask
+.sp
+.I Programming Guide,
+Section 5.2, Patterns

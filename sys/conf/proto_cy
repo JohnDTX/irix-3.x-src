@@ -1,0 +1,9 @@
+###########################
+# Cypress interface support
+pseudo-device	ustrm			# this needs user stream support
+
+pseudo-device	tcp
+pseudo-device	loop
+options		"INET"
+
+pseudo-device	cypress

@@ -1,0 +1,94 @@
+'\"macro stdmacro
+.TH INTRO 1
+.SH NAME
+intro \- introduction to commands and application programs
+.SH DESCRIPTION
+This section describes, in alphabetical order, publicly\-accessible commands.
+Certain distinctions of purpose are made in the headings:
+.TP "\w'(1C)\ \ 'u"
+(1)
+Commands of general utility.
+.PD 0
+.TP
+(1C)
+Commands for communication with other systems.
+.TP
+(1D)
+Demonstration programs.
+.TP
+(1G)
+Commands used primarily for graphics and computer-aided design.
+.TP
+(1M)
+Commands used chiefly for system maintenance
+and administration purposes.
+.TP
+(1W)
+Color editing commands and other tools for the window manager.
+.PD
+.SH COMMAND SYNTAX
+Unless otherwise noted, commands described in this section accept options and
+other arguments according to the following syntax:
+.IP "" .3i
+.B name
+.RI [ option ( s )]
+.RI [ cmdarg ( s )]
+.PP
+where:
+.TP "\w'\f2noargletter\f1\ \ \ 'u"
+.I name
+The name of an executable file.
+.TP
+.I option\^
+.RI \- noargletter\| (\| s \|)     
+or,
+.br
+.RI \- argletter\^ <>\^ optarg
+.br
+where <> is optional white space.
+.TP
+.I noargletter
+A single letter representing an option without an argument.
+.TP
+.I argletter
+A single letter representing an option requiring an argument.
+.TP
+.I optarg
+Argument (character string) satisfying preceding
+.IR argletter .
+.TP
+.I cmdarg
+Path name (or other command argument)
+.I not\^
+beginning with \- or, \-
+by itself indicating the standard input.
+.SH SEE ALSO
+getopt(1), getopt(3C).
+.SH DIAGNOSTICS
+Upon termination, each command returns two bytes of status,
+one supplied by the system and giving the cause for
+termination, and (in the case of ``normal'' termination)
+one supplied by the program
+(see
+.IR wait\^ (2)
+and
+.IR exit\^ (2)).
+The former byte is 0 for normal termination; the latter
+is customarily 0 for successful execution and non-zero
+to indicate troubles such as erroneous parameters, bad or inaccessible data,
+or other inability to cope with the task at hand.
+It is called variously ``exit code'', ``exit status'', or
+``return code'', and is described only where special
+conventions are involved.
+.SH PATHNAMES
+The window manager commands (1W) are found in 
+.B /usr/people/gifts/mextools/tools 
+and 
+.BR /usr/people/gifts/mextools/imgtools .
+Before executing these commands,
+.I cd
+to those directories and execute 
+.I make.
+.SH BUGS
+Regretfully, many commands do not adhere to the aforementioned syntax.
+.\"	@(#)intro.1	5.1 of 11/8/83

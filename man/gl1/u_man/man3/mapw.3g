@@ -1,0 +1,44 @@
+.TH mapw 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I mapw
+- map a point on the screen into a line in 3D world coordinates
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "mapw(vobj, sx, sy, wx1, wy1, wz1, wx2, wy2, wz2) "
+.B "Object vobj; "
+.B "Screencoord sx, sy; "
+.B "Coord *wx1, *wy1, *wz1, *wx2, *wy2, *wz2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine mapw(vobj, sx, sy, wx1, wy1, wz1, wx2, wy2, wz2)"
+.B "integer vobj"
+.B "integer*2 sx, sy"
+.B "real wx1, wy1, wz1, wx2, wy2, wz2"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure mapw(vobj: Object; sx, sy: Screencoord; "
+.B "	var wx1, wy1, wz1, wx2, wy2, wz2: Coord);"
+.sp
+.SH DESCRIPTION
+.I Mapw
+takes a 2D screen coordinate and maps it into 3D world
+space.  Since the \f3z\f1-coordinate is missing from screen space, the point
+becomes a line in world space.   \f2Mapw\f1 computes the inverse mapping from
+\f3vobj\f1, a viewing object.  A \f2viewing object\f1 
+is a graphical object that
+contains only  viewport, projection and viewing transformation
+commands.  A correct mapping
+from screen to world space requires that the viewing object contain the
+projection and viewing transformations
+that mapped the displayed object from world to screen coordinates.  The
+world space line that is computed from \f3(sx, sy)\f1 and \f3vobj\f1 is
+returned as two points and stored in the locations addressed by
+\f3wx1\f1, \f3wy1\f1, \f3wz1\f1 and \f3wx2\f1, \f3wy2\f1, \f3wz2\f1.
+.SH "SEE ALSO"
+.I mapw2
+.SH NOTE
+This command can only be used in immediate mode.

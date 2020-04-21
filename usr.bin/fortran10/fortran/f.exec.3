@@ -1,0 +1,599 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.EXEC.3.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               13-Mar-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+  
+  
+  procedure ioloopend;
+  begin {ioloopend}
+  IOGFirstTime := FALSE;
+  if IOGOptionFound
+  then begin
+    if token <> COMMASY
+    then begin
+      IOGExitFlag := TRUE;
+      if token <> RPARENSY then error(115);
+      end;
+    end
+  else begin IOGExitFlag := TRUE; error(273); end;
+  end; {ioloopend}
+  
+  
+  procedure getcharvarorarrayel(var fpn: pn);
+    var lpn: pn;
+  begin {getcharvarorarrayel}
+  if fpn <> nil then error(274);
+  fscan;
+  if token = IDENTSY
+  then begin
+    lpn := lookupname(localtree,ident);
+    if lpn = nil then lpn := declarevar(localtree,ident);
+    xref(lpn); fscan; variable(lpn);
+    if gattr.atype.typ <> CHARACTER then error(277);
+    end
+  else error(28);
+  fpn := gattr.treeptr;
+  end; {getcharvarorarrayel}
+  
+  
+  procedure getvarorarrayel(var fpn: pn; ftype: types);
+    var lpn: pn;
+  begin {getvarorarrayel}
+  if fpn <> nil then error(274);
+  fscan;
+  if token = IDENTSY
+  then begin
+    lpn := lookupname(localtree,ident);
+    if lpn = nil then lpn := declarevar(localtree,ident);
+    xref(lpn); fscan; variable(lpn); needaddr(gattr.treeptr);
+    if gattr.atype.typ <> ftype
+    then error(275)
+    else
+      if gattr.atype.siz <> 4 
+      then error(276);
+    end
+  else error(28);
+  fpn := gattr.treeptr;
+  end; {getvarorarrayel}
+  
+  
+  procedure getcharexp(var fpn: pn);
+  begin {getcharexp}
+  if fpn <> nil then error(274);
+  fscan; expression;
+  if gattr.atype.typ = CHARACTER 
+  then ckstrparm(gattr)
+  else error(278);
+  fpn := gattr.treeptr;
+  end; {getcharexp}
+  
+  
+  procedure getintexp(var fpn: pn);
+  begin {getintexp}
+  if fpn <> nil then error(274);
+  fscan; expression;
+  if gattr.atype.typ = INTEGR then makeisize(gattr,4) else error(143);
+  fpn := gattr.treeptr;
+  end; {getintexp}
+  
+  
+  procedure getlab(var flabel: plabelrec);
+    var llabel: alfa6;
+  begin {getlab}
+  if flabel <> nil then error(274);
+  getlabel(llabel); flabel := jumptolabel(llabel); fscan;
+  end; {getlab}
+  
+  
+  procedure inquirestmt;
+  begin {inquirestmt}
+  needstate(EXECSTATE,EXECSTATE);
+  fscan; if token <> LPARENSY then error(114);
+  new(newstmt,INQREST);
+  with newstmt^ do begin
+    nextstmt := nil; stmtop := INQREST;
+    iqfile := nil; iqunit := nil;
+    iqiostat := nil; iqerr := nil; iqexist := nil; iqopened := nil;
+    iqnumber := nil; iqnamed := nil; iqname := nil; 
+    iqaccess := nil; iqsequential := nil; iqdirect := nil;
+    iqform := nil; iqformatted := nil; iqunformatted := nil; 
+    iqrecl := nil; iqnextrec := nil; iqblank := nil;
+    IOGExitFlag := FALSE; IOGFirstTime := TRUE;
+    while not IOGExitFlag do begin
+      IOGOptionFound := TRUE;
+      if match('IOSTAT=')
+      then getvarorarrayel(iqiostat,INTEGR)
+      else
+        if match('ERR=')
+        then getlab(iqerr)
+        else
+          if match('EXIST=')
+          then getvarorarrayel(iqexist,LOGICAL)
+          else
+            if match('OPENED=')
+            then getvarorarrayel(iqopened,LOGICAL)
+            else
+              if match('NUMBER=')
+              then getvarorarrayel(iqnumber,INTEGR)
+              else
+                if match('NAMED=')
+                then getvarorarrayel(iqnamed,LOGICAL)
+                else
+                  if match('NAME=')
+                  then getcharvarorarrayel(iqname)
+                  else
+                    if match('ACCESS=')
+                    then getcharvarorarrayel(iqaccess)
+                    else
+                      if match('SEQUENTIAL=')
+                      then getcharvarorarrayel(iqsequential)
+                      else
+                        if match('DIRECT=')
+                        then getcharvarorarrayel(iqdirect)
+                        else
+                          if match('FORM=')
+                          then getcharvarorarrayel(iqform)
+                          else
+                            if match('FORMATTED=')
+                            then getcharvarorarrayel(iqformatted)
+                            else
+                              if match('UNFORMATTED=')
+                              then getcharvarorarrayel(iqunformatted)
+                              else
+                                if match('RECL=')
+                                then getvarorarrayel(iqrecl,INTEGR)
+                                else
+                                  if match('NEXTREC=')
+                                  then getvarorarrayel(iqnextrec,INTEGR)
+                                  else
+                                    if match('BLANK=')
+                                    then getcharvarorarrayel(iqblank)
+                                    else
+                                      if match('FILE=')
+                                      then begin 
+                                        if iqunit <> nil then error(279);
+                                        getcharexp(iqfile);
+                                        end
+                                      else
+                                        if match('UNIT=') or IOGFirstTime
+                                        then begin 
+                                          if iqfile <> nil then error(279);
+                                          getintexp(iqunit);
+                                          end
+                                        else IOGOptionFound := FALSE;
+      ioloopend;
+      end;
+    if (iqunit = nil) and (iqfile = nil) then error(280);
+    end;
+  fscan;
+  end; {inquirestmt}
+  
+  
+  procedure closestmt;
+  begin {closestmt}
+  needstate(EXECSTATE,EXECSTATE);
+  fscan; if token <> LPARENSY then error(114);
+  new(newstmt,CLOSEST);
+  with newstmt^ do begin
+    nextstmt := nil; stmtop := CLOSEST;
+    clunit := nil; cliostat := nil; clerr := nil; clstatus := nil;
+    IOGExitFlag := FALSE; IOGFirstTime := TRUE;
+    while not IOGExitFlag do begin
+      IOGOptionFound := TRUE;
+      if match('IOSTAT=')
+      then getvarorarrayel(cliostat,INTEGR)
+      else
+        if match('ERR=')
+        then getlab(clerr)
+        else
+          if match('STATUS=')
+          then getcharexp(clstatus)
+          else
+            if match('UNIT=') or IOGFirstTime
+            then getintexp(clunit)
+            else IOGOptionFound := FALSE;
+      ioloopend;
+      end;
+    if clunit = nil then error(281);
+    end;
+  fscan;
+  end; {closestmt}
+  
+  
+  procedure openstmt;
+  begin {openstmt}
+  needstate(EXECSTATE,EXECSTATE);
+  fscan; if token <> LPARENSY then error(114);
+  new(newstmt,OPENST);
+  with newstmt^ do begin
+    nextstmt := nil; stmtop := OPENST;
+    opunit := nil; opiostat := nil; operr := nil; 
+    opfile := nil; opstatus := nil; opaccess := nil;
+    opform := nil; oprecl := nil; opblank := nil;
+    opbuffed := nil; OpBinary := Binary;
+    IOGExitFlag := FALSE; IOGFirstTime := TRUE;
+    while not IOGExitFlag do begin
+      IOGOptionFound := TRUE;
+      if match('IOSTAT=')
+      then getvarorarrayel(opiostat,INTEGR)
+      else
+        if match('ERR=')
+        then getlab(operr)
+        else
+          if match('FILE=')
+          then getcharexp(opfile)
+          else
+            if match('STATUS=')
+            then getcharexp(opstatus)
+            else
+              if match('ACCESS=')
+              then getcharexp(opaccess)
+              else
+                if match('FORM=')
+                then getcharexp(opform)
+                else
+                  if match('RECL=')
+                  then getintexp(oprecl)
+                  else
+                    if match('BLANK=')
+                    then getcharexp(opblank)
+                    else
+                      if match('BUFFERED=')
+                      then begin getcharexp(opbuffed); notansi; end
+                      else
+                        if match('UNIT=') or IOGFirstTime
+                        then getintexp(opunit)
+                        else IOGOptionFound := FALSE;
+      ioloopend;
+      end;
+    if opunit = nil then error(281);
+    end;
+  fscan;
+  end; {openstmt}
+  
+  
+  procedure readwritestmt(fstmttype: stmttypes);
+    var lch: char; ExitFlag, SecondTime: Boolean;
+        iolist, lastiolistel: piolistel;
+    
+    procedure setformat;
+      var lch: char; lfmtlab: alfa6; llabrec: plabelrec;
+          lpn: pn; Done: Boolean; lstmtbufp: integer; 
+    begin {setformat}
+    with newstmt^ do begin
+      if fmtkind <> FMTUNFORMATTEDKIND then error(274);
+      lch := getnonblank; stmtbufp := stmtbufp - 1;
+      if chclass[ord(lch)] = DIGITCL
+      then begin
+        { Get label for a format }
+        getlabel(lfmtlab);
+        llabrec := findlabel(lfmtlab,FORMATLAB);
+        with llabrec^ do begin
+          if labkind = EXECLAB
+          then error(165)
+          else begin
+            if labkind = UNKNOWNLAB
+            then begin labkind := FORMATLAB; FmtDefined := FALSE; end;
+            end;
+          end;
+        fmtkind := FMTLABKIND; fmtlab := llabrec;
+        fscan;
+        end
+      else begin { not a statement label }
+        fscan;
+        if token = STARSY
+        then begin fmtkind := FMTLISTKIND; fscan; end
+        else begin
+          Done := FALSE;
+          if token = IDENTSY
+          then begin
+            lpn := lookupname(localtree,ident);
+            if lpn <> nil
+            then begin
+              if (lpn^.nkind = UNKN) and (lpn^.unbounds <> nil)
+              then declunkn(lpn);
+              if (lpn^.nkind = VARS) and (lpn^.idtype.typ <> CHARACTER)
+              then 
+                if lpn^.bounds <> nil
+                then begin 
+                  lch := getnonblank; stmtbufp := stmtbufp - 1;
+                  if lch <> '('
+                  then begin { Must be an array without following ( }
+                    Done := TRUE; xref(lpn); fscan; variable(lpn);
+                    fmtkind := FMTARRAYKIND; fmtarrayvar := gattr.treeptr;
+                    end;
+                  end;
+              end;
+            end;
+          if not Done
+          then begin
+            expression;
+            if gattr.atype.typ = CHARACTER
+            then begin
+              {Pushes wrong length for character array names}
+              ckstrparm(gattr);
+              fmtkind := FMTCHKIND; fmtchval := gattr.treeptr;
+              end
+            else begin (* Assigned format *)
+              if (gattr.atype.siz <> 4) or (gattr.atype.typ <> INTEGR)
+              then error(99);
+              fmtkind := FMTASVARKIND; fmtvar := gattr.treeptr; 
+              end;
+            end;
+          end;
+        end;
+      end; {with newstmt^}
+    end; {setformat}
+    
+    procedure setunit0;
+      var lpn: pn;
+    begin {setunit0}
+    new(lpn,CSTNODE);
+    with lpn^ do begin
+      node := CSTNODE; csttype.typ := INTEGR; 
+      csttype.siz := 4; cstvalu.ival := 0;
+      end;
+    newstmt^.rwunit := lpn;
+    end; {setunit0}
+    
+    procedure setunit;
+    begin {setunit}
+    if newstmt^.rwunit <> nil then error(291);
+    fscan;
+    if token = STARSY
+    then begin setunit0; fscan; end
+    else begin
+      expression;
+      if gattr.atype.typ = CHARACTER
+      then begin
+        (**** if not IsAddress(gattr.treeptr) then error(90); ****)
+        newstmt^.InternalFlag := TRUE; newstmt^.rwunit := gattr.treeptr;
+        end
+      else begin
+        if gattr.atype.typ = INTEGR then makeisize(gattr,4) else error(143);
+        newstmt^.rwunit := gattr.treeptr;
+        end;
+      end;
+    end; {setunit}
+    
+    procedure getiolistel;
+      var lpn: pn; Done,ExitFlag,OldXrefFlag: Boolean; 
+          lstmtbufp: integer; lbounds: pbound; lch: char; 
+          itype: ftntype; saveiolist, savelastiolistel,liolistel: piolistel;
+          lname: alfa6; lpadj: padjarrsz;
+      
+      function impdoexp: pn;
+      begin {impdoexp}
+      expression;
+      if (gattr.atype.typ <> INTEGR) and (gattr.atype.typ <> REEL)
+      then error(272);
+      makentype(gattr,itype);
+      impdoexp := gattr.treeptr;
+      end; {impdoexp}
+      
+    begin {getiolistel}
+    Done := FALSE;
+    if token = IDENTSY
+    then begin
+      lpn := lookupname(localtree,ident);
+      if lpn <> nil
+      then begin
+        if (lpn^.nkind = UNKN) and (lpn^.unbounds <> nil) then declunkn(lpn);
+        if lpn^.nkind = VARS
+        then 
+          if lpn^.bounds <> nil
+          then begin 
+            lch := getnonblank; stmtbufp := stmtbufp - 1;
+            if lch <> '('
+            then begin { Must be an array without following ( }
+              Done := TRUE; lbounds := lpn^.bounds;
+              while lbounds <> nil do
+                with lbounds^ do
+                  if (lo.bkind = ASSUMEDBOUND) or (hi.bkind = ASSUMEDBOUND)
+                  then begin error(151); lbounds := nil; end
+                  else begin
+                    if (lo.bkind = ADJUSTBOUND) or (hi.bkind = ADJUSTBOUND)
+                    then
+                      if onadjlst(lpn) = nil
+                      then begin
+                        new(lpadj);
+                        lpadj^.next := adjszlst; lpadj^.arr := lpn;
+                        lpadj^.addr := 0; adjszlst := lpadj;
+                        end;
+                    lbounds := next;
+                    end;
+              xref(lpn); fscan; variable(lpn);
+              new(liolistel,IOLARRTAG);
+              with liolistel^ do begin
+                nextiolistel := nil; listtag := IOLARRTAG;
+                iolarr := gattr; iolarrcount := lpn;
+                end;
+              if iolist = nil 
+              then iolist := liolistel 
+              else lastiolistel^.nextiolistel := liolistel;
+              lastiolistel := liolistel;
+              end;
+            end;
+        end;
+      end;
+    if (not Done) and (token = LPARENSY)
+    then begin
+      lstmtbufp := stmtbufp; AnyErrors := FALSE;
+      OldXrefFlag := XrefFlag; XrefFlag := FALSE; ErrorEnable := FALSE;
+      expression; 
+      XrefFlag := OldXrefFlag; ErrorEnable := TRUE; stmtbufp := lstmtbufp;
+      if AnyErrors
+      then begin { Implied do loop }
+        Done := TRUE;
+        saveiolist := iolist; savelastiolistel := lastiolistel;
+        iolist := nil; fscan; ExitFlag := FALSE;
+        while not ExitFlag do begin
+          getiolistel;
+          if token = COMMASY then fscan else ExitFlag := TRUE;
+          end;
+        if token = ASSIGNSY
+        then begin {last call on getiolistel left gattr set to control variable}
+          if not IsVariable(gattr.treeptr) then error(289);
+          fscan; itype := gattr.atype; 
+          if (itype.typ <> INTEGR) and (itype.typ <> REEL)
+          then error(271)
+          else begin
+            new(liolistel,IOLIMPDOTAG);
+            with liolistel^ do begin
+              nextiolistel := nil; listtag := IOLIMPDOTAG; 
+              impdotypecode := gettypecode(itype); 
+              impdovar := gattr.treeptr; impdoinit := nil; impdoterm := nil; 
+              impdoinc := nil; impdoiolist := iolist;
+              end;
+            iolist := saveiolist; lastiolistel := savelastiolistel;
+            if iolist = nil 
+            then iolist := liolistel 
+            else lastiolistel^.nextiolistel := liolistel;
+            lastiolistel := liolistel;
+            liolistel^.impdoinit := impdoexp;
+            if token = COMMASY then fscan else error(125);
+            liolistel^.impdoterm := impdoexp;
+            if token = COMMASY
+            then begin fscan; liolistel^.impdoinc := impdoexp; end;
+            if token = RPARENSY then fscan else error(26);
+            end;
+          end
+        else error(288);
+        end
+      else { Back things up to call expression with look ahead token LPARENSY }
+        token := LPARENSY; 
+      end;
+    if not Done
+    then begin
+      expression;
+      if gattr.atype.typ = CHARACTER then ckstrparm(gattr);
+      if token <> ASSIGNSY
+      then begin
+        if fstmttype = READST
+        then begin
+          needaddr(gattr.treeptr);
+          if not IsAddress(gattr.treeptr) then error(154);
+          end;
+        new(liolistel,IOLEXPTAG);
+        with liolistel^ do begin
+          nextiolistel := nil; listtag := IOLEXPTAG;
+          iolexp := gattr;
+          end;
+        if iolist = nil 
+        then iolist := liolistel 
+        else lastiolistel^.nextiolistel := liolistel;
+        lastiolistel := liolistel;
+        end;
+      end;
+    end; {getiolistel}
+    
+  begin {readwritestmt}
+  needstate(EXECSTATE,EXECSTATE);
+  lch := getnonblank; 
+  new(newstmt,READST);
+  with newstmt^ do begin
+    nextstmt := nil; stmtop := fstmttype; fmtkind := FMTUNFORMATTEDKIND;
+    InternalFlag := FALSE; rwunit := nil;
+    rwrec := nil; rwiostat := nil; rwerr := nil; rwend := nil;
+    if lch = '('
+    then begin
+      if fstmttype = PRINTST then error(282);
+      IOGExitFlag := FALSE; IOGFirstTime := TRUE; SecondTime := FALSE; 
+      while not IOGExitFlag do begin
+        IOGOptionFound := TRUE;
+        if match('IOSTAT=')
+        then getvarorarrayel(rwiostat,INTEGR)
+        else
+          if match('ERR=')
+          then getlab(rwerr)
+          else
+            if match('END=')
+            then getlab(rwend)
+            else
+              if match('REC=')
+              then getintexp(rwrec)
+              else
+                if match('FMT=') or SecondTime
+                then setformat
+                else
+                  if match('UNIT=')
+                  then setunit
+                  else 
+                    if IOGFirstTime
+                    then begin setunit; SecondTime := TRUE; end
+                    else IOGOptionFound := FALSE;
+        if not IOGFirstTime then SecondTime := FALSE;
+        ioloopend;
+        end;
+      if rwunit = nil then error(292);
+      if (rwrec <> nil) and (rwend <> nil) then error(284);
+      if (fmtkind = FMTLISTKIND) and (rwrec <> nil) then error(285);
+      if (fstmttype = WRITEST) and (rwend <> nil) then error(157);
+      if InternalFlag and 
+         ((fmtkind = FMTLISTKIND) or (fmtkind = FMTUNFORMATTEDKIND)) 
+      then error(286);
+      if InternalFlag and (rwrec <> nil) then error(287);
+      end {lch = '(' }
+    else begin {lch <> '('}
+      if fstmttype = WRITEST then error(283);
+      stmtbufp := stmtbufp - 1; setunit0; setformat;
+      if (token <> EOLNSY) and (token <> COMMASY) then error(125);
+      end;
+    
+    { Get iolist }
+    
+    fscan; ExitFlag := token = EOLNSY; iolist := nil;
+    while not ExitFlag do begin
+      getiolistel;
+      if token = COMMASY then fscan else ExitFlag := TRUE;
+      end;
+    rwiolist := iolist;
+    end; {with newstmt^ }
+  end; {readwritestmt}
+  
+  
+  { REWIND, ENDFILE, BACKSPACE }
+  
+  procedure rewendback(fstmttype: stmttypes);
+  begin {rewendback}
+  needstate(EXECSTATE,EXECSTATE);
+  new(newstmt,REWDST);
+  with newstmt^ do begin
+    nextstmt := nil; stmtop := fstmttype;
+    rebunit := nil; rebiostat := nil; reberr := nil; 
+    fscan; 
+    if token = LPARENSY 
+    then begin
+      IOGExitFlag := FALSE; IOGFirstTime := TRUE;
+      while not IOGExitFlag do begin
+        IOGOptionFound := TRUE;
+        if match('IOSTAT=')
+        then getvarorarrayel(rebiostat,INTEGR)
+        else
+          if match('ERR=')
+          then getlab(reberr)
+          else
+            if match('UNIT=') or IOGFirstTime
+            then getintexp(rebunit)
+            else IOGOptionFound := FALSE;
+        ioloopend;
+        end;
+      if rebunit = nil then error(281);
+      fscan;
+      end {token = LPARENSY}
+    else begin {token <> LPARENSY}
+      expression;
+      if gattr.atype.typ = INTEGR then makeisize(gattr,4) else error(143);
+      rebunit := gattr.treeptr;
+      end;
+    end; {with newstmt^}
+  end; {rewendback}
+
+
+
+                                                                                                                                                                                                                                                                                                                                   

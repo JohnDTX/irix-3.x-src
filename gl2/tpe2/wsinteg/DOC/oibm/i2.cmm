@@ -1,0 +1,225 @@
+		"Installing the Geometry Link"
+The Geometry Link is comprised of three parts:
+	The IRIS hardware, which includes the 3270 interface card, an internal
+cable, and the 3270 rear auxillary I/O panel connector.
+	The IRIS software, which is the t3279 program in /usr/bin.
+	The mainframe software, which includes both VM/CMS AND MVS/XA
+versions of file transfer and I/O driver software. Some Fortran
+Remote Graphics Library (RGL) demonstration programs, CLISTS and execs
+are included on an unsupported basis.
+All files are text or FORTRAN, except the file transfer and I/O drivers,
+and the executible modules.
+
+		"Installation Tools and Equipment"
+Installation tools and equipment consist of:
+RG62AU coaxial cable connected to IBM 3274/3276 (coax-A protocol).
+	(The lower-numbered 3274 ports are favored.)
+IBM 3278-2 or similar 24x80 character coax-A terminal.
+
+		"IRIS Software Installation"
+	To install the IRIS software, follow the software installation
+instructions for the "ibm" option. Software installation procedures appear
+in the release notes that accompany the software distribution. The t3279 file
+in /usr/bin is about 250,000 bytes in size. 
+
+		"Mainframe Software Installation"
+  
+	"VM/CMS Software Installation"
+
+	The Geometry Link software requires ten cylinders of 3350 storage in
+an account that can be ``dialed'' from the 3270 connection.  The software is in
+tape load form. The files include  the file transfer module UDT; the RGL;
+LIB FORTRAN; its interface IO FORTRAN; the files FDEVICE, FGET, FGL, FIO,
+and FRPC that become IRIS MACLIB; and several exec files to aid development.
+The IRISCOM driver is on the tape.
+MAINTEST, STAR, and SQIRAL test modules for VM are included.
+	Use the TAPE LOAD * * A(DEN 1600 command to read the VM/CMS files onto
+the test account A disk. Proceed to system checkout.
+
+
+
+      T	S O  /	 I R I S   D A T A   T R A N S F E R   C O M M A N D
+
+	    I N	S T A L	L A T I	O N   I	N S T R	U C T I	O N S
+
+    WARNING:	  The  intended	 target	 audience  for	the  installation
+ instructions which follow are MVS systems programmers.	 If you	are not	a
+ member	of the site systems programming	staff, it is  unlikely	that  you
+ have  enough  experience  /  systems  authority to correctly perform the
+ installation and checkout.   Please get experienced  help  to	assure	a
+ quick,	clean installation.
+
+    Accompanying  this	install	 letter	 is a tape mini	reel.  It is a no
+ label tape generated at 1600 BPI.  The	first dataset on the tape is  the
+ VM  installation  material.  The  second  dataset  is	a  single IEBCOPY
+ unloaded PDS.	Load the unloaded partitioned dataset to disk.	  JCL  to
+ perform the disk load will look somewhat like the sample below.
+
+ //SGIJOB   JOB	 site_data,'SGI	JOB',CLASS=A,MSGCLASS=A
+ //STEP1    EXEC PGM=IEBCOPY
+ //SYSPRINT DD	 SYSOUT=*
+ //TAPE	    DD	 UNIT=TAPE,VOL=SER=SGITAP,DISP=OLD,LABEL=(2,BLP),
+ //	    DSN=SGI.UNLOADED.COMMAND
+ //DISK	    DD	 UNIT=SYSDA,SPACE=(CYL,(5,1,15)),DISP=(,CATLG),
+ //	    DSN=SGI.TSO.COMMAND
+ //SYSIN    DD	 *
+  COPY OUTDD=DISK,INDD=TAPE
+ /*
+ //
+
+    The	 dataset  unloaded occupied five cylinders of 3380 DASD	space and
+ used five directory blocks.  The directory blocks in the sample JCL  are
+ set  to  allow	the 'STATS ON' option of SPF.  Reloading the dataset to	a
+ 3350 or 3330 will require a larger allocation number of cylinders.   Any
+ member	 of  the PDS which is not in the list below may	be deleted.  Some
+ of these deletable members are	tape preparation support, others  are  of
+ interest only to the VM installation process.
+
+    LINKxxx  Where  xxx	 is one	of CMD,	STAR, PP, SQRL or MAIN.	These are
+	     sample jobs to link the TSO file transfer command	(LINKCMD)
+	     and a number of installation checkout jobs	(all others).
+    LOADLIB  Sample JCL	which will create a checkout load library.
+    TEXTxxx  Or	 TXTxxx	 where	the x's	are any	value.	These members are
+	     object decks resulting from the the assembly or complilation
+	     of	source members in the library.
+    IFYxxx   Where the x's are any value.    These  members  are  FORTRAN
+	     support   routines	  required   to	  successfully	link  the
+	     installation check	routines.
+    NAMECMD  A module name card	for IEWL when linking the TSO command.
+    COPYHELP Sample JCL	to copy	the HELP member	to SYS1.HELP.
+    HELP     TSO help for the command.
+    INSTALL  A copy of this letter.
+    SRCCMD   Either one	line 'source not shipped' or command source.
+    SCRIOD   Either one	line 'source not shipped' or I/O driver	source.
+    SQIRAL   (STAR, PP,	MAINTEST) are FORTRAN source code members.   They
+	     are  both	checkout  code and samples for how to use the I/O
+	     driver in TSO.
+    IO	     (LIB, TEST1, TEST2, ... TEST7) FORTRAN source code	 members.
+	     They are support code for the mainline tests.
+    FDEVICE  (FGET,  FGL,  FIO,	FRPC) are COPY source code members.  They
+	     are referenced in the FORTRAN source.
+
+	Link edit the command text into	SYS1.CMDLIB.	The  JCL  in  the
+ LINKCMD  member  may be used as a guide.  This	program	is not authorized
+ and does not need to reside in	an authorized library.	 Any PDS  in  the
+ STEPLIB  chain	 or LNKLIST member of PARMLIB will be satisfactory.  As	a
+ checkout expedient, the command text may be used from any  load  library
+ via the sequence:
+
+    TEST 'library.name(member)'	CP
+    IRSXFR command parameters
+    GO
+    END
+
+ The  command  cannot  be  used	 via  the CALL command,	as this	sets up	a
+ pseudo	batch environment with which the command is not	prepared to deal.
+
+    Modify the COMMANDS	member of the SYS1.HELP	dataset	to include a line
+ of information	about the IRSXFR command.
+
+    Copy the the HELP  member  of  the	SGI.TSO.COMMAND	 library  to  the
+ SYS1.HELP  dataset  as	 member	IRSXFR.	  Sample JCL for the copy step is
+ included in member COPYHELP.
+
+
+	"System Checkout"
+  
+	VM/CMS Checkout
+
+	The mainframe account used for checkout requires only class "G" user
+privileges, however some general capabilities must be present. The VM account
+should have "TERM LINEND #" in the PROFILE EXEC. Typing "#cp disc"
+should cause a disconnect. If the 3270 controller is running SNA protocols,
+"TEST" mode interrupts must be passed back to the VTAM terminal handler. The
+3278 "TEST" mode is used to terminate file transfer in VM. When logged into the
+account, going into and out of "TEST" twice should cause the session
+to be dropped.
+  
+	To establish the Geometry Link:
+Connect the RG62AU coaxial cable to a 3278 terminal, and verify proper
+operation with the mainframe. Move the connection to the "3270" connector on
+the IRIS. Read and become familiar with the keyboard usage described in
+Section 3. Read and become familiar with file transfer described in Section 4.
+
+Execute the t3279 program in /usr/bin.
+It presents a menu and some keyboard mapping information. Press RETN
+to cause the keyboard mapping to be repeated in a more convenient place.
+Select 3279 terminal emulation by typing:
+ 34 RETN .
+The program displays any information that has been received
+from the coaxial connector.
+If the status line on the bottom is present, then connection to the 3274/6
+has been demonstrated.  If random characters are displayed, proceed to 
+Section 2.6 for system trouble shooting information.
+  
+To place the terminal in test mode, type CTRL-t .  The status line
+should show ``TEST''. Press RETN to select test 0. The top line should
+display the type of controller, and the physical unit (in decimal).
+Type CTRL-t again to exit the controller test mode.
+(The status line may show ``X SYSTEM'' at this point, in which case repeat
+going into and out of test mode, typing "pad-0" to reset as necessary)
+
+
+Type pad-0 to reset the keyboard, and pad-ENTER to send a clear aid
+to the mainframe. 'pad' refers to the keyboard to the right
+of the main keyboard. The system should respond with the mainframe's main logo
+panel.
+
+Find out the established procedure for ``dialing'' your account. (Talk to the
+mainframe person who is assisting you. This is important if you must use PVM to
+access ypur account.) Type TWICE to start the file transfer demonstration.
+The system displays four lines, reports that ``GRAF 200'' is defined to
+receive the dial-in, and you type "#cp disc"
+Press RETN three times and dial back into your account.  The status line shows four file transfers.
+Terminate the transfers by typing CTRL-t . The status line should show ``TEST''.
+Type CTRL-t again to exit the controller test mode.
+(The status line may show ``X SYSTEM'' at this point, in which case repeat
+going into and out of test mode)
+Type pad-0 to reset the keyboard, and pad-ENTER to send a clear aid to
+the mainframe.  The system should respond with the mainframe's logo panel.
+
+Press CTRL-d to return to the t3279 menu, and type 101 RETN to exit from t3279.
+
+		"System Troubleshooting"
+
+	An expanding loop concept is used to test the Geometry Link.
+The t3279 program has several diagnostic capabilities to verify
+proper operation. The first step is to verify the IRIS software installation.
+	/dev/pxd (23,0) is the character device opened by t3279.
+The kernel has pxdopen, which can be verified by:
+
+	nm /vmunix | egrep pxdopen
+
+where "/vmunix" is the full name of the kernel in use on the IRIS. The kernel
+shows each device probed when rebooted, and should show device "px0" installed
+at location "7e00" .
+The t3279 program will return the error message ``6 ENXIO'' if the pxdopen
+fails because of hardware, or ``2 ENOENT'' if the kernel does not
+support the Geometry Link.
+	If the t3279 program does not show the menu, then the IRIS software
+is probably not at the correct release level, or the kernel is bad, or the 3270
+interface card is not properly strapped. Call the Geometry Hotline.
+
+	This t3279 software package presents a 24-entry menu to the operator.
+This menu is documented in chapter 3.
+
+Menu item 5 is the Geometry Link self-test diagnostic. Type "5 80" to checkout
+the 3270 interface card. It will print "loop test", 80 periods, "direct write
+test" and 80 more periods if the card is working properly. The direct
+write test can be affected by polling from a 3274/6 controller, so repeat the
+test if it fails, and you do not wish to disconnect the coax connection.
+Failure messages should be noted to inform the Hotline support person.
+Success of the "5 80" entry means the board is ready for testing with a 3274
+or 3276 controller using menu item 2.
+
+The coaxial link is controlled by the 3274/6 controller, which polls the 3278
+or 3279 devices. The coaxial cable is normally RG62AU. The 3274 or 3276
+controller has many BNC terminations for 3278 terminals, with the
+lower numbered terminations preferred because of their higher priority.
+
+In normal operation, the operator keystrokes are read by the 3274/6, and it
+returns commands to update the screen to reflect the keystrokes. The 25th line
+shows status commands by the 3274/6, and is kept current by it. Select menu
+item 2, and watch for characters written into the 25th line by
+the 3274/6 controller. Any keystrokes should be echoed by the 3274/6 controller.
+

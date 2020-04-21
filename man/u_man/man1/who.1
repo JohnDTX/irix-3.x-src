@@ -1,0 +1,230 @@
+'\"macro stdmacro
+.ds P UNIX
+.TH WHO 1
+.SH NAME
+who \- who is on the system
+.SH SYNOPSIS
+.B who
+.RB [\| \-uTlpdbrtas \|]
+[ file ]
+.PP
+.B "who am i"
+.SH DESCRIPTION
+.I Who
+can list the user's name, terminal line, login time,
+elapsed time since activity occurred on the line,
+and the process-\s-1ID\s+1 of the command interpreter (shell)
+for each current \s-1UNIX\s+1 System user.
+It
+examines the
+.B /etc/utmp
+file to obtain its information.
+If \f2file\^\fP is given, that file is examined.
+Usually, \f2file\^\fP will be
+.BR /etc/wtmp ,
+which contains a history of all the logins since the file
+was last created.
+.PP
+.I Who\^
+with the
+.B am i
+option identifies the invoking user.
+.PP
+Except for the default
+.B \-s
+option, the general format for output entries is:
+.PP
+.RS
+name \|[\^state\^] \|line \|time \|activity \|pid \|[\^comment\^] \|[\^exit\^]
+.RE
+.PP
+With options,
+.I who\^
+can list
+logins, logoffs, reboots, and changes to the system clock, as well 
+as other
+processes spawned by the \f2init\^\fP process.
+These options are:
+.TP "\w'\f3\-T\f1\^\ \ 'u"
+.B \-u
+This option lists information about those users who are currently
+logged in.
+The
+.I name\^
+is the user's login name.
+The
+.I line\^
+is the name of the line as found in the directory
+.BR /dev .
+The
+.I time\^
+is the time that the user logged in.
+The
+.I activity\^
+is the number of hours and minutes since activity last occurred on
+that particular line.
+A
+dot
+.RB ( \^.\^ )
+indicates that the terminal has seen activity in the last minute
+and is therefore "current".
+If more than twenty-four hours have elapsed or
+the line has not been used since boot time,
+the entry is marked
+.RB old .
+This field is useful when trying to determine
+whether a person is working at the terminal or not.
+The
+.I pid\^
+is the process-\s-1ID\s+1 of the user's shell.
+The
+.I comment\^
+is the comment field associated with this line as found in
+.B /etc/inittab
+(see
+.IR inittab\^ (4)).
+This can contain information about where the terminal is located,
+the telephone number of the dataset, type of terminal if hard-wired, etc.
+.TP
+.B \-T
+This option causes the
+.I state\^
+of the terminal line to be printed.
+The
+.I state\^
+describes whether someone else can write to that terminal.
+A
+.B +
+appears if the terminal
+is writable by anyone;
+a
+.B \-
+appears
+if it is not.
+.B Root
+can write to all lines having a
+.B +
+or a
+.B \-
+in the
+.I state\^
+field.
+If a bad line is encountered, a
+.B ?
+is printed.
+.TP
+.B \-l
+This option lists only those lines on which the system is waiting
+for someone to login.
+The
+.I name\^
+field is
+.B \s-1LOGIN\s+1
+in such cases.
+Other fields are the same as for user entries except that the
+.I state\^
+field doesn't exist.
+.TP
+.B \-p
+This option lists any other process which is currently active and has
+been previously spawned by
+.IR init .
+The
+.I name\^
+field is
+the name of the program executed by
+.I init\^
+as found in
+.BR /etc/inittab .
+The
+.IR state ,
+.IR line ,
+and
+.I activity\^
+fields have no meaning.
+The
+.I comment\^
+field shows
+the
+.I id\^
+field of the line from
+.B /etc/inittab
+that spawned this process.
+See
+.IR inittab\^ (4).
+.TP
+.B \-d
+This option displays all processes
+that have expired and not been respawned by 
+.IR init .
+The
+.I exit\^
+field appears for dead processes and contains the termination and exit
+values (as returned by
+.IR wait\^ (2)),
+of
+the dead process.
+This can be useful in determining why a process
+terminated.
+.TP
+.B \-b
+This option indicates the time and date of the last reboot.
+.TP
+.B \-r
+This option indicates the current
+.I run-level\^
+of the
+.I init\^
+process.
+Following the run-level and date information are three fields which indicate
+the current state, the number of times that state was previously entered,
+and the previous state.
+.TP
+.B \-t
+This option indicates the last
+change to the system clock (via the
+.IR date\^ (1)
+command) by
+.BR root .
+See
+.IR su\^ (1).
+.TP
+.B \-a
+This option processes
+.B /etc/utmp
+or the named
+.I file\^
+with all options turned on.
+.TP
+.B \-s
+This option is the default and lists only the
+.IR name ,
+.I line\^
+and
+.I time\^
+fields.
+.SH EXAMPLE
+.IP
+who am i
+.PP
+reports the name under which you are currently logged
+in.  This could be a name other than the original name
+under which you logged in, if the
+.I su\^
+command has been used.
+.SH FILES
+/etc/utmp
+.br
+/etc/wtmp
+.br
+/etc/inittab
+.SH "SEE ALSO"
+date(1),
+login(1),
+mesg(1),
+su(1),
+wait(2),
+inittab(4),
+utmp(4),
+init(1M)
+.\"	@(#)who.1	5.1 of 11/14/83

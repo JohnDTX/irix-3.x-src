@@ -1,0 +1,22 @@
+'\"macro stdmacro
+.TH NEQN 1
+.SH NAME
+neqn \- format mathematical text for nroff
+.SH SYNOPSIS
+\f3neqn\f1 [\-d \f2xx\f1 ] [ \-p \f2n\f1 ] [ \-s \f2n\f1 ] [ \-f \f2n\f1 ] [ \-\- ] [ \f2file(s)\f1 ]
+.SH DESCRIPTION
+.I neqn
+is a preprocessor for formatting mathematical text with
+.I nroff
+on typewriter-like terminals.  Normal usage is:
+.RS
+\f3neqn\f1 [\f2option(s)\f1] \f2file(s)\f1 \(bv \f3nroff\f1 [\f2option(s)\f1] \(bv [\f2printer\f1]
+.RE
+.PP
+If you do not specify files (or if you specify \- as the last argument),
+.I neqn
+reads the standard input.
+.SH SEE ALSO
+eqn(1), mm(1), nroff(1), tbl(1), eqnchar(5), and mm(5).
+.br
+The section entitled ``EQN'' in the \f2UNIX Programmer's Manual, Volume II\f1.

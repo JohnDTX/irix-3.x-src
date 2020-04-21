@@ -1,0 +1,12 @@
+17c17
+< /* #define MAXUSERS	05	/* max number of users for this game */
+---
+> #define MAXUSERS	05	/* max number of users for this game */
+29c29
+< #define	NAMELIST "/vmunix"	/* where the system namelist lives */
+---
+> #define	NAMELIST	"/unix"	/* where the system namelist lives */
+37c37
+< /* #define	UTMP	"/etc/utmp"	/* where the utmp file lives */
+---
+> #define UTMP	"/etc/utmp"	/* where utmp file lives */

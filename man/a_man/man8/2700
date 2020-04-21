@@ -1,0 +1,12 @@
+total 21
+drwxrwxr-x  3 glen     doc           512 Feb 25 13:06 ./
+drwxrwxr-x  5 bob      doc           512 Feb 25 13:06 ../
+-rw-------  1 bob      doc           269 Jan 25 17:31 Makefile
+drwxrwxr-x  2 bob      doc            24 Aug  9  1984 RCS/
+-rw-rw-r--  1 glen     doc            78 Jun  7  1984 README
+-rw-rw-r--  1 glen     doc          2408 Jun  7  1984 boot.8
+-rw-r--r--  1 bob      doc          1298 Feb 13 13:23 cib.8
+-rw-rw-r--  1 glen     doc          6374 May 25  1984 crash.8
+-rw-r--r--  1 bob      doc           783 Feb 13 13:23 dib.8
+-rw-rw-r--  1 glen     doc           386 May 18  1984 intro.8
+-rw-r--r--  1 bob      doc          1227 Feb 13 13:23 tib.8

@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH SGINAP 2 
+.SH NAME
+sginap \- timed sleep and processor yield function
+.SH SYNOPSIS
+.B void sginap (ticks)
+.br
+.B long ticks;
+.SH DESCRIPTION
+.PP
+The
+.I sginap
+system call provides two functions.  With an argument of 0, it yields the
+processor to any higher or equal priority processes immediately, thus
+potentially allowing another process to run.  Note that because the user
+has no direct control over the exact priority of a given process, this
+does not guarantee that another process will run.
+.PP
+With an argument which is non-zero,
+.I sginap
+will suspend the process for
+.B ticks
+clock ticks.  The length of a clock tick is defined by
+.B HZ
+in the include file
+.I <machine/param.h>
+and is different for different
+.I IRIS
+products.
+.SH "SEE ALSO"
+sleep(3C), alarm(2), pause(2)

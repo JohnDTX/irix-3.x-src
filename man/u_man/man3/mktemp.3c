@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH MKTEMP 3C 
+.SH NAME
+mktemp \- make a unique file name
+.SH SYNOPSIS
+.B char \(**mktemp (template)
+.br
+.B char \(**template;
+.SH DESCRIPTION
+.I Mktemp\^
+replaces the contents of the string pointed to by
+.I template\^
+by a unique file name, and returns the
+address of
+.IR template .
+The string in
+.I template\^
+should look like a file name with six trailing
+.BR X s;
+.I mktemp\^
+will replace the
+.BR X s
+with a
+letter and the current process \s-1ID\s0.
+The letter will be chosen so that the resulting
+name does not duplicate an existing file.
+.SH SEE ALSO
+getpid(2), tmpfile(3S), tmpnam(3S).
+.SH BUGS
+It is possible to run out of letters.
+.\"	@(#)mktemp.3c	5.1 of 10/21/83

@@ -1,0 +1,40 @@
+#! /bin/sh
+
+# /etc/rc.s0
+#   This script is run only during the read of inittab at boot time.
+#   This script resets the system console to the actual physical
+#   console as defined by /dev/systty
+
+rm -f /dev/syscon
+ln /dev/systty /dev/syscon
+
+#
+# Initialize the mount table /etc/mtab to reflect the state of
+# mounted file systems in single user mode, i.e., that only
+# the root file system is mounted.  This allows
+# the /etc/mtab file to remain consistent with no further
+# handling in the rc and brc scripts.  Manual mounts can be
+# done in single user mode and /etc/mtab will remain consistent
+# if you subsequently go multi.
+#
+
+/etc/devnm / | /etc/setmnt
+
+#
+# Display message required for legal reasons.
+#
+
+echo " "
+echo " "
+echo "                       RESTRICTED RIGHTS LEGEND"
+echo " "
+echo "                Use, duplication or disclosure by the"
+echo "                Government is subject to restrictions"
+echo "                as set forth in subdivision (c)(1)(ii) of"
+echo "                the Rights in Technical Data and Computer"
+echo "                Software clause at 52.227-7013"
+echo " "
+echo "                        SILICON GRAPHICS, INC."
+echo "                          2011 Stierlin Road"
+echo "                     Mountain View, CA 94039-7311"
+echo " "

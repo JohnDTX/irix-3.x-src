@@ -1,0 +1,15 @@
+total 20
+drwxrwxr-x  9 bob      doc           512 Apr  4 15:27 ./
+drwxrwxr-x  8 glen     doc          1024 Mar 21 18:52 ../
+-rw-rw-r--  1 diane    doc             0 Apr  4 15:27 2700
+-r--r--r--  1 bob      doc           454 Jan 28 16:02 Makefile
+drwxrwxr-x  2 bob      doc           512 Mar 21 14:55 RCS/
+drwxrwxr-x  6 glen     doc          5632 Apr  4 14:59 man1/
+drwxrwxr-x  3 glen     doc          1536 Apr  4 15:01 man2/
+drwxrwxr-x  5 glen     doc          5120 Apr  4 15:02 man3/
+drwxrwxr-x  3 glen     doc          1024 Feb 27 15:38 man4/
+drwxrwxr-x  3 glen     doc           512 Feb 27 15:35 man5/
+drwxrwxr-x  3 glen     doc          1024 Feb 27 15:41 man6/
+
+*** man4: directory ***
+

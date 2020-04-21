@@ -1,0 +1,49 @@
+.TH reshapeviewport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B reshapeviewport 
+\- sets the viewport to the dimensions of the current graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "reshapeviewport()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine reshap"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure reshapeviewport;"
+.SH DESCRIPTION
+\f3reshapeviewport\f1 sets the viewport to the dimensions of
+the current graphics window.
+.B reshapeviewport
+is equivalent to:
+.sp
+.nf
+.in +0.5i
+.ft 7
+.ps -2
+long  xsize, ysize;
+.sp
+getsize(&xsize, &ysize);
+viewport(0, xsize, 0, ysize);\f1
+.ps
+.ft 1
+.fi
+.in -0.5i
+.sp
+\f1Use\f1
+.B reshapeviewport
+when REDRAW events are received. It is most useful in
+programs that are independent of the size and shape of the viewport.
+.SH "SEE ALSO"
+getorigin, getsize, viewport,
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

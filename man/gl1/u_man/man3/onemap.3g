@@ -1,0 +1,32 @@
+.TH onemap 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I onemap
+- treat the color map as one large map
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "onemap()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine onemap"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure onemap;"
+.sp
+.SH DESCRIPTION
+.I Onemap
+organizes the color map as a single map with a maximum of 4096 RGB 
+entries.  The
+number of entries is 2\u\s-2p\s0\d, where 
+.I p
+is the number of available
+planes.  Specification and limitation of available planes are discussed
+in the \f2setplanes\f1 manual page.  \f2Onemap\f1 does not take effect until 
+\f2gconfig\f1 is called.
+.SH "SEE ALSO"
+.I gconfig, getcmmode, multimap, setmap, setplanes
+.SH NOTE
+This command can only be used in immediate mode.

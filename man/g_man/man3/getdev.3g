@@ -1,0 +1,40 @@
+.TH getdev 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getdev 
+\- reads a list of valuators at one time
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getdev(n, devs, vals) "
+.B "long n;
+.B "Device *devs;"
+.B "short *vals;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getdev(n, devs, vals)"
+.B "integer*4 n
+.B "integer*2 devs(n), vals(n)
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getdev(n: longint; var dev: data: Short);"
+.SH DESCRIPTION
+.B getdev
+allows up to 128 valuators and buttons to be input devices
+at one time.
+.I n
+specifies the number of devices.
+.I devs 
+is an array
+of device number constants, such as MOUSEX, BPADX, LEFTMOUSE, etc.
+.I vals
+returns the state of each device in the corresponding location.
+.SH "SEE ALSO"
+getvaluator
+.sp
+\f2Programming Guide\fP, Section 7.3, Polling a Device

@@ -1,0 +1,61 @@
+'\" t
+'\"macro stdmacro
+.TH MASTERMIND 6
+.SH NAME
+mastermind \- game of "mastermind"
+.SH SYNOPSIS
+.B /usr/games/mastermind
+.SH DESCRIPTION
+This program plays the game of "mastermind".
+The playing field is a number of slots,
+in which a number of colored pegs can be placed.
+The program starts by placing a peg in each slot,
+and the player then must guess what color peg is in each slot.
+The player then places a peg in each slot,
+and the program guesses what color peg is in each slot.
+The player gets one point for each guess the program must make,
+and the program gets one point for each guess the player must make.
+.PP
+A guess consists of a possible sequence of colored pegs.
+The guesser's opponent then answers with two numbers:
+the number of pegs in the guess that exactly match
+the corresponding pegs in the configuration,
+and the number of pegs in the guess
+that match in color but not in position.
+For example,
+in a game with five slots
+the following situation might occur:
+.sp
+.TS
+center;
+l l l l l l.
+Program's configuration:	red	red	yellow	blue	brown
+Player's guess:	blue	red	green	red	red
+.TE
+.sp
+.PP
+The two numbers would then be 1 and 2.
+The 1 is because the program and the player
+each have a red peg in the second slot.
+In addition,
+the player's blue matches the program's blue,
+though the position is wrong,
+and one of the player's reds
+matches the program's red in the first slot.
+Only two of the player's reds match because
+the program only has two reds in its configuration.
+.PP
+Before the game starts,
+the player must have a chance to decide
+on how many slots and colors to use.
+.PP
+When entering a guess,
+type the names of the colors,
+separated by spaces.
+When the program makes a guess,
+answer with two digits,
+possibly separated by spaces.
+.PP
+During the player's turn,
+the player can find what happened
+by typing "review" instead of a guess.

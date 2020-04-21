@@ -1,0 +1,32 @@
+.TH setbell 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2setbell\fP - set the duration of the keyboard bell
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "setbell(mode)"
+.B "char mode;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine setbel(mode)"
+.B "character mode"
+.sp
+.SH DESCRIPTION
+\f2Setbell\fP sets the duration mode of the terminal bell.
+.sp
+.TS
+center, box;
+cB | cB
+n l.
+Mode	Meaning
+_
+0	off
+1	short beep
+2	long beep
+.TE
+.SH "SEE ALSO"
+.I clkoff, clkon, lampoff, lampon, ringbell
+.SH NOTE
+This command can only be used in immediate mode.

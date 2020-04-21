@@ -1,0 +1,29 @@
+.TH clkoff 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B clkoff 
+\- turns off the keyboard click
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clkoff()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clkoff"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure clkoff;"
+.SH DESCRIPTION
+\f3clkoff\fP turns off the keyboard click.
+.SH "SEE ALSO"
+clkon, lampoff, lampon, ringbell, setbell
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

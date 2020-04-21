@@ -1,0 +1,177 @@
+'\"macro stdmacro
+.TH DOG 1D
+.SH NAME
+dog \- cooperative or competitive flight simulator and airshow generator
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/dog 
+[\ 
+.B \-i 
+infile
+\ ] [\ 
+.B \-o 
+outfile\ ]
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+The 
+.I dog
+demonstration program
+is an enhanced version of the
+.IR flight (1D)
+demonstration program for use on multiple IRIS workstation systems.
+Each IRIS determines the position of its aircraft several times a second, 
+broadcasts the plane's location and orientation to the other IRIS systems
+running
+.IR dog ,
+and listens to the other planes' locations.
+All known planes in the current field of view are displayed on all systems.
+.PP
+If neither 
+.BR \-i  nor 
+.B \-o 
+is selected, the broadcast medium is the Ethernet.
+Otherwise, the media are the specified files.
+Ethernet is assumed for the combat described below.
+For the file options, see
+.I Airshow Option.
+.PP
+Pilots may cooperate by attempting formation aerobatics or compete by trying
+to shoot each other down.
+The coordinates of projectiles are included in the Ethernet packets, hits are
+detected, and scoring is maintained.
+.SH Weapons
+.PP
+Fighters are armed with rockets, sidewinders, and cannon.  
+The number of rockets and sidewinders available on each type of fighter are
+indicated on the help display. Landings replenish missiles as well as fuel.
+The number of missiles replenished depends on the quality of the
+landing (see
+.IR flight (1D).
+Ammunition for the cannon is inexhaustible.
+.PP
+Each weapon has a different kill radius. Weapons detonate themselves when
+they are within their kill radius of a plane other than the one they came
+from.  All planes within the kill radius of an exploding weapon are
+destroyed.
+.PP
+The
+.I q
+key fires a rocket.
+Rockets have about ten seconds of fuel and follow ballistic paths after the
+fuel is exhausted.  They explode when they strike the ground, come within
+range of an aircraft (except the one they came from), or are destroyed by 
+their owner.  Rockets have the largest kill radius of all the weapons.
+.PP
+The
+.I w
+key fires a sidewinder.
+Sidewinders are like rockets but track, or steer themselves towards, other
+aircraft if they are ``locked on''.
+Sidewinders are locked on if they are fired while a target aircraft is
+in the orange tracking rectangle or if locked on with the 
+.I t 
+key.
+The
+.I t
+key
+identifies the target and locks a sidewinder onto the target for one second 
+without firing the weapon.  This is useful for identifying other planes as
+friend or foe. Sidewinders will not lock on aircraft lower than 150 feet, but
+once they are locked on, they will track a plane below 150 feet.
+Sidewinders stop tracking and follow ballistic paths when they run out of
+fuel. The Cessna 150 does not generate enough heat to attract sidewinders.
+A good pilot can usually outmaneuver a sidewinder unless his plane is
+traveling slowly with a heavy load.  Sidewinders have a smaller kill radius
+than rockets.
+.PP
+The
+.I e
+key fires a cannon round.
+The cannon has a limited range\(emeach cannon shell exists for only one
+second. Cannons have the smallest kill radius.
+.PP
+The
+.I r
+key destroys the current missile.  Any aircraft in range of the explosion
+is destroyed. Each aircraft can have only one projectile in the air at a time.
+Thus, you can destroy missiles that have missed their targets allowing new
+ones to be fired.
+In
+.IR flight ,
+or in
+.I dog
+with no competition, strafing the airport can be good practice for the real
+thing.
+.SH Scoring
+.PP
+.I dog
+keeps track of victories and defeats.
+A pilot scores a ``won'' when a projectile fired by his plane destroys another
+aircraft.  A pilot scores a ``lost'' when his aircraft is destroyed by a
+projectile or crashes.
+.PP
+Each pilot's score is displayed on his instrument panel.
+The scores of all the current players are shown to each new player when he
+joins the game and when he reincarnates himself after destruction.
+.PP
+When a player joins the game, an announcement is broadcast to all players.
+Messages are also broadcast whenever a player quits, destroys another plane,
+or is destroyed.
+.SH Airshow Option
+The 
+.B \-o 
+option
+will record the path of your aircraft on 
+.I outfile
+rather than broadcasting it to the network.
+.PP
+The 
+.B \-i
+option
+replays a recorded flight.
+You will be in another aircraft, able to join the other recorded
+planes in formation or shoot at, but not destroy them.
+.PP
+Specifying both
+the
+.B \-i
+and
+.B \-o
+options
+replays a recorded flight and produces an
+.I outfile
+containing your aircraft's path as well as the other planes' paths.
+.I infile
+and
+.I outfile
+cannot be the same file.
+Repeated use of the command can make formations of many aircraft.
+.SH SEE ALSO
+flight(1D), radar(1D), shadow(1D)
+.SH AUTHOR
+.PP
+Gary Tarolli
+.SH NOTES
+.PP
+Various kinds of cheating are possible, e.g., temporarily selecting the
+night display to better see a distant opponent's exhaust.
+Some scrupulous pilots avoid operations not possible in real aircraft.
+Others use every trick possible.
+.PP
+The Cessna 150 and B-747 have 20mm cannon.
+This is inaccurate but amusing in the C-150 (the 747 is much too sluggish).
+Try taking off in the C-150 and flying around the runway, picking off
+opponents as they appear.  Since the Cessna does not attract
+sidewinders, it has a chance to survive.
+If you make a mistake and take off in the 747, you are dogmeat.
+.SH BUGS
+.PP
+The cannon ammunition should be finite and the cannon
+should overheat and jam if used too often.
+.PP
+.I dog
+core dumps if more than 15 planes join the game.

@@ -1,0 +1,88 @@
+'\"macro stdmacro
+.TH ACCEPT 1M
+.SH NAME
+accept, reject \- allow/prevent \s-1LP\s+1 requests
+.SH SYNOPSIS
+.B /usr/lib/accept
+destinations
+.br
+.B /usr/lib/reject
+.RB [\| \-r [\|reason\|]\|]
+destinations
+.SH DESCRIPTION
+.I Accept
+allows
+.IR lp (1)
+to accept requests for
+the named
+.IR destinations .
+A
+.I destination
+can be either
+a printer
+or a class of printers.
+Use
+.IR lpstat (1)
+to find the status
+of
+.IR destinations .
+.PP
+.I Reject
+prevents
+.IR lp (1)
+from accepting requests
+for the named
+.IR destinations .
+A
+.I destination
+can be either
+a printer
+or a class of printers.
+Use
+.IR lpstat (1)
+to find the status
+of
+.IR destinations .
+The following option is useful with
+.IR reject .
+.TP "\w'\-r[\|reason\|]\ \ \ \ 'u"
+.BR \-r [\|\f2reason\fP\|]
+Associates a
+.I reason
+with preventing
+.I lp
+from accepting requests.
+This
+.I reason
+applies
+to all printers
+mentioned
+up to the next
+.B \-r
+option.
+.I Reason
+is reported by
+.I lp
+when users direct requests to the named
+.I destinations
+and by
+.IR lpstat (1).
+If the
+.B \-r
+option is not present
+or the
+.B \-r
+option is given without a
+.IR reason ,
+then a default
+.I reason
+will be used.
+.SH FILES
+/usr/spool/lp/\(**
+.SH SEE ALSO
+enable(1),
+lp(1),
+lpadmin(1M),
+lpsched(1M),
+lpstat(1).
+.\"	@(#)accept.1m	5.1 of 10/17/83

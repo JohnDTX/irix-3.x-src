@@ -1,0 +1,76 @@
+'\"macro stdmacro
+.TH IBTAB 3N
+.SH NAME
+ibtab: setibfile, setibent, endibent, getibent, ibnflags \- package for dealing with ibtab files
+.SH SYNOPSIS
+.nf
+.B setibfile (file)
+.B char *file;
+.PP
+.B int setibent ( )
+.PP
+.B endibent ( )
+.PP
+.B struct ibtab *getibent ( )
+.PP
+.B int ibnflags (flagstr, val)
+.B char *flagstr;
+.B int *val;
+.fi
+.SH DESCRIPTION
+This is a basic set of routines for dealing with
+.IR ibtab (4)
+format files such as
+.IR /etc/ibtab .
+By default
+.I /etc/ibtab
+is used.
+.I setibfile
+changes
+the default within the calling program.
+.PP
+.I setibent
+opens and positions the file at the origin.
+.I getibent
+returns a pointer to a (static)
+structure containing the "next" entry.
+0 is returned at the end-of-file.
+The structure is declared in the include file
+.IR <ibtab.h> .
+.I endibent
+closes the file.
+.PP
+.I ibnflags
+interprets the flags (ibt_flags) field,
+saving its numeric equivalent in the caller-supplied val.
+The return value is 0 if the string is a legitimate
+expression,
+\-1 otherwise.
+.SH EXAMPLE
+.nf
+	# include "ibtab.h"
+	extern struct ibtab *getibent();
+	struct ibtab *ip;
+	int val;
+	...
+	setibent();
+	while( (ip = getibent()) != 0 )
+	{
+	    if( ibnflags(ip->ibt_flags,&val) < 0 )
+		printf("illegal flags string %s\en",ip->ibt_flags);
+	    else
+		printf("%s --> 0x%x\en",ip->ibt_flags,val);
+	}
+	endibent();
+.br
+.fi
+.SH FILES
+/etc/ibtab
+.SH "SEE ALSO"
+ib(7),
+iib(1M), ibtab(4)
+.SH BUGS
+.I getibent
+stores data in static areas.
+Return values are over-written by
+subsequent calls.

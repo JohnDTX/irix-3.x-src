@@ -1,0 +1,1295 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: DBG.MISC.1.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                           All Rights Reserved.                07-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+{ Get/Set user space long, word, byte }
+
+function getuw(faddr: longint): integer; forward;
+
+function getul(faddr: longint): longint;
+  var lplongint: ^longint;
+      trick: record
+               case integer of
+                 0: (trickl: longint);
+                 1: (tricka: array[0..1] of integer);
+             end;
+begin {getul}
+if ENVIRONMENT = GENIX
+then if USCOREFLAG
+     then getul := _ptrace(0,faddr,childpid,1)
+     else getul := ptrace(0,faddr,childpid,1)
+else
+  if odd(faddr)
+  then begin writeln('?Odd address'); getul := 0; end
+  else 
+    if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+       (ENVIRONMENT = CROMIX)
+    then begin moveleft(faddr,lplongint,4); getul := lplongint^; end
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+            (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+            (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+    then 
+      if CINTSIZE = 4
+      then if USCOREFLAG
+           then getul := _ptrace(0,faddr,childpid,1)
+           else getul := ptrace(0,faddr,childpid,1)
+      else begin {CINTSIZE = 2}
+        trick.tricka[0] := getuw(faddr);
+        trick.tricka[1] := getuw(faddr+2);
+        getul := trick.trickl;
+        end
+    else if ENVIRONMENT = UNOS
+    then begin
+      trick.tricka[0] := getuw(faddr);
+      trick.tricka[1] := getuw(faddr+2);
+      getul := trick.trickl;
+      end;
+end; {getul}
+
+function getuw{faddr: longint): integer};
+  var lpinteger: ^integer; 
+      lint: integer;
+      trick: record
+               case integer of
+                 0: (trickl: longint);
+                 1: (tricka: array[0..1] of integer);
+             end;
+begin {getuw}
+if ENVIRONMENT = GENIX
+then begin 
+  trick.trickl := getul(faddr); getuw := trick.tricka[0]; 
+  end
+else
+  if odd(faddr)
+  then begin writeln('?Odd address'); getuw := 0; end
+  else 
+    if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+       (ENVIRONMENT = CROMIX)
+    then begin moveleft(faddr,lpinteger,4); getuw := lpinteger^; end
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+            (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+            (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+    then 
+      if CINTSIZE = 4
+      then begin 
+        trick.trickl := getul(faddr); getuw := trick.tricka[0]; 
+        end
+      else {CINTSIZE = 2} if USCOREFLAG
+                          then getuw := _ptrace(0,faddr,childpid,1)
+                          else getuw := ptrace(0,faddr,childpid,1)
+    else if ENVIRONMENT = UNOS
+    then begin
+      if _pget(lint,faddr,1,childpid) < 0
+      then writeln('Error reading target process image');
+      getuw := lint;
+      end;
+end; {getuw}
+
+function getub(faddr: longint): byte;
+  var lpbyte: ^byte;
+      trick: record
+               case integer of
+                 0: (trickw: integer);
+                 1: (trickb: array[0..1] of byte);
+             end;
+begin {getub}
+if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+   (ENVIRONMENT = CROMIX)
+then begin moveleft(faddr,lpbyte,4); getub := lpbyte^; end
+else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS) or 
+        (ENVIRONMENT = XENIX) or (ENVIRONMENT = GENIX) or
+        (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+        (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+then begin
+  if odd(faddr)
+  then begin
+    trick.trickw := getuw(faddr - 1); getub := trick.trickb[1];
+    end
+  else begin
+    trick.trickw := getuw(faddr); getub := trick.trickb[0];
+    end;
+  end;
+end; {getub}
+
+procedure setuw(faddr: longint; val: integer); forward;
+
+procedure setul(faddr: longint; val: longint);
+  var lplongint: ^longint; garbage: cint;
+      trick: record
+               case integer of
+                 0: (trickl: longint);
+                 1: (tricka: array[0..1] of integer);
+             end;
+begin {setul}
+if ENVIRONMENT = GENIX
+then if USCOREFLAG
+     then garbage := _ptrace(val,faddr,childpid,4)
+     else garbage := ptrace(val,faddr,childpid,4)
+else
+  if odd(faddr)
+  then writeln('?Odd address')
+  else 
+    if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+       (ENVIRONMENT = CROMIX)
+    then begin moveleft(faddr,lplongint,4); lplongint^ := val; end
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+            (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+            (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+    then 
+      if CINTSIZE = 4
+      then if USCOREFLAG
+           then garbage := _ptrace(val,faddr,childpid,4)
+           else if ENVIRONMENT = CT_O
+                then begin {Hack to set both text and data}
+                     garbage := ptrace(val,faddr,childpid,5);
+                     garbage := ptrace(val,faddr,childpid,4);
+                     end
+                else garbage := ptrace(val,faddr,childpid,4)
+      else begin {CINTSIZE = 2}
+        trick.trickl := val;
+        setuw(faddr,trick.tricka[0]);
+        setuw(faddr+2,trick.tricka[1]);
+        end
+    else if ENVIRONMENT = UNOS
+    then begin
+      trick.trickl := val;
+      setuw(faddr,trick.tricka[0]);
+      setuw(faddr+2,trick.tricka[1]);
+      end;
+end; {setul}
+
+procedure setuw{faddr: longint; val: integer};
+  var lpinteger: ^integer; garbage: cint;
+      trick: record
+               case integer of
+                 0: (trickl: longint);
+                 1: (tricka: array[0..1] of integer);
+             end;
+begin {setuw}
+if ENVIRONMENT = GENIX
+then begin
+  trick.trickl := getul(faddr); trick.tricka[0] := val;
+  setul(faddr,trick.trickl);
+  end
+else
+  if odd(faddr)
+  then writeln('?Odd address')
+  else 
+    if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+       (ENVIRONMENT = CROMIX)
+    then begin moveleft(faddr,lpinteger,4); lpinteger^ := val; end
+    else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+            (ENVIRONMENT = XENIX_O) or (ENVIRONMENT = CT_O) or
+            (ENVIRONMENT = SG_O) or (ENVIRONMENT = SYS5_2)
+    then 
+      if CINTSIZE = 4
+      then begin
+        trick.trickl := getul(faddr); trick.tricka[0] := val;
+        setul(faddr,trick.trickl);
+        end
+      else {CINTSIZE = 2} if USCOREFLAG
+                          then garbage := _ptrace(val,faddr,childpid,4)
+                          else garbage := ptrace(val,faddr,childpid,4)
+    else if ENVIRONMENT = UNOS
+    then begin
+      if _pput(val,faddr,1,childpid) < 0
+      then writeln('Error writing target process image');
+      end;
+end; {setuw}
+  
+procedure setub(faddr: longint; val: byte);
+  var lpbyte: ^byte;
+      trick: record
+               case integer of
+                 0: (trickl: longint);
+                 1: (tricka: array[0..3] of byte);
+                 2: (trickw: integer);
+                 3: (trickb: array[0..1] of byte);
+             end;
+begin {setub}
+if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+   (ENVIRONMENT = CROMIX)
+then begin moveleft(faddr,lpbyte,4); lpbyte^ := val; end
+else if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = XENIX) or
+        (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+        (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+        (ENVIRONMENT = SYS5_2)
+then 
+  if CINTSIZE = 4
+  then 
+    if odd(faddr)
+    then begin
+      trick.trickl := getul(faddr - 1); trick.tricka[1] := val;
+      setul(faddr - 1,trick.trickl);
+      end
+    else begin
+      trick.trickl := getul(faddr); trick.tricka[0] := val;
+      setul(faddr,trick.trickl);
+      end
+  else {CINTSIZE = 2}
+    if odd(faddr)
+    then begin
+      trick.trickw := getuw(faddr - 1); trick.trickb[1] := val;
+      setuw(faddr - 1,trick.trickw);
+      end
+    else begin
+      trick.trickw := getuw(faddr); trick.trickb[0] := val;
+      setuw(faddr,trick.trickw);
+      end
+else if ENVIRONMENT = UNOS
+then
+  if odd(faddr)
+  then begin
+    trick.trickw := getuw(faddr - 1); trick.trickb[1] := val;
+    setuw(faddr - 1,trick.trickw);
+    end
+  else begin
+    trick.trickw := getuw(faddr); trick.trickb[0] := val;
+    setuw(faddr,trick.trickw);
+    end;
+end; {setub}
+
+{ Fetch from / Set to process "system" space }
+
+function getsl(faddr: longint): longint;
+begin {getsl}
+if ENVIRONMENT = SG_O
+then if USCOREFLAG
+     then getsl := _ptrace(0,faddr,childpid,10)
+     else getsl := ptrace(0,faddr,childpid,10)
+else if ENVIRONMENT = GENIX
+     then if USCOREFLAG
+          then getsl := _ptrace(0,faddr,childpid,3)
+          else getsl := ptrace(0,faddr,childpid,3)
+     else
+       if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+          (ENVIRONMENT = CT_O) or (ENVIRONMENT = SYS5_2)
+       then
+         if odd(faddr)
+         then begin writeln('?Odd address'); getsl := 0; end
+         else if USCOREFLAG
+              then getsl := _ptrace(0,faddr,childpid,3)
+              else getsl := ptrace(0,faddr,childpid,3)
+       else writeln('?No system space');
+end; {getsl}
+
+procedure setsl(faddr: longint; val: longint);
+  var garbage: cint;
+begin {setsl}
+if ENVIRONMENT = SG_O
+then if USCOREFLAG
+     then garbage := _ptrace(val,faddr,childpid,11)
+     else garbage := ptrace(val,faddr,childpid,11)
+else if ENVIRONMENT = GENIX
+     then if USCOREFLAG
+          then garbage := _ptrace(val,faddr,childpid,6)
+          else garbage := ptrace(val,faddr,childpid,6)
+     else
+       if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+          (ENVIRONMENT = CT_O) or (ENVIRONMENT = SYS5_2)
+       then
+         if odd(faddr)
+         then writeln('?Odd address')
+         else if USCOREFLAG
+              then garbage := _ptrace(val,faddr,childpid,6)
+              else garbage := ptrace(val,faddr,childpid,6)
+       else writeln('?No system space');
+end; {setsl}
+
+{Code in dbg.run.2 depends on the floating point registers being in order}
+
+function nsregaddr(reg: nsreg):longint;
+  const U_AR0_OFFSET = 8;      {depends on user.h}
+        U_FPUSAVE_OFFSET = 12; {depends on user.h}
+        VA_UAREA = $ff0200;    {depends on machine/???}
+        OLDTRAPOFF = 8;        {depends on machine/reg.h}
+        TRAPOFF = 7;           {depends on machine/reg.h}
+        ENTLOCL = 1;           {depends on machine/reg.h}
+  var ar0: longint; {address of R0 on kernel stack}
+begin {nsregaddr}
+if ENVIRONMENT = GENIX
+then
+  if OLDDYNIX
+  then begin
+    ar0 := getsl(U_AR0_OFFSET);
+    ar0 := ar0 - VA_UAREA;
+    case reg of
+      NSR0: nsregaddr := ar0 + 4*(0);
+      NSR1: nsregaddr := ar0 + 4*(-1);
+      NSR2: nsregaddr := ar0 + 4*(-2);
+      NSR3: nsregaddr := ar0 + 4*(-4-OLDTRAPOFF);
+      NSR4: nsregaddr := ar0 + 4*(-5-OLDTRAPOFF);
+      NSR5: nsregaddr := ar0 + 4*(-6-OLDTRAPOFF);
+      NSR6: nsregaddr := ar0 + 4*(-7-OLDTRAPOFF);
+      NSR7: nsregaddr := ar0 + 4*(-8-OLDTRAPOFF);
+      NSF0: nsregaddr := U_FPUSAVE_OFFSET;
+      NSF1: nsregaddr := U_FPUSAVE_OFFSET + 4;
+      NSF2: nsregaddr := U_FPUSAVE_OFFSET + 8;
+      NSF3: nsregaddr := U_FPUSAVE_OFFSET + 12;
+      NSF4: nsregaddr := U_FPUSAVE_OFFSET + 16;
+      NSF5: nsregaddr := U_FPUSAVE_OFFSET + 20;
+      NSF6: nsregaddr := U_FPUSAVE_OFFSET + 24;
+      NSF7: nsregaddr := U_FPUSAVE_OFFSET + 28;
+      NSPC: nsregaddr := ar0 + 4*(2 + ENTLOCL);
+      NSSP: nsregaddr := ar0 + 4*(-3);
+      NSFP: nsregaddr := ar0 + 4*(1 + ENTLOCL);
+      NSMODPSR: nsregaddr := ar0 + 4*(3 + ENTLOCL);
+      otherwise: nsregaddr := 0;
+    end; {case}
+    end {OLDDYNIX}
+  else if DYNIXFLAG
+  then begin
+    ar0 := getsl(U_AR0_OFFSET);
+    ar0 := ar0 - VA_UAREA;
+    case reg of
+      NSR0: nsregaddr := ar0 + 4*(0);
+      NSR1: nsregaddr := ar0 + 4*(-1);
+      NSR2: nsregaddr := ar0 + 4*(-2);
+      NSR3: nsregaddr := ar0 + 4*(-4-TRAPOFF);
+      NSR4: nsregaddr := ar0 + 4*(-5-TRAPOFF);
+      NSR5: nsregaddr := ar0 + 4*(-6-TRAPOFF);
+      NSR6: nsregaddr := ar0 + 4*(-7-TRAPOFF);
+      NSR7: nsregaddr := ar0 + 4*(-8-TRAPOFF);
+      NSF0: nsregaddr := U_FPUSAVE_OFFSET;
+      NSF1: nsregaddr := U_FPUSAVE_OFFSET + 4;
+      NSF2: nsregaddr := U_FPUSAVE_OFFSET + 8;
+      NSF3: nsregaddr := U_FPUSAVE_OFFSET + 12;
+      NSF4: nsregaddr := U_FPUSAVE_OFFSET + 16;
+      NSF5: nsregaddr := U_FPUSAVE_OFFSET + 20;
+      NSF6: nsregaddr := U_FPUSAVE_OFFSET + 24;
+      NSF7: nsregaddr := U_FPUSAVE_OFFSET + 28;
+      NSPC: nsregaddr := ar0 + 4*(2 + ENTLOCL);
+      NSSP: nsregaddr := ar0 + 4*(-3);
+      NSFP: nsregaddr := ar0 + 4*(1 + ENTLOCL);
+      NSMODPSR: nsregaddr := ar0 + 4*(3 + ENTLOCL);
+      otherwise: nsregaddr := 0;
+    end; {case}
+    end {DYNIXFLAG}
+  else if TEKFLAG
+  then begin
+    case reg of
+      NSR0: nsregaddr := $FE4;
+      NSR1: nsregaddr := $FE0;
+      NSR2: nsregaddr := $FDC;
+      NSR3: nsregaddr := $FD8;
+      NSR4: nsregaddr := $FD4;
+      NSR5: nsregaddr := $FD0;
+      NSR6: nsregaddr := $FCC;
+      NSR7: nsregaddr := $FC8;
+      NSPC: nsregaddr := $FF4;
+      NSSP: nsregaddr := $FEC;
+      NSFP: nsregaddr := $FF0;
+      otherwise: nsregaddr := 0;
+    end; {case}
+    end {TEKFLAG}
+  else if OPUSFLAG
+  then begin
+    ar0 := getsl($1c4 {U_AR0_OFFSET});
+    ar0 := ar0 - $e1f800 {VA_UAREA};
+    case reg of
+      NSR0: nsregaddr := ar0 + 4*(0);
+      NSR1: nsregaddr := ar0 + 4*(-2);
+      NSR2: nsregaddr := ar0 + 4*(-3);
+      NSR3: nsregaddr := ar0 + 4*(-4);
+      NSR4: nsregaddr := ar0 + 4*(-8);
+      NSR5: nsregaddr := ar0 + 4*(-9);
+      NSR6: nsregaddr := ar0 + 4*(-10);
+      NSR7: nsregaddr := ar0 + 4*(-11);
+      NSPC: nsregaddr := ar0 + 4*(2);
+      NSSP: nsregaddr := ar0 + 4*(-1);
+      NSFP: nsregaddr := ar0 + 4*(-6);
+      otherwise: nsregaddr := 0;
+    end; {case}
+    end {OPUSFLAG}
+  else {GENIX}
+    case reg of
+      NSR0: nsregaddr := 0;
+      NSR1: nsregaddr := -1;
+      NSR2: nsregaddr := -2;
+      NSR3: nsregaddr := -10;
+      NSR4: nsregaddr := -11;
+      NSR5: nsregaddr := -12;
+      NSR6: nsregaddr := -13;
+      NSR7: nsregaddr := -14;
+      NSF0: nsregaddr := -100;
+      NSF1: nsregaddr := -101;
+      NSF2: nsregaddr := -102;
+      NSF3: nsregaddr := -103;
+      NSF4: nsregaddr := -104;
+      NSF5: nsregaddr := -105;
+      NSF6: nsregaddr := -106;
+      NSF7: nsregaddr := -107;
+      NSPC: nsregaddr := 3;
+      NSSP: nsregaddr := -3;
+      NSFP: nsregaddr := 2;
+      NSMODPSR: nsregaddr := 4;
+      otherwise: nsregaddr := 0;
+    end; {case}
+end; {nsregaddr}
+  
+{ Return address in system space of 68000 registers }
+{ 0..7 => D0..D7;  8..15 => A0..A7;  16 => PC       }
+
+function mregaddr(freg: integer):longint;
+  var ar0: longint; {address of R0 on kernel stack}
+begin {mregaddr}
+if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O)
+then begin
+     if freg <= A7
+     then mregaddr := $7B0 + 4*freg
+     else mregaddr := $7f8; {PC}
+     end
+else if ENVIRONMENT = CT_O
+then begin
+     if freg <= A7
+     then mregaddr := $5B6 + 4*freg
+     else mregaddr := $5FA; {PC}
+     end
+else if ENVIRONMENT = SG_O
+then mregaddr := freg
+else if ENVIRONMENT = SYS5_2
+then begin
+     if ALTOSFLAG
+     then begin
+          ar0 := getsl($400);      {*** ALTOS ***}
+          ar0 := ar0 - $1FBF000;
+          if freg <= A7
+          then mregaddr := ar0 + 4*freg
+          else mregaddr := ar0 + 70; {PC}
+          end
+     else begin
+          ar0 := getsl($480);      {*** COUNTERPOINT ***}
+          ar0 := ar0 - $7ffff400;
+          if freg <= A6
+          then mregaddr := ar0 + 4*freg
+          else if freg = A7
+               then mregaddr := ar0 - 4
+               else mregaddr := ar0 + 60; {PC}
+          end;
+     end;
+end; {mregaddr}
+
+{ Get prog.a[reg] and prog.d[reg], where ever they are stored }
+
+function getproga(freg: integer): longint;
+begin {getproga}
+if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+   (ENVIRONMENT = CROMIX)
+then getproga := prog.a[freg]
+else
+  if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS)
+  then getproga := getul(dataareabase + 36 + 4*freg)
+  else
+    if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+       (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+       (ENVIRONMENT = SYS5_2)
+    then getproga := getsl(mregaddr(freg+8));
+end; {getproga}
+
+function getprogd(freg: integer): longint;
+begin {getprogd}
+if (ENVIRONMENT = MERLIN) or (ENVIRONMENT = ADVENTURE) or
+   (ENVIRONMENT = CROMIX)
+then getprogd := prog.d[freg]
+else
+  if (ENVIRONMENT = UNISOFT) or (ENVIRONMENT = UNOS)
+  then getprogd := getul(dataareabase + 4 + 4*freg)
+  else
+    if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+       (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+       (ENVIRONMENT = SYS5_2)
+    then getprogd := getsl(mregaddr(freg));
+end; {getprogd}
+
+function gettype(n: integer): ptyperec;
+  var i: integer;
+begin
+i := n div 128;
+if types[i] <> nil
+then gettype := types[i]^[n mod 128]
+else gettype := nil;
+end; {gettype}
+
+function getmem(n: longint): pbyte;
+begin
+getmem := %_new4(n);
+end; {getmem}
+
+{ Sets lastmodule as a side effect in ENVIRONMENTS which use module list }
+
+function getpentry(findex: integer): pentryrec;
+begin {getpentry}
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin {dotosys}
+  lastmodule := modules;
+  while lastmodule <> nil do begin
+    if findex < lastmodule^.numentrys
+    then begin
+      getpentry := @lastmodule^.entry^[findex];
+      exit(getpentry);
+      end;
+    findex := findex - lastmodule^.numentrys;
+    lastmodule := lastmodule^.next;
+    end;
+  writeln('getpentry called with bad index'); halt;
+  end
+else begin {not dotosys}
+  getpentry := @entry^[findex];
+  end;
+end; {getpentry}
+
+{ Sets lastmodule as a side effect in ENVIRONMENTS which use module list }
+
+function getindex(fentry: pentryrec): integer;
+  var lindex, count: integer;
+begin {getindex}
+if fentry = nil
+then getindex := -1
+else if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+        (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+        (ENVIRONMENT = SYS5_2)
+     then begin {dotosys}
+          lastmodule := modules; count := 0;
+          while lastmodule <> nil do begin
+                lindex := (ord(fentry) - ord(lastmodule^.entry)) div
+                                 sizeof(entryrec);
+                if (lindex >= 0) and (lindex < lastmodule^.numentrys)
+                then begin
+                     getindex := lindex + count; exit(getindex);
+                     end;
+                count := count + lastmodule^.numentrys;
+                lastmodule := lastmodule^.next;
+                end;
+          writeln('getindex called with bad pointer'); halt;
+          end
+     else begin {not dotosys}
+          getindex := (ord(fentry) - ord(entry)) div sizeof(entryrec);
+          end;
+end; {getindex}
+
+procedure getbounds(t: integer; var lo,hi: longint);
+  var i,j: integer;
+begin
+lo := 0; hi := 0;
+case t of
+  -1: begin lo := -128; hi := 127; end;
+otherwise:
+      if t > 0
+      then begin
+           i := t mod 128; j := t div 128;
+           with types[j]^[i]^ do begin
+                case form of
+                  SCALAR: hi := maxconst;
+                  SUBRANGE: begin lo := min; hi := max; end;
+                end; {case}
+                end;
+           end;
+end; {case}
+end; {getbounds}
+
+{ Sets lastmodule as a side effect in ENVIRONMENTS which use module list }
+
+procedure getsegoff(fpc: longint; var fseg: integer; var foffset: longint);
+  var i: integer;
+begin
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin
+  if fpc >= 0
+  then begin
+       lastmodule := modules; fseg := 0;
+       while lastmodule <> nil do
+             with lastmodule^ do begin
+                  if (fpc >= address) and (fpc < address + size)
+                  then begin
+                       foffset := fpc - address;
+                       exit(getsegoff);
+                       end;
+                  fseg := fseg + numentrys;
+                  lastmodule := next;
+                  end;
+       end;
+  foffset := -1; {lastmodule also nil}
+  end
+else begin {not dotosys}
+  if fpc >= 0
+  then for i := 0 to numsegs - 1 do
+           with seg^[i] do
+                if (fpc >= address) and (fpc < address + size)
+                then begin
+                     fseg := i; foffset := fpc - address;
+                     exit(getsegoff);
+                     end;
+  fseg := -1; foffset := -1;
+  end;
+end; {getsegoff}
+
+procedure getentryoff(fpc: longint; var fentry: integer; var foffset: longint);
+  var lsegno,i,s: integer; loffset,l: longint; FirstTime: Boolean;
+      r: record case integer of
+                  0: (c: array[0..3] of byte);
+                  1: (l: longint);
+         end;
+begin
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin
+  fentry := -1; foffset := -1; FirstTime := TRUE;
+  getsegoff(fpc,lsegno,loffset);
+  if lastmodule <> nil
+  then for i := 0 to lastmodule^.numentrys - 1 do begin
+           with lastmodule^.entry^[i] do begin
+                if (fpc >= address) and (language <> FTNENTRY)
+                then if FirstTime or (foffset > fpc - address)
+                     then begin
+                          FirstTime := FALSE;
+                          foffset := fpc - address;
+                          fentry := lsegno + i;
+                          end;
+                end;
+           end;
+  end
+else begin {not dotosys}
+  fentry := -1; foffset := -1; FirstTime := TRUE;
+  getsegoff(fpc,lsegno,loffset);
+  if lsegno >= 0
+  then for i := 0 to numentrys - 1 do begin
+           with entry^[i] do begin
+                r.l := address; s := r.c[0]; r.c[0] := 0; l := r.l;
+                if (lsegno = s) and (loffset >= l) and (language <> FTNENTRY)
+                then if FirstTime or (foffset > loffset - l)
+                     then begin
+                          FirstTime := FALSE;
+                          foffset := loffset - l;
+                          fentry := i;
+                          end;
+                end;
+           end;
+  end;
+end; {getentryoff}
+
+procedure getdataoff(faddr: longint;
+                     var fdatarec: pdatarec; var foffset: longint);
+  
+  procedure finddataoff(ftree: pdatarec);
+  begin {finddataoff}
+  if ftree <> nil
+  then with ftree^ do begin
+            if (faddr >= address) and (faddr < address + size)
+            then begin
+                 fdatarec := ftree; foffset := faddr - address;
+                 exit(getdataoff);
+                 end;
+            finddataoff(llink); finddataoff(rlink);
+            end;
+  end; {finddataoff}
+
+begin
+fdatarec := nil; foffset := 0; finddataoff(datatree^.rlink);
+end; {getdataoff}
+
+procedure prtno(t: integer);
+begin
+if t <= -100
+then write('CHARACTER*',(-t) - 100:1)
+else case t of
+          0: write('******** T0 *********');
+         -1: write('BYTE');
+         -2: write('INTEGER');
+         -3: write('LONGINT');
+         -4: write('UNSIGNED_BYTE');
+         -5: write('UNSIGNED_WORD');
+         -6: write('UNSIGNED_LONG');
+         -7: write('CHAR (BYTE)');
+         -8: write('CHAR (WORD)');
+         -9: write('REAL');
+        -10: write('DOUBLE');
+        -11: write('BOOLEAN');
+        -12: write('LOGICAL WORD');
+        -13: write('LOGICAL LONG');
+        -14: write('FILE');
+        -15: write('COMPLEX');
+        -16: write('SIGNED CHAR (BYTE)');
+       otherwise: write('T',t);
+       end; {case}
+end; {prtno}
+
+function membyte(var p: pbyte): integer;
+  var i: integer;
+begin
+i := p^; if i < 0 then i := i + 256;
+p := pointer(ord(p) + 1);
+membyte := i;
+end; {membyte}
+
+function memword(var p: pbyte): integer;
+  var c: array[0..1] of byte; i: integer;
+begin
+c[0] := p^; p := pointer(ord(p) + 1);
+c[1] := p^; p := pointer(ord(p) + 1);
+moveleft(c,i,2);
+memword := i;
+end; {memword}
+
+function memlong(var p: pbyte): longint;
+  var c: array[0..1] of byte; i: integer; l: longint;
+begin
+for i := 0 to 3 do
+    begin c[i] := p^; p := pointer(ord(p) + 1); end;
+moveleft(c,l,4);
+memlong := l;
+end; {memlong}
+
+function prfield(ffield: pbyte; FPacked: Boolean): pbyte;
+  var fname: string63; i,ltypeno,loc,m,n: integer;
+begin
+if ffield = nil then begin writeln('NIL to PRFIELD'); halt(ERRHALT); end;
+if ffield^ = -1
+then begin
+     ffield := pointer(ord(ffield) + 1);
+     ffield := pointer(memlong(ffield));
+     end;
+fname[0] := chr(membyte(ffield));
+for i := 1 to length(fname) do fname[i] := chr(membyte(ffield));
+ltypeno := membyte(ffield)*256 + membyte(ffield);
+loc := membyte(ffield)*256 + membyte(ffield);
+write(fname,': '); prtno(ltypeno); write(' at $',loc:4 hex);
+if FPacked
+then begin
+     m := membyte(ffield); n := membyte(ffield);
+     if (m <> 0) or (n <> 0)
+     then begin
+          if m > 127
+          then begin write(' Signed'); m := m - 128; end
+          else write(' Unsigned');
+          write(' nbits=',m,'/lbit=',n);
+          end;
+     end;
+writeln;
+prfield := ffield;
+end; {prfield}
+
+procedure nextfield(var fieldlist: pbyte; FPacked: Boolean;
+            var fname: string63; var foffset: longint;
+            var ftypeno,flbit,fnbit: integer; var FSigned: Boolean);
+  var i,m: integer;
+begin
+if fieldlist = nil then begin writeln('NIL to NEXTFIELD'); halt(ERRHALT); end;
+if fieldlist^ = -1
+then begin
+     fieldlist := pointer(ord(fieldlist) + 1);
+     fieldlist := pointer(memlong(fieldlist));
+     end;
+fname[0] := chr(membyte(fieldlist));
+for i := 1 to length(fname) do fname[i] := chr(membyte(fieldlist));
+ftypeno := membyte(fieldlist)*256 + membyte(fieldlist);
+foffset := membyte(fieldlist)*256 + membyte(fieldlist);
+if FPacked
+then begin
+     m := membyte(fieldlist);
+     if m > 127
+     then begin FSigned := TRUE; m := m - 128; end
+     else FSigned := FALSE;
+     fnbit := m; flbit := membyte(fieldlist);
+     end
+else begin FSigned := FALSE; flbit := 0; fnbit := 0; end;
+end; {nextfield}
+
+procedure prfields(p: pbyte; FPacked: Boolean);
+begin
+if p <> nil
+then while p^ <> 0 do
+           begin write(' ':6); p := prfield(p,FPacked); end;
+end; {prfields}
+
+procedure prtype(t: ptyperec);
+  var i: integer;
+begin
+if t <> nil
+then with t^ do begin
+          if PckdType then write('PCKD ');
+          case form of
+            SCALAR:   write('SCALAR, MAXCONST=',maxconst);
+            SUBRANGE: begin
+                      write('SUBRANGE ',min,'..',max,' OF ');
+                      prtno(rangeof);
+                      end;
+            POINTERS: begin
+                      write('POINTER TO ');
+                      prtno(pointerto);
+                      end;
+            SETS:     begin
+                      write('SET OF ');
+                      prtno(setof);
+                      end;
+            ARRAYS:   begin
+                      write('ARRAY['); prtno(indexedby);
+                      write('] of '); prtno(arrayof);
+                      if PckdType
+                      then begin
+                           write(' ',bitsperel,' bits/el ');
+                           if SignedEl
+                           then write('Signed')
+                           else write('Unsigned');
+                           end;
+                      end;
+            RECORDS:  begin
+                      writeln('RECORD, size=',recsize,', FIELDS = $',fields);
+                      prfields(fields,PckdType);
+                      end;
+            FILES:    begin
+                      write('FILE OF '); prtno(fileof);
+                      end;
+            STRINGS:  begin
+                      write('STRING[',stringlen,']'); 
+                      end;
+            SCONST:   begin
+                      write('SCONST[',stringlen,']'); 
+                      end;
+            FCHAR:    begin
+                      write('CHARACTER*',charlen);
+                      end;
+            FARRAY:   begin
+                      write('ARRAY(');
+                      for i := 1 to dims do begin
+                          if i > 1 then write(',');
+                          if bounds[i].lo <> 1
+                          then write(bounds[i].lo,':');
+                          write(bounds[i].hi);
+                          end;
+                      write(') OF '); prtno(farrayof);
+                      end;
+          otherwise: write('**** BAD FORM = ',ord(form),' ***');
+          end; {case}
+          writeln;
+          end;
+end; {prtype}
+
+procedure prtypes;
+  var i,j: integer;
+begin
+for i := 0 to 127 do
+    if types[i] <> nil
+    then for j := 0 to 127 do
+             if types[i]^[j] <> nil
+             then begin
+                  write('T',i*128 + j,' = ');
+                  prtype(types[i]^[j]);
+                  end;
+end; {prtypes}
+
+procedure nextvar(var fvar: pbyte; var vname: string63;
+                  var vtypeno,vkind,vreg: integer; var voffset: longint);
+  var i: integer; ldatarec: pdatarec;
+begin
+if fvar = nil then begin writeln('NIL to NEXTVAR'); halt(ERRHALT); end;
+if fvar^ = -1
+then begin
+     fvar := pointer(ord(fvar) + 1); fvar := pointer(memlong(fvar));
+     end;
+vname[0] := chr(membyte(fvar));
+for i := 1 to length(vname) do vname[i] := chr(membyte(fvar));
+vtypeno := memword(fvar); i := membyte(fvar);
+vkind := i mod 16; vreg := i div 16;
+case vkind of
+  0,1: voffset := memword(fvar);
+  2,3: ;
+  4:   begin
+       voffset := memlong(fvar);
+       if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+          (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+          (ENVIRONMENT = SYS5_2)
+       then begin
+         ldatarec := pointer(memlong(fvar));
+         voffset := voffset + ldatarec^.address;
+         end;
+       end;
+  6,7: voffset := memlong(fvar);
+end; {case}
+end; {nextvar}
+
+procedure wrcharn(p: pbyte; n: integer);
+begin
+for n := 1 to n do begin write(chr(p^)); p := pointer(ord(p) + 1); end;
+end; {wrcharn}
+
+function prvar(fvar: pbyte): pbyte;
+  var ltypeno,lkind,lreg: integer; vname: string63; loffset: longint;
+      ldatarec: pdatarec;
+begin
+if fvar = nil then begin writeln('NIL to PRVAR'); halt(ERRHALT); end;
+nextvar(fvar,vname,ltypeno,lkind,lreg,loffset);
+write(vname,': '); prtno(ltypeno); write(' at ');
+if (lkind = 1) or (lkind = 3) or (lkind = 7) then write('*');
+case lkind of
+  0,1,
+  6,7: begin
+       write('$');
+       if lkind >= 6 then write(loffset:8 hex) else write(loffset:4 hex);
+       write('(');
+       if ENVIRONMENT = GENIX
+       then {32000}
+         if lreg = 13
+         then write('SB)')
+         else if lreg = 14
+              then write('FP)')
+              else write('XX)')
+       else begin {68000}
+         if lreg >= 8 then write('A') else write('D');
+         write(lreg mod 8,')');
+         end;
+       end;
+  2,3: begin
+       if ENVIRONMENT = GENIX
+       then
+         if lreg >= 8 then write('F') else write('R')
+       else
+         if lreg >= 8 then write('A') else write('D');
+       write(lreg mod 8);
+       end;
+  4:   begin
+       getdataoff(loffset + database,ldatarec,loffset);
+       if ldatarec <> nil
+       then begin
+            wrcharn(ldatarec^.name,ldatarec^.namelen);
+            write('+$',loffset:6 hex);
+            end;
+       end;
+end; {case}
+writeln;
+prvar := fvar;
+end; {prvar}
+
+procedure prvars(p: pbyte);
+begin
+if p <> nil
+then while p^ <> 0 do
+           begin write('    '); p := prvar(p); end;
+end; {prvars}
+
+procedure prseg(fseg: segrec);
+begin
+with fseg do
+     writeln('''',name,''', size: ',size:8 hex,', addr ',address:8 hex);
+end; {prseg}
+
+procedure prsegs;
+  var i: integer; lmodrec: pmodrec;
+begin
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then begin {dotosys}
+  lmodrec := modules;
+  while lmodrec <> nil do
+    with lmodrec^ do begin
+      if (ENVIRONMENT = GENIX) and (not (TEKFLAG or DYNIXFLAG or OPUSFLAG))
+      then writeln('Address: ',address:8 hex,', Size: ',size:8 hex,
+                   ', SB: ',sb:8 hex, ', Modtable: ',modtable:4 hex)
+      else writeln('Address: ',address:8 hex,', Size: ',size:8 hex);
+      lmodrec := next;
+      end;
+  end
+else begin {not dotosys}
+  for i := 0 to numsegs - 1 do begin
+      write(i:2,': ');
+      prseg(seg^[i]);
+      end;
+  end;
+end; {prsegs}
+
+procedure prstmts(fstmts: pbyte);
+  type rec = record nstmts: integer; s: array[1..9999] of integer; end;
+  var p: ^rec; i: integer; stmtoff: longint;
+begin
+if fstmts <> nil
+then begin
+     p := pointer(ord(fstmts));
+     write('   ',p^.nstmts,' statements.');
+     stmtoff := 0;
+     for i := 1 to p^.nstmts do begin
+         if i mod 10 = 1 then begin writeln; write(' '); end;
+         stmtoff := stmtoff + p^.s[i];
+         write(' ',stmtoff:6 hex);
+         end;
+     end;
+end; {prstmts}
+
+function realaddress(faddr: longint): longint;
+  var c: packed array[0..3] of 0..255; s: integer;
+begin
+if (ENVIRONMENT = GENIX) or (ENVIRONMENT = XENIX_O) or
+   (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+   (ENVIRONMENT = SYS5_2)
+then realaddress := faddr
+else begin
+  moveleft(faddr,c,4); s := c[0]; c[0] := 0; moveleft(c,faddr,4);
+  if s <= numsegs
+  then realaddress := seg^[s].address + faddr
+  else realaddress := -1;
+  end;
+end; {realaddress}
+
+function namEQnam(a: pbyte; alen: integer; b: pbyte; blen: integer): Boolean;
+begin
+if alen = blen
+then begin
+     for alen := 1 to alen do begin
+         if a^ <> b^
+         then begin namEQnam := FALSE; exit(namEQnam); end;
+         a := pointer(ord(a) + 1); b := pointer(ord(b) + 1);
+         end;
+     namEQnam := TRUE;
+     end
+else namEQnam := FALSE;
+end; {namEQnam}
+
+function namLTnam(a: pbyte; alen: integer; b: pbyte; blen: integer): Boolean;
+begin
+if alen = blen
+then begin
+     for alen := 1 to alen do begin
+         if a^ <> b^
+         then begin namLTnam := a^ < b^; exit(namLTnam); end;
+         a := pointer(ord(a) + 1); b := pointer(ord(b) + 1);
+         end;
+     namLTnam := FALSE;
+     end
+else namLTnam := alen < blen;
+end; {namLTnam}
+
+procedure prentry(findex: integer; PrintAll: Boolean);
+  var lentry: pentryrec;
+begin
+lentry := getpentry(findex);
+with lentry^ do begin
+     wrcharn(linkname,linknlen);
+     case language of
+       PASCAL:   write(' Pas');
+       FORTRAN:  write(' FTN');
+       BASIC:    write(' BAS');
+       C:        write(' "C"');
+       FTNENTRY: write(' ENF');
+     otherwise: write(' ???');
+     end; {case}
+     write(' $',realaddress(address): 6 hex);
+     if username <> nil
+     then begin write(' '); wrcharn(username,usernlen); end;
+     writeln;
+     if PrintAll
+     then begin
+          if (ENVIRONMENT <> GENIX) and (ENVIRONMENT <> XENIX_O) and
+             (ENVIRONMENT <> CT_O) and (ENVIRONMENT <> SG_O) and
+             (ENVIRONMENT <> SYS5_2)
+          then write('  @',address:8 hex);
+          if parent < 4095 then write('  parent=',parent);
+          if level > 0 then write('  lev=',level);
+          if DebugFlag
+          then if symbols <> nil then write('  symb=',symbols);
+          writeln;
+          if (entryoff <> -1) or (exitoff <> -1) or
+             (statements <> nil) or (wherereg <> 0)
+          then begin
+               write('  ');
+               if entryoff <> -1 then write('Entry=',entryoff:6 hex,'  ');
+               if exitoff <> -1 then write('Exit=',exitoff:6 hex,'  ');
+               if DebugFlag then write(', Statements=',statements);
+               case wherereg of
+                 1: write('Regs: ',regmask:4 hex,
+                          ' at ',regoffset:6 hex,'(A6)');
+               end; {case}
+               if PrintAll then prstmts(statements);
+               writeln;
+               end;
+          prvars(symbols);
+          end;
+     end;
+end; {prentry}
+
+procedure prentrys;
+  var i: integer; lentry: pentryrec;
+begin
+for i := 0 to numentrys - 1 do begin
+    lentry := getpentry(i);
+    if ((token = IDENTSY) and (sval = '%')) or
+       (lentry^.linkname^ <> ord('%'))
+    then begin write(i:3,': '); prentry(i,FALSE); end;
+    end;
+end; {prentrys}
+
+(*** DEBUGGING CODE BEGIN
+procedure TEMPWALK(lev: integer; fnode: pdatarec);
+begin
+if lev <> 0 then write(' ':lev*2);
+if fnode = nil
+then writeln('NIL')
+else with fnode^ do begin
+     write(''''); wrcharn(name,namelen);
+     write(''', size = ',size:8 hex,', addr = ',address:8 hex);
+     write(' Balance = ');
+     case balance of
+       plus: writeln('PLUS');
+       zero: writeln('ZERO');
+       MINUS: writeln('MINUS');
+     end;
+     TEMPWALK(lev+1,llink); TEMPWALK(lev+1,rlink);
+     end;
+end;
+DEBUGGING CODE END ***)
+
+procedure prdatas(ftree: pdatarec);
+begin
+(*** TEMPWALK(0,ftree); exit(prdatas); ***)
+if ftree <> nil
+then with ftree^ do begin
+          prdatas(llink);
+          write(''''); wrcharn(name,namelen);
+          writeln(''', size = ',size:8 hex,', addr = ',address:8 hex);
+          prdatas(rlink);
+          end;
+end; {prdatas}
+
+procedure prentoff(entryno: integer; foffset: longint);
+  type rec = record nstmts: integer; s: array[1..9999] of integer; end;
+  var i,histmt,lostmt,stmtoffset: integer; recp: ^rec; ExitFlag: Boolean;
+      lentry: pentryrec; stmtoff: longint;
+begin
+lentry := getpentry(entryno);
+with lentry^ do begin
+     if username <> nil then wrcharn(username,usernlen);
+     if (username = nil) or
+        not namEQnam(username,usernlen,linkname,linknlen)
+     then begin write('('); wrcharn(linkname,linknlen); write(')'); end;
+     write('+$',foffset:6 hex);
+     histmt := -1;
+     if (statements <> nil) and (foffset <= exitoff)
+     then begin
+          recp := pointer(ord(statements));
+          stmtoff := 0;
+          for i := 1 to recp^.nstmts do begin
+              stmtoff := stmtoff + recp^.s[i];
+              if stmtoff <= foffset
+              then begin 
+                   histmt := i; stmtoffset := foffset - stmtoff; 
+                   end;
+              end;
+          lostmt := histmt; ExitFlag := FALSE;
+          while not ExitFlag do
+                if lostmt <= 1
+                then ExitFlag := TRUE
+                else if recp^.s[lostmt] = 0
+                     then lostmt := lostmt - 1
+                     else ExitFlag := TRUE;
+          end;
+     if entryoff <> -1
+     then if foffset < entryoff
+          then write(', entry-$',entryoff - foffset:4 hex)
+          else if foffset = entryoff
+               then write(', at entry');
+     if exitoff <> -1
+     then if foffset = exitoff
+          then write(', at exit')
+          else if foffset > exitoff
+               then write(', exit+$',foffset - exitoff:4 hex)
+               else if histmt <> -1
+                    then begin
+                         if lostmt = histmt
+                         then write(', stmt ',histmt:1)
+                         else write(', stmts ',lostmt:1,'-',histmt:1);
+                         if stmtoffset <> 0
+                         then write('+$',stmtoffset:4 hex);
+                         end;
+     end;
+end; {prentoff}
+
+procedure prfullloc(faddress: longint; PrintHex: Boolean);
+  var entryno: integer; offset: longint;
+begin
+getentryoff(faddress,entryno,offset);
+if entryno >= 0
+then prentoff(entryno,offset)
+else if PrintHex
+     then write('$',faddress:6 hex);
+end; {prfullloc}
+
+procedure prregs;
+  var i,segno: integer; offset: longint;
+begin
+case prog.state of
+  NONE:    write('NONE');
+  LOADED:  write('LOADED');
+  RUNNING: write('RUNNING');
+  STOPPED: write('STOPPED');
+  FINISHED:write('FINISHED');
+  CONTINUE:write('CONTINUE');
+  STEPPING:write('STEPPING');
+  ERROR:   write('ERROR');
+end; {case}
+if prog.state <> NONE
+then begin
+     writeln;
+     write('PC: ',envpc hex,'  ');
+     prfullloc(envpc,FALSE);
+     if (ENVIRONMENT <> GENIX) and (ENVIRONMENT <> XENIX_O) and
+        (ENVIRONMENT <> CT_O) and (ENVIRONMENT <> SG_O) and
+        (ENVIRONMENT <> SYS5_2)
+     then begin
+       getsegoff(envpc,segno,offset);
+       if offset >= 0 then write('  Seg ',segno:2 hex,'+',offset:6 hex);
+       end;
+     if envdepth = 0
+     then if (ENVIRONMENT = XENIX) or (ENVIRONMENT = XENIX_O) or
+             (ENVIRONMENT = CT_O) or (ENVIRONMENT = SG_O) or
+             (ENVIRONMENT = SYS5_2) or TEKFLAG or DYNIXFLAG or OPUSFLAG
+          then writeln
+          else 
+            if ENVIRONMENT = GENIX
+            then begin
+              writeln('  PSR: ',prog.sr:4 hex,'  MOD: ',prog.jt:4 hex)
+              end
+            else writeln('  SR: ',prog.sr:4 hex)
+     else writeln('  Depth: ',envdepth);
+     if ENVIRONMENT = GENIX then write('R:') else write('D:');
+     for i := 0 to 7 do
+         if display[0].d[i] <> nil
+         then write(' ',getul(ord4(display[0].d[i])) hex)
+         else write(' ????????');
+     writeln;
+     if not (TEKFLAG or OPUSFLAG)
+     then begin
+       if ENVIRONMENT = GENIX then write('F:') else write('A:');
+       for i := 0 to 7 do
+           if display[0].a[i] <> nil
+           then write(' ',getul(ord4(display[0].a[i])) hex)
+           else write(' ????????');
+       writeln;
+       end;
+     if ENVIRONMENT = GENIX
+     then begin
+       write('FP: ');
+       if display[0].fp <> nil
+       then write(' ',getul(ord4(display[0].fp)) hex)
+       else write(' ????????');
+       if not (TEKFLAG or OPUSFLAG)
+       then begin
+         write('  SB: ');
+         if display[0].sb <> nil
+         then write(' ',getul(ord4(display[0].sb)) hex)
+         else write(' ????????');
+         end;
+       writeln('  SP: ',getsl(nsregaddr(NSSP)) hex);
+       end;
+     end;
+end; {prregs} 
+

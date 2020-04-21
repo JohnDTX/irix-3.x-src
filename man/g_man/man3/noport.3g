@@ -1,0 +1,41 @@
+.TH noport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B noport
+\- specifies that a program does not require a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "noport()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine noport"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure noport;"
+.SH DESCRIPTION
+.B noport
+specifies that a graphics program does not need screen space, and
+therefore does not need a graphics window.
+This is useful for programs that only read or write the color map.
+Call \f3noport\f1 at the beginning of a graphics program;
+then call \f3getport\fP or
+\f3winopen\f1
+to do a graphics initialization.
+.PP
+The system ignores
+.B noport
+if
+\f3winopen\f1
+is not called. 
+.SH "SEE ALSO"
+getport, winopen
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

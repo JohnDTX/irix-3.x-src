@@ -1,0 +1,184 @@
+.TH SMTIO 7
+.SH NAME
+smtio \-
+.SM UNIX
+streaming magnetic tape interface
+.SH DESCRIPTION
+The special file
+.I /dev/rmt1
+refers to the
+.SM UNIX
+streaming magtape drive,
+which is on the
+.SM MULTIBUS
+using the
+.SM DSD-5217
+controller.
+The following description applies to any of the transport/controller pairs.
+The special files
+.IR /dev/rmt1 ,
+.IR /dev/rqic ,
+and
+.I /dev/mt1
+are 10000 fci, 450 ft, 45 ips, 45 MByte quarter inch tape streaming drives,
+the
+.IR /dev/nrqic ,
+.IR /dev/nrmt1 ,
+and
+.I /dev/nmt1
+are no rewind versions of the devices.
+.I /dev/nrmt1
+is the special file meant as the default to \f2smt\fP commands.
+Refer to
+.IR smt(1)
+for the specifications of ioctl commands to manipulate the tape drives.
+The files
+.IR /dev/rqic ,
+.IR /dev/rmt1 ,
+and
+.I /dev/mt1
+are rewound when closed; the others are not.
+These files will also be closed by writing a file mark.
+The other files will not be rewound upon close.
+They will also write a file mark but will be positioned at the file mark for
+additional files to be added to the tape cartridge.
+.PP
+A standard tape consists of a series of 512 byte records
+terminated by an end-of-file.
+The system makes it possible to treat the tape like any other file.
+Seeks do not have their usual meaning and it is not possible
+to read or write a byte at a time.  Writing in very small blocks
+(less than 5120 bytes) is inadvisable because this tends to create large
+record gaps and causes the tape to stop streaming.
+The tape drive must then reposition the tape cartridge
+for the next write or read.
+This causes a slower performance due to the tape moving backwards and forwards
+and stopping and starting.
+.PP
+The
+.IR smt
+manipulation program discussed above is useful when it is desired to access
+the tape in a way compatible with ordinary files.
+When foreign tapes are to be dealt with, and especially when long records are
+to be read or written, the `raw' interface is appropriate.
+The standard format for referring to the `blocked' device is
+.IR /dev/mt1 ,
+but the `raw' and the `blocked' devices are the same for the
+quarter inch streaming tape drive.
+The associated files are named
+.I /dev/rmt1
+and
+.I /dev/rqic
+but the same minor device considerations as for the regular devices still apply.
+A number of ioctl operations are available on raw magnetic tape.
+Refer to
+.IR smt
+for additional information for use with
+.IR /dev/nrmt1 .
+The following definitions are from
+.IR /usr/include/sys/mtio.h :
+.PP
+.nf
+.ta 1i,+1i,+\w'mt_hard_error0;\ \ 'u,+1i,+.1i
+/*
+ * Structures and definitions for mag tape io control commands
+ */
+
+/* structure for MTIOCTOP - mag tape op command */
+struct	mtop	{
+	short	mt_op;	/* operations defined below */
+	daddr_t	mt_count;	/* how many of them */
+};
+
+/* operations */
+#define	MTWEOF	0	/* write an end-of-file record */
+#define	MTFSF	1	/* forward space file */
+#define	MTFSR	3	/* forward space record */
+#define	MTREW	5	/* rewind */
+#define	MTNOP	7	/* no operation, sets status only */
+
+/* structure for MTIOCGET - mag tape get status command */
+
+struct	mtget	{
+	short	mt_type;	/* type of magtape device */
+/* the following six registers are very device dependent */
+	short	mt_hard_error0;	/* hard error byte 0 of status from DSD */
+	short	mt_hard_error1;	/* hard error byte 1 of status from DSD */
+	short	mt_soft_error0;	/* soft error byte of status from DSD */
+	short	mt_at_bot;	/* byte 0xff when tape at bot */
+	short	mt_retries;	/* byte number of retries by tape drive */
+	short	mt_file_mark;	/* byte 0xff when file mark encountered */
+/* end device-dependent registers */
+	daddr_t	mt_fileno;	/* file number of current position */
+	daddr_t	mt_blkno;	/* block number of current position */
+};
+
+/*
+ * Constants for mt_type byte
+ */
+#define	MT_ISTS	0x01	/* Streaming Quarter Inch Tape Drive */
+
+/* mag tape io control commands */
+#define	MTIOCTOP	(('m'<<8)|1)	/* do a mag tape op */
+#define	MTIOCGET	(('m'<<8)|2)	/* get tape status */
+
+#ifndef KERNEL
+#define	DEFTAPE	"/dev/rmtioctl"	/* IOCTL device */
+#endif
+.fi
+.PP
+Each
+.B read
+or
+.B write
+call reads or writes the next record on the tape.
+In the write case the record has the same length as the buffer given.
+Each tape write will write one file mark on close and will
+either rewind or position itself at the file mark.
+Addition writes will be positioned after the file mark and
+can be accessed by using the
+.IR smt
+streaming tape manipulation program.
+.SH FILES
+.ta \w'/dev/nrmt1\ \ 'u
+/dev/mt1	Cartridge tape
+.br
+/dev/rmt1	Cartridge tape
+.br
+/dev/rqic	Cartridge tape
+.br
+/dev/nrmt1	Cartridge tape \(em no rewind
+.PP
+The minor device numbers for each of the above devices to build special files
+using
+.IR mknod (1)
+is based on the standard default minor device number being 0x00.
+The minor device number for the
+.I /dev/nrmt*
+and
+.I /dev/nrqic
+is 0x01.
+The above minor device numbers refer to tape drive 0 of the DSD controller
+and at present the hardware only supports this one tape drive.
+.SH "SEE ALSO"
+smt(1), tar(1), cpio(1)
+.SH BUGS
+The status should be returned in a device independent format,
+but it isn't.
+.\" @(#)$Header: /d2/3.7/src/man/trash/standard/a_man/man1/RCS/smtio.7,v 1.1 89/03/27 16:40:45 root Exp $
+.\" $Log:	smtio.7,v $
+Revision 1.1  89/03/27  16:40:45  root
+Initial check-in for 3.7
+
+.\" Revision 1.3  85/05/03  18:35:44  robinf
+.\" Updates from 2000 Series Workstation Guide, Version 1.0
+.\" 
+Revision 1.0  85/05/02  14:50:36  robinf
+Initial Rev/Updates from 2000 Series Workstation Guide,Vers. 1.0
+
+.\" Revision 1.2  84/12/16  00:52:37  bob
+.\" Fixed formatting errors.
+.\" 
+.\" Revision 1.1  84/12/15  13:33:09  bob
+.\" Initial revision
+.\" 

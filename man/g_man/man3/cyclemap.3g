@@ -1,0 +1,54 @@
+.TH cyclemap 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME 
+.B cyclemap 
+\- cycles through color maps at a specified rate
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "cyclemap(duration, map, nextmap) "
+.B "short duration, map, nextmap;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine cyclem(duration, map, nextmap)"
+.B "integer*4 duration, map, nextmap"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure cyclemap(duration, map, nextmap: Scoord);"
+.SH DESCRIPTION
+.B cyclemap
+specifies the duration in vertical retraces the affected map (\f2map\f1)
+and the next map to use (\f2nextmap\f1) when the duration is over.
+For example, the following routines
+set up multimap mode and cycle between two maps, leaving map 1 on
+for ten vertical retraces and map 3 on for five retraces.
+.B cyclemap
+must be used in multimap mode.
+.sp
+.nf
+.in +0.5
+.ft 7
+.ps -2
+	...
+	multimap();
+	gconfig();
+	cyclemap(10, 1, 3);
+	cyclemap(5, 3, 1);
+	...
+.ps
+.ft 1
+.fi
+.sp
+.in -0.5
+.SH "SEE ALSO"
+blink, gconfig, multimap 
+.sp
+.I Programming Guide,
+Section 6.2, Color Maps 
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# This script assumes that the test filesystem is mounted on
+# /client/testmount, and the test directory is /client/testmount/nfstestdir.
+# To change, set NFSTESTDIR to be the directory you want to do the tests
+# in.  NFSTESTDIR can be overriden with a command line argument.
+#
+# This script runs through the basic tests with the -f (functional) flag
+
+#set -e
+NFSTESTDIR=/client/testmount/nfstestdir
+case $# in
+    1)
+	NFSTESTDIR=$1
+	;;
+
+    0)
+	;;
+
+    *)
+	echo "usage: $0 [nfstestdir]"
+	exit 1
+	;;
+esac
+export NFSTESTDIR
+
+echo "BASIC TESTS [-f] (directory $NFSTESTDIR)"
+(cd basic; runtests -f)
+
+echo
+rm -rf $NFSTESTDIR
+
+echo "Basic functional tests completed"

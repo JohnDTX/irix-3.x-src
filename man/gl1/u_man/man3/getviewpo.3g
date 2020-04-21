@@ -1,0 +1,29 @@
+.TH getviewport  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I getviewport
+- return the current viewport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getviewport(left, right, bottom, top) "
+.B "Screencoord *left, *right, *bottom, *top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getvie(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getviewport(var left, right, bottom, top: Screencoord);"
+.sp
+.SH DESCRIPTION
+The \f2getviewport\f1 command returns the current viewport, non-destructively
+reading the top of the viewport stack.  The arguments to \f2getviewport\f1
+are the addresses of four memory locations.  These will be
+assigned the left, right, bottom, and top coordinates of the viewport.
+.SH "SEE ALSO"
+.I popviewport, pushviewport, viewport
+.SH NOTE
+This command can only be used in immediate mode.

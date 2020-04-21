@@ -1,0 +1,837 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: U.PHASE2.1.TEXT                           *)
+(*                                                                           *)
+(*          (C) Copyright 1982, 1985 Silicon Valley Software, Inc.           *)
+(*                                                                           *)
+(*                            All Rights Reserved.               16-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure phase2;
+  var i,j: integer; lname: alfa8; lpint,locreloclist: pintlist;
+      lmodlist: pmodlist;
+      locpatchlist,locjtpatchlist,locrelpatchlist: ppatchlist;
+      heapmark: ^Boolean; lreflist: preflist;
+      
+  procedure countundefrefs;
+    var lftndata: pfcommon;
+    
+    procedure checkrefs(ftree: psymbol);
+      var i: integer;
+    begin
+    if ftree <> nil
+    then with ftree^ do
+              begin
+              if not Defined
+              then begin 
+                isymtabentry := undefrefs;
+                undefrefs := undefrefs + 1;
+                for i := 1 to 8 do
+                  if username[i] <> ' ' 
+                  then undefcharcount := undefcharcount + 1;
+                undefcharcount := undefcharcount + 1;
+                end;
+              if Defined and (linkname = username)
+              then begin
+                defrefs := defrefs + 1;
+                for i := 1 to 8 do
+                  if username[i] <> ' '
+                  then undefcharcount := undefcharcount + 1;
+                undefcharcount := undefcharcount + 1;
+                end;
+              checkrefs(llink);
+              checkrefs(rlink);
+              end;
+    end; {checkrefs}
+    
+  begin {countundefrefs}
+  undefrefs := 0; defrefs := 0; 
+  if UNDERSCORE
+  then undefcharcount := 6  (* zero terminated _main *)
+  else undefcharcount := 5; (* zero terminated main  *)
+  checkrefs(nametree);
+  undefftn := 0;
+  lftndata := ftndatalist;
+  while lftndata <> nil do begin
+        if not lftndata^.Defined then undefftn := undefftn + 1;
+        lftndata :=lftndata^.next;
+        end;
+  if not StartFlag then fatal_error('No main program');
+  if undefftn <> 0 then fatal_error('Missing referenced FORTRAN data area');
+  end; {countundefrefs}
+  
+  procedure assignbssanddatabaseaddresses;
+    var lftndata: pfcommon;
+  begin (* assignbssanddatabaseaddresses *)
+  bsssize := 0; datasize := 68;
+  lftndata := ftndatalist;
+  while lftndata <> nil do begin
+    if lftndata^.TextResident
+    then begin {Can't be AtAbsolute}
+      lftndata^.reladdr := totalcodesize;
+      totalcodesize := totalcodesize + lftndata^.size;
+      if odd(totalcodesize) then totalcodesize := totalcodesize + 1;
+      end
+    else
+      if lftndata^.initlist <> nil
+      then begin
+        if lftndata^.AtAbsolute
+        then begin
+          writeln('*** In data area named ',lftndata^.name);
+          fatal_error('no initialization in absolute address data areas');
+          end;
+        lftndata^.reladdr := datasize;
+        datasize := datasize + lftndata^.size;
+        if odd(datasize) then datasize := datasize + 1;
+        end
+      else 
+        if not lftndata^.AtAbsolute
+        then begin
+          lftndata^.reladdr := bsssize;
+          bsssize := bsssize + lftndata^.size;
+          if odd(bsssize) then bsssize := bsssize + 1;
+          end;
+    lftndata := lftndata^.next;
+    end;
+  {Only posibility for rounding totalcodesize if DataInText}
+  if odd(totalcodesize div 2) then totalcodesize := totalcodesize + 2;
+  if odd(datasize div 2) then datasize := datasize + 2;
+  if odd(bsssize div 2) then bsssize := bsssize + 2;
+  end; (* assignbssanddatabaseaddresses *)
+  
+  procedure flushiout;
+    var iblocks: integer;
+  begin
+  iblocks := (ioutbyte + 511) div 512;
+  if blockwrite(ioutfile,ioutbuffer,iblocks,ioutblock) <> iblocks
+  then 
+    if ENVIRONMENT = ADVENTURE
+    then fatal_error('Can''t write .rel file!')
+    else
+      if ENVIRONMENT = UNOS
+      then fatal_error('Can''t write .j file!')
+      else fatal_error('Can''t write .o file!');
+  ioutblock := ioutblock + iblocks;
+  end; {flushiout}
+  
+  
+  (* Used under Adventure to output character data *)
+  
+  procedure ioutone(a: integer);
+  begin
+  if ENVIRONMENT = ADVENTURE
+  then begin
+    if rellinelen >= 70
+    then begin 
+      if ioutbyte > MAXOUTBYTE
+      then begin
+           flushiout; ioutbyte := 0;
+           end;
+      ioutbuffer[ioutbyte] := 13;
+      ioutbyte := ioutbyte + 1;
+      rellinelen := 0; 
+      end;
+    rellinelen := rellinelen + 1;
+    if ioutbyte > MAXOUTBYTE
+    then begin
+         flushiout; ioutbyte := 0;
+         end;
+    ioutbuffer[ioutbyte] := a;
+    ioutbyte := ioutbyte + 1;
+    end
+  else begin {ENVIRONMENT <> ADVENTURE}
+    if ioutbyte > MAXOUTBYTE
+    then begin
+         flushiout; ioutbyte := 0;
+         end;
+    ioutbuffer[ioutbyte] := a;
+    ioutbyte := ioutbyte + 1;
+    end;
+  end; {ioutone}
+    
+  
+  (* Used under Adventure to output binary data *)
+  
+  procedure iout(a: longint; n: integer);
+    var i: integer; c: array[0..3] of bite;
+  begin {iout}
+  moveleft(a,c,4);
+  if ENVIRONMENT = ADVENTURE
+  then
+    for i := 4-n to 3 do begin
+      ioutone(hex[c[i] and $00F0]);
+      ioutone(hex[c[i] and $000F]);
+      end
+  else {ENVIRONMENT <> ADVENTURE}
+    for i := 4-n to 3 do ioutone(c[i]);
+  end; {iout}
+  
+  procedure ioutname(fname: alfa8);
+    var i: integer;
+  begin {ioutname}
+  if ENVIRONMENT = ADVENTURE
+  then
+    for i := 1 to 8 do
+      iout(ord(fname[i]),1)
+  else
+    if (ENVIRONMENT = CT) or (ENVIRONMENT = NCR) or 
+       (ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)
+    then
+      for i := 1 to 8 do
+        if fname[i] <> ' '
+        then iout(ord(fname[i]),1)
+        else iout(0,1)
+  end; {ioutname}
+  
+  procedure ioutheaderandjumptable;
+    var i,lsize,nextjtloc: integer; lname: alfa8;
+        lseg,lastseg: psegment; breaksym: psymbol;
+    
+    procedure assignjtaddr(fsymbol: psymbol; fseg: psegment; 
+                           DoUndefineds: Boolean);
+    begin
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if (Visible and (seg = fseg) and Defined) or 
+                 ((not Defined) and DoUndefineds)
+              then begin
+                   jtloc := nextjtloc;
+                   nextjtloc := nextjtloc + 6;
+                   end;
+              assignjtaddr(llink,fseg,DoUndefineds);
+              assignjtaddr(rlink,fseg,DoUndefineds);
+              end;
+    end; {assignjtaddr}
+    
+    procedure ioutdescriptor(fsymbol: psymbol; fseg: psegment; 
+                             DoUndefineds: Boolean);
+    begin
+    if fsymbol <> nil
+    then with fsymbol^ do
+              begin
+              if (Visible and (seg = fseg) and Defined) or 
+                 ((not Defined) and DoUndefineds)
+              then begin
+                   iout(20217,2); { JMP xxx.L }
+                   if DoUndefineds
+                   then begin
+                     if ENVIRONMENT = ADVENTURE
+                     then begin
+                       ioutname(username);
+                       ioutone(ord('X'));
+                       end
+                     else {ENVIRONMENT <> ADVENTURE}
+                       iout(0,4);     { Idris linker external }
+                     end
+                   else begin
+                     iout(seg^.segbaseaddr + loc,4); { Text relative address }
+                     if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+                     end;
+                   end;
+              ioutdescriptor(llink,fseg,DoUndefineds);
+              ioutdescriptor(rlink,fseg,DoUndefineds);
+              end;
+    end; {ioutdescriptor}
+  
+  begin (* ioutheaderandjumptable *)
+  
+  { Make sure starting address is in first segment }
+  
+  if startseg <> seglist
+  then begin
+       lseg := seglist;
+       repeat
+              lastseg := lseg;
+              lseg := lseg^.nextseg;
+       until lseg = startseg;
+       lastseg^.nextseg := lseg^.nextseg;
+       lseg^.nextseg := seglist;
+       seglist := lseg;
+       end;
+  
+  { Assign jump table addresses }
+  
+  nextjtloc := DBGTABLESIZE;
+  lseg := seglist;
+  while lseg <> nil do begin
+        assignjtaddr(nametree,lseg,FALSE);
+        lseg := lseg^.nextseg;
+        end;
+  assignjtaddr(nametree,nil,TRUE); { Jump table entries for undefineds }
+  
+  totalcodesize := nextjtloc + entrycodesize;
+  lseg := seglist;
+  while lseg <> nil do
+        with lseg^ do
+             begin
+             segbaseaddr := totalcodesize;
+             totalcodesize := totalcodesize + codesize;
+             lseg := nextseg;
+             end;
+  
+  if odd(totalcodesize div 2) 
+  then begin totalcodesize := totalcodesize + 2; TextRounded := TRUE; end
+  else TextRounded := FALSE;
+  executablecodesize := totalcodesize;
+  
+  assignbssanddatabaseaddresses;
+  
+  (* Header *)
+  
+  if ENVIRONMENT = IDRIS
+  then begin
+    iout(153 {hex 99},1); (* id byte *)
+    iout(45 {hex 2D},1);  (* configuration byte *)
+    iout((undefrefs+defrefs+1)*16,2); (* number of bytes of symtab *)
+    iout(totalcodesize,4); (* number of bytes of text section *)
+    iout(datasize,4);     (* number of bytes of data section *)
+    iout(bsssize,4);      (* number of bytes of bss section *)
+    iout(0,4);            (* number of bytes of stack + heap, idris default *)
+    iout(0,4);            (* text bias *)
+    iout(0,4);            (* data bias - patch to size of text section *)
+    end
+  else if ENVIRONMENT = UNISOFT
+  then begin
+    iout(263,4);              (* Magic number 0407 *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    if ALIGNMENT = DOUBLEWORD
+    then iout(8*(undefrefs+defrefs+1)+undefcharcount,4)  (* bytes of symtab *)
+    else iout(6*(undefrefs+defrefs+1)+undefcharcount,4); (* bytes of symtab *)
+    iout(0,4);                (* number of bytes of text relocation - patch *)
+    iout(0,4);                (* number of bytes of data relocation - patch *)
+    iout(0,4);                (* no entry point since not executable *)
+    end
+  else if ENVIRONMENT = SANTACRUZ
+  then begin
+    {Header}
+    iout(518,2);              (* Magic number 0206 *)
+    iout(20,2);               (* Header extension size *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    iout(8*(undefrefs+defrefs+1)+undefcharcount,4); (* bytes of symtab *)
+    iout(0,4);                (* number of bytes of relocation - patch *)
+    iout(0,4);                (* no entry point since not executable *)
+    iout(-31488,2);           (* cputype, byte and word order *)
+    iout(16480,2);            (* reloc and symbol info, r.t. environ *)
+    {Header Extension}
+    iout(0,4);                (* number of bytes of text relocation - patch *)
+    iout(0,4);                (* number of bytes of data relocation - patch *)
+    iout(0,4);                (* text bias *)
+    iout(totalcodesize,4);    (* data bias *)
+    iout(0,4);                (* stack size *)
+    end
+  else if ENVIRONMENT = ALTOS
+  then begin
+    iout(20217,2);            (* Magic number 4EF9 *)
+    iout(0,4);                (* no entry point since not executable *)
+    iout(0,2);                (* flags = 0 since not separate I and D *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    iout(0,4);                (* number of bytes of alternate data *)
+    iout(0,4);                (* initial stack size *)
+    iout(0,4);                (* text relocation offset *)
+    iout(0,4);                (* data relocation offset *)
+    iout(0,4);                (* stack relocation offset *)
+    iout(0,4);                (* number of bytes of read only sharable data *)
+    iout(0,4);                (* number of bytes of text relocation - patch *)
+    iout(0,4);                (* number of bytes of data relocation *)
+    iout(0,4);                (* number of bytes of alternate data relocation *)
+    iout(16*(undefrefs+defrefs+1),4); (* bytes of symtab *)
+    iout(undefcharcount+1,4); (* bytes of string table *)
+    end
+  else if ENVIRONMENT = UNOS
+  then begin
+    iout(11890,2);          (* Magic number '.r' *)
+    iout(25964,2);          (* Magic number 'el' *)
+    iout(64,4);             (* Header size, 64 bytes *)
+    iout(totalcodesize,4);  (* number of bytes of text section - patch *)
+    iout(datasize,4);       (* number of bytes of data section *)
+    iout(bsssize,4);        (* number of bytes of bss section *)
+    iout(60000,4);          (* stack size, default 60000 bytes *)
+    iout(0,4);              (* number of bytes of text relocation - patch *)
+    iout(22*(undefrefs+defrefs+1),4); (* number of bytes of symtab *)
+    iout(0,4);              (* textbase *)
+    iout(0,4);              (* database - bytes of text section - patch *)
+    iout(0,4);              (* bssbase - patch textsize + datasize *)
+    iout(0,4);              (* stackbase - must be zero *)
+    iout(68313410,4);       (* create time - anything reasonable *)
+    iout(0,4); iout(0,4); iout(0,4); (* reserved space *)
+    end
+  else if ENVIRONMENT = ADVENTURE
+  then begin
+    iout(0,4);            (* size of common area *)
+    ioutone(ord('P'));    (* program name indicator *)
+    ioutname('MAINPROG'); (* name of program *)
+    iout(0,4);            (* entry address *)
+    ioutone(ord('R'));    (* entry address is relocatable *)
+    ioutone(ord('N'));    (* entry point indicator *)
+    end
+  else if ENVIRONMENT = QU68000
+  then begin
+    iout(263,2);              (* Magic number 0407 *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    iout(22*(undefrefs+defrefs+1),4);  (* bytes of symtab *)
+    iout(0,4);                (* no entry point since not executable *)
+    iout(0,4);                (* stack size zero as good as anything *)
+    iout(1,2);                (* a_flag, reloc. info not stripped*)
+    end
+  else if ENVIRONMENT = MULTI
+  then begin
+    iout(263,2);              (* Magic number 0407 *)
+    iout(0,2);                (* Version *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    iout(14*(undefrefs+defrefs+1),4);  (* bytes of symtab *)
+    iout(0,4);                (* number of bytes of text relocation - patch *)
+    iout(0,4);                (* number of bytes of data relocation - patch *)
+    iout(0,4);                (* no entry point since not executable *)
+    end
+  else if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+  then begin
+    iout(24602,2);            (* Magic number 601A *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    iout(14*(undefrefs+defrefs+1),4); (* bytes of symtab *)
+    iout(0,4);                (* number of stack *)
+    iout(0,4);                (* no entry point since not executable *)
+    iout(0,2);                (* Relocation info not suppressed *)
+    end
+  else if (ENVIRONMENT = CT) or (ENVIRONMENT = ARETE) or
+          (ENVIRONMENT = PLEXUS)
+  then begin
+         {Filehdr}
+    if ENVIRONMENT = CT
+    then begin
+      iout(336,2);              (* Magic number 150 *)
+      iout(3,2);                (* There are 3 sections *)
+      iout($196E76CA,4);        (* Timedate, FOR NOW *)
+      iout(0,4);                (* File address of symtab - patch *)
+      iout(undefrefs+defrefs+4,4); (* Number of symbol table entries *)
+      iout(0,2);                (* No optional header *)
+      iout(516,2);              (* Flags: 68k, line numbers suppressed *)
+      end
+    else begin {(ENVIRONMENT = ARETE) or (ENVIRONMENT = PLEXUS)}
+      if (ENVIRONMENT = ARETE)
+      then iout(381,2)          (* Magic number 17D *)
+      else iout(336,2);         (* PLEXUS Magic number 150 *)
+      iout(3,2);                (* There are 3 sections *)
+      iout($1AF9505D,4);        (* Timedate, FOR NOW *)
+      iout(0,4);                (* File address of symtab - patch *)
+      iout(undefrefs+defrefs+7,4); (* Number of symbol table entries *)
+      iout(0,2);                (* No optional header *)
+      iout(260,2);              (* Flags *)
+      end;
+         {Texthdr}
+    ioutname('.text   ');
+    iout(0,4);                (* Physical address *)
+    iout(0,4);                (* Virtual address *)
+    iout(totalcodesize,4);    (* Section size *)
+    iout(140,4);              (* File ptr for section *)
+    iout(140+totalcodesize+datasize,4); (* File ptr to relocation *)
+    iout(0,4);                (* File ptr to line numbers *)
+    iout(0,2);                (* Number of relocation entries - patch *)
+    iout(0,2);                (* Number of line number entries *)
+    if ENVIRONMENT = PLEXUS
+    then iout($20,4)          (* Flags, text only *)
+    else iout(0,4);           (* CT, ARETE Flags *)
+         {Datahdr}
+    ioutname('.data   ');
+    iout(totalcodesize,4);    (* Physical address *)
+    iout(totalcodesize,4);    (* Virtual address *)
+    iout(datasize,4);         (* Section size *)
+    iout(140+totalcodesize,4);(* File ptr for section *)
+    iout(0,4);                (* File ptr to relocation - patch *)
+    iout(0,4);                (* File ptr to line numbers *)
+    iout(0,2);                (* Number of relocation entries - patch *)
+    iout(0,2);                (* Number of line number entries *)
+    if ENVIRONMENT = PLEXUS
+    then iout($40,4)          (* Flags, data only *)
+    else iout(0,4);           (* CT, ARETE Flags *)
+         {Bsshdr}
+    ioutname('.bss    ');
+    iout(totalcodesize+datasize,4); (* Physical address *)
+    iout(totalcodesize+datasize,4); (* Virtual address *)
+    iout(bsssize,4);          (* Section size *)
+    iout(0,4);                (* File ptr for section *)
+    iout(0,4);                (* File ptr to relocation *)
+    iout(0,4);                (* File ptr to line numbers *)
+    iout(0,2);                (* Number of relocation entries *)
+    iout(0,2);                (* Number of line number entries *)
+    if ENVIRONMENT = PLEXUS
+    then iout($80,4)          (* Flags, bss only *)
+    else iout(0,4);           (* CT, ARETE Flags *)
+    end
+  else if ENVIRONMENT = NCR
+  then begin
+         {Filehdr}
+    iout($188,2);             (* Magic number *)
+    iout(3,2);                (* There are 3 sections *)
+    iout($1A22013E,4);        (* Timedate, FOR NOW *)
+    iout(0,4);                (* File address of symtab - patch *)
+    iout(undefrefs+defrefs+1,4); (* Number of symbol table entries *)
+    iout(0,2);                (* No optional header *)
+    iout($204,2);             (* Flags *)
+         {Texthdr}
+    ioutname('.text   ');
+    iout(0,4);                (* Physical address *)
+    iout(0,4);                (* Virtual address *)
+    iout(totalcodesize,4);    (* Section size *)
+    iout(140,4);              (* File ptr for section *)
+    iout(140+totalcodesize+datasize,4); (* File ptr to relocation *)
+    iout(0,4);                (* File ptr to line numbers *)
+    iout(0,2);                (* Number of relocation entries - patch *)
+    iout(0,2);                (* Number of line number entries *)
+    iout($20,4);              (* Flags *)
+         {Datahdr}
+    ioutname('.data   ');
+    iout(0,4);                (* Physical address *)
+    iout(0,4);                (* Virtual address *)
+    iout(datasize,4);         (* Section size *)
+    iout(140+totalcodesize,4);(* File ptr for section *)
+    iout(0,4);                (* File ptr to relocation - patch *)
+    iout(0,4);                (* File ptr to line numbers *)
+    iout(0,2);                (* Number of relocation entries - patch *)
+    iout(0,2);                (* Number of line number entries *)
+    iout($40,4);              (* Flags *)
+         {Bsshdr}
+    ioutname('.bss    ');
+    iout(0,4);                (* Physical address *)
+    iout(0,4);                (* Virtual address *)
+    iout(bsssize,4);          (* Section size *)
+    iout(0,4);                (* File ptr for section *)
+    iout(0,4);                (* File ptr to relocation *)
+    iout(0,4);                (* File ptr to line numbers *)
+    iout(0,2);                (* Number of relocation entries *)
+    iout(0,2);                (* Number of line number entries *)
+    iout($80,4);              (* Flags *)
+    end
+  else if (ENVIRONMENT = LANDL) or (ENVIRONMENT = BERKELEY)
+  then begin
+    iout(263,4);              (* Magic number 0407 *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    if ENVIRONMENT = BERKELEY
+    then iout(12*(undefrefs+defrefs+1),4) (* bytes of symtab *)
+    else iout(12*(undefrefs+1),4); (* bytes of symtab for LANDL for now *)
+    {The order the the following fields for BERKELEY is TR, DR, ENT}
+    iout(0,4);                (* no entry point since not executable *)
+    iout(0,4);                (* number of bytes of text relocation - patch *)
+    iout(0,4);                (* number of bytes of data relocation - patch *)
+    end
+  else if ENVIRONMENT = NBI
+  then begin
+    iout($10107,4);           (* Magic number *)
+    iout(totalcodesize,4);    (* number of bytes of text section *)
+    iout(datasize,4);         (* number of bytes of data section *)
+    iout(bsssize,4);          (* number of bytes of bss section *)
+    iout(0,4);                (* number of bytes of text relocation - patch *)
+    iout(0,4);                (* number of bytes of data relocation - patch *)
+    iout(12*(undefrefs+defrefs+1),4); (* bytes of symtab *)
+    iout(0,4);                (* no entry point since not executable *)
+    end;
+  
+  (* Generate entry code -                              *)
+  (* _main: Load A4 with with address of the jump table *)
+  (*        MOVE.L #0,D7                                *)
+  (*        MOVE.L #breakaddr,D6   (ADVENTURE only)     *)
+  (*        Jump to $START                              *)
+  (*        Dbgtable (28 bytes):                        *)
+  (*           6 byte absolute jump                     *)
+  (*           4 byte text relative zero                *)
+  (*           4 byte data relative zero                *)
+  (*           4 byte bss  relative zero                *)
+  (*           2 byte flag, zero unless debugging       *)
+  (*           4 byte timedate simulator                *)
+  (*           4 byte area reserved for future use      *)
+  
+  iout(18937,2); { LEA debug/jump table,A4 }
+  iout(entrycodesize,4); { Text relative address of jump table }
+  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+  iout(10812,2); iout(0,4); { MOVE.L #0,D5 }
+  if ENVIRONMENT = ADVENTURE
+  then begin
+    { MOVE.L #breakaddr,D6 }
+    iout(11324,2); iout(totalcodesize + datasize + bsssize,4);
+    ioutone(ord('R'));
+    end;
+  iout(20217,2); { JMP xxx.L }
+  { Text relative address of $START }
+  iout(nametree^.seg^.segbaseaddr + nametree^.loc,4);
+  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+  
+  {Generate debug table with DBGTABLESIZE bytes}
+  
+  iout(20217,2); { JMP xxx.L }
+  breaksym := lookupname('%_BREAK ');
+  if breaksym = nil
+  then iout(0,4) {Text relative zero, %_BREAK not used by all debuggers}
+  else iout(breaksym^.seg^.segbaseaddr + breaksym^.loc,4);
+  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+  
+  iout(0,4); {Text relative zero}
+  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+  
+  if (ENVIRONMENT = ALTOS) or 
+     (ENVIRONMENT = REGULUS) or 
+     (ENVIRONMENT = CPM)
+  then iout(0,4) {Data relative zero}
+  else iout(totalcodesize,4); {Data relative zero}
+  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+  
+  if (ENVIRONMENT = REGULUS) or (ENVIRONMENT = CPM)
+  then iout(0,4) {Bss relative zero}
+  else
+    if ENVIRONMENT = ALTOS
+    then iout(datasize,4) {Bss relative zero}
+    else iout(totalcodesize + datasize,4); {Bss relative zero}
+  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+  
+  iout(0,2); {Not being debugged unless set by dbg}
+  iout(totalcodesize + datasize + bsssize,4); {Timedate simulator}
+  iout(0,4); {Bytes for future expansion}
+  
+  { Generate jump table }
+  
+  lseg := seglist;
+  while lseg <> nil do
+        begin
+        ioutdescriptor(nametree,lseg,FALSE);
+        lseg := lseg^.nextseg;
+        end;
+  ioutdescriptor(nametree,nil,TRUE);
+  end; (* ioutheaderandjumptable *)
+  
+  
+  {Obtain sorted relocs for fftndata}
+  
+  procedure getrelocs(fftndata: pfcommon; 
+                      var ffdfreloclist,ffdreloclist: pfdreloc);
+    var lfdreloclist, lfdfreloclist: pfdreloc;
+    
+    procedure insertreloc(insertel: pfdreloc; var inlist: pfdreloc);
+      var elcopy, thislistel, lastlistel: pfdreloc;
+          ExitFlag: Boolean;
+    begin {insertreloc}
+    new(elcopy); elcopy^ := insertel^; elcopy^.next := nil;
+    if inlist = nil
+    then inlist := elcopy
+    else
+      if elcopy^.daddr < inlist^.daddr
+      then begin elcopy^.next := inlist; inlist := elcopy; end
+      else begin
+        thislistel := inlist; ExitFlag := FALSE;
+        repeat
+          lastlistel := thislistel;
+          thislistel := thislistel^.next;
+          if thislistel <> nil
+          then ExitFlag := thislistel^.daddr > elcopy^.daddr
+          else ExitFlag := TRUE;
+        until ExitFlag;
+        elcopy^.next := thislistel; 
+        lastlistel^.next := elcopy;
+        end;
+    end; {insertreloc}
+    
+  begin {getrelocs}
+  ffdfreloclist := nil; 
+  lfdfreloclist := fdfreloclist; 
+  while lfdfreloclist <> nil do begin
+    if lfdfreloclist^.dname = fftndata^.name
+    then insertreloc(lfdfreloclist,ffdfreloclist);
+    lfdfreloclist := lfdfreloclist^.next;
+    end;
+  ffdreloclist := nil; 
+  lfdreloclist := fdreloclist; 
+  while lfdreloclist <> nil do begin
+    if lfdreloclist^.dname = fftndata^.name
+    then insertreloc(lfdreloclist,ffdreloclist);
+    lfdreloclist := lfdreloclist^.next;
+    end;
+  end; {getrelocs}
+  
+  
+  { FORTRAN Data Area Initialization }
+  
+  procedure idataarea;
+    var lftndata, lftndata2: pfcommon; i, lsize, addr: integer; 
+        llongint, ldataloc: longint; Done: Boolean;
+        lname: alfa8; linitlist: pdatainit; dataic: longint;
+        lfdreloclist, lfdfreloclist: pfdreloc; lsymbol: psymbol;
+    
+    procedure doinitlist;
+      var i, lsize, addr: integer; llongint: longint; 
+          lname: alfa8; linitlist: pdatainit;
+    begin {doinitlist}
+    linitlist := lftndata^.initlist;
+    while linitlist <> nil do 
+      with linitlist^ do begin
+        llongint := dataloc + lftndata^.reladdr;
+        if dataic > llongint
+        then begin
+          writeln('*** In data area named ',lftndata^.name);
+          writeln('*** at offset ',dataloc:1,' bytes into that data area');
+          fatal_error('overlapping data initialization');
+          end;
+        while dataic < llongint do begin
+          iout(0,1); dataic := dataic + 1;
+          end;
+        seekmodule(datamodule);
+        HalfFlag := FALSE; i := nextbyte;
+        lsize := next3bytes;
+        for i := 1 to 8 do lname[i] := chr(nextbyte);
+        addr := next4bytes;
+        for i := 17 to lsize do begin
+          iout(nextbyte,1); dataic := dataic + 1;
+          end;
+        linitlist := datanext;
+        end;
+    end; {doinitlist}
+
+    function next4dbytes: longint;
+      var l: longint; cc: array[0..3] of -128..127; j: integer;
+    begin
+    cc[0] := nextbyte; cc[1] := nextbyte; 
+    if (i+2) > lsize
+    then begin
+      linitlist := linitlist^.datanext; {Must be contiguous}
+      seekmodule(linitlist^.datamodule);
+      HalfFlag := FALSE; i := nextbyte;
+      lsize := next3bytes;
+      for j := 1 to 8 do lname[j] := chr(nextbyte);
+      addr := next4bytes;
+      i := 15;
+      end;
+    cc[2] := nextbyte; cc[3] := nextbyte;
+    moveleft(cc,l,4); next4dbytes := l;
+    end; {next4dbytes}
+  
+  begin (* idataarea *)
+  if CConstructs
+  then begin
+    dataic := 0;
+    lftndata := ftndatalist;
+    while lftndata <> nil do begin
+      if lftndata^.initlist <> nil
+      then begin
+        getrelocs(lftndata,lfdfreloclist,lfdreloclist);
+        linitlist := lftndata^.initlist;
+        while linitlist <> nil do begin
+          llongint := linitlist^.dataloc + lftndata^.reladdr;
+          if dataic > llongint
+          then begin
+            writeln('*** In data area named ',lftndata^.name);
+            writeln('*** at offset ',linitlist^.dataloc:1,
+                    ' bytes into that data area');
+            fatal_error('overlapping data initialization');
+            end;
+          while dataic < llongint do begin
+            iout(0,1); dataic := dataic + 1;
+            end;
+          ldataloc := linitlist^.dataloc;
+          seekmodule(linitlist^.datamodule);
+          HalfFlag := FALSE; i := nextbyte;
+          lsize := next3bytes;
+          for i := 1 to 8 do lname[i] := chr(nextbyte);
+          addr := next4bytes;
+          i := 17;
+          while i <= lsize do begin
+            Done := FALSE;
+            if lfdfreloclist <> nil
+            then
+              if lfdfreloclist^.daddr = ldataloc
+              then begin
+                Done := TRUE; llongint := next4dbytes;
+                lsymbol := lookupname(lfdfreloclist^.rname);
+                llongint := llongint + entrycodesize + lsymbol^.jtloc;
+                iout(llongint,4); 
+                if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+                dataic := dataic + 4; ldataloc := ldataloc + 4;
+                i := i + 4;
+                lfdfreloclist := lfdfreloclist^.next;
+                end;
+            if not Done
+            then
+              if lfdreloclist <> nil
+              then
+                if lfdreloclist^.daddr = ldataloc
+                then begin
+                  Done := TRUE; llongint := next4dbytes;
+                  lftndata2 := lookupfcommon(ftndatatree,lfdreloclist^.rname);
+                  (*!!! WHAT IF NOT DEFINED !!!*)
+                  if lftndata2^.initlist = nil
+                  (**** COULD BE WRONG FOR OTHER THAN UNISOFT ****)
+                  (**** OK FOR CT AND NCR AND ARETE AND PLEXUS****)
+                  (**** OK FOR LANDL, NBI,  AND BERKELEY ****)
+                  (**** OK FOR SANTACRUZ AND MULTI ****)
+                  then llongint := llongint + lftndata2^.reladdr +
+                                   totalcodesize + datasize
+                  (**** COULD BE WRONG FOR OTHER THAN UNISOFT ****)
+                  (**** OK FOR CT AND NCR AND ARETE AND PLEXUS****)
+                  (**** OK FOR LANDL, NBI, AND BERKELEY ****)
+                  (**** OK FOR SANTACRUZ AND MULTI ****)
+                  else llongint := llongint + lftndata2^.reladdr +
+                                   totalcodesize;
+                  iout(llongint,4); 
+                  if ENVIRONMENT = ADVENTURE then ioutone(ord('R'));
+                  dataic := dataic + 4; ldataloc := ldataloc + 4;
+                  i := i + 4;
+                  lfdreloclist := lfdreloclist^.next;
+                  end;
+            if not Done
+            then begin
+              iout(nextbyte,1); 
+              dataic := dataic + 1; ldataloc := ldataloc + 1;
+              i := i + 1;
+              end;
+            end;
+          linitlist := linitlist^.datanext;
+          end;
+        end;
+      lftndata := lftndata^.next;
+      end;
+    while dataic < datasize do begin
+      iout(0,1); dataic := dataic + 1;
+      end;
+    end
+  else begin {No "C" constructs, considerably faster idataarea}
+    {Output text areas initialized with data}
+    if DataInText
+    then begin
+      dataic := executablecodesize;
+      lftndata := ftndatalist;
+      while lftndata <> nil do begin
+        if lftndata^.TextResident then doinitlist;
+        lftndata := lftndata^.next;
+        end;
+      while dataic < totalcodesize do begin
+        iout(0,1); dataic := dataic + 1;
+        end;
+      end;
+    {Output data areas}
+    dataic := 0;
+    lftndata := ftndatalist;
+    while lftndata <> nil do begin
+      if (lftndata^.initlist <> nil {Can't be AtAbsolute}) and 
+         (not lftndata^.TextResident)
+      then doinitlist;
+      lftndata := lftndata^.next;
+      end;
+    while dataic < datasize do begin
+      iout(0,1); dataic := dataic + 1;
+      end;
+    end;
+  end; (* idataarea *)
+  
+

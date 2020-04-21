@@ -1,0 +1,100 @@
+'\"macro stdmacro
+.TH TERM 5
+.SH NAME
+term \- conventional names for terminals
+.SH DESCRIPTION
+These names are used by certain commands (e.g.,
+.IR nroff ,
+.IR mm (1),
+.IR man (1),
+.IR tabs (1))
+and are maintained as part of the shell environment (see
+.IR sh (1),
+.IR profile (4),
+and
+.IR environ (5))
+in the variable
+.SM
+.BR $TERM\*S :
+.PP
+.nf
+.ta \w'1620\-12\ \ 'u
+iris	Silicon Graphics IRIS 1400 Workstation
+1520	Datamedia 1520
+1620	Diablo 1620 and others using the HyType II printer
+1620\-12	same, in 12-pitch mode
+2621	Hewlett-Packard \s-1HP\s+12621 series
+2631	Hewlett-Packard 2631 line printer
+2631\-c	Hewlett-Packard 2631 line printer - compressed mode
+2631\-e	Hewlett-Packard 2631 line printer - expanded mode
+2640	Hewlett-Packard \s-1HP\s+12640 series
+2645	Hewlett-Packard \s-1HP\s+1264n series (other than the 2640 series)
+300	\s-1DASI/DTC/GSI\s+1 300 and others using the HyType I printer
+300\-12	same, in 12-pitch mode
+300s	\s-1DASI/DTC/GSI\s+1 300s
+382	\s-1DTC\s+1 382
+300s\-12	same, in 12-pitch mode
+3045	Datamedia 3045
+33	\s-1TELETYPE\s+1\*R Terminal Model 33 \s-1KSR\s+1
+37	\s-1TELETYPE\s+1 Terminal Model 37 \s-1KSR\s+1
+40\-2	\s-1TELETYPE\s+1 Terminal Model 40/2
+40\-4	\s-1TELETYPE\s+1 Terminal Model 40/4
+4540	\s-1TELETYPE\s+1 Terminal Model 4540
+3270	\s-1IBM\s+1 Model 3270
+4000a	Trendata 4000a
+4014	Tektronix 4014
+43	\s-1TELETYPE\s+1 Model 43 \s-1KSR\s+1
+450	\s-1DASI\s+1 450 (same as Diablo 1620)
+450\-12	same, in 12-pitch mode
+735	Texas Instruments \s-1TI\s+1735 and \s-1TI\s+1725
+745	Texas Instruments \s-1TI\s+1745
+du	generic dial-up
+dumb	generic name for terminals that lack reverse
+	line-feed and other special escape sequences
+sync	generic name for synchronous \s-1TELETYPE\s+1
+	4540-compatible terminals
+hp	Hewlett-Packard (same as 2645)
+lp	generic name for a line printer
+tn1200	General Electric TermiNet 1200
+tn300	General Electric TermiNet 300
+.fi
+.PP
+Up to 8 characters, chosen from [\-a\-z0\-9],
+make up a basic terminal name.
+Terminal sub-models and operational modes are distinguished by
+suffixes beginning with a \f3\-\fP.
+Names should generally be based on original vendors,
+rather than local distributors.
+A terminal acquired from one vendor should not have more than
+one distinct basic name.
+.PP
+Commands whose behavior depends on the type of terminal
+should accept arguments of the form
+.BI \-T term\^
+where
+.I term\^
+is one of the names given above;
+if no such argument is present,
+such commands should
+obtain the terminal type from
+the environment variable
+.SM
+.BR $TERM\*S ,
+which, in turn, should contain
+.IR term .
+.PP
+See
+.B /etc/termcap
+on your system for a complete list.
+.SH SEE ALSO
+mm(1),
+nroff(1),
+sh(1),
+stty(1),
+tabs(1),
+profile(4),
+environ(5).
+.SH BUGS
+This is a small candle trying to illuminate a large, dark problem.
+Programs that ought to adhere to this nomenclature do so somewhat fitfully.
+.\"	@(#)term.5	5.1 of 10/24/83

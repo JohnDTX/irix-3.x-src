@@ -1,0 +1,20 @@
+Multicast Library
+Version 1
+
+
+#include <zmsg.h>
+
+z = zinit(&buf, "name", flag)
+
+	buf	== address of msg buffer with zmsg at front
+	"name"	== name of multicast address
+	flag	== debug flag for verbose debug output
+	z	== returns unix file descriptor, or -1.
+
+
+cc = zsend(z, buf, cc)
+
+cc = zrecv(z, buf, cc)
+
+	cc	== size of data returned, not counting zmsg header.
+

@@ -1,0 +1,194 @@
+'\"macro stdmacro
+.TH DIFF 1 
+.SH NAME
+diff \- differential file comparator
+.SH SYNOPSIS
+.B diff
+[
+.B \-efbh
+] file1 file2
+.SH DESCRIPTION
+.I diff\^
+tells what lines must be changed in two files to bring them
+into agreement.
+If
+.I file1\^
+.RI ( file2 )
+is
+.BR \- ,
+the standard input is used.
+If
+.I file1\^
+.RI ( file2 )
+is a directory, then a file in that directory with the name
+.I file2\^
+.RI ( file1 )
+is used.
+The normal output contains lines of these forms:
+.IP "" 5
+.I n1\^
+.B a
+.I n3,n4\^
+.br
+.I n1,n2\^
+.B d
+.I n3\^
+.br
+.I n1,n2\^
+.B c
+.I n3,n4\^
+.PP
+These lines resemble
+.I ed\^
+commands to convert
+.I file1\^
+into
+.IR file2 .
+The numbers after the letters pertain to
+.IR file2 .
+In fact, by exchanging
+.B a
+for
+.B d
+and reading backward one may ascertain equally how to convert 
+.I file2\^
+into
+.IR file1 .
+As in 
+.IR ed ,
+identical pairs where
+.I n1\^
+=
+.I n2\^
+or
+.I n3\^
+=
+.I n4\^
+are abbreviated as a single number.
+.PP
+Following each of these lines come all the lines that are
+affected in the first file flagged by \f3<\fP, 
+then all the lines that are affected in the second file
+flagged by \f3>\fP.
+.PP
+The
+.B \-b
+option causes
+trailing blanks (spaces and tabs) to be ignored
+and other strings of blanks to compare equal.
+.PP
+The
+.B \-e
+option produces a script of
+.IR a ,
+.I c\^
+and 
+.I d\^
+commands for the editor
+.IR ed ,
+which will recreate
+.I file2\^
+from
+.IR file1 .
+The
+.B \-f
+option produces a similar script,
+not useful with
+.IR ed ,
+in the opposite order.
+In connection with
+.BR \-e ,
+the following shell program may help maintain
+multiple versions of a file.
+Only an ancestral file ($1) and a chain of 
+version-to-version
+.I ed\^
+scripts ($2,$3,...) made by
+.I diff\^
+need be on hand.
+A ``latest version'' appears on
+the standard output.
+.IP "" 5
+(shift; cat $\(**; echo '1,$p') \(bv ed \- $1
+.PP
+Except in rare circumstances,
+.I diff\^
+finds a smallest sufficient set of file
+differences.
+.PP
+Option
+.B \-h
+does a fast, half-hearted job.
+It works only when changed stretches are short
+and well separated,
+but does work on files of unlimited length.
+Options 
+.B \-e
+and
+.B \-f
+are unavailable with
+.BR \-h .
+.SH EXAMPLE
+.IP
+diff \-e file1 file2
+.PP
+where ``file1'' and ``file2'' are two versions of the manual text
+for the 
+.I cp\^
+command,
+produces:
+.IP
+.nf
+35,41d
+.br
+27c
+.br
+In the second form, one or more
+.IP
+18,25c
+existed; the mode of the source file
+is used otherwise.
+.br
+.IP
+15c
+.br
+The mode and owner of  
+.IP
+.br
+10c
+.br
+file ... directory
+.IP
+.br
+7c
+.br
+file1 file2
+.IP
+.br
+1,3c
+.br
+\ .TH CP 1
+\ .SH NAME
+.fi
+.PP
+Following this,
+.I ed\^
+script would transform
+"file1" into file2",
+line for
+line and character for character.
+.SH FILES
+/tmp/d?????
+.br
+/usr/lib/diffh	for 
+.B \-h
+.SH "SEE ALSO"
+cmp(1), comm(1), ed(1).
+.SH DIAGNOSTICS
+Exit status is 0 for no differences, 1 for some differences, 2 for trouble.
+.SH BUGS
+Editing scripts produced under the
+.BR \-e " or"
+.BR \-f " option are naive about"
+creating lines consisting of a single period (\f3.\fP).
+.\"	@(#)diff.1	5.1 of 11/17/83

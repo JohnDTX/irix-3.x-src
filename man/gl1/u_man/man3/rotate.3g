@@ -1,0 +1,34 @@
+.TH rotate  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I rotate
+- rotate graphical primitives
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rotate(a, axis) "
+.B "Angle a; "
+.B "char axis;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rotate(a, axis)"
+.B "integer*2 angle"
+.B "character axis"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rotate(a: Angle; axis: char);"
+.sp
+.SH DESCRIPTION
+.I Rotate
+specifies an angle and an axis of rotation.  The angle is given in tenths
+of degrees according to the right-hand rule.  The axis of 
+rotation is defined by a character, either 'x', 'y', or 'z' (the
+character can be upper or lower case).  \f2Rotate\f1 is a modeling command;
+thus, it changes the current transformation matrix.  All objects drawn
+after the \f2rotate\f1 command is executed will be rotated.  Use 
+\f2pushmatrix\f1 and \f2popmatrix\f1 to preserve and restore an unrotated
+world space.
+.SH "SEE ALSO"
+.I popmatrix, pushmatrix, scale, translate

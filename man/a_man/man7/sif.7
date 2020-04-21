@@ -1,0 +1,58 @@
+'\"macro stdmacro
+.TH SIF 7
+.SH NAME
+sif \- Interphase Storager 2 floppy controller
+.SH SYNOPSIS
+.B "controller sif0 at mb0 csr 0x7200 priority 5 vector siiintr
+.br
+.B "disk sf0 at sif0 drive 0
+.SH DESCRIPTION
+This is a MULTIBUS floppy disk controller.
+The driver software supports two floppy disk drives.
+This man page documents the floppy disk support.
+.PP
+The standard device names begin with ``sf'' followed by
+the drive number and then the letter
+.B a
+for partition 0.
+The special file
+.I /dev/sf0a
+is linked to
+.I /dev/floppy.
+The special file
+.I /dev/rsf0a
+is linked to
+.I /dev/rfloppy.
+.PP
+The block files access the disk via the system's normal
+buffering mechanism and may be read and written without regard to
+physical disk records.  There is also a `raw' interface
+which provides for direct transmission between the disk
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.'
+.PP
+In raw I/O counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.PP
+The size of the various partitions supported by the driver in fact
+are a function of the drive itself.
+.SH FILES
+/dev/sf0a     block files
+.br
+/dev/rsf0a    raw files
+.SH SEE ALSO
+autoconf(7),
+siq(7),
+sii(7)
+.SH DIAGNOSTICS
+.br
+\f3%s: hard error: %s, at: %d/%d/%d, cmd: %s\f1.  A hard error of some
+type has occured.  The first string printed is the name of the device where
+the error occured.  Next printed is a textual description
+of the error, followed by the physical disk address where the error
+occured.  Finally, the command which caused the error is printed.

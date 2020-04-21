@@ -1,0 +1,141 @@
+'\"macro stdmacro
+.TH SEMGET 2
+.SH NAME
+semget \- get set of semaphores
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/ipc.h>
+.br
+.B #include <sys/sem.h>
+.PP
+.nf
+.BR "int semget (key, nsems, semflg)
+.B key_t key;
+.B int nsems, semflg;
+.fi
+.SH DESCRIPTION
+.I Semget\^
+returns the semaphore identifier associated with
+.IR key .
+.PP
+A semaphore identifier and associated data structure and set containing
+.I nsems\^
+semaphores
+(see
+.IR intro\^ (2))
+are created for
+.I key\^
+if one of the following are true:
+.IP "" .3i
+.I Key\^
+is equal to
+.SM
+.BR IPC_PRIVATE .
+.IP "" .3i
+.I Key\^
+does not already have a semaphore identifier associated with it, and
+.RI ( semflg " & "
+.SM
+.BR IPC_CREAT\*S )
+is ``true''.
+.PP
+Upon creation, the data structure associated with the new semaphore
+identifier is initialized as follows:
+.IP "" .3i
+.BR Sem_perm.cuid ", " sem_perm.uid ,
+.BR sem_perm.cgid ", and " sem_perm.gid
+are set equal to the effective user
+.SM ID
+and effective group
+.SM ID\*S,
+respectively, of the calling process.
+.IP
+The low-order 9 bits of
+.B sem_perm.mode
+are set equal to the low-order 9 bits of
+.IR semflg .
+.IP
+.B Sem_nsems
+is set equal to the value of
+.IR nsems .
+.IP
+.B Sem_otime
+is set equal to 0 and
+.B sem_ctime
+is set equal to the current time.
+.PP
+.I Semget\^
+will fail if one or more of the following are true:
+.IP "" .3i
+.I Nsems\^
+is either less than or equal to zero or greater than the system imposed limit.
+.SM
+\%[EINVAL]
+.IP
+A semaphore identifier exists for
+.I key\^
+but operation permission (see
+.IR intro\^ (2))
+as specified by the low-order 9 bits of
+.I semflg\^
+would not be granted. 
+.SM
+\%[EACCES]
+.IP
+A semaphore identifier exists for
+.I key\^
+but the number of semaphores in the set associated with it is less than
+.IR nsems\^ " and " nsems\^
+is not equal to zero.
+.SM
+\%[EINVAL]
+.IP
+A semaphore identifier does not exist for
+.I key\^
+and
+.RI ( semflg " &"
+.SM
+.BR IPC_CREAT\*S )
+is ``false''.
+.SM
+\%[ENOENT]
+.IP
+A semaphore identifier is to be created but
+the system imposed limit on the maximum number of
+allowed semaphore identifiers system wide
+would be exceeded.
+.SM
+\%[ENOSPC]
+.IP
+A semaphore identifier is to be created but
+the system imposed limit on the maximum number of
+allowed semaphores system wide
+would be exceeded.
+.SM
+\%[ENOSPC]
+.IP
+A semaphore identifier exists for
+.I key\^
+but
+.RI "( (" semflg " & "
+.SM
+.RB IPC_CREAT\*S ") & ("
+.IR semflg " & "
+.SM
+.BR IPC_EXCL\*S ") )"
+is ``true''.
+.SM
+\%[EEXIST]
+.br
+.SH "RETURN VALUE"
+Upon successful completion,
+a non-negative integer,
+namely a semaphore identifier is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+semctl(2), semop(2).
+.\"	@(#)semget.2	5.1 of 11/1/83
+

@@ -1,0 +1,64 @@
+.TH rect 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B rect
+\- outlines a rectangular region
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "rect(x1, y1, x2, y2) "
+.B "Coord x1, y1, x2, y2;"
+.IP 
+.B "recti(x1, y1, x2, y2)  "
+.B "Icoord x1, y1, x2, y2;"
+.IP
+.B "rects(x1,y1, x2, y2) "
+.B "Scoord x1,y1, x2,y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine rect(x1, y1, x2, y2)"
+.B "real x1, y1, x2, y2"
+.IP 
+.B "subroutine recti(x1, y1, x2, y2)"
+.B "integer*4 x1, y1, x2, y2"
+.IP 
+.B "subroutine rects(x1, y1, x2,y2)"
+.B "integer*2 x1, y1, x2, y2"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure rect(x1, y1, x2, y2: Coord);"
+.IP
+.B "procedure recti(x1, y1, x2, y2: Icoord);"
+.IP
+.B "procedure rects(x1, y1, x2, y2: Scoord);"
+.SH DESCRIPTION
+.B rect
+draws a rectangle using the current linestyle,
+linewidth,
+color, and writemask.
+The sides of the rectangle are parallel to the
+.I x
+and
+.I y
+axes.
+Since a rectangle is a 2-D shape,
+.B rect
+takes only 2-D arguments, and sets the 
+.I z 
+coordinate to zero.
+The points
+.I (x1, y1)
+and
+.I (x2, y2)
+are the opposite corners of the rectangle.
+.SH "SEE ALSO"
+poly, rectf, rpdr, rpmv
+.sp
+.I Programming Guide, 
+Section 3.5, Rectangles
+

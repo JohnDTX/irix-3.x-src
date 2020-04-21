@@ -1,0 +1,29 @@
+.TH endpupmode 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B endpupmode 
+\- ends pop-up mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "endpupmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine endpup"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure endpupmode;"
+.SH DESCRIPTION
+.B endpupmode
+disables writing to the pop-up menu bitplanes.
+.SH "SEE ALSO"
+endfullscrn, fullscrn, pupmode
+.sp
+\f2Using mex\fP, Chapter 3, Making Pop-Up Menus
+.SH NOTE
+This routine is available only in immediate mode under the window manager.

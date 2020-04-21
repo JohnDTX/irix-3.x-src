@@ -1,0 +1,32 @@
+.TH gRGBmask 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gRGBmask
+- return the current RGB writemask
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gRGBmask(redm, greenm, bluem)"
+.B "RGBvalue *redm, *greenm, *bluem;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gRGBma(redm, greenm, bluem)"
+.B "integer*2 redm, greenm, bluem"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gRGBmask(var redm, greenm, bluem: RGBvalue);"
+.sp
+.SH DESCRIPTION
+The
+.I gRGBmask
+command returns the current RGB writemask as
+three eight-bit masks.  The masks are placed in the locations addressed
+by \f3redm\f1, \f3greenm\f1, and \f3bluem\f1.  The system must be
+in RGB mode when this command is executed; otherwise the command is 
+ignored.
+.SH "SEE ALSO"
+.I getwritemask, RGBwritemask
+.SH NOTE
+This command can only be used in immediate mode.

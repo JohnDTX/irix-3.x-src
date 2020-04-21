@@ -1,0 +1,38 @@
+.TH screenpnt  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I screenpnt
+- return screen coordinates to caller
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "screenpnt(n, pretrans, postrans, index)"
+.B "long n; "
+.B "Coord pretrans[][3];"
+.B "Screencoord postrans[][3];"
+.B "Boolean index[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine screen(n, pretra, postra, index)"
+.B "integer n"
+.B "integer*2 postra(3,n)"
+.B "real pretra(3,n)"
+.B "logical index(n)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure screenpnt(n: integer; var pretrans: Coord3array);"
+.B "	var postrans: Screenarray; var index: Boolarray);"
+.sp
+.SH DESCRIPTION
+The \f2screenpnt\f1 command transforms, clips, and scales \f3n\f1
+points in the \f3pretrans\f1 array, returning screen coordinates in \f3postrans\f1.
+\f3Index\f1 is an array of boolean values that indicate which entries in
+\f3postrans\f1 are valid.  The returned values are an \f3x\f1 coordinate,
+a \f3y\f1 coordinate,  and a \f3z\f1 coordinate representing 
+perspective depth.
+.SH "SEE ALSO"
+.I clipline, clippnt, clippoly, setdepth, transform
+.SH NOTE
+This command can only be used in immediate mode.

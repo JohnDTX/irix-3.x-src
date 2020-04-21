@@ -1,0 +1,74 @@
+'\"macro stdmacro
+.TH SCCSDIFF 1
+.SH NAME
+sccsdiff \- compare two versions of an \s-1SCCS\s+1 file
+.SH SYNOPSIS
+.B sccsdiff
+.BR \-r\| \s-1SID\s+1\&1
+.BR \-r\| \s-1SID\s+1\&2
+.RB [ \-p ]
+.RB [ \-s n]
+files
+.SH DESCRIPTION
+.I Sccsdiff\^
+compares two versions of an
+.SM SCCS
+file and generates the differences between the
+two versions.
+Any number of
+.SM SCCS
+files may be specified, but arguments apply to all files.
+.RS .3i
+.TP "\w'\f3\-r\|\f2\s-1SID\s+1\|?\f1\ \ \ 'u"
+.BI \-r\| \s-1SID\s+1\|?
+.SM
+.I SID\*S1\^
+and
+.SM
+.I SID\*S2\^
+specify
+the deltas of an
+.SM SCCS
+file that are to be compared.
+Versions are passed to
+.IR bdiff\^ (1)
+in the order given.
+.TP
+.B \-p
+pipe output for each file through
+.IR pr\^ (1).
+.TP
+.BI \-s\| n\^
+\f2n\^\fP is the file segment size that
+.I bdiff\^
+will pass to
+.IR diff\^ (1).
+This is useful when
+.I diff\^
+fails due to a high system load.
+.RE
+.SH EXAMPLE
+.IP
+sccsdiff \-r1.1 \-r1.2 s.test1.c
+.PP
+would show the differences between version 1.1 and version 1.2
+of the file "test1.c".
+.SH FILES
+.TP "\w'/tmp/get?????\ \ \ \ 'u"
+/tmp/get?????
+Temporary files
+.SH "SEE ALSO"
+bdiff(1), get(1), help(1), pr(1).
+.br
+.IR "Source Code Control System" .
+.SH DIAGNOSTICS
+.PD 0
+.TP "\w'\f2 file:  No differences \f1\ \ \ 'u"
+"\f2file:  No differences\f1"
+If the two versions are the same.
+.PP
+Use
+.IR help\^ (1)
+for explanations.
+.PD
+.\"	@(#)sccsdiff.1	5.1 of 11/10/83

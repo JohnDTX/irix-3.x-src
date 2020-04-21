@@ -1,0 +1,47 @@
+.TH spclos 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B spclos
+\- draws the current open, shaded polygon
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "spclos()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine spclos"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure spclos;"
+.SH DESCRIPTION
+\f3spclos\f1
+closes and shades the  polygon.
+It is like \f3pclos\fP.
+When
+.B spclos 
+ends a polygon, the system draws it using the
+intensities that 
+.B setshade 
+specifies.
+If 
+\f3setshade\fP
+is used in the definition of a polygon, it must be
+closed with
+\f3spclos\fP.
+If it is closed with
+\f3pclos\fP,
+the results are undefined.
+.SH "SEE ALSO"
+pclos,
+pdr,
+pmv,
+setshade,
+splf
+.sp
+.I Programming Guide,
+Section 13.1, Shading

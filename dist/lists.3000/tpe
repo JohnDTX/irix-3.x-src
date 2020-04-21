@@ -1,0 +1,16 @@
+usr/bin/glueboot
+usr/bin/makeVboot
+usr/bin/makeboot
+usr/bin/nm68
+usr/bin/rev68
+usr/bin/showboot
+usr/lib/gl2/vkernel
+usr/lib/gl2/vkernel.r
+usr/lib/libV.a
+usr/lib/libVgl2.a
+usr/lib/libVinternet.a
+usr/lib/libVkgl2.a
+usr/src/frgl2
+usr/src/rgl2
+usr/src/tpe1
+usr/src/tpe2

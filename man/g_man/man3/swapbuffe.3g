@@ -1,0 +1,34 @@
+.TH swapbuffers 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B swapbuffers
+\- exchanges the front and back buffers
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "swapbuffers()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine swapbu"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure swapbuffers;"
+.SH DESCRIPTION
+.B swapbuffers
+exchanges the front and back buffers
+in double buffer mode during the next vertical retrace.
+Once an image is fully drawn in the back buffer,
+.B swapbuffers
+displays it.
+.B swapbuffers
+is ignored in single buffer mode or RGB mode.
+.SH "SEE ALSO"
+backbuffer, doublebuffer, frontbuffer, gsync, swapinterval 
+.sp
+.I Programming Guide,
+Section 6.1, Display Modes 

@@ -1,0 +1,165 @@
+'\"macro stdmacro
+'\" t
+.TH EFS 4
+.SH NAME
+Extent file system \- layout of the Extent file system
+.SH SYNOPSIS
+.B #include <sys/param.h>
+.br
+.B #include <sys/fs.h>
+.SH DESCRIPTION
+Every Extent file system storage volume
+has a common format for certain vital information.
+Every such volume is divided into a certain number
+of 512 byte long sectors, also called
+.I basic
+.IR blocks .
+Basic block 0 is unused and is available to contain
+a bootstrap program or other information.
+.PP
+Basic block 1 is the
+.IR super-block .
+The format of an Extent file system super-block is:
+.PP
+.nf
+.in +.3i
+/*
+ * Structure of the super-block for the Extent file system
+ */
+struct	efs {
+	/*
+	 * This portion is read off the volume
+	 */
+	long	fs_size;		/* size of file system, in sectors */
+	long	fs_firstcg;	/* bb offset to first cg */
+	long	fs_cgfsize;	/* size of cylinder group in bb's */
+	short	fs_cgisize;	/* bb's in inodes per cylinder group */
+	short	fs_sectors;	/* sectors per track */
+	short	fs_heads;	/* heads per cylinder */
+	short	fs_ncg;		/* # of groups in file system */
+	short	fs_dirty;	/* fs needs to be fsck'd */
+	time_t	fs_time;		/* last super-block update */
+	char	fs_fname[6];	/* file system name */
+	char	fs_fpack[6];	/* file system pack name */
+	long	fs_magic;	/* magic number */
+	long	fs_prealloc;	/* a good file system pre-alloc size */
+	long	fs_bmsize;	/* size of bitmap in bytes */
+	long	fs_tfree;		/* total free data blocks */
+	long	fs_tinode;	/* total free inodes */
+	char	fs_spare[100];	/* space for expansion */
+	long	fs_checksum;	/* checksum of volume portion of fs */
+	/*
+	 * The remainder of this structure, defined fully in <sys/fs.h>
+	 * is used by the operating system only.
+	 */
+};
+
+#define	EFS_MAGIC	0x041755
+
+.in -.3i
+.fi
+.LP
+Note that the struct efs that is defined in
+.I <sys/fs.h>
+contains more fields.  The extra fields are used internally by the
+operating system, and are not discussed here.
+.I fs_size
+holds the size in basic blocks of the file system.  This variable is
+filled in when the file system is first created with
+.IR mkfs (1M).
+.PP
+.I fs_firstcg
+contains the basic block offset to the first
+.I cylinder group.
+There are
+.I fs_ncg
+cylinder groups contained in the file system.  Each cylinder group
+is composed of
+.I fs_cgfsize
+basic blocks, of which
+.I fs_cgisize
+basic blocks are used for inodes.
+.PP
+.IR fs_sectors ,
+and
+.I fs_heads
+are used to specify the geometry of the underlying disk containing
+the file system.
+.PP
+.I fs_dirty
+is a flag which indicates if the file system needs to be checked
+by the
+.IR fsck (1M)
+program.  The
+.I fs_time
+field contains the time stamp of when the file system was last
+modified.
+.I fs_name
+holds the
+.I name
+of the file system (where it is mounted, more or less) while 
+.I fs_fpack
+contains which volume this file system is.  The
+.I fs_fpack
+field is singularly useless, but is provided for utility compatibility.
+.I fs_magic
+is used to tag the superblock of the file system as an Extent file system.
+.I fs_prealloc
+is sometimes used by the allocator for pre-allocation during file writing
+and should indicate a particularly good pre-allocation for the given
+file system.
+The
+.I fs_bmsize
+field contains, in bytes, the size of the data block bitmap.  The
+data block bitmap is used for data block allocation.  Each one in the
+bitmap indicates a free block.
+.I fs_tfree
+and
+.I fs_tinode
+contain the total free blocks and inodes, respectively.
+The
+.I fs_spare
+field is reserved for future use.  Lastly, the
+.I fs_checksum
+variable holds a checksum of the above fields (not including itself).
+.PP
+During the
+.IR mount (1M)
+of the file system, the
+.I fs_dirty
+and
+.I fs_checksum
+fields are examined.  If
+.I fs_dirty
+is non-zero, or the
+.I fs_checksum
+variable does not match the systems computed checksum, then the file system
+must be cleaned with
+.I fsck 
+before it can be mounted.  If the file system is the
+.I root
+partition, then this check is ignored, as it is necessary to be able
+to run 
+.I fsck 
+on a dirty
+.I root
+from a dirty
+.IR root .
+For the format of an inode and its flags, see
+.IR inode (4).
+.SH CAVEATS
+.LP
+During the usage of an extent filesystem, several errors are possible
+which are not possible on the bell filesystem.  Because the extent filesystem
+uses extents for all allocation, it is possible that an extremely fragmented
+filesystem will cause ``out of space'' messages before the filesystem
+is actually full.  A possible temporary solution to this problem is to
+write the filesystems data to tape, then using \f2mkfs\f1 to clean the 
+filesystem,
+then reading the tape back in.  We do not recommend this procedure for
+novice users.  Eventually a filesystem
+.I reorganizer
+will be available which will solve this problem.
+.SH SEE ALSO
+fsck(1M), mkfs(1M), inode(4), efsinode(4), bellfs(4).
+.\"	@(#)fs.4	5.1 of 11/16/83

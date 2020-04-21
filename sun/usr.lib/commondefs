@@ -1,0 +1,14 @@
+# common definitions for libsun.a
+# "$Header: /d2/3.7/src/sun/usr.lib/RCS/commondefs,v 1.1 89/03/27 17:24:02 root Exp $"
+
+include $(ROOT)/usr/include/make/commondefs
+
+LCINCS= -I$(INCLDIR)/sun -I$(INCLDIR)/bsd 
+LCOPTS= -signed
+LMKDEPFLAGS= -e 's/^\(.*\)\.o:/\1.o \1.pf:/'
+LDIRT= lib_mark plib_mark
+
+LIBNAME= ../libsun.a
+PLIBNAME= ../libsun_p.a
+
+.PRECIOUS: $(LIBNAME) $(PLIBNAME)

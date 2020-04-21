@@ -1,0 +1,37 @@
+.TH select  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I select
+- put the IRIS in selecting mode
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "select(numnames) "
+.B "long numnames;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine select(numnam)"
+.B "integer numnam"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure select(numnames: integer);"
+.sp
+.SH DESCRIPTION
+.I Select
+turns on the selecting mode.  The viewing matrix
+in use when the \f2select\f1 command is executed defines the selection
+window.  Alternatively, however, a viewing matrix can be constructed after 
+selecting mode has begun.  \f2Select\f1 and \f2pick\f1 are identical
+except for the ability to create a viewing matrix in selection mode.
+\f3Numnames\f1 specifies the maximum number of names to be saved 
+by the system.
+.PP
+A name is a triplet of 32-bit numbers: an object identier, a tag
+in the object, and an offset from the tag.  It identifies a
+drawing command that intersected the selection window.
+.SH "SEE ALSO"
+.I endpick, endselect, pick, picksize
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,40 @@
+'\"macro stdmacro
+.TH HOLIDAYS 4
+.SH NAME
+holidays \- holidays of the year
+.SH SYNOPSIS
+.B /usr/lib/acct/holidays
+.SH DESCRIPTION
+The file
+.B /usr/lib/acct/holidays
+contains a list of holidays
+used by system accounting utilities.
+For example:
+.RS
+.nf
+.sp 1
+* Prime/Nonprime Table for UNIX Accounting System
+* and holidays for calendar program.
+*
+* Curr	Prime	Non-Prime
+* Year	Start	Start
+*
+  1984	1000	1800
+*
+* Day of	Calendar	Organ.
+* Year		Date		Holiday
+*
+    2		Jan  2		New Year's
+   51		Feb 20		Wash. Birthday
+  111		Apr 20		Good Friday
+  141		May 28		Memorial Day
+  186		Jul  4		Indep. Day
+  247		Sep  3		Labor Day
+  327		Nov 22		Thanksgiving
+  328		Nov 23		Day after Thanksgiving
+  359		Dec 24		Christmas Eve
+  360		Dec 25		Christmas Day
+.fi
+.RE
+.SH FILES
+/usr/lib/acct/holidays

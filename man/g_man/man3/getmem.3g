@@ -1,0 +1,33 @@
+.TH getmem 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getmem
+\- returns the amount of available memory
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long getmem()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function getmem()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function getmem: longint;"
+.sp
+.SH DESCRIPTION
+.B getmem
+returns the amount of available memory left on the system.  On a
+workstation with virtual memory up to 14 megabytes, it returns 14
+megabytes minus the amount that 
+has been used.  On a terminal, it returns the amount of free
+physical memory. 
+.SH SEE ALSO
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

@@ -1,0 +1,161 @@
+#
+#	@(#)Makefile	1.8	(Berkeley)	7/2/83
+#
+# @(#)$Header: /d2/3.7/src/usr.bin/lint/RCS/vjs,v 1.1 89/03/27 18:04:10 root Exp $
+# $Log:	vjs,v $
+# Revision 1.1  89/03/27  18:04:10  root
+# Initial check-in for 3.7
+# 
+# Revision 1.13  86/08/21  10:27:05  paulm
+# Fix 'clean' so that llib-curses.ln gets deleted.
+# Eliminate redundant -I 
+# 
+# Revision 1.12  86/08/21  09:58:28  paulm
+# When compiling trees.c, undefine LINT, since it redefines it.
+# 
+# Revision 1.11  86/04/24  09:20:16  gb
+# added alignment definition
+# 
+# Revision 1.10  86/04/24  09:19:26  root
+# before last 3.4 changes to ccom (alignment stuff)
+# 
+# Revision 1.9  87/03/15  00:36:55  root
+# Added a "boot" target that only makes "lpass1".
+# - donl
+# 
+# Revision 1.8  86/03/03  15:25:05  gb
+# fixed comm1.c -> common.c
+# 
+# Revision 1.7  86/03/03  15:23:42  dumbbob
+# current source
+# 
+# Revision 1.6  85/06/13  14:35:58  bob
+# *** empty log message ***
+# 
+# Revision 1.5  85/04/24  15:25:30  bob
+# Fixed.
+# 
+# Revision 1.4  85/03/11  18:11:22  bob
+# Cleaned up.
+# 
+# Revision 1.3  85/02/06  22:00:10  bob
+# Changed so that -lm lint library is linked to -lmsky.
+# 
+# Revision 1.2  85/01/30  22:28:42  bob
+# Commented out the -lmp library which does not seem to exist.
+# 
+# Revision 1.1  85/01/30  22:28:02  bob
+# Initial revision
+# 
+
+pass1	= /usr/lib/lint/lint1
+
+B	= $(DEST)/usr/bin
+L	= $(DEST)/usr/lib/lint
+M	= ../../lib/ccom
+LOAD1	= 
+LOAD2	= 
+DEFINES	= -DLINT -DIEEE -DHOST_FULL_IEEE -DDOUBLES32BITS -DNATIVE \
+	  -DSGI_REGS -DSGI_FIELDS -DSTABDOT -DFLEXNAMES  -DOLD_SGI_DEFAULT
+CFLAGS2	= $(DEFINES) -I$M -I.
+LINTLIBS= llib-port.ln llib-lc.ln llib-lm.ln llib-lcurses.ln llib-lm.ln
+
+LIFLAGS=-I$(INCLUDE) -D$C -DSYS5
+
+TARGETS=	lpass1 lpass2 $(LINTLIBS) llib-l$(GLHDWR).ln
+
+all:	$(TARGETS)
+
+boot:	lpass1
+	cp lpass1 $(DEST)/usr/lib/lint/lint1
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(CFLAGS2) $<
+
+lpass1:	cgram.o xdefs.o scan.o common.o pftn.o trees.o optim.o lint.o \
+	  hash.o sgi.o
+	$(CC) $(LDFLAGS) cgram.o xdefs.o scan.o common.o pftn.o trees.o optim.o \
+	  lint.o hash.o sgi.o -o $@
+
+trees.o:$M/manifest.h $M/macdefs.h $M/mfile1.h $M/trees.c
+	$(CC) -c $(CFLAGS) $(CFLAGS2) -ULINT $M/trees.c
+
+optim.o:$M/manifest.h $M/macdefs.h $M/mfile1.h $M/optim.c
+	$(CC) -c $(CFLAGS) $(CFLAGS2) $M/optim.c
+
+pftn.o:	$M/manifest.h $M/macdefs.h $M/mfile1.h $M/pftn.c
+	$(CC) -c $(CFLAGS) $(CFLAGS2) $M/pftn.c
+
+lint.o:	$M/manifest.h $M/macdefs.h $M/mfile1.h lmanifest.h
+	$(CC) -c $(CFLAGS) $(CFLAGS2) lint.c
+
+scan.o:	$M/manifest.h $M/macdefs.h $M/mfile1.h $M/scan.c
+	$(CC) -c $(CFLAGS) $(CFLAGS2) $M/scan.c
+
+xdefs.o:$M/manifest.h $M/mfile1.h $M/macdefs.h $M/xdefs.c
+	$(CC) -c $(CFLAGS) $(CFLAGS2) $M/xdefs.c
+
+cgram.o:$M/manifest.h $M/mfile1.h $M/macdefs.h cgram.c
+	$(CC) -c $(CFLAGS) $(CFLAGS2) cgram.c
+
+cgram.c:$M/cgram.y
+	$(YACC) $(YFLAGS) $M/cgram.y
+	mv y.tab.c cgram.c
+
+common.o:$M/manifest.h $M/mfile1.h $M/common.c $M/macdefs.h 
+	$(CC) -c $(CFLAGS) $(CFLAGS2) $M/common.c
+
+llib-port.ln:llib-port lpass1
+	(/lib/cpp -C -Dlint llib-port | $(pass1) -puv > llib-port.ln)
+
+llib-lm.ln:llib-lm lpass1
+	(/lib/cpp -C -Dlint llib-lm | $(pass1) -puv > llib-lm.ln)
+
+#llib-lmp.ln:llib-lmp lpass1
+#	(/lib/cpp -C -Dlint llib-lmp | $(pass1) -puv > llib-lmp.ln)
+
+llib-lc.ln:llib-lc lpass1
+	(/lib/cpp -C -Dlint llib-lc | $(pass1) -v > llib-lc.ln)
+
+llib-lcurses.ln:llib-lcurses lpass1
+	(/lib/cpp -C -Dlint llib-lcurses | $(pass1) -v > llib-lcurses.ln)
+
+llib-lgl1.ln:llib-lgl1 lpass1
+	(/lib/cpp -C -Dlint $(LIFLAGS) llib-lgl1 | $(pass1) -v > llib-lgl1.ln)
+
+llib-lgl2.ln:llib-lgl2 lpass1
+	(/lib/cpp -C -Dlint $(LIFLAGS) llib-lgl2 | $(pass1) -v > llib-lgl2.ln)
+
+lpass2:	lpass2.o hash.o
+	$(CC) lpass2.o hash.o -o lpass2
+
+lpass2.o:$M/manifest.h lmanifest.h
+	$(CC) $(CFLAGS) $(CFLAGS2) -c -I$M -I. lpass2.c
+	
+lintall:
+	lint -hpv -I. -I$M  $M/cgram.c $M/xdefs.c $M/scan.c \
+	  $M/pftn.c $M/trees.c $M/optim.c lint.c
+
+install:all SHELL
+	rm -f $L/lint[12]
+	cp lpass1 $L/lint1
+	cp lpass2 $L/lint2
+	cd $L ; chmod 755 lint1 lint2
+	cd $L ; chgrp bin lint1 lint2 ; chown bin lint1 lint2
+	cp $(LINTLIBS) llib-l$(GLHDWR).ln $L
+	cp `echo $(LINTLIBS) | sed 's:\.ln::g'` llib-l$(GLHDWR) $L
+	cd $L ; rm -f llib-lgl ; ln llib-l$(GLHDWR) llib-lgl
+	cd $L ; rm -f llib-lmsky llib-lmsky.ln
+	cd $L ; ln  llib-lm llib-lmsky
+	cd $L ; ln  llib-lm.ln llib-lmsky.ln
+	cd $L ; chmod 644 llib-* ; chown bin llib-* ; chgrp bin llib-*
+	cp SHELL $B/lint
+	chmod 755 $B/lint
+	chgrp bin $B/lint
+	chown bin $B/lint
+
+shrink:
+	rm -f *.o
+
+clobber clean:shrink
+	rm -f cgram.c $(TARGETS)

@@ -1,0 +1,38 @@
+.TH getviewport 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getviewport
+\- returns the current viewport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getviewport(left, right, bottom, top) "
+.B "Screencoord *left, *right, *bottom, *top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getvie(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getviewport(var left, right, bottom, top: 
+.br
+.B	Screencoord);
+.SH DESCRIPTION
+.B getviewport
+returns the current viewport and
+reads the top of the viewport stack.  
+\f2left\f1, \f2right\f1, \f2bottom\f1, \f2top\f1 are the addresses
+of four memory locations.  These are
+assigned the left, right, bottom, and top coordinates of the viewport.
+.SH "SEE ALSO"
+popviewport, pushviewport, viewport
+.sp
+.I Programming Guide,
+Section 4.4, Viewports
+.SH NOTE
+This routine is available only in immediate mode.

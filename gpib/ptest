@@ -1,0 +1,10 @@
+# polling test
+t0 ppc -1
+sleep 1024</dev/ib00&
+@ iii = 0
+while ( $iii < 9 )
+    t1 srq 0x4$iii
+    t0 poll
+    @ iii ++
+end
+kill $child

@@ -1,0 +1,45 @@
+#!/bin/sh
+# /usr/spool/lp/etc/util/log.rotate
+# Rotate the log files for resident printers
+
+# This is invoked by cron with the following entry:
+# 2 4 * * * sh /usr/spool/lp/etc/lib/log.rotate
+
+SPOOLDIR=/usr/spool/lp
+
+# LocalPS printers live in a different directory from PostScript printer
+# A PostScript printer that is installed directly to the workstation puts
+# its log file in $SPOOLDIR/transcript
+
+# All other printers, whether accessed over the net, or through the parallel
+# interface, live in $SPOOLDIR/etc/log.  For example, all printers in NetClass
+# have log files in $SPOOLDIR/etc/log.
+
+#Net printers and local parallel interface printers:
+# (Note that although PostScript is indeed a "PostScript" printer, it is
+#  accessed over the network)
+# replace PRINTER1 and PRINTER2 with the names of your appropriate printers
+#(make it a null string if there are no remote or parallel-interface printers)
+# Finally, uncomment the line.
+#printers="PRINTER1 PRINTER2"
+
+# Hard-wired (i.e., connected to the serial port) PostScript printers:
+# replace PRINTER1 with the name of your appropriate printers
+#(make it a null string if there are no local PostScript printers)
+# Finally, uncomment the line.
+#LocalPS="PRINTER1"
+
+for p in $LocalPS
+do
+	# rotate the log files
+
+	cp /dev/null $SPOOLDIR/transcript/$p-log $SPOOLDIR/transcript/$p-log.1
+	cp /dev/null $SPOOLDIR/transcript/$p-log
+done
+
+for p in $printers
+do
+	# rotate the log files
+	cp /dev/null $SPOOLDIR/etc/log/$p-log $SPOOLDIR/etc/log/$p-log.1
+	cp /dev/null $SPOOLDIR/etc/log/$p-log
+done

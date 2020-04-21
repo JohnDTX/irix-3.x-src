@@ -1,0 +1,8 @@
+#! /bin/sh
+#
+# Start up the gpib stuff
+#
+if test -r /dev/ib0 && ( > /dev/ib0 ) 2> /dev/null
+then
+	/etc/gpib/iib -r;			echo " (gpib init ok)"
+fi

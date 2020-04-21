@@ -1,0 +1,27 @@
+.TH unqvaluator  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I unqvaluator
+- unqueue a valuator
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "unqvaluator(v) "
+.B "Device v;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine unqval(v)"
+.B "integer*2 v"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure unqvaluator(v: Device);"
+.sp
+.SH DESCRIPTION
+\f2Unqvaluator\f1 removes the valuator \f3v\f1 from the list of 
+valuator devices whose changes are recorded in the event queue.
+.SH "SEE ALSO"
+.I qvaluator, setvaluator
+.SH NOTE
+This command can only be used in immediate mode.

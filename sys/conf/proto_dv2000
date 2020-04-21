@@ -1,0 +1,33 @@
+# devices common to 2000's, 3000's
+
+# Interphase 2190 smd controller
+controller	iph0	at mb0 csr 0x7010	priority 5 vector ipintr
+disk		ip0	at iph0 drive 0
+disk		ip1	at iph0 drive 1
+disk		ip2	at iph0 drive 2
+disk		ip3	at iph0 drive 3
+
+# Interphase storager 2 esdi disk controller
+controller	sii0	at mb0 csr 0x7200	priority 5 vector siiintr
+disk		si0	at sii0 drive 0
+disk		si1	at sii0 drive 1
+disk		sf0	at sii0 drive 2 flags 0x01
+
+# Interphase storager 2 qic02 tape controller
+controller	siq0	at mb0 csr 0x73fc	priority 5 vector siqintr
+tape		sq0	at siq0 drive 0
+
+# Ciprico Tapemaster 1000
+controller	tmt0	at mb0 csr 0x7090	priority 5 vector tmtintr
+tape		tm0	at tmt0 drive 0
+
+# Ikon Centronix controller 10085 rev a
+device		ik0	at mb0 csr 0x70C0	priority 5 vector ikcintr
+
+# Gpib
+device		ib0	at mb0 csr 0x0020	priority 5 vector tlcintr
+device		ib1	at mb0 csr 0x0100	priority 5 vector tlcintr
+
+# Pxd IBM 3270 interface card
+device		pxd0	at mb0 csr 0x7e00	priority 5 vector pxdintr
+

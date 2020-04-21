@@ -1,0 +1,45 @@
+'\"#ident	"@(#)shells:troff.aeneid	1.2"
+.in +1.2i
+.sp 3
+.ps 36
+.ce 1
+}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\
+\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\
+\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\
+\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\
+\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\
+\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{}\h'-0.5m'{
+.sp 2
+.ce 3
+.I "\s24THE ARGUMENTES OF"
+.sp 1
+.I "\s22the thirteene bookes of Aeneidos,"
+.sp 1
+.sp 2
+.B "\s11expressed in verse."
+.sp 3
+.ls 2
+.nf
+.br
+.ps 6
+.nm 1 5
+.ps 10
+.br
+.B
+1. AENEAS, \f2in the \(first, to \f3Lyby \f2land arriueth well.\f3
+2. \f2The fall of \f3Troy, \f2and wofull dole, \
+y\v'-0.5'\h'-0.35m'\s6e\s0\h'0.35m'\v'0.5' second booke doth tell.\f3
+3. \f2The thyrd of wandringes speakes, and father dead, and laid full low.\f3
+4. \f2In fourth Queene \f3Dido \f2burnes, & \(flames of raginge loue doth show.\f3
+5. \f2The fift declareth plaies, and how the \(fleete with fier was cought.\f3
+6. \f2The sixt doth speake of ghosts, and howe deepe \f3Plutoes \f2reygne was sought.\f3
+7. \f2The seuenth booke, \f3Aeneas\f2 bringes vnto his fatall land.\f3
+8. \f2The eight prepareth war, and power how foes for to withstand.\f3
+9. \f2The ninth of battels telles, and yet the captaine is away.\f3
+10. Aeneas \f2greeuous wrath \f3Mezentius, \f2in the tenth doth slay.\f3
+11. \f2The eleuenth in vnequall \(fight \f3Camilla \f2castes to ground.\f3
+12. \f2The twelfth with heauenly weapons giues to \f3Turnus \f2mortall wound.\f3
+13. \f2The thirteenth weds A\h'-0.35'Eneas wife, and brings him to eternall life.
+.nm
+.ft 1
+.ls 1

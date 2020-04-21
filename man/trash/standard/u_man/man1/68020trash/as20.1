@@ -1,0 +1,63 @@
+.TH AS20 1
+.SH NAME
+as20 \- assembler
+.SH SYNOPSIS
+.B as20
+.B \-o
+objfile [
+.B \-i
+] [\ inputfile\ ]
+.SH DESCRIPTION
+.I as20\^
+assembles the 68010 or 68020 assembly language file
+.I inputfile.
+If no file name is specified the standard input is used.
+.PP
+All undefined symbols in the assembly are treated as global.
+.PP
+The relocatable output of the assembly is put in the file
+.IR objfile ,
+which 
+must
+be specified.
+.PP
+The
+.B \-i
+option restricts 
+the instruction set of
+.I as20
+to 68010 instructions.
+.SH EXAMPLE
+.IP
+as20 \-o file.o filea 
+.PP
+would assemble the 
+file ``filea'' and put the output
+of the assembly into ``file.o''.
+.IP
+/lib/ccom file.c | as20 -o file.o
+.PP
+would cause 
+.I as20
+to assemble the output of 
+``/lib/ccom''
+and place the resultant object file in
+``file.o''.
+.SH "SEE ALSO"
+adb(1),
+ld(1),
+nm(1),
+a.out(4)
+.br
+.IR "U\s-2NIX\s+2 Programmer's Manual, Volume IIB,
+"as20 Reference Manual"
+.SH BUGS
+\f2As20\fP incorrectly assembles indexed instructions which use
+register d0 as a word-length index with a scale of one.  Thus, the
+instruction 
+.br
+	jmp	pc@(0,d0:w*1)
+.br
+would not be assembled correctly.  Users are cautioned against
+using this addressing mode.
+.\"	@(#)as20.1	5.1 of 11/15/83

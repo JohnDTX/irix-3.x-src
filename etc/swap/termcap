@@ -1,0 +1,34 @@
+# Silicon Graphics iris
+# HS is half-intensity start
+# HE is half-intensity end
+# CT is color terminal type (for Curses & rogue)
+# CP is color change escape sequence
+# CZ are color names (for Curses & rogue)
+# Silicon Graphics Iris Terminal (24 lines)
+S0|iris:bs:cd=\EJ:ce=\EK:cm=\EY%+ %+ :co#80:li#24:nd=\EC:\
+    :pt:sr=\EI:up=\EA:do=\EB:nd=\ED:ku=\EA:kd=\EB:kr=\EC:kl=\ED:\
+    :am:al=\EL:cl=\Ev:ho=\EH:dl=\EM:
+smiris:li#6:tc=iris:
+S1|wsiris|iris40|iris emulating a 40 line visual 50 (approximately):\
+	:am:al=\EL:is=\E7B0\E7F7\E7C2\E7R1:\
+	:bs:cd=\EJ:ce=\EK:cl=\EH\EJ:ho=\EH:cm=\EY%+ %+ :co#80:li#40:nd=\EC:\
+	:pt:sr=\EI:up=\EA:ku=\EA:kd=\EB:kr=\EC:kl=\ED:\
+	:cl=\Ev:ho=\EH:dl=\EM:so=\E9P:se=\E0@:\
+	:HS=\E7F2:HE=\E7F7:\
+	:us=\E7R2\E9P:ue=\E7R1\E0@:\
+	:CT#2:CZ=*Bblack,red,green,yellow,blue,magenta,cyan,*Fwhite:
+# Silicon Graphics Iris Workstation (40 lines) (remote)
+S2|rwsiris:is@:CT#3:CP=\E0@\E7R%d\E9P:\
+	:CZ=*-Bblack,red,green,yellow,blue,magenta,cyan,*-Fwhite:tc=wsiris
+# Silicon Graphics Iris Workstation (visual bells) Must do "stty vt1" first.
+S3|wsirisvb:vb=\E7F4\E7B1^K\E7F7\E7B0:tc=wsiris
+S4|rwsirisvb:vb=\E7F4\E7B1^K\E7F7\E7B0:tc=rwsiris
+# visual 50
+vj|v50am|v50 with automatic margins:\
+	:am:if=/lib/tabset/v50:al=\EL:\
+	:bs:cd=\EJ:ce=\EK:cl=\EH\EJ:cm=\EY%+ %+ :co#80:li#24:nd=\EC:\
+	:pt:sr=\EI:up=\EA:ku=\EA:kd=\EB:kr=\EC:kl=\ED:\
+	:cl=\Ev:ho=\EH:dl=\EM:so=\E9P\EU:se=\E0@\ET:\
+	:GS=\EF:GE=\EG:MC=^A`^Ba^Cl^Dm^Es^Fe^Kp:
+vJ|v50amvb|v50 with automatic margins and visual bells:\
+	:vb=\Ej^K\EW:tc=v50am:

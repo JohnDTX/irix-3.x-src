@@ -1,0 +1,61 @@
+.TH BINDKEY 1W
+.SH NAME
+bindkey \- bind keyboard function keys
+.SH SYNOPSIS
+.B bindkey
+.br
+.B bindkey key
+.br
+.B bindkey key string
+.SH DESCRIPTION
+.I Bindkey\^
+is used to bind the function keys for the iris keyboard, while using the
+.I gsh(1)
+shell tool.  Bindkey with no arguments displays the current settings of
+all the bindable function keys.  Bindkey with one argument will display
+the setting of the specified key.  Finally, bindkey with two arguments
+will set the specified key to the specified string.
+The string can also contain
+C-like escape conventions;
+beware of conflicts with the shell's use of \f3\e\fP:
+.PP
+.RS .3i
+.PD 0
+.TP \w'\f3\en\ \ \ 'u
+.B \eb
+backspace
+.TP
+.B \en
+new-line
+.TP
+.B \er
+carriage return
+.TP
+.B \et
+tab
+.TP
+.B \e\e
+backslash
+.TP
+.BI \e n\^
+the 8-bit character whose \s-1ASCII\s0 code is
+the 1-, 2- or 3-digit octal number
+.IR n ,
+which must start with a zero.
+.RE
+.PD
+.SH EXAMPLES
+.IP
+bindkey
+.PP
+displays the current function key settings for all function keys.
+.IP
+bindkey pf1
+.PP
+displays the current function key value for pf1.
+.IP
+bindkey pf1 "ls -l\er"
+.PP
+will bind pf1 to the "ls -l" command, complete with a carriage return.
+.SH SEE ALSO
+gsh(1).

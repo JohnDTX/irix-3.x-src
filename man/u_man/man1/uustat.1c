@@ -1,0 +1,243 @@
+'\"macro stdmacro
+.TH UUSTAT 1C
+.SH NAME
+uustat \- uucp status inquiry and job control
+.SH SYNOPSIS
+.B uustat
+[ options ] 
+.SH DESCRIPTION
+.I Uustat\^
+will display the status of, or cancel, previously specified
+.I uucp\^
+commands, or provide general status on
+.I uucp\^
+connections to other systems.
+The following
+.I options\^
+are recognized:
+.PP
+.PD 0
+.TP "\w'\f3\-M\|\f2mch\f1\^\ \ 'u"
+.BI \-j\| jobn\^
+Report the status of the
+.I uucp\^
+request
+.IR jobn .
+If
+.B all
+is used for
+.IR jobn ,
+the status of all
+.I uucp\^
+requests is reported.
+If
+.I jobn\^
+is omitted, the status of the current user's
+.I uucp\^
+requests is reported.
+.TP
+.BI \-k\| jobn\^
+Kill the
+.I uucp\^
+request whose job number is
+.IR jobn .
+The killed
+.I uucp\^
+request must belong to the person
+issuing the
+.I uustat\^
+command
+unless one is the super-user.
+.TP 
+.BI \-r\| jobn\^
+Rejuvenate
+.I jobn\^.
+That is
+.I jobn\^
+is touched so that 
+its modification time is set to the current time.
+This prevents
+.I uuclean\^
+from deleting the job until the jobs modification
+time reaches the limit imposed by 
+.IR uuclean .
+.TP
+.BI \-c\| hour\^
+Remove the status entries which are older than
+.I hour\^
+hours.
+This administrative option can only be initiated by the user
+.B uucp
+or the super-user.
+.TP
+.BI \-u\| user\^
+Report the status of all
+.I uucp\^
+requests issued by
+.IR user .
+.TP
+.BI \-s\| sys\^
+Report the status of all
+.I uucp\^
+requests which communicate with remote system
+.IR sys .
+.TP
+.BI \-o\| hour\^
+Report the status of all
+.I uucp\^
+requests which are older than
+.I hour\^
+hours.
+.TP
+.BI \-y\| hour\^
+Report the status of all
+.I uucp\^
+requests which are younger than
+.I hour\^
+hours.
+.TP
+.BI \-m\| mch\^
+Report the status of accessibility of machine
+.IR mch .
+If
+.I mch\^
+is specified as
+.BR all ,
+then the status of all machines known to the
+local
+.I uucp\^
+are provided.
+.TP
+.BI \-M\| mch\^
+This is the same as the 
+.I \-m
+option except that two times are printed.
+The time that the last status was obtained and the time that
+the last successful transfer to that
+system occurred.
+.TP
+.B \-O\^
+Report the
+.I uucp\^
+status using the octal status codes listed below.
+If this option is not specified,
+the verbose description is printed with each
+.I uucp\^
+request.
+.TP
+.B \-q\^
+List the number of jobs and other control files queued for each machine
+and the time of the oldest and youngest file queued for
+each machine.
+If a lock file exists for that system, its date of creation is listed.
+.PD
+.PP
+When no options are given,
+.I uustat\^
+outputs the status of all
+.I uucp\^
+requests issued by the current user.
+Note that only one of the options
+.BR \-j ,
+.BR \-m ,
+.BR \-k ,
+.BR \-c ,
+.BR \-r ,
+can be used with the rest of the other options.
+.PP
+For example, the command:
+.IP
+uustat \|\-uhdc \|\-smhtsa \|\-y72
+.PP
+will print the status of all
+.I uucp\^
+requests that were issued by user
+.I hdc\^
+to communicate with system
+.I mhtsa\^
+within the last 72 hours.
+The meanings of the job request status are:
+.IP "" 5
+job-number \|user \|remote-system \|command-time \|status-time \|status
+.PP
+where the
+.I status\^
+may be either an octal number or a verbose
+description.
+The octal code corresponds to the following description:
+.PP
+.RS .3i
+.PD 0
+.TP "\w'\s-1OCTAL\s+1\^\ \ \ 'u"
+.SM OCTAL
+.SM STATUS
+.TP
+000001
+the copy failed, but the reason cannot be determined
+.TP
+000002
+permission to access local file is denied
+.TP
+000004
+permission to access remote file is denied
+.TP
+000010
+bad
+.I uucp\^
+command is generated
+.TP
+000020
+remote system cannot create temporary file
+.TP
+000040
+cannot copy to remote directory
+.TP
+000100
+cannot copy to local directory
+.TP
+000200
+local system cannot create temporary file
+.TP
+000400
+cannot execute
+.I uucp\^
+.TP 
+001000
+copy (partially) succeeded
+.TP
+002000
+copy finished, job deleted
+.TP
+004000
+job is queued
+.TP
+010000
+job killed (incomplete)
+.TP
+020000
+job killed (complete)
+.PD
+.RE
+.PP
+The meanings of the machine accessibility status are:
+.IP "" 5
+system-name \|time \|status
+.PP
+where \f2time\f1 is the latest status time and
+.I status\^
+is a self-explanatory description of the machine status.
+.SH FILES
+.PD 0
+.TP "\w'/usr/lib/uucp/R_stat\ \ \ \ 'u"
+/usr/spool/uucp
+spool directory
+.TP
+/usr/lib/uucp/L_stat
+system status file
+.TP
+/usr/lib/uucp/R_stat
+request status file
+.PD
+.SH SEE ALSO
+uucp(1C).
+.\"	@(#)uustat.1c	5.1 of 11/14/83

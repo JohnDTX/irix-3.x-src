@@ -1,0 +1,39 @@
+.TH circf  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I circf
+- draw a filled circle
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "circf(x, y, radius) "
+.B "Coord x, y, radius;"
+.IP 
+.IP 
+.B "circfi(x, y, radius) "
+.B "Icoord x, y, radius;"
+.IP 
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine circf(x, y, radius)"
+.B "real x, y, radius"
+.IP 
+.B "subroutine circfi(x, y, radius)"
+.B "integer x, y, radius"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure circf(x, y, radius: Coord);"
+.IP 
+.B "procedure circfi(x, y, radius: Icoord);"
+.sp
+.SH DESCRIPTION
+.I Circf
+draws a filled circle, using the current color, writemask, and texture. 
+The circle has center at \f3(x,y)\f1 and radius \f3radius\f1, both 
+specified in world coordinates.  Since a circle is a two-dimensional
+shape, these commands have only 2D forms.
+The circle is drawn in the \f3x-y\f1 plane, with \f3z\f1=0. 
+.SH "SEE ALSO"
+.I arc, arcf, circ, curve

@@ -1,0 +1,185 @@
+'\"macro stdmacro
+.TH PACK 1
+.SH NAME
+pack, pcat, unpack \- compress and expand files
+.SH SYNOPSIS
+.B pack
+[
+.B \-
+]
+name .\|.\|.
+.PP
+.B pcat
+name .\|.\|.
+.PP
+.B unpack
+name .\|.\|.
+.SH DESCRIPTION
+.I Pack\^
+attempts to store the specified files in a compressed form.
+Wherever possible (and useful), each input file
+.I name\^
+is replaced by a packed file
+.IB name .z
+with the same access modes, access and modified dates, and owner as those of
+.IR name .
+If
+.I pack\^
+is successful,
+.I name\^
+will be removed.
+Packed files
+can be restored to their original form using
+.I unpack\^
+or
+.IR pcat .
+.PP
+.I Pack\^
+uses Huffman (minimum redundancy) codes on a byte-by-byte
+basis.
+If the
+.B \-
+argument is used,
+an internal flag is set that causes the number of times each
+byte is used, its relative frequency, and the code for the byte
+to be printed on the standard output.
+Additional occurrences of
+.B \-
+in place of
+.I name\^
+will cause the internal flag to be set and reset.
+.PP
+The amount of compression obtained depends on the size of the
+input file and the character frequency distribution.
+Because a decoding
+tree forms the first part of each
+.B .z
+file, it is usually not worthwhile
+to pack files smaller than three blocks, unless the character frequency
+distribution is very skewed, which may occur with printer plots or pictures.
+.PP
+Typically, text files are reduced to 60-75% of their original size.
+Load modules, which use a larger character set and have a more
+uniform distribution of characters, show little compression, the
+packed versions being about 90% of the original size.
+.PP
+.I Pack\^
+returns a value that is the number of files that it failed to
+compress.
+.PP
+No packing will occur if:
+.PP
+.RS .3i
+the file appears to be already packed;
+.br
+the file name has more than 12 characters;
+.br
+the file has links;
+.br
+the file is a directory;
+.br
+the file cannot be opened;
+.br
+no disk storage blocks will be saved by packing;
+.br
+a file called
+.IB name .z
+already exists;
+.br
+the
+.B .z
+file cannot be created;
+.br
+an I/O error occurred during processing.
+.RE
+.PP
+The last segment of the file name must contain no more than 12
+characters to allow space for the appended
+.B .z
+extension.
+Directories cannot be compressed.
+.PP
+.I Pcat\^
+does for packed files what
+.IR cat\^ (1)
+does for ordinary files.
+The specified files are unpacked and written to the standard output.
+Thus to view a packed file named
+.IB name .z
+use:
+.PP
+.RS .3i
+pcat name.z
+.RE
+or just:
+.RS .3i
+pcat name
+.RE
+.PP
+To make an unpacked copy, say
+.IR nnn ,
+of a packed file named
+.IB name .z
+(without destroying
+\f2name\^\fP\f3.z\fP)
+use the command:
+.PP
+.RS .3i
+pcat name > nnn
+.RE
+.PP
+.I Pcat\^
+returns the number of files it was unable
+to unpack.
+Failure may occur if:
+.PP
+.RS .3i
+the file name (exclusive of the
+.BR .z )
+has more than 12 characters;
+.br
+the file cannot be opened;
+.br
+the file does not appear to be the output of
+.IR pack .
+.RE
+.PP
+.I Unpack\^
+expands files created by
+.IR pack .
+For each file
+.I name\^
+specified in the command, a search is made for a file called
+.IB name .z
+(or just
+.IR name ,
+if
+.I name\^
+ends in
+.BR .z ).
+If this file appears to be a packed file, it is replaced by
+its expanded version.
+The new file has the
+.B .z
+suffix stripped from its name, and has the same access modes,
+access and modification dates, and owner as those of the packed file.
+.PP
+.I Unpack\^
+returns a value that is the number of files it was unable
+to unpack.
+Failure may occur for the same reasons that it may in
+.IR pcat ,
+as well as for the following:
+.PP
+.RS .3i
+a file with the "unpacked" name already exists;
+.br
+if the unpacked file cannot be created.
+.RE
+.SH EXAMPLE
+.IP
+pack file1
+.PP
+will pack file "file1" into "file1.z" and removes "file1"
+if packing is successful.
+.\"	@(#)pack.1	5.1 of 11/9/83

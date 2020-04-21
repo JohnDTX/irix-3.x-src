@@ -1,0 +1,75 @@
+'\"macro stdmacro
+.TH FLOOR 3M 
+.SH NAME
+floor (_lfloor), ceil (_lceil), fmod (_lfmod), fabs (_lfabs) \- floor, ceiling, remainder, absolute value functions
+.SH SYNOPSIS
+.B #include <math.h>
+.PP
+.B float floor (x)
+.br
+.B float x;
+.PP
+.B long float _lfloor (x)
+.br
+.B long float x;
+.PP
+.B float ceil (x)
+.br
+.B float x;
+.PP
+.B long float _lceil (x)
+.br
+.B long float x;
+.PP
+.B float fmod (x, y)
+.br
+.B float x, y;
+.PP
+.B long float _lfmod (x, y)
+.br
+.B long float x, y;
+.PP
+.B float fabs (x)
+.br
+.B float x;
+.PP
+.B long float _lfabs (x)
+.br
+.B long float x;
+.SH DESCRIPTION
+.I Floor, _lfloor\^
+returns the
+largest integer (as a floating point number in the indicated precision)
+not greater than
+.IR x .
+.PP
+.I Ceil, _lceil\^
+returns the
+smallest integer
+not less than
+.IR x .
+.PP
+.I Fmod, _lfmod\^
+returns the number
+.I f\^
+with the same sign as
+.IR x ,
+such that
+.I "x = iy + f\^"
+for some integer
+.IR i ,
+and
+.RI | \|f\^ "| < |" \|y\| |\|.
+.I Fmod\^
+will thus return
+.I x\^
+if
+.I y\^
+is zero.
+.PP
+.I Fabs, _lfabs\^
+returns
+.RI | \|x\| |\|.
+.SH SEE ALSO
+abs(3C).
+.\"	@(#)floor.3m	5.1 of 10/25/83

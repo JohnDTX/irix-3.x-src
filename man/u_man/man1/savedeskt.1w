@@ -1,0 +1,16 @@
+'\"macro stdmacro
+.TH SAVEDESKTOP 1W
+.SH NAME
+savedesktop \- saves colors in \f2~/.desktop\fP
+.SH SYNOPSIS
+.B savedesktop
+.SH DESCRIPTION
+\f2savedesktop\f1 saves colors in indexes 0 and 7-15 for use as text, 
+border, and background colors.
+.I makemap
+uses these color assignments.
+.SH SEE ALSO
+showmap(1W),
+makemap(1W)
+.SH FILES
+~/.desktop

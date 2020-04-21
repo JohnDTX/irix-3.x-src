@@ -1,0 +1,26 @@
+'\"macro stdmacro
+.TH RANDMAP 1W
+.SH NAME
+randmap \- randomize a section of the color map
+.SH SYNOPSIS
+.B randmap 
+seed p1 p2
+.SH DESCRIPTION
+If there are less than eight bitplanes and no argument is given,
+.I randmap 
+ramdomizes colors 16 to 31.
+If there are 
+more than eight bitplanes and no argument is given, it 
+randomizes colors 128 to 255.  
+.I randmap
+can also be given a seed and a range of colors to randomize.  
+.I seed 
+is an integer used to generate random colors.
+.I p1 
+and 
+.I p2 
+specify
+a range of color indexes to randomize.
+.SH SEE ALSO
+makemap(1W),
+showmap(1W)

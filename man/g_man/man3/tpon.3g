@@ -1,0 +1,31 @@
+.TH tpon 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B tpon 
+\- turns on the textport 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "tpon()"
+.sp
+.B ""
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine tpon"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure tpon;"
+.SH DESCRIPTION
+.B tpon
+turns on the textport.
+.SH SEE ALSO
+tpoff, textport 
+.sp
+\f2Programming Guide\fP, Chapter 14, Textports 
+.SH NOTE
+This routine is available only in immediate mode.

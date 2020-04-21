@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH ISTAT 1W
+.SH NAME
+istat \- provide information about an image file
+.SH SYNOPSIS
+.B istat 
+imagefile
+.SH DESCRIPTION
+.I
+istat
+gives information about an 
+image file, 
+including 
+the number of bytes per pixel in the image, the 
+number of dimensions, the 
+.I x,
+.I y,
+and 
+.I z 
+dimensions, the 
+.I min
+and 
+.I
+max 
+pixel values, and
+the 
+.I
+type 
+of the image.
+See \f2/usr/people/gifts/mextools/images\f1 for example image files.
+.SH SEE ALSO
+iset(1W),
+ipaste(1W)

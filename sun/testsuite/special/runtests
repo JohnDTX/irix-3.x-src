@@ -1,0 +1,39 @@
+#!/bin/sh
+#set -e
+umask 0
+
+echo
+echo "check for proper open/unlink operation"
+open-unlk
+
+echo
+echo "check for proper open/chmod 0 operation"
+open-chmod
+
+echo
+echo "check for lost reply on non-idempotent requests"
+dupreq 100 testfile
+
+echo
+echo "test exclusive create, should get: exctest.file2: File exists"
+excltest
+
+echo
+echo "test statfs for file count, should get positive, different numbers"
+echo " (known bug in some implementations)"
+statfs
+
+echo
+echo "test negative seek, you should get: read: Invalid argument"
+negseek testfile
+
+echo
+echo "test rename"
+rename 100
+
+echo
+echo "test sparse file write/read"
+holey
+
+echo
+echo "Special tests complete"

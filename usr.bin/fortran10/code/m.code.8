@@ -1,0 +1,802 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.8.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               04-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure stmtlist(endop: integer); forward;
+
+procedure forstmt;
+  var varcattr,stepcattr,limitcattr,initcattr: cattr;
+      n,lsize,toplabel,bottomlabel,exitlabel,lop: integer;
+      OverFlag,MustTest: Boolean;
+begin
+n := nextbyte;
+if n = 1 then lsize := BYTE
+else if n = 2 then lsize := WORD
+else lsize := LONG;
+expression(nextbyte); varcattr := gcattr;
+expression(nextbyte); initcattr := gcattr;
+expression(nextbyte);
+if gcattr.ckind = CNST
+then limitcattr := gcattr
+else begin
+     gettemp(limitcattr,n); store(gcattr,limitcattr,lsize);
+     end;
+expression(nextbyte);
+MustTest := TRUE;
+if gcattr.ckind = CNST
+then begin
+     stepcattr := gcattr;
+     if (initcattr.ckind = CNST) and (limitcattr.ckind = CNST)
+     then if stepcattr.cvalu.lvalu > 0
+          then MustTest := limitcattr.cvalu.lvalu < initcattr.cvalu.lvalu
+          else if stepcattr.cvalu.lvalu < 0
+               then MustTest := limitcattr.cvalu.lvalu > initcattr.cvalu.lvalu;
+     end
+else begin
+     gettemp(stepcattr,n); store(gcattr,stepcattr,lsize);
+     end;
+store(initcattr,varcattr,lsize);
+toplabel := newlabel; bottomlabel := newlabel; exitlabel := newlabel;
+if MustTest then genjump(_BRA,bottomlabel);
+defilabel(toplabel);
+stmtlist(203 {FOREND});
+if (stepcattr.ckind = CNST) and
+  ((stepcattr.cvalu.ivalu[1] = 1) or (stepcattr.cvalu.ivalu[1] = -1))
+then begin
+     if stepcattr.cvalu.ivalu[1] > 0
+     then lop := 20992 { ADDQ }
+     else lop := 21248; { SUBQ }
+     if lsize = WORD
+     then lop := lop + 64
+     else if lsize = LONG
+          then lop := lop + 128;
+     geneffaddr(lop,varcattr,lsize,FALSE,0);
+     if lsize < LONG
+     then begin
+          OverFlag := TRUE;
+          if limitcattr.ckind = CNST
+          then if stepcattr.cvalu.ivalu[1] > 0
+               then if lsize = BYTE
+                    then OverFlag := limitcattr.cvalu.ivalu[1] >= 127
+                    else OverFlag := limitcattr.cvalu.ivalu[1] >= 32767
+               else if lsize = BYTE
+                    then OverFlag := limitcattr.cvalu.ivalu[1] <= -128
+                    else OverFlag := limitcattr.cvalu.ivalu[1] <= -32768;
+          if OverFlag then genjump(_BVS,exitlabel);
+          end;
+     defilabel(bottomlabel);
+     if gencompare(varcattr,limitcattr,lsize)
+     then if stepcattr.cvalu.ivalu[1] > 0
+          then lop := _BGE
+          else lop := _BLE
+     else if stepcattr.cvalu.ivalu[1] > 0
+          then lop := _BLE
+          else lop := _BGE;
+     genjump(lop,toplabel);
+     defilabel(exitlabel);
+     if limitcattr.ckind <> CNST then freetemp(limitcattr,n);
+     end
+else error(2013);
+end; {forstmt}
+
+procedure casestmt;
+  var llab,elselabel,i,n,lsize: integer; lval: longint; NotNeg: Boolean;
+      d: pregrec; caselist,lastcase,thiscase: pcaserec;
+  
+  procedure gencase(fcaselist: pcaserec; basebias: longint; NotNeg: Boolean);
+    var lcase,biggap,lastlastcase,lastcase,runstart,bigrun,bigrunend: pcaserec;
+        entries,beforegap,gapsize,i,hi,lo: longint; llab,llab2: integer;
+        beforerun,afterrun,runsize,bigrunsize: longint;
+        Dense,HoleFlag: Boolean;
+  begin
+  entries := 0; beforegap := 0; gapsize := 0; lcase := fcaselist;
+  lastcase := nil; runsize := 0; bigrunsize := 0;
+  while lcase <> nil do begin
+        if entries > 0
+        then begin
+             if lcase^.cval - lastcase^.cval > gapsize
+             then begin
+                  beforegap := entries; biggap := lastcase;
+                  gapsize := lcase^.cval - lastcase^.cval;
+                  end;
+             if lcase^.cval < lo then lo := lcase^.cval;
+             if lcase^.cval > hi then hi := lcase^.cval;
+             if (lastcase^.clab = lcase^.clab) and
+                (lastcase^.cval + 1 = lcase^.cval)
+             then begin
+                  if runsize = 0
+                  then begin runstart := lastlastcase; runsize := 1; end;
+                  runsize := runsize + 1;
+                  if runsize > bigrunsize
+                  then begin
+                       bigrunsize := runsize; bigrun := runstart;
+                       bigrunend := lcase;
+                       end;
+                  end
+             else runsize := 0;
+             end
+        else begin lo := lcase^.cval; hi := lo; end;
+        lastlastcase := lastcase; lastcase := lcase;
+        entries := entries + 1; lcase := lcase^.next;
+        end;
+  beforerun := 0; afterrun := 0;
+  if bigrunsize <> 0
+  then begin
+       if bigrun <> nil
+       then beforerun := bigrun^.next^.cval - bigrun^.cval - 1;
+       if bigrunend^.next <> nil
+       then afterrun := bigrunend^.next^.cval - bigrunend^.cval - 1;
+       end;
+  Dense := entries*2 >= hi - lo + 1;
+  HoleFlag := entries < (hi - lo + 1);
+  if (entries <= 4) or ((entries <= 6) and not Dense)
+  then if entries = 0
+       then genjump(_BRA,elselabel)
+       else begin
+            lcase := fcaselist;
+            while lcase <> nil do begin
+                  if lcase^.cval = basebias
+                  then begin
+                       if ccodereg <> d^.regno
+                       then testd(d,lsize);
+                       end
+                  else addidreg(d,basebias-lcase^.cval,lsize);
+                  if lcase^.next = nil
+                  then genjump(_BNE,elselabel);
+                  genjump(_BEQ,lcase^.clab);
+                  basebias := lcase^.cval; lcase := lcase^.next;
+                  end;
+            end
+  else if Dense
+       then begin
+            if lo = basebias
+            then begin
+                 if ccodereg <> d^.regno then testd(d,lsize);
+                 end
+            else addidreg(d,basebias - lo,lsize);
+            if not NotNeg then genjump(_BMI,elselabel);
+            if lsize = LONG
+            then begin { CMPI.L } genr(3200,d); gen2(hi - lo); end
+            else begin { CMPI.W } genr(3136,d); gen(hi - lo); end;
+            genjump(_BGT,elselabel);
+            cjmpblk(fcaselist,hi-lo+1,d^.regno,elselabel,HoleFlag);
+            {>>>} ctabblk(gcaselist,hi-lo+1); {<<<}
+            end
+       else if beforerun + afterrun + bigrunsize - 2 > gapsize
+            then begin
+                 if bigrun = nil
+                 then begin llab := elselabel; lcase := fcaselist; end
+                 else begin llab := newlabel; lcase := bigrun^.next; end;
+                 if lcase^.cval = basebias
+                 then begin
+                      if ccodereg <> d^.regno then testd(d,lsize);
+                      end
+                 else addidreg(d,basebias - lcase^.cval,lsize);
+                 genjump(_BLT,llab);
+                 addidreg(d,-bigrunsize,lsize);
+                 genjump(_BLT,bigrunend^.clab);
+                 ccodereg := d^.regno;
+                 gencase(bigrunend^.next,bigrunend^.cval + 1,FALSE);
+                 if bigrun <> nil
+                 then begin
+                      defilabel(llab); bigrun^.next := nil;
+                      gencase(fcaselist,lcase^.cval,FALSE);
+                      end;
+                 end
+            else begin
+                 llab := newlabel;
+                 if biggap^.next^.cval = basebias
+                 then begin
+                      if ccodereg <> d^.regno then testd(d,lsize);
+                      end
+                 else addidreg(d,basebias - biggap^.next^.cval,lsize);
+                 genjump(_BLT,llab);
+                 ccodereg := d^.regno; basebias := biggap^.next^.cval;
+                 gencase(biggap^.next,basebias,FALSE);
+                 defilabel(llab); biggap^.next := nil;
+                 gencase(fcaselist,basebias,FALSE);
+                 end;
+  end; {gencase}
+  
+begin {casestmt}
+i := nextbyte; if i = 2 then lsize := WORD else lsize := LONG;
+i := nextbyte; NotNeg := i = 62; { EXTUFLD }
+expression(i); d := loadd(gcattr,lsize); isol(d,lsize,TRUE);
+i := nextbyte; {C9}
+elselabel := nextword; n := nextword;
+caselist := nil;
+for i := 1 to n do begin
+    llab := nextword; lval := nextlong;
+    new(thiscase);
+    with thiscase^ do
+         begin next := nil; cval := lval; clab := llab; end;
+    if caselist = nil
+    then caselist := thiscase
+    else lastcase^.next := thiscase;
+    lastcase := thiscase;
+    end;
+gencase(caselist,0,NotNeg);
+freereg(d);
+end; {casestmt}
+
+procedure defbases;
+  var i,k: integer; a,a2: pregrec; lcattr: cattr; lv: regvalrec;
+begin
+k := nextbyte; a := getbase(level);
+for i := level - 1 downto level - k do begin
+    lv.rvsize := LONG; lv.rvkind := ADDRRV; lv.rvlev := i; lv.rvoffset := 0;
+    if a^.regno <= D7
+    then begin
+         a2 := getreg(A0,AMAX);
+         { MOVE.L D,A } genrr(8256,a2,a);
+         a := a2;
+         end;
+    k := nextbyte;
+    if k <= 31
+    then begin { Save in D reg }
+         k := D7 - k;
+         { MOVE.L 8(A),D } gennr(8232,k,a); gen(8);
+         freereg(a); a := reg[k].r; reg[k].v := lv;
+         bases[i].bwhere := BREG; bases[i].bregno := k;
+         end
+    else if k <= 63
+         then begin { Save in A reg }
+              k := (AMAX + 32) - k;
+              { MOVE.L 8(A),Ak } gennr(8296,k,a); gen(8);
+              freereg(a); a := reg[k].r; reg[k].v := lv;
+              bases[i].bwhere := BREG; bases[i].bregno := k;
+              end
+         else begin
+              a2 := getreg(A0,AMAX);
+              { MOVE.L 8(A),A2 } genrr(8296,a2,a); gen(8);
+              freereg(a); a := a2;
+              if (k = 128) and (i < level - 1)
+              then begin { Save in TEMP }
+                   gettemp(lcattr,4);
+                   { MOVE.L A,xxx(A6) } genr(11592,a); gen(lcattr.voffset);
+                   bases[i].bwhere := BMEM; bases[i].boffset := lcattr.voffset;
+                   end;
+              end;
+    end;
+end; {defbases}
+
+procedure stmtlist{endop: integer};
+  var i,userlabno,intlabno,llev,lablinkno,lsize,loffset,parambytes: integer;
+      a,d,base: pregrec; lpulab: puserlabel;
+      ltlab,eqlab,gtlab,hi,lo,fctresiz,lop,lregno,j: integer;
+      lentry: pentryrec; lfmtrec: pfmtrec; lcattr: cattr;
+      AddrFlag,OpFlag,DoIt: Boolean; longop: longint; baseno: integer;
+      lstloc: pstlocrec; lid: linkid; lstr,mstr: idstring;
+  
+  procedure puttrans(fvalue: integer);
+    var ltrans: ptrans;
+  begin
+  if translist = nil
+  then begin
+       new(translist);
+       translist^.next := nil;
+       translist^.freeword := 0;
+       lasttrans := translist;
+       end
+  else if lasttrans^.freeword >= 1000
+       then begin
+            new(ltrans);
+            ltrans^.next := nil;
+            ltrans^.freeword := 0;
+            lasttrans^.next := ltrans;
+            lasttrans := ltrans;
+            end;
+  lasttrans^.b[lasttrans^.freeword] := fvalue;
+  lasttrans^.freeword := lasttrans^.freeword + 1;
+  end; {puttrans}
+  
+  procedure copyblk;
+    var i,lblock: integer; lbyte,lsize: longint; ltransptr: ptransblk;
+  begin
+  lbyte := inbyte; lblock := inblock;
+  i := nextbyte; lsize := next3bytes;
+  if i = $A0 then DebugInfo := TRUE;
+  if lsize <= 100
+  then begin
+    puttrans(i*256); puttrans(lsize);
+    for i := 3 to (lsize + 1) div 2 do puttrans(nextword);
+    end
+  else begin
+    if odd(lsize) then lsize := lsize + 1;
+    new(ltransptr);
+    with ltransptr^ do begin
+         next := nil; tblock := lblock; tbyte := lbyte; tsize := lsize;
+         end;
+    if tblocks = nil
+    then tblocks := ltransptr
+    else lasttblock^.next := ltransptr;
+    lasttblock := ltransptr;
+    lbyte := lbyte + lsize;
+    lblock := lblock + lbyte div 512; lbyte := lbyte mod 512;
+    seekicode(lblock,lbyte);
+    end;
+  end; {copyblk}
+  
+begin {stmtlist}
+op := nextbyte;
+while op <> endop do begin
+      OpFlag := TRUE;
+      case op of
+             6: { DEF/UNDEF REG }
+                begin
+                i := nextbyte; AddrFlag := (i and 32) <> 0;
+                lregno := i and 7;
+                if AddrFlag
+                then lregno := AMAX - lregno
+                else lregno := D7 - lregno;
+                if i > 127
+                then begin { Define }
+                     a := getpreg(lregno,lregno);
+                     if a = nil
+                     then begin prreg(lregno); error(9261); end;
+                     end
+                else begin { Undefine }
+                     freepreg(reg[lregno].r);
+                     end;
+                end;
+            32,
+            33,
+            34,
+            35: assign1248;
+            36: begin
+                longop := nextword;
+                if longop < 0
+                then longop := (longop + 32768)*256 + nextbyte;
+                assignlong(longop);
+                end;
+            37: assignset;
+            38: assignpacked;
+            39: assignstring;
+            40: assignalfa;
+            41: opto;
+            44: withstmt;
+            45: begin
+                with withcattr[withlevel] do
+                     if wkind = WINREG
+                     then freepreg(cat.adreg)
+                     else if wkind = WINMEM
+                          then freetemp(cat,4);
+                forgetwith(level + withlevel);
+                withlevel := withlevel - 1;
+                i := nextbyte;
+                end;
+           156: { FMTDEF }
+                begin
+                new(lfmtrec);
+                with lfmtrec^ do begin
+                     next := fmtlist; fmtlist := lfmtrec;
+                     fmtno := nextword; fmt.cstkind := PAOCCNST;
+                     fmtilabno := newlabel; fmt.len := nextword;
+                     fmt.strvalu := getstrvalu(fmt.len);
+                     end;
+                end;
+           178: { Load Function Result }
+                begin
+                lsize := nextbyte; expression(nextbyte);
+                lsize := lsize and 15; { Mask off floating point flag }
+                if lsize <= 1
+                then lsize := BYTE
+                else if lsize = 2
+                     then lsize := WORD
+                     else if lsize = 4
+                          then lsize := LONG
+                          else lsize := QUAD;
+                if lsize = QUAD
+                then if LastPushQ
+                     then ungen(4)
+                     else if gcattr.ckind = CNST
+                          then begin
+                               { MOVEM.L $+x,D0/D1 }
+                               gen(19706); gen(3); genlitcref(gcattr,QUAD);
+                               end
+                          else { MOVEM.L ea,D0/D1 }
+                               geneffaddr(19648,gcattr,WORD,TRUE,3)
+                else begin
+                     makevalid(gcattr);
+                     d := loadd(gcattr,lsize);
+                     {!!!} if d^.regno <> D0 then { MOVE.L D,D0 } genr(8192,d);
+                     freereg(d);
+                     (*****
+                     if (gcattr.ckind = COND) or
+                        (gcattr.ckind = BOOL) or
+                        (gcattr.ckind = BITZ)
+                     then d := loadd(gcattr,lsize);
+                     if lsize = 1
+                     then begin
+                          lop := 4096; { MOVE.B ea,D0 }
+                          lsize := BYTE;
+                          end
+                     else if lsize = 2
+                          then begin
+                               lop := 12288; { MOVE.W ea,D0 }
+                               lsize := WORD;
+                               end
+                          else begin
+                               lop := 8192; { MOVE.L ea,D0 }
+                               lsize := LONG;
+                               end;
+                     geneffaddr(lop,gcattr,lsize,FALSE,0);
+                     *****)
+                     end;
+                end;
+           190: gencall;
+           192: defilabel(nextword);
+           193,
+           194,
+           195: jumpilabel;
+           196, { LULAB }
+           197: { GULAB }
+                begin
+                userlabno := nextword; intlabno := nextword;
+                defilabel(intlabno); new(lpulab);
+                with lpulab^ do begin
+                     userno := userlabno; intno := intlabno; linkerno := -1;
+                     next := ulabellist; ulabellist := lpulab;
+                     end;
+                if op = 197 {GULAB}
+                then begin
+                     lablinkno := nextword; lpulab^.linkerno := lablinkno;
+                     if level = 1 then baseno := A5 else baseno := A6;
+                     { MOVE.L SPcattr(A?),SP } gen(11872 + baseno);
+                                               gen(SPcattr.voffset);
+                     lcattr := gotocattr; pushvalue(lcattr,LONG);
+                     genjsra('%_GOTO  ');
+                     end;
+                end;
+           198: { LGOTO }
+                begin userlabno := nextword; genjump(_BRA,nextword); end;
+           199: { GGOTO }
+                begin
+                llev := nextbyte; userlabno := nextword;
+                if llev > 1
+                then begin
+                     base := getbase(llev); freereg(base);
+                     { MOVE.L A,A6 } genr(11336,base);
+                     end;
+                { JMP x.L } gen(20217); gen(0); gen(0);
+                makeid(lid,userlabno,'***Label');
+                globref(lid,nextblk,pc - blkpc - 4);
+                end;
+           200: casestmt;
+           202: forstmt;
+           205: { JMPEXPR }
+                begin
+                expression(nextbyte); pushvalue(gcattr,LONG);
+                { RTS } gen(20085);
+                end;
+           206: { ALTRET }
+                begin
+                expression(nextbyte); a := loadaddress(gcattr); lock(a);
+                d := getreg(D0,D7); intlabno := newlabel;
+                { MOVE.W 2(A),D } genrr(12328,d,a); gen(2);
+                                genjump(_BLE,intlabno);
+                { CMP.W (A),D } genrr(-20400,d,a);
+                                genjump(_BGT,intlabno);
+                { LSL.W #2,D } genr(-6840,d);
+                { MOVE.L 0(A,D.W),4(A6) } genr(11632,a); gen(d^.regno*4096);
+                                          gen(4);
+                defilabel(intlabno);
+                unlock(a); freereg(d); freereg(a);
+                end;
+           212: { AIFJMP }
+                begin
+                i := nextbyte; ltlab := nextword;
+                eqlab := nextword; gtlab := nextword;
+                expression(nextbyte);
+                if i <= 2
+                then begin
+                     if i = 0
+                     then lsize := BYTE
+                     else if i = 1
+                          then lsize := WORD
+                          else lsize := LONG;
+                     d := loadd(gcattr,lsize); freereg(d);
+                     if ccodereg <> d^.regno
+                     then { TST.B/W/L D } gen(18880 + lsize*64 + d^.regno);
+                     end
+                else begin { 3 = REAL*4, 4=REAL*8 }
+                     if i = 3 then lsize := LONG else lsize := QUAD;
+                     pushvalue(gcattr,lsize);
+                     { CLR.L -(SP) } gen(17063);
+                     if lsize = QUAD
+                     then begin
+                          { CLR.L -(SP) } gen(17063);
+                          genjsra('%D_CMP  ');
+                          end
+                     else genjsra('%F_CMP  ');
+                     end;
+                if ltlab >= 0
+                then begin
+                     lop := _BLT;
+                     if eqlab = ltlab
+                     then begin lop := _BLE; eqlab := -1; end
+                     else if gtlab = ltlab
+                          then begin lop := _BNE; gtlab := -1; end;
+                     genjump(lop,ltlab);
+                     end;
+                if eqlab >= 0
+                then begin
+                     lop := _BEQ;
+                     if gtlab = eqlab
+                     then begin lop := _BGE; gtlab := -1; end;
+                     genjump(lop,eqlab);
+                     end;
+                if gtlab >= 0
+                then genjump(_BGT,gtlab);
+                end;
+           220: assignfchar;
+           226: { "C" unary ops. Must be IGNORE }
+                begin
+                if nextbyte <> 64 then error(2014);
+                lsize := nextword;
+                expression(nextbyte);
+                ignorexp(lsize);
+                end;
+           230: { CRTN }
+                begin
+                lop := nextbyte;
+                { !!! Use an array indexed by (INT1,INT2,..,FLT8) !!! }
+                if lop = 0 {INT1}
+                then lsize := BYTE
+                else if lop = 1 {INT2}
+                     then lsize := WORD
+                     else if lop = 4 {FLT8}
+                          then lsize := QUAD
+                          else lsize := LONG;
+                expression(nextbyte);
+                if lsize <> QUAD
+                then begin
+                     d := loadd(gcattr,lsize);
+                     {!!!} if d^.regno <> D0 then { MOVE.L D,D0 } genr(8192,d);
+                     freereg(d);
+                     end
+                else begin
+                     if gcattr.ckind = STCK
+                     then begin
+                          { MOVE.L (SP)+,D0 } gen(8223);
+                          { MOVE.L (SP)+,D1 } gen(8735);
+                          end
+                     else if gcattr.ckind = CNST
+                          then begin
+                               if gcattr.cvalu.lvalu = 0
+                               then { CLR.L D0 } gen(17024)
+                               else begin
+                                    { MOVE.L #x,D0 } gen(8252);
+                                                     gen2(gcattr.cvalu.lvalu);
+                                    end;
+                               if gcattr.cvalu.lvalu2 = 0
+                               then { CLR.L D1 } gen(17025)
+                               else begin
+                                    { MOVE.L #x,D1 } gen(8764);
+                                                     gen2(gcattr.cvalu.lvalu2);
+                                    end;
+                               end
+                          else begin
+                               a := loadaddress(gcattr);
+                               { MOVE.L (A)+,D0 } genr(8216,a);
+                               { MOVE.L (A)+,D1 } genr(8728,a);
+                               freereg(a);
+                               end;
+                     end;
+                genjump(_BRA,crtnlab);
+                end;
+           232: { ASM }
+                begin
+                j := nextbyte; if odd(j) then error(1912);
+                for i := 1 to j div 2 do gen(nextword);
+                end;
+           238: { MARKMISC }
+                begin
+                DebugInfo := TRUE; j := nextbyte; nextlinkid(lid);
+                lentry := entrylist;
+                while lentry <> nil do
+                      with lentry^ do
+                           if idEQid(lid,entname)
+                           then begin
+                                if j = 0
+                                then begin
+                                     dbgenblk := nextblk;
+                                     dbgenoff := pc - blkpc;
+                                     end
+                                else begin
+                                     dbgexblk := nextblk;
+                                     dbgexoff := pc - blkpc;
+                                     end;
+                                lentry := nil;
+                                end
+                           else lentry := next;
+                end;
+           239: { MARKSTMT }
+                begin
+                DebugInfo := TRUE; j := numstmts mod 100;
+                if j = 0
+                then begin
+                     new(lstloc); lstloc^.next := nil;
+                     if numstmts = 0
+                     then stloclist := lstloc
+                     else thisstloc^.next := lstloc;
+                     thisstloc := lstloc;
+                     end;
+                thisstloc^.loc[j].blk := nextblk;
+                thisstloc^.loc[j].off := pc - blkpc;
+                numstmts := numstmts + 1;
+                { added for dbx by jim t at SGI }
+                thisstloc^.loc[j].linenumber := nextword;
+				nexts(lstr);
+				if length(lstr) > 0 then
+				begin
+					new(thisstloc^.loc[j].filename);
+					thisstloc^.loc[j].filename^ := lstr;
+				end else
+				begin
+					thisstloc^.loc[j].filename := nil;
+				end;
+
+                end;
+           241: extref;
+           245: { ENTRY }
+                begin
+                nextlinkid(lid); getusrstr(lstr,lid);
+                i := newlabel; defilabel(i); { Clears reg info }
+                if not BeginMess
+                then begin
+                     username := lstr; entryid := lid;
+                     entrylab := i;
+                     end;
+                if not (BeginMess or QuietFlag)
+                then begin
+                     write(lstr);
+                     if lid.linkno >= 0
+                     then begin
+                          getlnkstr(mstr,lid);
+                          write(' (',mstr,')');
+                          end;
+                     end;
+                BeginMess := TRUE;
+                new(lentry);
+                with lentry^ do begin
+                     entname := lid; next := nil;
+                     entryblk := nextblk; entryoff := pc - blkpc;
+                     dbgenblk := -1; dbgexblk := -1;
+                     end;
+                if entrylist = nil
+                then entrylist := lentry
+                else begin
+                     lentry^.next := entrylist^.next;
+                     entrylist^.next := lentry;
+                     end;
+                if level = 1
+                then begin
+                     if targetos = ADVENTURE
+                     then begin
+                          { LEA retlab,A0 } gen(16890); gen(6);
+                          makeid(lid,-1,'%P830701');
+                          globref(lid,nextblk,pc - blkpc + 2);
+                          { JMP %P830701 } gen(20218); gen(0);
+                          { retlab: }
+                          end
+                     else genjsra('%P830701');
+                     { LINK #-lc,A5 } gen(20053); lcrefblk;
+		        { added by jim terhorst at sgi to 
+                          make fortran callable from C }
+		        { make an undefined variable 
+			  '_$a5_save' and save a5 in it }
+                         makeid(lid,-1,'_$a5_save');
+                         globref(lid,nextblk,pc - blkpc + 2);
+                         gen($23cd); gen(0); gen(0); { mov.l a5, $_a5_save }
+                     end
+                else begin
+                     { LINK #-lc,A6 } gen(20054); lcrefblk;
+                     end;
+                A0SetFlag := FALSE;
+                op := nextbyte;
+                while op = 248 {STKALOC} do begin
+                      hi := nextbyte; lo := nextword;
+                      if (hi = 0) and (lo >= 0)
+                      then { SUBA.W #xx,SP } gen(-24836)
+                      else begin
+                           { SUBA.L #xx,SP } gen(-24580); gen(hi);
+                           end;
+                      gen(lo); expression(nextbyte);
+                      { MOVE.L SP,xx(A?) } gen(11087+ord(gcattr.vlev > 1)*512);
+                                           gen(gcattr.voffset);
+                      if lo < 0 then hi := hi + 1;
+                      extralc := extralc + hi*65536 + lo;
+                      op := nextbyte;
+                      end;
+                if level > 1
+                then begin a0setblk; rsaveblk; end;
+				if (level = 1) and (ZeroSTACK) then rsaveblk;
+                OpFlag := FALSE;
+                if SKY_FLAG or MAX_FLAG
+                then if (level = 1) or
+                        ((language = C) and
+                         ((lstr = 'main') or (lstr = '_main')))
+                     then if FPHardware
+                          then if SKY_FLAG
+                               then if (lc > 0) and ZeroStack then
+							   begin
+								  genjsra('_bzero  ');
+								  gen($508f);
+                                  genjsra('%_ACP   ')
+							   end else genjsra('%_SKY   ')
+                               else genjsra('%_ACP   ')
+                          else if targetos = CROMIX
+                               then if SKY_FLAG
+                                    then genjsra('%_NO_SKY')
+                                    else genjsra('%_NO_ACP');
+                if GlobalLabels
+                then begin
+                     if level = 1 then baseno := A5 else baseno := A6;
+                     gettemp(SPcattr,4);
+                     { MOVE.L SP,SPcattr(A?) } gen(4431 + baseno*512);
+                                               gen(SPcattr.voffset);
+                     { CLR.L -(SP) } gen(17063); genjsra('%_LSTSG ');
+                     { MOVE.L (SP)+,goto(A?) } gen(4447 + baseno*512);
+                                               gen(gotocattr.voffset);
+                     end;
+		if (lc > 0) and (level > 1) and ZeroStack then  
+		begin
+			{ call bzero to clear stack }
+			genjsra('_bzero  ');
+			gen($508F);
+		end;
+                end;
+           246: { RTN }
+                begin
+                if language = C then defilabel(crtnlab);
+                parambytes := nextword;
+                if level = 1
+                then begin
+                     genjsra('%_TERM  ');
+                     { UNLK A5 } gen(20061);
+                     genjsra('%_END   ');
+                     { RTS } gen(20085);
+                     end
+                else begin
+                     rloadblk;
+                     { UNLK A6 } gen(20062);
+                     if parambytes <= 8
+                     then { RTS } gen(20085)
+                     else if parambytes = 12
+                          then begin
+                               { MOVE.L (SP)+,(SP) } gen(11935);
+                               { RTS } gen(20085)
+                               end
+                          else begin
+                               { MOVE.L (SP)+,A0 } gen(8287);
+                               if parambytes <= 16
+                               then { ADDQ.L #x,SP }
+                                    gen(20623 + (parambytes mod 8)*512)
+                               else begin
+                                    { ADDA.L #x,SP } gen(-8452);
+                                                     gen(parambytes-8);
+                                    end;
+                               { JMP (A0) } gen(20176);
+                               end;
+                     end;
+                end;
+           247: { Data Area Definition }
+                defdata(ftndtree);
+           250: { BASEREGS }
+                defbases;
+           253: { COPYBLK }
+                copyblk;
+      otherwise: error(3000+op);
+      end; {case}
+      if OpFlag then op := nextbyte;
+      end;
+end; {stmtlist}
+

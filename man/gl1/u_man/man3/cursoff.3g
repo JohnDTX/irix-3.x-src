@@ -1,0 +1,35 @@
+.TH cursoff 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I cursoff
+- turn the cursor off
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "cursoff()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine cursof"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure cursoff;"
+.sp
+.SH DESCRIPTION
+.I Cursoff
+prevents the cursor from being displayed.   This command
+should precede any drawing commands
+that write into the currently displayed
+cursor planes.
+.PP
+The cursor, by default, is always displayed.  As it is drawn on the 
+screen, the image that it covers is saved away.  When the cursor moves,
+the saved image is restored.  If the image
+changes while the cursor is displayed, the saved image may no
+longer be valid.  This is a concern in single buffer and RGB modes
+and in double buffer mode when the front buffer is enabled.
+.SH "SEE ALSO"
+.I curson, getcursor, setcursor
+.SH NOTE
+This command can only be used in immediate mode.

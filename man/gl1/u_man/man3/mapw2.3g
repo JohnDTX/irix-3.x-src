@@ -1,0 +1,37 @@
+.TH mapw2  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I mapw2
+- map a point on the screen into 2D world coordinates
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "mapw2(vobj, sx, sy, wx, wy)"
+.B "Object vobj;"
+.B "Screencord sx, sy;"
+.B "Coord *wx, *wy;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine mapw2(vobj, sx, sy, wx, wy)"
+.B "integer vobj"
+.B "integer*2 sx, sy"
+.B "real wx, wy"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure mapw2(vobj: Object; sx, sy,: Screencoord; var wx, wy: Coord);"
+.SH DESCRIPTION
+.I Mapw2
+is the two-dimensional version of \f2mapw\f1.  \f3Vobj\f1
+is a viewing object containing the viewport, projection and 
+viewing transformations
+that define world space; \f3sx\f1 and \f3sy\f1 define 
+a screen space point.
+The corresponding world space coordinates are 
+returned in \f3wx\f1 and \f3wy\f1.  If the transformation is not
+2D, the result is undefined.
+.SH "SEE ALSO"
+.I mapw
+.SH NOTE
+This command can only be used in immediate mode.

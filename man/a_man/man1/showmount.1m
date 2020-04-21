@@ -1,0 +1,53 @@
+'\"macro stdmacro
+.TH SHOWMOUNT 1M
+.SH NAME
+showmount \- show all remote mounts
+.SH SYNOPSIS
+.B /usr/etc/showmount
+[
+.B \-a
+] [
+.B \-d
+] [
+.B \-e
+] [ host ]
+.SH DESCRIPTION
+.IX  "showmount command"  ""  "\fLshowmount\fP \(em display remote mounts"
+.I Showmount
+lists all the clients
+that have remotely mounted a filesystem from
+.IR host .
+This information is maintained by the
+.IR mountd (1M)
+server on
+.IR host ,
+and is saved across crashes in the file
+.IR /etc/rmtab .
+The default value for
+.I host
+is the value returned by
+.IR hostname (1).
+.SH OPTIONS
+.TP
+.B \-d
+List directories that have been remotely mounted by clients.
+.TP
+.B \-a
+Print all remote mounts in the format
+.sp.5
+	hostname:directory
+.sp.5
+where
+.I hostname
+is the name of the client, and
+.I directory
+is the root of the file system that has been mounted.
+.TP
+.B \-e
+Print the list of exported file systems.
+.SH "SEE ALSO"
+mountd(1M), exports(4)
+.SH BUGS
+If a client crashes, its entry will not be removed from the list
+until it reboots and executes
+.IR "umount \-a" .

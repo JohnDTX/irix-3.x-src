@@ -1,0 +1,54 @@
+
+.SUFFIXES:	.asm .o .obj
+
+HDIR=../flib.hardware
+SDIR=../flib.software
+
+HOBJS=\
+	$(HDIR)/cai.o $(HDIR)/cmplxf.o $(HDIR)/flibback.o\
+	$(HDIR)/flibchain.o $(HDIR)/flibfmt.o $(HDIR)/flibfr.o\
+	$(HDIR)/flibfrd.o $(HDIR)/flibfrr.o $(HDIR)/flibfw.o \
+	$(HDIR)/flibfwd.o $(HDIR)/flibfwr.o $(HDIR)/flibinit.o\
+	$(HDIR)/flibinq.o $(HDIR)/fliblr.o $(HDIR)/fliblw.o \
+	$(HDIR)/fliblwd.o $(HDIR)/fliblwr.o $(HDIR)/flibopen.o\
+	$(HDIR)/flibrec.o $(HDIR)/flibstop.o $(HDIR)/flibu.o \
+	$(HDIR)/flibusr.o $(HDIR)/flibusr2.o $(HDIR)/flibwd.o\
+	$(HDIR)/flibwr.o $(HDIR)/ftnchar.o $(HDIR)/ufio.o $(HDIR)/junftnmisc.o
+
+SOBJS=\
+	$(SDIR)/cai.o $(SDIR)/cmplxf.o $(SDIR)/flibback.o\
+	$(SDIR)/flibchain.o $(SDIR)/flibfmt.o $(SDIR)/flibfr.o\
+	$(SDIR)/flibfrd.o $(SDIR)/flibfrr.o $(SDIR)/flibfw.o \
+	$(SDIR)/flibfwd.o $(SDIR)/flibfwr.o $(SDIR)/flibinit.o\
+	$(SDIR)/flibinq.o $(SDIR)/fliblr.o $(SDIR)/fliblw.o \
+	$(SDIR)/fliblwd.o $(SDIR)/fliblwr.o $(SDIR)/flibopen.o\
+	$(SDIR)/flibrec.o $(SDIR)/flibstop.o $(SDIR)/flibu.o \
+	$(SDIR)/flibusr.o $(SDIR)/flibusr2.o $(SDIR)/flibwd.o\
+	$(SDIR)/flibwr.o $(SDIR)/ftnchar.o $(SDIR)/ufio.o $(SDIR)/ftnmisc.o
+
+
+.asm.o:
+	../bin/asm68k -s $<
+	/usr/lib/jlinker $*.obj -o$@
+
+.p.obj:
+	/usr/lib/pascal20 $(PFLAGS) $<
+
+.obj.o:
+	/usr/lib/jlinker $< -o$@
+
+.f.o:
+	f77 -c $(FFLAGS) $<
+
+all:	software hardware
+
+
+software:	$(SOBJS)
+	cd ../lib.software ;\
+	ar rv ../libf.a $(COMMOBJS) $(SOBJS)
+	rm $(SOBJS) $(COMMOBJS)
+
+hardware:
+	cd ../lib.hardware ;\
+	ar rv ../libfhwfp.a $(COMMOBJS) $(HOBJS)
+	rm *.o

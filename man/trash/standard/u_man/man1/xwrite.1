@@ -1,0 +1,109 @@
+.TH XWRITE 1
+.SH NAME
+xwrite \- write to another local or remote user
+.SH SYNOPSIS
+.B xwrite 
+[system:]user [ line ]
+.SH DESCRIPTION
+.I Xwrite 
+copies lines from your terminal to that of another user.
+When first called, it sends the message:
+.PP
+.RS
+.B Message from 
+.I [system:]yourname 
+.BR (tty ?? )
+[
+.I date
+.RB ] \&.\|.\|.
+.RE
+.PP
+to the person you want to talk to.  When it has successfully
+completed the connection it also sends two bells to your own
+terminal to indicate that what you are typing is being sent.
+.PP
+The recipient of the message should xwrite back at this point.
+Communication continues until an end of file is read from the
+terminal or an interrupt is sent.  At that point 
+.I xwrite 
+writes \f3\s-1<EOT>\s+1\f1 on the other terminal and exits.
+.PP
+The system may be specified to
+.I xwrite
+to a user on a remote system over \s-1XNS\s0.
+In this case a colon ( : ) must separate the system and user name, e.g.:
+.PP
+.RS
+xwrite sauron:bob
+.RE
+.PP
+If you want to xwrite to a user who is logged in more than once,
+the 
+.I line
+argument may be used to indicate which line or terminal
+to send to (e.g.,
+.BR tty00 );
+otherwise, the first instance of
+the user found in
+.B  /etc/utmp 
+is assumed and the
+following message posted:
+.PP
+.RS
+.nf
+\f2user\f1 is logged on more than one place.
+You are connected to "\f2terminal\f1\^".
+Other locations are:
+\f2terminal\f1
+.fi
+.RE
+.PP
+Permission to xwrite may be denied or granted by use of the 
+.I mesg(1) 
+command.
+Xwriting to others is normally allowed by default.
+Certain commands, in
+particular 
+.IR nroff (1) 
+and 
+.IR pr (1) 
+disallow messages in order to prevent
+interference with their output.  However, if the user has super-user permissions,
+messages can be forced onto a xwrite inhibited terminal.
+.PP
+If the character \f3!\f1 is found at the beginning of a line, 
+.I xwrite
+calls the shell to execute the rest of the line as a command.
+.PP
+The following protocol is suggested for using 
+.IR xwrite :
+when you first \f2xwrite\f1 to another user, wait for them to
+\f2xwrite\f1 back before starting to send.
+Each person should end a message with a distinctive
+signal
+(i.e.,
+.B -o-
+for ``over'') so that the other person knows when to reply.
+The signal
+.B -oo-
+(for ``over and out'') is suggested when conversation
+is to be terminated.
+.SH FILES
+.nf
+.ta +15m
+/etc/utmp	to find user
+/bin/sh	to execute \f3!\f1
+.fi
+.SH SEE ALSO
+mail(1),
+mesg(1),
+nroff(1),
+pr(1),
+sh(1),
+who(1),
+write(1).
+.SH DIAGNOSTICS
+.RI `` "user not logged in" ''
+if the person you are trying to
+.I xwrite
+to is not logged in.

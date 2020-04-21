@@ -1,0 +1,97 @@
+	The IBM 3278 interface description.
+	Peter Ecclesine 30 July 1985 revised 26 Jan 86
+
+	The IBM interface card contains an internal processor and display
+memory to allow autonomous operation with an IBM 3274 cluster controller
+as a 3278 display terminal. The card can act as a model 2(24x80), model 3(32x80) or a model 4(43x80), in either monochrome or 3279 color(base color).
+The system implimentation is:
+
+  +---+  +---+  +---+  +---+      +----+   +---+  +---+   +---+
+  | U |  | U |  | V |  | 3 |      |  I |   | K |  | U |   | U |
+  | S |  | S |  | T |  | 2 |      |  / |   | E |  | S |   | S |
+  | E |  | E |  | A |  | 7 |      |  F |   | R |  | E |   | E |
+  | R |  | R |  | M |  | 4 |      |    |   | N |  | R |   | R |
+  |   |  |   |  |   |  |   |coax-a|  C | m | A |  |   |   |   |
+  | C |  | I |  | H |  | C |      |  A | b | L |  | I |   | C |
+  | O |  | / |  | O |  | T |      |  R |   |   |  | / |   | O |
+  | D |  | F |  | S |  | L |      |  D |   | D |  | F |   | D |
+  | E |  |   |  | T |  | R |      |  px|   | R |  |   |   | E |
+  +---+  +---+  +---+  +---+      +----+   +---+  +---+   +---+
+  U S E R     |     IBM        |         I R I S  | U  S E R
+     S   /   W         H/W          H / W       S / W   
+
+
+	The hardware implimentation is defined in the Hardware Specification,
+(i.e. the IBM interface card is a bus slave, 16 bit i/o address, 8 bit data
+interface card). Data from the 3278  and IBM are held in a 16k dma buffer on the
+interface card and are processed by 'update_3270' in a polled operation. The
+mainframe protocol prevents dma overrun, so the IRIS user interface is a 
+simple poll at convenient times.
+
+	The software implimentation is model 2 monochrome, with most of
+the interface code executing in user space. The file transfer is 
+implimented in user code area in the routine functions.c.
+
+The 3274 to 3278 coax-A protocol is based on the 3278 holding the
+terminal screen image and altering it with received commands and orders.
+The 3274 owns the screen image, and may send update commands at any time,
+having a higher priority than the terminal operator. The 3278 keystrokes
+are each sent to the 3274 for approval before execution. Examples are shift,
+alt-break(alt-release), back-space, text, reset, clear, etc.
+ The IRIS program to IBM data is passed directly into the local screen buffer
+using 'send_ebx_string', as this is much faster (7x) than sending the
+data to the 3274 for it to store in the buffer. 
+There is also a 'force_ebx_string'
+routine to insure an aid to the host is generated. The protocol allows the IRIS
+to abort the mainframe application by sending a Program Attention 1.
+ The IRIS user code also performs the
+EBCDIC/3274 translation, so that the kernel interfaces are transparent to
+the data contents. The 3278 processor maintains it's terminal image in 
+3274 codes.
+
+     The general organization of the pxd software is:
+	Kernel - Pxd - open, close, read, write, ioctl
+	functions - writes data and sends to host, rgl and ft interface
+	emulint - process 'screen' commands from 3278
+	conio - keyboard processing in terminal emulation
+	display - display 'screen' on IRIS, Visual 50, textport
+	pxdio and dispxlat - utilities of display and conio
+	emulator - 3279 terminal emulation
+	t3279 - main program calling emulator
+	dbgmenu - debug menu for stand-alone checkout
+
+
+	The normal operation of the 3278 processor stores the 3274
+commands in a 16k DMA buffer, and updates an internal 'Screen' image. The
+IRIS code does not use this 'Screen' but maintains one via emulint. The
+hardware 'Screen' is not visible to the software, but is required by the
+3274 protocol. Keystrokes are sent via the 3278 processor to the 3274, 
+which returns commands that impliment the keystrokes. The 3274 may
+ignore any keystrokes at any time, and also drops keystrokes from
+3278 terminals when typing rapidly.
+	The ultimate user has to process host output in both screen update
+and file download forms. The 'update_3270' routine returns the received file 
+length, 0 if the screen is current, or -1 and an error code.
+	The DMA interface hardware is polled by 'emulint' via 'update_3270'.
+This is necessary because the 3278 processor's first priority is 3274
+processing, and it may be absent for many Msec at any time in its
+transfer to the DMA. 
+'update_3270' may be at such a low priority that the buffer is overrun.
+The overrun is not present in message transfer, but may be noticed in 3279
+terminal emulation. The color screen commands are much slower than the
+commands from the 3274. The message transfer protocol prevents overruns by
+requiring IRIS acknowledgements to show the DMA buffer is empty.
+'emulint' maintains the current screen image in it's memory,
+and commands the terminal processor 'display' to update the terminal
+display copy.
+
+     The current i/o structure is:
+     
+     Level 1 direct tx/rx with IBM card - dbgmenu/pxdio
+     Level 2 call level 1 routines for tx/rx - functions/emulint
+     Level 3 rx via 'DMA' buffer - emulator/update_3270
+
+
+The next documents to read are the functions description and the Hardware
+document.
+

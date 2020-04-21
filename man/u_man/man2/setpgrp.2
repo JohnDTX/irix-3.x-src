@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH SETPGRP 2
+.SH NAME
+setpgrp \- set process group \s-1ID\s+1
+.SH SYNOPSIS
+.B int setpgrp (\|)
+.SH DESCRIPTION
+.I Setpgrp\^
+sets the process group
+.SM ID
+of the calling process to the process
+.SM ID
+of the calling process and returns the new process group
+.SM ID\*S.
+.SH RETURN VALUE
+.I Setpgrp\^
+returns the value of the new process group
+.SM ID\*S.
+.SH SEE ALSO
+exec(2), fork(2), getpid(2), intro(2), kill(2), signal(2).
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	#39,D0
+.B movw	#1,A0
+.B trap	#0
+.fi
+.PP
+Carry bit set on failure and cleared on success.
+.DT
+.\"	@(#)setpgrp.2	5.1 of 10/19/83

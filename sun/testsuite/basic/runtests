@@ -1,0 +1,38 @@
+#!/bin/sh
+# 'ARGS=-f' for basic funtionality tests (one pass of each test)
+# 'ARGS=  ' for longer tests without timing (1-3 minutes per test)
+# 'ARGS=-t' for longer tests with timing
+case $# in
+    0)
+	ARGS=""
+	;;
+    1)
+	ARGS=$1
+	;;
+    *)
+	echo "usage: $0 [-f] [-t]"
+	exit 1
+	;;
+esac
+
+#set -e
+echo ""
+test1 $ARGS
+echo ""
+csh test2 $ARGS
+echo ""
+test3 $ARGS
+echo ""
+test4 $ARGS
+echo ""
+test5 $ARGS
+echo ""
+test6 $ARGS
+echo ""
+test7 $ARGS
+echo ""
+test8 $ARGS
+echo ""
+test9 $ARGS
+echo ""
+echo "Congratulations, you passed the basic tests!"

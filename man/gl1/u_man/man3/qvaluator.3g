@@ -1,0 +1,36 @@
+.TH qvaluator  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I qvaluator
+- enable queuing of valuator state changes
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "qvaluator(v) "
+.B "Device v;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine qvalua(v)"
+.B "integer*2 v"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure qvaluator(v: Device);"
+.sp
+.SH DESCRIPTION
+.I Qvaluator
+designates a valuator as a queued device.  Its argument
+is a valuator device number.  Current valuators are the horizontal
+or vertical motion of a mouse or a dial on a control panel.
+By default, no devices are queued.  Once the user decides to queue a 
+valuator, entries are made in the event queue
+each time the valuator position changes by more than a
+a value set by the \f2noise\f1  command.
+.PP
+The queue entry has two parts,
+the device number and the data.
+.SH "SEE ALSO"
+.I noise, qbutton, qkeyboard, setvaluator, unqvaluator
+.SH NOTE
+This command can only be used in immediate mode.

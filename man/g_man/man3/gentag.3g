@@ -1,0 +1,39 @@
+.TH gentag 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gentag
+\- returns a unique integer for use as a tag
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Tag gentag()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function gentag()"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function gentag: Tag;"
+.SH DESCRIPTION
+.B gentag
+generates a unique integer to use as a tag.
+Tags must be unique within an object.
+.PP
+.B gentag
+provides a unique 31-bit integer
+tag which acts as a
+label.
+\f3gentag\f1 generates unique tags, although
+if you later define a tag with the same value,
+the first tag is lost.
+.SH "SEE ALSO"
+genobj, istag
+.sp
+.I Programming Guide,
+Section 8.3, Object Editing
+.SH NOTE
+This routine is available only in immediate mode.

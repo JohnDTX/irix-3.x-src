@@ -1,0 +1,121 @@
+'\"macro stdmacro
+.TH MERGEMAIL 1
+.SH NAME
+mergemail \- merge mail messages from one folder to another
+.SH SYNOPSIS
+.PP
+.B
+mergemail [
+.B
+\-d
+] [
+.B
+\-c
+]
+.I
+emacs-folder
+[
+.I
+unix-folder ]
+.SH DESCRIPTION
+.PP
+.I
+Emacs-folder
+is a directory that has been created by the 
+Emacs
+command
+.B
+rmail .  
+The messages in the 
+.I
+emacs-folder
+are individual files stored in this directory.
+.I
+Unix-folder
+is a file in 
+Unix 
+mail format \-\- that is,
+it contains many messages.  Two familiar examples of a Unix folder
+are the files 
+.I
+~/mbox 
+and your mail spool file that is read with the 
+.I
+ \f2mail\f1(1)
+command.
+.B
+Mergemail
+merges the individual message files
+found in 
+.I
+emacs-folder
+with the messages in the 
+.I
+unix-folder .
+The default value of
+.I
+unix-folder
+is
+.I
+~/mbox .
+.PP
+Unless given the
+.B
+\-c 
+option, 
+.B
+mergemail 
+simply appends the messages in the
+.I
+emacs-folder 
+to the 
+.I 
+unix-folder .
+.SH OPTIONS
+.PP
+.IP "\-d" 17
+Delete the 
+.I
+emacs-folder 
+after the merge.
+.IP "\-c" 17
+Check for message collisions.  Messages in the 
+.I
+unix-folder 
+that are not in the 
+.I 
+emacs-folder 
+are preserved; otherwise, the message in the 
+.I
+unix-folder 
+is replaced by its version from the 
+.I
+emacs-folder .  
+(Messages common to both folders are determined by the 
+.B
+Message-Id 
+field.)
+Messages contained only in the 
+.I 
+emacs-folder 
+are appended to the 
+.I
+unix-folder .
+.PP
+For information on the 
+Emacs
+database facility, see the following documents:
+.PP
+.RS 5
+.I
+Emacs Reference Manual
+.br
+.SH FILES
+.IP "~/mbox"
+.SH SEE ALSO
+.PP
+.IP "collectmail(1)" 17
+converts an Unix mail folder to an 
+Emacs 
+mail folder.
+

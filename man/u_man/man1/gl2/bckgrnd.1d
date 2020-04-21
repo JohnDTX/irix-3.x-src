@@ -1,0 +1,14 @@
+'\"macro stdmacro
+.TH BCKGRND 1D
+.SH NAME
+bckgrnd \- generate a textured background texture
+.SH SYNOPSIS
+.B bckgrnd 
+number
+.SH DESCRIPTION
+.I bckgrnd 
+generates a textured background for the window manager.
+.I number 
+is an integer from 1 to 16 which selects a texture 
+pattern; larger numbers
+produce unpredictable results.

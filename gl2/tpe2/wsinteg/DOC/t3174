@@ -1,0 +1,87 @@
+	The 3174 changes to the GeometryLink Product
+	Peter Ecclesine 20 July 1987
+
+	The GeometryLink Product:
+
+	The GeometryLink is comprised of
+		a multibus based 3278 processor (PCOX), based on the CXI
+			Model 1A Emulation Adapter for IBM PCs,
+		a unix kernel driver (pxd),
+		a unix user program (t3279),
+		a mainframe tape with VM(SP/XA)
+				file transfer (udt)
+				Fortvs remote graphics library (RGL, iriscom)
+			and MVS(/XA)
+				file transfer (irsxfr)
+				Fortvs remote graphics library (RGL).
+	
+	The product was introduced at Autofact '84, and is resold by several
+large customers, including
+		McDonnell Douglas St. Louis for their KATY application
+		LSI Logic Milpitas for chip design
+		ATP Campbell for CIMPLEX, mechanical design and manufacturing
+Other important users include
+		Lockheed Burbank of mechanical design
+		Amdahl for chip design
+		McDonnell Douglas Long Beach for mechanical engineering.
+Note that chip design is a 2D application that requires information management,
+and many other vendors have suitable platforms, while MCAE requires fast
+floating point 3D display, and SGI has few direct competitors (until fall '87).
+
+
+	The '3270' Connection:
+
+
+	The IRIS appears to be a 3278 Model 2 Control Unit Terminal(CUT), and
+can be connected to 3274/3276 local and remote controllers. The keyboard and
+display operate in the US 87 key keyboard mode and 3279 S2A (base color) mode.
+The IRIS can also permit local ansi terminals or TCP/IP connected IRISs to use
+the 3278 terminal emulation.
+	IBM no longer manufactures the 3270 family, and the 3170 family has
+replaced it. The CUT coax protocol is unchanged, but the 3174 is much faster,
+and has different command processing algorithms.  The 3174 coax interface is
+about 1 volt p-p stronger than the 3274 coax levels.
+
+
+
+	GeometryLink Modifications (supporting 3170 and 3270 applications):
+
+	The multibus interface board changes include:
+		Firmware changes for the PCOX processor to acknowledge the 3174
+			options request ("S" at address 0). The PROMS are in
+			sockets.
+		Transmit signal level changes - four resistors change
+		Receive filter - baby board to low-pass filter the receive. This
+			is because many customers are using balums and twisted
+			pair wiring, rather than RG62A/U coax.
+		Xtal changed to 18.870 MHZ from 18.86792 MHZ - 3174 uses 18.870.
+		Buffer RAM - unchanged for IRIS 2000 products, 16kbytes.
+			   - expanded for IRIS 3000 products, 64kbytes. The
+			     change permits larger mainframe writes, and faster
+			     transfers. The modification requires unsoldering
+			     the existing RAMs, adding sockets and the 8Kx8 RAM.
+			     This takes 0.5 hour to perform.
+		Cost of changes - $30 parts + 45 minutes technician's time.
+
+	The unix kernel driver changes include:
+		Probe for 64k buffer memory to establish board in use.
+		Faster read operation.
+		Ioctl to report board in use.
+		The kernel driver is 700 lines of C code.
+
+	The unix user program changes include:
+		Use of Ioctl to size the read operation.
+		Faster read operation.
+		Faster write operation.
+		Allow ansi terminal and TCP/IP IRIS terminal operation.
+		The user program is 12200 lines of C code.
+
+	The mainframe driver changes include:
+		Transfer Bid Reply has buffer size and MaxRU parameters.
+		The MVS CLIST suport has option for uppercase dsn, lowercase
+			irisname.
+		The VM file transfer driver is 1600 lines of 370 assembler.
+		The MVS file transfer driver is 4000 lines of 370 assembler.
+		We have not supported the mainframe RGL since release 3.5, and
+			are not changing it to 3174 support.
+			The VM RGL driver is 1000 lines of 370 assembler.

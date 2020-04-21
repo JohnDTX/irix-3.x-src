@@ -1,0 +1,33 @@
+.TH linewidth  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I linewidth
+- specify the linewidth
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "linewidth(n) "
+.B "short n;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine linewi(n)"
+.B "integer*2 n"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure linewidth(n: Short);"
+.sp
+.SH DESCRIPTION
+\f2Linewidth\f1 specifies whether lines are to be one or two pixels wide.  
+Width is the number of pixels along the screen axis
+having the least change between the endpoints of the line.  That is, if 
+\f2S\fP is the slope of the line, then if 0\(<=\(brS\(br\(<=1, the line will be
+two pixels wide in the \f3y\f1 direction. If \(br\&S\(br\&>\&1, the line
+will be two pixels wide in the \f3x\f1 direction.
+The \f2linewidth\f1 command takes one argument, 
+either the integer one or two.  If \f2linewidth\f1 is set to two,
+\f2resetls\f1 must be 
+.I TRUE. 
+.SH "SEE ALSO"
+.I lsbackup, resetls, setlinestyle

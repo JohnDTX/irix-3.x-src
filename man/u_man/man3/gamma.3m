@@ -1,0 +1,77 @@
+'\" e
+'\"macro stdmacro
+.TH GAMMA 3M
+.SH NAME
+gamma \- log gamma function
+.SH SYNOPSIS
+.B #include <math.h>
+.PP
+.B extern int signgam;
+.PP
+.B long float gamma (x)
+.br
+.B long float x;
+.SH DESCRIPTION
+.EQ
+delim $$
+.EN
+.I Gamma\^
+returns
+$ln ( | GAMMA ( ^ x ) | )$,
+where $GAMMA ( ^ x )$ is defined as
+$int from 0 to inf e sup { - t } t sup { x - 1 } dt$.
+The sign of
+.EQ
+GAMMA ( ^ x )
+.EN
+is returned in the external integer
+.IR signgam .
+The argument
+.I x\^
+may not be a non-positive integer.
+.PP
+The following C program fragment might be
+used to calculate
+\(*G:
+.PP
+.RS
+.nf
+if ((y = gamma(x)) > \s-1LOGHUGE\s+1)
+	error(\|);
+y = signgam \(** exp(y);
+.fi
+.RE
+.PP
+where
+.SM LOGHUGE
+is
+the least value that causes
+.IR exp\^ (3M)
+to return a range error.
+.SH DIAGNOSTICS
+.I Gamma\^
+checks its input for the illegal values Nan and \(if, raising a floating
+point exception with the type codes
+.I INVALID_OP_A,\^
+and
+.I INVALID_OP_F2,\^
+respecively.
+Non-positive integer arguments
+cause
+a floating point exception to be raised with the type code
+.I DOMAIN_ERROR.\^
+.PP
+A floating point exception with the type
+.I OVERFL\^
+is raised if the input value would cause 
+.I gamma\^ 
+to overflow.
+.PP
+In all cases, the operation is 
+.I MATH,\^
+and the global function identifier
+.I _mathfunc_id\^
+is set to GAMMA.
+.SH SEE ALSO
+exp(3M), fpsigset(3C).
+.\"	@(#)gamma.3m	5.1 of 10/25/83

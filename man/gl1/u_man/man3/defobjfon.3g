@@ -1,0 +1,42 @@
+.TH defobjfont 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I defobjfont
+- define an object font
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "defobjfont(n, nc, chars)"
+.B "short n, nc;"
+.B "Object chars[];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine defobj(n, nc, chars)"
+.B "integer*2 n,nc"
+.B "integer chars(nc)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure defobjfont(n, nc: Short; var chars: Objarray);"
+.sp
+.SH DESCRIPTION
+.I Defobjfont
+defines an object font.  Its first argument is an
+index into the object font table.  This index will be used
+as the name of the font in later references.  
+\f3Chars\f1 is an array of \f3nc\f1 object names, one for
+each character in the font.  Spacing is the responsibility 
+of the individual characters in the
+object font.  Each character definition should end by translating to
+the baseline position of the next character where the next
+character's origin should be placed.  To replace an object font, define
+the new one to have the same index as the old one.
+.PP
+To delete an object font, call 
+.I "defobjfont(n, 0, 0),"
+that is, define a font with no characters.
+.SH "SEE ALSO"
+.I defrasterfont, objfont, objstr
+.SH NOTE
+This command can only be used in immediate mode.

@@ -1,0 +1,35 @@
+.TH lampon 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B lampon
+\- turns on the keyboard display lights
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lampon(lamps)"
+.B "char lamps;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lampon(lamps)"
+.B "integer*4 lamps"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lampon (lamps: longint);"
+.SH DESCRIPTION
+.B lampon
+turns on any combination of the four user-controlled lamps
+on the keyboard.  The four low-order bits of 
+.I lamps
+control lamps 1 through 4.
+.SH "SEE ALSO"
+clkon, clkoff, lampoff, ringbell, setbell
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

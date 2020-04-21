@@ -1,0 +1,874 @@
+.TH intro 3G
+.SH NAME
+.B introduction
+\- description of routines in the Graphics Library
+.SH DESCRIPTION
+The \f2Graphics Library Reference\f1 contains descriptions
+of the routines in the Graphics Library.
+.PP
+Each description defines the number, order, and types of the arguments
+for each routine.
+C and FORTRAN are provided
+under the heading \f3SPECIFICATION\f1.
+A description of the routine, including function, effects,
+and potential errors is given in the section called \f3DESCRIPTION\f1;
+related routines and related material are listed under \f3SEE ALSO\f1.
+.PP
+Some of the routines have several versions, depending on the number
+and type of the arguments.  Coordinate data can be 2D or 3D, and can be
+specified as floating point numbers, integers, or short (16-bit) integers.
+The default is 3-D floating point data.
+Integer data and 2-D points are specified with suffixes: \f2i\f1 for integer,
+\f2s\f1 for short, and \f22\f1 for 2D.
+.PP
+If the routine can be compiled into a display list, it is so stated in the
+\f3NOTE\f1.
+.PP
+Bugs are listed under \f3BUGS\fP.
+.SH TEXT STRINGS
+C text strings are terminated with a null character (ASCII 0);
+FORTRAN has a \f3character\f1 
+data type that includes the length of the string.
+.SH POINTERS
+Many of the Graphics Library routines return several values to the caller.
+The arguments to these routines are \f2pointers\f1, or addresses of memory
+locations.
+In C, they are declared as pointer variables by prefixing the
+variable name with an asterisk in the declaration.
+FORTRAN passes all
+parameters by reference, so no special declaration is necessary.
+
+.ne 16
+.SH BOOLEANS
+Many of the routines have boolean arguments or return boolean values.
+These are declared as type 
+.I Boolean
+in C, and
+as 
+.I logical
+or
+.I integer
+in FORTRAN.
+We assume that 
+FALSE
+is zero, and that 
+TRUE
+is anything except
+FALSE.
+.SH TYPE DECLARATIONS
+We have constructed type declarations for C 
+wherever they add to the readability of the code.
+Here are the type definitions:
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+#define PATTERN_16 16
+#define PATTERN_32 32
+#define PATTERN_64 64
+#define PATTERN_16_SIZE 16
+#define PATTERN_32_SIZE 64
+#define PATTERN_64_SIZE 256
+.sp .75v
+typedef unsigned char Byte;
+typedef long Boolean;
+typedef short Angle;
+typedef short Scoord;
+typedef short Screencoord;
+typedef long Icoord;
+typedef float Coord;
+typedef char *String;
+typedef float Matrix[4][4];
+.sp .75v
+typedef unsigned short Device;
+.sp .75v
+typedef unsigned short Colorindex;
+typedef unsigned char RGBvalue;
+.sp .75v
+typedef unsigned short Linestyle;
+typedef unsigned short Cursor[16];
+typedef struct {
+	unsigned short offset;	/* 2 bytes */
+	Byte w,h;		/* 2 bytes */
+	char xoff,yoff;		/* 2 bytes */
+	short width;		/* 2 bytes */
+} Fontchar;
+.sp .75v
+typedef long Object;
+typedef long Tag;
+.sp .75v
+typedef unsigned short Pattern16[PATTERN_16_SIZE];
+typedef unsigned short Pattern32[PATTERN_32_SIZE];
+typedef unsigned short Pattern64[PATTERN_64_SIZE];
+.sp .75v
+.nf
+.bp
+.SH LIST OF GRAPHICS LIBRARY ROUTINES
+.PP
+.B addtopup
+- adds items to an existing pop-up menu
+.PP
+.B arc
+- draws a circular arc
+.PP
+.B arcf
+- draws a filled circular arc
+.PP
+.B attachcursor
+- attaches the cursor to two valuators
+.PP
+.B backbuffer
+- enables updating in the back buffer
+.PP
+.B backface
+- turns backfacing polygon removal on and off 
+.PP
+.B bbox2
+- specifies bounding box and minimum pixel radius 
+.PP
+.B blankscreen
+- turns screen refresh on and off 
+.PP
+.B blanktime
+- sets the screen blanking timeout
+.PP
+.B blink
+- changes the color map entry at a selectable rate
+.PP
+.B blkqread
+- reads multiple entries from the queue
+.PP
+.B callfunc
+- calls a function from within an object
+.PP
+.B callobj
+- draws an instance of an object
+.PP
+.B charstr
+- draws a string of raster characters on the screen
+.PP
+.B chunksize
+- specifies minimum object size in memory
+.PP
+.B circ
+- outlines a circle 
+.PP
+.B circf
+- draws a filled circle
+.PP
+.B clear
+- clears the viewport
+.PP
+.B clearhitcode
+- sets the system hitcode to zero
+.PP
+.B clkoff
+- turns off the keyboard click
+.PP
+.B clkon
+- turns on the keyboard click
+.PP
+.B closeobj
+- closes an object
+.PP
+.B cmov
+- updates the current character position
+.PP
+.B color 
+- sets the color index in the current mode
+.PP
+.B compactify
+- compacts the memory storage of an object
+.PP
+.B crv
+- draws a curve
+.PP
+.B crvn
+- draws a series of curve segments
+.PP
+.B curorigin
+- sets the origin of a cursor
+.PP
+.B cursoff
+- turns off the cursor 
+.PP
+.B curson
+- turns on the cursor 
+.PP
+.B curvebasis
+- sets the basis matrix used to draw curves
+.PP
+.B curveit
+- draws a curve segment
+.PP
+.B curveprecision
+- sets the number of line segments that draw a curve segment
+.PP
+.B cyclemap 
+- cycles through color maps at a specified rate
+.PP
+.B dbtext
+- sets the dial and button box text
+.PP
+.B defbasis
+- defines a basis matrix
+.PP
+.B defcursor
+- defines a cursor glyph
+.PP
+.B deflinestyle
+- defines a linestyle
+.PP
+.B defpattern
+- defines patterns
+.PP
+.B defpup
+- defines a menu
+.PP
+.B defrasterfont
+- defines a raster font
+.PP
+.B delobj
+- deletes an object
+.PP
+.B deltag
+- deletes tags from objects
+.PP
+.B depthcue
+- turns depth-cue mode on and off 
+.PP
+.B devport
+- assigns a serial port to an external graphics device
+.PP
+.PP
+.B dopup
+- displays the specified pop-up menu
+.PP
+.B doublebuffer
+- sets the display mode to double buffer mode
+.PP
+.B draw
+- draws a line 
+.PP
+.B editobj
+- opens an object for editing
+.PP
+.B endfeedback
+- turns off feedback mode
+.PP
+.B endfullscrn
+- ends full-screen mode
+.PP
+.B endpick
+- turns off picking mode 
+.PP
+.B endpupmode
+- ends pop-up mode
+.PP
+.B endselect
+- turns off selecting mode 
+.PP
+.B feedback
+- turns on feedback mode
+.PP
+.B finish
+- blocks the host process until the Geometry Pipeline is empty
+.PP
+.B font
+- selects a raster font for drawing text strings
+.PP
+.B foreground 
+- keeps a graphical process in the foreground 
+.PP
+.B freepup
+- returns a menu and its data structures to the system 
+.PP
+.B frontbuffer
+- enables updating in the front buffer
+.PP
+.B fudge
+- specifies fudge values that are added to a graphics window 
+.PP
+.B fullscrn
+- gives a program the entire screen as a window 
+.PP
+.B gbegin
+- initializes the system without altering the color map
+.PP
+.B gconfig
+- reconfigures the system 
+.PP
+.B genobj
+- returns a unique integer for use as an object identifier
+.PP
+.B gentag
+- returns a unique integer for use as a tag
+.PP
+.B getbackface
+- returns whether backfacing polygons will appear
+.PP
+.B getbuffer
+- indicates which buffers are enabled for writing
+.PP
+.B getbutton
+- returns the state (up or down) of a button
+.PP
+.B getcmmode
+- returns the current color map mode
+.PP
+.B getcolor
+- returns the current color
+.PP
+.B getcpos
+- returns the current character position
+.PP
+.B getcursor
+- returns the cursor characteristics
+.PP
+.B getdcm
+- indicates whether depth-cue mode is on or off
+.PP
+.B getdepth
+- returns the parameters of setdepth
+.PP
+.B getdescender
+- returns the character characteristics
+.PP
+.B getdev
+- reads a list of valuators at one time
+.PP
+.B getdisplaymode
+- returns the current display mode
+.PP
+.B getfont
+- returns the current raster font number
+.PP
+.B getgpos
+- returns the current graphics position
+.PP
+.B getheight
+- returns the maximum character height in the current raster font
+.PP
+.B gethitcode
+- returns the current system hitcode
+.PP
+.B getlsbackup
+- returns the current value of the linestyle backup flag
+.PP
+.B getlsrepeat
+- returns the linestyle repeat count
+.PP
+.B getlstyle
+- returns the current linestyle  
+.PP
+.B getlwidth
+- returns the current linewidth
+.PP
+.B getmap
+- returns the number of the current color map
+.PP
+.B getmatrix
+- returns the current transformation matrix
+.PP
+.B getmcolor
+- returns a color map entry
+.PP
+.B getmem
+- returns the amount of available memory
+.PP
+.B getmonitor
+- returns the current display monitor 
+.PP
+.B getopenobj
+- returns the current open object 
+.PP
+.B getorigin
+- returns the position of a graphics window 
+.PP
+.B getothermonitor
+- returns the nondisplayed monitor type
+.PP
+.B getpattern
+- returns the index of the current pattern
+.PP
+.B getplanes
+- returns the number of available bitplanes
+.PP
+.B getport
+- creates a graphics window 
+.PP
+.B getresetls
+- returns the current value of resetls
+.PP
+.B getscrmask
+- returns the current screenmask
+.PP
+.B getshade
+- returns the current shade
+.PP
+.B getsize
+- returns the size of a graphics window 
+.PP
+.B gettp
+- returns the location of the current textport 
+.PP
+.B getvaluator
+- returns the current state of a valuator
+.PP
+.B getviewport
+- returns the current viewport
+.PP
+.B getwritemask
+- returns the current writemask
+.PP
+.B getzbuffer
+- indicates whether z-buffering is on or off
+.PP
+.B gexit
+- terminates a program
+.PP
+.B gflush
+- forces all unsent commands down the network 
+.PP
+.B ginit
+- initializes the system 
+.PP
+.B greset
+- resets all global state attributes to their initial values
+.PP
+.B gRGBcolor
+- returns the current RGB value
+.PP
+.B gRGBcursor
+- returns the cursor characteristics in RGB mode
+.PP
+.B gRGBmask
+- returns the current RGB writemask
+.PP
+.B gselect
+- puts the system in selecting mode
+.PP
+.B gsync 
+-  waits for a vertical retrace period
+.PP
+.B imakebackground
+- registers the screen background process 
+.PP
+.B initnames
+- initializes the name stack
+.PP
+.B ismex
+- returns TRUE if the window manager is running 
+.PP
+.B isobj
+- indicates whether a given object number identifies an object
+.PP
+.B isqueued
+- indicates if the specified device is queued
+.PP
+.B istag 
+- indicates if a given tag is used within the current open object
+.PP
+.B keepaspect 
+- specifies the aspect ratio of a graphics window 
+.PP
+.B lampoff
+- turns off the keyboard display lights 
+.PP
+.B lampon
+- turns on the keyboard display lights
+.PP
+.B linewidth
+- specifies the linewidth
+.PP
+.B loadmatrix
+- loads a transformation matrix
+.PP
+.B loadname
+- loads the name on the top of the name stack
+.PP
+.B lookat
+- defines a viewing transformation
+.PP
+.B lsbackup
+- controls whether the last two pixels of a line are closed
+.PP
+.B lsrepeat
+- sets repeat factor for the current linestyle
+.PP
+.B makeobj
+- creates an object
+.PP
+.B maketag
+- numbers a routine in the display list
+.PP
+.B mapcolor
+- changes a color map entry
+.PP
+.B mapw
+- maps a point on the screen into a line in 3-D world coordinates
+.PP
+.B mapw2
+- maps a point on the screen into 2-D world coordinates
+.PP
+.B maxsize
+- specifies a maximum size of a graphics window 
+.PP
+.B minsize
+- specifies a minimum size of a graphics window 
+.PP
+.B move
+- moves the current graphics position to a specified point 
+.PP
+.B multimap
+- organizes the color map as 16 small maps
+.PP
+.B multmatrix
+- premultiplies the current transformation matrix
+.PP
+.B newpup
+- allocates and initializes a structure for a new menu
+.PP
+.B newtag
+- creates a new tag in an object
+.PP
+.B noise
+- filters valuator motion
+.PP
+.B noport
+- specifies that a program does not require a graphics window 
+.PP
+.B objdelete
+- deletes routines from an object
+.PP
+.B objinsert
+- inserts routines in an object at a specified location
+.PP
+.B objreplace
+- overwrites existing display list routines with new ones
+.PP
+.B onemap
+- organizes the color map as one large map
+.PP
+.B ortho
+- defines an orthographic projection transformation
+.PP
+.B pagecolor
+- sets the color of the textport background
+.PP
+.B pagewritemask
+- sets the writemask for the textport background
+.PP
+.B passthrough
+- passes a single token through the Geometry Pipeline
+.PP
+.B patch
+- draws a surface patch
+.PP
+.B patchbasis
+- sets current patch basis matrices
+.PP
+.B patchcurves
+- sets the number of curves that represent a patch
+.PP
+.B patchprecision
+- sets the precision at which curves are drawn
+.PP
+.B pclos
+- polygon close
+.PP
+.B pdr
+- polygon draw
+.PP
+.B perspective
+- defines a perspective projection transformation
+.PP
+.B pick
+- puts the system in picking mode
+.PP
+.B picksize
+- sets the dimensions of the picking region
+.PP
+.B pmv
+- polygon move
+.PP
+.B pnt
+- draws a point
+.PP
+.B polarview
+- defines the viewer's position in polar coordinates
+.PP
+.B polf
+- draws a filled polygon
+.PP
+.B poly
+- outlines a polygon
+.PP
+.B popattributes
+- pops the attribute stack
+.PP
+.B popmatrix
+- pops the transformation matrix stack
+.PP
+.B popname
+-  pops a name off the name stack
+.PP
+.B popviewport
+- restores the viewport, screenmask, and setdepth parameters
+.PP
+.B prefposition 
+- specifies the preferred location and size of a graphics window
+.PP
+.B prefsize 
+- specifies the preferred size of a graphics window 
+.PP
+.B pupcolor
+- specifies the current pop-up drawing color
+.PP
+.B pupmode
+- provides access to the pop-up menu bitplanes
+.PP
+.B pushattributes
+- saves the global state attributes 
+.PP
+.B pushmatrix
+- pushes down the transformation matrix stack
+.PP
+.B pushname
+- pushes a new name on the name stack
+.PP
+.B pushviewport
+- duplicates the current viewport 
+.PP
+.B qdevice
+- queues a device (keyboard, button, or valuator)
+.PP
+.B qenter
+- creates an event queue entry
+.PP
+.B qread
+- reads the first entry in the event queue
+.PP
+.B qreset
+- empties the event queue
+.PP
+.B qtest
+- checks the contents of the event queue
+.PP
+.B rcrv
+- draws a curve 
+.PP
+.B rcrvn
+- draws a series of curve segments 
+.PP
+.B rdr
+- relative draw
+.PP
+.B readpixels
+- returns values of specific pixels
+.PP
+.B readRGB
+- returns values of specific pixels
+.PP
+.B rect
+- outlines a rectangular region
+.PP
+.B rectcopy
+- copies a rectangle of pixels on the screen
+.PP
+.B rectf
+- fills a rectangular area
+.PP
+.B resetls
+- controls the continuity of linestyles
+.PP
+.B reshapeviewport
+- sets the viewport to the current graphics window dimensions 
+.PP 
+.B RGBcolor
+- sets the current color in RGB mode
+.PP
+.B RGBcursor
+- sets the characteristics of the cursor in RGB mode
+.PP
+.B RGBmode
+- sets a display mode that bypasses the color map
+.PP
+.B RGBwritemask
+- grants write access to a subset of available bitplanes
+.PP
+.B ringbell
+- rings the keyboard bell
+.PP
+.B rmv
+- relative move 
+.PP
+.B rot
+- rotates graphical primitives (floating point version)
+.PP
+.B rotate
+- rotates graphical primitives
+.PP
+.B rpatch
+- draws a rational surface patch
+.PP
+.B rpdr
+- relative polygon draw 
+.PP
+.B rpmv
+- relative polygon move
+.PP
+.B scale
+- scales and mirrors objects
+.PP
+.B screenspace
+- interprets graphics positions as absolute screen coordinates
+.PP
+.B scrmask 
+- defines a clipping mask for fine character clipping
+.PP
+.B setbell
+- sets the duration of the keyboard bell
+.PP
+.B setcursor
+- sets the cursor characteristics
+.PP
+.B setdblights
+- sets the lights on the dial and button box
+.PP
+.B setdepth
+- sets up a 3-D viewport
+.PP
+.B setfastcom
+- sends data in 8 bits per byte
+.PP
+.B setlinestyle
+- selects a linestyle pattern
+.PP
+.B setmap
+- selects one of the 16 small color maps 
+.PP
+.B setmonitor
+- sets the monitor type
+.PP
+.B setpattern
+- selects a pattern for filling polygons, rectangles, and curves
+.PP
+.B setshade
+- sets the current polygon shade
+.PP
+.B setslowcom
+- sends data in 6 bits per byte
+.PP
+.B setvaluator
+- assigns an initial value to a valuator
+.PP
+.B shaderange
+- sets range of color indices used in depth-cueing
+.PP
+.B singlebuffer
+- writes and displays all the bitplanes
+.PP
+.B spclos
+- draws the current open shaded polygon
+.PP
+.B splf
+- draws a shaded filled polygon
+.PP
+.B stepunit 
+- specifies that a graphics window change size in discrete steps
+.PP
+.B strwidth
+- returns the width of the specified text string
+.PP
+.B swapbuffers
+- exchanges the front and back buffers 
+.PP
+.B swapinterval
+- defines a minimum time between buffer swaps
+.PP
+.B textcolor
+- sets the color of text drawn in the textport
+.PP
+.B textinit
+- initializes the console textport
+.PP
+.B textport
+- allocates an area of the screen for the textport
+.PP
+.B textwritemask
+- grants write permission for text drawn in the textport
+.PP
+.B tie
+- ties two valuators to a button 
+.PP
+.B tpoff
+- turns off the textport
+.PP
+.B tpon
+- turns on the textport
+.PP
+.B translate
+- translates graphical primitives
+.PP
+.B unqdevice
+- disables the specified device from making entries in the event queue
+.PP
+.B viewport
+- allocates an area of the window for an image
+.PP
+.B winat
+- returns the identifier of the window beneath the cursor
+.PP
+.B winattach
+- attaches the input focus to the current graphics window and call process
+.PP
+.B winclose
+- closes the identified graphics window
+.PP
+.B winconstraints
+- changes the constraints of the current graphics window 
+.PP
+.B window
+- defines a perspective projection transformation
+.PP
+.B winget
+- returns the identifier of the current graphics window
+.PP
+.B winmove
+- moves the lower-left corner of the current graphics window 
+.PP
+.B winopen
+- creates a graphics window 
+.PP
+.B winpop
+- places the current graphics window in front of all other windows
+.PP
+.B winposition
+- changes the size and position of the current graphics window 
+.PP
+.B winpush
+- places the current window behind all other graphics windows 
+.PP
+.B winset
+- sets the current graphics window
+.PP
+.B wintitle
+- adds a title bar to the current graphics window 
+.PP
+.B writemask
+- grants write permission to available bitplanes
+.PP
+.B writepixels
+- paints a row of pixels on the screen
+.PP
+.B writeRGB
+- paints a row of pixels on the screen
+.PP
+.B xfpt
+- transforms points
+.PP
+.B zbuffer
+- starts or ends z-buffer mode
+.PP
+.B zclear
+- initializes the z-buffer 

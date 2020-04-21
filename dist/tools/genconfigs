@@ -1,0 +1,36 @@
+#! /bin/sh
+
+# genconfigs
+#
+#	For each configuration file, create an entry in configs
+#	with the destination pathname of the configuration file
+#	followed by a tab and then the type of the configuration
+#	file.  If no configuration file type is specified, the
+#	default type is assumed.
+
+default=update		# The default method is to mv the old config file
+			# aside and replace it with the new one.
+
+while test $# -gt 0
+do
+	case $1 in
+	-i) shift ; idb=$1 ;;
+	-m) shift ; machine=$1 ;;
+	--) shift ; break ;;
+	*) break ;;
+	esac
+	shift
+done
+
+if test -z "$idb" ; then idb=$sbase/idb ; fi
+
+case "$machine" in
+2000|iris) other=3000 ;;
+3000|juniper) other=2000 ;;
+*) echo "setenv machine or use '-m' option'" ; exit 1 ;;
+esac
+
+
+$ROOT/usr/sbin/idbscan -i$idb "
+	if (!@$other && @config )  printf('%s	%s\n', dstpath, 
+		(config[0] != '') ? config[0] : '$default') " > configs

@@ -1,0 +1,14 @@
+cc -O -UDEBUG -n -I$DEST/usr/include -c iib.c
+cc -O -UDEBUG -n -I$DEST/usr/include -c ibtab.c
+cc -O -UDEBUG -n -I$DEST/usr/include -c _ib.c
+rm -f iib
+cc -O -UDEBUG -n -I$DEST/usr/include -o iib iib.o ibtab.o _ib.o
+fixhex iib
+Make: Cannot load fixhex.  Stop.
+*** Error code 1 (ignored)
+chmod 04555 iib; chown root iib
+strip iib
+strip: cannot recreate iib
+*** Error code 2
+
+Stop.

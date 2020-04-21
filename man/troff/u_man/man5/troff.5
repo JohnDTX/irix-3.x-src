@@ -1,0 +1,286 @@
+'\"macro stdmacro
+.\"	%W%
+.TH TROFF 5
+.SH NAME
+troff \- description of output language
+.SH DESCRIPTION
+The device-independent
+.I troff
+outputs a pure ASCII description of a typeset document.
+The
+description specifies the typesetting device,
+the fonts,
+and
+the point sizes of characters to be used as well as the
+position of each character on the page.
+A list of all the
+legal commands follows.
+Most numbers are denoted as
+.I n
+and are ASCII strings.
+Strings inside of
+.B [
+.B ]
+are optional.
+.I Troff
+may produce them,
+but they are not required for the
+specification of the language.
+The character
+.B \en
+has the standard meaning of "newline" character.
+Between commands white space has no meaning.
+White space
+characters are spaces and newlines.
+.PP
+.TP 20
+.BI s n
+The point size of the characters to be generated.
+.TP 20
+.BI f n
+The font mounted in the specified position is to be used.
+The number ranges from 0 to the highest font presently mounted.
+0 is a special position,
+invoked by
+.IR troff ,
+but not directly accessible to the troff user.
+Normally fonts
+are mounted starting at position 1.
+.TP 20
+.BI c x
+Generate the character
+.I x
+at the current location on the page;
+.I x
+is a single ASCII character.
+.TP 20
+.BI C xyz
+Generate the special character
+.IR xyz .
+The name of the character is delimited by white space.
+The name will be one of the special characters legal
+for the typesetting device as specified by the device specification
+found in the file
+.IR DESC .
+This file resides in a directory specific for the typesetting
+device.
+(See
+.IR font (4)
+and
+.BR /usr/lib/font/dev* .)
+.TP 20
+.BI H n
+Change the horizonal position on the page to the number specified.
+The number is in basic units of motions as specified by
+.IR DESC .
+This is an absolute "goto".
+.TP 20
+.BI h n
+Add the number specified to the current horizontal position.
+This is a relative "goto".
+.TP 20
+.BI V n
+Change the vertical position on the page to the number specified
+(down is positive).
+.TP 20
+.BI v n
+Add the number specified to the current vertical position.
+.TP 20
+.I nnx
+This is a two-digit number followed by an ASCII character.
+The
+meaning is a combination of
+.BI h nn
+followed by
+.BI c x.
+The two digits
+.I nn
+are added to the current horizontal position and then the
+ASCII character,
+.IR x ,
+is produced.
+This is the most common form of character specification.
+.TP 20
+.BI n b\ a
+This command indicates that the end of a line has been reached.
+No
+action is required, though by convention the horizontal position is
+set to 0.
+.I Troff
+will specify a resetting of the
+.IR x , y
+coordinates on the page before
+requesting that more characters be printed.
+The first number,
+.IR b ,
+is the amount of space before
+the line and the second number,
+.IR a ,
+the amount of space after the line.
+The second number is delimited by white space.
+.TP 20
+.B w
+A
+.B w
+appears between words of the input document.
+No action is
+required.
+It is included so that one device can be emulated more
+easily on another device.
+.TP 20
+.BI p n
+Begin a new page.
+The new page number is included in this command.
+The vertical position on the page should be set to 0.
+.TP 20
+.B {
+Push the current environment,
+which means saving the current point size,
+font,
+and location on the page.
+.TP 20
+.B }
+Pop a saved environment.
+.TP 20
+.BI t xxxxx
+Print the string of characters,
+.IR xxxxx ,
+using the natural width of each character to determine the next
+x coordinate.
+.I Troff
+does not currently produce this form of command.
+It is not recommended.
+The characters will probably be too close
+together.
+.TP 20
+.BI # \ ....\  \en
+A line beginning with a pound sign is a comment.
+.TP 20
+.BI Dl \ x\ y \en
+Draw a line from the current location to
+.IR x , y .
+At the end of the
+drawing operation the current location will be
+.IR x , y .
+.TP 20
+.BI Dc \ d \en
+Draw a circle of diameter
+.I d
+with the leftmost edge being at the current location (x, y).
+The current
+location after drawing the circle will be
+.RI x+ d ,y,
+the rightmost edge
+of the circle.
+.TP 20
+.BI De \ dx\ dy \en
+Draw an ellipse with the specified axes.
+.I dx
+is the axis in the x direction and
+.I dy
+is the axis in the y direction.
+The leftmost edge
+of the ellipse will be at the current location.
+After drawing the
+ellipse the current location will be
+.RI x+ dx ,y.
+.TP 20
+.BI Da \ dh1\ dv1\ dh2\ dv2 \en
+Draw a counterclockwise arc from the current location to
+.IR dh1i + dh2 ,
+.IR dv1 + dv2
+whose center is
+.I dh1, dv1
+from the current position.  The current location after drawing the arc
+will be at its end.
+.TP 20
+.BI D~ \ x\ y\ x\ y... \en
+Draw a spline curve (wiggly line) between each of the
+.IR x , y
+coordinate
+pairs starting at the current location.
+The final location will be
+the final
+.IR x , y
+pair of the list.
+Currently there may be no
+more than 36
+.IR x , y
+pairs to this command.
+.TP 20
+.B x\ i[nit]\en
+Initialize the typesetting device.
+The actions required are
+dependent on the device.
+An
+.B init
+command will always occur before
+any output generation is attempted.
+.TP 20
+.BI x\ T \ device \en
+The name of the typesetter is
+.IR device .
+This is the same as the argument to the
+.B \-T
+option.
+The information about the typesetter will be found in
+the directory
+.BI /usr/lib/font/dev device .
+.TP 20
+.BI x\ r[es] \ n\ h\ v \en
+The resolution of the typesetting device in increments per inch is
+.IR n .
+Motion in the horizontal direction can take place in units of
+.I h
+basic increments.
+Motion in the vertical direction can take place
+in units of
+.I v
+basic increments.
+For example,
+the APS-5 typesetter has a basic resolution of
+723 increments per inch and can move in 
+either direction in 723rds of
+an inch.
+Its specification
+is:
+.RS 20
+.B x res 723 1 1
+.RE
+.TP 20
+.B x\ p[ause]\en
+Pause.
+Cause the current page to finish but do not relinquish the
+typesetter.
+.TP 20
+.B x\ s[top]\en
+Stop.
+Cause the current page to finish and then relinquish the typesetter.
+Perform any shutdown and bookkeeping procedures required.
+.TP 20
+.B x\ t[railer]\en
+Generate a trailer.
+On some devices no operation is performed.
+.TP 20
+.BI x\ f[ont] \ n\ name \en
+Load the font
+.I name
+into position
+.IR n .
+.TP 20
+.BI x\ H[eight] \ n \en
+Set the character height to
+.I n
+points.
+This causes the letters
+to be elongated or shortened.
+It does not affect the width
+of a letter.
+.TP 20
+.BI x\ S[lant] \ n \en
+Set the slant to
+.I n
+degrees.
+Only some typesetters can do this
+and not all angles are supported.
+.\"	%W% of %G%

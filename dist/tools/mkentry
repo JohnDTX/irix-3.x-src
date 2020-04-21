@@ -1,0 +1,49 @@
+#! /bin/sh
+#
+# Make tape images for entries to be written to tape.
+#
+# mkentry [ -r root ] [ -d dest ] entries...
+#
+# where "-r root" specifies an alternate root directory
+#	"-d dest" is where the cpio images go,
+# and "entries" are symbolic names of entries for which tape images
+# are to be created.  For each entry, a file called "dist/list.<entry>" is
+# expected under root; these files contain the names of files to write to the
+# entry.  If the entry is "ftn" or "pas", the common files from "ftnpas" are
+# included in the entry.  The entries are created in the current directory.
+
+root=$rbase
+dest=$dest
+v=
+
+while test $# -gt 1
+do
+	case "$1" in
+	-r)	shift ; root="$1" ; shift ;;
+	-d)	shift ; dest="$1" ; shift ;;
+	-v)	v=v ; shift ;;
+	-*)	echo $0: unknown option $1 ; exit 1 ;;
+	*)	break ;;
+	esac
+done
+
+if test ! -d "$root"
+then
+	echo $root: no such directory. ; exit 1
+fi
+
+if test ! -d "$dest"
+then
+	echo $dest: no such directory. ; exit 1
+fi
+
+for f in $*
+do
+	if test ! -r $root/dist/list.$f
+	then
+		echo $root/dist/list.$f: no such file. ; exit 1
+	fi
+	( cd $root ; \
+		join -j1 2 -j2 1 -a2 -o 1.1 2.1 dist/nsizesi dist/list.$f \
+		| sort -nr | cut -f2 -d" " -s |  cpio -oh$v ) > $dest/entry.$f
+done

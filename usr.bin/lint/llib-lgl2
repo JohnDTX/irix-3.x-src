@@ -1,0 +1,1386 @@
+/*LINTLIBRARY*/
+
+#include <gl2/gl.h>
+#include <math.h>
+
+void RGBcolor(red, green, blue) 
+short red, green, blue;
+{;}
+
+void RGBcursor(index, red, green, blue, redm, greenm, bluem)
+short index;
+short red, green, blue, redm, greenm, bluem;
+{;}
+
+void RGBmode()
+{;}
+
+void RGBwritemask(red, green, blue) 
+short red, green, blue;
+{;}
+
+void arc(x, y, radius, startang, endang)
+Coord x, y, radius;
+Angle startang, endang;
+{;}
+
+void arci(x, y, radius, startang, endang)
+Icoord x, y, radius;
+Angle startang, endang;
+{;}
+
+void arcs(x, y, radius, startang, endang)
+Scoord x, y, radius;
+Angle startang, endang;
+{;}
+
+void arcf(x, y, radius, startang, endang)
+Coord x, y, radius;
+Angle startang, endang;
+{;}
+
+void arcfi(x, y, radius, startang, endang)
+Icoord x, y, radius;
+Angle startang, endang;
+{;}
+
+void arcfs(x, y, radius, startang, endang)
+Scoord x, y, radius;
+Angle startang, endang;
+{;}
+
+void attachcursor(vx, vy) 
+Device vx, vy;
+{;}
+
+void backbuffer(b)
+Boolean b;
+{;}
+
+void backface(b)
+Boolean b;
+{;}
+
+void bbox2(xmin, ymin, x1, y1, x2, y2) 
+Screencoord xmin, ymin;
+Coord x1, y1, x2, y2;
+{;}
+
+void bbox2i(xmin, ymin, x1, y1, x2, y2) 
+Screencoord xmin, ymin;
+Icoord x1, y1, x2, y2;
+{;}
+
+void bbox2s(xmin, ymin, x1, y1, x2, y2) 
+Screencoord xmin, ymin;
+Scoord x1, y1, x2, y2;
+{;}
+
+void blankscreen(bool)
+short bool;
+{;}
+
+void blanktime(n)
+int n;
+{;}
+
+void blink(rate, color, red, green, blue) 
+short rate; 
+Colorindex color; 
+short red, green, blue;
+{;}
+
+long blkqread(data, n)
+short data[];
+short n;
+{;}
+
+/*VARARGS2*/
+void callfunc(fctn, nargs)
+int (*fctn)();
+long nargs;
+{;}
+
+void callobj(obj) 
+Object obj;
+{;}
+
+void captur(name,len,cmap)
+char *name;
+long len;
+RGBvalue cmap[][3];
+{;}
+
+void capture(name,cmap)
+char *name;
+RGBvalue cmap[][3];
+{;}
+
+void charst(str, len) 
+String str;
+long len;
+{;}
+
+void charstr(str) 
+String str;
+{;}
+
+void chunksize(chunk)
+long chunk;
+{;}
+
+void circ(x, y, radius) 
+Coord x, y, radius; 
+{;}
+
+void circi(x, y, radius) 
+Icoord x, y, radius;
+{;}
+
+void circs(x, y, radius)
+Scoord x, y, radius;
+{;}
+
+void circf(x, y, radius) 
+Coord x, y, radius;
+{;}
+
+void circfi(x, y, radius) 
+Icoord x, y, radius;
+{;}
+
+void circfs(x, y, radius)
+Scoord x, y, radius;
+{;}
+
+void clear()
+{;}
+
+void clearhitcode()
+{;}
+
+void clkoff()
+{;}
+
+void clkon()
+{;}
+
+void closeobj()
+{;}
+
+void cmov(x, y, z) 
+Coord x, y, z;
+{;}
+
+void cmovi(x, y, z) 
+Icoord x, y, z;
+{;}
+
+void cmovs(x, y, z)
+Scoord x, y, z;
+{;}
+
+void cmov2(x, y) 
+Coord x, y;
+{;}
+
+void cmov2i(x, y) 
+Icoord x, y;
+{;}
+
+void cmov2s(x, y)
+Scoord x, y;
+{;}
+
+void color(c) 
+Colorindex c;
+{;}
+
+void compactify(obj)
+Object obj;
+{;}
+
+void crv(geom)
+Coord geom[4][3];
+{;}
+
+void crvn(n, geom)
+long n;
+Coord geom[][3];
+{;}
+
+void curorigin(n, xorigin, yorigin)
+short n, xorigin, yorigin;
+{;}
+
+void cursoff()
+{;}
+
+void curson()
+{;}
+
+void curvebasis(basisid)
+short basisid;
+{;}
+
+void curveit(iterationcount)
+short iterationcount;
+{;}
+
+void curveprecision(nsegments)
+short nsegments;
+{;}
+
+void cyclemap(duration,map,nextmap)
+short duration,map,nextmap;
+{;}
+
+void dbtext(str)
+char *str;
+{;}
+
+void defbasis(id, matrix)
+long id;
+Matrix matrix;
+{;}
+
+void defcursor(n, curs)
+short n;
+Cursor curs;
+{;}
+
+void deflinestyle(n, ls) 
+short n;
+Linestyle ls;
+{;}
+
+void defpattern(n, size, mask) 
+short n, size;
+short *mask;
+{;}
+
+void defrasterfont(n, ht, nc, chars, nr, raster)
+short n, ht, nc, nr;
+Fontchar chars[];
+short raster[];
+{;}
+
+void delobj(obj) 
+Object obj;
+{;}
+
+void deltag(t)
+Tag t;
+{;}
+
+void depthcue(mode)
+short mode;
+{;}
+
+void devport(dev, port)
+Device dev;
+long port;
+{;}
+
+void doublebuffer()
+{;}
+
+void draw(x, y, z) 
+Coord x, y, z;
+{;}
+
+void drawi(x, y, z) 
+Icoord x, y, z;
+{;}
+
+void draws(x, y, z)
+Scoord x, y, z;
+{;}
+
+void draw2(x, y) 
+Coord x, y;
+{;}
+
+void draw2i(x, y) 
+Icoord x, y;
+{;}
+
+void draw2s(x, y, z)
+Scoord x, y;
+{;}
+
+void editobj(obj) 
+Object obj;
+{;}
+
+long endfeedback(buffer)
+short buffer[];
+{;}
+
+long endpick(buffer)
+short buffer[];
+{;}
+
+long endselect(buffer)
+short buffer[];
+{;}
+
+void feedback(buffer, size)
+short buffer[];
+long size;
+{;}
+
+void finish()
+{;}
+
+void font(fntnum) 
+short fntnum;
+{;}
+
+void foreground()
+{;}
+
+void frontbuffer(b)
+Boolean b;
+{;}
+
+void fudge(x, y)
+long x, y;
+{;}
+
+void gRGBcolor(red, green, blue)
+short *red, *green, *blue;
+{;}
+
+void gRGBcursor(index, red, green, blue, redm, greenm, bluem, b)
+short *index;
+short *red, *green, *blue, *redm, *greenm, *bluem;
+Boolean *b;
+{;}
+
+void gRGBmask(redm, greenm, bluem)
+short *redm, *greenm, *bluem;
+{;}
+
+void gbegin()
+{;}
+
+void gconfig()
+{;}
+
+Object genobj()
+{return (Object) 0;}
+
+Tag gentag()
+{return (Tag) 0;}
+
+long getbuffer()
+{return (long) 0;}
+
+long getbutton(num)
+Device num;
+{return (long) 0;}
+
+long getcmmode()
+{return (long) 0;}
+
+long getcolor()
+{return (long) 0;}
+
+void getcpos(ix, iy)
+Screencoord *ix, *iy;
+{;}
+
+void getcursor(index, color, wtm, b)
+short *index;
+Colorindex *color, *wtm;
+Boolean *b;
+{;}
+
+long getdcm()
+{return (long) 0;}
+
+void getdepth(near, far)
+Screencoord *near, *far;
+{;}
+
+void getdev(n, devs, vals)
+long n;
+Device *devs;
+short *vals;
+{;}
+
+long getdisplaymode()
+{return (long) 0;}
+
+long getfont()
+{return (long) 0;}
+
+void getgpos(fx, fy, fz, fw)
+Coord *fx, *fy, *fz, *fw;
+{;}
+
+long getheight()
+{return (long) 0;}
+
+long gethitcode()
+{return (long) 0;}
+
+long getlsbackup()
+{return (long) 0;}
+
+long getlsrepeat()
+{return (long) 0;}
+
+long getlstyle()
+{return (long) 0;}
+
+long getlwidth()
+{return (long) 0;}
+
+long getmap()
+{return (long) 0;}
+
+void getmatrix(m) 
+Matrix m;
+{;}
+
+void getmcolor(color, r, g, b)
+Colorindex color;
+short *r, *g, *b;
+{;}
+
+long getmem()
+{return (long) 0;}
+
+long getmonitor()
+{return (long) 0;}
+
+Object getopenobj()
+{return (Object) 0;}
+
+void getorigin(x, y)
+long *x, *y;
+{;}
+
+long getothermonitor()
+{return (long) 0;}
+
+long getpattern()
+{return (long) 0;}
+
+long getplanes()
+{return (long) 0;}
+
+void getpor(name, len)
+char *name; long len;
+{;}
+
+void getport(name)
+char *name;
+{;}
+
+long getresetls()
+{return (long) 0;}
+
+void getscrmask(left, right, bottom, top)
+Screencoord *left, *right, *bottom, *top;
+{;}
+
+void getsize(x, y)
+long *x, *y;
+{;}
+
+void gettp(left, right, bottom, top)
+Screencoord *left, *right, *bottom, *top;
+{;}
+
+long  getvaluator(val)
+Device val;
+{return (long) 0;}
+
+void getviewport(left, right, bottom, top) 
+Screencoord *left, *right, *bottom, *top;
+{;}
+
+long getwritemask()
+{return (long) 0;}
+
+long getzbuffer()
+{return (long) 0;}
+
+void gewrite(array, n)
+short array[];
+long n;
+{;}
+
+void gexit()
+{;}
+
+void gflush()
+{;}
+
+void ginit()
+{;}
+
+void greset()
+{;}
+
+void gsync()
+{;}
+
+void imakebackground()
+{;}
+
+void initnames()
+{;}
+
+long ismex()
+{return (long) 0;}
+
+long isobj(obj)
+Object obj;
+{return (long) 0;}
+
+long isqueued(arg)
+short arg;
+{return (long) 0;}
+
+long istag(t)
+Tag t;
+{return (long) 0;}
+
+void keepaspect(x, y)
+long x, y;
+{;}
+
+void lampoff(lamps)
+char lamps;
+{;}
+
+void lampon(lamps)
+char lamps;
+{;}
+
+void linewidth(n) 
+short n;
+{;}
+
+void loadmatrix(m) 
+Matrix m;
+{;}
+
+void loadname(name)
+short name;
+{;}
+
+void lookat(vx, vy, vz, px, py, pz, twist) 
+Coord vx, vy, vz, px, py, pz; 
+Angle twist;
+{;}
+
+void lsbackup(b) 
+Boolean b;
+{;}
+
+void lsrepeat(factor)
+long factor;
+{;}
+
+void makeobj(obj) 
+Object obj;
+{;}
+
+void maketag(t) 
+Tag t;
+{;}
+
+void mapcolor(color, red, green, blue) 
+Colorindex color; 
+short red, green, blue;
+{;}
+
+void mapw(vobj, sx, sy, wx1, wy1, wz1, wx2, wy2, wz2) 
+Object vobj; 
+Screencoord sx, sy; 
+Coord *wx1, *wy1, *wz1, *wx2, *wy2, *wz2;
+{;}
+
+void mapw2(vobj, sx, sy, wx, wy)
+Object vobj;
+Screencoord sx, sy;
+Coord *wx, *wy;
+{;}
+
+void maxsize(x, y)
+long x, y;
+{;}
+
+void minsize(x, y)
+long x, y;
+{;}
+
+void move(x, y, z) 
+Coord x, y, z;
+{;}
+
+void movei(x, y, z) 
+Icoord x, y, z;
+{;}
+
+void moves(x, y, z) 
+Scoord x, y, z;
+{;}
+
+void move2(x, y) 
+Coord x, y;
+{;}
+
+void move2i(x, y)
+Icoord x, y;
+{;}
+
+void move2s(x, y) 
+Scoord x, y;
+{;}
+
+void multimap()
+{;}
+
+void multmatrix(m) 
+Matrix m;
+{;}
+
+void newtag(newtag, oldtag, offset)
+Tag newtag, oldtag;
+long offset;
+{;}
+
+void noise(v, delta) 
+Device v; 
+short delta;
+{;}
+
+void noport()
+{;}
+
+void objdelete(tag1, tag2) 
+Tag tag1, tag2; 
+{;}
+
+void objinsert(t) 
+Tag t; 
+{;}
+
+void objreplace(t) 
+Tag t; 
+{;}
+
+void onemap()
+{;}
+
+void ortho(left, right, bottom, top, near, far) 
+Coord left, right, bottom, top, near, far;
+{;}
+
+void ortho2(left, right, bottom, top) 
+Coord left, right, bottom, top;
+{;}
+
+void pagecolor(c) 
+Colorindex c;
+{;}
+
+void pagewritemask(pmask) 
+Colorindex pmask;
+{;}
+
+void passthrough(token)
+short token;
+{;}
+
+void patch(geomx, geomy, geomz)
+Matrix geomx, geomy, geomz;
+{;}
+
+void patchbasis(uid, vid)
+long uid, vid;
+{;}
+
+void patchcurves(ucurves, vcurves)
+long ucurves, vcurves;
+{;}
+
+void patchprecision(usegments, vsegments)
+long usegments, vsegments;
+{;}
+
+void pclos()
+{;}
+
+void pdr(x, y, z)
+Coord x, y, z;
+{;}
+
+void pdri(x, y, z)
+Icoord x, y, z;
+{;}
+
+void pdrs(x, y, z)
+Scoord x, y, z;
+{;}
+
+void pdr2(x, y)
+Coord x, y;
+{;}
+
+void pdr2i(x, y)
+Icoord x, y;
+{;}
+
+void pdr2s(x, y)
+Scoord x, y;
+{;}
+
+void perspective(fovy, aspect, near, far) 
+Angle fovy;
+float aspect; 
+Coord near, far;
+{;}
+
+void prefposition(x1, x2, y1, y2)
+long x1, x2, y1, y2;
+{;}
+
+void prefsize(x, y)
+long x, y;
+{;}
+
+void pick(buffer, numnames) 
+short buffer[];
+long numnames;
+{;}
+
+void picksize(deltax, deltay) 
+short deltax, deltay;
+{;}
+
+void pmv(x, y, z)
+Coord x, y, z;
+{;}
+
+void pmvi(x, y, z)
+Icoord x, y, z;
+{;}
+
+void pmvs(x, y, z)
+Scoord x, y, z;
+{;}
+
+void pmv2(x, y)
+Coord x, y;
+{;}
+
+void pmv2i(x, y)
+Icoord x, y;
+{;}
+
+void pmv2s(x, y)
+Scoord x, y;
+{;}
+
+void pnt(x, y, z) 
+Coord x, y, z;
+{;}
+
+void pnti(x, y, z) 
+Icoord x, y, z;
+{;}
+
+void pnts(x, y, z) 
+Scoord x, y, z;
+{;}
+
+void pnt2(x, y) 
+Coord x, y;
+{;}
+
+void pnt2i(x, y) 
+Icoord x, y;
+{;}
+
+void pnt2s(x, y) 
+Scoord x, y;
+{;}
+
+void polarview(dist, azim, inc, twist) 
+Coord dist;
+Angle azim, inc, twist;
+{;}
+
+void polf(n, parray) 
+long n; 
+Coord parray[][3];
+{;}
+
+void polfi(n, parray) 
+long n; 
+Icoord parray[][3];
+{;}
+
+void polfs(n, parray) 
+long n; 
+Scoord parray[][3];
+{;}
+
+void polf2(n, parray) 
+long n; 
+Coord parray[][2];
+{;}
+
+void polf2i(n, parray) 
+long n; 
+Icoord parray[][2];
+{;}
+
+void polf2s(n, parray) 
+long n; 
+Scoord parray[][2];
+{;}
+
+void poly(n, parray) 
+long n; 
+Coord parray[][3];
+{;}
+
+void polyi(n, parray) 
+long n; 
+Icoord parray[][3];
+{;}
+
+void polys(n, parray) 
+long n; 
+Scoord parray[][3];
+{;}
+
+void poly2(n, parray) 
+long n; 
+Coord parray[][2];
+{;}
+
+void poly2i(n, parray) 
+long n; 
+Icoord parray[][2];
+{;}
+
+void poly2s(n, parray) 
+long n; 
+Scoord parray[][2];
+{;}
+
+void popattributes()
+{;}
+
+void popmatrix()
+{;}
+
+void popname()
+{;}
+
+void popviewport()
+{;}
+
+void pushattributes()
+{;}
+
+void pushmatrix()
+{;}
+
+void pushname(name)
+short name;
+{;}
+
+void pushviewport()
+{;}
+
+void qdevice(v) 
+Device v;
+{;}
+
+void qenter(qtype, val)
+short qtype, val;
+{;}
+
+long qread(data)
+short *data;
+{return (long) 0;}
+
+void qreset()
+{;}
+
+long qtest() 
+{return (long) 0;}
+
+void rcaptu(name,len,cmap,left,right,bottom,top,dithsize,dithmat,res)
+char *name;
+long len;
+RGBvalue cmap[][3];
+Screencoord left,right,bottom,top;
+long dithsize;
+short **dithmat;
+long res;
+{;}
+
+void rcapture(name,cmap,left,right,bottom,top,dithsize,dithmat,res)
+char *name;
+RGBvalue cmap[][3];
+Screencoord left,right,bottom,top;
+long dithsize;
+short **dithmat;
+long res;
+{;}
+
+void rcrv(geom)
+Coord geom[4][4];
+{;}
+
+void rcrvn(n, geom)
+long n;
+Coord geom[][4];
+{;}
+
+void rdr(dx, dy, dz)
+Coord dx, dy, dz;
+{;}
+
+void rdri(dx, dy, dz)
+Icoord dx, dy, dz;
+{;}
+
+void rdrs(dx, dy, dz)
+Scoord dx, dy, dz;
+{;}
+
+void rdr2(dx, dy)
+Coord dx, dy;
+{;}
+
+void rdr2i(dx, dy)
+Icoord dx, dy;
+{;}
+
+void rdr2s(dx, dy)
+Scoord dx, dy;
+{;}
+
+long readRGB(n, red, green, blue) 
+short n; 
+RGBvalue red[], green[], blue[];
+{return (long) 0;}
+
+long readpixels(n, colors) 
+short n; 
+Colorindex colors[];
+{return (long) 0;}
+
+void rect(x1, y1, x2, y2) 
+Coord x1, y1, x2, y2;
+{;}
+
+void recti(x1, y1, x2, y2)  
+Icoord x1, y1, x2, y2;
+{;}
+
+void rects(x1, y1, x2, y2)  
+Scoord x1, y1, x2, y2;
+{;}
+
+void rectcopy(left, right, bottom, top, newx, newy)
+Screencoord left, right, bottom, top, newx, newy;
+{;}
+
+void rectf(x1, y1, x2, y2)  
+Coord x1, y1, x2, y2;
+{;}
+
+void rectfs(x1, y1, x2, y2)  
+Scoord x1, y1, x2, y2;
+{;}
+
+void rectfi(x1, y1, x2, y2)  
+Icoord x1, y1, x2, y2;
+{;}
+
+void resetls(b) 
+Boolean b;
+{;}
+
+void reshapeviewport()
+{;}
+
+void ringbell()
+{;}
+
+void rmv(dx, dy, dz)
+Coord dx, dy, dz;
+{;}
+
+void rmvi(dx, dy, dz)
+Icoord dx, dy, dz;
+{;}
+
+void rmvs(dx, dy, dz)
+Scoord dx, dy, dz;
+{;}
+
+void rmv2(dx, dy)
+Coord dx, dy;
+{;}
+
+void rmv2i(dx, dy)
+Icoord dx, dy;
+{;}
+
+void rmv2s(dx, dy)
+Scoord dx, dy;
+{;}
+
+void rot(a, axis)
+float a;
+char axis;
+{;}
+
+void rotate(a, axis) 
+Angle a; 
+char axis;
+{;}
+
+void rpatch(geomx, geomy, geomz, geomw)
+Matrix geomx, geomy, geomz, geomw;
+{;}
+
+void rpdr(x, y, z)
+Coord x, y, z;
+{;}
+
+void rpdri(x, y, z)
+Icoord x, y, z;
+{;}
+
+void rpdrs(x, y, z)
+Scoord x, y, z;
+{;}
+
+void rpdr2(x, y)
+Coord x, y;
+{;}
+
+void rpdr2i(x, y)
+Icoord x, y;
+{;}
+
+void rpdr2s(x, y)
+Scoord x, y;
+{;}
+
+void rpmv(x, y, z)
+Coord x, y, z;
+{;}
+
+void rpmvi(x, y, z)
+Icoord x, y, z;
+{;}
+
+void rpmvs(x, y, z)
+Scoord x, y, z;
+{;}
+
+void rpmv2(x, y)
+Coord x, y;
+{;}
+
+void rpmv2i(x, y)
+Icoord x, y;
+{;}
+
+void rpmv2s(x, y)
+Scoord x, y;
+{;}
+
+void scale(x, y, z) 
+float x, y, z;
+{;}
+
+void screenspace()
+{;}
+
+void scrmask(left, right, bottom, top)
+Screencoord left, right, bottom, top;
+{;}
+
+void select(numnames, buffer) 
+long numnames;
+short buffer[];
+{;}
+
+void gselect(numnames, buffer) 
+long numnames;
+short buffer[];
+{;}
+
+void setbell(mode)
+char mode;
+{;}
+
+void setcursor(index, color, wtm) 
+short index; 
+Colorindex color, wtm;
+{;}
+
+void setdblights(mask)
+long mask;
+{;}
+
+long setfastcom()
+{return (long) 0;}
+
+void setdepth(near, far)
+Screencoord near, far;
+{;}
+
+void setlinestyle(index) 
+short index;
+{;}
+
+void setmap(mapnum) 
+short mapnum; 
+{;}
+
+void setmonitor(type)
+short type;
+{;}
+
+void setpattern(index)  
+short index;
+{;}
+
+void setshade(shade)
+Colorindex shade;
+{;}
+
+long setslowcom()
+{return (long) 0;}
+
+void setvaluator(v, init, min, max) 
+Device v; 
+short init, min, max;
+{;}
+
+void shaderange(lowindex, highindex, z1, z2)
+Colorindex lowindex, highindex;
+Screencoord z1, z2;
+{;}
+
+void singlebuffer()
+{;}
+
+void spclos()
+{;}
+
+void splf(n, parray, iarray)
+long n;
+Coord parray[][3];
+Colorindex iarray[];
+{;}
+
+void splfi(n, parray, iarray)
+long n;
+Icoord parray[][3];
+Colorindex iarray[];
+{;}
+
+void splfs(n, parray, iarray)
+long n;
+Scoord parray[][3];
+Colorindex iarray[];
+{;}
+
+void splf2(n, parray, iarray)
+long n;
+Coord parray[][2];
+Colorindex iarray[];
+{;}
+
+void splf2i(n, parray, iarray)
+long n;
+Icoord parray[][2];
+Colorindex iarray[];
+{;}
+
+void splf2s(n, parray, iarray)
+long n;
+Scoord parray[][2];
+Colorindex iarray[];
+{;}
+
+void stepunit(x, y)
+long x, y;
+{;}
+
+long strwid(str, len) 
+String str;
+long len;
+{;}
+
+long strwidth(str) 
+String str;
+{;}
+
+void swapbuffers()
+{;}
+
+void swapinterval(i) 
+short i;
+{;}
+
+void textcolor(tcolor) 
+Colorindex tcolor;
+{;}
+
+void textinit()
+{;}
+
+void textport(left, right, bottom, top)
+Screencoord left, right, bottom, top;
+{;}
+
+void textwritemask(tmask)
+Colorindex tmask;
+{;}
+
+void tie(b, v1, v2) 
+Device b, v1, v2;
+{;}
+
+void tpoff()
+{;}
+
+void tpon()
+{;}
+
+void translate(x, y, z) 
+Coord x, y, z;
+{;}
+
+void unqdevice(v) 
+Device v;
+{;}
+
+void viewport(left, right, bottom, top)
+Screencoord left, right, bottom, top;
+{;}
+
+long winattach()
+{return (long) 0;}
+
+void winclose(gfnum)
+long gfnum;
+{;}
+
+void window(left, right, bottom, top, near, far) 
+Coord left, right, bottom, top, near, far;
+{;}
+
+long winget()
+{return (long) 0;}
+
+void winmove(orgx, orgy)
+long orgx, orgy;
+{;}
+
+long winope(name, len)
+char *name; long len;
+{return (long) 0;}
+
+long winopen(name)
+char *name;
+{return (long) 0;}
+
+void winpop()
+{;}
+
+void winposition(x1, x2, y1, y2)
+long x1, x2, y1, y2;
+{;}
+
+void winpush()
+{;}
+
+long winset(gfnum)
+long gfnum;
+{return (long) 0;}
+
+void wintit(name, len)
+char *name; long len;
+{;}
+
+void wintitle(name)
+char *name;
+{;}
+
+void writeRGB(n, red, green, blue) 
+short n; 
+RGBvalue red[], green[], blue[];
+{;}
+
+void writemask(wtm) 
+Colorindex wtm;
+{;}
+
+void writepixels(n, colors) 
+short n; 
+Colorindex colors[];
+{;}
+
+void xfpt(x, y, z)
+Coord x, y, z;
+{;}
+
+void xfpti(x, y, z)
+Icoord x, y, z;
+{;}
+
+void xfpts(x, y, z)
+Scoord x, y, z;
+{;}
+
+void xfpt2(x, y)
+Coord x, y;
+{;}
+
+void xfpt4(x, y, z, w)
+Coord x, y, z, w;
+{;}
+
+void xfpt2i(x, y)
+Icoord x, y;
+{;}
+
+void xfpt2s(x, y)
+Scoord x, y;
+{;}
+
+void xfpt4i(x, y, z, w)
+Icoord x, y, z, w;
+{;}
+
+void xfpt4s(x, y, z, w)
+Scoord x, y, z, w;
+{;}
+
+void zbuffer(bool)
+Boolean bool;
+{;}
+
+void zclear()
+{;}

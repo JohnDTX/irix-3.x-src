@@ -1,0 +1,113 @@
+.TH PLOT 3X
+.SH NAME
+plot \- graphics interface subroutines
+.SH SYNOPSIS
+.nf
+.B openpl (\^)
+.PP
+.B erase (\^)
+.PP
+.B label (s)
+.B char \(**s;
+.PP
+.B line (x1, y1, x2, y2)
+.B int x1, y1, x2, y2;
+.PP
+.B circle (x, y, r)
+.B int x, y, r;
+.PP
+.B "arc (x, y, x0, y0, x1, y1)"
+.B "int x, y, x0, y0, x1, y1;"
+.PP
+.B move (x, y)
+.B int x, y;
+.PP
+.B cont (x, y)
+.B int x, y;
+.PP
+.B point (x, y)
+.B int x, y;
+.PP
+.B linemod (s)
+.B char \(**s;
+.PP
+.B space (x0, y0, x1, y1)
+.B int x0, y0, x1, y1;
+.PP
+.B closepl (\^)
+.fi
+.SH DESCRIPTION
+These subroutines
+generate
+graphic output in a relatively
+device-independent manner.
+.I Space\^
+must be used before any of these functions to declare the
+amount of space necessary. See
+.IR plot\^ (4).
+.I Openpl\^
+must be used before any of the others to open the
+device for writing.
+.I Closepl\^
+flushes the output.
+.PP
+.I Circle\^
+draws a circle of radius
+.I r\^
+with center at the point
+.RI ( x , y\^ ).
+.PP
+.I Arc\^
+draws an arc of a circle with center at the point
+.RI  ( x , y\^ )
+between the points
+.RI ( x0 , y0\^ )
+and
+.RI ( x1 , y1\^ ).
+.PP
+String arguments to
+.I label\^
+and
+.I linemod\^
+are terminated by nulls and do not contain new-lines.
+.PP
+See
+.IR plot\^ (4)
+for a description
+of the effect of the remaining functions.
+.PP
+The library files listed below provide
+several flavors of these routines.
+.SH FILES
+.ta \w'/usr/lib/lib4014\f3.\fPa\ \ \ 'u
+/usr/lib/libplot\f3.\fPa	produces output for
+.IR tplot\^ (1G)
+filters
+.br
+/usr/lib/lib300\f3.\fPa	for \s-1DASI\s+1 300
+.br
+/usr/lib/lib300s\f3.\fPa	for \s-1DASI\s+1 300s
+.br
+/usr/lib/lib450\f3.\fPa	for \s-1DASI\s+1 450
+.br
+/usr/lib/lib4014\f3.\fPa	for Tektronix 4014
+.DT
+.SH WARNINGS
+In order to compile a program containing these functions
+in
+.I file.c\^
+it is necessary to use
+``cc
+.I file.c\^
+\-lplot''.
+.PP
+In order to execute it, it is necessary to use
+\&``a.out | tplot''.
+.PP
+The above routines use \f3<stdio.h>\fP, which causes 
+them to increase the size of programs,
+not otherwise using standard I/O, more
+than might be expected.
+.SH SEE ALSO
+tplot(1G), plot(4).
+.\"	@(#)plot.3x	5.1 of 10/25/83

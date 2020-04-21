@@ -1,0 +1,22 @@
+.TH ERRLOG 7 
+.SH NAME
+errlog \- reroute the board messages
+.SH SYNOPSIS
+.B "cat \-u /dev/EXOS/errlog"
+\>
+\f2file\f1
+.B &
+.SH DESCRIPTION
+If the
+\f2errlog\f1
+device is opened, the EXOS error status messages 
+do not appear on the system console and may be read from this device.
+This command sequence routes the ``printf'' messages from
+the board to the designated
+\f2file\f1.
+If this option is used, the file should be examined and
+flushed periodically so it does not become too large.
+.SH FILES
+.nf
+/dev/EXOS/errlog		- special file
+.fi

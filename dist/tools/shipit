@@ -1,0 +1,40 @@
+#! /bin/sh
+
+rm -rf /usr/test && echo "/usr/test removed."
+
+mount /dev/md0c /mnt
+
+if test ! -f /kernels/3000.std ; then ln /vmunix /kernels/3000.std ; fi
+
+for f in tcp 488 ibm
+do
+	echo "Do you want the $f option installed ? \c"
+	read x
+	case $x in
+	y*|Y*)	( cd /mnt ; cpio -pdaum / ) < list.$f
+		newkernel=/kernels/3000.$f
+		if test -f $newkernel
+		then
+			rm -f /vmunix /defaultboot
+			ln $newkernel /vmunix
+			ln /vmunix /defaultboot
+			echo $newkernel installed as vmunix and defaultboot.
+		fi
+		if test $f = "tcp"
+		then
+			mv .wsirisrc stdwsirisrc
+			mv tcpwsirisrc .wsirisrc
+		fi
+		;;
+	*)	echo $f not installed.
+	esac
+done
+
+cd /
+umount /dev/md0c
+
+rm /shipit /list.*
+
+echo "Making a copy of /root on md0c."
+/etc/rootcopy ok
+echo "Done."

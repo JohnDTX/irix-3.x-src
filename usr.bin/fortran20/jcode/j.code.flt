@@ -1,0 +1,291 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: J.CODE.FLT.TEXT                           *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               10-Sep-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure fexpr(var fsiz: sizes);
+  var lop: integer;
+begin
+lop := nextbyte;
+case lop of
+  48: { INT12  } begin fsiz := B; fexpr(fsiz); end;
+  49: { INT24  } begin fsiz := W; fexpr(fsiz); end;
+  50: { INT14  } begin fsiz := B; fexpr(fsiz); end;
+  54: { REAL48 } begin fsiz := S; fexpr(fsiz); end;
+  55: { REAL84 } begin fsiz := D; fexpr(fsiz); end;
+  56: { FLOAT4 } begin fsiz := L; fexpr(fsiz); end;
+  57: { FLOAT8 } begin fsiz := L; fexpr(fsiz); end;
+otherwise: numexpr(lop,fsiz);
+end; {case}
+end; {fexpr}
+
+procedure funop(fop: integer; fsiz: sizes);
+  var f: pregrec; lcattr,tcattr: cattr; tsiz: sizes;
+begin
+fexpr(fsiz);
+if gcattr.ckind = FEXP
+then if gcattr.exreg^.count <= 1
+     then begin
+          erase(gcattr.exreg); f := gcattr.exreg; dupref(gcattr,S);
+          end
+     else f := getreg(F0,F7)
+else f := getreg(F0,F7);
+genfear(fop,gcattr,f,fsiz);
+gcattr.ckind := FEXP; gcattr.exreg := f;
+end; {funop}
+
+procedure fround(fsiz: sizes);
+  var f: pregrec; lab1,lab2: integer; lcattr: cattr;
+begin
+lcattr.ckind := CNST; lcattr.cvalu.cstkind := SCALCNST;
+lcattr.cvalu.lvalu := $3f000000; { 0.5 }
+lab1 := newlabel; lab2 := newlabel;
+fexpr(fsiz); f := loadf(gcattr,fsiz);
+dupref(gcattr,X); genfear(_FTEST,gcattr,f,X);
+genfjump(ord(FCC_LT),lab1);
+genfear(_FADD,lcattr,f,S);
+genjump(_BRA,lab2);
+defilabel(lab1);
+genfear(_FSUB,lcattr,f,S);
+defilabel(lab2);
+dupref(gcattr,X); genfear(_FINTRZ,gcattr,f,X);
+end; {fround}
+
+function IsPwrOf2(fvalu: valu; fsiz: sizes; var k: integer): Boolean;
+  var ll: longint;
+begin
+IsPwrOf2 := FALSE; ll := fvalu.lvalu;
+case fsiz of
+  B,W,L: begin
+         if ll > 0
+         then begin
+              k := 0;
+              while not odd(ll) do
+                    begin k := k + 1; ll := ll div 2; end;
+              if ll = 1 then IsPwrOf2 := TRUE;
+              end;
+         end;
+  S:     begin
+         if ll > 0
+         then if (ll and $007FFFFF) = 0
+              then begin
+                   k := (ll and $7F800000) div $800000 - 127;
+                   if k < ($FF - 127) then IsPwrOf2 := TRUE;
+                   end;
+         end;
+  D:     begin
+         if ll > 0
+         then if ((ll and $000FFFFF) = 0) and (fvalu.lvalu2 = 0)
+              then begin
+                   k := (ll and $7FF00000) div $100000 - 1023;
+                   if k < ($7FF - 1023) then IsPwrOf2 := TRUE;
+                   end;
+         end;
+end; {case}
+end; {IsPwrOf2}
+
+procedure fbinop(fop: integer; lsiz,gsiz: sizes; FComm: Boolean);
+  var f: pregrec; lcattr,tcattr: cattr; tsiz: sizes;
+      CheckIt,IsMul,MultByOne: Boolean; n: integer;
+begin
+fexpr(lsiz); lcattr := gcattr; fexpr(gsiz); MultByOne := FALSE;
+if FComm
+then begin
+     if lcattr.ckind <> FEXP
+     then CheckIt := TRUE
+     else CheckIt := not lcattr.exreg^.InReg;
+     if CheckIt and (gcattr.ckind = FEXP)
+     then begin
+          tcattr := gcattr; gcattr := lcattr; lcattr := tcattr;
+          tsiz := gsiz; gsiz := lsiz; lsiz := tsiz;
+          end;
+     end;
+IsMul := (fop = _FMUL) or (fop = _FSMUL);
+if IsMul or (fop = _FDIV) or (fop = _FSDIV)
+then begin
+     CheckIt := TRUE;
+     if gcattr.ckind = CNST
+     then if IsPwrOf2(gcattr.cvalu,gsiz,n)
+          then begin
+               if not IsMul then n := -n;
+               CheckIt := FALSE;
+               end;
+     if CheckIt and IsMul and (lcattr.ckind = CNST)
+     then if IsPwrOf2(lcattr.cvalu,lsiz,n)
+          then begin
+               CheckIt := FALSE;
+               tcattr := gcattr; gcattr := lcattr; lcattr := tcattr;
+               tsiz := gsiz; gsiz := lsiz; lsiz := tsiz;
+               end;
+     if not CheckIt
+     then begin
+          gcattr.cvalu.lvalu := n; gcattr.cvalu.cstkind := SCALCNST;
+          fop := _FSCALE; gsiz := W;
+          if n = 0 then MultByOne := TRUE;
+          end;
+     end;
+f := loadf(lcattr,lsiz);
+if not MultByOne
+then begin
+     isolate(f); erase(f); genfear(fop,gcattr,f,gsiz);
+     end;
+gcattr.ckind := FEXP; gcattr.exreg := f;
+end; {fbinop}
+
+procedure floadexpr(fsiz: sizes);
+  var f: pregrec;
+begin
+fexpr(fsiz); f := loadf(gcattr,fsiz);
+end; {floadexpr}
+
+procedure m81transop(fop: integer);
+  var lsiz: sizes;
+begin
+if odd(fop) then lsiz := D else lsiz := S;
+funop(tm81op[fop],lsiz);
+end; {m81transop}
+
+procedure transop(fop: integer);
+  var n: integer; lcattr: cattr; lsiz: sizes; TempFlag: Boolean;
+begin
+expression(nextbyte); TempFlag := FALSE;
+if odd(fop)
+then begin n := 8; lsiz := D; end
+else begin n := 4; lsiz := S; end;
+if TArgKind[fop]
+then if (gcattr.ckind = ADDR) or (gcattr.ckind = VARB) or
+        (gcattr.ckind = FDAT) or (gcattr.ckind = INDX) or
+        (gcattr.ckind = INDR)
+     then pushaddress(gcattr)
+     else begin
+          gettemp(lcattr,n); TempFlag := TRUE;
+          store(gcattr,lcattr,lsiz);
+          pushaddress(lcattr);
+          end
+else pushvalue(gcattr,lsiz);
+saveallregs; genjsra(tname[fop]); clearscr;
+if TempFlag then freetemp(lcattr,n);
+if FPHardware and JUN_FLAG
+then begin
+     gcattr.ckind := JEXP; gcattr.exreg := getreg(F1,F1);
+     end
+else if lsiz = S
+     then begin
+          gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D0);
+          end
+     else begin
+          { MOVEM.L D0/D1,-(SP) } gen(18663); gen(-16384);
+          gcattr.ckind := STCK; LastPushQ := TRUE;
+          end;
+end; {transop}
+
+procedure skycmd(fop: integer);
+  var lcattr: cattr;
+begin
+if SKY_FLAG
+then begin
+     lcattr.ckind := CNST; lcattr.cvalu.cstkind := SCALCNST;
+     lcattr.cvalu.lvalu := fop + $1000;
+     store(lcattr,skyccattr,W);
+     end;
+end; {skycmd}
+
+procedure putsky(fcattr: cattr; fsiz: sizes);
+  var a: pregrec;
+begin
+if SKY_FLAG
+then begin
+     if fcattr.ckind = STCK
+     then begin
+          store(fcattr,skydcattr,L);
+          if fsiz = D then store(fcattr,skydcattr,L);
+          end
+     else if fsiz < D
+          then store(fcattr,skydcattr,L)
+          else if fcattr.ckind = CNST
+               then if SKY_LONG
+                    then begin
+                         { MOVE.L #xxx,SKYD.L } gen(9212);
+                                                gen2(fcattr.cvalu.lvalu);
+                                                gen2(SKYADDRESS+4);
+                         { MOVE.L #xxx,SKYD.L } gen(9212);
+                                                gen2(fcattr.cvalu.lvalu2);
+                                                gen2(SKYADDRESS+4);
+                         end
+                    else begin
+                         { MOVE.L #xxx,SKYD.W } gen(8700);
+                                                gen2(fcattr.cvalu.lvalu);
+                                                gen(SKYADDRESS+4);
+                         { MOVE.L #xxx,SKYD.W } gen(8700);
+                                                gen2(fcattr.cvalu.lvalu2);
+                                                gen(SKYADDRESS+4);
+                         end
+               else begin
+                    a := loadaddress(fcattr); isolate(a);
+                    if SKY_LONG
+                    then begin
+                         { MOVE.L (A)+,SKYD.L } genr(9176,a);
+                                                gen2(SKYADDRESS+4);
+                         { MOVE.L (A)+,SKYD.L } genr(9176,a);
+                                                gen2(SKYADDRESS+4);
+                         end
+                    else begin
+                         { MOVE.L (A)+,SKYD.W } genr(8664,a);
+                                                gen(SKYADDRESS+4);
+                         { MOVE.L (A)+,SKYD.W } genr(8664,a);
+                                                gen(SKYADDRESS+4);
+                         end;
+                    incrv(a^.regno,8); freereg(a);
+                    end;
+     end;
+end; {putsky}
+
+procedure getsky(fsiz: sizes);
+  var d: pregrec;
+begin
+if SKY_FLAG
+then begin
+     d := getreg(D0,D7); genrea(_MOVE_L,d,skydcattr,L);
+     if fsiz <= S
+     then begin
+          gcattr.ckind := EXPR; gcattr.exreg := D;
+          end
+     else begin
+          pushvalue(skydcattr,L);
+          { MOVE.L D,-(SP) } genr(12032,d);
+          freereg(d);
+          gcattr.ckind := STCK;
+          end;
+     end;
+end; {getsky}
+
+procedure skyarg(fop: integer; fsiz,tsiz: sizes);
+begin
+if SKY_FLAG
+then begin
+     expression(nextbyte);
+     skycmd(fop); putsky(gcattr,fsiz); getsky(tsiz);
+     end;
+end; {skyarg}
+
+procedure sky44(fop: integer);
+  var lcattr: cattr; d: pregrec;
+begin
+if SKY_FLAG
+then begin
+     expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+     skycmd(fop);
+     if (lcattr.ckind = STCK) and (gcattr.ckind = STCK)
+     then d := loadd(gcattr,L);
+     putsky(lcattr,S); putsky(gcattr,S); getsky(S);
+     end;
+end; {sky44}
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                               

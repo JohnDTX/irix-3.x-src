@@ -1,0 +1,31 @@
+.TH viewport 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I viewport
+- allocate an area of the screen for an image
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "viewport(left, right, bottom, top)"
+.B "Screencoord left, right, bottom, top;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine viewpo(left, right, bottom, top)"
+.B "integer*2 left, right, bottom, top"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure viewport(left, right, bottom, top: Screencoord);"
+.sp
+.SH DESCRIPTION
+The first step in defining the mapping from world coordinates to
+screen coordinates is to choose an area of the screen to display an
+image.  This area is called the \f2viewport\f1 and is specified in
+screen coordinates.  
+The arguments
+to the \f2viewport\f1 command define a rectangular area on the screen by
+the left, right, bottom, and top coordinates.  This command also loads the 
+screen mask.
+.SH "SEE ALSO"
+.I scrmask, getviewport, popviewport, pushviewport

@@ -1,0 +1,30 @@
+.TH textinit 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B textinit
+\- initializes the console textport
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textinit()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textin"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure textinit;"
+.SH DESCRIPTION
+\f3textinit\f1 
+initializes the console textport to default size, location, textcolor,
+and pagecolor.
+.SH SEE ALSO
+pagecolor, textcolor, textport, textwritemask
+.sp
+\f2Programming Guide\fP, Chapter 14, Textports 
+.SH NOTE
+This routine is available only in immediate mode. 

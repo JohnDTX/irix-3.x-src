@@ -1,0 +1,26 @@
+
+
+	These programs demonstrate how a program can make an xns
+	connection (from an IRIS and to an IRIS) from within a program.
+
+	To use these programs first run make. This will build xnscon
+	and xnslis. Then run xnslis with a socket number on one machine
+	(100 - 2000 are good numbers to use) Then run xnscon with a
+	hostname and a socket number on the other machine.  Once a
+	connection is established then everything typed on the connect
+	side will appear on the listen side. To terminate the session
+	type EOF (ctrl-d).
+	For example:
+
+	site1% xnslis 100
+	...
+
+	<from another site>
+	site2% xnscon site1 100 
+	this is a little message
+	...
+
+
+	<back at site 1>
+	this is a little message
+	<should appear on your screen>

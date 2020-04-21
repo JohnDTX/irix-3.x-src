@@ -1,0 +1,22 @@
+.TH textwritemask 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2textwritemask\fP - grant write permission for the textport
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textwritemask(tmask)"
+.B "Colorindex tmask;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textwr(tmask)"
+.sp
+.SH DESCRIPTION
+\f2Textwritemask\fP grants write permission
+for text drawn in the textport.
+.SH "SEE ALSO"
+.I pagecolor, pagewritemask, textcolor,
+.I textport, tpoff, tpon, writemask
+.SH NOTE
+This command can only be used in immediate mode.

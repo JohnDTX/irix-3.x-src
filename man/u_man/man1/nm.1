@@ -1,0 +1,95 @@
+'\"macro stdmacro
+.TH NM 1
+.SH NAME
+nm \- print name list
+.SH SYNOPSIS
+.B nm
+[
+.B \-gnoprsu
+]
+[ file ... ]
+.SH DESCRIPTION
+.I Nm\^
+prints the name list (symbol table) of each object
+.I file\^
+in the argument list.
+If an argument
+is an archive, a listing for each object
+file in the archive will be produced.
+If no
+.I file\^
+is given, the symbols in
+.B a.out
+are listed.
+.PP
+Each symbol name is preceded by its value (blanks if undefined)
+and one of the letters
+.B U
+(undefined),
+.B A
+(absolute),
+.B T
+(text segment symbol),
+.B D
+(data segment symbol),
+.B B
+(bss segment symbol),
+.B R
+(register symbol),
+.B F
+(file symbol),
+or
+.B C
+(common symbol).
+If the symbol is local (non-external) the type letter is in
+lower case.
+The output is sorted alphabetically.
+.PP
+Options are:
+.TP "\w'\f3\-p\f1\ \ 'u"
+.B  \-g
+Print only global (external) symbols.
+.TP
+.B \-n
+Sort numerically rather than alphabetically.
+.TP
+.B  \-o
+Prepend file or archive element name to each
+output line rather than only once.
+This option can be used to make piping to
+.IR grep\^ (1)
+more meaningful.
+.TP
+.B  \-p
+Don't sort; print in symbol-table order.
+.TP
+.B  \-r
+Sort in reverse order.
+.TP
+.B \-s
+Sort according to the size of the external 
+symbol (computed from
+the difference between the value of the symbol and the
+value of the symbol with the next highest value).
+This difference is the value printed.
+This flag turns on
+.B \-g
+and
+.B \-n
+and turns off
+.B \-u
+and
+.BR \-p .
+.TP
+.B  \-u
+Print only undefined symbols.
+.SH EXAMPLE
+.IP
+nm
+.PP
+prints the symbol list of
+.B a.out ,
+the default output file for the C compiler.
+.SH SEE ALSO
+ar(1), a.out(4), ar(4).
+.\"	@(#)nm.1	5.1 of 11/9/83

@@ -1,0 +1,36 @@
+'\"macro stdmacro
+.TH REBOOT 2 
+.SH NAME
+reboot \- reboot the system
+.SH SYNOPSIS
+.nf
+#include <sys/reboot.h>
+.B int reboot (opts)
+.B int opts;
+.fi
+.SH DESCRIPTION
+.I Reboot\^
+causes the kernel to execute the initial
+bootstrap code that was used to boot the operating system.
+.PP
+On most 
+.SM CPUs\*S 
+the 
+.IR reboot\^ (2)
+command will take the place of a manual restart.
+.SH ASSEMBLER
+.ta \w'\f3moveq\f1\ \ \ 'u 1.5i
+.nf
+.B moveq	64,D0
+.B trap	#0
+.fi
+.DT
+.\"	@(#)reboot.2	5.1 of 11/2/83
+.SH NOTE
+The primitives documented on this manual page
+are system calls, but unlike most system calls
+they are not resolved by libc.
+To compile and link a program that makes these calls,
+follow the procedures for section (3B) routines as
+described in
+.IR intro (3).

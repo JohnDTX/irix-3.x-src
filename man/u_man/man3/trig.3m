@@ -1,0 +1,123 @@
+'\"macro stdmacro
+.TH TRIG 3M 
+.SH NAME
+trig: sin (_lsin), cos (_lcos), tan (_ltan), asin (_lasin), acos (_lacos), atan (_latan), atan2 (_latan2) \- trigonometric functions
+.SH SYNOPSIS
+.B #include <math.h>
+.PP
+.B float sin (x)
+.br
+.B float x;
+.PP
+.B long float _lsin (x)
+.br
+.B long float x;
+.PP
+.B float cos (x)
+.br
+.B float x;
+.PP
+.B long float _lcos (x)
+.br
+.B long float x;
+.PP
+.B float tan (x)
+.br
+.B float x;
+.PP
+.B long float _ltan (x)
+.br
+.B long float x;
+.PP
+.B float asin (x)
+.br
+.B float x;
+.PP
+.B long float _lasin (x)
+.br
+.B long float x;
+.PP
+.B float acos (x)
+.br
+.B float x;
+.PP
+.B long float _lacos (x)
+.br
+.B long float x;
+.PP
+.B float atan (x)
+.br
+.B float x;
+.PP
+.B long float _latan (x)
+.br
+.B long float x;
+.PP
+.B float atan2 (y, x)
+.br
+.B float y, x;
+.PP
+.B long float _latan2 (y, x)
+.br
+.B long float y, x;
+.SH DESCRIPTION
+.I sin (_lsin),\^
+.I cos (_lcos),\^
+and
+.I tan (_ltan)\^
+return respectively the sine, cosine and tangent of
+their argument, which is in radians.
+.PP
+.I asin (_lasin)\^
+returns the arcsine of
+.IR x ,
+in the range \-\(*p/2 to \(*p/2.
+.PP
+.I acos (_lacos)\^
+returns the arccosine of
+.IR x ,
+in the range 0 to \(*p.
+.PP
+.I atan (_latan)\^
+returns the arctangent of
+.IR x ,
+in the range \-\(*p/2 to \(*p/2.
+.PP
+.I atan2 (_latan2)\^
+returns the arctangent of
+.IR y / x ,
+in the range \-\(*p to \(*p,
+using the signs of both arguments
+to determine the quadrant of the return value.
+.SH DIAGNOSTICS
+.PP
+An invalid argument to any of the math routines raises 
+a floating point exception 
+with the operation 
+.I MATH,\^
+and with
+.I _mathfunc_id
+set to indicate the function causing the exception.
+.PP
+All of the routines check their input for the erroneous values
+NaN and \(if, raising an exception with the type code set
+to 
+.I INVALID_OP_A,\^
+and
+.I INVALID_OP_F2,\^
+respectively.
+.PP
+Arguments of magnitude greater than 1.0 cause
+.I asin (_lasin)\^
+and
+.I acos (_lacos)\^
+to raise a floating point exception after setting the type code to
+.I DOMAIN_ERROR.\^
+.PP
+If their argument is too large for accurate range reduction,
+.I sin (_lsin), and cos (_lcos)\^
+raise a floating point exception with the type code set to
+.I CANT_REDUCE_RANGE.\^
+.SH SEE ALSO
+fpsigset(3C).
+.\"	@(#)trig.3m	5.1 of 10/21/83

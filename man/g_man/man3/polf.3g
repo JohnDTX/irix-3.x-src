@@ -1,0 +1,96 @@
+.TH polf 3G
+.rs
+.sp -0.28i
+.\".SH\(Dn
+.SH NAME
+.B polf
+\- draws a filled polygon
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "polf(n, parray) "
+.B "long n; "
+.B "Coord parray[][3];"
+.IP 
+.B "polfi(n, parray) "
+.B "long n; "
+.B "Icoord parray[][3];"
+.IP 
+.B "polfs(n, parray) "
+.B "long n; "
+.B "Scoord parray[][3];"
+.IP 
+.B "polf2(n, parray) "
+.B "long n; "
+.B "Coord parray[][2];"
+.IP 
+.B "polf2i(n, parray) "
+.B "long n; "
+.B "Icoord parray[][2];"
+.IP 
+.B "polf2s(n, parray) "
+.B "long n; "
+.B "Scoord parray[][2];"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine polf(n, parray)"
+.B "integer*4 n"
+.B "real parray(3,n)"
+.IP 
+.B "subroutine polfi(n, parray)"
+.B "integer*4 n"
+.B "integer*4 parray(3,n)"
+.IP 
+.B "subroutine polfs(n, parray)"
+.B "integer*4 n"
+.B "integer*2 parray(3,n)"
+.IP 
+.bp
+.B "subroutine polf2(n, parray)"
+.B "integer*4 n"
+.B "real parray(2,n)"
+.IP 
+.B "subroutine polf2i(n, parray)"
+.B "integer*4 n"
+.B "integer*4 parray(2,n)"
+.IP 
+.B "subroutine polf2s(n, parray)"
+.B "integer*4 n"
+.B "integer*2 parray(2,n)"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure polf(n: longint; var parray: Coord);"
+.IP
+.B "procedure polfi(n: longint; var parray: Icoord);"
+.IP
+.B "procedure polfs(n: longint; var parray: Scoord);"
+.IP
+.B "procedure polf2(n: longint; var parray: Coord);"
+.IP
+.B "procedure polf2i(n: longint; var parray: Icoord);"
+.IP
+.B "procedure polf2s(n: longint; var parray: Scoord);"
+.SH DESCRIPTION
+.B polf
+fills polygonal areas using the current
+pattern, color, and writemask.
+It takes two arguments:
+an array of points (\f2parray\f1) and the number of points
+in that array (\f2n\f1).  Polygons are represented
+as arrays of points.
+The first and last points connect automatically
+to close a polygon.  The points can be expressed as integers, shorts, or 
+real numbers in 2-D or 3-D space.
+2-D polygons are drawn with
+\f2z\fP=0.
+After the polygon is filled, the current
+graphics position is set to the first point in 
+the array.
+.SH "SEE ALSO"
+pdr, pmv, poly, rect, rectf, rpdr, rpmv
+.sp
+.I Programming Guide,
+Section 3.6, Polygons

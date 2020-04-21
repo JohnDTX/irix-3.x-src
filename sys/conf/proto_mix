@@ -1,0 +1,15 @@
+# Tcp support
+options		"INET"
+device		nex0 	at mb0 csr 0x7ffc	priority 2 vector exintr
+device		nex1 	at mb0 csr 0x7ffe	priority 2 vector exintr
+pseudo-device	tcp
+pseudo-device	ether
+pseudo-device	loop
+
+# NFS support
+pseudo-device	nfs
+
+# XNS support
+pseudo-device	nx
+pseudo-device	xns
+

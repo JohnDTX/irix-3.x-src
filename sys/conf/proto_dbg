@@ -1,0 +1,9 @@
+# Debugging support
+pseudo-device	debug
+options		OS_ASSERT
+options		OS_DEBUG
+options		OS_CDEBUG
+options		OS_METER
+options		NFSDEBUG
+options		RPCDEBUG
+

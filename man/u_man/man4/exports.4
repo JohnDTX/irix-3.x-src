@@ -1,0 +1,84 @@
+'\"macro stdmacro
+.if n .pH man4.exports @(#)exports	30.3 of 2/1/86
+.TH EXPORTS 4
+.SH NAME
+exports \- NFS filesystems being exported
+.SH SYNOPSIS
+.B /etc/exports
+.SH DESCRIPTION
+The file
+.I /etc/exports
+describes the filesystems which are being exported to 
+.IR nfs (7)
+clients.  It is created by the system administrator
+using a text editor and processed by the
+.I mount
+request daemon
+.IR mountd (1M)
+each time a mount request is received.
+.PP
+The file consists of a list of filesystems, the
+.IR netgroup (4)
+or machine names allowed to remote mount each filesystem, and possibly
+a list of options.
+The filesystem names are left justified and followed by
+a list of names separated by white space.
+The names will be looked up in
+.I /etc/netgroup
+and then in
+.IR /etc/hosts .
+Options begin with a hyphen and are separated by commas.
+Currently
+.I mountd
+understands the following options:
+.RS
+.IP \f3ro\fP
+Prevent clients from writing to this entry's filesystem;
+allow reading only.
+.IP \f3rw\fP
+Allow clients both to read and to write this entry's filesystem.
+.IP \f3hide\fP
+Prevents a client who mounts this entry's parent filesystem
+from accessing files in this filesystem.  Instead, clients who
+mount a filesystem containing a hidden filesystem access the
+directory on which the hidden child is mounted, not the child
+filesystem's root directory.
+.IP \f3nohide\fP
+Allows a client who mounts this entry's parent filesystem
+to access files in this filesystem.
+.IP \f3rootid=\f2uid\fP
+Translate credentials for client operations issued by
+.I root
+on a client to have effective user-id
+.IR uid .
+.I uid
+may be either a name or an integer user-id from 
+.I /etc/passwd
+.RE
+The default options are
+.BR rw,hide,rootid=nobody .
+A filesystem name with no name list following means export to everyone.
+A ``#'' anywhere in the file indicates a comment
+extending to the end of the line it appears on.
+Lines beginning with white space are continuation lines.
+.SH EXAMPLE
+.PP
+.nf
+/usr	clients			# export to my clients
+/usr/local			# export to the world
+/usr2	phoenix sun sundae	# export to only these machines
+/usr3	-rootid=guest		# map client root to guest
+/	-ro			# export the root and usr filesystems
+/usr	-ro,nohide		# export all local filesystems read-only
+.sp
+Exporting all your machine's local filesystems requires enumerating
+all local mount points, and using ``nohide'' for each root filesystem:
+.sp .5
+/	\-ro
+/usr	\-ro,nohide
+/d	\-ro,nohide
+.fi
+.SH FILES
+/etc/exports
+.SH SEE ALSO
+mountd(1M)

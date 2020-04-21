@@ -1,0 +1,55 @@
+.TH modify  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I modify
+- define a linear mapping between a valuator and a command argument
+.SH SYNOPSIS
+.nf
+C
+.TP \w'FORTRAN\ \ \ 'u
+.B "modify(obj, tagname, offst, argnum, a, b, v) "
+.B "Object obj; "
+.B "Tag tagname; "
+.B "Offset offst; "
+.B "short argnum; "
+.B "float a, b;"
+.B "Device v;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine modify(obj, tagnam, offst, argnum, a, b, v)"
+.B "integer obj, tagnam, offst"
+.B "integer*2 argnum, v"
+.B "real a, b"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure modify(obj: Object; tagname: Tag; offst: Offset; "
+.B "	argnum: Short; a, b: real; v: Device);"
+.sp
+.SH DESCRIPTION
+The \f2modify\f1 command provides a general mechanism for defining a linear
+mapping between an input device and a command argument.  The 
+first four parameters, \f3obj\f1, \f3tagname\f1, 
+\f3offst\f1, and \f3argnum\f1, uniquely 
+define an argument to a command in a display list.  The next two, \f3a\f1 and
+\f3b\f1, are coefficients used in the computation of the new value for the
+selected argument, and \f3v\f1 selects a valuator device.  The mapping is
+\f3a\f1 $times$ \f2getvaluator(v)\f1 + \f3b\f1.
+.PP
+The 
+.I modify
+is implemented for the following commands:
+.TS
+center ;
+lI lI lI lI.
+cmov	cmovi	cmov2	cmov2i
+draw	drawi	draw2	draw2i
+move	movei	move2	move2i
+pnt	pnti	pnt2	pnt2i
+rect	recti	rectf	rectfi
+lookat	perspective	scale
+ortho	polarview	translate
+ortho2	rotate	window
+.TE
+.SH "SEE ALSO"
+.I getvaluator

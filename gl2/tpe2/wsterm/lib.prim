@@ -1,0 +1,648 @@
+##########################################################################
+#									 #
+# 		 Copyright (C) 1985, Silicon Graphics, Inc.		 #
+#									 #
+#  These coded instructions, statements, and computer programs  contain  #
+#  unpublished  proprietary  information of Silicon Graphics, Inc., and  #
+#  are protected by Federal copyright law.  They  may  not be disclosed  #
+#  to  third  parties  or copied or duplicated in any form, in whole or  #
+#  in part, without the prior written consent of Silicon Graphics, Inc.  #
+#									 #
+##########################################################################
+
+#		Graphics library primitives transfer description
+#
+#	This file provides a description of what data is transfered
+#	to and from the Iris terminal as each graphics primitive is executed
+#	by a program running on a host.  This description is language in-
+#	dependent -- it is intended that awk scripts be used to convert this
+#	representation into a host library in C, FORTRAN, Pascal and PL/I.
+#
+#	However, the Pascal awk script uses slightly different conventions
+#	from the FORTRAN.  FORTRAN uses triplets (shown below) that
+#	are specifically enumerated here and parsed in the FORTRAN awk
+#	script.  The Pascal awk script treats the members triplets as 
+#	separate dimensions.  In short, this means that there is a preserved
+#	segment in this file, the TRIPLETS segment, that is used only by
+#	FORTRAN.
+#
+#	The type of each argument is given as well as the type re-
+#	turned by the primitive.  A special notation is used to describe
+#	the defined types of the arguments to the function calls, the
+#	transfer types of the arguments as sent over a communications line
+#	to the primitives, which arguments return values, and also the size
+#	of arrays to be packaged for communication with the terminal.
+#	The syntax is:
+#				def xfr mode:size
+#
+#	where 'def' is the defined type, 'xfr' is the transferred type, 'mode'
+#	is the mode of parameter acceptance, and 'size' is the size of the
+#	array to be transferred, if an array (not used for strings).  The size
+#	must be that required by the communications primitive used, e.g. sendss.
+#
+#	For all languages, the modes are as follows:
+#
+#	v - passed by value (in languages where this is possible)
+#	r - passed by reference
+#	a - an array of these is passed by reference
+#
+#	Lower case transfer type letters indicate the parameter value is sent,
+#	uppercase letters indicate the parameter value is received.
+#
+#	Here is a machine readable table of type meanings for the various
+#	languages supported.  It lists the abbreviations for transfer types
+#	(also defined types in Fortran) as implemented in the primitives file
+#	further below.  Each is followed by the physical type used by each
+#	language.
+#
+#---------- TRANSFER TYPES ----------
+#xfr	 C		Fortran		Pascal		PL/I		etc.
+#---	---		-------		------		----		----
+# one byte integer
+  b	char		character
+  B	char		character
+# language dependent character string
+  c	char		NA	
+  C	char		NA	
+# two byte integer
+  s	short		integer*2
+  S	short		integer*2
+# four byte integer
+  l	long		integer*4
+  L	long		integer*4
+# language dependent Boolean
+  o	long		logical	
+  O	long		logical	
+# floating point number
+  f	float		real	
+  F	float		real	
+# Fontchar structure
+  q	Fontchar	integer*2
+# type of fn's which return no value
+  V	int		subroutine
+#---------- END TRANSFER TYPES
+#
+#
+# FORTRAN and C-specific section.
+#
+#	The next table lists each type triplet used in the primitives table
+#	below it, and gives the defined values for, plus some transfer
+#	information, for each one in each language.  In Fortran, the defined
+#	types are given as the same characters used for transfer type (above),
+#	with an 's' appended for arrays.
+#
+#	C and Pascal types, on the other hand, are the types used in
+#	declarations, with a '[]' appended if data transfer is via an array.
+#	C strings (type String, which is char *) are listed as if they are
+#	sent by value, because it makes the declarations work right, even
+#	though they are really null terminated arrays without size specs,
+#	sent by reference.
+#
+#	There are several types (e.g, Cursor and Matrix) that in C are
+#	typedefs for arrays.  Each one is sent to the primitive as an array
+#	of its smallest elements, and therefore needs a size field, but is
+#	declared as a single quantity in C.  Arrays of them can also be sent.
+#	In Fortran, these must always be declared and sent as arrays.  In this
+#	file, these are defined to be of type 'r'; arrays of them are of type
+#	'a'.  However, to show that they are themselves arrays, the data type
+#	in the table below has a '[]' appended to it in 'c' or an 's' appended
+#	in Fortran, which is used for proper generation of the lib.c,
+#	lib.f, etc.
+#
+#---------- TRIPLETS ----------
+#     +-defined type
+#    /+-transfer type
+#   //+-mode
+#  ///
+# ///	 C		Fortran		Pascal		PL/I		etc.
+#///	---		-------		------		----		----
+ Abv	char		l
+ Aba	char[]		bs
+ Bba	RGBvalue[]	bs
+ BBa	RGBvalue[]	Bs
+ Cbv	char		b
+
+ Dqa	Fontchar[]	qs
+ Ecv	String		<not_avail>
+
+ Fsv	short		l
+ FSr	short		S
+ Fsa	short[]		ss
+ FSa	short[]		Ss
+ Gsv	Angle		l
+ Hsv	Screencoord	l
+ HSr	Screencoord	S
+ Isv	Device		l
+ Jsv	Colorindex	l
+ JSr	Colorindex	S
+ Jsa	Colorindex[]	ss
+ JSa	Colorindex[]	Ss
+ Ksv	Linestyle	l
+ Lsv	Scoord		s
+ Lsa	Scoord[]	ss
+ Msr	Cursor[]	ss
+ Msv	Cursor[]	ss
+ Nsx	<reserved>	<reserved>
+
+ Olv	long		l
+ OLv	long		L
+ OLr	long		L
+ Plv	Icoord		l
+ Pla	Icoord[]	ls
+ Qlv	Object		l
+ QLv	Object		L
+ Rlv	Tag		l
+ RLv	Tag		L
+ Slv	Offset		l
+ Tlx	<reserved>	<reserved>
+
+ Uov	Boolean		o
+ UOv	Boolean		O
+ UOr	Boolean		O
+
+ VVv	void		V
+
+ Wfv	float		f
+ Xfv	Coord		f
+ XFr	Coord		F
+ Xfa	Coord[]		fs
+ Yfr	Matrix[]	fs
+ YFr	Matrix[]	Fs
+ Zfx	<reserved>	<reserved>
+#---------- END TRIPLETS
+# End of FORTRAN-specific information
+#
+#	IMPORTANT: We use SVS Pascal on the workstation.  In calling C
+#	routines (specifically the graphic library) Pascal puts a number
+#	of bytes on the stack, the number corresponding to the data type.
+#	This works fine between SVS C and SVS Pascal, but the Pascal on
+#	the workstation calls OUR C.  Our C passes everything as 32-bit
+#	quantities, and expects to receive args that way.  Therefore,
+#	I have defined another column, SVS Pascal, that uses the revised
+#	mapping.  Some of the data types are not mapped here because
+#	SVS already passes them as 32-bit quantities (such as UNSIGNED SHORT).
+#
+#	Note that we still pass the original type if it is an array of them,
+#	since only the pointer to the array need conform to the stack rules.
+#
+#	This section is used by the Pascal awk script
+#---------- DEFTYPES ----------
+#        C		Fortran		Pascal		SVS Pascal
+#   	---		-------		------		----		----
+A	xxx		xxx		Byte		longint
+B	xxx		xxx		RGBvalue	RGBvalue
+C	xxx		xxx		char		longint
+D	xxx		xxx		Fontchar	Fontchar
+E	xxx		xxx		pstring128	pstring128
+F	xxx		xxx		Short		longint
+G	xxx		xxx		Angle		longint
+H	xxx		xxx		Screencoord	longint
+I	xxx		xxx		Device		Device
+J	xxx		xxx		Colorindex	longint
+K	xxx		xxx		Linestyle	Linestyle
+L	xxx		xxx		Scoord		longint
+M	xxx		xxx		Cursor		Cursor
+N	xxx		xxx		xxx		xxx
+O	xxx		xxx		longint		longint
+P	xxx		xxx		Icoord		Icoord
+Q	xxx		xxx		Object		Object
+R	xxx		xxx		Tag		Tag
+S	xxx		xxx		Offset		Offset
+T	xxx		xxx		xxx		xxx
+U	xxx		xxx		Boolean		longint
+V	xxx		xxx		xxx		xxx
+W	xxx		xxx		real		real
+X	xxx		xxx		Coord		Coord
+Y	xxx		xxx		Matrix		Matrix
+Z	xxx		xxx		xxx		xxx
+#---------- END DEFTYPES
+#  End of Pascal-specific info
+# 
+#	This table lists each graphics primitive, with its return type and the
+#	types of its parameters encoded as given by the above tables.
+#
+#   NOTES:
+#	(1) New procedures MUST be added at the end of the list and
+#	    the order of existing procedures MUST NOT change.
+#
+#	(2) The white space inside parens is significant and must be
+#	    preserved.
+#
+#	(3) A 'w' is appended after the right paren in each function for
+#	    which a local Fortran wrapper must be generated.
+#
+#	(4) Comments may be added with impunity one space after the right
+#	    paren or 'w', but must not contain the character sequence ' )w'.
+#
+#---------- ROUTINES ----------
+VVv:zzsetslowcom( )		put routines here that have same functionality
+VVv:zzsetfastcom( )		as old ones so that old host progs stil work
+OLv:gversion( )w
+VVv:bogus( )			used to be gdownload
+VVv:pagecolor( Fsv )w
+VVv:textcolor( Jsv )w
+VVv:textport( Hsv Hsv Hsv Hsv )w
+VVv:arc( Xfv Xfv Xfv Gsv Gsv )w
+VVv:arcf( Xfv Xfv Xfv Gsv Gsv )w
+VVv:arcfi( Plv Plv Plv Gsv Gsv )w
+VVv:arci( Plv Plv Plv Gsv Gsv )w
+VVv:attachcursor( Isv Isv )w
+VVv:backbuffer( Uov )w
+VVv:bogus( )
+VVv:bbox2( Hsv Hsv Xfv Xfv Xfv Xfv )w
+VVv:bbox2i( Hsv Hsv Plv Plv Plv Plv )w
+VVv:bogus( )
+VVv:blink( Fsv Jsv Fsv Fsv Fsv )w
+VVv:callobj( Qlv )w
+VVv:charstr( Ecv )
+VVv:circ( Xfv Xfv Xfv )w
+VVv:circf( Xfv Xfv Xfv )w
+VVv:circfi( Plv Plv Plv )w
+VVv:circi( Plv Plv Plv )w
+VVv:clear( )w
+VVv:clearhitcode( )w
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:closeobj( )w
+VVv:cmov( Xfv Xfv Xfv )w
+VVv:cmov2( Xfv Xfv )w
+VVv:cmov2i( Plv Plv )w
+VVv:cmovi( Plv Plv Plv )w
+VVv:color( Jsv )w
+VVv:cursoff( )w
+VVv:curson( )w
+VVv:bogus( )
+VVv:curveit( Fsv )w
+VVv:defcursor( Fsv Msr:16 )w
+VVv:deflinestyle( Fsv Ksv )w
+VVv:bogus( )
+VVv:defrasterfont( Fsv Fsv Fsv Dqa:a3 Fsv Fsa:a5 )w
+VVv:bogus( )
+VVv:bogus( )
+VVv:delobj( Qlv )w
+VVv:doublebuffer( )w
+VVv:draw( Xfv Xfv Xfv )w
+VVv:draw2( Xfv Xfv )w
+VVv:draw2i( Plv Plv )w
+VVv:drawi( Plv Plv Plv )w
+VVv:editobj( Qlv )w
+OLv:endpick( FSa:retval )w
+OLv:endselect( FSa:retval )w
+VVv:finish( )w
+VVv:font( Fsv )w
+VVv:frontbuffer( Uov )w
+VVv:gconfig( )w
+QLv:genobj( )w
+RLv:gentag( )w
+OLv:getbuffer( )w
+UOv:getbutton( Isv )w
+UOv:getcmmode( )w
+OLv:getcolor( )w
+VVv:getcursor( FSr JSr JSr UOr )w
+VVv:getdepth( HSr HSr )w
+OLv:getdisplaymode( )w
+OLv:getfont( )w
+OLv:getheight( )w
+OLv:gethitcode( )w
+UOv:getlsbackup( )w
+OLv:getlstyle( )w
+OLv:getlwidth( )w
+OLv:getmap( )w
+VVv:getmatrix( YFr:16 )w
+VVv:bogus( )
+OLv:getplanes( )w
+UOv:getresetls( )w
+VVv:getscrmask( HSr HSr HSr HSr )w
+VVv:bogus( )
+OLv:getvaluator( Isv )w
+VVv:getviewport( HSr HSr HSr HSr )w
+OLv:getwritemask( )w
+VVv:gflush( )w
+VVv:ginit( )w
+VVv:greset( )w
+VVv:gRGBcolor( FSr FSr FSr )w
+VVv:gRGBcursor( FSr FSr FSr FSr FSr FSr FSr UOr )w
+VVv:gRGBmask( FSr FSr FSr )w
+VVv:bogus( )
+UOv:isobj( Qlv )w
+UOv:istag( Rlv )w
+VVv:bogus( )
+VVv:linewidth( Fsv )w
+VVv:loadmatrix( Yfr:16 )w
+VVv:lookat( Xfv Xfv Xfv Xfv Xfv Xfv Gsv )w
+VVv:lsbackup( Uov )w
+VVv:makeobj( Qlv )w
+VVv:maketag( Rlv )w
+VVv:mapcolor( Jsv Fsv Fsv Fsv )w
+VVv:mapw( Qlv Hsv Hsv XFr XFr XFr XFr XFr XFr )w
+VVv:mapw2( Qlv Hsv Hsv XFr XFr )w
+VVv:bogus( )
+VVv:move( Xfv Xfv Xfv )w
+VVv:move2( Xfv Xfv )w
+VVv:move2i( Plv Plv )w
+VVv:movei( Plv Plv Plv )w
+VVv:multimap( )w
+VVv:multmatrix( Yfr:16 )w
+VVv:noise( Isv Fsv )w
+VVv:bogus( )
+VVv:bogus( )
+VVv:onemap( )w
+VVv:ortho( Xfv Xfv Xfv Xfv Xfv Xfv )w
+VVv:ortho2( Xfv Xfv Xfv Xfv )w
+VVv:perspective( Gsv Wfv Xfv Xfv )w
+VVv:pick( Fsa:0 Olv )w
+VVv:picksize( Fsv Fsv )w
+VVv:pnt( Xfv Xfv Xfv )w
+VVv:pnt2( Xfv Xfv )w
+VVv:pnt2i( Plv Plv )w
+VVv:pnti( Plv Plv Plv )w
+VVv:polarview( Xfv Gsv Gsv Gsv )w
+VVv:polf( Olv Xfa:3*a1 )w
+VVv:polf2( Olv Xfa:2*a1 )w
+VVv:polf2i( Olv Pla:2*a1 )w
+VVv:polfi( Olv Pla:3*a1 )w
+VVv:poly( Olv Xfa:3*a1 )w
+VVv:poly2( Olv Xfa:2*a1 )w
+VVv:poly2i( Olv Pla:2*a1 )w
+VVv:polyi( Olv Pla:3*a1 )w
+VVv:popattributes( )w
+VVv:popmatrix( )w
+VVv:popviewport( )w
+VVv:pushattributes( )w
+VVv:pushmatrix( )w
+VVv:pushviewport( )w
+VVv:bogus( )
+VVv:qenter( Fsv Fsv )w
+VVv:bogus( )
+OLv:qread( FSr )w
+VVv:qreset( )w
+OLv:qtest( )w
+VVv:bogus( )
+OLv:readpixels( Fsv JSa:retval )w
+OLv:readRGB( Fsv BBa:retval BBa:retval BBa:retval )w
+VVv:rect( Xfv Xfv Xfv Xfv )w
+VVv:rectf( Xfv Xfv Xfv Xfv )w
+VVv:rectfi( Plv Plv Plv Plv )w
+VVv:recti( Plv Plv Plv Plv )w
+VVv:bogus( )
+VVv:resetls( Uov )w
+VVv:RGBcolor( Fsv Fsv Fsv )w
+VVv:RGBcursor( Fsv Fsv Fsv Fsv Fsv Fsv Fsv )w
+VVv:RGBmode( )w
+VVv:RGBwritemask( Fsv Fsv Fsv )w
+VVv:rotate( Gsv Cbv )w
+VVv:scale( Wfv Wfv Wfv )w
+VVv:bogus( )
+VVv:scrmask( Hsv Hsv Hsv Hsv )w
+VVv:gselect( Fsa:0 Olv )w
+VVv:setbutton( Isv Uov )w
+VVv:setcursor( Fsv Jsv Jsv )w
+VVv:setdepth( Hsv Hsv )w
+VVv:setlinestyle( Fsv )w
+VVv:setmap( Fsv )w
+VVv:bogus( )
+VVv:bogus( )
+VVv:setvaluator( Isv Fsv Fsv Fsv )w
+VVv:singlebuffer( )w
+OLv:strwidth( Ecv )
+VVv:swapbuffers( )w
+VVv:swapinterval( Fsv )w
+VVv:gsync( )w
+VVv:tie( Isv Isv Isv )w
+VVv:bogus( )
+VVv:translate( Xfv Xfv Xfv )w
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:viewport( Hsv Hsv Hsv Hsv )w
+VVv:window( Xfv Xfv Xfv Xfv Xfv Xfv )w
+VVv:writemask( Jsv )w
+VVv:writepixels( Fsv Jsa:a1 )w
+VVv:writeRGB( Fsv Bba:a1 Bba:a1 Bba:a1 )w
+VVv:tpon( )w
+VVv:tpoff( )w
+VVv:bogus( )
+VVv:textwritemask( Jsv )w
+VVv:gexit( )w
+VVv:clkon( )w
+VVv:clkoff( )w
+VVv:lampon( Abv )w
+VVv:lampoff( Abv )w
+VVv:setbell( Abv )w
+VVv:ringbell( )w
+VVv:tadelay( Fsv )
+#
+#	Here comes the gl2 stuff!!
+#
+VVv:arcfs( Lsv Lsv Lsv Gsv Gsv )w
+VVv:arcs( Lsv Lsv Lsv Gsv Gsv )w
+VVv:bogus( )
+VVv:bbox2s( Hsv Hsv Lsv Lsv Lsv Lsv )w
+VVv:blankscreen( Uov )w
+VVv:bogus( )
+OLv:blkqread( FSa:retval Fsv )w
+VVv:getmcolor( Jsv FSr FSr FSr )w
+VVv:bogus( )				used to be callfunc()
+VVv:chunksize( Olv )w
+VVv:circfs( Lsv Lsv Lsv )w
+VVv:circs( Lsv Lsv Lsv )w
+VVv:cmov2s( Lsv Lsv )w
+VVv:cmovs( Lsv Lsv Lsv )w
+VVv:compactify( Qlv )w
+VVv:qdevice( Isv )w
+VVv:unqdevice( Isv )w
+VVv:curvebasis( Fsv )w
+VVv:curveprecision( Fsv )w
+VVv:crv( Xfa:4*3 )w
+VVv:gettp( HSr HSr HSr HSr )w
+VVv:gbegin( )w
+VVv:textinit( )w
+VVv:crvn( Olv Xfa:3*a1 )w
+VVv:defbasis( Fsv Yfr:16 )w
+VVv:deltag( Rlv )w
+VVv:depthcue( Uov )w
+VVv:draw2s( Lsv Lsv )w
+VVv:draws( Lsv Lsv Lsv )w
+OLv:endfeedback( FSa:retval )w
+VVv:feedback( Fsa:0 Olv )w
+VVv:getcpos( HSr HSr )w
+UOv:getdcm( )w
+VVv:getgpos( XFr XFr XFr XFr )w
+OLv:getlsrepeat( )w
+OLv:getmem( )w
+OLv:getmonitor( )w
+QLv:getopenobj( )w
+UOv:getzbuffer( )w
+VVv:gewrite( Fsa:a2 Olv )w
+VVv:initnames( )w
+VVv:loadname( Fsv )w
+VVv:lsrepeat( Olv )w
+VVv:move2s( Lsv Lsv )w
+VVv:moves( Lsv Lsv Lsv )w
+VVv:newtag( Rlv Rlv Slv )w
+VVv:passthrough( Fsv )w
+VVv:patchbasis( Olv Olv )w
+VVv:patchprecision( Olv Olv )w
+VVv:patch( Yfr:16 Yfr:16 Yfr:16 )w
+VVv:pclos( )w
+VVv:pdr( Xfv Xfv Xfv )w
+VVv:pdr2( Xfv Xfv )w
+VVv:pdri( Plv Plv Plv )w
+VVv:pdr2i( Plv Plv )w
+VVv:pdrs( Lsv Lsv Lsv )w
+VVv:pdr2s( Lsv Lsv )w
+VVv:polf2s( Olv Lsa:2*a1 )w
+VVv:polfs( Olv Lsa:3*a1 )w
+VVv:poly2s( Olv Lsa:2*a1 )w
+VVv:polys( Olv Lsa:3*a1 )w
+VVv:pmv( Xfv Xfv Xfv )w
+VVv:pmv2( Xfv Xfv )w
+VVv:pmvi( Plv Plv Plv )w
+VVv:pmv2i( Plv Plv )w
+VVv:pmvs( Lsv Lsv Lsv )w
+VVv:pmv2s( Lsv Lsv )w
+VVv:pnt2s( Lsv Lsv )w
+VVv:pnts( Lsv Lsv Lsv )w
+VVv:popname( )w
+VVv:pushname( Fsv )w
+VVv:rdr( Xfv Xfv Xfv )w
+VVv:rdr2( Xfv Xfv )w
+VVv:rdri( Plv Plv Plv )w
+VVv:rdr2i( Plv Plv )w
+VVv:rdrs( Lsv Lsv Lsv )w
+VVv:rdr2s( Lsv Lsv )w
+VVv:rectcopy( Hsv Hsv Hsv Hsv Hsv Hsv )w
+VVv:rmv( Xfv Xfv Xfv )w
+VVv:rmv2( Xfv Xfv )w
+VVv:rmvi( Plv Plv Plv )w
+VVv:rmv2i( Plv Plv )w
+VVv:rmvs( Lsv Lsv Lsv )w
+VVv:rmv2s( Lsv Lsv )w
+VVv:rpdr( Xfv Xfv Xfv )w
+VVv:rpdr2( Xfv Xfv )w
+VVv:rpdri( Plv Plv Plv )w
+VVv:rpdr2i( Plv Plv )w
+VVv:rpdrs( Lsv Lsv Lsv )w
+VVv:rpdr2s( Lsv Lsv )w
+VVv:rpmv( Xfv Xfv Xfv )w
+VVv:rpmv2( Xfv Xfv )w
+VVv:rpmvi( Plv Plv Plv )w
+VVv:rpmv2i( Plv Plv )w
+VVv:rpmvs( Lsv Lsv Lsv )w
+VVv:rpmv2s( Lsv Lsv )w
+VVv:setdblights( Olv )w
+VVv:setmonitor( Fsv )w
+VVv:setshade( Jsv )w
+VVv:shaderange( Jsv Jsv Hsv Hsv )w
+VVv:spclos( )w
+VVv:splf( Olv Xfa:3*a1 Jsa:a1 )w
+VVv:splf2( Olv Xfa:2*a1 Jsa:a1 )w
+VVv:splfi( Olv Pla:3*a1 Jsa:a1 )w
+VVv:splf2i( Olv Pla:2*a1 Jsa:a1 )w
+VVv:splfs( Olv Lsa:3*a1 Jsa:a1 )w
+VVv:splf2s( Olv Lsa:2*a1 Jsa:a1 )w
+VVv:xfpt( Xfv Xfv Xfv )w
+VVv:xfpti( Plv Plv Plv )w
+VVv:xfpts( Lsv Lsv Lsv )w
+VVv:xfpt2( Xfv Xfv )w
+VVv:xfpt2i( Plv Plv )w
+VVv:xfpt2s( Lsv Lsv )w
+VVv:xfpt4( Xfv Xfv Xfv Xfv )w
+VVv:xfpt4i( Plv Plv Plv Plv )w
+VVv:xfpt4s( Lsv Lsv Lsv Lsv )w
+VVv:zbuffer( Uov )w
+VVv:charst( Aba:a2 Olv )w
+OLv:strwid( Aba:a2 Olv )w
+VVv:defpattern( Fsv Fsv Fsa:(a2*a2)/16 )w
+OLv:getpattern( )w
+VVv:setpattern( Fsv )w
+VVv:objinsert( Rlv )w
+VVv:objdelete( Rlv Rlv )w
+VVv:objreplace( Rlv )w
+VVv:zclear( )w
+VVv:curorigin( Fsv Fsv Fsv )w
+VVv:pagewritemask( Fsv )w
+VVv:patchcurves( Olv Olv )w
+VVv:dbtext( Aba:8 )w
+VVv:backface( Uov )w
+VVv:cyclemap( Lsv Lsv Lsv )w
+VVv:minsize( Olv Olv )w
+VVv:maxsize( Olv Olv )w
+VVv:keepaspect( Olv Olv )w
+VVv:prefsize( Olv Olv )w
+VVv:stepunit( Olv Olv )w
+VVv:fudge( Olv Olv )w
+VVv:prefposition( Olv Olv Olv Olv )w
+VVv:getport( Ecv )
+VVv:getpor( Aba:a2 Olv )w
+VVv:getsize( OLr OLr )w
+VVv:getorigin( OLr OLr )w
+VVv:screenspace( )w
+VVv:reshapeviewport( )w
+OLv:winopen( Ecv )
+OLv:winope( Aba:a2 Olv )w
+VVv:winclose( Olv )w
+OLv:winset( Olv )w
+OLv:winget( )w
+VVv:winpush( )w
+VVv:winpop( )w
+OLv:winattach( )w
+VVv:winmove( OLr OLr )w
+VVv:winposition( OLr OLr OLr OLr )w
+VVv:wintitle( Ecv )
+VVv:wintit( Aba:a2 Olv )w
+VVv:iftpsetup( Ecv Ecv )
+VVv:iftpse( Aba:a2+1 Olv Cbv )w
+VVv:capture( Ecv Bba:3*4096 )
+VVv:captur( Aba:a2 Olv Bba:3*4096 )w
+VVv:rcapture( Ecv Bba:3*4096 Hsv Hsv Hsv Hsv Olv Fsa:a7*a7 Olv )
+VVv:rcaptu( Aba:a2 Olv Bba:3*4096 Hsv Hsv Hsv Hsv Olv Fsa:a8*a8 Olv )w
+VVv:rects( Lsv Lsv Lsv Lsv )w
+VVv:rectfs( Lsv Lsv Lsv Lsv )w
+VVv:foreground( )w
+VVv:devport( Olv Olv )w
+VVv:getdev( Olv Fsa:a1 FSa:a1 )w
+UOv:ismex( )w
+VVv:rcrv( Xfa:4*4 )w
+VVv:rcrvn( Olv Xfa:4*a1 )w
+VVv:rpatch( Yfr:16 Yfr:16 Yfr:16 Yfr:16 )w
+OLv:getothermonitor( )w
+VVv:blanktime( Olv )w
+UOv:isqueued( Isv )w
+VVv:rot( Wfv Cbv )w
+VVv:addtopup( Olv Ecv Olv )
+VVv:addtop( Olv Aba:a3 Olv Olv )w
+OLv:dopup( Olv )w
+VVv:freepup( Olv )w
+OLv:newpup( )w
+VVv:pupcolor( Olv )w
+VVv:fullscrn( )w
+VVv:pupmode( )w
+VVv:endfullscrn( )w
+VVv:endpupmode( )w
+OLv:getshade( )w
+VVv:winconstraints( )w
+VVv:bogus( )
+VVv:noport( )w
+VVv:imakebackground( )w
+UOv:setfastcom( )w
+UOv:setslowcom( )w
+#
+# Reserve a few for SGI additions
+#
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+VVv:bogus( )
+#
+# Customer additions go here.  Starting command number is 400.
+# 
+#---------- END ROUTINES

@@ -1,0 +1,62 @@
+'\"macro stdmacro
+.TH ECHO 1
+.SH NAME
+echo \- echo arguments 
+.SH SYNOPSIS
+.B echo
+[ arg ] ...
+.SH DESCRIPTION
+.I Echo\^
+writes its arguments separated by blanks and terminated by
+a new-line on the standard output.
+It also
+understands C-like escape conventions;
+beware of conflicts with the shell's use of \f3\e\fP:
+.PP
+.RS .3i
+.PD 0
+.TP \w'\f3\en\ \ \ 'u
+.B \eb
+backspace
+.TP
+.B \ec
+print line without new-line
+.TP
+.B \ef
+form-feed
+.TP
+.B \en
+new-line
+.TP
+.B \er
+carriage return
+.TP
+.B \et
+tab
+.TP
+.B \e\e
+backslash
+.TP
+.BI \e n\^
+the 8-bit character whose \s-1ASCII\s0 code is
+the 1-, 2- or 3-digit octal number
+.IR n ,
+which must start with a zero.
+.RE
+.PD
+.PP
+.I Echo\^
+is useful for producing diagnostics in command files
+and for sending known data into a pipe.
+.SH EXAMPLE
+.IP
+echo curmudgeon
+.PP
+simply responds
+.IP
+curmudgeon
+.PP
+on the standard output.
+.SH SEE ALSO
+sh(1).
+.\"	@(#)echo.1	5.1 of 10/27/83

@@ -1,0 +1,1016 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                             File: CODE.6.TEXT                             *)
+(*                                                                           *)
+(*           (C) Copyright 1980, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All rights reserved.               15-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  function fmtref(ffmtno: integer): integer;
+    var lfmtrec: pfmtrec; Done: Boolean;
+  begin
+  lfmtrec := fmtlist; Done := FALSE;
+  while (lfmtrec <> nil) and (not Done) do begin
+        if lfmtrec^.fmtno = ffmtno
+        then begin
+             fmtref := lfmtrec^.fmtilabno; Done := TRUE;
+             end
+        else lfmtrec := lfmtrec^.next;
+        end;
+  if lfmtrec = nil then error(2010);
+  end; {fmtref}
+  
+  procedure cassign;
+    var lop,mop,nop,ltype,rtype: integer; lsiz,rsiz: sizes;
+        ImmFlag,DregFlag,ExprFlag,UnFlag,Done: Boolean; lcattr,tcattr: cattr;
+        d1,d2,a,exprreg: pregrec; lname: alfa8; immval: longint;
+  begin
+  lop := nextbyte; ltype := nextbyte;
+  rtype := ltype mod 16; ltype := ltype div 16;
+  lsiz := csizs[ltype]; rsiz := csizs[rtype];
+  if lop = 16 { L = E, Packed }
+  then asspckfld(nextbyte,TRUE)
+  else
+  if lop = 0 { L = E }
+  then begin
+       expression(nextbyte); lcattr := gcattr;
+       expression(nextbyte); tcattr := gcattr;
+       if (lcattr.ckind = EXPR) and (gcattr.ckind <> EXPR)
+       then begin dupref(lcattr,lsiz); gcattr := lcattr; end
+       else begin dupref(tcattr,lsiz); gcattr := tcattr; end;
+       store(tcattr,lcattr,lsiz);
+       end
+  else begin
+       expression(nextbyte); lcattr := gcattr;
+       { 1. LTYPE is the type of the l-value     }
+       { 2. RTYPE is the type of the expression  }
+       { 3. RTYPE is at least as big as LTYPE    }
+       { 4. If LTYPE is FLT4/8 then RTYPE is too }
+       case rtype of
+         0, { INT1 }
+         1, { INT2 }
+         2: { INT4 }
+            begin
+            case lop of
+              1, { *= }
+              2, { /= }
+              3, { %= }
+             12, { /u= }
+             13: { %u= }
+                 begin
+                 expression(nextbyte); forgetcattr(lcattr,lsiz);
+                 if lop >= 12
+                 then begin UnFlag := TRUE; lop := lop - 10; end
+                 else UnFlag := FALSE;
+                 if lcattr.ckind = EXPR
+                 then begin
+                      ExprFlag := TRUE; exprreg := lcattr.exreg;
+                      end
+                 else begin
+                      ExprFlag := FALSE;
+                      a := loadaddress(lcattr);
+                      lcattr.ckind := ADDR; lcattr.adreg := a;
+                      lcattr.aoffset := 0;
+                      end;
+                 if rsiz <= W
+                 then begin
+                      dupref(lcattr,lsiz); tcattr := lcattr;
+                      d1 := loadd(lcattr,lsiz);
+                      isolate(d1); lcattr.exreg := d1; erase(d1);
+                      if lsiz = B
+                      then if lop >= 2
+                           then if UnFlag
+                                then begin
+                                     { ANDI.W D } genr(576,d1); gen(255);
+                                     end
+                                else { EXT.W D } genr(18560,d1);
+                      { expression(nextbyte); }
+                      if (rsiz = B) and (gcattr.ckind <> CNST)
+                      then begin
+                           d2 := loadd(gcattr,rsiz); isolate(d2);
+                           gcattr.exreg := d2; erase(d2);
+                           if lop >= 2
+                           then if UnFlag
+                                then begin
+                                     { ANDI.W D2 } genr(576,d2); gen(255);
+                                     end
+                                else genr(_EXT_W,d2);
+                           end;
+                      load(d1); lock(d1);
+                      if lop = 1
+                      then mop := -15936 { MULS <ea>,D }
+                      else if UnFlag
+                           then begin
+                                {ANDI.L #$ffff,d1} genr(640,d1); gen(0); gen(-1);
+                                mop := -32576; { DIVU <ea>,D }
+                                end
+                           else begin
+                                genr(_EXT_L,d1);
+                                mop := -32320; { DIVS <ea>,D }
+                                end;
+                      genrea(mop,d1,gcattr,W);
+                      unlock(d1);
+                      if lop = 3 then genr(18496,d1); { SWAP D }
+                      dupref(lcattr,lsiz); gcattr := lcattr;
+                      store(lcattr,tcattr,lsiz);
+                      end
+                 else begin
+                      if lop = 1 then mop := _MULS_L else mop := _DIVS_L;
+                      if UnFlag then nop := 0 else nop := $0800;
+                      if lsiz = L
+                      then begin
+                           { expression(nextbyte); }
+                           if ExprFlag
+                           then d2 := exprreg
+                           else begin
+                                d2 := getreg(D0,D7); genrr(_MOVE_L+$10,d2,a);
+                                end;
+                           if lop = 3
+                           then begin
+                                d1 := getreg(D0,D7);
+                                geneaxrr(mop,nop,gcattr,L,d2,d1);
+                                if ExprFlag
+                                then begin
+                                     genrr(_MOVE_L,d2,d1); freereg(d1);
+                                     end
+                                else begin
+                                     freereg(d2); d2 := d1;
+                                     end;
+                                end
+                           else geneaxrr(mop,nop,gcattr,L,d2,d2);
+                           if not ExprFlag
+                           then begin
+                                genrr(_MOVE_L+$80,a,d2); freereg(a);
+                                lcattr.ckind := EXPR; lcattr.exreg := d2;
+                                end;
+                           gcattr := lcattr;
+                           end
+                      else begin
+                           { expression(nextbyte); }
+                           d2 := getreg(D0,D7);
+                           if UnFlag then genr(_CLR_L,d2);
+                           if lsiz = B
+                           then begin
+                                if ExprFlag
+                                then { MOVE.B D,D } genrr(_MOVE_B,d2,exprreg)
+                                else { MOVE.B (A),D } genrr(4112,d2,a);
+                                if not UnFlag then genr(_EXT_W,d2);
+                                end
+                           else begin
+                                if ExprFlag
+                                then { MOVE.W R,D }
+                                     genr0(12288 + ord(exprreg^.regno),d2)
+                                else { MOVE.W (A),D } genrr(12304,d2,a);
+                                end;
+                           if not UnFlag then genr(_EXT_L,d2);
+                           if lop = 3
+                           then begin
+                                d1 := getreg(D0,D7);
+                                geneaxrr(mop,nop,gcattr,L,d2,d1);
+                                genrr(_EXGDD,d2,d1); freereg(d2); d2 := d1;
+                                end
+                           else geneaxrr(mop,nop,gcattr,L,d2,d2);
+                           if ExprFlag
+                           then begin
+                                if lsiz = B
+                                then lop := _MOVE_B
+                                else lop := _MOVE_W;
+                                if exprreg^.regno >= A0 then lop := lop + 64;
+                                genrr(lop,exprreg,d2); erase(exprreg);
+                                end
+                           else begin
+                                if lsiz = B
+                                then { MOVE.B D,(A) } genrr(4224,a,d2)
+                                else { MOVE.W D,(A) } genrr(12416,a,d2);
+                                freereg(a);
+                                end;
+                           gcattr.ckind := EXPR; gcattr.exreg := d2;
+                           end;
+                      end;
+                 if IsDReg(gcattr) and (ccodereg = SP)
+                 then ccodereg := gcattr.exreg^.regno;
+                 end;
+              6, { >>= }
+              7, { >u>= }
+              8: { <<= }
+                 begin
+                 if lop = 6
+                 then lop := -8192 { ASR.B #x,D }
+                 else if lop = 7
+                      then lop := -8184 { LSR.B #x,D }
+                      else lop := -7928; { LSL.B #x,D }
+                 if lsiz = W
+                 then lop := lop + 64
+                 else if lsiz = L
+                      then lop := lop + 128;
+                 if lcattr.ckind <> EXPR
+                 then begin
+                      a := loadaddress(lcattr);
+                      lcattr.ckind := ADDR; lcattr.adreg := a;
+                      lcattr.aoffset := 0;
+                      end;
+                 dupref(lcattr,lsiz); tcattr := lcattr;
+                 d1 := loadd(lcattr,lsiz);
+                 isolate(d1); lcattr.exreg := d1; erase(d1);
+                 expression(nextbyte);
+                 if (gcattr.ckind = CNST) and
+                    (gcattr.cvalu.lvalu > 0) and (gcattr.cvalu.lvalu <= 8)
+                 then gennr(lop,gcattr.cvalu.lvalu,d1)
+                 else begin
+                      load(d1); lock(d1);
+                      d2 := loadd(gcattr,rsiz);
+                      genrr(lop + 32,d2,d1);
+                      unlock(d1); freereg(d2);
+                      end;
+                 dupref(lcattr,lsiz); gcattr := lcattr;
+                 store(lcattr,tcattr,lsiz);
+                 if IsDReg(gcattr) and (ccodereg = SP)
+                 then ccodereg := gcattr.exreg^.regno;
+                 end;
+              4, { += }
+              5, { -= }
+              9, { &= }
+             10, { ^= }
+             11: { |= }
+                 begin
+                 Done := FALSE;
+                 expression(nextbyte); DregFlag := FALSE; ExprFlag := FALSE;
+                 if gcattr.ckind = CNST
+                 then begin
+                      Done := TRUE; ImmFlag := TRUE;
+                      immval := gcattr.cvalu.lvalu;
+                      if lop = 4
+                      then if (immval > 0) and (immval <= 8)
+                           then begin { ADDQ }
+                                lop := 20480 + (immval mod 8)*512;
+                                ImmFlag := FALSE;
+                                end
+                           else if IsAReg(lcattr)
+                                then Done := FALSE
+                                else lop := 1536 { ADDI.B #-,<ea> }
+                      else if lop = 5
+                           then if (immval > 0) and (immval <= 8)
+                                then begin { SUBQ }
+                                     lop := 20736 + (immval mod 8)*512;
+                                     ImmFlag := FALSE;
+                                     end
+                                else if IsAReg(lcattr)
+                                     then Done := FALSE
+                                     else lop := 1024 { SUBI.B #-,<ea> }
+                           else if lop = 9
+                                then lop := 512 { ANDI.B #-,<ea> }
+                                else if lop = 10
+                                     then lop := 2560 { EORI.B #-,<ea> }
+                                     else lop := 0;   { ORI.B  #-,<ea> }
+                      end;
+                 if not Done
+                 then begin
+                      ImmFlag := FALSE; immval := 0; DregFlag := TRUE;
+                      d1 := loadd(gcattr,rsiz); lock(d1);
+                      if lop = 4
+                      then lop := -12032 { ADD.B D,<ea> }
+                      else if lop = 5
+                           then lop := -28416 { SUB.B D,<ea> }
+                           else if lop = 9
+                                then lop := -16128 { AND.B D,<ea> }
+                                else if lop = 10
+                                     then lop := -20224 { EOR.B D,<ea> }
+                                     else lop := -32512; { OR.B D,<ea> }
+                      if (lcattr.ckind = EXPR) and (lop <> -20224)
+                      then ExprFlag := TRUE
+                      else lop := lop + d1^.regno*512;
+                      end;
+                 if lsiz = W
+                 then lop := lop + 64
+                 else if lsiz = L
+                      then lop := lop + 128;
+                 forgetcattr(lcattr,lsiz);
+                 if ExprFlag
+                 then begin
+                      if lcattr.exreg^.regno > D7
+                      then begin
+                           if d1^.regno = 0 then mop := 512 else mop := 0;
+                           { EXG D,A } genr(-15992 + mop,lcattr.exreg);
+                           genr(lop - 256 + mop,d1);
+                           { EXG D,A } genr(-15992 + mop,lcattr.exreg);
+                           end
+                      else genrr(lop - 256,lcattr.exreg,d1);
+                      gcattr := lcattr; erase(lcattr.exreg);
+                      end
+                 else begin
+                      dupref(lcattr,lsiz); gcattr := lcattr;
+                      if ImmFlag
+                      then geneai(lop,lcattr,lsiz,immval)
+                      else genea(lop,lcattr,lsiz);
+                      end;
+                 if DregFlag then begin unlock(d1); freereg(d1); end;
+                 if IsDReg(gcattr) and (ccodereg = SP)
+                 then ccodereg := gcattr.exreg^.regno;
+                 end;
+            end; {case}
+            end;
+         3, { FLT4 }
+         4: { FLT8 }
+            begin
+            if FPHardWare and M81_FLAG
+            then begin
+                 expression(nextbyte);
+                 if lcattr.ckind <> EXPR
+                 then begin
+                      a := loadaddress(lcattr); lcattr.ckind := ADDR;
+                      lcattr.adreg := a; lcattr.aoffset := 0;
+                      dupref(lcattr,L); dupref(lcattr,L);
+                      end;
+                 tcattr := lcattr; d1 := loadf(tcattr,lsiz);
+                 case lop of
+                   1: mop := _FMUL;
+                   2,12: mop := _FDIV;
+                   4: mop := _FADD;
+                   5: mop := _FSUB;
+                 end; {case}
+                 genfear(mop,gcattr,d1,rsiz);
+                 tcattr := lcattr;
+                 genfear(_FSTORE,tcattr,d1,lsiz); freereg(d1);
+                 gcattr := lcattr;
+                 end
+            else begin
+                 if ltype = 4 {FLT8} then incoffset(lcattr,8);
+                 if lcattr.ckind = EXPR
+                 then begin ExprFlag := TRUE; exprreg := lcattr.exreg; end
+                 else begin
+                      ExprFlag := FALSE;
+                      a := loadaddress(lcattr);
+                      end;
+                 if ltype <= 2 {INT4}
+                 then begin
+                      if ltype = 2 {INT4}
+                      then if ExprFlag
+                           then { MOVE.L R,-(SP) }
+                                gen(12032 + ord(exprreg^.regno))
+                           else { MOVE.L (A),-(SP) } genr(12048,a)
+                      else begin
+                           d1 := getreg(D0,D7);
+                           if ltype = 0 {INT1}
+                           then begin
+                                if ExprFlag
+                                then { MOVE.B R,D } genrr(4096,d1,exprreg)
+                                else { MOVE.B (A),D } genrr(4112,d1,a);
+                                { EXT.W D } genr(18560,d1);
+                                end
+                           else {INT2} if ExprFlag
+                                then { MOVE.W R,D }
+                                     genr0(12288 + ord(exprreg^.regno),d1)
+                                else { MOVE.W (A),D } genrr(12304,d1,a);
+                           { EXT.L D } genr(18624,d1);
+                           { MOVE.L D,-(SP) } genr(12032,d1);
+                           freereg(d1);
+                           end;
+                      if rtype = 3 {FLT4}
+                      then lname := '%I_2_F  '
+                      else lname := '%I_2_D  ';
+                      genjsra(lname);
+                      end
+                 else if ltype = 3 {FLT4}
+                      then if ExprFlag
+                           then { MOVE.L R,-(SP) }
+                                gen(12032 + ord(exprreg^.regno))
+                           else { MOVE.L (A),-(SP) } genr(12048,a)
+                      else begin {FLT8}
+                           isolate(a);
+                           { MOVE.L -(A),-(SP) } genr(12064,a);
+                           { MOVE.L -(A),-(SP) } genr(12064,a);
+                           incrv(a^.regno,-8);
+                           end;
+                 expression(nextbyte); pushvalue(gcattr,rsiz);
+                 case lop of
+                   1: lname := '%F_MUL  ';
+                   2,12: lname := '%F_DIV  ';
+                   4: lname := '%F_ADD  ';
+                   5: lname := '%F_SUB  ';
+                 end; {case}
+                 if rtype = 4 then lname[2] := 'D';
+                 genjsra(lname);
+                 if ExprFlag
+                 then begin gcattr.ckind := EXPR; gcattr.exreg := exprreg; end
+                 else begin
+                      load(a);
+                      gcattr.ckind := ADDR; gcattr.adreg := a;
+                      gcattr.aoffset := 0;
+                      end;
+                 if ltype <= 2 {INT4}
+                 then begin
+                      if rtype = 3 {FLT4}
+                      then lname := '%F_2_I  '
+                      else lname := '%D_2_I  ';
+                      genjsra(lname);
+                      if ltype = 2
+                      then if ExprFlag
+                           then if exprreg^.regno <= D7
+                                then { MOVE.L (SP)+,D } genr0(8223,exprreg)
+                                else { MOVE.L (SP)+,A } genr0(8287,exprreg)
+                           else { MOVE.L (SP)+,(A) } genr0(8351,a)
+                      else begin
+                           d1 := getreg(D0,D7);
+                           { MOVE.L (SP)+,D } genr0(8223,d1);
+                           if ExprFlag
+                           then begin
+                                if ltype = 0 {INT1}
+                                then lop := 4096 { MOVE.B }
+                                else lop := 12288; { MOVE.W }
+                                if exprreg^.regno >= A0 then lop := lop + 64;
+                                genrr(lop,exprreg,d1); erase(exprreg);
+                                end
+                           else begin
+                                if ltype = 0 {INT1}
+                                then { MOVE.B D,(A) } genrr(4224,a,d1)
+                                else { MOVE.W D,(A) } genrr(12416,a,d1);
+                                freereg(a);
+                                end;
+                           gcattr.ckind := EXPR; gcattr.exreg := d1;
+                           end;
+                      end
+                 else if ltype = 3 {FLT4}
+                      then if ExprFlag
+                           then begin
+                                if exprreg^.regno <= D7
+                                then { MOVE.L (SP)+,D } genr0(8223,exprreg)
+                                else { MOVE.L (SP)+,A } genr0(8287,exprreg);
+                                erase(exprreg);
+                                end
+                           else { MOVE.L (SP)+,(A) } genr0(8351,a)
+                      else begin {FLT8}
+                           { MOVE.L (SP)+,(A)+ } genr0(8415,a);
+                           { MOVE.L (SP)+,(A)+ } genr0(8415,a);
+                           gcattr.aoffset := -8; incrv(a^.regno,8);
+                           end;
+                 end;
+            end;
+       end; {case}
+       end;
+  end; {cassign}
+  
+  procedure expr3(fop: integer);
+    var lopsize,lsize,setsize,llabel,lop,mop,ltype,lincr,i: integer;
+        OnStack,LeftStack,RightStack,ExprFlag: Boolean; lsiz,rsiz: sizes;
+        lcattr: cattr; lcc: condition; mlabel: integer;
+        d1,d2,td,a,exprreg: pregrec; ll: longint;
+  begin
+  case fop of
+  157: { FMTREF }
+       begin
+       a := getreg(A0,AMAX);
+       { LEA $+xxx,A } genr0(16890,a); pcrefblk(fmtref(nextword),1);
+       gcattr.ckind := ADDR; gcattr.adreg := a; gcattr.aoffset := 0;
+       end;
+  163: { IN }
+       begin
+       setsize := nextbyte; expression(nextbyte);
+       d1 := loadd(gcattr,W); llabel := newlabel;
+       setexpression(nextbyte,OnStack); load(d1);
+       if OnStack
+       then begin
+            lock(d1); d2 := getreg(D0,D7); freereg(d2); unlock(d1);
+            { MOVE.W (SP),D2 } genr0(12311,d2);
+            { LSL.W #3,D2 } genr(-6328,d2);
+            { CMP.W  D2,D } genrr(-20416,d1,d2);
+            end
+       else begin
+            { CMP.W #xx,D } genr0(-20356,d1); gen(setsize*8);
+            end;
+       genjump(_BGE,llabel);
+       isolate(d1); erase(d1); lock(d1);
+       genr(_EXT_L,d1);
+       genr(_NOT_L,d1);
+       genjump(_BGE,llabel);
+       if OnStack
+       then begin
+            d2 := getreg(D0,D7); freereg(d2);
+            { MOVE.W (SP),D2 } genr0(12311,d2);
+            { BFTST <D:1>,2(SP,D2.W) } gen(_BFTST+55);
+                    gen($801 + d1^.regno*64); gen(d2^.regno*4096 + 2);
+            end
+       else begin
+            makevalid(gcattr);
+            if gcattr.ckind = EXPR
+            then genr(_NOT_L,d1)
+            else incoffset(gcattr,setsize);
+            geneai(_BFTST,gcattr,W,$801+d1^.regno*64);
+            end;
+       defilabel(llabel); unlock(d1); freereg(d1);
+       if OnStack then { ADDA.W (SP)+,SP } gen(-8481);
+       gcattr.ckind := COND; gcattr.cc := LT;
+       end;
+  164, { SETLE }
+  165, { SETGE }
+  166, { SETEQ }
+  167: { SETNE }
+       begin
+       setsize := nextbyte; setexpression(nextbyte,LeftStack);
+       lcattr := gcattr; setexpression(nextbyte,RightStack);
+       if (setsize > 4) or LeftStack or RightStack
+       then begin
+            if not LeftStack then pushset(lcattr,setsize,TRUE);
+            if not RightStack then pushset(gcattr,setsize,TRUE);
+            gcattr.ckind := EXPR; gcattr.exreg := getreg(D0,D0);
+            case fop of
+                 164: if RightStack and not LeftStack
+                      then genjsra('%_SETGE ')
+                      else genjsra('%_SETLE ');
+                 165: if RightStack and not LeftStack
+                      then genjsra('%_SETLE ')
+                      else genjsra('%_SETGE ');
+                 166: genjsra('%_SETEQ ');
+                 167: genjsra('%_SETNE ');
+            end; {case}
+            end
+       else begin
+            if setsize = 1
+            then begin lopsize := 0; lsiz := B; end
+            else if setsize = 2
+                 then begin lopsize := 64; lsiz := W; end
+                 else begin lopsize := 128; lsiz := L; end;
+            makevalid(gcattr); lockcattr(gcattr); makevalid(lcattr);
+            d1 := loadd(lcattr,lsiz); isolate(d1); lock(d1);
+            unlockcattr(gcattr);
+            d2 := loadd(gcattr,lsiz); isolate(d2); unlock(d1);
+            erase(d1); erase(d2);
+            if fop = 165 { >= }
+            then begin td := d1; d1 := d2; d2 := td; end;
+            if fop <= 165
+            then begin
+                 { NOT D2 } genr(17920 + lopsize,d2);
+                 { AND D2,D } genrr(-16384 + lopsize,d1,d2);
+                 end
+            else { CMP D,D2 } genrr(-20480 + lopsize,d1,d2);
+            gcattr.ckind := COND;
+            if fop = 167 { <> }
+            then gcattr.cc := NE
+            else gcattr.cc := EQ;
+            freereg(d1); freereg(d2);
+            end;
+       end;
+  176, { UFCALL }
+  177: { UPCALL }
+       begin
+       i := nextword;
+       with userprocs[i div 32]^[i mod 32]^ do
+            globref(procname,nextblk,pc - blkpc + 2);
+       a := getreg(A0,AMAX);
+       if SHORTCALLS
+       then begin
+            { LEA $+xxx } genr0(16890,a); gen(0);
+            end
+       else begin
+            { LEA xxx.L } genr0(16889,a); gen2(0);
+            end;
+       gcattr.ckind := ADDR; gcattr.adreg := a; gcattr.aoffset := 0;
+       end;
+  190: { PARMLST} gencall;
+  204: { ILABREF }
+       begin
+       a := getreg(A0,AMAX);
+       { LEA $+xxx,A } genr0(16890,a); pcrefblk(nextword,1);
+       gcattr.ckind := ADDR; gcattr.adreg := a; gcattr.aoffset := 0;
+       end;
+  208: { Complex Binary Ops }
+       begin
+       case nextbyte of
+         0: { COMPLEX }
+            begin
+            { Imag } expression(nextbyte); pushvalue(gcattr,L);
+            { Real } expression(nextbyte); pushvalue(gcattr,L);
+            gcattr.ckind := STCK;
+            end;
+         1: push88call('%C_ADD  ',TRUE,8);
+         2: push88call('%C_SUB  ',TRUE,8);
+         3: push88call('%C_MUL  ',TRUE,8);
+         4: push88call('%C_DIV  ',TRUE,8);
+       end; {case}
+       end;
+  209: { Complex Compares }
+       begin
+       lop := nextbyte;
+       push88call('%C_CMP  ',FALSE,0);
+       if FPHardware and M81_FLAG
+       then begin
+            gcattr.ckind := FCND;
+            if lop = 0 then gcattr.fcc := FCC_EQ else gcattr.fcc := FCC_NEQ;
+            a := getreg(F0,F0); freereg(a); { Clobbers F0 }
+            end
+       else begin
+            gcattr.ckind := COND;
+            if lop = 0 then gcattr.cc := EQ else gcattr.cc := NE;
+            end;
+       end;
+  210: { Complex Unary Ops: RPART, IPART, CNEG. }
+       begin
+       lop := nextbyte;
+       if lop = 2
+       then push8call('%C_NEG  ',TRUE,8)
+       else begin
+            expression(nextbyte);
+            if (gcattr.ckind = VARB) or
+               (gcattr.ckind = ADDR) or
+               (gcattr.ckind = INDX) or
+               (gcattr.ckind = FDAT) or
+               (gcattr.ckind = INDR)
+            then begin
+                 if lop <> 0
+                 then incoffset(gcattr,4);
+                 end
+            else begin
+                 pushvalue(gcattr,D);
+                 if lop = 0
+                 then { MOVE.L (SP)+,(SP) } gen(11935)
+                 else { ADDQ.L #4,SP } gen(22671);
+                 gcattr.ckind := STCK;
+                 end;
+            end;
+       end;
+  211: { DOD Extensions: }
+       begin
+       lop := nextbyte;
+       if lop <> 0 then error(8382); { Only ISHFT done for now }
+       expression(nextbyte); lcattr := gcattr; expression(nextbyte);
+       d1 := loadd(lcattr,L); isolate(d1); erase(d1); lock(d1);
+       if gcattr.ckind = CNST
+       then begin
+            if gcattr.cvalu.lvalu <> 0
+            then begin
+                 if gcattr.cvalu.lvalu > 0
+                 then lop := _LSL_L
+                 else lop := _LSR_L;
+                 i := abs(gcattr.cvalu.lvalu);
+                 if i <= 31
+                 then begin
+                      while i > 8 do begin genr(lop,d1); i := i - 8; end;
+                      gennr(lop,i,d1);
+                      end;
+                 end;
+            end
+       else begin
+            d2 := loadd(gcattr,L); isol(d2,L,TRUE);
+            llabel := newlabel; mlabel := newlabel;
+            if ccodereg <> d2^.regno then testd(d2,L);
+            genjump(_BLT,llabel);
+            genrr(_LSL_L+$20,d2,d1);
+            genjump(_BRA,mlabel);
+            defilabel(llabel);
+            genr(_NEG_L,d2);
+            genrr(_LSR_L+$20,d2,d1);
+            defilabel(mlabel);
+            erase(d2); freereg(d2);
+            end;
+       unlock(d1); gcattr.ckind := EXPR; gcattr.exreg := d1;
+       end;
+  214: { FINDEX } genfindex;
+  219: { FCHCMP }
+       begin
+       lop := nextbyte; pushfchaddr(nextbyte); pushfchaddr(nextbyte);
+       genjsra('%FC_CMP '); gcattr.ckind := COND;
+       { Unsigned bytes }
+       case lop of
+         0: gcattr.cc := LO;
+         1: gcattr.cc := HI;
+         2: gcattr.cc := LS;
+         3: gcattr.cc := HS;
+         4: gcattr.cc := EQ;
+         5: gcattr.cc := NE;
+       end; {case}
+       end;
+  224: { C-UNOPS }
+       uintexpr(nextbyte,nil);
+  225: { C-BINOPS }
+       begin
+       lop := nextbyte;
+       case lop of
+         0, {<<}
+         1, {>> Signed}
+         2: {>> Unsigned}
+            begin
+            if lop = 0
+            then lop := -7800 { LSL.L #x,D }
+            else if lop = 1
+                 then lop := -8064 { ASR.L #x,D }
+                 else lop := -8056;{ LSR.L #x,D }
+            expression(nextbyte); d1 := loadd(gcattr,L);
+            expression(nextbyte);
+            if (gcattr.ckind = CNST) and (gcattr.cvalu.lvalu <= 8) and
+               (gcattr.cvalu.lvalu >= 0)
+            then begin
+                 if gcattr.cvalu.lvalu <> 0
+                 then begin
+                      load(d1); isolate(d1); gennr(lop,gcattr.cvalu.lvalu,d1);
+                      ccodereg := d1^.regno;
+                      end;
+                 end
+            else begin
+                 load(d1); isolate(d1); lock(d1);
+                 d2 := loadd(gcattr,L); unlock(d1);
+                 { SHIFT.L D2,D } genrr(lop + 32,d2,d1);
+                 freereg(d2); ccodereg := d1^.regno;
+                 end;
+            gcattr.ckind := EXPR; gcattr.exreg := d1; erase(d1);
+            end;
+         3, {||}
+         4: {&&}
+            begin
+            llabel := newlabel; expression(nextbyte); d1 := loadd(gcattr,B);
+            if lop = 3 then mop := _BNE else mop := _BEQ;
+            genjump(mop,llabel); i := d1^.regno; freereg(d1);
+            expression(nextbyte); d2 := loadd(gcattr,B);
+            if d2^.regno <> i
+            then begin
+                 d1 := getreg(i,i); freereg(d2);
+                 { MOVE.B D2,D } genrr(4096,d1,d2);
+                 ccodereg := d1^.regno; d2 := d1; erase(d1);
+                 end;
+            gcattr.ckind := EXPR; gcattr.exreg := d2;
+            defilabel(llabel);
+            end;
+         8, { UDIV2 }
+        10: { UMOD2 }
+            begin
+            numexpr(nextbyte,W); lcattr := gcattr; numexpr(nextbyte,W);
+            make2valid(gcattr,lcattr);
+            if (gcattr.ckind = STCK) and (lcattr.ckind = STCK)
+            then begin
+                 lockcattr(lcattr); d1 := loadd(gcattr,W);
+                 unlockcattr(lcattr);
+                 end;
+            lockcattr(gcattr); d1 := loadd(lcattr,W); isolate(d1);
+            { ANDI.L } genr(640,d1); gen(0); gen(-1);
+            unlockcattr(gcattr); lock(d1);
+            genrea(-32320,d1,gcattr,W);
+            unlock(d1); ccodereg := d1^.regno; erase(d1);
+            if fop = 72 then genr(18496,d1); { SWAP }
+            gcattr.ckind := EXPR; gcattr.exreg := d1;
+            end;
+         9: { UDIV4 } if FPHardware and (MAX_FLAG or M81_FLAG)
+                      then if MAX_FLAG
+                           then maxcmd(M_UDIV4,4)
+                           else begin
+                                expression(nextbyte); lcattr := gcattr;
+                                expression(nextbyte);
+                                d1 := loadd(lcattr,L); isolate(d1); erase(d1);
+                                geneaxrr(_DIVS_L,0,gcattr,L,d1,d1);
+                                gcattr.ckind := EXPR; gcattr.exreg := d1;
+                                end
+                      else push44call('%U_DIV4 ',TRUE,4);
+        11: { UMOD4 } if FPHardware and (MAX_FLAG or M81_FLAG)
+                      then if MAX_FLAG
+                           then maxcmd(M_UMOD4,4)
+                           else begin
+                                expression(nextbyte); lcattr := gcattr;
+                                expression(nextbyte);
+                                d1 := loadd(lcattr,L); isolate(d1); erase(d1);
+                                d2 := getreg(D0,D7);
+                                geneaxrr(_DIVS_L,0,gcattr,L,d1,d2);
+                                gcattr.ckind := EXPR; gcattr.exreg := d2;
+                                freereg(d1);
+                                end
+                      else push44call('%U_MOD4 ',TRUE,4);
+        16, {ULT1}
+        17, {ULT2}
+        18, {ULT4}
+        19, {UGT1}
+        20, {UGT2}
+        21, {UGT4}
+        22, {ULE1}
+        23, {ULE2}
+        24, {ULE4}
+        25, {UGE1}
+        26, {UGE2}
+        27: {UGE4}
+            begin
+            lop := lop - 16;
+            case lop mod 3 of
+              0: lsiz := B;
+              1: lsiz := W;
+              2: lsiz := L;
+            end; {case}
+            case lop div 3 of
+              0: lcc := LO;
+              1: lcc := HI;
+              2: lcc := LS;
+              3: lcc := HS;
+            end; {case}
+            numexpr(nextbyte,lsiz); lcattr := gcattr; numexpr(nextbyte,lsiz);
+            if GenCompare(lcattr,gcattr,lsiz)
+            then case lcc of
+                  LO: lcc := HI;
+                  HI: lcc := LO;
+                  LS: lcc := HS;
+                  HS: lcc := LS;
+                 end; {case}
+            gcattr.ckind := COND; gcattr.cc := lcc;
+            end;
+       end; {case}
+       end;
+  226: { C-UNOPS }
+       begin
+       lop := nextbyte; ltype := lop mod 16; lop := lop div 16;
+       lsize := csizes[ltype]; lsiz := csizs[ltype];
+       lincr := nextword; expression(nextbyte);
+       case lop of
+         0, { L++ }
+         1, { L-- }
+         2, { ++L }
+         3: { --L }
+            begin
+            forgetcattr(gcattr,lsiz);
+            if odd(lop) then lincr := -lincr;
+            {!!! What if it is a packed field? !!!}
+            if lincr <> 0
+            then begin
+                 if ltype <= 2
+                 then begin
+                      lcattr := gcattr; dupref(gcattr,lsiz);
+                      if lop <= 1
+                      then if IsAReg(gcattr)
+                           then isolate(gcattr.exreg)
+                           else begin
+                                d1 := loadd(gcattr,lsiz);
+                                isolate(d1); gcattr.exreg := d1;
+                                end;
+                      if abs(lincr) <= 8
+                      then begin
+                           if lincr < 0
+                           then lop := _SUBQ_B
+                           else lop := _ADDQ_B;
+                           lop := lop + sizebits[lsize];
+                           genea(lop + (abs(lincr) and 7)*512,lcattr,lsiz);
+                           end
+                      else begin
+                           if IsAReg(lcattr)
+                           then begin
+                                { ADDA.W #x,A } genr0(-12036,lcattr.exreg);
+                                                gen(lincr);
+                                freereg(lcattr.exreg);
+                                end
+                           else begin
+                                lop := 1536 + sizebits[lsize]; {ADDI}
+                                geneai(lop,lcattr,lsiz,lincr);
+                                if IsDReg(gcattr)
+                                then ccodereg := gcattr.exreg^.regno;
+                                end;
+                           end;
+                      end
+                 else begin {floating-point}
+                      if ltype = 4 {double} then incoffset(gcattr,8);
+                      if gcattr.ckind = EXPR
+                      then begin ExprFlag := TRUE; exprreg := gcattr.exreg; end
+                      else begin
+                           ExprFlag := FALSE; a := loadaddress(gcattr);
+                           end;
+                      if ltype = 3 {float}
+                      then begin
+                           if odd(lop)
+                           then ll := $bf800000
+                           else ll := $3f800000;
+                           if ExprFlag
+                           then { MOVE.L D,-(SP) } genr(12032,exprreg)
+                           else { MOVE.L (A),-(SP) } genr(12048,a);
+                           if lop > 1
+                           then begin
+                                pushint(ll,L);
+                                {::}
+                                genjsra('%F_ADD  ');
+                                if ExprFlag
+                                then { MOVE.L (SP),D } genr0(8215,exprreg)
+                                else { MOVE.L (SP),(A) } genr0(8343,a);
+                                end
+                           else begin
+                                { MOVE.L (SP),-(SP) } gen(12055);
+                                pushint(ll,L);
+                                {::}
+                                genjsra('%F_ADD  ');
+                                if ExprFlag
+                                then { MOVE.L (SP)+,D } genr0(8223,exprreg)
+                                else { MOVE.L (SP)+,(A) } genr0(8351,a);
+                                end;
+                           end
+                      else begin {double}
+                           if odd(lop)
+                           then ll := $bff00000
+                           else ll := $3ff00000;
+                           { MOVE.L -(A),-(SP) } genr(12064,a);
+                           { MOVE.L -(A),-(SP) } genr(12064,a);
+                           if lop > 1
+                           then begin
+                                pushint(0,L);
+                                pushint(ll,L);
+                                {::}
+                                genjsra('%D_ADD  ');
+                                { MOVE.L (SP),(A)+ } genr0(8407,a);
+                                { MOVE.L 4(SP),(A)+ } genr0(8431,a); gen(4);
+                                end
+                           else begin
+                                { MOVE.L 4(SP),-(SP) } gen(12079); gen(4);
+                                { MOVE.L 4(SP),-(SP) } gen(12079); gen(4);
+                                pushint(0,L);
+                                pushint(ll,L);
+                                {::}
+                                genjsra('%D_ADD  ');
+                                { MOVE.L (SP)+,(A)+ } genr0(8415,a);
+                                { MOVE.L (SP)+,(A)+ } genr0(8415,a);
+                                end;
+                           end;
+                      gcattr.ckind := STCK;
+                      if not ExprFlag then freereg(a);
+                      end;
+                 end;
+            end;
+         4: { IGNORE }
+            begin
+            ignorexp(lsize);
+            expression(nextbyte);
+            end;
+       otherwise: (***) writeln('BAD C OP  226:',lop:0);
+       end; {case}
+       end;
+  227: { C-? }
+       begin
+       lop := nextbyte; mop := lop mod 16; lop := lop div 16;
+       llabel := newlabel; mlabel := newlabel;
+       saveallregs; clearscr; expression(nextbyte);
+       if lop <= 3
+       then begin
+            lsiz := csizs[lop];
+            if gcattr.ckind = EXPR
+            then if gcattr.exreg^.regno <= D7
+                 then begin
+                      if ccodereg <> gcattr.exreg^.regno
+                      then begin
+                           load(gcattr.exreg);
+                           lop := 18944; {TST.B}
+                           if lsiz = W
+                           then lop := lop + 64 {.W}
+                           else if lsiz = L
+                                then lop := lop + 128; {.L}
+                           genr(lop,gcattr.exreg);
+                           end;
+                      freereg(gcattr.exreg);
+                      gcattr.ckind := COND; gcattr.cc := NE;
+                      end;
+            if gcattr.ckind <> COND
+            then begin d1 := loadd(gcattr,lsiz); freereg(d1); end;
+            end
+       else begin
+            pushvalue(gcattr,D);
+            { CLR.L -(SP) } gen(17063); gen(17063);
+            {::}
+            genjsra('%D_CMP  ');
+            end;
+       if gcattr.ckind = COND
+       then begin
+            if odd(ord(gcattr.cc))
+            then gcattr.cc := pred(gcattr.cc)
+            else gcattr.cc := succ(gcattr.cc);
+            lop := $60 + ord(gcattr.cc);
+            end
+       else lop := _BEQ;
+       genjump(lop,llabel);
+       rsiz := csizs[mop];
+       expression(nextbyte);
+       if mop <= 2
+       then begin d1 := loadd(gcattr,rsiz); isolate(d1); freereg(d1); end
+       else pushvalue(gcattr,rsiz);
+       genjump(_BRA,mlabel);
+       defilabel(llabel);
+       expression(nextbyte);
+       if mop <= 2
+       then begin
+            d2 := loadd(gcattr,rsiz);
+            if d1^.regno <> d2^.regno
+            then begin
+                 d1 := getreg(d1^.regno,d1^.regno);
+                 { MOVE.L D2,D } genrr(8192,d1,d2);
+                 freereg(d2);
+                 gcattr.ckind := EXPR; gcattr.exreg := d1;
+                 if rsiz = L then ccodereg := d1^.regno;
+                 end;
+            end
+       else begin
+            pushvalue(gcattr,rsiz);
+            gcattr.ckind := STCK;
+            end;
+       defilabel(mlabel);
+       end;
+  228: { CASSIGN } cassign;
+  otherwise: writeln('OP ''',fop:0,''' not implemented in EXPR3');
+  end; {case}
+  end; {expr3}
+  
+begin {expression}
+if fop <= 63
+then expr1(fop)
+else if fop <= 155
+     then expr2(fop)
+     else expr3(fop);
+end; {expression}
+
+                                                                                                                                                                       

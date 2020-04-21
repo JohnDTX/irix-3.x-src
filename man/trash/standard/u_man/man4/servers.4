@@ -1,0 +1,71 @@
+'\"macro stdmacro
+.\" @(#)servers.4 1.1 85/12/28 SMI;
+.TH SERVERS 4 "28 August 1985"
+.SH NAME
+servers \- inet server data base
+.SH DESCRIPTION
+.IX  "servers file"  ""  "\fLservers\fP \(em inet server database"
+.IX  "inet server database"  ""  "inet server database \(em \fLservers\fP"
+The
+.I servers
+file contains the list of servers that
+.IR inetd (1m)
+operates.
+For each server a single line should be present
+with the following information:
+.HP 10
+name of server
+.br
+.ns
+.HP 10
+protocol
+.br
+.ns
+.HP 10
+server location
+.PP
+If the server is rpc based, then the name field should
+be \f3rpc\fP, and following the server location are two
+additional fields, one with the rpc program number, the
+second with either a version number or a range of version
+numbers.
+.PP
+Items are separated by any number of blanks and/or
+tab characters.  A ``#'' indicates the beginning of
+a comment; characters up to the end of the line are
+not interpreted by routines which search the file.
+.PP
+The name of the server should be the official service
+name as contained in 
+.IR services (5).
+The protocol entry is either udp or tcp.
+The server location
+is the full path name of the server program.
+.SH EXAMPLE
+.LP
+The following example is taken from the Sun UNIX system.
+.sp
+.nf
+.ta \w'comsat\0\0'u +\w'udp\0\0'u +\w'xusrxetcxinxtelnetd\0\0'u +\w'100001\0\0'u
+tcp	tcp	/usr/etc/in.tcpd
+telnet	tcp	/usr/etc/in.telnetd
+shell	tcp	/etc/in.rshd
+login	tcp	/etc/in.rlogind
+exec	tcp	/usr/etc/in.rexecd
+tcp	udp	/usr/etc/in.ttcpd
+syslog	udp	/usr/etc/in.syslog
+comsat	udp	/usr/etc/in.comsat
+talk	udp	/usr/etc/in.talkd
+time	tcp	/usr/etc/in.timed
+rpc	udp	/usr/etc/rpc.rstatd	100001	1-2
+rpc	udp	/usr/etc/rpc.rusersd	100002	1
+rpc	udp	/usr/etc/rpc.rwalld	100008	1
+rpc	udp	/usr/etc/rpc.mountd	100005	1
+.fi
+.SH FILES
+/etc/servers
+.SH "SEE ALSO"
+services(4), inetd(1m)
+.SH BUGS
+Because of a limitation on the number of open files,
+this file must contain fewer than 27 lines.

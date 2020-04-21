@@ -1,0 +1,23 @@
+.TH textcolor 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2textcolor\fP - set the color of text
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "textcolor(tcolor) "
+.B "Colorindex tcolor;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine textco(tcolor)"
+.B "integer*2 tcolor"
+.sp
+.SH DESCRIPTION
+\f2Textcolor\fP sets the color
+of the text drawn in the textport.
+.SH "SEE ALSO"
+.I color, pagecolor, pagewritemask, textport,
+.I textwritemask, tpoff, tpon
+.SH NOTE
+This command can only be used in immediate mode.

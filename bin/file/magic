@@ -1,0 +1,119 @@
+#
+#			@(#)magic	1.1+
+#
+#		file cmd's magic file
+#
+#
+#	Basically, the fields of this file are as follows:
+#	byte offset, value type, optional operator (= by default), value
+#	to match (numeric or string), and string to be printed.  Numeric
+#	values may be decimal, octal, or hex.  Also note that the last
+#	string may have 1 printf format spec.
+#	The '>' in occassional column 1's is magic: it forces file to
+#	continue scanning and matching additional lines.  The first line
+#	afterwards not so marked terminates the search.
+#
+0	short		070707		cpio archive
+0	string		070707		ASCII cpio archive
+0	long		0177555		real old archive
+0	long		0177545		old archive
+0	string		!<arch>		archive
+0	long		0100554		apl workspace
+0	short		017037		packed text
+0	string		<ar>		common object archive
+#
+# The following two lines commented out so that the 407 case
+# can be handled with special case code.  Distinguishing
+# 'executable' from 'relocatable' can't be handled with the
+# magic mechanism as presently constituted.
+#
+# 0	long		0407		executable
+# >16	long		>0		not stripped
+0	short		0407		4.0 executable
+>16	long		>0		not stripped
+>2	short		>0		- version %ld
+0	short		0401		unix-rt ldp
+0	short		0405		old overlay
+0	long		0410		pure executable
+>16	long		>0		not stripped
+0	long		0413		demand-paged executable
+>16	long		>0		not stripped
+0	short		0410		4.0 pure executable
+>16	long		>0		not stripped
+>2	short		>0		- version %ld
+0	short		0411		4.0 separate I&D
+>16	long		>0		not stripped
+>2	short		>0		- version %ld
+0	short		0437		pdp11 kernel overlay
+0	short		0570		common object executable
+>12	long		>0		not stripped
+>22	short		>0		- version %ld
+0	short		0575		common object pure executable
+>12	long		>0		not stripped
+>22	short		>0		- version %ld
+0	short		0502		basic-16 executable
+>12	long		>0		not stripped
+0	short		0503		basic-16 executable (TV)
+>12	long		>0		not stripped
+0	short		0510		x86 executable
+>12	long		>0		not stripped
+0	short		0511		x86 executable (TV)
+>12	long		>0		not stripped
+0	short		0550		3b20d executable
+>12	long		>0		not stripped
+0	short		0551		3b20d executable (TV)
+>12	long		>0		not stripped
+0	short		0560		3b5 executable
+>12	long		>0		not stripped
+0	short		0561		3b5 executable (TV)
+>12	long		>0		not stripped
+0	short		0540		MIPS executable
+#
+# MIPS binary information - Note that version number printing is an
+# extreme hack.
+#
+0	short		0x0160		mipseb
+>20	short		0407		executable
+>20	short		0410		pure
+>20	short		0413		demand paged
+>8	long		!0		not stripped
+>8	long		0		stripped
+>22	byte		x		- version %ld.
+>23	byte		x		%ld
+0	short		0x0162		mipsel
+>20	short		0407		executable
+>20	short		0410		pure
+>20	short		0413		demand paged
+>8	long		!0		not stripped
+>8	long		0		stripped
+>23	byte		x		- version %ld.
+>22	byte		x		%ld
+0	short		0x6001		swapped mipseb
+>20	short		03401		executable
+>20	short		04001		pure
+>20	short		05401		demand paged
+>8	long		!0		not stripped
+>8	long		0		stripped
+>22	byte		x		- version %ld.
+>23	byte		x		%ld
+0	short		0x6201		swapped mipsel
+>20	short		03401		executable
+>20	short		04001		pure
+>20	short		05401		demand paged
+>8	long		!0		not stripped
+>8	long		0		stripped
+>22	byte		x		- version %ld.
+>23	byte		x		%ld
+0	short		0x180		mipseb ucode
+0	short		0x182		mipsel ucode
+#
+# Archives - This handles archive subtypes
+#
+0	string		!<arch>\n__________E	MIPS archive
+>20	string		U			with mipsucode members
+>21	string		L			with mipsel members
+>21	string		B			with mipseb members
+>19	string		L			and a EL hash table
+>19	string		B			and a EB hash table
+>22	string		X			-- out of date
+0	string		!<arch>		archive

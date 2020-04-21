@@ -1,0 +1,79 @@
+TIME=/bin/time
+if [ ! -f $TIME ]
+then
+	TIME=/usr/bin/time
+	if [ ! -f $TIME ]
+	then
+		echo "Where is the time command?"
+		exit 1
+	fi
+fi
+
+chmod 777 large4.sh mkdummy rmdummy
+umask 0
+
+echo
+echo "Small Compile"
+rm -f smcomp.time
+$TIME cc -o stat stat.c -lm 2>> smcomp.time
+$TIME cc -o stat stat.c -lm 2>> smcomp.time
+$TIME cc -o stat stat.c -lm 2>> smcomp.time
+$TIME cc -o stat stat.c -lm 2>> smcomp.time
+$TIME cc -o stat stat.c -lm 2>> smcomp.time
+stat smcomp.time
+
+echo
+echo "Tbl"
+rm -f tbl.time
+$TIME tbl nroff.in > nroff.tbl 2>> tbl.time
+$TIME tbl nroff.in > nroff.tbl 2>> tbl.time
+$TIME tbl nroff.in > nroff.tbl 2>> tbl.time
+$TIME tbl nroff.in > nroff.tbl 2>> tbl.time
+$TIME tbl nroff.in > nroff.tbl 2>> tbl.time
+stat tbl.time
+
+echo
+echo "Nroff"
+rm -f nroff.time
+$TIME nroff < nroff.tbl > nroff.out 2>> nroff.time
+$TIME nroff < nroff.tbl > nroff.out 2>> nroff.time
+$TIME nroff < nroff.tbl > nroff.out 2>> nroff.time
+$TIME nroff < nroff.tbl > nroff.out 2>> nroff.time
+$TIME nroff < nroff.tbl > nroff.out 2>> nroff.time
+rm nroff.out nroff.tbl
+stat nroff.time
+
+echo
+echo "Large Compile"
+rm -f lrgcomp.time
+$TIME cc -o large large.c 2>> lrgcomp.time
+$TIME cc -o large large.c 2>> lrgcomp.time
+$TIME cc -o large large.c 2>> lrgcomp.time
+$TIME cc -o large large.c 2>> lrgcomp.time
+$TIME cc -o large large.c 2>> lrgcomp.time
+rm large
+stat lrgcomp.time
+
+echo
+echo "Four simultaneous large compiles"
+rm -f 4lrg.time
+$TIME large4.sh 2>> 4lrg.time
+$TIME large4.sh 2>> 4lrg.time
+$TIME large4.sh 2>> 4lrg.time
+$TIME large4.sh 2>> 4lrg.time
+$TIME large4.sh 2>> 4lrg.time
+stat 4lrg.time
+
+echo
+echo "Makefile"
+mkdummy
+rm -f makefile.time
+$TIME make -f makefile.tst > /dev/null 2>> makefile.time
+$TIME make -f makefile.tst > /dev/null 2>> makefile.time
+$TIME make -f makefile.tst > /dev/null 2>> makefile.time
+$TIME make -f makefile.tst > /dev/null 2>> makefile.time
+$TIME make -f makefile.tst > /dev/null 2>> makefile.time
+stat makefile.time
+rmdummy
+
+echo

@@ -1,0 +1,28 @@
+.TH multmatrix 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I multmatrix
+- pre-multiply the current transformation matrix
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "multmatrix(m) "
+.B "Matrix m;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine multma(m)"
+.B "real m(4,4)"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure multmatrix(m: Matrix);"
+.sp
+.SH DESCRIPTION
+.I Multmatrix
+pre-multiplies
+the current top of the transformation stack by the given 
+matrix.  If \f2T\fP is 
+the current matrix, \f2multmatrix(M)\f1 replaces \f2T\fP with M\u.\dT.
+.SH "SEE ALSO"
+.I loadmatrix, popmatrix, pushmatrix

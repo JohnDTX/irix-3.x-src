@@ -1,0 +1,48 @@
+.TH minsize 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B minsize
+\- specifies the minimum size of a graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "minsize(x, y)"
+.B "long x, y;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine minsiz(x, y)"
+.B "integer*4 x, y"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure minsize(x, y: longint);"
+.SH DESCRIPTION
+.B minsize
+specifies the minimum size of a graphics window under the window manager.
+Call it at the beginning of a graphics program that runs under the
+window manager.  
+It takes effect when
+.B winopen 
+is called.
+You can also call
+.B minsize
+in conjuction with 
+.B winconstraints
+to modify the enforced minimum size after the window has been created.
+The default minimum size is 40 pixels wide and 30 pixels high.
+You can reshape the  window,
+but the window manager does not allow it to become smaller
+than the specified minimum size.
+.PP
+If \f3minsize\fP is called without \f3winopen\fP, or if
+the system is not running the window manager, the routine is ignored.
+.SH "SEE ALSO"
+maxsize, winopen 
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode.

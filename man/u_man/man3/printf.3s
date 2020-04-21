@@ -1,0 +1,409 @@
+'\"macro stdmacro
+.TH PRINTF 3S
+.SH NAME
+printf, fprintf, sprintf \- print formatted output
+.SH SYNOPSIS
+.B "#include <stdio.h>"
+.PP
+.B "int printf (format"
+[
+.B ,
+arg ] .\|.\|.
+.B )
+.br
+.B "char \(**format;"
+.PP
+.B "int fprintf (stream, format"
+[
+.B ,
+arg ] .\|.\|.
+.B )
+.br
+.SM
+.B FILE
+.B \(**stream;
+.br
+.B "char \(**format;"
+.PP
+.B "int sprintf (s, format"
+[
+.B ,
+arg ] .\|.\|.
+.B )
+.br
+.B "char \(**s, format;"
+.SH DESCRIPTION
+.I Printf\^
+places output on the standard output stream
+.IR stdout .
+.I Fprintf\^
+places output on the named output
+.IR stream .
+.I Sprintf\^
+places ``output'',
+followed by the null character
+.RB ( \e0 )
+in consecutive bytes starting at
+.RI \(** s ;
+it is the user's responsibility to ensure that
+enough storage is available.
+Each function returns the number of characters
+transmitted (not including the
+.B \e0
+in the case of
+.IR sprintf ),
+or
+a negative value if an output error was encountered.
+.PP
+Each of these functions
+converts, formats, and prints its
+.IR arg s
+under control of the
+.IR format .
+The
+.I format\^
+is a character string
+that contains
+two types of objects:
+plain characters, which are simply copied to the
+output stream,
+and conversion specifications,
+each of which results in fetching of
+zero or more
+.IR arg s.
+The results are undefined if there are insufficient
+.IR arg s
+for the format.
+If the format is exhausted while
+.IR arg s
+remain, the excess
+.IR arg s
+are simply ignored.
+.PP
+Each conversion specification is introduced by
+the character
+.BR % .
+After the
+.BR % ,
+the following
+appear in sequence:
+.PP
+.RS
+Zero or more
+.IR flags ,
+which modify the meaning of
+the conversion specification.
+.PP
+An optional decimal digit string specifying a minimum
+.IR "field width" .
+If the converted value has fewer characters
+than the field width,
+it will be padded on the left (or right,
+if the left-adjustment flag (see below) has been
+given) to the field width;
+.PP
+A
+.I precision\^
+that gives
+the minimum number of digits to appear for the
+.BR d ,
+.BR o ,
+.BR u ,
+.BR x ,
+or
+.B X
+conversions,
+the number of digits to appear after the
+decimal point for the
+.B e
+and
+.B f
+conversions,
+the maximum number of significant digits
+for the
+.B g
+conversion,
+or the maximum number of characters
+to be printed from a string in
+.B s
+conversion.
+The precision takes the form of a period
+.RB ( \&. )
+followed by a decimal digit string:
+a null digit string is treated as zero.
+.PP
+An optional
+.B l
+specifying that a following
+.BR d ,
+.BR o ,
+.BR u ,
+.BR x ,
+.BR X ,
+.BR f ,
+.BR e ,
+.BR E ,
+.BR g ,
+or
+.BR G ,
+conversion character applies to a long
+integer or long float
+.IR arg ,
+respectively.
+.PP
+A character that indicates the type of
+conversion to be applied.
+.RE
+.PP
+A field width or precision may be
+indicated by an asterisk
+.RB ( \(** )
+instead of a digit string.
+In this case, an integer
+.I arg\^
+supplies
+the field width or precision.
+The
+.I arg\^
+that is actually converted is not fetched until
+the conversion letter is seen, so the
+.IR arg s
+specifying field width or precision must appear
+.I before\^
+the
+.I arg\^
+(if any) to be converted.
+.PP
+The flag characters and their meanings are:
+.PD 0
+.TP 10
+.B \-
+The result of the conversion will be left-justified within the field.
+.TP
+.B +
+The result of a signed
+conversion will always begin with a sign
+.RB ( +
+or
+.BR \- ).
+.TP
+blank
+If the first character of a signed conversion is not a sign, a blank
+will be prefixed to the result.
+This implies that if the blank and
+.B +
+flags both appear, the blank flag will be ignored.
+.TP
+.B #
+This flag specifies that the value is to be converted
+to an ``alternate form.''\ 
+For
+.BR c ,
+.BR d ,
+.BR s ,
+and
+.B u
+conversions, the flag has no effect.
+For
+.B o
+conversion, it increases the precision to force
+the first digit of the result to be a zero.
+For
+.B x
+.RB ( X )
+conversion, a non-zero result will have
+.B 0x
+.RB ( 0X )
+prefixed to it.
+For
+.BR e ,
+.BR E ,
+.BR f ,
+.BR g ,
+and
+.B G
+conversions, the result will always contain a decimal point,
+even if no digits follow the point (normally, a decimal point
+appears in the result of these conversions only if a digit
+follows it).
+For
+.B g
+and
+.B G
+conversions, trailing zeroes will
+.I not\^
+be removed from the result
+(which they normally are).
+.PD
+.PP
+The conversion characters
+and their meanings are:
+.PP
+.PD 0
+.TP 10
+\f3d\fP,\f3o\fP,\f3u\fP,\f3x\fP,\f3X\fP
+The integer
+.I arg\^
+is converted to signed decimal,
+unsigned octal, decimal, or
+hexadecimal notation
+.RB ( x
+and
+.BR X ),
+respectively;
+the letters
+.B abcdef
+are used for
+.B x
+conversion and the letters
+.SM
+.B ABCDEF
+for
+.B X
+conversion.
+The precision specifies the minimum number of digits
+to appear; if the value being converted can be represented
+in fewer digits, it will be expanded with leading zeroes.
+The default precision is 1.
+The result of converting a zero value with a precision
+of zero is a null string.
+.TP
+\f3D\fP,\f3O\fP,\f3U\fP
+The long
+.I arg\^
+is converted to signed decimal, or unsigned octal or decimal
+respectively.
+This form is to support programs written under previous versions of
+\s-2UNIX\s0 and is strongly discouraged.
+.TP
+.BR f
+The float or double
+.I arg\^
+is converted to decimal notation
+in the style ``[\f3\-\fP]ddd\f3.\fPddd'',
+where the number of digits after the decimal point
+is equal to the precision specification.
+If the precision
+is missing,
+6 digits are output;
+if the precision is explicitly 0,
+no decimal point appears.
+.TP
+.BR e , E
+The float or double
+.I arg\^
+is converted in the style
+``[\f3\-\fP]d\f3.\fPddd\f3e\(+-\fPdd'',
+where there is one digit before the decimal point and
+the number of digits after it is equal to the
+precision;
+when the precision is missing,
+6 digits are produced;
+if the precision is zero, no decimal point appears.
+The
+.B E
+format code will produce a number with
+.B E
+instead of
+.B e
+introducing the exponent.
+The exponent always contains at least two digits.
+.TP
+.BR g , G
+The float or double
+.I arg\^
+is printed in style
+.BR f
+or
+.BR e
+(or in style
+.B E
+in the case of a
+.B G
+format code),
+with the precision specifying the number of significant digits.
+The style used depends on the value converted:
+style
+.B e
+will be used only if the exponent resulting from
+the conversion is less than \-4 or greater than the precision.
+Trailing zeroes are removed from the result; a decimal point
+appears only if it is followed by a digit.
+.TP
+.B c
+The character
+.I arg\^
+is printed.
+.TP
+.B s
+The
+.I arg\^
+is taken to be a string (character pointer)
+and characters from the string are printed until
+a null character
+.RB ( \e0 )
+is encountered or
+the number of characters indicated by the precision
+specification is reached.
+If the precision is missing, it is taken to be infinite, so
+all characters up to the first null character are printed.
+If the string pointer
+.I arg\^
+has the value zero, the result is undefined.
+A 
+.I null\^
+arg will yield undefined results.
+.TP
+.B %
+Print a
+.BR % ;
+no argument is converted.
+.PD
+.PP
+In no case does a non-existent or small field width
+cause truncation of a field;
+if the result of a conversion is wider than the field width,
+the field is simply expanded to contain the conversion result.
+Characters generated by
+.I printf\^
+and
+.I fprintf\^
+are printed as if
+.IR putc (3S)
+had been called.
+.SH EXAMPLES
+To print a date and time in the form ``Sunday, July 3, 10:02'',
+where
+.I weekday\^
+and
+.I month\^
+are pointers to null-terminated strings:
+.RS
+.nh
+.PP
+printf("%s,\ %s\ %d,\ %\f2.\fP2d\f2:\fP%\f2.\fP2d",\ weekday,\ month,\ day,\ hour,\ min);
+.RE
+.PP
+.hy 14
+To print
+.if n .I pi\^
+.if t \(*p
+to 5 decimal places:
+.RS
+.PP
+printf("pi \|= \|%\f3.\fP5f", \|4\(**atan(1\f3.\fP0));
+.RE
+.SH SEE ALSO
+ecvt(3C),
+putc(3S),
+scanf(3S),
+stdio(3S).
+.\"	@(#)printf.3s	5.2 of 5/18/82
+.\" @(#)$Header: /d2/3.7/src/man/u_man/man3/RCS/printf.3s,v 1.1 89/03/27 17:01:04 root Exp $
+.\" $Log:	printf.3s,v $
+Revision 1.1  89/03/27  17:01:04  root
+Initial check-in for 3.7
+
+.\" Revision 1.2  85/01/08  11:27:39  bob
+.\" Changed \f[RIB] to \f[123].
+.\" 

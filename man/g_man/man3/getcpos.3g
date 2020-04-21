@@ -1,0 +1,32 @@
+.TH getcpos 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B getcpos
+\- returns the current character position
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "getcpos(ix, iy)"
+.B "Screencoord *ix, *iy;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine getcpo(ix, iy)"
+.B "integer*2 ix, iy"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure getcpos(var ix, iy: Screencoord);"
+.SH DESCRIPTION
+.B getcpos
+returns the current character position.
+.SH "SEE ALSO"
+getgpos
+.sp
+.I Programming Guide,
+Section 3.1, Current Drawing Positions
+.SH NOTE
+This routine is available only in immediate mode.

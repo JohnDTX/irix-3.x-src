@@ -1,0 +1,41 @@
+.TH beginpupmode "" "" "Silicon Graphics"
+.rs
+.sp 0.1i
+.SH\(Dy
+.SH NAME
+.B beginpupmode 
+- provides access to the popup menu bit planes
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "beginpupmode()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "suboutine beginp"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure beginpupmode;"
+.sp
+.SH DESCRIPTION
+.B beginpupmode
+enables the two highest-order bit planes for writing. These bit planes
+are used by the window manager to display popup menus. An application
+process may use these planes without conflict with other processes
+while it retains the 
+input focus.
+Though processes may write in these
+planes at any time, it is recommended that they write to them only 
+while they have the 
+input focus.
+Exceptions to this rule should be considered carefully.
+.SH "SEE ALSO"
+endpupmode, pupcolor, fullscrn, endfullscrn
+.br
+``Multiple Exposure: The IRIS Window Manager''
+in the
+.I "IRIS User's Guide"
+.SH NOTE
+This command can be used only in immediate mode in the window manager.

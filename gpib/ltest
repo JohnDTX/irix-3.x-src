@@ -1,0 +1,3 @@
+# listen test
+xib -llll 999 1024 1999 2048 -f /dev/ib01 -v &
+xib -tttt 999 1024 1999 2048 -f /dev/ib11 &

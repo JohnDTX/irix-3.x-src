@@ -1,0 +1,179 @@
+
+The PM2 proms were not designed for diagnostics.  It was
+expected that these functions would be added to the proms,
+or a set of diagnostic proms would be created at a later date.
+Some minimal functions, however, are performed by the proms
+to test basic hardware functionality.  Each of these tests, and
+each of the phases of the prom boot process itself, is given a
+test code which is displayed on the LEDs when the phase is begun.
+Later phases of the boot process may be accompanied by screen i/o
+if the VERBOSE configuration switch (switch 3 on the back
+panel) is set.
+
+
+On a hard reset, the proms do the following in the early stages:
+
+	start refresh. turn off parity.
+
+	If the configuration switches are set to the special 
+DONTTOUCH environment (switches 3-8 set), the proms skip from this point
+to the intermediate initialization sequence.
+
+
+	map page zero logical to physical.
+	perform various hardware tests:
+
+		If one of these tests fail, the action of the prom will be
+		controlled by the verbose switch (switch 3 on back panel). If
+		this switch is not set, the proms will halt the processor. The
+		led should display the id of the test which caused the failure. If
+		the verbose switch is set, the proms will cycle between displaying 
+		the current test code and an error code in the led (forever). In this
+		case, the test code is displayed for twice as long as the error code.
+
+		
+		A.	test the page map	(test code 0(back) F(on board))
+
+			The entire page map is tested by writing various patterns
+		to it and reading them back.  Certain information during this
+		test is available in the registers (for examination by the ICE):
+
+			a0 - contains the address of one word below the address of
+				 the pagemap entry which failed.
+
+			d0 - is the error code.  The error occurred on a read (1)
+				 or a write (0).
+
+			d1 - is the pattern which was being written.
+
+
+		B.	test the protection map (test code 1(back) E(board))
+
+			The entire protection map is tested similarly to the page 
+		map. The registers contain analagous information to test A.
+
+
+		C.	test the context register (test code 2(back) D(board))
+
+			Various patterns are written to and read from the context 
+		register.  The registers set similarly to A and B.
+
+
+
+
+
+	intermediate initialization sequence.  
+	
+		This consists of setting up whatever things the proms need to 
+		get at the world.
+
+
+		A.	map for the prom RAM needs, and set up the prom RAM data
+			area. (test code 7(back) 8 (board))
+
+			The prom needs page 0 and page 7f.  Page zero is used for
+		the vectors and a communications area that the prom uses to 
+		interface to standalone programs and UNIX.  Page 7f is used
+		for stack space and for the prom globals.  
+
+			1. clears page 7f.
+			2. copies the data currently at 0-0x300 to 0x7f000.
+			3. clears the area from 8 to 0x200.
+
+		B.	stuff interrupt and trap vectors, clear bss.
+			(test code 8(back) 7(board)).
+
+			The trap and interrupt vectors are stuffed.  It is possible
+		that a trap received between this point and the time the duarts 
+		are set will not be handled gracefully.
+		The prom bss area is cleared.
+
+
+		C.  test code 9(back) 6(board).
+
+			The multibus is reset.
+
+		D.	test code A(back) 5(board)
+
+			Autoconfiguring is done for the terminal type.  The
+		multibus I/O space is set up, the duarts are initialized, and
+		an attempt is made to access the iris keyboard.  If the keyboard
+		responds, the screen is initialized.  If this succeeds, the 
+		terminal is assumed to be a microswitch keyboard on an IRIS 
+		terminal.  If the keyboard was found, but the screen cannot be
+		initialized, the message 'Screeninit fail' will be written to 
+		the ASCII terminal assumed attached to port 1.
+
+			The PM2 prom monitor sign message is printed in this phase.
+
+		
+		E. 	test code B (back) 4(board)
+
+			Hook for future expansion.
+
+		
+	At this point, if the configuration switches are set to the	
+magic DONTTOUCH environment, the final setup phase is skipped to.
+
+		F.	test code C (back) 3 (board)
+
+			Memory is sized and cleared.  If VERBOSE is set,
+			this appears as a line of X/.'s on the screen. A character
+			is output for each half meg of memory found. '.' infers
+			no memory present, and 'X' infers memory was found.
+
+		G.	test code D (back) 2 (board)
+
+			The map is initialized.  All memory is mapped logically
+			contiguous, multibus memory is mapped, etc.  (This is
+			the first memory access via the multibus.)  I/O space is 
+			mapped.  The amount of each type of memory mapped and their
+			locations is written to the screen if the VERBOSE switch is
+			set.
+
+	final setup phase:
+
+		A.	test code 0(back) f(board).
+
+			parity is enabled.  The host duart is set to the speed 
+			indiated in the configuration switches.
+
+		B.	test code 1(back) E(board).
+
+			The main prom routine is called.  This initializes the
+			serial interrupt handler and the prom internal clock.  If
+			the DONTTOUCH configuration is selected, nothing else is
+			initialized.  Otherwise, a download buffer is allocated,
+			and the duarts are flushed.
+
+		C. 	test code 2(back) D(board).
+
+			If the fields in the communications area are set to do 
+			a UNIX-initiated boot sequence, this is begun.  Else, the
+			prom action is defined by the configuration switches.  These
+			are: (switches 4(LSB) - 8(MSB)):
+
+		  back panel switch    
+				8---4	function
+				-------------------
+				00000 - floppy boot 
+				00001 - tape boot 
+				00010 - enter iris monitor
+				00110 - talk over the serial line (emulate a
+							v50 terminal.
+				01000 - net boot
+				10000 - disk boot
+				11111 - if VERBOSE (switch 3) is one, this is the
+							DONTTOUCH environment.
+
+			all boots are done from the file defaultboot on the indicated
+			device (except netboot, in which case the
+			default file is defined by the host).  
+			Certain other environments are defined which are
+			not mentioned here.
+
+			Undefined environments default to the iris monitor.
+
+
+		
+		

@@ -1,0 +1,32 @@
+.TH genobj  3 "R1c" "Silicon Graphics"
+.SH NAME
+.I genobj
+- return a unique integer for use as an object name
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Object genobj()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer function genobj()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function genobj: Object;"
+.sp
+.SH DESCRIPTION
+Object names can be up to
+31 bits long and must be unique within the program.  Names might
+be pointers into data structures or databases, hashed string names, or
+randomly chosen numbers.  The \f2genobj\f1 command generates unique
+31-bit integer names, and can be used when object names carry no semantic
+information beyond a way to refer to an object.  \f2Genobj\f1 will 
+not generate an object name that is currently in use.
+The user must take the same care in generating names when using a 
+combination of user-defined and \f2genobj\f1-defined names.
+.SH "SEE ALSO"
+.I callobj, gentag, isobj, makeobj
+.SH NOTE
+This command can only be used in immediate mode.

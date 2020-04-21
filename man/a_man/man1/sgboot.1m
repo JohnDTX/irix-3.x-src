@@ -1,0 +1,33 @@
+'\"macro stdmacro
+.TH SGBOOT 1M
+.SH NAME
+sgboot \- provide network boot service
+.SH SYNOPSIS
+.B sgboot
+[ system name ] [ boot directory ]
+.SH DESCRIPTION
+\f2Sgboot\fP is a daemon that provides XNS boot service to IRIS
+Terminals on an Ethernet local area network.  This service is provided
+on the socket \f2BOOTSOCKET\fP defined in \f2/usr/include/xns/Xns.h\fP.
+After the client obtains a connection, \f2sgboot\fP expects the client
+to supply the name of the boot file to send.  \f2sgboot\fP then
+transmits the file and closes the connection.  The pathname of the
+boot file may be absolute or relative to the boot directory specified
+on the command line.
+.PP
+.I Sgboot
+is normally started by
+.I xnsd (1M).
+.SH "NOTE"
+Multiple copies of \f2sgboot\fP may be running at a given time.
+The total number of instances of \f2sgboot\fP equals the number
+of IRIS Terminals that may be booted in parallel.
+.SH "SEE ALSO"
+.nf
+Silicon Graphics, Inc., \f2IRIS Terminal Guide\fP, Appendix B
+.fi
+sgbounce(1M),
+xcp(1C),
+xnsd(1M),
+xx(1C),
+xnslib(3X).

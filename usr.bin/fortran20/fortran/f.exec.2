@@ -1,0 +1,720 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.EXEC.2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               25-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+  
+  
+  procedure assignment;
+    var lattr: attr; lpn: pn; UndefFlag,SubStrFlag: Boolean;
+        lop,i: integer; lpchval: chvaltype; lname: idstring;
+  
+    function AssignOK(var vattr,eattr: attr; var fop: integer): Boolean;
+    begin
+    if Numeric(eattr.atype.typ) and Numeric(vattr.atype.typ)
+    then begin
+      if (eattr.atype.typ = REEL) and (vattr.atype.typ = INTEGR)
+	and (FPHardwarediv) then warning(406);
+      makentype(eattr,vattr.atype)
+      end
+    else
+      if (eattr.atype.typ = LOGICAL) and (vattr.atype.typ = LOGICAL)
+      then makeisize(eattr,vattr.atype.siz);
+    if eattr.atype.typ = vattr.atype.typ
+    then begin
+      AssignOK := TRUE;
+      case vattr.atype.typ of
+        INTEGR,
+        REEL,
+        LOGICAL,
+        COMPLEX:   if vattr.atype.siz <= 1
+                   then fop := 32 {ASS1}
+                   else
+                     if vattr.atype.siz = 2
+                     then fop := 33 {ASS2}
+                     else
+                       if vattr.atype.siz = 4
+                       then fop := 34 {ASS4}
+                       else fop := 35 {ASS8};
+        CHARACTER: fop := 220 {ASSFCH};
+                   
+      end; {case}
+      end
+    else begin error(61); AssignOK := FALSE; end;
+    end; {AssignOK}
+    
+    procedure stmtfunction(fname: idstring);
+      var lpn: pn; lop: integer; lattr: attr; lstmt,lstmt2: pstmt;
+      
+      function sfunparameters: pnlist;
+        var lpn,lpn2: pn; lastarg,larglist,lpnlist: pnlist; ExitFlag: Boolean;
+      begin
+      fscan; larglist := nil; stfuntree := nil;
+      if token = IDENTSY
+      then
+        begin
+        ExitFlag := FALSE;
+        repeat
+          lpn := lookupname(stfuntree,ident);
+          if lpn <> nil then error(34);
+          { Note: No SUBROUTINE/FUNCTION parameters allowed in stmt funcs }
+          newn(lpn,VARS,ident); xref(lpn);
+          lpn^.nlev := STFUNVAR; lpn^.Indirect := TRUE;
+          lpn2 := lookupname(localtree,ident);
+          if lpn2 <> nil
+          then begin
+            if (lpn2^.nkind <> VARS) and (lpn2^.nkind <> UNKN) then error(252);
+            if lpn2^.ExpType
+            then lpn^.idtype := lpn2^.idtype;
+            end;
+          new(lpnlist); lpnlist^.next := nil; lpnlist^.nrec := lpn;
+          if larglist = nil
+          then larglist := lpnlist
+          else lastarg^.next := lpnlist;
+          lastarg := lpnlist; entername(lpn,stfuntree); fscan;
+          if token = COMMASY then fscan else ExitFlag := TRUE;
+        until ExitFlag;
+        end;
+      if token = RPARENSY then fscan else error(26);
+      sfunparameters := larglist;
+      end; {sfunparameters}
+      
+    begin {stmtfunction}
+    needstate(STMTFUNSTATE,STMTFUNSTATE);
+    level := STFUNVAR;
+    lpn := lookupname(localtree,fname);
+    if lpn = nil
+    then begin
+      newn(lpn,FUNCT,fname); lpn^.rtnlev := 3;
+      entername(lpn,localtree);
+      end
+    else
+      with lpn^ do
+        if nkind = UNKN
+        then 
+          begin nkind := FUNCT; rtnlev := 3; RtnLocal := FALSE; end
+        else error(34);
+    xref(lpn);
+    with lpn^ do
+      begin rtnno := extprocno; NDefined := TRUE; end;
+    extprocno := extprocno + 1;
+    lpn^.arglist := sfunparameters;
+    if token = ASSIGNSY then fscan else error(59);
+    lattr.atype := lpn^.idtype; lattr.treeptr := lpn;
+    if lattr.atype.typ = CHARACTER
+    then begin
+      lattr.treeptr := newunnode(223 {MKFCH},lattr.treeptr);
+      lattr.treeptr^.unsubop := lattr.atype.siz;
+      end;
+    expression;
+    if AssignOK(lattr,gattr,lop)
+    then begin
+      new(lstmt2,ASMTST);
+      with lstmt2^ do begin
+        nextstmt := nil; stmtop := ASMTST; asmtop := lop;
+        asmtvar := lattr.treeptr; asmtexpr := gattr.treeptr;
+        end;
+      new(lstmt,STFUNST);
+      with lstmt^ do begin
+        nextstmt := stfunlist; stmtop := STFUNST;
+        funname := lpn; funstmt := lstmt2;
+        end;
+      stfunlist := lstmt;
+      end;
+    level := LOCALVAR;
+    end; {stmtfunction}
+    
+  begin {assignment}
+  needstate(STMTFUNSTATE,EXECSTATE);
+  fscan;
+  if token = IDENTSY
+  then begin
+    lname := ident; fscan;
+    lpn := lookupname(localtree,lname);
+    if lpn = nil
+    then UndefFlag := TRUE
+    else
+      if (lpn^.nkind = UNKN) and not lpn^.Indirect
+      then UndefFlag := lpn^.unbounds = nil
+      else UndefFlag := FALSE;
+    if state < EXECSTATE
+    then
+      if token = LPARENSY
+      then SubStrFlag := IsSubStr
+      else SubStrFlag := FALSE
+    else SubStrFlag := FALSE;
+    if UndefFlag and (token = LPARENSY) and
+       (state < EXECSTATE) and not SubStrFlag
+    then stmtfunction(lname)
+    else
+      begin { Assignment Statement }
+      needstate(EXECSTATE,EXECSTATE);
+      if lpn = nil
+      then lpn := declarevar(localtree,ident)
+      else
+        begin
+        if lpn^.nkind = UNKN then declunkn(lpn);
+        if (lpn^.nkind <> VARS) and (lpn^.nkind <> FUNCT)
+         then begin error(58); newn(lpn,VARS,ident); end;
+        end;
+      xref(lpn); variable(lpn); lattr := gattr;
+      FPHardwarediv := FALSE;
+      if token = ASSIGNSY
+      then
+        if IsHollerith
+        then begin
+          fscanhollerith;
+          if lattr.atype.typ = COMPLEX then lattr.atype.typ := REEL;
+          gattr.atype.typ := CHARACTER; gattr.atype.siz := chlen; 
+          new(gattr.treeptr,CSTNODE); gattr.treeptr^.node := CSTNODE;
+          gattr.treeptr^.csttype := gattr.atype;
+          gattr.treeptr^.cstvalu.clen := chlen;
+          gattr.treeptr^.cstvalu.cval := chval;
+          if lattr.atype.typ <> CHARACTER 
+          then begin
+            if not CharEqu then error(299);
+            cmakesnum(gattr,lattr.atype);
+            end;
+          {!!! Correct the byte sex of gattr value !!!}
+          fscan;
+          end
+        else begin
+          fscan; expression;
+          if CharEqu and (lattr.atype.typ <> CHARACTER) and
+                         (gattr.atype.typ = CHARACTER)
+          then
+            if gattr.treeptr <> nil
+            then
+              if gattr.treeptr^.node = CSTNODE
+              then begin cmakesnum(gattr,lattr.atype); notansi; end;
+          end
+      else error(59);
+      if AssignOK(lattr,gattr,lop)
+      then begin
+{dar check if is a do variable}
+    if lattr.treeptr = dovarsav then 
+	begin
+	   warning(405);
+	end;
+
+        new(newstmt,ASMTST);
+        with newstmt^ do begin
+          nextstmt := nil; stmtop := ASMTST; asmtop := lop;
+          asmtvar := lattr.treeptr; asmtexpr := gattr.treeptr;
+          end;
+        end;
+      end; { Assignment Statement }
+    end;
+  end; {assignment}
+  
+  procedure assignstmt;
+    var llabel: alfa6; llabrec: plabelrec;
+  begin
+  needstate(EXECSTATE,EXECSTATE);
+  getlabel(llabel);
+  llabrec := findlabel(llabel,UNKNOWNLAB);
+  if Match('TO')
+  then begin
+    fscan; identifier;
+    if gattr.atype.typ = INTEGR 
+    then begin if gattr.atype.siz <> 4 then error(270); end
+    else error(137);
+    new(newstmt,ASSGNST);
+    with newstmt^ do begin
+      nextstmt := nil; stmtop := ASSGNST;
+      assignlab := llabrec; assignvar := gattr.treeptr;
+      end;
+    fscan;
+    end
+  else error(138);
+  end; {assignstmt}
+  
+  procedure callstmt;
+    var lpn,lpn2: pn;
+  begin
+  needstate(EXECSTATE,EXECSTATE);
+  fscan;
+  if token = IDENTSY
+  then
+    begin
+    lpn := lookupname(localtree,ident);
+    if lpn = nil
+    then
+      begin
+      lpn := lookupname(globaltree,ident);
+      if lpn = nil
+      then
+        begin
+        newn(lpn,SUBR,ident); entername(lpn,localtree); makeglobal(lpn);
+        end
+      else
+        if lpn^.nkind = SUBR
+        then
+          begin
+          new(lpn2); lpn2^ := lpn^; lpn2^.llink := nil; lpn2^.rlink := nil;
+          entername(lpn2,localtree); lpn := lpn2;
+          end;
+      end;
+    xref(lpn); fscan;
+    if (lpn^.nkind = SUBR) or (lpn^.nkind = EXTERN) or (lpn^.nkind = UNKN)
+    then fcall(lpn,SUBR)
+    else error(62);
+    end
+  else error(28);
+  end; {callstmt}
+  
+  procedure contstmt;
+  begin {contstmt}
+  needstate(EXECSTATE,EXECSTATE);
+  new(newstmt,CONTST);
+  newstmt^.nextstmt := nil; newstmt^.stmtop := CONTST;
+  fscan;
+  end; {contstmt}
+  
+  procedure dostmt;
+    var lctrlrec: pctrlstkrec; llabrec: plabelrec; llabel: alfa6; 
+        itype: ftntype; lpn: pn;
+    
+    function doexp: pn;
+    begin {doexp}
+    expression;
+    if (gattr.atype.typ <> INTEGR) and (gattr.atype.typ <> REEL)
+    then error(272);
+    makentype(gattr,itype);
+    doexp := gattr.treeptr;
+    end; {doexp}
+    
+  begin {dostmt}
+  needstate(EXECSTATE,EXECSTATE);
+  if InsideLogIf or AfterDoLab
+  then error(106)
+  else begin
+    getlabel(llabel);
+    llabrec := findlabel(llabel,EXECLAB);
+    with llabrec^ do 
+      if labkind = FORMATLAB
+      then error(103)
+      else
+        if Defined
+        then error(107);
+    new(newstmt,DOST);
+    with newstmt^ do begin
+      nextstmt := nil; stmtop := DOST; dotypecode := INT4;
+      dovar := nil; doinit := nil; doterm := nil; doinc := nil; dobody := nil;
+      end;
+    lastctrlblk := lastctrlblk + 1;
+    new(lctrlrec,DOBLK);
+    with lctrlrec^ do begin
+      nextblk := ctrlstk; ctrlblknum := lastctrlblk;
+      cbkind := DOBLK; finallab := llabel; doblkstmt := newstmt;
+      end;
+    ctrlstk := lctrlrec;
+    if getnonblank <> ',' then stmtbufp := stmtbufp - 1;
+    fscan;
+    if token = IDENTSY
+    then begin
+      identifier; itype := gattr.atype;
+      if (itype.typ <> INTEGR) and (itype.typ <> REEL)
+      then error(271)
+      else begin
+{dar note do variable to give warning if changed}
+	dovarsav := gattr.treeptr;
+
+        newstmt^.dovar := gattr.treeptr;
+        newstmt^.dotypecode := gettypecode(itype);
+        fscan;
+        if token = ASSIGNSY then fscan else error(59);
+        newstmt^.doinit := doexp;
+        if token = COMMASY then fscan else error(125);
+        newstmt^.doterm := doexp;
+        if token = COMMASY
+        then begin
+          fscan; lpn := doexp;
+          if lpn <> nil
+          then
+            if lpn^.node = CSTNODE
+            then
+              if (lpn^.csttype.typ = INTEGR) and (lpn^.cstvalu.ival = 1)
+              then lpn := nil;
+          newstmt^.doinc := lpn;
+          end;
+        end;
+      end
+    else begin error(28); ctrlstk := ctrlstk^.nextblk; end;
+    end;
+  end; {dostmt}
+  
+  procedure endifstmt;
+  begin {endifstmt}
+  needstate(EXECSTATE,EXECSTATE);
+  if InsideLogIf or AfterDoLab
+  then error(108)
+  else begin
+    if ctrlstk = nil
+    then error(109)
+    else
+      if ctrlstk^.cbkind = DOBLK
+      then error(110)
+      else begin
+        if ctrlstk^.cbkind = ELSEBLK
+        then begin
+          ctrlstk := ctrlstk^.nextblk;  { throw away top of control stack }
+          
+          { underneath is always an IFBLK or and ELSEIFBLK for }
+          { which we are completing the else part              }
+          
+          with ctrlstk^.blkstmt^ do begin
+            elsest := nextstmt; nextstmt := nil
+            end;
+          end
+        else (* IFBLK or ELSEIFBLK, closing a then part *)
+          with ctrlstk^.blkstmt^ do begin
+            thenst := nextstmt; nextstmt := nil;
+            end;
+        
+        { Pop down control stack, making last statement original if stmt }
+        
+        while ctrlstk^.cbkind <> IFBLK do
+          ctrlstk := ctrlstk^.nextblk;
+        laststmt := ctrlstk^.blkstmt;
+        
+        ctrlstk := ctrlstk^.nextblk; { throw away IFBLK }
+        end;
+    end;
+  fscan;
+  end; {endifstmt}
+  
+  procedure elseifstmt;
+    var lctrlrec: pctrlstkrec; lstmt: pstmt;
+  begin {elseifstmt}
+  needstate(EXECSTATE,EXECSTATE);
+  if InsideLogIf or AfterDoLab
+  then error(111)
+  else
+    if ctrlstk = nil
+    then error(112)
+    else
+      if ctrlstk^.cbkind in [DOBLK,ELSEBLK]
+      then error(113)
+      else begin
+        fscan;
+        if token = LPARENSY then fscan else error(114);
+        expression;
+        if token <> RPARENSY then error(115);
+        if not Match('THEN') then error(116);
+        if gattr.atype.typ = LOGICAL then makeisize(gattr,1) else error(117);
+        new(lstmt,IFST);
+        with lstmt^ do begin
+          nextstmt := nil; stmtop := IFST; ifexpr := gattr.treeptr;
+          thenst := nil; elsest := nil;
+	{ added by jim t at sgi for dbx }
+               linenumber := cpplinenum;
+               filename := originalfile;
+          end;
+        stmtnumb := stmtnumb + 1;
+        
+        { top of control stack points to an IFST for which }
+        { the then part is now complete.                   }
+        
+        with ctrlstk^.blkstmt^ do begin
+          thenst := nextstmt; nextstmt := nil; elsest := lstmt;
+          end;
+        laststmt := lstmt;
+        
+        { Stack ELSEIFBLK onto control stack }
+        
+        lastctrlblk := lastctrlblk + 1;
+        new(lctrlrec,ELSEIFBLK);
+        with lctrlrec^ do begin
+          nextblk := ctrlstk; ctrlblknum := lastctrlblk; 
+          cbkind := ELSEIFBLK; blkstmt := lstmt;
+          end;
+        ctrlstk := lctrlrec;
+        end;
+  fscan;
+  end; {elseifstmt}
+  
+  procedure elsestmt;
+    var lctrlrec: pctrlstkrec;
+  begin {elsestmt}
+  needstate(EXECSTATE,EXECSTATE);
+  if InsideLogIf or AfterDoLab
+  then error(118)
+  else
+    if ctrlstk = nil
+    then error(119)
+    else
+      if ctrlstk^.cbkind in [DOBLK,ELSEBLK]
+      then error(113)
+      else begin
+        
+        { top of control stack points to an IFST for which }
+        { the then part is now complete.                   }
+        
+        with ctrlstk^.blkstmt^ do begin
+          thenst := nextstmt; nextstmt := nil;
+          end;
+        laststmt := ctrlstk^.blkstmt;
+        
+        { Stack ELSEBLK onto control stack }
+        
+        lastctrlblk := lastctrlblk + 1;
+        new(lctrlrec,ELSEBLK);
+        with lctrlrec^ do begin
+          nextblk := ctrlstk; ctrlblknum := lastctrlblk; cbkind := ELSEBLK;
+          end;
+        ctrlstk := lctrlrec;
+        end;
+  fscan;
+  end; {elsestmt}
+  
+  procedure gotostmt;
+    var lch: char; llabel: alfa6;
+    
+    procedure compgoto;
+      var llablist,lastllab: plabellist; llabel: alfa6; cnt: integer;
+    begin {compgoto}
+    new(llablist); lastllab := llablist; getlabel(llabel); cnt := 1;
+    lastllab^.labrec := jumptolabel(llabel); 
+    fscan;
+    while token = COMMASY do begin
+      new(lastllab^.next);
+      lastllab := lastllab^.next;
+      getlabel(llabel); cnt := cnt + 1;
+      lastllab^.labrec := jumptolabel(llabel);
+      fscan;
+      end;
+    lastllab^.next := nil;
+    if token = RPARENSY then fscan else error(115);
+    if token = COMMASY then fscan;
+    expression;
+    if gattr.atype.typ = INTEGR
+    then begin
+      if gattr.atype.siz <> 4 then makeisize(gattr,2);
+      end
+    else error(139);
+    new(newstmt,CGOTOST);
+    with newstmt^ do begin
+      nextstmt := nil; stmtop := CGOTOST; 
+      cgotolabs := llablist; cgotoexp := gattr.treeptr; cgotocnt := cnt;
+      cgotosiz := gattr.atype.siz;
+      end;
+    end; {compgoto}
+      
+    procedure assgoto;
+      var llablist,lastllab: plabellist; llabel: alfa6; cnt: integer;
+          llabrec: plabelrec;
+    begin {assgoto}
+    if AfterDoLab then error(121);
+    fscan; identifier; 
+    if gattr.atype.typ = INTEGR 
+    then begin if gattr.atype.siz <> 4 then error(270); end
+    else error(137);
+    fscan;
+    new(newstmt,AGOTOST);
+    with newstmt^ do begin
+      nextstmt := nil; stmtop := AGOTOST; 
+      agotolabs := nil; agotovar := gattr.treeptr; agotocnt := 0;
+      end;
+    if token = COMMASY
+    then begin
+      fscan;
+      if token <> LPARENSY then error(114);
+      end;
+    if token = LPARENSY
+    then begin
+      llablist := nil; cnt := 0;
+      repeat
+        getlabel(llabel); cnt := cnt + 1;
+        llabrec := findlabel(llabel,EXECLAB);
+        with llabrec^ do begin
+          if labkind = FORMATLAB
+          then error(103)
+          else labkind := EXECLAB;
+          end;
+        if llablist = nil
+        then begin new(llablist); lastllab := llablist; end
+        else begin new(lastllab^.next); lastllab := lastllab^.next; end;
+        lastllab^.labrec := llabrec;
+        fscan;
+      until token <> COMMASY;
+      if token = RPARENSY then fscan else error(115);
+      newstmt^.agotolabs := llablist; newstmt^.agotocnt := cnt;
+      end;
+    end; {assgoto}
+    
+  begin {gotostmt}
+  needstate(EXECSTATE,EXECSTATE);
+  lch := getnonblank;
+  if lch = '('
+  then compgoto
+  else begin
+    stmtbufp := stmtbufp - 1;
+    if chclass[ord(lch)] = DIGITCL
+    then begin
+      if AfterDoLab then error(120);
+      getlabel(llabel);
+      new(newstmt,GOTOST);
+      with newstmt^ do begin
+        nextstmt := nil; stmtop := GOTOST; gotolab := jumptolabel(llabel);
+        end;
+      fscan;
+      end
+    else assgoto;
+    end;
+  end; {gotostmt}
+  
+  procedure ifstmt;
+    var lctrlrec: pctrlstkrec; llabel: alfa6; lstmt: pstmt;
+        BlockIfFlag: Boolean; lstmtbufp: integer;
+  begin {ifstmt}
+  needstate(EXECSTATE,EXECSTATE);
+  fscan;
+  if token = LPARENSY then fscan else error(114);
+  expression;
+  if token <> RPARENSY then error(115);
+  lstmtbufp := stmtbufp;
+  if Match('THEN')
+  then begin fscan; BlockIfFlag := token = EOLNSY; end
+  else BlockIfFlag := FALSE;
+  if BlockIfFlag
+  then  { Block if statement }
+    if InsideLogIf or AfterDoLab 
+    then error(122)
+    else begin
+      if gattr.atype.typ <> LOGICAL then error(117);
+      makeisize(gattr,1);
+      new(newstmt,IFST);
+      with newstmt^ do begin
+        nextstmt := nil; stmtop := IFST; ifexpr := gattr.treeptr;
+        thenst := nil; elsest := nil;
+        end;
+      lastctrlblk := lastctrlblk + 1;
+      new(lctrlrec,IFBLK);
+      with lctrlrec^ do begin
+        nextblk := ctrlstk; ctrlblknum := lastctrlblk;
+        cbkind := IFBLK; blkstmt := newstmt;
+        end;
+      ctrlstk := lctrlrec;
+      end
+  else
+    if gattr.atype.typ = LOGICAL
+    then  { Logical if }
+      if InsideLogIf
+      then error(123)
+      else begin
+        stmtbufp := lstmtbufp; AfterDoLab := FALSE; InsideLogIf := TRUE;
+        makeisize(gattr,1);
+        new(lstmt,IFST);
+        with lstmt^ do begin
+          nextstmt := nil; stmtop := IFST; ifexpr := gattr.treeptr;
+          compexecstmt; thenst := newstmt; elsest := nil;
+          if newstmt <> nil then 
+	  begin
+		stmtnumb := stmtnumb + 1;
+      { added for dbx by jim t at SGI }
+      		newstmt^.linenumber := cpplinenum;
+      		newstmt^.filename := originalfile;
+	  end;
+          end;
+        newstmt := lstmt;
+        end
+    else begin { Arithmetic if }
+      if AfterDoLab then error(124);
+      if (gattr.atype.typ = INTEGR) or (gattr.atype.typ = REEL)
+      then begin
+        new(newstmt,AIFST);
+        with newstmt^ do begin
+          nextstmt := nil; stmtop := AIFST;
+          aiftypecode := gettypecode(gattr.atype); aifexpr := gattr.treeptr; 
+          zerolab := nil; poslab := nil;
+          getlabel(llabel); neglab := jumptolabel(llabel);
+          fscan; 
+          if token = COMMASY 
+          then begin
+            getlabel(llabel); zerolab := jumptolabel(llabel);
+            fscan; 
+            if token = COMMASY 
+            then begin getlabel(llabel); poslab := jumptolabel(llabel); fscan; end
+            else error(125);
+            end
+          else error(125);
+          end;
+        end
+      else error(126);
+      end; { Arithmetic if }
+  end; {ifstmt}
+  
+  procedure returnstmt;
+  begin {returnstmt}
+  needstate(EXECSTATE,EXECSTATE);
+  if AfterDoLab or (blockkind = PROGBLOCK) then error(127);
+  fscan;
+  new(newstmt,RETRNST);
+  with newstmt^ do begin
+    nextstmt := nil; stmtop := RETRNST;
+    if token = EOLNSY
+    then altret := nil
+    else begin
+      expression;
+      if gattr.atype.typ = INTEGR then makeisize(gattr,2) else error(139);
+      altret := gattr.treeptr;
+      end;
+    end;
+  end; {returnstmt}
+  
+  
+  procedure stoppause(StopFlag: Boolean);
+    var lch: char; 
+  begin {stoppause}
+  needstate(EXECSTATE,EXECSTATE);
+  if AfterDoLab and StopFlag then error(128);
+  lch := getnonblank; chval := nil; {scanner global}
+  if chclass[ord(lch)] = DIGITCL
+  then begin
+    new(chval);
+    with chval^ do begin
+      fillchar(chpart,10,' '); next := nil;
+      chlen := 0;
+      repeat
+        chlen := chlen + 1;
+        chpart[chlen] := lch;
+        lch := getnonblank;
+      until (chlen >= 5) or (chclass[ord(lch)] <> DIGITCL);
+      end;
+    fscan;
+    end
+  else begin { character constant or no argument }
+    stmtbufp := stmtbufp - 1;
+    if lch = ''''
+    then begin fscan; {sets chval and chlen} fscan; end
+    else fscan;
+    end;
+  new(newstmt,STOPST);
+  with newstmt^ do begin
+    nextstmt := nil;
+    if StopFlag then stmtop := STOPST else stmtop := PAUSEST;
+    sparg := chval; { nil if no argument } sparglen := chlen;
+    end;
+  end; {stoppause}
+  
+  procedure endstmt;
+  begin
+{dar: give recursive error if is a recursive routine,}
+{ and we have overflowed the local stack 	    }
+  if OverflowStack and RecurseErr then begin
+	error(404);
+	RecurseErr := FALSE;
+	OverflowStack := FALSE;
+  end;
+     
+  if InsideLogIf or AfterDoLab
+  then error(129)
+  else fscan;
+  end; {endstmt}
+
+

@@ -1,0 +1,49 @@
+'\"macro stdmacro
+.TH PUTS 3S 
+.SH NAME
+puts, fputs \- put a string on a stream
+.SH SYNOPSIS
+.B #include <stdio.h>
+.PP
+.B int puts (s)
+.br
+.B char \(**s;
+.PP
+.B int fputs (s, stream)
+.br
+.B char \(**s;
+.br
+.SM
+.B FILE
+.B \(**stream;
+.SH DESCRIPTION
+.I Puts\^
+writes the null-terminated string pointed to by
+.IR s ,
+followed by a new-line character,
+to the standard output stream
+.IR stdout .
+.PP
+.I Fputs\^
+writes the null-terminated string pointed to by
+.I s\^
+to the named output
+.IR stream .
+.PP
+Neither function writes the terminating
+null character.
+.SH DIAGNOSTICS
+Both routines return
+.SM
+.B EOF
+on error. This will happen if
+the routines try to write on a file that has not been opened for writing.
+.SH "SEE ALSO"
+ferror(3S), fopen(3S), fread(3S),
+printf(3S), putc(3S).
+.SH NOTES
+.I Puts\^
+appends a new-line character while
+.I \^fputs\^
+does not.
+.\"	@(#)puts.3s	5.1 of 10/25/83

@@ -1,0 +1,32 @@
+'\"macro stdmacro
+.TH MOUNTD 1M
+.SH NAME
+mountd \- NFS mount request server
+.SH SYNOPSIS
+.B /usr/etc/rpc.mountd
+.SH DESCRIPTION
+.IX  "mountd command"  ""  "\fLmountd\fP \(em NFS mount server"
+.IX  "NFS mount server"  ""  "NFS mount server \(em \fLmountd\fP"
+.IX  servers  mountd  ""  "\fLmountd\fP \(em mount request server"
+.LP
+.I Mountd
+is an
+.IR rpc (4)
+server that answers file system mount requests.
+It reads the file
+.IR /etc/exports ,
+described in
+.IR exports (4),
+to determine which file systems are available to
+which machines and users.  It also provides information
+as to which clients have file systems mounted.
+This information can be printed using the
+.IR showmount (1M)
+command.
+.LP
+The 
+.I mountd
+daemon is normally invoked by
+.IR inetd (1M).
+.SH "SEE ALSO"
+exports(4), services(4), inetd(1M), showmount(1M)

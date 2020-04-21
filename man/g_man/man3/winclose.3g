@@ -1,0 +1,32 @@
+.TH winclose 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B winclose
+\-  closes the identified graphics window 
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "winclose(gid)"
+.B "long gid;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine winclo(gid)"
+.B "integer*4 gid"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure winclose(gid: longint);"
+.SH DESCRIPTION
+.B winclose
+closes the graphics window associated with identifier
+.I gid .
+.SH "SEE ALSO"
+winopen
+.sp
+\f2Using mex\fP, Chapter 2, Programming with mex
+.SH NOTE
+This routine is available only in immediate mode under the window manager. 

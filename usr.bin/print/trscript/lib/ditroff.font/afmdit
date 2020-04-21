@@ -1,0 +1,31 @@
+
+# lib/ditroff.font/afmdit.sysv
+#
+# shell script to drive afm-file to ditroff font description conversion
+# Copyright (c) 1984,1985 Adobe Systems Incorporated. All Rights Reserved.
+# RCSID: $Header: /d2/3.7/src/usr.bin/print/trscript/lib/ditroff.font/RCS/afmdit,v 1.1 89/03/27 18:19:42 root Exp $
+
+
+PATH=$PATH:$PSLIBDIR
+export PATH
+
+DITFont=$1
+AFMDIR=$2
+
+PSFontName=`line <${DITFont}.map`
+Special=`tail +2 ${DITFont}.map`
+
+echo "# $PSFontName" > $DITFont
+echo "name $DITFont" >> $DITFont
+echo "$Special" >> $DITFont
+rm -f temp.*
+
+realpslibdir=$PSLIBDIR
+PSLIBDIR=../../lib
+export PSLIBDIR
+shortname=`../../src/map_host $PSFontName`
+PSLIBDIR=$realpslibdir
+export PSLIBDIR
+awk -f afmdit.awk ${DITFont}.map $AFMDIR/${shortname}.afm
+cat temp.header temp.spaces temp.trailer >> $DITFont
+mv temp.aux ${DITFont}.aux

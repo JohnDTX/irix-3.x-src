@@ -1,0 +1,566 @@
+'\" t
+.TH CC 1
+.SH NAME
+cc, pc, f77 \- C, Pascal and FORTRAN compilers for the 68000/68020
+.SH SYNOPSIS
+.B cc
+[ options ] files ...
+.br
+.B pc
+[ options ] files ...
+.br
+.B f77
+[ options ] files ...
+.SH DESCRIPTION
+.I cc
+is a general driver for the U\s-2NIX\s+2 C, Pascal and FORTRAN compilers 
+for the 68000/68020.  It is
+also available under the names
+.I f77
+and
+.I pc.
+The names are synonymous 
+.I except
+during the linking phase, when it is used to create the
+appropriate run-time environment.
+.I cc 
+accepts many types of input files, determined by the file's suffix.
+The highest form of input is language source:  
+C (\f2.c\fP), Pascal (\f2.p\fP) or
+FORTRAN (\f2.f\fP\^).
+These are translated to assembler (in the case of C), to 
+U\s-2NIX\s+2 object files (\f2.o\fP), 
+and finally to an executable file called \f2a.out\fP.
+Input to
+.I cc
+may consist of any of these types of files
+and translation may be stopped at any point.
+.PP
+Translation proceeds as follows:
+.TP 8
+a)
+Each
+.IR .c ,
+.I .p
+and
+.I .f
+input is run through the C macro preprocessor
+\f2cpp\fP.  In the case of Pascal source, 
+.I cpp 
+is given the
+.B "\-p"
+switch. This switch tells 
+.I cpp
+to ignore Pascal-style comments and do the
+correct things with preprocessor control lines so that the
+line numbers in the resultant Pascal file will be the same as
+the original.
+.TP 8
+b)
+The preprocessed C files are then run through the C compiler
+.I ccom
+and, if specified, 
+the C optimizer
+.I c2.
+The resulting
+.I .s
+files are then assembled,
+producing U\s-2NIX\s+2 binaries (\f2.o\fP).
+.TP 8
+c)
+Preprocessed FORTRAN (\f2.f\^\^\fP) and Pascal (\f2.p\fP) files are run 
+through the
+appropriate SVS front end,
+.I fortran
+or 
+.I pascal,
+then through the code generator 
+.I code,
+and object code formatter
+.I ulinker,
+to produce a U\s-2NIX\s+2 binary (\f2.o\fP).
+.TP 8
+d)
+Finally, all U\s-2NIX\s+2 object files are passed to
+\f2ld\fP(1),
+along with the U\s-2NIX\s+2 startup file
+.I /lib/crt0.o,
+and the appropriate libraries,
+to produce a single executable named
+\f2a.out\fP.
+.PP
+Preprocessed source files and assembler files are usually removed.
+All U\s-2NIX\s+2 binaries (\f2.o\fP) 
+are preserved, 
+.B unless 
+there was
+a single source (\f2.f\fP, \f2.p\fP, or \f2.c\fP) file being compiled, no
+previously-compiled binaries are being loaded, and the
+compilation is continuing to an executable.  In this case, the single
+binary file is not saved.
+.PP
+If C and FORTRAN files are mixed in a single executable, special
+interface routines may need to be generated as described in Appendix C
+of the \f2IRIS Workstation Guide, Series 2000\fP.
+If C and Pascal procedures are mixed, the user should consult the
+\f2SVS Pascal Reference Manual\fP for instructions on altering the external
+procedure declarations in Pascal.
+.SH OPTIONS
+The following options are interpreted by
+.I "cc (f77,pc)."
+Some options have meaning for only one of these languages.
+(see
+.IR ld (1)
+for load-time options):
+.TP 8
+.B \-c
+Suppress the loading phase of the compilation, and force
+an object file to be produced even if only one source file is given.
+.TP
+.B \-g
+Generate debugging information.
+Currently, this does not have meaning when C is intermixed with
+another language.  For FORTRAN and Pascal files, the
+appropriate 
+compiler will be called with the 
+.B +d 
+switch.  This causes
+a symbol table to be produced for \f3each\f1 binary and placed
+in a file with the suffix \f2odbg\fP.
+When the load step is performed, the symbol tables for each object file
+are combined and placed in a file named
+\f2x.dbg\fP,
+where
+.I x
+is the name of the final program.  For pure C programs, additional
+symbol table information 
+will be generated for 
+.IR dbx (1).  
+.TP
+.BI \-l\^ x
+Include lib\f2x\fP.a as a library which
+.I ld
+should search for undefined references.
+.I ld
+will look for the library first in the directory
+.I lib,
+then in
+\f2usr/lib\fP, and finally in \f2usr/local/lib\fP relative
+to the root of the library tree.  The root of the library
+tree defaults to \f2/\fP, but may be set using the \f3\-ZR\fP
+switch.
+The string
+.I x
+may be more than one letter.
+.TP
+.B \-\^\^\-n
+Normally,
+.I cc
+passes the
+.B \-n
+switch to
+\f2ld\fP,
+which causes it to load the program with shared text.  The
+.B \-\^\^\-n
+switch suppresses the passing of 
+.B \-n 
+to 
+.I ld.
+.TP
+.B \-o\0\f2output\fP
+Name the final output file \f2output\fP.  \f2output\fP is normally
+an executable; however,
+if a single input file is being translated to a \f2.s\fP or a \f2.o\fP 
+file, the final output file will be named \f2output\fP, regardless of its type.
+This provides a facility for naming an output file by other than the
+default method of suffix-replacement.
+.TP
+.B \-p
+Tell
+.I ccom
+to generate code to count subroutine calls for use with
+\f2prof\^\^\fP(1).
+FORTRAN and Pascal do not support profiling.
+.TP
+.B \-\^\^\-x
+By default,
+.I cc
+passes the
+.B \-x
+flag to
+\f2ld\fP,
+in order to suppress local symbols from the final symbol table.  The
+.B \-\^\^\-x
+flag inhibits this default.  The 
+.B \-\^\^\-x 
+switch should not be used
+in conjunction with the 
+.B \-r 
+switch.
+.TP
+.B \-C
+Prevent the macro preprocessor from removing C style comments 
+found in the source.  Such comments are 
+.B always 
+removed from Pascal programs.
+.TP
+.BR \-D\^ \f2name\=def\fP
+.br
+.ns
+.TP
+.BR \-D\^ \f2name\fP
+Define the
+.I name
+to the preprocessor,
+as if by
+\f2#define\fP.  (There should be no blanks between the 
+.B D 
+and the
+symbol to be defined.)
+If no definition is given,
+the name is defined as ``1''.
+.TP
+.B \-E
+Run only the macro preprocessor
+on the named C, Pascal and FORTRAN source
+and send the result to the
+standard output.
+.TP
+.BR \-I\^ \f2dir\fP
+Look in directory
+.I dir
+for missing
+.I #include
+files.
+Include files
+whose names are surrounded by double quotes and
+do not begin with `/' are always
+first sought in the directory
+of the input file,
+then in directories named in
+.I \-I
+options,
+then in
+\f2/usr/include\fP.
+Include files with names beginning with `/' are treated as absolute paths.
+The directory of the input file is not used as a search path for
+include files whose names are surrounded by pointed brackets.
+(There should be no blanks between the directory name and the switch.)
+.TP
+.B \-L
+Produce a FORTRAN listing of each FORTRAN source file.
+FORTRAN listings have the
+suffix
+.I .l .
+.TP
+.BR \-O\^ \f2xx\fP
+Invoke an
+object-code improver on each C file.
+.I xx
+are the options to
+\f2c2\fP.
+Possible options are 
+.B S 
+(perform stack optimizations), 
+.B P 
+(remove
+stackprobes), 
+.B K 
+(omit kernel optimizations).  Use of these
+options is not recommended for the standard compilation environment.
+(There should be no blanks between the switch and the options.)
+.TP
+.B \-P
+Run only the macro preprocessor
+on the named C, FORTRAN, and Pascal files,
+and place the results on 
+.I "file.i" .
+.TP
+.B \-S
+Compile the named C files, leaving the
+C assembly language output in files suffixed
+.I .s .
+.TP
+.BR \-U\^ \f2name\fP
+Remove any initial definition of
+\f2name\fP. (There should be no blanks between U and the
+name to be undefined.)
+.TP
+.B \-Zf
+Cause
+instructions for the floating-point accelerator to be generated.
+Use of this
+switch on systems which do NOT have the floating-point accelerator installed
+will cause a run-time abort.  
+Programs which expect to use the floating point accelerator must be
+both compiled and loaded with 
+.B \-Zf .
+.TP
+.B \-Zg
+Load the program with the special files and libraries necessary for
+IRIS graphics programs.  When this switch is used, the Graphics Library
+.B "\-lgl"
+and the appropriate math library 
+is given by default.  
+Special files must be loaded for using graphics with each 
+source language.  Hence, 
+.I cc
+must be able to determine the combination of languages involved
+in the link step.
+If the compilation line specified 
+.I f77,
+a FORTRAN source file (with the extension 
+.IR .f\^\^ ) 
+.B or 
+the
+switch 
+.B \-ZF 
+is given, 
+.I cc 
+assumes that FORTRAN routines are present. In this case, 
+the program is also loaded with
+the FORTRAN graphics interface library
+.B "\-lfgl" .
+If the compilation line specified 
+.I pc,
+a Pascal source file (with the extension 
+.IR .p ) 
+.B or 
+the switch 
+.B \-ZP 
+is given,
+.I cc 
+assumes that Pascal routines are present.  The program is
+loaded with the special Pascal jump table (\f2/usr/lib/pjmptbl.o\fP).
+.TP
+.BR \-Zi\^ \f2filename\fP
+Use the file named
+.I filename
+as the run-time startup, rather than the standard C run-time startup.
+This may be useful for generating stand-alone programs.
+(There should be no blanks between the filename and the switch.)
+.TP
+.B \-Zq
+Time all subprocesses, and report these times on
+.I stdout
+at the end of the compilation.
+.TP
+.B \-Zr
+Load the program for the remote graphics environment.  
+If the source contains FORTRAN or \f2f77\fP has
+been invoked,
+the FORTRAN remote Graphics Library will be loaded, otherwise the
+C remote Graphics Library will be loaded.
+As does loading  the standard Graphics Library, 
+loading the remote Graphics Library
+automatically causes the math library
+to be loaded.
+If the program is a C program, the directory 
+.I "/usr/include/rgl"
+will be searched prior to 
+.I "/usr/include"
+for graphics header files.
+.TP
+.B \-Zv
+Turn on
+.I verbose
+mode. In verbose mode,
+the C compiler
+.I ccom
+will give additional diagnostics.
+This includes such things as flagging any use of the C type
+.I double,
+and complaining about too many register declarations.
+.TP
+.B \-Zz
+Print a trace of all
+.I exec()
+calls.
+.TP
+.B \-ZA
+Pass the remainder of the string to
+\f2as\fP.
+Thus, the
+.I cc
+switch
+.B \-ZA\^\-q
+will pass \f2as\fP the switch
+\f3\-q\fP.
+.TP
+.B \-ZC
+Pass the remainder of the string to
+\f2ccom\fP.
+Thus, the
+.I cc
+switch
+.B \-ZC\^\-v
+will pass \f2ccom\fP the switch
+\f3\-v\fP.
+.TP
+.B \-ZF
+Pass the remainder of the string to the
+FORTRAN compiler front-end 
+.I fortran.
+Thus, the
+.I cc
+switch
+.B \-ZF\^\+d
+will pass 
+.I fortran
+the switch
+\f3\+d\fP.  This switch (with or without a switch to pass to
+the FORTRAN front-end) also informs 
+.I cc 
+that FORTRAN files were present in the compilation.  
+.TP
+.B \-ZN
+Pass the \f3\-N\fP switch to \f2cpp\fP(1).  This switch causes 
+\f2cpp\fP(1) to 
+\f3NOT\f1 look in 
+.I /usr/include 
+for include files.
+.TP
+.B \-ZP
+Pass the remainder of the string to the
+Pascal compiler front-end 
+.I pascal.
+Thus, the
+.I cc
+switch
+.B \-ZP\^\+d
+will pass 
+.I pascal
+the switch
+\f3\+d\fP.  This switch (with or without a switch to pass to
+the Pascal front-end) also informs 
+.I cc 
+that Pascal files were present in the compilation.  
+.I cc
+cannot determine this unless it sees a 
+.I .p 
+file or the name
+.I pc
+is used.
+.TP
+.B \-ZR\0\f2libroot\fP
+Pass the \f3-R\f2 libroot\fP switch to 
+the loader (\f2ld\fP(1)).  This causes it to 
+use the directory \f2libroot\fP as the
+root of the tree for its search to find libraries specified by the \f3\-l\f2x\f1
+method.  Relative to this library root, \f2ld\fP will successively
+search for lib\f2x\fP.a
+in \f2lib\fP, \f2usr/lib\fP, and \f2usr/local/lib\fP.  If no 
+\f3\-ZR\fP switch
+is given, the loader will use \f2/\fP as its default \f2libroot\fP.
+.PP
+Other flags are passed to \f2ld\fP.
+The files may consist of any mix of C, object, FORTRAN, assembler,
+binary or library files.
+The files are passed to
+.I ld,
+if opted, after rearranging according to the file type,
+to produce an executable program named
+.I a.out
+or that specified by the
+.B \-o
+option.  Files of unknown type (i.e., with an extension other
+than \f2.c\fP, \f2.f\fP, \f2.o\fP, \f2.a\fP, \f2.p\fP,
+or \f2.s\fP) are given to \f2ld\fP as if they had been previously
+loaded (i.e., are in \f2a.out\fP format). The order of files of unknown type
+in the load step is indeterminate.
+.SH FILES
+.TS
+;
+l l.
+file.c	C source file
+file.f	FORTRAN source file
+file.p	Pascal source file
+file.o	binary (relocatable) file
+file.s	assembly file
+a.out	executable file
+/lib/ccom	C compiler
+/lib/cpp	C preprocessor
+/lib/crt0.o	run time startup
+/lib/libc.a	C library
+/usr/lib/libf.a	FORTRAN library
+/usr/lib/libp.a	FORTRAN and Pascal library
+/usr/lib/fortran20	FORTRAN front-end
+/usr/lib/pascal20	Pascal front-end
+/usr/lib/jcode20	FORTRAN code-generator
+/usr/lib/jlinker	FORTRAN pre-linker
+/bin/as20	68020 assembler
+/bin/ld	linking loader
+/usr/include	default include directory
+/usr/lib/pjmptbl.o	Pascal graphics jump table and C string converter
+.TE
+.SH "SEE ALSO"
+.br
+\f2U\s-2NIX\s+2 Programmer's Manual, Volume IIB,\f1 "as20 Reference
+Manual", "C/FORTRAN Interface", "IRIS Floating Point".
+.br
+B. W. Kernighan and D. M. Ritchie,
+\f2The C Programming Language\fP,
+Prentice-Hall,
+1978
+.br
+B. W. Kernighan,
+.I "Programming in C\(ema Tutorial"
+.br
+D. M. Ritchie,
+.I "C Reference Manual"
+.br
+.I "SVS FORTRAN Reference Manual"
+.br
+.I "SVS Pascal Reference Manual"
+.br
+as20(1),
+ccom(1),
+cpp(1),
+ld(1),
+extcentry(1),
+mkf2c(1),
+a.out(5)
+.SH BUGS
+Three bugs are currently outstanding in the C compiler system.  The first
+bug is the result of the compiler running out of temporary registers when
+compiling an expression.  This has been seen to occur in an expression such as
+.I "junk[c].i += a"
+and in certain bitfield assignment expressions
+in a function which contains many register variables.  The compiler aborts
+with the message
+``expression causes compiler loop, try simplifying''.
+Rather than to reserve an additional register for the compiler's internal use,
+it has been left to the user to alleviate this problem by reducing the 
+number of data registers being
+used in this instance to five or fewer.  
+.PP
+The second bug occurs when using the optimizer 
+.I c2.
+In certain situations, the optimizer gets confused as to the boundary between
+functions when optimizing functions which are declared as 
+.I static.
+This can result in optimizing away necessary register save/restore code at
+function entry and exit.  
+Although the problem occurs rarely even in conjunction with such declarations,
+users are currently warned against declaring
+functions as 
+.I static
+when using the optimizer. 
+.PP
+The third bug occurs when passing an autoincremented (or autodecremented)
+bit field to a function, as in
+.I "foo(a.i++),"
+where 
+.I i 
+is a bitfield element of structure 
+.I foo.
+In some cases, the compiler will autoincrement the bitfield correctly,
+but pass the incorrect value to \f2foo\fP.  The value may have little or
+no relationship to the true value of
+.I "a.i"
+either before or after autoincrementing.
+.SH DIAGNOSTICS
+The diagnostics produced by C, FORTRAN, and Pascal are intended to be
+self-explanatory.
+Occasional messages may be produced by the assembler
+or loader.

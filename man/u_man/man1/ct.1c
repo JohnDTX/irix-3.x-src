@@ -1,0 +1,112 @@
+'\"macro stdmacro
+.tr ~
+.TH CT 1C
+.SH NAME
+ct \- spawn getty to a remote terminal
+.SH SYNOPSIS
+.B ct
+[
+.B \-h
+] [
+.B \-v
+] [
+.BR \-w n
+] [
+.BR \-s speed
+] telno ...
+.SH DESCRIPTION
+.I Ct\^
+dials the phone number of a modem that is attached
+to a terminal, and spawns a
+.I getty\^
+process to that terminal.
+.I Telno\^
+is a telephone number,
+with equal signs for secondary dial tones and minus
+signs for delays at appropriate places.
+If more than one telephone number is specified,
+.I ct\^
+will try each in succession until one answers;
+this is useful for specifying alternate dialing paths.
+.PP
+.I Ct\^
+will try each line listed in the file
+.B \%/usr/lib/uucp/L-devices
+until it finds an available line with appropriate
+attributes or runs out of entries.
+If there are no free lines,
+.I ct\^
+will ask if it should wait for
+one, and if so, for how many minutes
+it should wait
+before it gives up.
+.I Ct\^
+will continue to try to open
+the dialers
+at one-minute intervals until
+the specified limit is exceeded.
+The dialogue may be overridden by
+specifying the
+.BI \-w n\^
+option, where
+.I n\^
+is the maximum number of minutes
+that
+.I ct\^
+is
+to wait for a line.
+.PP
+Normally,
+.I ct\^
+will hang up the current line, so that
+that line can answer the incoming call.
+The
+.B \-h
+option will prevent this action.
+If the
+.B \-v
+option is used,
+.I ct\^
+will send a running narrative
+to the standard error output stream.
+.PP
+The data rate may be set with the
+.B \-s
+option, where
+.I speed\^
+is expressed in baud.
+The default rate is 300.
+.PP
+After the user on the destination terminal
+logs out,
+.I ct\^
+prompts, \f3Reconnect?\fP~
+If the response begins with the letter \f3n\fP
+the line will be dropped;
+otherwise,
+.I getty\^
+will be started again and the \f3login:\fP
+prompt will be printed.
+.PP
+Of course, the destination terminal must be attached
+to a modem that can answer the telephone.
+.SH EXAMPLE
+.IP
+ct -w15 -s1200 644-1234
+.PP
+dials from the terminal the given modem phone number (644-1234),
+spawning a login process at 1200 baud.  If the dialer line is busy,
+.I ct
+will continue to try to open the dialer at one-minute intervals for
+a total of 15 minutes (as set by the 
+.B \-w 
+option).
+.SH FILES
+/usr/lib/uucp/L-devices
+.br
+/usr/adm/ctlog
+.SH "SEE ALSO"
+cu(1C),
+login(1),
+uucp(1C).
+.\"	@(#)ct.1c	5.1 of 10/27/83

@@ -1,0 +1,126 @@
+'\"macro stdmacro
+.ds P UNIX
+.TH AT 1
+.SH NAME
+at \- execute commands at a later time
+.SH SYNOPSIS
+.B at
+time [ day ] [ file ]
+.SH DESCRIPTION
+.I At\^
+squirrels away a copy of the named
+.I file\^
+(standard input default) to be used as input to
+.IR sh\^ (1)
+at a specified later time.
+A
+.IR cd\^ (1)
+command to the current directory is inserted at the beginning,
+followed by assignments to all environment variables.
+When the script is run, it uses the user and group ID of the creator of the
+copy file.
+.PP
+The
+.I time\^
+is 1 to 4 digits, with an optional following "A", "P", "N" or "M" for
+AM, PM, noon or midnight.
+One and two digit numbers are taken to be hours, three and four digits
+to be hours and minutes.
+If no letters follow the digits, a 24-hour clock time is understood.
+.PP
+The optional
+.I day\^
+is either (1) a month name followed by a day number, or (2) a day of the week;
+if the word "week" follows invocation is moved seven days further off.
+Names of months and days may be recognizably truncated.
+Examples of legitimate commands are
+.IP
+at 8am jan 24
+.br
+at 1530 fr week
+.PP
+.I At\^
+programs are executed by periodic execution of the command
+.I /usr/lib/atrun
+from
+.IR cron\^ (1M).
+The granularity of
+.I at\^
+depends upon how often
+.I atrun\^
+is executed.
+.PP
+Standard output or error output is lost unless redirected.
+The directory 
+.B /usr/spool/at/past
+must be present or 
+.I at\^
+will not run.
+.SH EXAMPLE
+.IP
+at 10:25
+.br
+ls -l /etc > /dev/console
+.PP
+will cause the directory 
+.B /etc
+to be listed in long format
+on device 
+.B /dev/console
+at approximately 10:25 pm on the same day.
+The exact time this is executed will depend on how often
+.I /usr/lib/atrun\^
+is scheduled to run in 
+.BR /usr/lib/crontab ; 
+e.g., if
+.I /usr/lib/atrun\^
+is set up to run every 15 minutes, the above command
+will be executed at 10:30 am.  A temporary file is created in
+directory 
+.B /usr/spool/at 
+containing the "ls -l" command to be executed;
+this temporary file will be removed upon completion of the command.
+Note that 
+.B /usr/lib/crontab 
+must contain a schedule entry for 
+.I /usr/lib/atrun\^
+in order for "at" to work.
+.SH FILES
+.TP "\w'/usr/spool/at/yy.ddd.hhhh.uu\ \ \ 'u"
+/usr/spool/at/yy.ddd.hhhh.uu
+activity to be performed at hour
+.I hhhh\^
+of day
+.I ddd\^
+of year
+.IR yy .
+.I uu\^
+is a unique number.
+.PD 0
+.TP
+/usr/spool/at/lasttimedone
+contains
+.I hhhh\^
+for last hour of activity.
+.TP
+/usr/spool/at/past
+directory of activities now in progress.
+.TP
+/usr/lib/atrun
+program that executes activities that are 
+due.
+.TP
+/usr/lib/crontab
+cron table entry for running atrun.
+.PD
+.SH "SEE ALSO"
+calendar(1),
+.br
+cron(1M)
+.SH DIAGNOSTICS
+Complains about various syntax errors and times out of range.
+.SH BUGS
+Due to the granularity of the execution of
+.I /usr/lib/atrun,
+there may be bugs in scheduling things almost exactly 24 hours into the future.
+.\"	@(#)at.1	5.1 of 11/16/83

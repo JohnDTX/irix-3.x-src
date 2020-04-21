@@ -1,0 +1,103 @@
+'\"macro stdmacro
+.TH UNITS 1
+.SH NAME
+units \- conversion program
+.SH SYNOPSIS
+.B units
+.SH DESCRIPTION
+.I Units\^
+converts quantities expressed
+in various standard scales to
+their equivalents in other scales.
+It works interactively, as in the examples below.
+.PP
+A quantity is specified as a multiplicative combination of
+units optionally preceded by a numeric multiplier.
+Powers are indicated by suffixed positive integers,
+division by the usual sign (see the second example below).
+.PP
+.I Units\^
+only does multiplicative scale changes;
+thus it can convert Kelvin to Rankine, but not Celsius to
+Fahrenheit.
+Most familiar units,
+abbreviations, and metric prefixes are recognized,
+together with a generous leavening of exotica
+and a few constants of nature including:
+.RS .3i
+.PD 0
+.TP "\w'\f3water\f1\ \ \ 'u"
+.B pi
+ratio of circumference to diameter,
+.TP
+.B c
+speed of light,
+.TP
+.B e
+charge on an electron,
+.TP
+.B g
+acceleration of gravity,
+.TP
+.B force
+same as
+.BR g ,
+.TP
+.B mole
+Avogadro's number,
+.TP
+.B water
+pressure head per unit height of water,
+.TP
+.B au
+astronomical unit.
+.PD
+.RE
+.PP
+.B Pound
+is not recognized as a unit of
+mass;
+.B lb
+is.
+Compound names are run together, (e.g.,
+.BR lightyear ).
+British units that differ from
+their \s-1U\s+1\&.\s-1S\s+1\&. counterparts are prefixed thus:
+.BR brgallon .
+For a complete list of units, type:
+.IP
+cat /usr/lib/unittab
+.SH EXAMPLE
+.RS
+.nf
+.TP "\w'You want:\ \ \ 'u"
+You have:
+.B inch
+.PD 0
+.TP
+You want:
+.B cm
+.TP
+\&
+\(** 2.540000e+00
+.br
+\(sl 3.937008e\-01
+.PD
+.TP
+You have:
+.B 15 lbs force/in2"
+.ns
+.TP
+You want:
+.B atm
+.ns
+.TP
+\&
+\(** 1.020689e+00
+.br
+\(sl 9.797299e\-01
+.fi
+.RE
+.SH FILES
+/usr/lib/unittab
+.\"	@(#)units.1	5.1 of 11/18/83

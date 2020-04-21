@@ -1,0 +1,78 @@
+'\"macro stdmacro
+.TH SHADOW 1D
+.SH NAME
+shadow \- full-screen armchair pilot's view of the dogfight
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/shadow 
+[
+.B \-i
+infile]
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+The 
+.I shadow 
+demo allows passive observation of the 
+.I dog
+environment.
+The 
+.I shadow
+operator sees a full-screen view of the world from a selected aircraft or
+of a selected aircraft from the control tower.
+.PP
+The program asks your name and broadcasts it to the 
+.I dog
+world.
+The initial display is a help menu.
+Any key starts the program.
+At any time during the operation of the demo, the
+.I h
+key
+brings back the help page.
+.PP
+The 
+.I d
+key toggles the view from the cockpit to the control tower.
+The
+.I z
+and 
+.I x
+keys
+increase and decrease the field of view in the tower view.
+The
+.I arrow
+keys select front, right, left, and rear cockpit views as in
+.IR flight .
+The
+.I n
+key
+toggles between day and night views.
+.PP
+The
+.I t
+key advances your view to the next of several aircraft that may be in the
+environment.
+.PP
+.SH Airshow Option
+The
+.B \-i
+option
+reads the aircraft positions from 
+.IR infile .
+.I infile
+should be created by 
+using the
+.BR \-o 
+option to
+.IR dog (1D).
+This allows passive observation of the ``airshow'' recorded in 
+.IR infile .
+.SH SEE ALSO
+dog(1D), flight(1D), radar(1D)
+.SH AUTHOR
+.PP
+Gary Tarolli

@@ -1,0 +1,1193 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                           File: ASM68K.P2.TEXT                            *)
+(*                                                                           *)
+(*           (C) Copyright 1982, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               27-Jun-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure pass2;
+    var ExitFlag,PCFlag,IncludeFlag: Boolean; incfname: string30;
+        numfields,isize,op,ldreg,i,llsize: integer;
+        oldscanclass,lmode,offset,olderrors,hi,lo,j,dhi,dlo: integer;
+        LoopFlag: Boolean; lpsy: psy; PageFlag: Boolean; lint: pintlist;
+        
+    procedure resetfile;
+    begin
+    if topoffilestack <> 1
+       then begin
+            writeln;
+            writeln('\07Fatal error.  Module does not end at level 1');
+            goto 999;
+            end;
+    filestack[1] := filestack[0];
+    inbufp := filestack[1].nextchtoread; inbuf[512] := 0;
+    curlineno := filestack[0].flineno;
+    if blockread(infile,inbuf,2,filestack[1].lastrelblkread) = 0
+       then begin
+            writeln;
+            writeln('\07Error rereading source file.');
+            goto 999;
+            end;
+    if ENVIRONMENT = CPM then inbuf[scaneq(1025,chr(26),inbuf)] := 0;
+    end; {resetfile}
+    
+    procedure p2op10;
+       var ldreg,lreg,treg,offset,lo,hi: integer;
+    begin
+    case oldscanclass of
+     10: { NOP RESET RTE RTR RTS TRAPV }
+         begin
+         isize := 2;
+         data[1].val := op;
+         numfields := 1;
+         end;
+     11: { MOVE }
+         begin
+         isize := 2;
+         if token = USPREGSY
+         then begin
+              if instsize <> LONG then error(10);
+              op := 20072; scan; comma;
+              if token = AREGSY
+              then begin op := op + scanreg; scan; end
+              else error(16);
+              end
+         else if token = SREGSY
+              then begin
+                   if instsize <> WORD then error(10);
+                   op := 16576; scan; comma;
+                   effaddr(WORD,lmode,lreg,isize,ALTDAT);
+                   op := op + (lmode*8 + lreg);
+                   end
+              else begin
+                   case instsize of
+                        BYTE: op := 4096;
+                        WORD: op := 12288;
+                        LONG: op := 8192;
+                   end;
+                   effaddr(instsize,lmode,lreg,isize,ALL);
+                   op := op + lmode*8 + lreg;
+                   comma;
+                   if token = USPREGSY
+                   then begin
+                        if instsize <> LONG then error(10);
+                        if lmode <> 1 then error(16);
+                        op := 20064 + lreg; scan;
+                        end
+                   else if token = CCREGSY
+                        then begin
+                             if instsize <> WORD then error(10);
+                             if lmode = 1 then error(25);
+                             op := 17600 + lreg + lmode*8; scan;
+                             end
+                        else if token = SREGSY
+                             then begin
+                                  if instsize <> WORD then error(10);
+                                  if lmode = 1 then error(25);
+                                  op := 18112 + lreg + lmode*8; scan;
+                                  end
+                             else begin
+                                  effaddr(instsize,lmode,lreg,isize,ALT);
+                                  op := op + lreg*512 + lmode*64;
+                                  end;
+                   end;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     12: { ADD SUB AND OR }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         if token = DREGSY
+            then begin
+                 ldreg := getdreg;
+                 comma;
+                 effaddr(instsize,lmode,lreg,isize,ALTDAT);
+                 if lmode = 0
+                    then begin
+                         treg := lreg;
+                         lreg := ldreg;
+                         ldreg := treg;
+                         end
+                    else op := op + 256;
+                 end
+            else begin
+                 effaddr(instsize,lmode,lreg,isize,ALL{ !!! AND OR !!! });
+                 comma;
+                 ldreg := getdreg;
+                 end;
+         op := op + ldreg*512 + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     13: { JMP JSR PEA }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,CTR);
+         op := op + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     14: { Bcc BRA BSR }
+         begin
+         expression;
+         gethilo(gattr.avalue - pc - 2,hi,lo);
+         offset := lo;
+         if gattr.akind <> RELOCATABLE
+            then error(21);
+         if instsize <> BYTE
+            then begin
+                 isize := 4;
+                 data[2].val := offset;
+                 end
+            else begin
+                 isize := 2;
+                 if (offset <= 127) and
+                    (offset >= -128)
+                    then begin
+                         if offset = 0 then error(33);
+                         op := op + offset;
+                         if offset < 0
+                            then op := op + 256;
+                         end
+                    else error(20);
+                 end;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     15: { MOVEQ }
+         begin
+         if token = HASHSY then scan else error(23);
+         expression;
+         gethilo(gattr.avalue,hi,lo);
+         offset := lo;
+         if gattr.akind <> ABSOLUTE
+            then error(4)
+            else if (offset <= 127) and (offset >= -128)
+                    then begin
+                         if offset < 0
+                            then offset := offset + 256;
+                         op := op + offset;
+                         end
+                    else error(20);
+         comma;
+         ldreg := getdreg;
+         op := op + ldreg*512;
+         isize := 2;
+         data[1].val := op;
+         numfields := 1;
+         end;
+     16: { ADDA CMPA SUBA }
+         begin
+         isize := 2;
+         if instsize = WORD
+            then op := op + 192
+            else op := op + 448;
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         op := op + lmode*8 + lreg;
+         comma;
+         if token = AREGSY
+            then begin
+                 op := op + scanreg*512;
+                 scan;
+                 end
+            else error(16);
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+    end;
+    end; {p2op10}
+    
+    procedure p2op17;
+       var lreg,treg,offset,hi,lo,index,t: integer;
+    begin
+    case oldscanclass of
+     17: { ADDI ANDI CMPI EORI ORI SUBI }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,IMMDATA);
+         comma;
+         if (token = CCREGSY) or (token = SREGSY)
+         then begin
+              if (op <> 0 {ORI}) and (op <> 512 {ANDI}) and
+                 (op <> 2560 {EORI})
+              then error(25);
+              if token = SREGSY
+              then begin
+                   op := op + 64;
+                   if instsize <> WORD then error(10);
+                   end
+              else if instsize <> BYTE then error(10);
+              op := op + 60; scan;
+              end
+         else begin
+              effaddr(instsize,lmode,lreg,isize,ALTDAT);
+              op := op + (lmode*8 + lreg + sizebits[instsize]);
+              end;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     18: { ADDQ SUBQ }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         if token = HASHSY then scan else error(23);
+         expression;
+         if gattr.akind = ABSOLUTE
+            then begin
+                 if (gattr.avalue <= 0) or (gattr.avalue > 8)
+                    then error(24)
+                    else begin
+                         gethilo(gattr.avalue,hi,lo);
+                         offset := lo;
+                         if offset = 8
+                            then offset := 0;
+                         op := op + offset*512;
+                         end;
+                 end
+            else error(4);
+         comma;
+         effaddr(instsize,lmode,lreg,isize,ALT);
+         op := op + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     19: { CLR NEG NEGX NOT TST }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         effaddr(instsize,lmode,lreg,isize,ALTDAT);
+         op := op + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     20: { ASL ASR LSL LSR ROL ROR ROXL ROXR }
+         begin
+         isize := 2;
+         effaddr(instsize,lmode,lreg,isize,ALL{!!!});
+         if token = COMMASY
+            then begin
+                 op := op + sizebits[instsize];
+                 index := isize div 2;
+                 isize := 2;
+                 if lmode = 0
+                    then op := op + lreg*512 + 32
+                    else if (lmode = 7) and (lreg = 4)
+                            then begin
+                                 gethilo(data[index].val,hi,lo);
+                                 offset := lo;
+                                 if (offset <= 0) or (offset > 8)
+                                    then error(24)
+                                    else if offset <> 8
+                                            then op := op + offset*512;
+                                 end
+                            else error(25);
+                 scan;
+                 op := op + getdreg;
+                 end
+            else begin
+                 if instsize <> WORD then error(10);
+                 t := (op + 8192) mod 32;
+                 op := op + t*63 + 192 + lmode*8 + lreg;
+                 if (lmode <= 1) or ((lmode = 7) and (lreg > 1))
+                 then error(25);
+                 end;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     21: { EOR }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         ldreg := getdreg;
+         comma;
+         effaddr(instsize,lmode,lreg,isize,ALTDAT);
+         op := op + 256;
+         op := op + ldreg*512 + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     22: { CMP }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         comma;
+         ldreg := getdreg;
+         op := op + ldreg*512 + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+    end;
+    end; {p2op17}
+    
+    procedure p2op23;
+        var lreg,treg,offset,mask,revmask,lmode,hi,lo: integer;
+        
+        procedure getregset(var fmask,frevmask: integer);
+            var i,j,k,bit: integer; ExitFlag: Boolean;
+        begin
+        fmask := 0; frevmask := 0; ExitFlag := FALSE;
+        repeat
+               if (token = DREGSY) or (token = AREGSY)
+                  then begin
+                       j := scanreg;
+                       if token = AREGSY then j := j + 8;
+                       k := j;
+                       scan;
+                       if token = MINUSSY
+                          then begin
+                               scan;
+                               if (token = DREGSY) or (token = AREGSY)
+                                  then begin
+                                       k := scanreg;
+                                       if token = AREGSY then k := k + 8;
+                                       scan;
+                                       end
+                                  else error(19);
+                               end;
+                       bit := 1;
+                       for i := 1 to j do bit := bit + bit;
+                       for i := j to k do
+                           begin
+                           fmask := fmask + bit;
+                           bit := bit + bit;
+                           end;
+                       bit := 1;
+                       for i := 14 downto k do bit := bit + bit;
+                       for i := k downto j do
+                           begin
+                           frevmask := frevmask + bit;
+                           bit := bit + bit;
+                           end;
+                       end
+                  else error(19);
+               if token = SLASHSY then scan else ExitFlag := TRUE;
+        until ExitFlag;
+        end; {getregset}
+        
+    begin {p2op23}
+    case oldscanclass of
+     23: { CHK DIVS DIVU MULS MULU }
+         begin
+         isize := 2;
+         effaddr(WORD,lmode,lreg,isize,DAT);
+         comma;
+         ldreg := getdreg;
+         op := op + ldreg*512 + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     24: { BCHG BCLR BSET BTST }
+         begin
+         isize := 2;
+         if token = DREGSY
+            then begin
+                 op := op + scanreg*512 + 256;
+                 scan;
+                 end
+            else if token = HASHSY
+                    then begin
+                         op := op + 2048;
+                         scan;
+                         expression;
+                         if gattr.akind <> ABSOLUTE
+                            then error(4);
+                         isize := 4;
+                         gethilo(gattr.avalue,hi,lo);
+                         data[2].val := lo;
+                         end
+                    else error(10);
+         comma;
+         effaddr(WORD,lmode,lreg,isize,ALTDAT);
+         op := op + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     25: { EXT }
+         begin
+         isize := 2;
+         if instsize = WORD
+         then op := op + 128
+         else
+           if instsize = LONG
+           then op := op + 192;
+         ldreg := getdreg;
+         op := op + ldreg;
+         data[1].val := op;
+         numfields := 1;
+         end;
+     26: { SWAP }
+         begin
+         isize := 2;
+         ldreg := getdreg;
+         op := op + ldreg;
+         data[1].val := op;
+         numfields := 1;
+         end;
+     27: { LINK }
+         begin
+         isize := 4;
+         if token = AREGSY
+            then begin
+                 op := op + scanreg;
+                 scan;
+                 end
+            else error(16);
+         comma;
+         if token = HASHSY then scan else error(23);
+         expression;
+         gethilo(gattr.avalue,hi,lo);
+         data[2].val := lo;
+         if gattr.akind <> ABSOLUTE then error(4);
+         data[1].val := op;
+         numfields := 2;
+         end;
+     28: { UNLK }
+         begin
+         isize := 2;
+         if token = AREGSY
+            then begin
+                 op := op + scanreg;
+                 scan;
+                 end
+            else error(16);
+         data[1].val := op;
+         numfields := 1;
+         end;
+     29: { MOVEM }
+         begin
+         isize := 4;
+         if instsize = LONG
+            then op := op + 64;
+         if (token = AREGSY) or (token = DREGSY)
+            then begin
+                 getregset(mask,revmask);
+                 comma;
+                 effaddr(instsize,lmode,lreg,isize,CTRPRE);
+                 if lmode = 4 then mask := revmask;
+                 end
+            else begin
+                 op := op + 1024;
+                 effaddr(instsize,lmode,lreg,isize,CTRPOST);
+                 comma;
+                 getregset(mask,revmask);
+                 end;
+         op := op + lmode*8 + lreg;
+         data[1].val := op;
+         data[2].val := mask;
+         numfields := isize div 2;
+         end;
+     30: { CMPM }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         effaddr(instsize,lmode,lreg,isize,ALL{!!!});
+         op := op + lreg;
+         if lmode <> 3 then error(25);
+         comma;
+         effaddr(instsize,lmode,lreg,isize,ALL{!!!});
+         op := op + lreg*512;
+         if lmode <> 3 then error(25);
+         isize := 2;
+         data[1].val := op;
+         numfields := 1;
+         end;
+    end;
+    end; {p2op23}
+    
+    procedure p2op31;
+        var lreg,treg,offset,mask,revmask,lmode,hi,lo: integer; DFlag: Boolean;
+    begin
+    case oldscanclass of
+     31: { LEA }
+         begin
+         isize := 2;
+         effaddr(LONG,lmode,lreg,isize,CTR);
+         op := op + lmode*8 + lreg;
+         comma;
+         if token = AREGSY
+            then begin
+                 op := op + scanreg*512;
+                 scan;
+                 end
+            else error(16);
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     32: { TRAP }
+         begin
+         isize := 2;
+         if token = HASHSY then scan else error(23);
+         expression;
+         gethilo(gattr.avalue,hi,lo);
+         if gattr.akind = ABSOLUTE
+            then if (lo >= 0) and (lo <= 15)
+                    then op := op + lo
+                    else error(30)
+            else error(4);
+         data[1].val := op;
+         numfields := 1;
+         end;
+     33: { ABCD ADDX SBCD SUBX }
+         begin
+         isize := 2;
+         op := op + sizebits[instsize];
+         if token = DREGSY
+            then begin
+                 op := op + scanreg;
+                 scan;
+                 comma;
+                 op := op + getdreg*512;
+                 end
+            else begin
+                 op := op + 8;
+                 effaddr(instsize,lmode,lreg,isize,ALL{!!!});
+                 op := op + lreg;
+                 if lmode <> 4 then error(25);
+                 comma;
+                 effaddr(instsize,lmode,lreg,isize,ALL{!!!});
+                 op := op + lreg*512;
+                 if lmode <> 4 then error(25);
+                 end;
+         data[1].val := op;
+         numfields := 1;
+         end;
+     34: { STOP }
+         begin
+         isize := 4;
+         if token = HASHSY then scan else error(23);
+         expression;
+         if gattr.akind <> ABSOLUTE
+            then error(4);
+         data[1].val := op;
+         gethilo(gattr.avalue,hi,lo);
+         data[2].val := lo;
+         numfields := 2;
+         end;
+     35: { DBcc }
+         begin
+         isize := 4;
+         op := op + getdreg;
+         comma;
+         expression;
+         if gattr.akind <> RELOCATABLE
+            then error(21);
+         data[1].val := op;
+         gethilo(gattr.avalue - pc - 2,hi,lo);
+         data[2].val := lo;
+         numfields := 2;
+         end;
+     36: { EXG }
+         begin
+         isize := 2;
+         op := op + 64;
+         if token = DREGSY
+            then begin { EXG Dx,?? }
+                 op := op + scanreg*512;
+                 scan;
+                 comma;
+                 if token = DREGSY
+                    then begin { EXG Dx,Dy }
+                         op := op + scanreg;
+                         scan;
+                         end
+                    else if token = AREGSY
+                            then begin { EXG Dx,Ay }
+                                 op := op + (scanreg + 72);
+                                 scan;
+                                 end
+                            else error(19);
+                 end
+            else if token = AREGSY
+                    then begin { EXG ??,Ay }
+                         op := op + scanreg;
+                         scan;
+                         comma;
+                         if token = DREGSY
+                            then begin { EXG Dx,Ay }
+                                 op := op + (scanreg*512 + 72);
+                                 scan;
+                                 end
+                            else if token = AREGSY
+                                    then begin { EXG Ax,Ay }
+                                         op := op + (scanreg*512 + 8);
+                                         scan;
+                                         end
+                                    else error(19);
+                         end
+                    else error(19);
+         data[1].val := op;
+         numfields := 1;
+         end;
+     37: { MOVEA }
+         begin
+         isize := 2;
+         case instsize of
+              WORD: op := 12352;
+              LONG: op := 8256;
+         end;
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         op := op + (lmode*8 + lreg);
+         comma;
+         if token = AREGSY
+            then begin
+                 op := op + scanreg*512;
+                 scan;
+                 end
+            else error(16);
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     38: { MOVEP }
+         begin
+         isize := 4;
+         if instsize = WORD
+            then op := op + 256
+            else op := op + 320;
+         if token = DREGSY
+            then begin
+                 DFlag := TRUE;
+                 op := op + (scanreg*512 + 128);
+                 scan;
+                 comma;
+                 end
+            else DFlag := FALSE;
+         effaddr(instsize,lmode,lreg,isize,ALL);
+         if lmode = 5
+            then op := op + lreg
+            else error(25);
+         if gattr.akind <> ABSOLUTE
+            then error(4);
+         if not DFlag
+            then begin
+                 comma;
+                 if token = DREGSY
+                    then begin
+                         op := op + scanreg*512;
+                         scan;
+                         end
+                    else error(16);
+                 end;
+         data[1].val := op;
+         gethilo(gattr.avalue,hi,lo);
+         data[2].val := lo;
+         isize := 4;
+         numfields := 2;
+         end;
+     39: { Scc }
+         begin
+         isize := 2;
+         effaddr(BYTE,lmode,lreg,isize,ALTDAT);
+         op := op + lmode*8 + lreg;
+         data[1].val := op;
+         numfields := isize div 2;
+         end;
+     40: { JSYS }
+         begin
+         expression;
+         if gattr.akind <> ABSOLUTE then error(8);
+         data[1].val := op;
+         data[2].val := gattr.avalue;
+         data[2].cls := ABS2;
+         isize := 4;
+         numfields := 2;
+         end;
+    end;
+    end; {p2op31}
+    
+    procedure p2op50;
+      var mreg,lreg,lmode,hi,lo: integer; offset: longint;
+    begin
+    case oldscanclass of
+      50, { Fxxx <EA>,Fx }
+      52: { FTEST }
+          begin
+          { Floating point ops: TYPE = 000 }
+          isize := 4;
+          if token = FREGSY
+          then begin { OPCLAS = 000 }
+               data[1].val := $f200; op := op + scanreg*$400; scan;
+               if instsize <> XTND then error(51);
+               end
+          else begin { OPCLAS = 010 }
+               effaddr(instsize,lmode,lreg,isize,ALL);
+               data[1].val := $f200 + lmode*8 + lreg;
+               op := op + ($4000 + fsizebits[instsize]*$400);
+               end;
+          if oldscanclass <> 52
+          then begin { No second arg for FTEST }
+               comma;
+               if token = FREGSY
+               then begin op := op + scanreg*$80; scan; end
+               else error(50);
+               end;
+          data[2].val := op;
+          numfields := isize div 2;
+          end;
+      51: { FMOVE }
+          begin
+          isize := 4;
+          if token = FREGSY
+          then begin
+               mreg := scanreg; scan; comma;
+               if token = FREGSY
+               then begin { OPCLAS = 000: FMOVE Fx,Fy }
+                    data[1].val := $f200;
+                    op := op + mreg*$400 + scanreg*$80;
+                    if instsize <> XTND then error(51);
+                    scan;
+                    end
+               else begin { OPCLAS = 011: FMOVE Fx,<EA> }
+                    effaddr(instsize,lmode,lreg,isize,ALL);
+                    data[1].val := $f200 + lmode*8 + lreg;
+                    op := op + ($6000 + fsizebits[instsize]*$400 + mreg*$80);
+                    end
+               end
+          else begin { OPCLAS = 010: FMOVE <EA>,Fx }
+               effaddr(instsize,lmode,lreg,isize,ALL);
+               data[1].val := $f200 + lmode*8 + lreg;
+               op := op + ($4000 + fsizebits[instsize]*$400);
+               comma;
+               if token = FREGSY
+               then begin op := op + scanreg*$80; scan; end
+               else error(50);
+               end;
+          data[2].val := op;
+          numfields := isize div 2;
+          end;
+      53: { FBcc }
+          begin
+          if instsize = LONG
+          then begin isize := 6; numfields := 3; end
+          else begin
+               isize := 4; numfields := 2;
+               if instsize <> WORD then error(52);
+               end;
+          expression; offset := gattr.avalue - pc - 2;
+          gethilo(offset,hi,lo);
+          if gattr.akind <> RELOCATABLE
+          then error(21);
+          if instsize = LONG
+          then begin
+               data[1].val := $f2c0 + op;
+               data[2].val := hi;
+               data[3].val := lo; data[3].cls := ABS2;
+               end
+          else begin
+               if (offset > 32767) or (offset < -32768)
+               then error(53);
+               data[1].val := $f280 + op;
+               data[2].val := lo;
+               end;
+          end;
+    end; {case}
+    end; {p2op50}
+    
+begin {pass2}
+pass := 2;
+ExitFlag := FALSE; ByteFlag := FALSE;
+MakeUpper := OldMakeUpper; MakeLower := OldMakeLower;
+resetfile;
+if pageno > 0
+then begin finishpage; printheading; end;
+repeat
+       newline;
+       PCFlag := FALSE;
+       numfields := 0;
+       isize := 0;
+       PageFlag := FALSE;
+       StringOK := FALSE;
+       IncludeFlag := FALSE;
+       olderrors := errors;
+       lasterrcol := -1;
+       if CommentFlag
+       then begin
+            if EOFFlag
+               then begin
+                    ExitFlag := TRUE;
+                    error(32);
+                    end;
+            end
+       else begin
+            if token = OPSY
+            then begin
+                 if odd(pc)
+                 then if scanclass >= 9
+                      then begin genbyte(pc,0); pc := pc + 1; end;
+                 oldscanclass := scanclass;
+                 op := scanop;
+                 if scanclass < 50
+                 then begin { Not FP }
+                      instsize := getsize(extension,FALSE);
+                      case extension of
+                           ' ': ;
+                           'B': if (scansize <> B) and (scansize <> BWL)
+                                   then error(10);
+                           'W': if (scansize <> W) and
+                                   (scansize <> BWL) and
+                                   (scansize <> WL)
+                                   then error(10);
+                           'L': if (scansize <> L) and
+                                   (scansize <> BWL) and
+                                   (scansize <> WL)
+                                   then error(10);
+                           'S': if (scansize <> S)
+                                   then error(10);
+                      end; {case}
+                      if scansize = B
+                      then instsize := BYTE
+                      else if scansize = L
+                           then instsize := LONG;
+                      end
+                 else begin
+                      if extension <> ' '
+                      then instsize := getsize(extension,TRUE)
+                      else case scanclass of
+                             50,
+                             51,
+                             52: instsize := XTND;
+                             53: instsize := WORD;
+                           end; {case}
+                      end;
+                 PCFlag := oldscanclass >= 10;
+                 data[1].cls := ABS2;
+                 data[2].cls := ABS2;
+                 scan;
+                 case oldscanclass of
+                   1: { END }
+                      begin
+                      ExitFlag := TRUE;
+                      if (token <> EOLNSY) and (token <> EOFSY)
+                      then begin
+                           expression;
+                           if StartBefore then error(41);
+                           StartBefore := TRUE;
+                           if gattr.akind <> RELOCATABLE then error(21);
+                           data[1].val := gattr.avalue;
+                           data[1].cls := REL4;
+                           numfields := 1;
+                           end;
+                      end;
+                   2: { ORG }
+                      begin
+                      expression;
+                      pc := gattr.avalue;
+                      if (gattr.akind <> ABSOLUTE) and
+                         (gattr.akind <> RELOCATABLE)
+                      then error(8);
+                      PCFlag := TRUE;
+                      end;
+                   3: { EQU }
+                      begin
+                      if not LabelFlag
+                      then error(13)
+                      else begin
+                           lpsy := lookupname(symboltree,labelname);
+                           if lpsy^.Double then error(14);
+                           if lpsy^.EquNoVal then error(39);
+                           LabelFlag :=  FALSE;
+                           end;
+                      expression;
+                      if (gattr.akind <> ABSOLUTE) and
+                         (gattr.akind <> RELOCATABLE)
+                      then begin error(9); gattr.akind := ABSOLUTE; end;
+                      data[1].val := gattr.avalue;
+                      if gattr.akind = ABSOLUTE
+                      then data[1].cls := ABS4
+                      else data[1].cls := REL4;
+                      numfields := 1;
+                      end;
+                   4: { EXT }
+                      begin
+                      while token = IDENTSY do begin
+                            lpsy := lookupname(symboltree,scanname);
+                            if lpsy^.Double then error(14);
+                            scan;
+                            if token = COMMASY
+                            then scan
+                            else if token = IDENTSY
+                                 then error(11);
+                            end;
+                      end;
+                   5: { GLOBAL }
+                      begin
+                      while token = IDENTSY do begin
+                            lpsy := lookupname(symboltree,scanname);
+                            if lpsy^.Defined
+                            then begin
+                                 if lpsy^.Double then error(14);
+                                 end
+                            else error(7);
+                            scan;
+                            if token = COMMASY
+                            then scan
+                            else if token = IDENTSY
+                                 then error(11);
+                            end;
+                      end;
+                   6: { RES }
+                      begin
+                      expression;
+                      if gattr.akind <> ABSOLUTE then error(8);
+                      gethilo(gattr.avalue,hi,lo);
+                      isize := lo;
+                      PCFlag := TRUE;
+                      end;
+                   7: { DATA }
+                      begin
+                      StringOK := TRUE;
+                      LoopFlag := FALSE;
+                      if extension = 'B'
+                      then llsize := 1
+                      else if extension = 'L'
+                           then llsize := 4
+                           else llsize := 2;
+                      repeat
+                             expression;
+                             numfields := numfields + 1;
+                             case gattr.akind of
+                               ABSOLUTE:
+                                 begin
+                                 isize := isize + llsize;
+                                 data[numfields].val := gattr.avalue;
+                                 case llsize of
+                                   1: data[numfields].cls := ABS1;
+                                   2: data[numfields].cls := ABS2;
+                                   4: data[numfields].cls := ABS4;
+                                 end;
+                                 end;
+                               RELOCATABLE,
+                               EXTERN:
+                                 begin
+                                 isize := isize + llsize;
+                                 data[numfields].val := gattr.avalue;
+                                 if llsize <> 4 then error(4);
+                                 data[numfields].val := gattr.avalue;
+                                 if gattr.akind = EXTERN
+                                 then data[numfields].cls := EXT4
+                                 else data[numfields].cls := REL4;
+                                 end;
+                               STRINGVAL,
+                               PAOCVAL:
+                                 begin
+                                 if gattr.akind = PAOCVAL
+                                 then numfields := numfields - 1
+                                 else begin
+                                      isize := isize + 1;
+                                      data[numfields].val :=
+                                              length(gattr.svalue);
+                                      data[numfields].cls := CHR1;
+                                      end;
+                                 for i := 1 to length(gattr.svalue) do
+                                     begin
+                                     numfields := numfields + 1;
+                                     isize := isize + 1;
+                                     data[numfields].val :=
+                                              ord(gattr.svalue[i]);
+                                     data[numfields].cls := CHR1;
+                                     end;
+                                 end;
+                             end;
+                             if token = COMMASY
+                             then scan
+                             else LoopFlag := TRUE;
+                      until LoopFlag;
+                      j := isize;
+                      isize := ((isize + llsize - 1) div llsize)*llsize;
+                      for i := j+1 to isize do begin
+                          numfields := numfields + 1;
+                          data[numfields].cls := FILL;
+                          end;
+                      PCFlag := TRUE;
+                      end;
+                   8: { PAGE IDENT LIST }
+                      case op of
+                        1: { PAGE }
+                           if token = EOLNSY
+                           then PageFlag := TRUE
+                           else begin
+                                expression;
+                                gethilo(gattr.avalue,hi,lo);
+                                linesperpage := lo;
+                                PageSetFlag := TRUE;
+                                end;
+                        2: { IDENT }
+                           if token = IDENTSY
+                           then scan
+                           else error(29);
+                        3: { LIST }
+                           begin
+                           expression;
+                           ListFlag := gattr.avalue <> 0;
+                           end;
+                        4: { INCLUDE }
+                           begin
+                           if token = PAOCSY
+                           then begin
+                                IncludeFlag := TRUE;
+                                incfname := scanstring;
+                                scan;
+                                end
+                           else error(35);
+                           end;
+                        5: { SEG }
+                           begin
+                           if token = IDENTSY
+                           then scan
+                           else error(29);
+                           end;
+                        6: { UPPER }
+                           begin
+                           MakeUpper := TRUE;
+                           MakeLower := FALSE;
+                           end;
+                        7: { LOWER }
+                           begin
+                           MakeLower := TRUE;
+                           MakeUpper := FALSE;
+                           end;
+                        8: { LITERAL }
+                           begin
+                           MakeLower := FALSE;
+                           MakeUpper := FALSE;
+                           end;
+                      end; {case}
+                   9: { Unimplemented instruction }
+                      begin
+                      error(999);
+                      isize := 4;
+                      numfields := 2;
+                      data[1].val := 0;
+                      data[2].val := 0;
+                      PCFlag := TRUE;
+                      end;
+                  10, { NOP RESET RTE RTR RTS TRAPV }
+                  11, { MOVE }
+                  12, { ADD SUB AND  OR }
+                  13, { JMP JSR PEA }
+                  14, { Bcc BRA BSR }
+                  15, { MOVEQ }
+                  16: { ADDA CMPA SUBA }
+                      p2op10;
+                  17, { ADDI ANDI CMPI EORI ORI SUBI }
+                  18, { ADDQ SUBQ }
+                  19, { CLR NEG NEGX NOT TST }
+                  20, { ASL ASR LSL LSR ROL ROR ROXL ROXR }
+                  21, { EOR }
+                  22: { CMP }
+                      p2op17;
+                  23, { CHK DIVS DIVU MULS MULU }
+                  24, { BCHG BCLR BSET BTST }
+                  25, { EXT }
+                  26, { SWAP }
+                  27, { LINK }
+                  28, { UNLK }
+                  29, { MOVEM }
+                  30: { CMPM }
+                      p2op23;
+                  31, { LEA }
+                  32, { TRAP }
+                  33, { ABCD ADDX SBCD SUBX }
+                  34, { STOP }
+                  35, { DBcc }
+                  36, { EXG }
+                  37, { MOVEA }
+                  38, { MOVEP }
+                  39, { Scc }
+                  40: { JSYS }
+                      p2op31;
+                  50, { Fxxx <EA>,Fx }
+                  51, { FMOVE }
+                  52, { FTEST }
+                  53: { FBcc }
+                      p2op50;
+                 end; {case}
+                 if olderrors = errors
+                 then if (token <> EOLNSY) and (token <> EOFSY)
+                      then error(31);
+                 end
+            else if token = EOFSY
+                 then ExitFlag := TRUE
+                 else if token <> EOLNSY
+                      then error(3);
+            if LabelFlag
+            then begin
+                 PCFlag := TRUE;
+                 lpsy := lookupname(symboltree,labelname);
+                 if lpsy^.Double
+                 then begin
+                      i := lasttokcol; lasttokcol := 1;
+                      error(14); lasttokcol := i;
+                      end;
+                 if lpsy^.idclass = EXTERN then error(28);
+                 end;
+            end;
+       if isize > 0
+       then begin
+            gethilo(pc,hi,lo);
+            for i := 1 to numfields do
+                with data[i] do begin
+                     gethilo(val,dhi,dlo);
+                     case cls of
+                          FILL,CHR1,ABS1: begin
+                                          genbyte(lo,dlo);
+                                          lo := lo + 1;
+                                          end;
+                          ABS2,REL2:      begin
+                                          genword(lo,dlo);
+                                          lo := lo + 2;
+                                          end;
+                          ABS4,REL4,EXT4: begin
+                                          if cls = REL4
+                                          then begin
+                                               new(lint); lint^.intval :=lo;
+                                               lint^.nextint := reloclist;
+                                               reloclist := lint;
+                                               end
+                                          else if cls = EXT4
+                                          then begin
+                                               lpsy := sym; new(lint);
+                                               lint^.nextint :=
+                                                     lpsy^.lreflist;
+                                               lpsy^.lreflist := lint;
+                                               lint^.intval := lo;
+                                               dlo := 0; dhi := 0;
+                                               end;
+                                          genword(lo,dhi);
+                                          genword(lo + 2,dlo);
+                                          lo := lo + 4;
+                                          end;
+                          EXT2:           begin
+                                          genword(lo,0);
+                                          lpsy := sym; new(lint);
+                                          if LongExts
+                                          then begin
+                                               lint^.nextint := lpsy^.lreflist;
+                                               lpsy^.lreflist := lint;
+                                               end
+                                          else begin
+                                               lint^.nextint := lpsy^.sreflist;
+                                               lpsy^.sreflist := lint;
+                                               end;
+                                          lint^.intval := lo;
+                                          lo := lo + 2;
+                                          end;
+                     end; {case}
+                     end;
+            end;
+       if ListOpen and (ListFlag or (errors > olderrors))
+       then if PageFlag
+            then begin finishpage; printheading; end
+            else printline(PCFlag,numfields);
+       if IncludeFlag then doinclude(incfname);
+       pc := pc + isize;
+until ExitFlag;
+if errors = 0 then dumprefs;
+end; {pass2}
+
+

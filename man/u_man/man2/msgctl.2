@@ -1,0 +1,139 @@
+'\"macro stdmacro
+.TH MSGCTL 2
+.SH NAME
+msgctl \- message control operations
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/ipc.h>
+.br
+.B #include <sys/msg.h>
+.PP
+.nf
+.B int msgctl (msqid, cmd, buf)
+.B int msqid, cmd;
+.B struct msqid_ds \(**buf;
+.fi
+.SH DESCRIPTION
+.I Msgctl
+provides a variety of message control operations as specified by
+.IR cmd .
+The following
+.IR cmd s
+are available:
+.TP \w'\f3\s-1IPC_RMID\s+1\fP\ \ \ 'u
+.SM
+.B IPC_STAT
+Place the current value of each member of the data structure associated with
+.I msqid
+into the structure pointed to by
+.IR buf .
+The contents of this structure are defined in
+.IR intro (2).
+.SM {READ}
+.TP
+.SM
+.B IPC_SET
+Set the value of the following members of the data structure associated with
+.I msqid
+to the corresponding value found in the structure pointed to by
+.IR buf :
+.RS 
+.IP "" \w'\f3\s-1IPC_RMID\s+1\fP\ \ \ 'u
+.nf
+msg_perm.uid
+msg_perm.gid
+msg_perm.mode\ \ \ \ \ /\(** only low 9 bits \(**/
+msg_qbytes
+.fi
+.RE
+.IP "" \w'\f3\s-1IPC_RMID\s+1\fP\ \ \ 'u
+This \f2cmd\fP can only be executed by a process that has an effective user
+.SM ID
+equal to either that of super user or to the value of
+.B msg_perm.uid
+in the data structure associated with
+.IR msqid .
+Only super user can raise the value of
+.BR msg_qbytes .
+.TP
+.SM
+.B IPC_RMID
+Remove the message queue identifier specified by
+.I msqid
+from the system and destroy the message queue and data structure
+associated with it.
+This \f2cmd\fP can only be executed by a process that has an effective user
+.SM ID
+equal to either that of super user or to the value of
+.B msg_perm.uid
+in the data structure associated with
+.IR msqid .
+.PP
+.I Msgctl
+will fail if one or more of the following are true:
+.RS .3i
+.PP
+.I Msqid
+is not a valid message queue identifier.
+.SM
+\%[EINVAL]
+.PP
+.I Cmd
+is not a valid command.
+.SM
+\%[EINVAL]
+.PP
+.I Cmd
+is equal to
+.SM
+.B IPC_STAT
+and
+.SM {READ}
+operation permission is denied to the calling process (see
+.IR intro (2)).
+.SM
+\%[EACCES]
+.PP
+.I Cmd
+is equal to
+.SM
+.B IPC_RMID
+or
+.SM
+.B IPC_SET
+and the effective user
+.SM ID
+of the calling process is not equal to that of super user and it is
+not equal to the value of
+.B msg_perm.uid
+in the data structure associated with
+.IR msqid .
+.SM
+\%[EPERM]
+.PP
+.I Cmd
+is equal to
+.SM
+.BR IPC_SET\*S,
+an attempt is being made to increase to the value of
+.BR msg_qbytes,
+and the effective user
+.SM ID
+of the calling process is not equal to that of super user.
+.SM
+\%[EPERM]
+.PP
+.I Buf
+points to an illegal address.
+.SM
+\%[EFAULT]
+.RE
+.SH "RETURN VALUE"
+Upon successful completion, a value of 0 is returned. Otherwise, a
+value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+msgget(2), msgop(2).
+.\"	@(#)msgctl.2	5.1 of 11/1/83

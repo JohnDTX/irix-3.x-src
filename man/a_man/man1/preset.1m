@@ -1,0 +1,21 @@
+'\"macro stdmacro
+.TH PRESET 1M
+.SH NAME
+preset \- reset the lp queue system to a pristine state by deleting printers
+.SH SYNOPSIS
+.B preset
+.SH DESCRIPTION
+.I preset\^ 
+should be used when standard methods of manipulating printers (adding,
+deleting) or the lp printing queue fail.  For example,
+.I rmprinter (1M)
+can fail if any of the standard lp utilities it calls fail, and the utilities
+can fail if certain files are corrupted.
+.I preset\^
+deletes and creates crucial files in the lp spool directory; after it is
+run, there are no printers and the system will allow printers to be
+added.
+.SH AUTHOR
+Glen Williams
+.SH "SEE ALSO"
+mknetpr(1M), mkPS(1M), mkcentpr(1M)

@@ -1,0 +1,69 @@
+.TH bbox 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I bbox
+- specify bounding box and minimum pixel radius for drawing commands
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "bbox(xmin, ymin, x1, y1, z1, x2, y2, z2) "
+.B "Screencoord xmin, ymin;"
+.B "Coord x1, y1, z1, x2, y2, z2;"
+.IP 
+.B "bboxi(xmin, ymin, x1, y1, z1, x2, y2, z2) "
+.B "Screencoord xmin, ymin;"
+.B "Icoord x1, y1, z1, x2, y2, z2;"
+.IP 
+.B "bbox2(xmin, ymin, x1, y1, x2, y2) "
+.B "Screencoord xmin, ymin;"
+.B "Coord x1, y1, x2, y2;"
+.IP 
+.B "bbox2i(xmin, ymin, x1, y1, x2, y2) "
+.B "Screencoord xmin, ymin;"
+.B "Icoord x1, y1, x2, y2;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine bbox(xmin, ymin, x1, y1, z1, x2, y2, z2) "
+.B "integer*2 xmin, ymin"
+.B "real x1, y1, z1, x2, y2, z2"
+.IP 
+.B "subroutine bboxi(xmin, ymin, x1, y1, z1, x2, y2, z2)"
+.B "integer*2 xmin, ymin"
+.B "integer x1, y1, z1, x2, y2, z2"
+.IP 
+.B "subroutine bbox2(xmin, ymin, x1, y1, x2, y2)"
+.B "integer*2 xmin, ymin"
+.B "real x1, y1, x2, y2"
+.IP 
+.B "subroutine bbox2i(xmin, ymin, x1, y1, x2, y2)"
+.B "integer*2 xmin, ymin"
+.B "integer x1, y1, x2, y2"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure bbox(xmin, ymin: Screencoord; x1, y1, z1, x2, y2, z2: Coord);"
+.IP 
+.B "procedure bboxi(xmin, ymin: Screencoord; x1, y1, z1, x2, y2, z2: Icoord);"
+.IP 
+.B "procedure bbox2(xmin, ymin: Screencoord; x1, y1, x2, y2: Coord);"
+.IP 
+.B "procedure bbox2i(xmin, ymin: Screencoord; x1, y1, x2, y2: Icoord);"
+.sp
+.SH DESCRIPTION
+The \f2bbox\f1 command controls the pruning and culling functions.  
+Its arguments
+are an object space bounding box and 
+minimum horizontal and vertical
+feature sizes, in pixels.  The bounding box
+is transformed to screen coordinates and compared with the viewport.
+If the bounding box is completely outside the viewport, the
+commands between the \f2bbox\f1 command and the end of the object will
+be ignored.  Otherwise, the bounding box of the
+transformed bounding box is compared with the
+minimum feature size.  If the bounding box is too small in both
+the \f3x\f1 and \f3y\f1 dimensions, the rest of the
+commands in the object are ignored.  Otherwise, interpretation of the
+object continues.
+.SH "SEE ALSO"
+.I makeobj

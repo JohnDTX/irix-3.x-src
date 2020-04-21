@@ -1,0 +1,286 @@
+'\"macro stdmacro
+.TH SEMOP 2
+.SH NAME
+semop \- semaphore operations
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/ipc.h>
+.br
+.B #include <sys/sem.h>
+.PP
+.nf
+.B int semop (semid, sops, nsops)
+.B int semid;
+.B struct sembuf (\(**sops)[];
+.B int nsops;
+.fi
+.SH DESCRIPTION
+.I Semop\^
+is used to atomically perform an array of semaphore operations on the
+set of semaphores associated with the semaphore identifier specified by
+.IR semid .
+.I Sops\^
+is a pointer to the array of semaphore-operation structures.
+.I Nsops\^
+is the number of such structures in the array.
+The contents of each structure includes the following members:
+.PP
+.RS
+.ta \w'short\ \ \ 'u +\w'sem_num\ \ \ 'u
+.nf
+short	sem_num;	/\(** semaphore number \(**/
+short	sem_op;	/\(** semaphore operation \(**/
+short	sem_flg;	/\(** operation flags \(**/
+.fi
+.RE
+.PP
+Each semaphore operation specified by
+.I sem_op\^
+is performed on the corresponding semaphore specified by
+.I semid\^ 
+and
+.IR sem_num .
+.PP
+.I Sem_op\^
+specifies one of three semaphore operations as follows:
+.RS .3i
+.PP
+If
+.I sem_op\^
+is a negative integer, one of the following will occur:
+.SM
+\%{ALTER}
+.IP "" .3i
+If semval (see
+.IR intro\^ (2))
+is greater than or equal to the absolute value of
+.IR sem_op ,
+the absolute value of
+.I sem_op\^
+is subtracted from semval.
+Also, if
+.RI ( sem_flg " &"
+.SM
+.BR SEM_UNDO\*S )
+is ``true'', the absolute value of
+.I sem_op\^
+is added to the calling process's semadj value (see
+.IR exit\^ (2))
+for the specified semaphore.
+.IP
+If semval is less than the absolute value of
+.I sem_op\^
+and
+.RI ( sem_flg " &"
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true'',
+.I semop\^
+will return immediately.
+.IP
+If semval is less than the absolute value of
+.I sem_op\^
+and
+.RI ( sem_flg " &"
+.SM
+.BR IPC_NOWAIT\*S )
+is ``false'',
+.I semop\^
+will increment the semncnt associated with the specified semaphore
+and suspend execution of the calling process 
+until one of the following occurs:
+.RS .3i
+.IP "" .3i
+Semval becomes greater than or equal to the absolute value of
+.IR sem_op .
+When this occurs, the value of semncnt associated with the specified
+semaphore is decremented, the absolute value of
+.I sem_op\^
+is subtracted from semval and, if
+.RI ( sem_flg " &"
+.SM
+.BR SEM_UNDO\*S )
+is ``true'', the absolute value of
+.I sem_op\^
+is added to the calling process's semadj value for the specified semaphore.
+.IP
+The semid for which the calling process is awaiting action
+is removed from the system (see
+.IR semctl\^ (2)).
+When this occurs,
+.I errno\^
+is set equal to
+.SM
+EIDRM\*S,
+and a value of \-1 is returned.
+.IP
+The calling process receives a signal that is to be caught.
+When this occurs, the value of semncnt associated with the specified
+semaphore is decremented,
+and the calling process resumes execution in the manner prescribed in
+.IR signal\^ (2).
+.RE
+.PP
+If
+.I sem_op\^
+is a positive integer, the value of
+.I sem_op\^
+is added to semval
+and, if
+.RI ( sem_flg " &"
+.SM
+.BR SEM_UNDO\*S )
+is ``true'', the value of
+.I sem_op\^
+is subtracted from the calling process's semadj value for the specified
+semaphore.
+.SM
+\%{ALTER}
+.PP
+If
+.I sem_op\^
+is zero,
+one of the following will occur:
+.SM
+\%{READ}
+.IP "" .3i
+If semval is zero,
+.I semop\^
+will return immediately.
+.IP
+If semval is not equal to zero and
+.RI ( sem_flg " &"
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true'',
+.I semop\^
+will return immediately.
+.IP
+If semval is not equal to zero and
+.RI ( sem_flg " &"
+.SM
+.BR IPC_NOWAIT\*S )
+is ``false'',
+.I semop\^
+will increment the semzcnt associated with the specified semaphore
+and suspend execution of the calling process until
+one of the following occurs:
+.RS .3i
+.IP "" .3i
+Semval becomes zero, at which time the value of semzcnt associated with the
+specified semaphore is decremented.
+.IP
+The semid for which the calling process is awaiting action
+is removed from the system.
+When this occurs,
+.I errno\^
+is set equal to
+.SM
+EIDRM\*S,
+and a value of \-1 is returned.
+.IP
+The calling process receives a signal that is to be caught.
+When this occurs, the value of semzcnt associated with the specified
+semaphore is decremented,
+and the calling process resumes execution in the manner prescribed in
+.IR signal\^ (2).
+.RE
+.RE
+.PP
+.I Semop\^
+will fail if one or more of the following are true for any of the semaphore
+operations specified by
+.IR sops :
+.IP "" .3i
+.I Semid\^
+is not a valid semaphore identifier.
+.SM
+\%[EINVAL]
+.IP
+.I Sem_num\^
+is less than zero or greater than or equal to the number of semaphores
+in the set associated with
+.IR semid .
+.SM
+\%[EFBIG]
+.IP
+.I Nsops\^
+is greater than the system imposed maximum.
+.SM
+\%[E2BIG]
+.IP
+Operation permission is denied to the calling process (see
+.IR intro\^ (2)).
+.SM
+\%[EACCES]
+.IP
+The operation would result in suspension of the calling process but
+.RI ( sem_flg " &"
+.SM
+.BR IPC_NOWAIT\*S )
+is ``true''.
+.SM
+\%[EAGAIN]
+.IP
+The limit on the number of individual  processes requesting an
+.SM
+.B SEM_UNDO
+would be exceeded.
+.SM
+\%[ENOSPC]
+.IP
+The number of individual semaphores for which the calling process
+requests a
+.SM
+.B SEM_UNDO
+would exceed the limit.
+.SM
+\%[EINVAL]
+.IP
+An operation would cause a semval to overflow the system imposed limit.
+.SM
+\%[ERANGE]
+.IP
+An operation would cause a semadj value to overflow the system
+imposed limit.
+.SM
+\%[ERANGE]
+.IP
+.I Sops\^
+points to an illegal address.
+.SM
+\%[EFAULT]
+.PP
+Upon successful completion, the value of sempid
+for each semaphore specified in the array pointed to by
+.I sops\^
+is set equal to the process
+.SM ID
+of the calling process.
+.SH RETURN VALUE
+.RI If " semop
+returns due to the receipt of a signal, a value of \-1 is returned to the
+calling process and
+.I errno\^
+is set to
+.SM
+\%EINTR\*S.
+If it returns due to the removal of a
+.I semid\^
+from the system, a value of \-1 is returned and
+.I errno\^
+is set to
+.SM
+\%EIDRM\*S.
+.PP
+Upon successful completion, the value of semval at the time of the call for the
+last operation in the array pointed to by
+.I sops\^
+is returned.
+Otherwise, a value of \-1 is returned and
+.I errno\^
+is set to indicate the error.
+.SH SEE ALSO
+exec(2), exit(2), fork(2), semctl(2), semget(2).
+.\"	@(#)semop.2	5.1 of 11/1/83

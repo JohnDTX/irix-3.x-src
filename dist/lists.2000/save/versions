@@ -1,0 +1,19 @@
+part1	004-0011-042	Release Tape part 1
+part2	004-0011-052	Release Tape part 2
+feboot	004-0031-011	FE Bootstrap Tape
+feupd	004-0041-011	FE Update Tape
+dist	004-0024-032	Distribution Tools
+boot	004-0124-012	Bootstrap System
+root	004-0134-181	Standard System (root)
+usr	004-0134-191	Standard System (usr)
+upd	004-0144-032	Update System
+man	004-0154-022	Update Manual Pages
+games	004-0164-022	Update Games
+demos	004-0174-022	Update Demos
+ftn	004-0314-022	FORTRAN Option
+pas	004-0324-022	Pascal Option
+tcp	004-0334-022	TCP/IP Option
+488	004-0344-022	IEEE-488 Option
+ibm	004-0354-012	IBM Option
+test	004-0614-032	Test Software
+sys	004-0631-012	Reconfigurable Kernel Option

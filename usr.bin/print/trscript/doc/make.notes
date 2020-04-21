@@ -1,0 +1,20 @@
+PLEASE! Read the hardcopy overview and installation instructions CAREFULLY!
+
+ONLY ONCE: SET UP FOR YOUR SYSTEM TYPE:
+	if you are on a BSD (Berkeley UNIX) system, type "bsd"
+	if you are on a System V system, type "sysv"
+
+ONLY ONCE: EDIT THE TOP-LEVEL files "config" and "printer" files 
+	to specify parameters for your machine!
+
+ONLY ONCE: Configure and Install TranScript software
+	make programs 
+	(this will take some time)
+	>> Become super-user and ...
+	make install
+	(this will take some time)
+
+For EACH PostScript/TranScript printer you have:
+	cd etc
+	>>> Become super-user and ...
+	mkprinter PRINTER TTY

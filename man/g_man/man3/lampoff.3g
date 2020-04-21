@@ -1,0 +1,35 @@
+.TH lampoff 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B lampoff 
+\- turns off the keyboard display lights
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "lampoff(lamps)"
+.B "char lamps;"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine lampof(lamps)"
+.B "integer*4 lamps"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure lampoff(lamps: longint);"
+.SH DESCRIPTION
+.B lampoff
+turns off any combination of the four user-controlled
+lamps on the keyboard.  The four low-order bits of 
+.I lamps
+control lamps 1 through 4.
+.SH "SEE ALSO"
+clkoff, clkon, lampon, ringbell, setbell
+.sp
+.I Programming Guide,
+Section 7.5, Controlling Peripheral Input/Output Devices
+.SH NOTE
+This routine is available only in immediate mode.

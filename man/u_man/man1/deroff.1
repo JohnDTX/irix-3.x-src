@@ -1,0 +1,126 @@
+'\"macro stdmacro
+.TH DEROFF 1
+.SH NAME
+deroff \- remove nroff/troff, tbl, and eqn constructs
+.SH SYNOPSIS
+.B deroff
+.RB [\0 \-m x\0]
+.RB [\0 \-w \0]
+[ files ]
+.SH DESCRIPTION
+.I Deroff\^
+reads each
+of the
+.I files\^
+in sequence
+and removes all
+.IR troff\^ (1)
+requests, macro calls, backslash constructs,
+.IR eqn\^ (1)
+constructs
+(between
+.SM
+.B \&.EQ
+and
+.SM
+.B \&.EN
+lines, and between
+delimiters),
+and
+.IR tbl\^ (1)
+descriptions,
+perhaps replacing them with white
+space (blanks and blank lines),
+and writes the remainder of the file on the standard output.
+.I Deroff\^
+follows chains of included files
+.RB ( .so
+and
+.B \&.nx
+.I troff\^
+commands);
+if a file has already been included, a
+.B \&.so
+naming that file
+is ignored and a
+.B \&.nx
+naming that file
+terminates execution.
+If no input file is given,
+.I deroff\^
+reads the standard input.
+.PP
+The
+.B \-m
+option may be followed by an
+.BR m ,
+.BR s ,
+or
+.BR l .
+The
+.B \-mm
+option causes the macros be
+interpreted so that only
+running text
+is output
+(i.e., no text
+from macro lines.)\ 
+The
+.B \-ml
+option
+forces the
+.B \-mm
+option and also
+causes deletion of lists associated with the
+.B mm
+macros.
+.PP
+If the
+.B \-w
+option is given, the output is a word list, one ``word''
+per line, with all other characters deleted.
+Otherwise, the output follows the original, with the deletions mentioned
+above.
+In text, a ``word'' is any string
+that
+.I contains\^
+at least two letters and
+is composed
+of letters, digits, ampersands
+.RB ( & ),
+and
+apostrophes
+.RB ( \^'\^ );
+in a macro call,
+however,
+a ``word'' is a string that
+.I begins\^
+with at least
+two letters and contains a total of at least
+three letters.
+Delimiters are any characters other than
+letters, digits, apostrophes,
+and ampersands.
+Trailing apostrophes and ampersands are removed from ``words.''
+.SH EXAMPLE
+.IP
+deroff textfile
+.PP
+removes all 
+.IR nroff ,
+.IR troff ,
+and macro definitions from "textfile".
+.SH SEE ALSO
+eqn(1), nroff(1), tbl(1), troff(1).
+.SH BUGS
+.I Deroff\^
+is not a complete
+.I troff\^
+interpreter,
+so it can be confused by subtle constructs.
+Most such errors result in too much rather than too little output.
+.br
+The
+.B \-ml
+option does not handle nested lists correctly.
+.\"	@(#)deroff.1	5.1 of 10/27/83

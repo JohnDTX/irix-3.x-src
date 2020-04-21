@@ -1,0 +1,21 @@
+Following is a table that gives the symbolic name of each possible distribution
+tape entry, and a brief description of the entry.  The symbolic names are
+recognized as arguments to the various distribution commands.
+
+Standard Software:
+
+upd	Update System
+man	Update Manual Pages
+games	Update Games
+demos	Update Demos
+gifts	Update Gifts
+gltut	Update IRIS Programming Tutorial
+mail	Update Mail
+
+Optional Software:
+
+ftn	FORTRAN Option
+pas	Pascal Option
+xns	XNS Option
+emacs	Emacs Option
+troff	Laser Printer Option

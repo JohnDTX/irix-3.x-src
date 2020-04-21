@@ -1,0 +1,73 @@
+'\"macro stdmacro
+.TH UNGET 1
+.SH NAME
+unget \- undo a previous get of an \s-1SCCS\s+1 file
+.SH SYNOPSIS
+.B unget
+.RB [ \-r\| \s-1SID\s+1]
+.RB [ \-s ]
+.RB [ \-n ]
+files
+.SH DESCRIPTION
+Unget undoes the effect of a
+.B "get \-e"
+done prior to creating the intended new delta.
+If a directory is named,
+.I unget\^
+behaves as though each file in the directory were
+specified as a named file, except that
+non-\s-1SCCS\s+1
+files and unreadable files are silently ignored.
+If a name of
+.B \-
+is given, the standard input is read with each line
+being taken as the name of an
+.SM SCCS
+file to be processed.
+.PP
+Keyletter arguments apply independently to each
+named file.
+.RS .3i
+.TP "\w'\f3\-r\|\f2SID\f1\ \ \ 'u"
+.BI \-r\| \s-1SID\s+1\^
+Uniquely identifies which delta is no longer intended.
+(This would have been specified by
+.I get\^
+as the "new delta").
+The use of this keyletter is necessary only if two or
+more outstanding
+.IR get\| s
+for editing on the same
+.SM SCCS
+file were done by the same person (login name).
+A diagnostic results if the specified
+.I \s-1SID\s+1\^
+is ambiguous, or if it is necessary and omitted
+on the command line.
+.TP
+.B \-s
+Suppresses the printout, on the standard output,
+of the intended delta's
+.IR \s-1SID\s+1 .
+.TP
+.B \-n
+Causes the retention of the gotten file
+which would normally be removed from
+the current directory.
+.SH EXAMPLE
+.IP
+% unget s.test1.c
+.br
+1.2
+.PP
+undoes version 1.2 of "test1.c" set up for editing by an earlier
+.BR get -e .
+.SH "SEE ALSO"
+delta(1),
+get(1),
+sact(1).
+.SH DIAGNOSTICS
+Use
+.IR help\^ (1)
+for explanations.
+.\"	@(#)unget.1	5.1 of 11/14/83

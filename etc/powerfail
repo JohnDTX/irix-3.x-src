@@ -1,0 +1,9 @@
+#! /bin/sh
+#
+# We use this script to cleanly shut the system down.
+# /etc/reboot sends init the signal SIGPWR; init then runs this
+# script which wipes out all user processes, and then does another
+# reboot which shuts the system down.
+#
+echo "POWER FAIL RC"
+/etc/reboot -q

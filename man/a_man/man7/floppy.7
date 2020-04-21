@@ -1,0 +1,60 @@
+'\"macro stdmacro
+.TH FLOPPY 7
+.SH NAME
+floppy \- st-506 disk/tape/floppy controller
+.SH SYNOPSIS
+.B "controller dsd0 at mb0 csr 0x7F00 priority 1 vector dsdintr
+.br
+.B "disk md0 at dsd0 drive 3 flags 0x01
+.SH DESCRIPTION
+This is a MULTIBUS st-506 disk and tape controller.
+The driver software supports 2 winchester hard disk drives,
+one qic-02 tape drive, and one floppy.
+This manual page documents the floppy support.
+See \f2dsd\f1(7) for
+information on the winchester disk support and \f2qic\f1(7) for
+the streaming tape support.
+.PP
+The block files access the disk via the system's normal
+buffering mechanism and may be read and written without regard to
+physical disk records.  There is also a `raw' interface
+which provides for direct transmission between the disk
+and the user's read or write buffer.
+A single read or write call results in exactly one I/O operation
+and therefore raw I/O is considerably more efficient when
+many words are transmitted.  The names of the raw files
+conventionally begin with an extra `r.'
+.PP
+In raw I/O counts should be a multiple of 512 bytes (a disk sector).
+Likewise
+.I seek
+calls should specify a multiple of 512 bytes.
+.PP
+The minor device bits for the floppy device support several different
+sizes and configurations:  single sided versus double sided; single
+density versus double density; 256 byte sectors versus 512 byte sectors.
+Each configuration can be combined, thus it is possible to use 256 byte
+single sided double density floppys (it may not be tested though).
+.SH FILES
+/dev/mf0a	block device
+.br
+/dev/rmf0a	raw device
+.SH SEE ALSO
+autoconf(7),
+qic(7),
+dsd(7)
+.SH DIAGNOSTICS
+\f3mf%d: Write Protected\f1.  The floppy in the floppy drive is write
+protected.
+.PP
+\f3mf%d: Is Diskette Formatted?\f1.  The controller is seriously confused
+by the floppy in the drive. Try using a formatted floppy.
+.PP
+\f3%s on mf%d, slice %d\f1.  Usually proceeded by ``out of space'' when
+unix runs out of space on the drive.
+.PP
+\f3mf%d%c: %s err(%s) at %d/%d/%d retry:%d %d/%d/%d req%d atc%d\f1.
+A hard error of some sort occured.
+.PP
+\f3mf%d%c: cmd(%s), err(%s), physical block %d %d/%d/%d req%d atc%d\f1.
+A hard error of some sort occured.

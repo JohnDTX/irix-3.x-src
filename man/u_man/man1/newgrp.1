@@ -1,0 +1,62 @@
+'\"macro stdmacro
+.TH NEWGRP 1
+.SH NAME
+newgrp \- log in to a new group
+.SH SYNOPSIS
+.B newgrp
+.RB [ \|\-\| ]
+[ group ]
+.SH DESCRIPTION
+.I newgrp\^
+changes the group identification of its caller,
+analogously to
+.IR login\^ (1).
+The same person remains logged in,
+and the current directory is unchanged,
+but calculations of access permissions to files are
+performed with respect to the
+new group
+.SM ID\*S.
+.PP
+.I newgrp\^
+without an argument changes the group identification to
+the group in the password file; in effect it changes the group
+identification back to the caller's original group.
+.PP
+An initial
+.B \-
+flag causes the environment to be changed to the one that
+would be expected if the user actually logged in again.
+.PP
+A password is demanded if the group has
+a password 
+or if the group has a password and the user is not listed
+in
+.B /etc/group
+as being
+a member of that group.
+.PP
+When most users log in, they
+are members of the group named
+.BR user .
+.SH EXAMPLE
+.IP
+newgrp grpnam
+.PP
+would set the user's group 
+.SM ID
+to that of the group named ``grpnam''.
+.SH FILES
+/etc/group
+.br
+/etc/passwd
+.SH SEE ALSO
+login(1),
+group(4).
+.SH BUGS
+There is no convenient way to enter a password into
+.BR /etc/group .
+Use of group passwords is not encouraged, because,
+by their very nature, they encourage poor security practices.
+Group passwords may disappear in the future.
+.\"	@(#)newgrp.1	5.1 of 11/9/83

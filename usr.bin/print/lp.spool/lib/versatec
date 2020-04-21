@@ -1,0 +1,52 @@
+#
+# lp interface for versatec printer
+#
+
+errfile=/usr/spool/lp/log
+user=`grep "^$2:" /etc/passwd | line | cut -d: -f5`
+#echo "Request id: $1    Printer: `basename $0`\n"
+#if [ -n "$3" ]
+#then
+#	banner $3
+#fi
+copies=$4
+
+for i in $5
+do
+    case $i in
+	-r)	remove="t"
+		;;
+	*)	break
+    esac
+done
+
+shift; shift; shift; shift; shift
+files="$*"
+i=1
+while [ $i -le $copies ]
+do
+    for file in $files
+    do
+	if [ ! -r $file ] ; then
+	    echo "file not found: $file" >> $errfile
+	    exit 2
+	fi
+    done
+
+    set `dd bs=1 count=2 < $file 2> /dev/null | od -h`
+    if [ $2 = "6765" ] ; then
+	for file in $files
+	do
+	    /usr/local/cad/prod/bin/vdump 1024 "$user" `hostname` "$file" < $file 2>> $errfile
+	done
+    elif [ $2 = "01da" -o $2 = "da01" ] ; then
+	/usr/people/paul/vprint $5 $files 2>> $errfile
+    else 
+	echo "bad magic number in $file" >> $errfile
+	exit 1
+    fi
+    i=`expr $i + 1`
+done
+
+[ $remove ] && rm -f $files 2>> $errfile
+exit 0

@@ -1,0 +1,44 @@
+#! /bin/sh
+# sh/psroff.bsd
+# Copyright (c) 1985 Adobe Systems Incorporated
+# PostScript is a trademark of Adobe Systems Incorporated
+# RCSID: $Header: /d2/3.7/src/usr.bin/print/trscript/sh/RCS/psroff.bsd,v 1.1 89/03/27 18:20:25 root Exp $
+#
+# run ditroff in an environment to print on a PostScript printer
+#
+# pstroff - ditroff | psdit [| lpr]
+#
+
+ditroff=ditroff
+psdit=psdit
+nospool= dopt= fil= spool= dit=
+printer=-P${PRINTER-PostScript}
+while test $# != 0
+do	case "$1" in
+	-t)	nospool=1 ;;
+	-Tpsc)	;;
+	-T*)	echo only -Tpsc is valid 1>&2 ; exit 2 ;;
+	-#*|-h|-m)	spool="$spool $1" ;;
+	-P*)	printer=$1 ;;
+	-C)	spool="$spool $1 $2" ; shift ;;
+	-J)	spool="$spool $1 $2" ; jobname=$2 ; shift ;;
+	-)	fil="$fil $1" ;;
+	-*)	dopt="$dopt $1" ;;
+	*)	fil="$fil $1" ; jobname=${jobname-$1} ;;
+	esac
+	shift
+done
+if test "$jobname" = "" ; then
+	spool="-J Ditroff"
+fi
+spool="lpr $printer $spool"
+if test "$fil" = "" ; then
+	fil="-"
+fi
+dit="$ditroff -Tpsc -t $dopt $fil "
+
+if test "$nospool" = "1" ; then
+	$dit | $psdit
+else
+	$dit | $psdit | $spool
+fi

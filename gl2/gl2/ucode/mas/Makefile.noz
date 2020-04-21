@@ -1,0 +1,46 @@
+#
+# Makefile for GF2 microassembler -- UC4 hardware
+#
+
+CC       = cc -DNOZPOLY -DNOZSCAN
+INCLUDE  = ../include
+HDWR	 = ../../include
+INCLUDES = ../include/mas.h \
+	   ../include/fbcparams.h \
+	   ../include/fbc.h \
+	   ../include/fbc.mic.h \
+	   ../include/libh.h
+
+UDEFINES   = -DUNIX
+VDEFINES   = -DVAX
+
+CFLAGS   = -DUC4 -I$(INCLUDE) -I$(HDWR)
+
+SRCS     = main.c mas.c endstate.c fbc.c \
+	defines.c symbols.c libh.c version.c
+
+OBJS   = main.o libh.o fbc.o endstate.o defines.o symbols.o version.o
+WSOBJS = $(OBJS) masws.o
+VAXOBJS= $(OBJS) masvax.o
+
+ws:	$(WSOBJS) $(INCLUDES)
+
+vax:	$(VAXOBJS) $(INCLUDES)
+
+masws.o: mas.c $(INCLUDES)
+	$(CC) $(CFLAGS) $(UDEFINES) -c mas.c
+	mv mas.o masws.o
+
+
+masvax.o: mas.c $(INCLUDES)
+	$(CC) $(CFLAGS) $(VDEFINES) -c mas.c
+	mv mas.o masvax.o
+
+.c.o: 
+	$(CC) $(CFLAGS) -c $< 
+
+# remove files that can be re-created
+
+clean :
+	rm -f *.out *.CKP *.BAK .emacs* *.o $(UC3OBJS) $(UC4OBJS)
+

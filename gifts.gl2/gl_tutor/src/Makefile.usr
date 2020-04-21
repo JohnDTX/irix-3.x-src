@@ -1,0 +1,23 @@
+all:	install
+
+install: 
+	cd lib; make install
+	cd online; make install
+	cd workshop; make install
+
+sales:
+	cd lib; make install
+	cd online; make install
+
+clean:
+	rm -f .[BC]* .em* *.o $(ALL) core
+	cd lib; make clean
+	cd online; make clean
+	-cd workshop; make clean
+
+neat:
+	rm -f .[BC]* .em* *.o core
+	cd lib; make neat
+	cd online; make neat
+	-cd workshop; make neat
+

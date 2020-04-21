@@ -1,0 +1,7 @@
+#! /bin/sh
+
+for f in fluff.* list.*
+do
+	echo --- $f
+	comm -12 $f list.$1
+done

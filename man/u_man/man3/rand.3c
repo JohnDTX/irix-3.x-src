@@ -1,0 +1,31 @@
+'\"macro stdmacro
+.TH RAND 3C 
+.SH NAME
+rand, srand \- simple random-number generator
+.SH SYNOPSIS
+.B int rand ( )
+.PP
+.B void srand (seed)
+.br
+.B unsigned seed;
+.SH DESCRIPTION
+.I Rand\^
+uses a multiplicative congruential
+random-number generator
+with period 2\u\s-232\s0\d
+that returns successive pseudo-random
+numbers in the range from 0 to 2\u\s-215\s0\d\-1.
+.PP
+.I Srand\^
+can be called at any time to reset the random-number generator
+to a random starting point.
+The generator is initially seeded with a value of 1.
+.SH NOTE
+The spectral properties of
+.I rand\^
+leave a great deal to be desired.
+.IR drand48\^ (3C)
+provides a much better, though more elaborate, random-number generator.
+.SH SEE ALSO
+drand48(3C).
+.\"	@(#)rand.3c	5.1 of 10/25/83

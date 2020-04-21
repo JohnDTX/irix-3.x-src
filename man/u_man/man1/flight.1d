@@ -1,0 +1,305 @@
+'\"macro stdmacro
+.TH FLIGHT 1D
+.SH NAME
+flight \- simulate the flight of any of several aircraft
+.SH SYNOPSIS
+.nh
+.na
+.B /usr/people/demos/flight
+.in
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+One large viewport shows the world; several smaller ones simulate
+instruments.
+The world is shown from the cockpit of an aircraft or from a control tower.
+The mouse and keyboard control the aircraft and its environment.
+.SH Starting Up
+.I flight
+provides two pages of help information.
+The first help page briefly describes the program.
+To freeze the action at any time and display the first page, type
+.IR h .
+Read the first page and press any key to continue.
+The second page offers descriptions of five aircraft: one two-place trainer
+(Cessna 150), one heavy transport (Boeing 747), and three fighters.
+.PP
+Type
+.I 1
+to select the Cessna 150.
+The view you see is from the cockpit of the Cessna.
+Type 
+.I d
+to see the Cessna from the control tower.
+Type 
+.I x
+a few times for a closer view.
+Type 
+.I d
+to return to the cockpit and strike
+.I s
+three or four times to advance the throttle.
+The aircraft will start to taxi towards the runway.
+Type
+.I F
+twice to raise the flaps \(em Cessnas normally take off that way.
+When the plane is almost on the runway, tap the right mouse button five or
+six times to apply right rudder.
+The plane will start to turn right.
+The left mouse button moves the rudder one increment to the left;
+the center one sets the rudder to zero.
+Move the mouse till the cursor is centered on the bottom edge of the
+windshield and tap 
+.I s
+until the thrust indicator shows all blue.
+When the airspeed indicator passes 50 knots, move the mouse smoothly toward
+you. The cursor should be in the upper center of the horizon indicator.
+When the rate-of-climb indicator shows blue, you are flying! Congratulations!
+.PP
+Now turn around and land.
+.SH Flight Controls
+.PP
+.I flight
+is controlled by the mouse, the mouse buttons, and the keyboard.  The mouse
+holds the primary flight controls.
+.PP
+.I rightmouse
+and
+.I leftmouse
+move the rudder one increment to the right and left, respectively.
+.I middlemouse
+centers it.
+The rudder position is shown by a small red triangle at the lower edge of
+the artificial horizon.
+The rudder is used primarily to maneuver the aircraft on the ground.
+Airborne turns are made, as in real aircraft, by coordinated application of
+aileron and elevator.
+.PP
+The mouse X and Y valuators control the ailerons and elevator, emulating a
+control stick.
+Left-right motion controls roll; forward-back motion controls pitch.
+The stick position is indicated by a square white cursor.
+Both controls are at their neutral position when the cursor is centered at the
+bottom of the windshield.
+Stick position for level flight is slightly below center.
+.PP
+The 
+.I s
+key increases the throttle setting; the
+.I a 
+key decreases it.
+The left bar indicator shows the throttle setting as a percentage of full
+power.
+Reverse thrust is available and shown in red.
+Thrust goes to zero when the plane climbs through 50,000 feet and the engine
+flames out.
+It can be restored by descending and applying throttle.
+Thrust also goes to zero when fuel goes to zero.
+Fuel can be restored only by making a safe landing.
+.PP
+Secondary flight controls include the landing gear, flaps, and spoilers.
+To raise or lower the landing gear, type
+.IR l .
+To increase or decrease the flaps, type
+.I f
+or
+.IR F .
+To increase or decrease the spoilers, type
+.I c
+or 
+.IR C .
+Flap and spoiler ranges are determined by the aircraft.
+The Cessna has no spoilers and its gear is down and welded.
+.PP
+The landing gear has two functions: to protect the fuselage from the ground
+and to add drag.
+You may lower the gear to slow the plane down and make handling
+easier.
+.PP
+Flaps and gear are structurally unsound at high speeds.
+They fall off if you exceed approximately 400 knots while they are deployed.
+Missing flaps make good landings difficult.
+Missing gear makes a good landing impossible.
+.PP
+Flaps increase lift, increase drag, and decrease stall speed.
+Takeoffs are normally made with partial flaps; landings are made 
+with full flaps.
+.PP
+Spoilers decrease lift and increase drag dramatically.
+They are most useful in dissipating excess altitude without increasing speed.
+While spoilers are deployed, it is difficult to recover from a stall.
+.SH Display Controls
+.PP
+Several controls allow the viewer to alter his view of the world.
+.PP
+The
+.I left\-arrow
+and 
+.I right\-arrow 
+keys rotate the pilot's point of view 90 degrees to the left or right
+respectively.
+The viewing angle (front, left, rear, or right) is displayed on the
+windshield.
+The keys are useful for looking around, but remember to set the view back to
+the front for any but the simplest flying.
+.PP
+The
+.I d
+key switches the viewpoint from the cockpit to the control tower or back.
+The control tower always looks toward the plane.
+The
+.I x
+key
+decreases the tower's field of view, effectively magnifying the aircraft.
+The
+.I z
+key
+increases the field of view.
+If there is doubt as to whether the view observed is from the cockpit or the
+tower, observe the center of the window: an orange cross marks the cockpit
+view.
+.PP
+The
+.I n
+key
+changes the time of day from daylight to night or back.
+There is an interesting city NNW of the airport.
+.bp
+.SH Instruments
+.PP
+This section describes the instruments on the panel from left to right.
+In the bar indicators, blue denotes a positive value and red a negative
+value.
+.PP
+The 
+.I thrust
+indicator shows thrust as a percentage of full throttle.
+Reverse thrust is possible only on the ground and is used for braking.
+.PP
+The
+.I airspeed
+indicator is calibrated from 0-1000 knots.
+(100 knots is about 118 miles per hour.)
+Negative airspeeds can happen during such acrobatic maneuvers as hammerhead
+stalls. Since wind is not simulated, airspeed \(== groundspeed.
+The numeric display at the bottom of the band displays the exact speed.
+.PP
+The 
+.I climb
+indicator shows rate of climb in feet per minute.
+Note that the fighters (in normal operation) and the civil planes (usually
+while crashing) can exceed the 10,000 fpm maximum rate displayed.
+The numeric display at the bottom of the band displays the exact climb rate.
+.PP
+The
+.I G\-meter
+indicates vertical acceleration.
+Each aircraft has maximum stress limits. If they are exceeded, the
+attitude indicator shows the message ``G-LIMIT.''
+.PP
+The 
+.I artificial horizon
+helps orient the plane when the real horizon is not visible.
+The triangular indicator at the bottom edge shows the rudder position.
+If the maximum angle of attack is exceeded, a ``WING-STALL'' message is
+displayed and a warning bell sounds.  The more severe the wing stall,
+the less control you have over your plane.  Very severe stalls may throw
+your plane into a violent spin.
+.PP
+The 
+.I heading
+meter displays a combination compass and radar screen.  The compass rotates
+and indicates your heading.  Your plane's location is always at the center
+of the radar screen. The radar screen shows the positions of the
+runway and planes that are within a few miles of your aircraft.
+The blue line indicates the position of the runway.  
+In
+.IR dog (1D)
+other planes are shown on the
+.I heading
+meter as red blobs if they are above you or green blobs if they are below you.
+.PP
+The 
+.I fuel
+gauge shows remaining fuel as a percentage of a full tank.
+To reduce fuel consumption to zero (for tests only) type
+.IR ~.
+This is considered cheating in normal flight.
+.SH Landings and Crashes
+.PP
+A good landing is a landing on the runway, with gear down, a descent rate of
+less than 600 fpm, and wings level.
+Good landings are rewarded with scores from 0 - 100 points.  Points are
+subtracted from a perfect score of 100 based on touchdown location, descent
+rate, roll, heading, and drift.
+For every point scored, fuel on board is increased by 1% of total capacity
+until your tank is full.  For every ten points scored you 
+receive a missile up to the plane's limit.
+.PP
+Landings with the gear up, descent rate, roll, or drift too high, but
+not disastrous, count as crash landings.
+You can keep flying, but get no more fuel nor ordnance.
+.PP
+Landings off the runway are ``crashed into the swamps'' landings.
+Landings with excessive descent rate, roll, or drift are ``EXPLODED ON
+IMPACT'' landings.  In either case,
+all you can do is look at the wreckage from the tower or restart the game.
+.SH Restarts
+.PP
+Your plane is destroyed if it crashes, taxis too far off the
+runway, raises the gear while on the ground, or is shot down.
+After your plane is destroyed,
+.IR r ,
+.IR R ,
+or
+.I u
+reincarnates your plane and restarts the game at the second help page.
+You then choose which type of plane you want to fly.
+.PP
+The
+.I r
+key
+restarts you at the original starting location.
+The
+.I R
+key
+restarts you at the south end of the runway.
+The
+.I u
+key
+reincarnates your aircraft at a random location in the sky
+with randomly low airspeed.
+Hit the throttle and dive to build up flying speed.
+These different restart options are included to make it easier to restart in
+intense
+.I dog
+combat.
+Without them, some pilots simply hang around the runway and blast new planes
+as they appear.
+.SH Weapons
+See
+.IR dog (1D)
+for a complete description of weaponry.
+.SH Weight
+.I flight
+models aircraft weight accurately.
+Ordnance and fuel have substantial weight. As you fire weapons
+and burn fuel, your plane becomes lighter and more maneuverable.
+.SH SEE ALSO
+dog(1D), radar(1D), shadow(1D)
+.SH AUTHOR
+.PP
+Gary Tarolli
+.SH NOTES
+.PP
+.I flight
+and its offspring are continually being improved.
+There is a significant creative spurt before each major trade show.
+Improvements may be documented in the program's help display before
+this document is updated.
+.PP
+The Cessna is too difficult to bring out of a stall.
+.SH HARDWARE CONFIGURATION
+12 bitplanes and 1.5 Megabytes of memory are required to run
+.I flight.

@@ -1,0 +1,286 @@
+#
+/*
+ * file_sub.c --
+ * unix file system package (currently used by disk boot).
+ *
+ *	void closef()
+ *	{
+ *		perform cleanup.
+ *	}
+ *
+ *	int openf(file)
+ *	     char *file;
+ *	{
+ *		set up to read file.
+ *		return 0 (success) or -1 (failure).
+ *	}
+ *
+ *	int readf(buf)
+ *	    char *buf;
+ *	{
+ *		read one block from the file to buf.
+ *		return the actual count.
+ *	}
+ */
+# include "pmII.h"
+
+# include "sys/types.h"
+# include "dklabel.h"
+
+# include "sys/inode.h"
+# include "sys/ino.h"
+# include "sys/dir.h"
+# include "safs.h"
+
+
+
+# undef DEBUG do_debug
+# include "dprintf.h"
+# define MIN(a,b)	((a)<(b)?(a):(b))
+
+# define PROMSTATIC
+
+
+
+
+daddr_t iblocknums[MAXINDIRECT+1];
+char *iblockp[MAXINDIRECT+1];
+struct fino *fs_inode;
+
+
+# define closei(x)	iput(x)
+# define openi(x)	(*fs_iget)(x)
+
+
+int
+openf(path)
+    char *path;
+{
+    extern struct fino *namei();
+
+    if( (fs_inode = namei(ROOTINO,path)) == 0 )
+	return -1;
+    return 0;
+}
+
+closef()
+{
+    if( fs_inode != 0 )
+	closei(fs_inode);
+    fs_inode = 0;
+}
+
+int
+readf(buf)
+    char *buf;
+{
+    return (*fs_readi)(fs_inode,buf);
+}
+
+iput(ip)
+    register struct fino *ip;
+{
+    ip->flag = -1;
+}
+
+PROMSTATIC
+	struct dio dio;
+struct fino *
+namei(curino,path)
+    register long curino;
+    char *path;
+{
+    register char *comp,*cp;
+    register struct fino *ip;
+    register int complen,ecomplen;
+    register struct gendir *gp;
+
+    comp = path;
+
+    if( *comp == '/' )
+    {
+	curino = ROOTINO;
+	while( *comp == '/' )
+	    comp++;
+    }
+
+    if( (ip = openi(curino)) == 0 )
+	return 0;
+
+    while( *comp != 000 )
+    {
+	/* break off next component */
+	cp = comp;
+	while( *cp != 000 && *cp != '/' )
+	    cp++;
+
+	complen = cp-comp;
+
+	/* get next pathname component */
+	if( dopen(ip,&dio) < 0 )
+	{
+	    iput(ip);
+	    return 0;
+	}
+
+	curino = 0;
+
+	/* search the directory */
+	while( (gp = (*fs_dread)(&dio)) != 0 )
+	if( gp->d_ino != 0 )
+	{
+	    ecomplen = MIN(gp->d_len,complen);
+
+	    /*
+	     * if the entry name is not null-terminated,
+	     * it is presumed to match anything beyond
+	     * its length.
+	     */
+	    if( strncmp(gp->d_name,comp,ecomplen) == 0
+	     && (ecomplen >= gp->d_len || gp->d_name[ecomplen] == 000) )
+	    {
+		curino = gp->d_ino;
+		break;
+	    }
+	}
+
+	dclose(&dio);
+
+	if( curino == 0 )
+	{
+	    printf("\"%s\" not found\n",path);
+	    return 0;
+	}
+
+	comp = cp;
+
+	while( *comp == '/' )
+	    comp++;
+
+	if( (ip = openi(curino)) == 0 )
+	    return 0;
+    }
+
+    return ip;
+}
+
+int
+dopen(ip,dp)
+    register struct fino *ip;
+    register struct dio *dp;
+{
+    extern char *gmalloc();
+
+    if( (ip->flag&IFMT) != IFDIR )
+    {
+dprintf((" dopen([0%o %d])",ip->flag,ip->size));
+	printf("Is not a directory\n");
+	return -1;
+    }
+
+    if( dp->dirbase == 0 )
+    if( (dp->dirbase = gmalloc(FsBlockSize)) == 0 )
+	return -1;
+
+    dp->dirfile = ip;
+    ip->off = 0;
+    dp->dircnt = 0;
+    return 0;
+}
+
+dclose(dp)
+    register struct dio *dp;
+{
+    iput(dp->dirfile);
+    dp->dircnt = 0;
+}
+
+
+/*
+ * getblk() --
+ * try to keep indirect blocks around.
+ */
+char *
+getblk(n,level)
+    daddr_t n;
+    register int level;
+{
+    extern char *gmalloc();
+
+    register char *bp;
+
+    if( (bp = iblockp[level]) == 0 )
+    {
+	bp = iblockp[level] = gmalloc(FsBlockSize);
+	if( bp == 0 )
+	    return 0;
+    }
+
+    if( iblocknums[level] == n )
+	return bp;
+
+    if( n == 0 )
+    {
+	bzero(bp,FsBlockSize);
+	return bp;
+    }
+
+    (*fs_bread)(FsbToDb(n),bp,FsBlockSize);
+    iblocknums[level] = n;
+    return bp;
+}
+
+flushblk()
+{
+    register int level;
+
+    for( level = MAXINDIRECT+1; --level >= 0; )
+	iblocknums[level] = -1;
+}
+
+
+# define FILESPERLINE	4
+fs_list()
+{
+    register struct gendir *gp;
+    register int i;
+
+    if( dopen(fs_inode,&dio) < 0 )
+	return;
+
+    i = 0;
+
+    while( (gp = (*fs_dread)(&dio)) != 0 )
+    if( gp->d_ino != 0 )
+    if( gp->d_name[0] != '.' )
+    {
+	char x[DIRSIZ+1];
+
+	strncpy(x,gp->d_name,DIRSIZ);
+	x[DIRSIZ] = 000;
+	printf("%-18s",x);
+
+	i++;
+	if( i >= FILESPERLINE )
+	{
+	    i = 0;
+	    newline();
+	}
+    }
+
+    if( i != 0 )
+	newline();
+
+    dclose(&dio);
+}
+
+kprint(n)
+    unsigned n;
+{
+    n /= 1024;
+
+    if( n <= 0 )
+	printf("half-K");
+    else
+	printf("%dK",n);
+}

@@ -1,0 +1,19 @@
+.TH clkon 3 "R1c" "Silicon Graphics"
+.SH NAME
+\f2clkon\fP - turn on the keyboard click
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "clkon()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine clkon"
+.sp
+.SH DESCRIPTION
+\f2Clkon\fP turns on the keyboard click.
+.SH "SEE ALSO"
+.I clkoff, lampoff, lampon, ringbell, setbell
+.SH NOTE
+This command can only be used in immediate mode.

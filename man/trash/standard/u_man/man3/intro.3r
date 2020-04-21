@@ -1,0 +1,31 @@
+.TH INTRO 3R
+.SH NAME
+intro \- introduction to RPC service library functions
+.SH DESCRIPTION
+These functions constitute the RPC service library,
+.IR librpcsvc .
+In order to get the link editor to load this library,
+use the
+.B \-lrpcsvc
+option of
+.IR cc .
+Declarations for these functions may be obtained from
+various include files
+.RI < rpcsvc/*.h >.
+.SH "LIST OF FUNCTIONS"
+.ta \w'getrpcport\0\0'u +\w'yppasswd(3r)\0\0'u
+.nf
+\fIroutine	on page 	description\fP
+.sp .1
+ether   	ether(3R)	monitor traffic on the Ethernet
+getrpcport 	getrpcport(3R)	get RPC port number
+havedisk	rstat(3R)	determine if remote machine has disk
+mount   	mount(3R)	keep track of remotely mounted filesystems
+rnusers 	rnusers(3R)	return number of users on remote machine
+rquota  	rquota(3R)	implement quotas on remote machines
+rstat   	rstat(3R)	get performance data from remote kernel
+rusers  	rnusers(3R)	return information about users on remote machine
+rwall   	rwall(3R)	write to specified remote machines
+spray   	spray(3R)	scatter data in order to check the network
+yppasswd	yppasswd(3R)	update user password in yellow pages
+.fi

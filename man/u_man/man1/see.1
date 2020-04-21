@@ -1,0 +1,38 @@
+'\"macro stdmacro
+.TH SEE 1
+.SH NAME
+see \- see what a file has in it
+.SH SYNOPSIS
+.B see
+[
+.B \- 
+] [ name ... ]
+.SH DESCRIPTION
+.I See\^
+prints a file which contains non-printing characters in a readable format.
+Control characters print like ^I for tab.
+Delete prints as ^?.
+Ends of lines are marked with $ unless the \- option is given.
+.SH EXAMPLE
+.PP
+If "myfile" contains:
+.RS .3i
+She sells C shells
+.br
+	by the sea shore.
+.RE
+.PP
+then
+.IP
+see myfile
+.PP
+displays:
+.IP
+She sells sea^?^?^?C shells$
+.br
+^Iby the sea shore.$
+.SH "SEE ALSO"
+cat(1), ex(1).
+.SH AUTHOR
+Bill Joy
+.\"	@(#)see.1	5.1 of 11/16/83

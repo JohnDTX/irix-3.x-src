@@ -1,0 +1,143 @@
+#
+# Makefile for system V running on pmII
+#
+# This makefile is constructed from a machine description:
+#	config machine
+# Most changes should be made in the machine description
+#	/sys/conf/``machineid''
+# after which you should do
+#	 config machineid
+# Generic makefile changes should be made in
+#	/sys/conf/makefile
+# after which config should be rerun for all machines.
+#
+
+include ${ROOT}/usr/include/make/${PRODUCT}defs
+
+LD=	ld
+AS=	as -i
+
+MOPTS=	-ZI -DPM2
+COPTS=	${MOPTS} -ZN ${IDENT} -DKERNEL -DUNIX -DSVR0 -I. -I${ROOT}/usr/include 
+CFLAGS=	-OS ${COPTS}
+CCF=	${CC} ${CFLAGS}
+
+%LIBS
+
+%SYSOBJS
+
+%SYSFILES
+
+%DEVOBJS
+
+%DEVFILES
+
+%OEMOBJS
+
+%OEMFILES
+
+GENCFILES=ioconf.c param.c conf.c level.c 
+GENFILES=locore.c ${GENCFILES}
+GENOBJS=locore.o ${GENCFILES:.c=.o}
+CFILES=	${SYSFILES} ${DEVFILES} ${OEMFILES}
+OBJS=	${SYSOBJS} ${DEVOBJS} ${OEMOBJS}
+LIBOUT=../kernels/${TYPE}${CLASS}.a
+
+%LOAD
+
+${TARGETS}:makefile machine ${OBJS} ${GENOBJS} ${LIBS}
+	RELEASE=${RELEASE} TYPE=${TYPE} CLASS=${CLASS} SYS=${SYS} \
+		../conf/newvers.sh
+	cc -c vers.c
+	${LD} -R ${ROOT}/ -X -o $@ -e start -T C00400 \
+		${GENOBJS} ${OBJS} vers.o ${LIBS} -lc
+	@size $@
+
+vmunix.a:	makefile machine ${SYSOBJS} ${DEVOBJS} anything
+	rm -f vmunix.a ${LIBOUT}
+	ar cr vmunix.a ${SYSOBJS} ${DEVOBJS}
+	strip vmunix.a
+	ranlib vmunix.a
+	ln vmunix.a ${LIBOUT}
+
+binary: makefile machine ${OEMOBJS} ${GENOBJS} ${LIBOUT} anything
+	RELEASE=${RELEASE} TYPE=${TYPE} CLASS=${CLASS} SYS=${SYS} \
+		../conf/newvers.sh
+	cc -c vers.c
+	${LD} -R ${ROOT}/ -X -o vmunix -e start -T C00400 \
+		${GENOBJS} ${OEMOBJS} vers.o ${LIBOUT} ${LIBS} -lc
+	@size vmunix
+
+machine:
+	rm -rf machine incdepend
+	ln -s ../pmII machine 
+
+anything:
+
+clean:
+	rm -f *unix tags *.[oi] errs fluff make.out assym.s incdepend
+
+depend: machine ${CFILES} ${GENFILES} anything
+	../conf/c-depend.sh "${CC} ${COPTS}" \
+		makefile makefile.bak ${CFILES} ${GENFILES}
+	echo "marker file for increment make-depend" > incdepend
+
+incdepend:${CFILES}
+	../conf/c-depend.sh -i "${CC} ${COPTS}" \
+		makefile makefile.bak $?
+	echo "marker file for increment make-depend" > incdepend
+
+fluff:	machine ${GENCFILES} anything
+	lint -n -Dlint -DGENERIC ${COPTS} \
+		machine/Locore.c ${GENCFILES} ${CFILES} > fluff
+
+tags:	${GENCFILES} machine
+	ctags ${CFILES} ${GENCFILES}
+
+print:	${GENFILES}
+	@pr -f makefile ../sys/TODO fluff
+	@/usr/ucb/ctags -x ${CFILES} ${GENCFILES} | pr -f -h XREF
+	@(size vmunix *.o) | pr -f -h sizes
+	@ls -ls | pr -f
+	@cd ../h; ls -ls | pr -f ; pr -f *.m *.h
+	@pr -f ../machine/Locore.c ${CFILES} ${GENFILES}
+
+conf.c: machine machine/conf.c
+	rm -f conf.c; cp machine/conf.c .
+
+conf.o: makefile conf.c
+	${CCF} -c conf.c
+
+ioconf.o: ioconf.c
+	${CCF} -c ioconf.c
+
+level.c: ../multibus/level.c
+	rm -f level.c; cp ../multibus/level.c .
+
+level.o: makefile level.c
+	${CCF} -c level.c
+
+param.c: machine machine/param.c
+	rm -f param.c; cp machine/param.c .
+
+param.o: param.c makefile
+	${CCF} -c ${PARAM} param.c
+
+locore.c: assym.s machine machine/locore.c
+	rm -f locore.c; cat assym.s machine/locore.c > locore.c
+
+locore.o: locore.c makefile
+	${CC} -E -DLOCORE ${COPTS} locore.c | egrep -v "^#" | ${AS} -o locore.o
+
+# depend on maxusers
+assym.s: makefile
+
+assym.s: machine machine/pte.h ../h/param.h ../vm/vm.h ../h/dir.h \
+		../h/user.h machine/cx.h machine/reg.h machine/cpureg.h \
+		machine/frame.h machine/genassym.c
+	${CC} ${COPTS} ${PARAM} machine/genassym.c
+	./a.out >assym.s; rm -f a.out
+
+%RULES
+
+%DEPEND

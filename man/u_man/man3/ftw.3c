@@ -1,0 +1,119 @@
+'\"macro stdmacro
+.TH FTW 3C
+.SH NAME
+ftw \- walk a file tree
+.SH SYNOPSIS
+.B #include <ftw.h>
+.PP
+.B int ftw (path, fn, depth)
+.br
+.B char *path;
+.br
+.B int (*fn) ( );
+.br
+.B int depth;
+.SH DESCRIPTION
+.I Ftw\^
+recursively descends the directory hierarchy
+rooted in
+.IR path .
+For each object in the hierarchy,
+.I ftw\^
+calls
+.IR fn ,
+passing it a pointer to a null-terminated
+character string containing the name of the object,
+a pointer to a
+.B stat
+structure (see
+.IR stat\^ (2))
+containing information about the object, and an integer.
+Possible values of the integer, defined in the <ftw.h> header file,
+are \s-1FTW_F\s+1 for a file, \s-1FTW_D\s+1 for a directory, \s-1FTW_DNR\s+1 for
+a directory that cannot be read, and \s-1FTW_NS\s+1 for an object
+for which
+.I stat\^
+could not successfully be executed.
+If the integer is \s-1FTW_DNR\s+1,
+descendants of that directory will not be processed.
+If the integer is \s-1FTW_NS\s+1, the
+.B stat
+structure will contain garbage.
+An example of an object that would cause
+\s-1FTW_NS\s+1 to be passed to
+.I fn\^
+would be a file in a directory
+with read but without execute (search) permission.
+.PP
+.I Ftw\^
+visits a directory before visiting any of its descendants.
+.PP
+The tree traversal continues until the tree is exhausted,
+an invocation of
+.I fn\^
+returns a nonzero value,
+or some error is detected within
+.I ftw\^
+(such as an I/O error).
+If the tree is exhausted,
+.I ftw\^
+returns zero.
+If
+.I fn\^
+returns a nonzero value,
+.I ftw\^
+stops its tree traversal and returns whatever
+value was returned by
+.IR fn .
+If
+.I ftw\^
+detects an error, it returns
+\-1, and sets the error type in
+.IR errno .
+.PP
+.I Ftw\^
+uses one file descriptor for each level in the tree.
+The
+.I depth\^
+argument limits the number of file descriptors so used.
+If
+.I depth\^
+is zero or negative, the effect is the same as if it were 1.
+.I Depth\^
+must not be greater than the number of file descriptors currently
+available for use.
+.I Ftw\^
+will run more quickly if
+.I depth\^
+is at least as large as the number of levels in the tree.
+.SH SEE ALSO
+stat(2), malloc(3C).
+.SH BUGS
+Because
+.I ftw\^
+is recursive, it is possible for it to terminate with a memory
+fault when applied to very deep file structures.
+.br
+It could be made to run faster and use less storage on deep
+structures at the cost of considerable complexity.
+.br
+.I Ftw\^
+uses
+.IR malloc\^ (3C)
+to allocate dynamic storage during its operation.
+If
+.I ftw\^
+is forcibly terminated, such as by
+.I longjmp\^
+being executed by
+.I fn\^
+or an interrupt routine,
+.I ftw\^
+will not have a chance to free that storage,
+so it will remain permanently allocated.
+A safe way to handle interrupts is to store
+the fact that an interrupt has occurred,
+and arrange to have
+.I fn\^
+return a nonzero value at its next invocation.
+.\"	@(#)ftw.3c	5.1 of 10/25/83

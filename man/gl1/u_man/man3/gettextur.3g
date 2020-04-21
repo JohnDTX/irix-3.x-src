@@ -1,0 +1,26 @@
+.TH gettexture 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gettexture
+- return the index of the currently selected texture
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "short gettexture()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*2 function gettex()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function gettexture: Short;"
+.sp
+.SH DESCRIPTION
+.I Gettexture
+returns the index of the texture currently in use from the table of 
+available textures.
+.SH "SEE ALSO"
+.I deftexture, settexture
+.SH NOTE
+This command can only be used in immediate mode.

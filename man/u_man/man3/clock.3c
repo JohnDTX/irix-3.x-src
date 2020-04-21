@@ -1,0 +1,27 @@
+'\"macro stdmacro
+.TH CLOCK 3C 
+.SH NAME
+clock \- report CPU time used
+.SH SYNOPSIS
+.B long clock ( )
+.SH DESCRIPTION
+.I Clock\^
+returns the amount of CPU time (in microseconds) used since the
+first call to
+.IR clock .
+The time reported is the sum of the user and system times of the
+calling process and its terminated child processes for which it has executed
+.IR wait (2)
+or
+.IR system (3S).
+.SH SEE ALSO
+times(2), wait(2), system(3S).
+.SH BUGS
+The value returned by
+.I clock\^
+is defined in microseconds for compatibility with systems that have
+CPU clocks with much higher resolution.
+Because of this, the value returned
+will wrap around after accumulating
+only 2147 seconds of CPU time (about 36 minutes).
+.\"	@(#)clock.3c	5.1 of 11/16/83

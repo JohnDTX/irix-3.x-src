@@ -1,0 +1,66 @@
+'\" t
+'\"macro stdmacro
+.TH TZ 4
+.SH NAME
+TZ \- local time zone
+.SH SYNOPSIS
+.B /etc/TZ
+.SH DESCRIPTION
+The file
+.B /etc/TZ
+contains the current time zone specification for use by the
+.IR ctime (3C)
+routines in programs such as
+.IR date (1) ,
+.IR ls (1) ,
+.IR mail (1) ,
+and
+.IR uucp (1C).
+The file
+.B /etc/TZ
+is an \s-1ASCII\s+1 file which is read by
+.I login
+and
+.I rc
+in order to set the environment variable \f3TZ\f1.
+.P
+There are three fields in this file.
+There is no character separating these fields and there should be
+a newline after the last field.
+.sp
+.in +12m
+.ti -4m
+1.\ \ Three letter abbreviation for standard time zone.
+.ti -4m
+2.\ \ Offset from Greenwich Mean Time, in hours.
+.ti -4m
+3.\ \ Optional three letter abbreviation for Daylight Savings Time.
+.in -12m
+.sp
+If you do not want U.S. Daylight Savings Time changes to be handled
+automatically then omit the third field.
+The following table illustrates the correct data for the four
+major U.S. time zones.
+.sp
+.TS
+doublebox center.;
+cB s
+lI | lI
+l | l.
+U.S. Time Zones
+_
+Time zone	TZ
+=
+Eastern time	EST5EDT
+Central time	CST6CDT
+Mountain time	MST7MDT
+Pacific time	PST8PDT
+.TE
+.sp
+.P
+This variable is used by the time conversion routines documented in
+.IR ctime (3C).
+.SH FILES
+/etc/TZ
+.SH "SEE ALSO"
+login(1), brc(1M), ctime(3C).

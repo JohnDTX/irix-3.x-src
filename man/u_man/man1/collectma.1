@@ -1,0 +1,110 @@
+'\"macro stdmacro
+.TH COLLECTMAIL 1
+.SH NAME
+collectmail \- convert mail from unix to rmail format
+.SH SYNOPSIS
+.PP
+.B
+collectmail [
+.I
+message-directory
+] [
+.I
+mailbox ...
+]
+.SH DESCRIPTION
+.PP
+This program was developed for use by the 
+Emacs 
+command 
+.B
+rmail 
+to convert a mail folder (or folders) in Unix format (a file containing 
+many messages) to a 
+.I
+"snapshot" 
+folder in 
+.B
+Rmail 
+format (a directory containing separate message files).
+Two familiar examples of a Unix folder
+are the files 
+.I
+~/mbox 
+and your mail spool file that is read with the 
+.I
+ \f2mail\f1(1)
+command.
+.PP
+.B
+Collectmail
+reads a list of mailboxes (by default, your mail spool file),
+splits the mail found in each one into separate files, and places them
+in the
+.I
+message-directory 
+(default: ~/Messages/Folder-XXXXXXXX, where XXXXXXXX is a unique 
+hexadecimal number).  It creates a file called 
+.I
+"Directory" 
+which is also placed in the 
+.I
+message-directory .
+The first line of this file is the name of the 
+.I
+mailbox 
+from which the 
+.I
+message-directory 
+was created (in the case of a list of mailboxes, it 
+is the first one on the list).   
+.I
+"Directory" 
+is a listing of information about each message in the form:
+.IP
+	<flags> <message-filename> <sender> <subject>
+.IP
+The first column contains some flags: '>' indicates the current message,
+\&'B' indicates that the message is a blindcopy (ie. A copy of a
+message that you sent to someone else), 'A' indicates that you've
+answered the message, 'N' indicates that the message is new and
+unread,  and 'n' indicates that the message is new and read.
+.IP
+The second column contains a filename that is the internal name of
+that message.
+.IP
+The third column contains the sender of the message, unless it is a
+blindcopy, in which case it contains the destination (indicated by
+"=>").
+.IP
+The fourth column contains the subject of the message.
+.PP
+After the contents of 
+.I
+mailbox 
+have been placed in the 
+.I
+message-directory , 
+the mailbox file is truncated.
+.PP
+For information on the 
+Emacs
+database facility, see the following documents:
+.PP
+.RS 5
+.I
+Emacs Reference Manual
+.br
+.SH FILES
+.IP "~/mbox"
+.IP "~/Messages/<foldername>/Directory"
+.SH SEE ALSO
+.PP
+.IP "mergemail(1)" 17
+merges an 
+Emacs 
+mail folder with an Unix mail folder.
+.SH BUGS
+.IP
+For now, it does no locking on the mail box, unless you have the
+exclusive-access mod to the Unix kernel.

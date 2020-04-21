@@ -1,0 +1,3 @@
+.xx "intro" "introduction to system maintenance procedures"
+.xx "boot" "startup procedures"
+.xx "crash" "what to do when the system crashes"

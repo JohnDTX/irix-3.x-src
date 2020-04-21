@@ -1,0 +1,58 @@
+'\"macro stdmacro
+.TH DIR 4 
+.SH NAME
+dir \- format of directories
+.SH SYNOPSIS
+.B #include <sys/types.h>
+.br
+.B #include <sys/dir.h>
+.SH DESCRIPTION
+A directory
+behaves exactly like an ordinary file, save that no
+user may write into a directory.
+The fact that a file is a directory is indicated by
+a bit in the flag word of its i-node entry
+(see
+.IR fs (4)).
+The structure of a directory entry as defined in
+.I <sys/dir.h>
+is:
+.PP
+.RS .3i
+.if t .ta .5i 1.15i
+.if n .ta 8n +6n +6n
+.ta \w'#define\ \ 'u +\w'\s-1DIRSIZ\s+1\ \ \ 'u
+.nf
+#ifndef	\s-1DIRSIZ\s+1
+#define	\s-1DIRSIZ\s+1	14
+#endif
+.PP
+struct	direct {
+	ino_t	d_ino;
+	char	d_name[\s-1DIRSIZ\s+1];
+};
+.fi
+.RE
+.DT
+.PP
+By convention, the first two entries in each directory
+are for `.' and `.\|.'\|.  The first is an entry for the
+directory itself.  The second is for the parent
+directory.
+The meaning of `.\|.' is modified for the root directory
+of the master file system;
+there is no parent, so `.\|.' has the
+same meaning as `.'\|.
+.SH "SEE ALSO"
+getdents(2), dirent(4), fs(4).
+.SH NOTE
+This page describes only the structure of an EFS or Bell filesystem directory
+entry; other filesystem types exist.
+Therefore, programs should not read directories directly with
+.IR read (2), 
+but use
+the filesystem independent interface described in 
+.IR getdents (2)
+and
+.IR directory (3C).
+.\"	@(#)dir.4	5.1 of 10/15/83

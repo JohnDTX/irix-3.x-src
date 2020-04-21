@@ -1,0 +1,617 @@
+'\"macro stdmacro
+.ds dB \f2dbx\f1
+.ds DB \f2Dbx\f1
+.TH DBX 1 
+.UC 4
+.SH NAME
+dbx \- debugger
+.SH SYNOPSIS
+.B dbx
+[\ 
+.B \-r
+\ ] [\ 
+.B \-i
+\ ] [\ 
+.BR \-I\0 dir
+\ ] [\  
+.BR \-c\0 file
+\ ] [\ objfile\ ]
+.SH DESCRIPTION
+\*(dB is a tool for source level debugging and execution of
+programs under U\s-2NIX\s+2.
+\f2objfile\f1 is an object file produced by a compiler
+with the appropriate flag (usually \f3\-g\f1)
+specified to produce symbol information in the object file.
+Currently, both \f2cc\f1(1) and \f2f77\f1(1)
+produce the appropriate source information.
+The machine level facilities of \*(dB
+can be used on any program.
+.PP
+The object file contains a symbol table that includes the name of 
+all the source files translated by the compiler to create it.
+These source files are available for perusal while using the debugger.
+.PP
+If the file \f2.dbxinit\f1 exists in the current directory, then the
+debugger commands in it are executed.
+If a \f2.dbxinit\f1 is not in the current directory,
+\*(dB checks for it in the user's home directory.
+.PP
+The command line options and their meanings are:
+.nr In 8
+.in +\n(Inn
+.ta \n(Inn
+.sp 1
+.ti -\n(Inn
+\&\f3\-r\f1	\c
+Execute \f2objfile\f1 immediately.
+If it terminates successfully, \*(dB exits.
+Otherwise, the reason for termination will be reported
+and the user offered the option of entering the debugger
+or letting the program fault.
+When \f3\-r\f1 is specified
+and standard input is not a terminal, \f2\*(DB\f1 will read from \f2/dev/tty\f1.
+.sp 1
+.ti -\n(Inn
+\&\f3\-i\f1	\c
+Force \*(dB to act as though standard input is a terminal.
+.sp 1
+.ti -\n(Inn
+\&\f3\-I\f1 \f2dir\f1	\c
+Add \f2dir\f1 to the list of directories
+that are searched when looking for a source file.
+Normally \*(dB looks for source files in the current directory
+and in the directory where \f2objfile\f1 is located.
+The directory search path can also be set with the \f3use\f1 command.
+.sp 1
+.ti -\n(Inn
+\&\f3\-c\f1 \f2file\f1	\c
+Execute the \*(dB commands in the \f2file\f1 before
+reading from standard input.
+.in -\n(Inn
+.sp 1
+.PP
+Unless \f3\-r\f1 is specified, \*(dB just prompts and waits for a command.
+.sp 1
+.ne 8
+.B "Execution and Tracing Commands"
+.sp 1
+.TP
+\f3run\f1 [\f2args\f1] [\f3<\f1 \f2filename\f1] [\f3>\f1 \f2filename\f1]
+.ns
+.TP
+\f3rerun\f1 [\f2args\f1] [\f3<\f1 \f2filename\f1] [\f3>\f1 \f2filename\f1]
+Start executing \f2objfile\f1, passing \f2args\f1 as command line arguments;
+\f3<\f1 or \f3>\f1 can be used to redirect input or output in the usual manner.
+When \f3rerun\f1 is used without any arguments,
+the previous
+argument list is passed to the program;
+otherwise it is identical to \f3run\f1.
+If \f2objfile\f1 has been written since the last time the symbolic information
+was read in, \*(dB will read in the new information.
+.TP
+\f3trace\f1 [\f3in\f1 \f2procedure/function\f1] [\f3if\f1 \f2condition\f1]
+.ns
+.TP
+\f3trace\f1 \f2source-line-number\f1 [\f3if\f1 \f2condition\f1]
+.ns
+.TP
+\f3trace\f1 \f2procedure/function\f1 [\f3in\f1 \f2procedure/function\f1] [\f3if\f1 \f2condition\f1]
+.ns
+.TP
+\f3trace\f1 \f2expression\f1 \f3at\f1 \f2source-line-number\f1 [\f3if\f1 \f2condition\f1]
+.ns
+.TP
+\f3trace\f1 \f2variable\f1 [\f3in\f1 \f2procedure/function\f1] [\f3if\f1 \f2condition\f1]
+Have tracing information printed when the program is executed.
+A number is associated with the command that is used
+to turn the tracing off (see the \f3delete\f1 command).
+.sp 1
+The first argument describes what is to be traced.
+If it is a \f2source-line-number\f1, then the line is printed
+immediately prior to being executed.
+Source line numbers in a file other than the current one
+must be preceded by the name of the file in quotes and a colon, e.g., 
+"mumble.p":17.
+.sp 1
+If the argument is a procedure or function name then
+every time it is called, information is printed telling
+what routine called it, from what source line it was called,
+and what parameters were passed to it.
+In addition, its return is noted, and if it is a function
+then the value it is returning is also printed.
+.sp 1
+If the argument is an \f2expression\f1 with an \f3at\f1 clause,
+then the value of the expression is printed whenever the
+identified source line is reached.
+.sp 1
+If the argument is a variable, then the name and value of the variable
+are printed whenever it changes.
+During this form of tracing, execution is substantially slower.
+.sp 1
+If no argument is specified, then all source lines are printed
+before they are executed.
+Execution is substantially slower during this form of tracing.
+.sp 1
+The clause ``\f3in\f1 \f2procedure/function\f1'' restricts tracing information
+to be printed only while executing inside the given procedure
+or function.
+.sp 1
+\f2Condition\f1 is a boolean expression and is
+evaluated prior to printing the tracing information;
+if it is false, then the information is not printed.
+.br
+.ne 10
+.IP "\f3stop\f1 \f3if\f1 \f2condition\f1"
+.ns
+.IP "\f3stop\f1 \f3at\f1 \f2source-line-number\f1 [\f3if\f1 \f2condition\f1]"
+.ns
+.IP "\f3stop\f1 \f3in\f1 \f2procedure/function\f1 [\f3if\f1 \f2condition\f1]"
+.ns
+.IP "\f3stop\f1 \f2variable\f1 [\f3if\f1 \f2condition\f1]"
+Stop execution when the given line is reached, procedure or function
+called, variable changed, or condition true.
+.IP "\f3status\f1 [\f3>\f1 \f2filename\f1]"
+Print out the currently active \f3trace\f1 and \f3stop\f1 commands.
+.IP "\f3delete\f1 \f2command-number\f1 ..."
+The traces or stops corresponding to the given numbers are removed.
+The numbers associated with traces and stops are printed by
+the \f3status\f1 command.
+.IP "\f3catch\f1 \f2number\f1"
+.ns
+.IP "\f3catch\f1 \f2signal-name\f1"
+.ns
+.IP "\f3ignore\f1 \f2number\f1"
+.ns
+.IP "\f3ignore\f1 \f2signal-name\f1"
+Start or stop trapping a signal before it is sent
+to the program.
+This is useful when a program being debugged
+handles signals such as interrupts.
+A signal may be specified by number or by a name
+(e.g., SIGINT).
+Signal names are case insensitive and the ``SIG'' prefix is optional.
+By default, all signals are trapped except SIGCLD,
+SIGALRM and SIGKILL.
+.IP "\f3cont\f1 \f2integer\f1"
+.ns
+.IP "\f3cont\f1 \f2signal-name\f1"
+Continue execution from where it stopped.
+If a signal is specified, the process continues as though
+it received the signal.
+Otherwise, the process is continued as though it had not been stopped.
+.PP
+Execution cannot be continued if the process has ``finished''
+(e.g., it has called the standard procedure ``exit'').
+\f2\*(DB\f1 does not allow the process to exit, thereby
+letting the user examine the program state.
+.IP \f3step\f1
+Execute one source line.
+.IP \f3next\f1
+Execute up to the next source line.
+The difference between \f3next\f1 and \f3step\f1 is that
+if the line contains a call to a procedure or function
+the \f3step\f1 command will stop at the beginning of that
+block, while the \f3next\f1 command will not.
+.IP "\f3return\f1 [\f2procedure\f1]"
+Continue until a return to \f2procedure\f1 is executed, or
+until the current procedure returns if none is specified.
+.IP "\f3call\f1 \f2procedure(parameters)\f1"
+Execute the object code associated with the named procedure or function.
+.sp 1
+.br
+.ne 8v
+.PP
+.B Printing Variables and Expressions
+.sp 1
+.PP
+Names are resolved first using the static scope of the current function.
+If the name is not defined in the static scope, then the dynamic scope 
+is searched to resolve the name.
+If static and dynamic searches do not yield a result,
+an arbitrary symbol is chosen and
+the message ``[using\ \f2qualified\ name\f1]'' is printed.
+The name resolution procedure may be overridden by qualifying an identifier
+with a block name, e.g., ``\f2module\f1.\f2variable\f1''.
+All source files in C are treated as modules. Thus, to specify the block name
+(\f2module\f1), use the file name without the 
+``.c'' extension.
+.PP
+Expressions are specified with an approximately
+common subset of C and Pascal syntax.
+Indirection can be denoted using either a prefix ``*'' or
+a postfix ``^''.
+Array expressions are subscripted by brackets (``[ ]'').
+The field reference operator (``.'') can be used with pointers
+as well as records, making the C operator ``\->'' unnecessary
+(although it is supported).
+.PP
+Types of expressions are checked;
+the type of an expression may be overridden
+by using ``\f2type-name\f1(\f2expression\f1)''.
+\f2Type-name\f1 must be a simple single-word type (i.e., char, short)
+or a typedef'd type.  It may \f2not\f1 be a complex type (such as 'char *').
+When there is no corresponding named type,
+the special construct ``&\f2type-name\f1'' and ``$$\f2tag-name\f1''
+can be used to represent a pointer to a named type or C structure tag.
+For example: 
+.sp 1
+.br
+.nf
+.in +0.5i
+struct first_s { int i,j,k; } fs;
+struct second_s { short i0,i1,j0,j1,k0,k1;} ss;
+typedef struct first_s *first_p;
+typedef struct second_s *second_p;
+first_p fp;
+second_p sp;
+.in
+.fi
+.sp 1
+With the type information above, it is possible 
+to 'cast' a pointer to struct first_s to a pointer to
+struct second_s by:
+.br
+.in +1i
+assign fp=first_p(&ss)
+.br
+.in
+or
+.br
+.in +1i
+assign fp=first_p(sp)
+.br
+.in
+The following assignments, however, are illegal:
+.br
+.nf
+.in +1i
+assign fp=sp
+assign fp=&ss
+.br
+.fi
+.in
+.sp 1
+.IP "\f3assign\f1 \f2variable\f1 \f3=\f1 \f2expression\f1"
+Assign the value of the expression to the variable.
+.IP "\f3dump\f1 [\f2procedure\f1] [\f3>\f1 \f2filename\f1]"
+Print the names and values of variables in the given procedure.
+If no procedure name is specified, print the values of the variables
+in the current procedure.
+If the procedure given is ``.'', then the all active variables
+are dumped.
+.IP "\f3print\f1 \f2expression\f1 [\f3,\f1 \f2expression\f1 ...]"
+Print out the values of the expressions.
+.IP "\f3whatis\f1 \f2name\f1"
+Print the declaration of the given name, which may be qualified
+with block names as indicated above.
+.IP "\f3which\f1 \f2identifier\f1"
+Print the full qualification of the given identifer, i.e., 
+the outer blocks that the identifier is associated with.
+.IP "\f3up\f1 [\f2count\f1]"
+.ns
+.IP "\f3down\f1 [\f2count\f1]"
+Move the current context, which is used for resolving names,
+up or down the stack \f2count\f1 levels.
+The default \f2count\f1 is 1.  Suppose our program has two routines
+that call \f2A\f1 and \f2B\f1 and both define variable \f2foo\f1.  If we are
+debugging \f2B\f1, all references to \f2foo\f1 will refer to \f2B.foo\f1.
+After an \f3up\f1 command, \f2B\f1's context will be ignored, and a reference
+to \f2foo\f1 will refer to \f2A.foo\f1.
+.IP \f3where\f1
+Print out a list of the active procedures and functions.
+.IP "\f3whereis\f1 \f2identifier\f1"
+Print the full qualification of all the symbols whose
+name matches the given identifier.
+The order in which the symbols are printed is not meaningful.
+.sp 1
+.br
+.ne 8v
+.PP
+.B Accessing Source Files
+.IP "\f3edit\f1 [\f2filename\f1]"
+.ns
+.IP "\f3edit\f1 \f2procedure/function-name\f1"
+Invoke an editor on \f2filename\f1. If no file name is specified,
+the current source file is used.
+If a \f2procedure\f1 or \f2function\f1 name is specified,
+the editor is invoked for the file that contains it.
+The editor that is invoked depends on which editor is specified
+as the default by the installation.
+To override the default editor, set the environment variable,
+EDITOR, to the name of the desired editor.
+.IP "\f3file\f1 [\f2filename\f1]"
+Change the current source file name to \f2filename\f1.
+If none is specified then the current source file name is printed.
+.IP "\f3func\f1 [\f2procedure/function\f1]"
+Change the current function.
+If no function name is specified, then print the current function.
+Changing the current function implicitly changes the current source file
+to the file that contains the function; it also changes the current scope
+used for name resolution.
+.IP "\f3list\f1 [\f2source-line-number\f1 [\f3,\f1 \f2source-line-number\f1]]"
+.ns
+.IP "\f3list\f1 \f2procedure/function\f1"
+List the lines in the current source file from the first line number to
+the second line number, inclusive.
+If a line range is not specified, the next 10 lines in the current 
+file are listed.
+If the name of a procedure or function is given,
+lines \f2n-k\f1 to \f2n+k\f1 are listed where \f2n\f1 is the first statement
+in the procedure or function and \f2k\f1 is a value set by 
+the \f3set $listwindow\f1 command (see below).
+.IP "\f3use\f1 \f2directory-list\f1"
+When looking for source files, set the list of directories to be searched.
+.sp 1
+.br
+.ne 8v
+.PP
+.B Command Aliases and Variables
+.sp 1
+.TP
+\f3alias\f1 \f2name\f1 \f2name\f1
+.ns
+.TP
+\f3alias\f1 \f2name\f1 ``\f2string\f1''
+.ns
+.TP
+\f3alias\f1 \f2name\f1 (\f2parameters\f1) ``\f2string\f1''
+When commands are processed,
+\*(dB
+first checks to see if the word
+is an alias for either a command or a string.
+If it is an alias, then \*(dB treats the input as though
+the corresponding string (with values substituted for any parameters)
+had been entered.
+For example,
+to define an alias ``rr'' for the command ``rerun'',
+one can say
+.sp 1
+.in +8n
+alias rr rerun
+.in -8n
+.sp 1
+To define an alias called ``b'' that sets a stop at a particular line
+one can say
+.sp 1
+.in +8n
+alias b(x) ``stop at x''
+.in -8n
+.sp 1
+Subsequently, the command ``b(12)'' will expand to ``stop at 12''.
+.need 5
+.TP
+\f3set\f1 \f2name\f1 [= \f2expression\f1]
+The \f3set\f1 command defines values for debugger variables.
+The names of these variables cannot conflict with names in the program
+being debugged, and are expanded to the corresponding expression
+within other commands.
+The following variables have a special meaning:
+.sp 1
+.in +8n
+.ti -5n
+$frame
+.br
+Setting this variable to an address causes \*(dB to use the stack frame
+pointed to by the address for
+doing stack traces and accessing local variables.
+.sp 1
+.ti -5n
+$hexchars
+.ti -5n
+$hexints
+.ti -5n
+$hexoffsets
+.ti -5n
+$hexstrings
+.br
+When set, \*(dB prints out
+out characters, integers, offsets from registers, or character pointers
+, respectively, in hexadecimal.
+.sp 1
+.ti -5n
+$listwindow
+.br
+The value of this variable specifies the number
+of lines to list around a function or when the \f3list\f1 command
+is given without any parameters.
+The default value is 10.
+.sp 1
+.ti -5n
+$mapaddrs
+.br
+Setting (unsetting) this variable causes \*(dB to start (stop)
+mapping addresses.
+.in -8n
+.TP
+\f3unalias\f1 \f2name\f1
+Remove the alias with the given name.
+.TP
+\f3unset\f1 \f2name\f1
+Delete the debugger variable associated with \f2name\f1.
+.sp 1
+.br
+.ne 8v
+.PP
+.B Machine Level Commands
+.sp 1
+.TP
+\f3tracei\f1 [\f2address\f1] [\f3if\f1 \f2cond\f1]
+.ns
+.TP
+\f3tracei\f1 [\f2variable\f1] [\f3at\f1 \f2address\f1] [\f3if\f1 \f2cond\f1]
+.ns
+.TP
+\f3stopi\f1 [\f2address\f1] [\f3if\f1 \f2cond\f1]
+.ns
+.TP
+\f3stopi\f1 [\f3at\f1] [\f2address\f1] [\f3if\f1 \f2cond\f1]
+Turn on tracing or set a stop using a machine instruction address.
+.TP
+\f3stepi\f1
+.ns
+.TP
+\f3nexti\f1
+Single step as in \f3step\f1 or \f3next\f1, but do a single instruction
+rather than source line.
+.TP
+\f2address\f1\f3, \f1\f2address\f1\f3/\f1 [\f2mode\f1]
+.ns
+.TP
+\f2address\f1 \f3/\f1 [\f2count\f1] [\f2mode\f1]
+Print the contents of memory starting at the first \f2address\f1
+and continuing up to the second \f2address\f1 or until \f2count\f1 items are printed.
+If the address is ``.'', the address following the one
+printed most recently is used.
+The \f2mode\f1 specifies how memory is to be printed;
+if it is omitted the previous mode specified is used.
+The initial mode is ``X''.
+The following modes are supported:
+.nr In 5
+.in +\n(Inn
+.ta \n(Inn
+.sp 1
+.ti -\n(Inn
+\&\f3i\f1	\c
+print the machine instruction
+.ti -\n(Inn
+\&\f3d\f1	\c
+print a short word in decimal
+.ti -\n(Inn
+\&\f3D\f1	\c
+print a long word in decimal
+.ti -\n(Inn
+\&\f3o\f1	\c
+print a short word in octal
+.ti -\n(Inn
+\&\f3O\f1	\c
+print a long word in octal
+.ti -\n(Inn
+\&\f3x\f1	\c
+print a short word in hexadecimal
+.ti -\n(Inn
+\&\f3X\f1	\c
+print a long word in hexadecimal
+.ti -\n(Inn
+\&\f3b\f1	\c
+print a byte in octal
+.ti -\n(Inn
+\&\f3c\f1	\c
+print a byte as a character
+.ti -\n(Inn
+\&\f3s\f1	\c
+print a string of characters terminated by a null byte
+.ti -\n(Inn
+\&\f3f\f1	\c
+print a single precision real number
+.ti -\n(Inn
+\&\f3g\f1	\c
+print a double precision real number
+.in -\n(Inn
+.sp 1
+.PP
+Symbolic addresses are specified by preceding the name with an ``&''.
+Addresses may be expressions made up of other addresses and
+the operators ``\+'', ``\-'', and indirection (unary ``*'').
+.PP
+Machine registers are denoted by ``$dN'' 
+and ``$aN'', where N is the number of the register.  Machine registers
+may be displayed with the \f3print\f1 command and assigned to with the
+\f3assign\f1 command.  They may not be used as objects in machine level
+commands.
+.sp 1
+.br
+.ne 8v
+.PP
+.B Miscellaneous Commands
+.sp 1
+.IP \f3help\f1
+Print out a synopsis of \*(dB commands.
+.IP "\f3quit\f1"
+Exit \*(dB.
+.IP "\f3sh\f1 \f2command-line\f1"
+Pass the command line to the shell for execution.
+The SHELL environment variable determines which shell is used.
+.TP
+\f3source\f1 \f2filename\f1
+Read \*(dB commands from the given \f2filename\f1.
+.SH FILES
+.nr In 20
+.in +\n(Inn
+.ta \n(Inn
+.sp 1
+.ti -\n(Inn
+\&a.out	\c
+object file
+.ti -\n(Inn
+\&\&.dbxinit	\c
+initial commands
+.SH SEE ALSO
+cc(1)
+.br
+``Getting Started with DBX''
+.SH COMMENTS
+\f2\*(dB\f1 suffers from a ``multiple include'' malady.
+If you have a program consisting of a number of object files
+and each is built from source files that include header files,
+the symbolic information for the header files is replicated in
+each object file.
+Since about one debugger start-up is done for each link,
+having the linker (\f2ld\f1(1)) re-organize the symbol information
+would not save much time, though it would reduce some of the
+disk space used.
+.PP
+This problem is an artifact of the unrestricted semantics
+of #include's in C.  For example, an include file can contain
+static declarations that are separate entities for each file
+in which they are included.
+.SH BUGS
+Assigning strings of characters to character pointers overwrites
+the character pointer (and other data in the vicinity) with the string.
+.PP
+The use of pseudo-casts in assignments is limited.  \*(DB seems
+to understand many more combinations of the pseudo-casts in 
+\f3print\f1 commands that it does in \f3assign\f1 commands.  With
+reference to the example previously given under the heading
+``Printing Variables and Expressions'', the following commands work:
+.br
+.sp 1
+.nf
+.in +.5i
+print $$second_s(fp^)
+print &$$second_s(fp^)
+print $$second_s(fs)
+.br
+.fi
+.sp 1
+.in
+However, the following command fails:
+.br
+.nf
+.sp 1
+.in +.5i
+assign sp=&$$second_s(fs)
+.br
+.fi
+.in
+.sp 1
+.PP
+If given the command \f3list \f2func\f1,
+where \f2func\f1 is an entrypoint for which debugging information is
+not available (e.g. an assembly-language routine), \*(dB will 
+reset the line number to the beginning of the current file.
+.PP
+If you edit one of the program's 
+source files while in \*(dB (i.e., with the
+\f3edit\f1 command), remake it through the editor, return to \*(dB
+and \f3rerun\f1 the program, \*(dB aborts with an internal error.
+However, if the program is edited through \*(dB and then remade by
+invoking a shell from \*(dB itself (with the \f3sh\f1 command),
+a subsequent \f3rerun\f1 does not cause this behavior.
+.PP 
+When tracing, it is very difficult to get \*(dB to respond to 
+an interrupt, and the program can run away.
+.PP
+If a function has been invoked in the current call chain which has failed
+to do a link (e.g., an assembly-language routine), \*(dB will drop
+the previous function in the call chain from a stack 
+trace (given by the \f3where\f1 command).

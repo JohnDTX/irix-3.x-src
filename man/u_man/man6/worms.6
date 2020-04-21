@@ -1,0 +1,68 @@
+'\"macro stdmacro
+.TH WORMS 6 
+.SH NAME
+worms  \-  animate worms on a display terminal
+.SH SYNOPSIS
+.B worms
+[
+.B -field
+] [
+.B -length
+# ] [
+.B -number
+# ] [
+.B -trail
+]
+.SH DESCRIPTION
+.B -field
+makes a ``field'' for the worm(s) to eat;
+.B -trail
+causes each worm to leave a trail behind it.  You can figure
+out the rest by yourself.
+.SH FILES
+/etc/termcap
+.SH DIAGNOSTICS
+.ta .3i .6i
+Invalid length
+.br
+	Value not in range  2 <= length <= 1024
+.sp
+Invalid number of worms
+.br
+	Value not in range  1 <= number <= 40
+.sp
+TERM: parameter not set
+.br
+	The
+.B TERM
+environment variable is not defined.  Do
+.PP
+		\f3TERM=\f1terminal type
+.br
+		\f3export TERM\f1
+.sp
+Unknown terminal type
+.br
+	Your terminal type (as determined from the
+.B TERM
+environment
+.br
+	variable) is not defined in
+.BR /etc/termcap .
+.sp
+Terminal not capable of cursor motion
+.br
+	Your terminal is too stupid to run this program.
+.sp
+Out of memory
+.br
+	This should never happen.
+.DT
+.SH BUGS
+The lower-right-hand character position will not be updated properly
+on a terminal that wraps at the right margin.
+.PP
+Terminal initialization is not performed.
+.SH AUTHOR
+Eric P. Scott
+.\"	@(#)worms.6	5.1 of 10/18/83

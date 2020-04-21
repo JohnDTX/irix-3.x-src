@@ -1,0 +1,49 @@
+.TH strwidth 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B strwidth
+\- returns the width of the specified text string
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "long strwidth(str) "
+.B "String str;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer*4 function strwid(str, length)"
+.B "character*(*) str"
+.B "integer*4 length"
+.IP
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function strwidth(str: pstring128): longint;"
+.SH DESCRIPTION
+.B strwidth
+returns the width
+of a text string in pixels,
+using the character spacing parameters
+of the current raster font.
+.B strwidth
+is useful when you do a simple mapping
+from screen space to world space.
+.PP
+Undefined characters have zero width.
+.PP
+In FORTRAN,
+.B strwid
+has two arguments:
+.I str
+is the name of the string;
+.I length
+is the number of characters in that string.
+.SH "SEE ALSO"
+getdescender, getheight, getlwidth, mapw, mapw2
+.sp
+.I Programming Guide,
+Section 5.3, Fonts
+.SH NOTE
+This routine is available only in immediate mode.

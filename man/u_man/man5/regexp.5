@@ -1,0 +1,454 @@
+'\"macro stdmacro
+.tr ~
+.TH REGEXP 5
+.SH NAME
+regexp \- regular expression compile and match routines
+.SH SYNOPSIS
+.B #define
+.SM
+.B INIT
+<declarations>
+.br
+.B #define
+.SM
+.B GETC\*S(\|)
+<getc code>
+.br
+.B #define
+.SM
+.B PEEKC\*S(\|)
+<peekc code>
+.br
+.B #define
+.SM
+.BR UNGETC\*S( c )
+<ungetc code>
+.br
+.B #define
+.SM
+.BR RETURN\*S( pointer )
+<return code>
+.br
+.B #define
+.SM
+.BR ERROR\*S( val )
+<error code>
+.PP
+.B "#include <regexp.h>"
+.PP
+.B "char \(**compile(instring, expbuf, endbuf, eof)"
+.br
+.B "char \(**instring, \(**expbuf, \(**endbuf;"
+.PP
+.B "int step(string, expbuf)
+.br
+.B "char \(**string, \(**expbuf;
+.SH DESCRIPTION
+.PP
+This page describes general
+purpose regular expression matching routines in the
+form of
+.IR ed (1),
+defined in
+.BR <regexp.h> .
+Programs such as
+.IR ed (1),
+.IR sed (1),
+.IR grep (1),
+.IR bs (1),
+.IR expr (1),
+etc., which perform regular expression matching
+use this source file.
+In this way,
+only this file need be changed to maintain regular expression compatibility.
+.PP
+The interface to this file is unpleasantly complex.
+Programs that include this file must have
+the following five macros declared before the
+``#include~<regexp.h>'' statement.
+These macros are used by the
+.I compile\^
+routine.
+.TP
+.SM
+GETC\*S(\|)
+Return the value of the next character
+in the regular expression pattern.
+Successive
+calls to
+.SM
+GETC\*S(\|)
+should return successive characters
+of the regular expression.
+.TP
+.SM
+PEEKC\*S(\|)
+Return the next character in the regular
+expression.
+Successive calls to
+.SM
+PEEKC\*S(\|)
+should return
+the same character (which should also be the
+next character returned by \s-1GETC\s0(\|)).
+.TP
+.SM
+.RI UNGETC\*S( c )
+Cause the argument
+.I c\^
+to be returned by the next call to
+.SM
+GETC\*S(\|)
+(and \s-1PEEKC\s0(\|)).
+No more that one character of pushback
+is ever needed and this character is guaranteed
+to be the last character read by \s-1GETC(\|)\s0.
+The
+value of the macro
+.SM
+.RI UNGETC\*S( c )
+is always ignored.
+.TP
+.SM
+.RI RETURN\*S( pointer )
+This macro is used on normal exit of the
+.I compile\^
+routine.
+The value of the argument
+.I pointer\^
+is a pointer to the
+character after the last character of the compiled regular
+expression.
+This is useful to programs which have
+memory allocation to manage.
+.TP
+.SM
+.RI ERROR\*S( val )
+This is the abnormal return from the
+.I compile\^
+routine.
+The argument
+.I val\^
+is an error number
+(see table below for meanings).
+This call should never return.
+.PP
+.ne 14
+.RS
+.PD 0
+.TP 1i
+ERROR
+MEANING
+.TP
+11
+Range endpoint too large.
+.TP
+16
+Bad number.
+.TP
+25
+``\f3\e\fPdigit'' out of range.
+.TP
+36
+Illegal or missing delimiter.
+.TP
+41
+No remembered search string.
+.TP
+42
+\f3\e(\|~\e)\fP imbalance.
+.TP
+43
+Too many \f3\e(\fP.
+.TP
+44
+More than 2 numbers given in \f3\e{\|~\e}\fP.
+.TP
+45
+\f3}\fP expected after \f3\e\fP.
+.TP
+46
+First number exceeds second in \f3\e{\|~\e}\fP.
+.TP
+49
+\f3[ ]\fP imbalance.
+.TP
+50
+Regular expression overflow.
+.RE
+.PD
+.PP
+The syntax of the
+.I compile\^
+routine is as follows:
+.PP
+.RS
+compile(instring, expbuf, endbuf, eof)
+.RE
+.PP
+The first parameter
+.I instring\^
+is never used
+explicitly by the
+.I compile\^
+routine but is useful
+for programs that pass down different pointers
+to input characters.
+It is sometimes used in
+the
+.SM
+INIT
+declaration (see below).
+Programs
+which call functions to input characters or have
+characters in an external array can pass down a value
+of ((char \(**) 0) for this parameter.
+.PP
+The next parameter
+.I expbuf\^
+is a character pointer.
+It points to the place where the
+compiled
+regular expression will be placed.
+.PP
+The parameter
+.I endbuf\^
+is one more than the highest address where
+the compiled regular expression may be placed.
+If the compiled expression cannot fit in
+.RI ( endbuf \- expbuf )
+bytes, a call to
+.SM
+ERROR\*S(50)
+is made.
+.PP
+The parameter
+.I eof\^
+is the character which marks
+the end of the regular expression.
+For example, in
+.IR ed (1),
+this character is usually a
+.BR / .
+.PP
+Each program that includes this file must have
+a
+.B #define
+statement for
+.SM
+INIT\*S.
+This
+definition will be placed right after
+the declaration for the function
+.I compile\^
+and the opening curly brace
+.RB ( { ).
+It is
+used for dependent declarations and initializations.
+Most often it is used to set a register variable to
+point the beginning of the regular expression
+so that this register variable can be used in the
+declarations for
+.SM
+GETC\*S(\|),
+.SM
+PEEKC\*S(\|)
+and
+.SM
+UNGETC\*S(\|).
+Otherwise it can be used to declare external variables
+that might be used by
+.SM
+GETC\*S(\|),
+.SM
+PEEKC\*S(\|)
+and
+.SM
+UNGETC\*S(\|).
+See the example below of the declarations taken from
+.IR grep (1).
+.PP
+There are other functions in this file
+which perform actual regular expression matching,
+one of which is the function
+.IR step .
+The call
+to
+.I step\^
+is as follows:
+.PP
+.RS
+step(string, expbuf)
+.RE
+.PP
+The first parameter to
+.I step\^
+is a pointer to a string
+of characters to be checked
+for a match.
+This string should be null terminated.
+.PP
+The second parameter
+.I expbuf\^
+is the compiled
+regular expression which was obtained by a call of
+the function
+.IR compile .
+.PP
+The function
+.I step\^
+returns one, if the given
+string matches the regular expression, and zero
+if the expressions do not match.
+If there is a match, two external character
+pointers are set as a side effect to the
+call to
+.IR step .
+The variable set in
+.I step\^
+is
+.IR loc1 .
+This is a pointer to the first character that
+matched the regular expression.
+The variable
+.IR loc2 ,
+which is set by the function
+.IR advance ,
+points
+the character after the last character that matches
+the regular expression.
+Thus if the regular
+expression matches the entire line, loc1 will point
+to the first character of
+.I string\^
+and
+.I loc2\^
+will point to the
+null at the end of
+.IR string .
+.PP
+.I Step\^
+uses the external variable
+.I circf\^
+which is set by
+.I compile\^
+if the regular expression begins
+with
+.BR ^ .
+If this is set then
+.I step\^
+will only try to match
+the regular expression to the beginning of the string.
+If more than one regular expression is to be
+compiled before the first is executed the value
+of
+.I circf\^
+should be saved for each compiled expression
+and
+.I circf\^
+should be set to that saved value before each call
+to
+.IR step .
+.PP
+The function
+.I advance\^
+is called from
+.I step\^
+with the same arguments as
+.IR step .
+The purpose of
+.I step\^
+is to step through the
+.I string\^
+argument and call
+.I advance\^
+until
+.I advance\^
+returns a one indicating a match or until the end of
+.I string\^
+is reached.
+If one wants to constrain
+.I string\^
+to the beginning of the
+line in all cases,
+.I step\^
+need not be called, simply call
+.IR advance .
+.PP
+When
+.I advance\^
+encounters a \f3\(**\fP or \f3\e{\|~\e}\fP sequence in the regular
+expression it will advance its pointer to the string to be matched as far
+as possible and will recursively call itself trying to match the
+rest of the string to the rest of the regular expression.
+As long as there is no match,
+.I advance\^
+will back up along the
+string until it finds a match or reaches the
+point in the string that initially matched the \f3\(**\fP or \f3\e{\|~\e}\fP.
+It is sometimes desirable to stop this backing up before
+the initial point in the string is reached.
+If the external
+character pointer
+.I locs\^
+is equal to the point in the string
+at sometime during the backing up process,
+.I advance\^
+will break out of the loop that backs
+up and will return zero.
+This is used by
+.IR ed (1)
+and
+.IR sed (1)
+for substitutions done globally
+(not just the first occurrence, but the whole line)
+so, for example, expressions like
+.B s/y\(**//g
+do not loop forever.
+.PP
+The routines
+.IR ecmp 
+and
+.I getrange\^
+are trivial
+and are called by the routines previously mentioned.
+.SH EXAMPLES
+The following is an example of how the regular expression macros
+and calls look from
+.IR grep (1):
+.if t .ta 12
+.in n .ta 20
+.PP
+.nf
+#define \s-1INIT\s+1	register char \(**sp = instring;
+#define \s-1GETC\s+1(\|)	(\(**sp\++)
+#define \s-1PEEKC\s+1(\|)	(\(**sp)
+#define \s-1UNGETC\s+1(c)	(\-\^\-sp)
+#define \s-1RETURN\s+1(c)	return;
+#define \s-1ERROR\s+1(c)	regerr(\|)
+.PP
+#include <regexp.h>
+.RI ...
+.ta 8 16
+	compile(\(**argv, expbuf, &expbuf[\s-1ESIZE\s+1], '\e\^0');
+.RI ...
+	if(step(linebuf, expbuf))
+		succeed(\|);
+.fi
+.SH "SEE ALSO"
+ed(1), grep(1), sed(1).
+.SH BUGS
+The handling of
+.I circf\^
+is kludgy.
+.br
+The routine
+.IR ecmp 
+is equivalent to the Standard I/O
+routine
+.I strncmp\^
+and should be replaced by that routine.
+.br
+The actual code is probably easier to understand than this manual page.
+.tr ~~
+.\"	@(#)regexp.5.1 of 10/15/83

@@ -1,0 +1,64 @@
+.TH gRGBcursor 3G
+.rs
+.sp -0.28i
+.\".SH\(Dy
+.SH NAME
+.B gRGBcursor
+\- returns the cursor characteristics in RGB mode
+.SH SPECIFICATION
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "gRGBcursor(index, red, green, blue, redm, 
+.br
+.B	greenm, bluem, b)
+.B "short *index, *red, *green, *blue, *redm, 
+.br
+.B	*greenm, *bluem;
+.B "Boolean *b;"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "subroutine gRGBcu(index, red, green, blue, 
+.br
+.B	redm, greenm, bluem, b)
+.B "integer*2 index, red, green, blue, redm, greenm," 
+.br
+.B 	bluem logical b
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "procedure gRGBcursor(var index, red, green, blue,"
+.br
+.B " 	redm, greenm, bluem: Short; var b: Boolean);"
+.SH DESCRIPTION
+.B gRGBcursor
+returns the seven parameters of the last
+executed
+.B RGBcursor .
+The parameters are
+.I index,
+.I red,
+.I green,
+.I blue,
+.I redm,
+.I greenm,
+and
+.I bluem.
+.B gRGBcursor
+also returns a boolean 
+.I b
+that is 
+TRUE(1)
+if the automatic cursor is on.
+The system must be in RGB mode
+when 
+.B gRGBcursor
+executes.
+.SH "SEE ALSO"
+RGBcursor
+.sp
+.I Programming Guide,
+Section 6.4, Cursors
+.SH NOTE
+This routine is available only in immediate mode.

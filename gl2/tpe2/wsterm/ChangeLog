@@ -1,0 +1,138 @@
+***************************
+1-Mar-86 CSK (kuta!olympus)
+***************************
+
+NB. Some of these changes made it into 3.3.1.  All are in W2.4/3.4.
+--------
+lib.prim changes:
+    - RGL FORTRAN winope() is now generated to return a value.  Before
+      it wasn't.
+    - strgen.awk has been changed to not do any of the name conversions 
+      for the "special" routines, ie. those GL routines which for one
+      reason or another can not be called directly from the dispatch
+      table, except for the routines in ret.c.  The conversion is now 
+      done by calling sed in the Makefiles.  This way different programs
+      can have different routines be "special".
+    - set{fast,slow}com() now return a Boolean telling if the communications
+      medium can be put into the selected mode.  The old versions of the
+      routines were kept in their spots in lib.prim and given a "zz"
+      prefix in order for things to be compatible with old RGL programs.
+
+
+iris/wsiris changes:
+    - Code to handle getdev() in terminal emulator needed to be fixed.
+    - The RGL should now recover better from failures when malloc-ing
+      temporary buffers for routines which return arrays.
+    - Temporary buffer malloc error message reworded slightly.
+    - Test for use of localbuffer is now required_size <= sizeof localbuffer.
+      Test used to be < .
+    - set{fast,slow}com() now return a Boolean telling if the communications
+      medium can be put into the selected mode (for the iris program, TRUE
+      is always returned).  The old versions of the routines were kept and 
+      given a "zz" prefix.
+
+wsiris changes:
+    - gbegin(), getport(), and winopen() now have the same special handling
+      that ginit() does.  Before this change, the use of gbegin(), getport(),
+      or winopen() instead of ginit() would have caused the RGL gexit() to
+      be ignored.
+    - Entered IP address are now checked that they contain three dots.
+    - When using the window manager on the terminal, only one TCP/IP 
+      wsiris will be run when /etc/hosts doesn't exist.  When run on
+      the workstation, if /etc/hosts does not exist, wsiris now 
+      exits instead of asking for the IRIS and host IP addresses.
+    - "IP/TCP" changed to "TCP/IP" and "2300" in comments changed to
+      "2300/3010".
+    - The functions recs() and recb() are typed to return a short and a byte.
+    - TCP/IP wsiris used to hang if a bad host IP address was entered.
+      This was been fixed.
+    - Error messages dealing with temporary buffer allocation and
+      array transport will now display the GL command name during the
+      processing of which they occur.
+    - getcmdname() now always returns a valid character pointer.
+    - Now possible to use serial communications in fast mode.  The serial
+      line is no longer conditioned with ISTRIP (strip bit 7).  The RGL
+      hasn't been changed to support fastmode, however.
+    - If the -y option was given, wsiris will abort if put in fast mode.
+    - New keyboard commands: ~%Dn and ~%Zn.  They toggle the -d n and -z n
+      options.  ~%D3 takes the characters following it until a terminating
+      <RETURN> to be a new logfile name.  The current one is closed and the
+      new one opened for append.  If the <RETURN> follows immediately, 
+      the current logfile name is displayed.
+    - New keyboard command: ~DEL.  This reboots the IRIS after asking for
+      confirmation.  SCR# 1357
+    - New options:
+	-d 3 filename - This sets the logfile name to filename.
+	-d 5	      - writehost() will be killed when initializing
+			the graphics.  This is useful when debugging
+			readhost().
+    - A special hack was done to log FORTRAN routines with character array
+      arguments as strings instead of arrays.  The same hack is used
+      to print the string argument to dbtext().
+    - errorm() will now only call perror() if its type argument is a capital
+      letter, eg. 'F' instead of 'f'.
+    - winattach() is called upon receipt of a ginit(), gbegin(), 
+      getport(), or winopen() so that the graphics window, which is always
+      in the foreground, is attached to automatically.  Has no effect when 
+      not running the window manager.  SCR# 1146 
+    - You can now interrupt out of a connection attempt.  This means
+      that you don't have to wait for the connection failure if you know
+      you typed an incorrect hostname.
+    - Floating-point errors are now caught using fpsigset().  A message
+      is displayed and processing continues.
+    - wsiris checks the return status of the call to system() which does
+      the TCP/IP initialization.  If the initialization failed, it prints
+      a message and exits.
+    - Since the IEEE-488 devices are really only half-duplex, two of them
+      are now used: one for reading and the other for writing.
+    - The size of the stack frame used to execute the GL commands was
+      increased to 0x3000 longs.  capture() and rcapture() require this
+      much stack space.  A marker is placed in the last element of the
+      stack frame before use.  An error is generated if the marker is no
+      longer there after the GL routine has been executed.
+    - The echo of the monitor type after a ~%M command is now correct.
+    - SIGCLD is no longer used to let the parent (readhost()) know when a 
+      child has died.  Instead, writehost() gives readhost() a pipe cmd
+      telling it to terminate.
+
+libgl changes:
+    - In getport, gl_hintinit is now called before the test to
+      see if should fork.  This is so gl_putinbackground can be
+      set before it is tested.  This fixed the wsiris bug where after
+      exitting there were two keyboard readers.  SCR #1344
+    - The Vkernel versions of getport() and winopen() now call gbegin()
+      instead of being simply null routines.
+    - Added null setfastcom() and setslowcom() to local GL.  This was done
+      so that remote programs which called them do not have be changed
+      when compiled to run locally.  Both always return TRUE.
+
+****************************
+12-Jun-86 CSK (kuta!olympus)
+****************************
+
+NB. Some of these changes made it in time for T2.4/3.4.  All made it into
+    W2.5/3.5.
+
+wsiris changes:
+    - rc.tcp is now called to do the TCP initialization when there is no
+      /etc/hosts.
+    - errorm() wasn't recognizing the capitial letter type codes the rest
+      of wsiris was callling it with.
+    - isystem() now does a setuid(geteuid()) after the fork() so that
+      irsh commands are executed with a real-uid of root.
+
+
+****************************
+31-Jul-86 CSK (kuta!olympus)
+****************************
+
+wsiris changes:
+    - By default, the parity bit is stripped from incoming bytes over the
+      serial line.  This action is turned off when in fast mode.
+
+****************************
+01-Sep-86 kipp
+****************************
+
+wsiris changes:
+    - converted to use 3.5 tcp

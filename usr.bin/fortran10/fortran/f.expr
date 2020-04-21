@@ -1,0 +1,910 @@
+(*****************************************************************************)
+(*                                                                           *)
+(*                            File: F.EXPR.TEXT                              *)
+(*                                                                           *)
+(*           (C) Copyright 1981, 1985 Silicon Valley Software, Inc.          *)
+(*                                                                           *)
+(*                            All Rights Reserved.               28-Oct-85   *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+procedure expression;
+  var lattr: attr; lop: integer; ltoken: symbol;
+
+  procedure primary;
+    var lpn,lpn2: pn; newname: idstring; lattr: attr;
+  begin
+  if token = IDENTSY
+  then
+  
+    { Identifier }
+    
+    begin
+    if exprkind = DATAEXPR
+    then lpn := lookupname(impdotree,ident)
+    else
+      if level = STFUNVAR
+      then lpn := lookupname(stfuntree,ident)
+      else lpn := nil;
+    if lpn = nil
+    then lpn := lookupname(localtree,ident);
+    if lpn = nil
+    then begin
+      newname := ident; fscan;
+      if token = LPARENSY
+      then
+        begin
+        lpn2 := lookupname(intrintree,newname);
+        if lpn2 = nil
+        then
+          begin
+          lpn := lookupname(globaltree,newname);
+          if lpn = nil
+          then begin
+            newn(lpn,FUNCT,newname);
+            makeglobal(lpn);
+            end
+          else { Found it in globaltree }
+            begin
+            new(lpn2); lpn2^ := lpn^; lpn2^.llink := nil; lpn2^.rlink := nil;
+            lpn := lpn2;
+            end
+          end
+        else
+          begin
+          newn(lpn,INTRIN,newname); lpn^.key := lpn2^.key;
+          lpn^.ifunno := lpn2^.ifunno; lpn^.idtype := lpn2^.idtype;
+          end;
+        xref(lpn); entername(lpn,localtree); fcall(lpn,FUNCT);
+        end
+      else begin
+        if exprkind = ADJUSTEXPR
+        then begin
+          newn(lpn,UNKN,newname); entername(lpn,localtree); xref(lpn);
+          gattr.treeptr := lpn; gattr.atype := int4type;
+          end
+        else begin
+          lpn := declarevar(localtree,newname); xref(lpn); variable(lpn);
+          end;
+        end;
+      end
+    else begin { Found it in localtree or stfuntree or impdotree }
+      newname := ident; xref(lpn); fscan;
+      if (lpn^.nkind = UNKN) and (lpn^.unbounds <> nil) then declunkn(lpn);
+      if (lpn^.nkind = UNKN) and (token = LPARENSY) and (not lpn^.Indirect)
+      then begin
+        lpn2 := lookupname(intrintree,newname);
+        if lpn2 <> nil
+        then begin
+          lpn^.nkind := INTRIN; lpn^.key := lpn2^.key;
+          if lpn^.idtype.typ <> lpn2^.idtype.typ then error(82);
+          end;
+        end;
+      if lpn^.nkind = IMPDO
+      then begin gattr.atype := int4type; gattr.treeptr := lpn; end
+      else
+        if lpn^.nkind = PARAMETER
+        then begin
+          gattr.atype := lpn^.idtype;
+          new(gattr.treeptr,CSTNODE);
+          with gattr.treeptr^ do begin
+            node := CSTNODE; csttype := gattr.atype; cstvalu := lpn^.pvalu;
+            end;
+          end
+        else
+          if lpn^.nkind = VARS
+          then variable(lpn)
+          else
+            if (exprkind = ADJUSTEXPR) and (lpn^.nkind = UNKN)
+            then begin
+              gattr.treeptr := lpn;
+              if lpn^.ExpType
+              then gattr.atype := lpn^.idtype
+              else gattr.atype := int4type;
+              end
+            else
+              if (lpn^.nkind = FUNCT) or
+                 (lpn^.nkind = UNKN) or
+                 (lpn^.nkind = EXTERN) or
+                 (lpn^.nkind = INTRIN)
+              then
+                if token = LPARENSY
+                then
+                  if lpn^.idtype.typ = CHARACTER
+                  then
+                    if IsSubStr
+                    then variable(lpn)
+                    else fcall(lpn,FUNCT)
+                  else fcall(lpn,FUNCT)
+                else variable(lpn)
+              else begin
+                error(51);
+                gattr.atype := int4type;
+                gattr.treeptr := nil;
+                end;
+      end;
+    end
+  else if token = ICONSTSY
+    then
+    
+      { Integer Constant }
+      
+      begin
+      gattr.atype.typ := INTEGR;
+      if (intval >= -32768) and (intval <= 32767)
+      then gattr.atype.siz := defisize
+      else gattr.atype.siz := 4;
+      new(gattr.treeptr,CSTNODE);
+      with gattr.treeptr^ do begin
+           node := CSTNODE; csttype := gattr.atype; cstvalu.ival := intval;
+           end;
+      fscan;
+      end
+    else
+      if (token = RCONSTSY) or (token = DCONSTSY)
+      then
+      
+        { Floating-point Constant }
+        
+        begin
+        new(gattr.treeptr,CSTNODE);
+        with gattr.treeptr^ do begin
+             node := CSTNODE;
+             if token = RCONSTSY
+             then begin
+                  gattr.atype := realtype;
+                  cstvalu.rval := realval;
+                  end
+             else begin
+                  gattr.atype := doubletype;
+                  cstvalu.dval := dblval;
+                  end;
+             csttype := gattr.atype;
+             end;
+        fscan;
+        end
+      else
+        if token = CCONSTSY
+        then
+        
+          { String Constant }
+          
+          begin
+          gattr.atype.typ := CHARACTER; gattr.atype.siz := chlen;
+          new(gattr.treeptr,CSTNODE);
+          with gattr.treeptr^ do begin
+               node := CSTNODE; csttype := gattr.atype;
+               cstvalu.clen := chlen; cstvalu.cval := chval;
+               end;
+          fscan;
+          end
+        else
+          if token = LPARENSY
+          then
+          
+            { Parenthesised Expression  or  COMPLEX constructor }
+            
+            begin
+            fscan; expression;
+            if token = RPARENSY
+            then fscan
+            else
+              if token = COMMASY
+              then begin
+                lattr := gattr;
+                with lattr do
+                  if (atype.typ <> REEL) and (atype.typ <> INTEGR)
+                  then begin error(52); atype := realtype; end;
+                makentype(lattr,realtype); fscan; expression;
+                with gattr do
+                  if (atype.typ <> REEL) and (atype.typ <> INTEGR)
+                  then begin error(52); atype := realtype; end;
+                makentype(gattr,realtype);
+                if token = RPARENSY then fscan else error(231);
+                gattr.atype := cmplxtype;
+                if (lattr.treeptr^.node = CSTNODE) and
+                   (gattr.treeptr^.node = CSTNODE)
+                then begin
+                  gattr.treeptr^.cstvalu.cimag := gattr.treeptr^.cstvalu.rval;
+                  gattr.treeptr^.cstvalu.creal := lattr.treeptr^.cstvalu.rval;
+                  gattr.treeptr^.csttype := gattr.atype;
+                  end
+                else begin
+                  gattr.treeptr :=
+                      newbinnode(208{COMPLEX},gattr.treeptr,lattr.treeptr);
+                  gattr.treeptr^.binsubop := 0;   { L = Imag, R = Real }
+                  end;
+                end
+              else error(26);
+            end
+          else
+            if token = LCONSTSY
+            then
+              
+              { Logical Constant: .TRUE. or .FALSE. }
+              
+              begin
+              gattr.atype := log1type;
+              new(gattr.treeptr,CSTNODE);
+              with gattr.treeptr^ do begin
+                   node := CSTNODE; csttype := gattr.atype;
+                   cstvalu.ival := intval;
+                   end;
+              fscan;
+              end
+            else
+          
+              { Error }
+              
+              begin error(50);
+              gattr.atype := int4type;
+              gattr.treeptr := nil;
+              end;
+  end; {primary}
+  
+  procedure addsign(Negative: Boolean);
+    var lop,lsubop: integer;
+  begin
+  if Numeric(gattr.atype.typ)
+  then begin
+    if Negative
+    then begin
+      minsize2(gattr);
+      if gattr.treeptr^.node = CSTNODE
+      then
+        if gattr.atype.typ = INTEGR
+        then gattr.treeptr^.cstvalu.ival := -gattr.treeptr^.cstvalu.ival
+        else
+          if gattr.atype.typ = REEL
+          then
+            if gattr.atype.siz = 4
+            then gattr.treeptr^.cstvalu.rval := -gattr.treeptr^.cstvalu.rval
+            else gattr.treeptr^.cstvalu.dval := -gattr.treeptr^.cstvalu.dval
+          else begin {COMPLEX}
+            gattr.treeptr^.cstvalu.creal := -gattr.treeptr^.cstvalu.creal;
+            gattr.treeptr^.cstvalu.cimag := -gattr.treeptr^.cstvalu.cimag;
+            end
+      else begin
+        lsubop := 0;
+        if gattr.atype.typ = INTEGR
+        then if gattr.atype.siz = 2
+             then lop := 74 {INEG2}
+             else lop := 75 {INEG4}
+        else if gattr.atype.typ = REEL
+             then if gattr.atype.siz = 4
+                  then lop := 134 {FNEG4}
+                  else lop := 135 {FNEG8}
+             else begin lop := 210; lsubop := 2; {CXNEG} end;
+        gattr.treeptr := newunnode(lop,gattr.treeptr);
+        gattr.treeptr^.unsubop := lsubop;
+        end;
+      end;
+    end {Numeric}
+  else begin error(219); gattr.atype := int4type; end;
+  end; {addsign}
+  
+  procedure factor;
+    var lattr: attr; lop: integer; lpn: pn; OpFlag: Boolean;
+  begin
+  primary;
+  while token = EXPSY do begin
+    fscan; lattr := gattr;
+    if Numeric(lattr.atype.typ)
+    then begin
+      if lattr.atype.typ = INTEGR
+      then makeisize(lattr,4);
+      end
+    else begin error(219); lattr.atype := int4type; end;
+    factor;
+    if Numeric(gattr.atype.typ)
+    then begin
+      {:: Could convert REAL/DOUBLE constants to type INTEGER if exact ::}
+      OpFlag := FALSE;
+      if gattr.atype.typ = INTEGR
+      then begin
+        makeisize(gattr,4);
+        if lattr.atype.typ = INTEGR
+        then begin lop := 79; {I4**I4}; OpFlag := TRUE; end
+        else
+          if lattr.atype.typ = REEL
+          then begin
+            if lattr.atype.siz <= 4
+            then lop := 138 {R4**I4}
+            else lop := 139;{R8**I4}
+            OpFlag := TRUE;
+            end
+          else lop := 96; {C8**I4}
+        if lattr.atype.siz > 4 then needaddr(gattr.treeptr);
+        end
+      else begin
+        maxnumtypes(lattr,gattr);
+        if gattr.atype.typ = REEL
+        then
+          if gattr.atype.siz <= 4
+          then lop := 97 {R4**R4}
+          else lop := 98 {R8**R8}
+        else lop := 99; {C8**C8}
+        end;
+      if OpFlag
+      then gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr)
+      else begin
+           lpn := newbinnode(0,gattr.treeptr,nil);
+           lpn := newbinnode(0,lattr.treeptr,lpn);
+           gattr.treeptr := newbinnode(178{STDFCALL},nil,lpn);
+           gattr.treeptr^.binsubop := lop;
+           end;
+      gattr.atype := lattr.atype;
+      end
+    else begin error(219); lattr.atype := int4type; end;
+    end; {while}
+  end; {factor}
+  
+  procedure term;
+    var lattr: attr; lop,lsubop: integer; ltoken: symbol;
+        Signed,Negative: Boolean;
+  begin
+  factor;
+  while (token = STARSY) or (token = SLASHSY) do begin
+    lattr := gattr; lsubop := 0;
+    if Numeric(lattr.atype.typ)
+    then minsize2(lattr)
+    else begin error(219); lattr.atype := int4type; end;
+    ltoken := token; fscan;
+    Negative := token = MINUSSY; Signed := Negative or (Token = PLUSSY);
+    if Signed then begin notansi; fscan; end;
+    factor;
+    if Signed then addsign(Negative);
+    maxnumtypes(lattr,gattr);
+    if ltoken = STARSY
+    then if lattr.atype.typ = INTEGR
+         then if lattr.atype.siz = 2
+              then lop := 68 {IMUL2}
+              else lop := 69 {IMUL4}
+         else if lattr.atype.typ = REEL
+              then if lattr.atype.siz = 4
+                   then lop := 116 {FMUL4}
+                   else lop := 117 {FMUL8}
+              else begin lop := 208; lsubop := 3; {CXMUL} end
+    else if lattr.atype.typ = INTEGR
+         then if lattr.atype.siz = 2
+              then lop := 70 {IDIV2}
+              else lop := 71 {IDIV4}
+         else if lattr.atype.typ = REEL
+              then begin
+		   if (FPHardware) then FPHardwarediv := TRUE;
+		   if lattr.atype.siz = 4
+                   then lop := 118 {FDIV4}
+                   else lop := 119 {FDIV8}
+		   end
+              else begin lop := 208; lsubop := 4; {CXDIV} end;
+    gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr);
+    gattr.treeptr^.binsubop := lsubop;
+    end;
+  end; {term}
+  
+  procedure aexpression;
+    var lattr: attr; lop,lsubop: integer; ltoken: symbol;
+        Signed,Negative: Boolean;
+  begin
+  Negative := token = MINUSSY; Signed := Negative or (Token = PLUSSY);
+  if Signed then fscan;
+  term;
+  if Signed then addsign(Negative);
+  while (token = PLUSSY) or (token = MINUSSY) do begin
+    lattr := gattr; lsubop := 0;
+    if Numeric(lattr.atype.typ)
+    then minsize2(lattr)
+    else begin error(219); lattr.atype := int4type; end;
+    ltoken := token; fscan; term; maxnumtypes(lattr,gattr);
+    if ltoken = PLUSSY
+    then if lattr.atype.typ = INTEGR
+         then if lattr.atype.siz = 2
+              then lop := 64 {IADD2}
+              else lop := 65 {IADD4}
+         else if lattr.atype.typ = REEL
+              then if lattr.atype.siz = 4
+                   then lop := 112 {FADD4}
+                   else lop := 113 {FADD8}
+              else begin lop := 208; lsubop := 1; {CXADD} end
+    else if lattr.atype.typ = INTEGR
+         then if lattr.atype.siz = 2
+              then lop := 66 {ISUB2}
+              else lop := 67 {ISUB4}
+         else if lattr.atype.typ = REEL
+              then if lattr.atype.siz = 4
+                   then lop := 114 {FSUB4}
+                   else lop := 115 {FSUB8}
+              else begin lop := 208; lsubop := 2; {CXSUB} end;
+    gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr);
+    gattr.treeptr^.binsubop := lsubop;
+    end;
+  end; {aexpression}
+  
+  procedure cexpression;
+    var lattr: attr;
+  begin
+  aexpression;
+  while token = CONCATSY do begin
+    if gattr.atype.typ <> CHARACTER
+    then error(238);
+    lattr := gattr; fscan; aexpression;
+    if gattr.atype.typ <> CHARACTER
+    then error(238);
+    gattr.treeptr := newbinnode(221{CONCAT},lattr.treeptr,gattr.treeptr);
+    if (lattr.atype.siz > 0) and (gattr.atype.siz > 0)
+    then gattr.atype.siz := gattr.atype.siz + lattr.atype.siz
+    else gattr.atype.siz := -1;
+    gattr.atype.typ := CHARACTER;
+    end;
+  end; {cexpression}
+  
+  procedure lprimary;
+    var ltoken: symbol; lattr: attr; lop,lsubop: integer;
+  begin
+  cexpression;
+  if token in [LTSY,GTSY,LESY,GESY,EQSY,NESY]
+  then
+    begin
+    lattr := gattr; ltoken := token;
+    lop := 0; lsubop := ord(ltoken) - ord(LTSY);
+    if gattr.atype.typ = CHARACTER
+    then
+      begin
+      ckstrparm(lattr); fscan; cexpression;
+      if gattr.atype.typ = CHARACTER
+      then begin ckstrparm(gattr); lop := 219 {FCHCMP}; end
+      else error(54);
+      end
+    else { gattr.atype <> CHARACTER }
+      begin
+      if not Numeric(lattr.atype.typ)
+      then begin error(232); lattr.atype := int4type; end;
+      fscan; cexpression; maxnumtypes(lattr,gattr);
+      if gattr.atype.typ = lattr.atype.typ
+      then begin
+        case gattr.atype.typ of
+          INTEGR:    begin
+                     if gattr.atype.siz <= 1
+                     then lop := 92 {ILT1}
+                     else
+                       if gattr.atype.siz = 2
+                       then lop := 93 {ILT2}
+                       else lop := 94 {ILT4};
+                     lop := lop + lsubop*3;
+                     end;
+          REEL:      begin
+                     if gattr.atype.siz = 4
+                     then lop := 122 {RLT4}
+                     else lop := 123 {RLT8};
+                     lop := lop + lsubop*2;
+                     end;
+          COMPLEX:   begin
+                     if (ltoken <> EQSY) and (ltoken <> NESY) then error(233);
+                     lop := 209 {CMPLXCMP}; lsubop := lsubop - 4;
+                     end;
+        end; {case}
+        end
+      else error(54);
+      end;
+    gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr);
+    gattr.treeptr^.binsubop := lsubop;
+    gattr.atype := log1type;
+    end;
+  end; {lprimary}
+  
+  procedure lfactor;
+    var NotFlag: Boolean;
+  begin
+  NotFlag := token = NOTSY;
+  if NotFlag then fscan;
+  lprimary;
+  if NotFlag
+  then begin
+    if gattr.atype.typ <> LOGICAL
+    then error(55);
+    makeisize(gattr,1);
+    gattr.treeptr := newunnode(110 {BNOT},gattr.treeptr);
+    gattr.atype := log1type;
+    end;
+  end; {lfactor}
+  
+  procedure lterm;
+    var lattr: attr; lop: integer;
+  begin
+  lfactor;
+  while token = ANDSY do begin
+    if gattr.atype.typ <> LOGICAL then error(55);
+    lattr := gattr; fscan; lfactor;
+    if gattr.atype.typ = LOGICAL
+    then maxlsize(lattr,gattr)
+    else begin error(55); gattr.atype := log1type; end;
+    if gattr.atype.siz <= 1
+    then lop := 80 {AND1}
+    else
+      if gattr.atype.siz = 2
+      then lop := 81 {AND2}
+      else lop := 82 {AND4};
+    gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr);
+    end;
+  end; {lterm}
+  
+procedure ldisjunct;
+  var lop: integer; lattr: attr;
+begin
+lterm;
+while token = ORSY do begin
+  if gattr.atype.typ <> LOGICAL then error(55);
+  lattr := gattr; fscan; lterm;
+  if gattr.atype.typ = LOGICAL
+  then maxlsize(lattr,gattr)
+  else begin error(55); gattr.atype := log1type; end;
+  if gattr.atype.siz <= 1
+  then lop := 83 {OR1}
+  else
+    if gattr.atype.siz = 2
+    then lop := 84 {OR2}
+    else lop := 85 {OR4};
+  gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr);
+  end;
+end; {ldisjunct}
+
+begin {expression}
+ldisjunct;
+while (token = EQVSY) or (token = NEQVSY) do begin
+  if gattr.atype.typ <> LOGICAL then error(55);
+  ltoken := token; lattr := gattr; fscan; ldisjunct;
+  if gattr.atype.typ = LOGICAL
+  then maxlsize(lattr,gattr)
+  else begin error(55); gattr.atype := log1type; end;
+  if ltoken = EQVSY
+  then lop := 104 {IEQ1}
+  else lop := 107 {INE1};
+  if gattr.atype.siz > 1
+  then
+    if gattr.atype.siz = 2
+    then lop := lop + 1
+    else lop := lop + 2;
+  gattr.treeptr := newbinnode(lop,lattr.treeptr,gattr.treeptr);
+  end;
+end; {expression}
+
+procedure fold{*var fexpr: pn*};
+  var a,b,c: valu; AFlag,BFlag: Boolean; ctype: ftntype; res,lpn: pn;
+      n: longint; lchval: chvaltype; chlenmodalfalen: integer;
+      q,s: real;
+  
+  procedure foldinsert(fchval: chvaltype; flen: integer);
+    var i: integer;
+  begin {foldinsert}
+  for i := 1 to flen do begin
+    if chlenmodalfalen = 10
+    then begin
+         new(lchval^.next); lchval := lchval^.next;
+         lchval^.next := nil; fillchar(lchval^.chpart,10,' ');
+         chlenmodalfalen := 0;
+         end;
+    chlenmodalfalen := chlenmodalfalen + 1;
+    lchval^.chpart[chlenmodalfalen] := fchval^.chpart[((i-1) mod 10) + 1];
+    c.clen := c.clen + 1;
+    if (i mod 10) = 0 then fchval := fchval^.next;
+    end;
+  end; {foldinsert}
+  
+begin {fold}
+if fexpr <> nil
+then
+  with fexpr^ do begin
+    case node of
+      IDENTNODE,
+      CSTNODE: ;
+      UNNODE:  begin
+               fold(unarg); AFlag := FALSE;
+               if unarg^.node = CSTNODE
+               then
+                 begin
+                 a := unarg^.cstvalu; AFlag := TRUE;
+                 res := unarg;
+                 end
+               else
+                 if unarg^.node = IDENTNODE
+                 then
+                   if unarg^.nkind = PARAMETER
+                   then
+                     begin
+                     a := unarg^.pvalu; AFlag := TRUE;
+                     ctype := unarg^.idtype; new(res,CSTNODE);
+                     res^.node := CSTNODE; res^.csttype := ctype;
+                     end;
+              if AFlag
+              then
+                 case unop of
+                   51, {INT21}
+                   53: {INT41} begin
+                               res^.csttype.siz := 1; fexpr := res;
+                               end;
+                   48, {INT12}
+                   52: {INT42} begin
+                               res^.csttype.siz := 2; fexpr := res;
+                               end;
+                   49, {INT24}
+                   50: {INT14} begin
+                               res^.csttype.siz := 4; fexpr := res;
+                               end;
+                   74, {INEG2}
+                   75: {INEG4} begin
+                               res^.cstvalu.ival := -a.ival;
+                               fexpr := res;
+                               end;
+                  110: {BNOT}  begin
+                               res^.cstvalu.ival := 1 - res^.cstvalu.ival;
+                               fexpr := res;
+                               end;
+                  134: {RNEG4} begin
+                               res^.cstvalu.rval := -a.rval;
+                               fexpr := res;
+                               end;
+                  135: {RNEG8} begin
+                               res^.cstvalu.dval := -res^.cstvalu.dval;
+                               fexpr := res;
+                               end;
+                 end; {case}
+               end;
+      BINNODE: if binop = 178 {STDFCALL}
+               then begin
+                 if (binsubop = 93 {I4**I4}) or 
+                    (binsubop = 94 {R4**I4}) or 
+                    (binsubop = 95 {R8**I4}) (*** or
+                    (binsubop = 96 {C8**I4}) ***)
+                 then begin {Look for exponential constant expressions}
+                   fold(rightarg^.leftarg); fold(rightarg^.rightarg^.leftarg);
+                   AFlag := FALSE; BFlag := FALSE; res := nil;
+                   if rightarg^.leftarg^.node = CSTNODE
+                   then begin
+                     res := rightarg^.leftarg; AFlag := TRUE; 
+                     a := rightarg^.leftarg^.cstvalu;
+                     end
+                   else
+                     if rightarg^.leftarg^.node = IDENTNODE
+                     then
+                       if rightarg^.leftarg^.nkind = PARAMETER
+                       then begin
+                         AFlag := TRUE; a := rightarg^.leftarg^.pvalu;
+                         ctype := rightarg^.leftarg^.idtype;
+                         end;
+                   if rightarg^.rightarg^.leftarg^.node = CSTNODE
+                   then begin
+                     BFlag := TRUE; b := rightarg^.rightarg^.leftarg^.cstvalu;
+                     end
+                   else
+                     if rightarg^.rightarg^.leftarg^.node = IDENTNODE
+                     then
+                       if rightarg^.rightarg^.leftarg^.nkind = PARAMETER
+                       then begin
+                         BFlag := TRUE;
+                         b := rightarg^.rightarg^.leftarg^.pvalu;
+                         end;
+                   if AFlag and BFlag
+                   then begin
+                     if res = nil
+                     then begin
+                       new(res,CSTNODE);
+                       res^.node := CSTNODE; res^.csttype := ctype; 
+                       end;
+                     if binsubop = 93 {I4**I4} 
+                     then c.ival := %i_up_i(a.ival,b.ival)
+                     else
+                       if binsubop = 94 {R4**I4} 
+                       then c.rval := %_up_i(a.rval,b.ival)
+                       else 
+                         if binsubop = 95 {R8**I4} 
+                         then c.dval := %_dupi(a.dval,b.ival)
+                         (*** else {binsubop = 96 C8**I4}
+                           c.dval := %_cupi(a.dval,b.ival) ***);
+                     fexpr := res; res^.cstvalu := c;
+                     end;
+                   end
+                 else if binsubop = 41 {SQRT}
+                 then begin
+                   lpn := rightarg^.leftarg;
+                   if (lpn^.node = BINNODE) and
+                      (lpn^.binop = 178 {STDFCALL}) and
+                      (lpn^.binsubop = 44 {EXP})
+                   then begin
+                     new(res,CSTNODE);
+                     res^.node := CSTNODE; res^.csttype := realtype; 
+                     res^.cstvalu.rval := 0.5;
+                     lpn^.rightarg^.leftarg :=
+                        newbinnode(116{FMUL4},res,lpn^.rightarg^.leftarg);
+                     fexpr := lpn;
+                     end;
+                   end
+                 else if binsubop = 42 {DSQRT}
+                 then begin
+                   lpn := rightarg^.leftarg;
+                   if (lpn^.node = BINNODE) and
+                      (lpn^.binop = 178 {STDFCALL}) and
+                      (lpn^.binsubop = 45 {DEXP})
+                   then begin
+                     new(res,CSTNODE);
+                     res^.node := CSTNODE; res^.csttype := doubletype; 
+                     res^.cstvalu.dval := 0.5d0;
+                     lpn^.rightarg^.leftarg :=
+                        newbinnode(117{FMUL8},res,lpn^.rightarg^.leftarg);
+                     fexpr := lpn;
+                     end;
+                   end;
+                 end {binop = 178}
+               else begin {Look for non exponential constant expressions}
+                 fold(leftarg); fold(rightarg);
+                 AFlag := FALSE; BFlag := FALSE; res := nil;
+                 if leftarg <> nil
+                 then
+                   if leftarg^.node = CSTNODE
+                   then begin
+                     res := leftarg; AFlag := TRUE; a := leftarg^.cstvalu;
+                     end
+                   else
+                     if leftarg^.node = IDENTNODE
+                     then
+                       if leftarg^.nkind = PARAMETER
+                       then begin
+                         AFlag := TRUE; a := leftarg^.pvalu;
+                         ctype := leftarg^.idtype;
+                         end;
+                 if rightarg <> nil
+                 then
+                   if rightarg^.node = CSTNODE
+                   then begin
+                     res := rightarg; BFlag := TRUE; b := rightarg^.cstvalu;
+                     end
+                   else
+                     if rightarg^.node = IDENTNODE
+                     then
+                       if rightarg^.nkind = PARAMETER
+                       then begin
+                         BFlag := TRUE; b := rightarg^.pvalu;
+                         ctype := rightarg^.idtype;
+                         end;
+                 if (binop = 208) and (binsubop = 0) then AFlag := FALSE;
+                 if AFlag and BFlag and (binop in [64..71,79..85,92..109,
+                                           112..119,122..133,138,139,208,221])
+                 then begin
+                   if res = nil
+                   then begin
+                     new(res,CSTNODE);
+                     res^.node := CSTNODE; res^.csttype := ctype;
+                     end;
+                   if binop in [92..109,122..133]
+                   then res^.csttype := log1type;
+                   case binop of
+                     64, {IADD2}
+                     65: {IADD4} c.ival := a.ival + b.ival;
+                     66, {ISUB2}
+                     67: {ISUB4} c.ival := a.ival - b.ival;
+                     68, {IMUL2}
+                     69: {IMUL4} c.ival := a.ival * b.ival;
+                     70, {IDIV2}
+                     71: {IDIV4} if b.ival = 0
+                                 then error(230)
+                                 else c.ival := a.ival div b.ival;
+                     79: {I4**I4} c.ival := %i_up_i(a.ival,b.ival);
+                     80,
+                     81,
+                     82: {AND 1,2,4} c.ival := a.ival and b.ival;
+                     83,
+                     84,
+                     85: {OR 1,2,4} c.ival := a.ival or b.ival;
+                     92, {ILT1}
+                     93, {ILT2}
+                     94: {ILT4} c.ival := ord(a.ival < b.ival);
+                     95, {IGT1}
+                     96, {IGT2}
+                     97: {IGT4} c.ival := ord(a.ival > b.ival);
+                     98, {ILE1}
+                     99, {ILE2}
+                    100: {ILE4} c.ival := ord(a.ival <= b.ival);
+                    101, {IGE1}
+                    102, {IGE2}
+                    103: {IGE4} c.ival := ord(a.ival >= b.ival);
+                    104, {IEQ1}
+                    105, {IEQ2}
+                    106: {IEQ4} c.ival := ord(a.ival = b.ival);
+                    107, {INE1}
+                    108, {INE2}
+                    109: {INE4} c.ival := ord(a.ival <> b.ival);
+                    112: {RADD4} c.rval := a.rval + b.rval;
+                    113: {RADD8} c.dval := a.dval + b.dval;
+                    114: {RSUB4} c.rval := a.rval - b.rval;
+                    115: {RSUB8} c.dval := a.dval - b.dval;
+                    116: {RMUL4} c.rval := a.rval * b.rval;
+                    117: {RMUL8} c.dval := a.dval * b.dval;
+                    118: {RDIV4} if b.rval = 0
+                                 then error(230)
+                                 else c.rval := a.rval / b.rval;
+                    119: {RDIV8} if b.dval = 0
+                                 then error(230)
+                                 else c.dval := a.dval / b.dval;
+                    122: {RLT4}  c.ival := ord(a.rval < b.rval);
+                    123: {RLT8}  c.ival := ord(a.dval < b.dval);
+                    124: {RGT4}  c.ival := ord(a.rval > b.rval);
+                    125: {RGT8}  c.ival := ord(a.dval > b.dval);
+                    126: {RLE4}  c.ival := ord(a.rval <= b.rval);
+                    127: {RLE8}  c.ival := ord(a.dval <= b.dval);
+                    128: {RGE4}  c.ival := ord(a.rval >= b.rval);
+                    129: {RGE8}  c.ival := ord(a.dval >= b.dval);
+                    130: {REQ4}  c.ival := ord(a.rval = b.rval);
+                    131: {REQ8}  c.ival := ord(a.dval = b.dval);
+                    132: {RNE4}  c.ival := ord(a.rval <> b.rval);
+                    133: {RNE8}  c.ival := ord(a.dval <> b.dval);
+                    138: {R**I4} begin
+                                 c.rval := %_up_i(a.rval,b.ival);
+                                 res^.csttype := realtype;
+                                 end;
+                    139: {D**I4} begin
+                                 c.dval := %_dupi(a.dval,b.ival);
+                                 res^.csttype := doubletype;
+                                 end;
+                    208: {CX Add, Sub, Mul, Div}
+                         begin
+                         case binsubop of
+                           1: begin { CADD }
+                              c.creal := a.creal + b.creal;
+                              c.cimag := a.cimag + b.cimag;
+                              end;
+                           2: begin { CSUB }
+                              c.creal := a.creal - b.creal;
+                              c.cimag := a.cimag - b.cimag;
+                              end;
+                           3: begin { CMUL }
+                              c.creal := a.creal*b.creal -
+                                         a.cimag*b.cimag;
+                              c.cimag := a.creal*b.cimag +
+                                         a.cimag*b.creal;
+                              end;
+                           4: begin { CDIV }
+                              if (b.creal = 0) and (b.cimag = 0)
+                              then begin error(230); b.creal := 1; end;
+                              if abs(b.creal) > abs(b.cimag)
+                              then begin
+                                   q := b.cimag/b.creal;
+                                   s := b.creal + b.cimag*q;
+                                   c.creal := (a.creal + a.cimag*q)/s;
+                                   c.cimag := (a.cimag - a.creal*q)/s;
+                                   end
+                              else begin
+                                   q := b.creal/b.cimag;
+                                   s := b.cimag + b.creal*q;
+                                   c.creal := (a.cimag + a.creal*q)/s;
+                                   c.cimag := (q*a.cimag - a.creal)/s;
+                                   end;
+                              end;
+                         end; {case}
+                         end;
+                    221: {CONCAT}begin
+                                 c.clen := 0; chlenmodalfalen := 0;
+                                 new(c.cval);
+                                 lchval := c.cval; c.cval^.next := nil;
+                                 fillchar(c.cval^.chpart,10,' ');
+                                 foldinsert(a.cval,a.clen);
+                                 foldinsert(b.cval,b.clen);
+                                 res^.csttype.siz := c.clen;
+                                 end;
+                   end; {case}
+                   fexpr := res; res^.cstvalu := c;
+                   end;
+                 end;
+      TRINODE: ;
+      INDEXNODE: ;
+    end; {case}
+    end;
+end; {fold}
+
+procedure cstexpression;
+begin
+expression; fold(gattr.treeptr);
+if gattr.treeptr^.node <> CSTNODE
+then error(235);
+end; {cstexpression}
+
+

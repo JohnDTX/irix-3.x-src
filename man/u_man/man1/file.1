@@ -1,0 +1,64 @@
+'\"macro stdmacro
+.TH FILE 1
+.SH NAME
+file \- determine file type
+.SH SYNOPSIS
+.B file
+.RB "[ " \-c " ] [ "
+.BR \-f " ffile ] [ "
+.BR \-m " mfile ] "
+arg ...
+.SH DESCRIPTION
+.I File\^
+performs a series of tests on each argument
+in an attempt to classify it.
+If an argument appears to be \s-1ASCII\s0,
+.I file\^
+examines the first 512 bytes
+and tries to guess its language.
+If an argument is an executable
+.BR a.out ,
+.I file\^
+will print the version stamp, provided it is greater than 0 (see
+.IR ld\^ (1)).
+.PP
+If the
+.B \-f
+option is given, the next argument is taken
+to be a file containing the names of
+the files to be examined.
+.PP
+.I File\^
+uses the file
+.B /etc/magic
+to identify files that have some sort of
+.IR "magic number" ,
+that is, any file containing a numeric or string constant that indicates its
+type.
+Commentary at the beginning of
+.B /etc/magic
+explains its format.
+.PP
+The
+.B \-m
+option instructs
+.I file\^
+to use an alternate magic file.
+.PP
+The
+.B \-c
+flag causes
+.I file\^
+to check the magic file for format errors.
+This validation is not normally carried out for reasons of efficiency.
+No file typing is done under
+.BR \-c .
+.SH EXAMPLE
+.IP
+file textfile programfile directory
+.PP
+reports the file names and directory name, and whether the files
+are English text, 
+.I nroff\^
+input, a C program, or whatever. 
+.\"	@(#)file.1	5.1 of 10/31/83

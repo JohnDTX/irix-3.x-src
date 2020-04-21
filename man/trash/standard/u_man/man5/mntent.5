@@ -1,0 +1,93 @@
+'\"macro stdmacro
+.\" @(#)mntent.5 1.1 85/12/28 SMI;
+.TH MNTENT 5 "21 August 1985"
+.SH NAME
+mntent \- static information about filesystems
+.SH SYNOPSIS
+.B #include <mntent.h>
+.SH DESCRIPTION
+.IX  "mntent file"  ""  "\fLmntent\fP \(em file system static information"
+.IX  "file system"  "mntent file"  ""  "\fLmntent\fP \(em static information"
+.IX  "static file system information mntent"  ""  "static file system information \(em \fLmntent\fP"
+The file
+.I /etc/fstab
+describes the file systems and swapping partitions used by the local machine.
+It is created by the system administrator using a text editor
+and processed by commands which mount, unmount, check consistency of,
+dump and restore file systems, and by the system in providing
+swap space.
+.LP
+It consists of a number of lines of the form:
+.IP
+fsname dir type opts freq passno
+.LP
+an example of which would be:
+.IP
+/dev/xy0a / efs rw, 1 2
+.LP
+.LP
+The entries from this file are accessed using the routines in
+.IR getmntent (3),
+which returns a structure of the following form:
+.IP
+.ta \w'#define'u +\w'char\0\0'u +\w'*mnt_fsname;\0\0'u
+.nf
+struct mntent {
+	char	*mnt_fsname;	/* file system name */
+	char	*mnt_dir;	/* file system path prefix */
+	char	*mnt_type;	/* nfs, efs, bell, or ignore */
+	char	*mnt_opts;	/* ro, quota, etc. */
+	int	mnt_freq;	/* dump frequency, in days */
+	int	mnt_passno;	/* pass number on parallel fsck */
+};
+.fi
+.LP
+The fields are separated by white space,
+and a `#' as the first non-white character indicates a comment.
+.LP
+The \f2mnt_type\fP field determines how the 
+.I mnt_fsname,
+and 
+.I mnt_opts
+fields will be interpreted.
+Below is a list of the file system types currently supported and
+the way each of them interprets these fields.
+.LP
+.B efs or bell
+.IP mnt_fsname 12
+Must be a block special device.
+.IP mnt_opts 12
+Valid opts are ro, rw.
+.LP
+.B nfs
+.IP mnt_fsname 12
+The path on the server of the directory to be served.
+.IP mnt_opts 12
+Valid opts are ro, rw, hard, soft.
+.LP
+If the
+.I mnt_type
+is specified as ``ignore'' the entry is ignored.
+This is useful to show disk partitions which are currently not used.
+.LP
+.LP
+\f2mnt_freq\fP and \f2mnt_passno\fP are not supported.
+.LP
+.I /etc/fstab
+is only
+.I read
+by programs, and not written;
+it is the duty of the system administrator to properly create 
+and maintain this file.
+The order of records in
+.I /etc/fstab
+is important because
+.I mount
+and
+.I umount
+process the file sequentially; file systems must appear
+\f2after\f1 file systems they are mounted within.
+.SH FILES
+/etc/fstab
+.SH SEE ALSO
+fsck(1M), getmntent(3), mount(1M), umount(1M)

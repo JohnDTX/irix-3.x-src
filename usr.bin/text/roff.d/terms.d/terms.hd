@@ -1,0 +1,33 @@
+/*	@(#)terms.hd	1.1	*/
+/* $Source: /d2/3.7/src/usr.bin/text/roff.d/terms.d/RCS/terms.hd,v $ */
+static	char	*Sccsid = "@(#)$Revision: 1.1 $";
+/* $Date: 89/03/27 18:28:51 $ */
+struct termtable {
+	int bset;
+	int breset;
+	int Hor;
+	int Vert;
+	int Newline;
+	int Char;
+	int Em;
+	int Halfline;
+	int Adj;
+	char *twinit;
+	char *twrest;
+	char *twnl;
+	char *hlr;
+	char *hlf;
+	char *flr;
+	char *bdon;
+	char *bdoff;
+	char *iton;
+	char *itoff;
+	char *ploton;
+	char *plotoff;
+	char *up;
+	char *down;
+	char *right;
+	char *left;
+	char *codetab[256-32];
+	char *zzz;
+		};

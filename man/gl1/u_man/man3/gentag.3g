@@ -1,0 +1,30 @@
+.TH gentag 3 "R1c" "Silicon Graphics"
+.SH NAME
+.I gentag
+- return a unique integer for use as a tag
+.SH SYNOPSIS
+.nf
+.TP \w'FORTRAN\ \ \ 'u
+C
+.B "Tag gentag()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+FORTRAN
+.B "integer function gentag()"
+.IP 
+.TP \w'FORTRAN\ \ \ 'u
+Pascal
+.B "function gentag: Tag;"
+.sp
+.SH DESCRIPTION
+\f2Gentag\f1 generates a unique integer to be used as a tag.
+Tags must be unique within the enclosing object.  The \f2gentag\f1 command
+provides a unique 31-bit integer for use when the tag has no
+significance beyond labeling a command.  Note that the generated tag is
+unique when \f2gentag\f1 is executed.  If the user later defines a 
+tag with the
+same value,  the first command tag is lost.
+.SH "SEE ALSO"
+.I genobj, istag
+.SH NOTE
+This command can only be used in immediate mode.

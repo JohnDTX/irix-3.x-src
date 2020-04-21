@@ -1,0 +1,203 @@
+'\"macro stdmacro
+.TH LOGIN 1
+.SH NAME
+login \- sign on
+.SH SYNOPSIS
+.B login
+[ name [ env-var .\|.\|. ]\|]
+.SH DESCRIPTION
+The
+.I login\^
+command
+is used at the beginning of each terminal session
+and allows you to identify yourself to the system.
+It may be invoked as a command or
+by the system when a connection
+is first established.
+Also, it is invoked by the system when a previous user has
+terminated the initial shell by typing a
+.I cntrl-d
+to indicate an "end-of-file".
+.PP
+If
+.I login\^
+is invoked as a command, it must replace the initial
+command interpreter.
+This is accomplished by typing:
+.RS
+exec login
+.RE
+from the initial shell.
+.PP
+.I Login\^
+asks for your user name (if not supplied as an argument), and, if
+appropriate, your password.
+Echoing is turned off (where possible) during the typing of your password,
+so it will not appear on the written record of the
+session.
+.PP
+At some installations, an option may be invoked that will require
+you to enter a second "dialup" password.
+This will occur only
+for dial-up connections, and will be prompted by the message
+"dialup password:".
+Both passwords are required for a successful 
+.IR login .
+.PP
+If you do not complete the 
+.I login\^
+successfully within a
+certain period of time (e.g.,
+one minute), you are likely to be silently disconnected.
+.PP
+After a successful 
+.IR login ,
+accounting files are updated,
+the procedure
+.B /etc/profile
+is performed,
+the message-of-the-day, if any, is printed,
+the user-\s-1ID\s+1, the group-\s-1ID\s+1, 
+the working directory, and the command interpreter
+(usually 
+.IR sh\^ (1))
+is initialized,
+and the file
+.B \&.profile
+in the working directory is executed,
+if it exists.
+These specifications are found in the 
+.B /etc/passwd
+file entry for the user.
+The name of the command interpreter is
+.B \-
+followed by the last component of the interpreter's pathname
+(i.e.,
+.BR \-sh ).
+If this field in the password file is empty,
+then the default command interpreter,
+.B /bin/sh
+is used.
+.PP
+The basic
+.I environment\^
+(see
+.IR environ\^ (5))
+is initialized to:
+.PP
+.RS
+\s-1HOME\s+1=\f2your-login-directory\fP
+.br
+\s-1PATH\s+1=:/bin:/usr/bin
+.br
+\s-1SHELL\s+1=\f2last-field-of-passwd-entry\fP
+.br
+\s-1MAIL\s+1=/usr/mail/\f2your-login-name\fP
+.br
+\s-1TZ\s+1=\f2timezone-specification\fP
+.br
+\s-1LOGNAME\s+1=\f2your-login-name\fP
+.RE
+.PP
+The environment may be expanded or modified by supplying additional
+arguments to
+.IR login ,
+either at execution time or when
+.I login\^
+requests your 
+.I login\^
+name.  The arguments may take either the form
+.I xxx\^
+or
+.IR xxx=yyy .
+Arguments without an equal sign are placed
+in the environment as
+.RS
+\f3L\|\f2n\^\f1=xxx
+.RE
+where
+.I n\^
+is a number starting at 0 and is incremented each time
+a new variable name is required.
+Variables containing an
+.B =
+are placed into the environment without modification.  If they
+already appear in the environment, then they replace the older
+value.  There are two exceptions.  The variables
+.B \s-1PATH\s+1
+and
+.B \s-1SHELL\s+1
+cannot be changed.  This prevents people, logging into restricted
+shell environments, from spawning secondary shells which aren't
+restricted.  Both
+.I login\^
+and
+.I getty\^
+understand simple single character quoting conventions.  Typing a
+backslash
+in front of a character quotes it and allows the inclusion of such
+things as spaces and tabs.
+.SH EXAMPLE
+At the beginning of each terminal session, the following sort of
+message is displayed on the screen:
+.IP
+.br
+login:
+.PP
+to which a user name is the appropriate response.
+.SH FILES
+.ta \w'/usr/mail/your-name\ \ 'u
+/etc/utmp	accounting
+.br
+/etc/wtmp	accounting
+.br
+.RI /usr/mail/ your-name "	mailbox for user\^"
+.I your-name\^
+.br
+/etc/motd	message-of-the-day
+.br
+/etc/passwd	password file
+.br
+/etc/profile	systemwide personal profile 
+.RI ( sh\^ (1))
+.br
+/etc/cshrc	systemwide personal csh startup 
+.RI ( csh\^ (1))
+.br 
+/etc/TZ	systemwide time-zone specification
+.br
+\&.profile	personal profile 
+.RI ( sh\^ (1))
+.br
+\&.login	personal csh startup used at login time
+.RI ( csh\^ (1))
+.br
+\&.cshrc	personal csh startup
+.RI ( csh\^ (1))
+.br
+\&.logout	personal csh logout used at logout time
+.RI ( csh\^ (1))
+.SH "SEE ALSO"
+mail(1),
+newgrp(1),
+sh(1),
+su(1),
+passwd(4),
+profile(4),
+environ(5).
+.SH DIAGNOSTICS
+.TP .3i
+.I "Login incorrect"
+if the user name or the password cannot be matched.
+.TP
+\f2No shell\f1, \f2cannot open password file\f1, or \f2no directory\f1
+consult a
+.SM UNIX 
+system programming counselor.
+.tr ~"
+.TP
+.I "No utmp entry. You must exec ~login~ from the lowest level ~sh~."
+if you attempted to execute \f2login\^\fP as a command without using
+the shell's \f2exec\^\fP internal command or from other than the initial shell.
+.tr ~~
+.\"	@(#)login.1	5.1 of 11/15/83

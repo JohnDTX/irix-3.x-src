@@ -1,0 +1,249 @@
+'\" t
+'\"macro stdmacro
+.TH BELLFS 4
+.SH NAME
+Bell file system \- format of Bell file system volume
+.SH SYNOPSIS
+.B #include <sys/param.h>
+.br
+.B #include <sys/filsys.h>
+.br
+.SH DESCRIPTION
+Every Bell file system
+(formerly known as ``the''
+U\s-2NIX\s+2
+System V
+file system)
+storage volume
+has a common format for certain vital information.
+Every such volume is divided into a certain number
+of 512 byte long sectors.
+Sector 0 is unused and is available to contain
+a bootstrap program or other information.
+.PP
+Sector 1 is the
+.IR super-block .
+The format of a super-block is:
+.PP
+.ps 10
+.vs 12
+.nf
+/*
+*	Structure of the super-block
+*/
+.fi
+.TS
+center;
+l l l l.
+struct	filsys{	\&	\&
+\&	ushort	s_isize;	/* size in blocks of i-list */
+\&	daddr_t	s_fsize;	/* size in blocks of entire volume */
+\&	short	s_nfree;	/* number of addresses in s_free */
+\&	daddr_t	s_free[NICFREE];	/* free block list */
+\&	short	s_ninode;	/* number of i-nodes in s_inode */
+\&	ino_t	s_inode[NICINOD];	/* free i-node list */
+\&	char	s_flock;	/* lock during free list manipulation */
+\&	char	s_ilock;	/* lock during i-list manipulation */
+\&	char  	s_fmod; 	/* super block modified flag */
+\&	char	s_ronly;	/* mounted read-only flag */
+\&	time_t	s_time; 	/* last super block update */
+\&	short	s_dinfo[4];	/* device information */
+\&	daddr_t	s_tfree;	/* total free blocks*/
+\&	ino_t	s_tinode;	/* total free inodes */
+\&	char	s_fname[6];	/* file system name */
+\&	char	s_fpack[6];	/* file system pack name */
+\&	long	s_fill[14];	/* ADJUST to make sizeof filsys be 512 */
+\&	ino_t	s_lasti;	/* start place for circular search */
+\&	ino_t	s_nbehind;	/* est # free inodes before s_lasti */
+\&	long	s_magic;	/* magic number to indicate new file system */
+\&	long	s_type;	/* type of new file system */
+};
+.TE
+.bp
+.TS
+center;
+l l l l.
+#define	FsMAGIC	0xfd187e20	/* s_magic number */
+
+#define	Fs1b	1	/* 512 byte block */
+#define	Fs2b	2	/* 1024 byte block */
+#define	Fs4b	4	/* 2048 byte block */
+.TE
+.ps 12
+.vs 14
+.PP
+.I s_type\^
+indicates the file system type.
+Currently,
+two types of file systems are supported:
+the original 512-byte oriented and the new improved 1024-byte oriented.
+.I s_magic\^
+is used to distinguish the original 512-byte oriented file systems
+from the newer file systems.
+If this field is not equal to the magic number,
+.IR Fs\s-1MAGIC\s+1 ,
+the type is assumed to be
+.IR Fs1b ,
+otherwise the
+.I s_type\^
+field is used.
+In the following description, a block is then
+determined by the type.
+For the original 512-byte oriented file system, a block
+is 512 bytes.
+For the 1024-byte oriented file system, a block is 1024 bytes or
+two sectors.
+The operating system takes care of all conversions from
+logical block numbers to physical sector numbers.
+.PP
+.I s_isize\^
+is the address of the first data block after the i-list;
+the i-list starts just after the super-block, namely in block 2;
+thus the i-list is \f2s_isize\^\fP\-2 blocks long.
+.I s_fsize\^
+is the first block not potentially available for allocation
+to a file.
+These numbers are used by the system to
+check for bad block numbers;
+if an ``impossible'' block number is allocated from the free list
+or is freed,
+a diagnostic is written on the on-line console.
+Moreover, the free array is cleared, so as to prevent further
+allocation from a presumably corrupted free list.
+.PP
+The free list for each volume is maintained as
+follows.
+The
+.I s_free\^
+array contains, in
+.IR s_free [1],
+\&.\|.\|.,
+.IR s_free [ s_nfree \-1],
+up to 49 numbers of free blocks.
+.IR s_free [0]
+is the block number of the head
+of a chain of blocks constituting the free list.
+The first long in each free-chain block is the number
+(up to 50) of free-block numbers listed in the
+next 50 longs of this chain member.
+The first of these 50 blocks is the link to the
+next member of the chain.
+To allocate a block:
+decrement
+.IR s_nfree ,
+and the new block is
+.IR s_free [ s_nfree ].
+If the new block number is 0,
+there are no blocks left, so give an error.
+If
+.I s_nfree\^
+became 0,
+read in the block named by the new block number,
+replace
+.I s_nfree\^
+by its first word,
+and copy the block numbers in the next 50 longs into the
+.I s_free\^
+array.
+To free a block, check if
+.I s_nfree\^
+is 50; if so,
+copy
+.I s_nfree\^
+and the
+.I s_free\^
+array into it,
+write it out, and set
+.I s_nfree\^
+to 0.
+In any event set
+.IR s_free [ s_nfree ]
+to the freed block's number and
+increment
+.IR s_nfree .
+.PP
+.I s_tfree\^
+is the total free blocks available in the file system.
+.PP
+.I s_ninode\^
+is the number of free i-numbers in the
+.I s_inode\^
+array.
+To allocate an i-node:
+if
+.I s_ninode\^
+is greater than 0,
+decrement it and return
+.IR s_inode [ s_ninode ].
+If it was 0, read the i-list
+and place the numbers of all free inodes
+(up to 100) into the
+.I s_inode\^
+array,
+then try again.
+To free an i-node,
+provided
+.I s_ninode\^
+is less than 100,
+place its number into
+.IR s_inode [ s_ninode ]
+and increment
+.IR s_ninode .
+If
+.I s_ninode\^
+is already 100, do not bother to enter the freed i-node into any table.
+This list of i-nodes is only to speed
+up the allocation process; the information
+as to whether the inode is really free
+or not is maintained in the inode itself.
+.PP
+.I s_tinode\^
+is the total free inodes available in the file system.
+.PP
+.I s_flock\^
+and
+.I s_ilock\^
+are flags maintained in the core
+copy of the file system
+while it is mounted
+and their values on disk are immaterial.
+The value of
+.I s_fmod\^
+on disk is likewise immaterial;
+it is used as a flag to indicate that the super-block has
+changed and should be copied to
+the disk during the next periodic update of file
+system information.
+.PP
+.I s_ronly\^
+is a read-only flag to indicate write-protection.
+.PP
+.I s_time\^
+is the last time the super-block of the file system was changed,
+and is
+the number of seconds that have elapsed
+since
+00:00 Jan. 1, 1970 (\s-1GMT\s+1).
+During a reboot, the
+.I s_time\^
+of the super-block for the root file system
+is used to set the system's idea of the time.
+.PP
+.I s_fname\^
+is the name of the file system and
+.I s_fpack\^
+is the name of the pack.
+.PP
+I-numbers begin at 1, and the storage for i-nodes
+begins in block 2.
+Also, i-nodes are 64 bytes long.
+I-node 1 is reserved for future use.
+I-node 2 is reserved for the root directory of the file
+system, but no other i-number has a built-in
+meaning.
+Each i-node represents one file.
+For the format of an inode and its flags, see
+.IR inode (4).
+.SH SEE ALSO
+fsck(1M), mkfs(1M), inode(4), fs(4).
+.\"	@(#)fs.4	5.1 of 11/16/83
